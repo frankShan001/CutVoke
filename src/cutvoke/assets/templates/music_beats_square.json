@@ -1,0 +1,26 @@
+{
+  "id": "music_beats_square",
+  "name": "音乐卡点（方形 1:1）",
+  "description": "8 个画面按 0.75 秒硬切卡点，配鼓点循环。套用后把每段换成自己的图即可踩点。",
+  "aspect": "1:1",
+  "category": "卡点",
+  "placeholders": ["bg_grid_dark", "bg_checker", "bg_gradient_blue", "bg_gradient_sunset",
+                   "bg_gradient_teal", "bg_bokeh", "bg_vignette", "bg_paper"],
+  "slots": [
+    {"key": "beat1", "kind": "image", "label": "第 1 拍", "duration": 0.75},
+    {"key": "beat2", "kind": "image", "label": "第 2 拍", "duration": 0.75},
+    {"key": "beat3", "kind": "image", "label": "第 3 拍", "duration": 0.75},
+    {"key": "beat4", "kind": "image", "label": "第 4 拍", "duration": 0.75},
+    {"key": "beat5", "kind": "image", "label": "第 5 拍", "duration": 0.75},
+    {"key": "beat6", "kind": "image", "label": "第 6 拍", "duration": 0.75},
+    {"key": "beat7", "kind": "image", "label": "第 7 拍", "duration": 0.75},
+    {"key": "beat8", "kind": "image", "label": "第 8 拍", "duration": 0.75}
+  ],
+  "transition": null,
+  "captions": [
+    {"text": "跟着节拍剪", "at": 0.2, "duration": 1.6,
+     "style": {"fontSize": 52, "bold": true, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 3}}
+  ],
+  "bgm": {"assetId": "builtin_audio_drum_loop", "volume": 0.5},
+  "stickers": []
+}

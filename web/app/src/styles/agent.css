@@ -1,0 +1,245 @@
+/* Agent 活动抽屉（D10）：右侧滑出面板，全部走 Design Token，无硬编码颜色。 */
+
+.topbar__agent-btn--on {
+  color: var(--accent-text);
+  background: var(--accent-soft-4);
+}
+
+/* 遮罩：点击关闭抽屉 */
+.agent-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 40;
+}
+
+/* 抽屉本体：右侧固定，占满高度 */
+.agent-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 360px;
+  max-width: 90vw;
+  z-index: 41;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-2);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--elev-raised);
+}
+
+.agent-panel__head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+.agent-panel__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+.agent-panel__count {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1px 7px;
+}
+.agent-panel__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.agent-panel__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-3);
+}
+
+.agent-empty {
+  display: block;
+  color: var(--text-dim);
+  font-style: italic;
+  font-size: 12px;
+  padding: var(--space-3) 0;
+}
+.agent-empty--err {
+  color: var(--err);
+  font-style: normal;
+}
+
+.agent-event-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.agent-event {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+}
+.agent-event__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-2);
+}
+.agent-event__actor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 1px 7px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.agent-event__actor--agent {
+  color: var(--accent-text);
+  border-color: var(--accent-border-rgba);
+  background: var(--accent-soft-5);
+}
+.agent-event__actor--human {
+  color: var(--text-dim);
+}
+.agent-event__rev {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.agent-event__type {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.agent-event__id {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  margin-left: auto;
+}
+
+.agent-event__entities {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.agent-entity {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    border-color var(--motion) var(--ease-standard),
+    color var(--motion) var(--ease-standard);
+}
+.agent-entity:hover {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.agent-entity svg {
+  color: var(--text-faint);
+  flex: none;
+}
+.agent-entity:hover svg {
+  color: var(--accent-text);
+}
+
+.agent-event__foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+}
+
+.agent-panel__foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.agent-panel__sync {
+  font-variant-numeric: tabular-nums;
+}
+.agent-panel__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@keyframes agent-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.agent-spin {
+  animation: agent-spin 1s linear infinite;
+}
+
+/* Agent 编辑租约期间保留底层画面与外部更新，但拦截所有人工点击/拖拽。 */
+.agent-edit-lock {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  cursor: wait;
+  background: rgba(0, 0, 0, 0.025);
+}
+.agent-edit-lock__card {
+  position: absolute;
+  top: var(--space-3);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  max-width: min(680px, calc(100vw - 32px));
+  padding: 8px 14px;
+  color: var(--accent-text);
+  background: var(--bg-2);
+  border: 1px solid var(--accent-border-rgba);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elev-raised);
+  font-size: 12px;
+  pointer-events: none;
+}
+.agent-edit-lock__card span,
+.agent-edit-lock__card small {
+  color: var(--text-dim);
+}
+.agent-edit-lock__card small {
+  font-size: 11px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-spin {
+    animation: none;
+  }
+}

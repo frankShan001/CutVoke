@@ -1,0 +1,23 @@
+{
+  "id": "vertical_short_9x16",
+  "name": "竖屏短视频（9:16）",
+  "description": "4 段竖屏画面左右推入，大字号居中字幕，快节奏垫乐。套用后画布会自动切成 1080×1920。",
+  "aspect": "9:16",
+  "category": "短视频",
+  "placeholders": ["bg_gradient_sunset", "bg_gradient_blue", "bg_bokeh", "bg_gradient_teal"],
+  "slots": [
+    {"key": "clip1", "kind": "image", "label": "第 1 段画面", "duration": 3.0},
+    {"key": "clip2", "kind": "image", "label": "第 2 段画面", "duration": 3.0},
+    {"key": "clip3", "kind": "image", "label": "第 3 段画面", "duration": 3.0},
+    {"key": "clip4", "kind": "image", "label": "第 4 段画面", "duration": 3.0}
+  ],
+  "transition": {"effectId": "cutvoke.transition.slide", "params": {"duration": 0.35}},
+  "captions": [
+    {"text": "第一句钩子", "at": 0.4, "duration": 2.4,
+     "style": {"fontSize": 56, "bold": true, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 3}},
+    {"text": "第二句钩子", "at": 6.4, "duration": 2.4,
+     "style": {"fontSize": 56, "bold": true, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 3}}
+  ],
+  "bgm": {"assetId": "builtin_audio_groove", "volume": 0.3},
+  "stickers": []
+}

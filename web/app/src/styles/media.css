@@ -1,0 +1,170 @@
+/* 素材库（左区）：素材条目 + 拖拽目标高亮 + 空态 + 加载动画。 */
+
+.media-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.media-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: grab;
+  user-select: none;
+  min-width: 0;
+}
+.media-item:hover {
+  border-color: var(--accent);
+  box-shadow: var(--elev-raised);
+}
+.media-item:active {
+  cursor: grabbing;
+}
+.media-item--dragging {
+  opacity: 0.5;
+}
+.media-item__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text);
+}
+.media-item__thumb {
+  width: 40px;
+  height: 24px;
+  flex: none;
+  object-fit: cover;
+  border-radius: 3px;
+  background: var(--bg-3);
+}
+.media-item__meta {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  flex: none;
+}
+
+/* ---- 素材搜索 + 类型过滤（D02） ---- */
+.media-filter {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.media-filter__search {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-faint);
+}
+.media-filter__search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+}
+.media-filter__search input::placeholder {
+  color: var(--text-faint);
+}
+.media-filter__kinds {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}
+.media-filter__kind {
+  appearance: none;
+  height: 30px;
+  padding: 0 8px;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--text-faint);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.media-filter__kind--active {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+/* ---- 已用 / 未用徽标（D02） ---- */
+.media-badge {
+  flex: none;
+  font-size: 10px;
+  line-height: 1.4;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ok);
+  color: var(--ok);
+  background: transparent;
+}
+.media-badge--unused {
+  border-color: var(--border);
+  color: var(--text-faint);
+}
+
+/* ---- 换图套版：素材卡片上的「替换选中片段」按钮 ---- */
+.media-item__swap {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 24px;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-faint);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.media-item__swap:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.media-item__swap:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.media-item__swap--disabled {
+  opacity: 0.45;
+}
+
+/* 拖拽导入目标高亮（轨道 lane） */
+.timeline-track__lane--drop {
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+}
+
+/* ---- 素材库空态 / 加载动画 ---- */
+.media-empty {
+  padding: 8px 2px;
+}
+.cv-spin {
+  animation: cv-spin 0.9s linear infinite;
+}
+@keyframes cv-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cv-spin {
+    animation: none;
+  }
+}

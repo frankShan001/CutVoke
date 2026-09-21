@@ -1,0 +1,66 @@
+name: Bug report
+description: Report a reproducible problem in CutVoke
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Please search existing issues before opening a new report. Remove private paths, tokens, and media from logs.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Web editor
+        - Editing engine
+        - Preview or export
+        - Audio or captions
+        - CLI
+        - HTTP API
+        - MCP server
+        - Packaging or installation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include your operating system, Python version, browser, and `cutvoke doctor --json` output when relevant.
+      placeholder: |
+        OS: Windows 11
+        Python: 3.12
+        Browser: Chrome 140
+        FFmpeg: 8.x
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use the smallest project and media sample that still shows the problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Paste only the relevant section and remove sensitive information.

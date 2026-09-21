@@ -1,0 +1,167 @@
+/* 工程首页：产品定位 + 新建 + 最近工程列表。仅用 Design Token。 */
+
+.home {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 48px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  background: var(--bg);
+}
+
+/* ---- Hero ---- */
+.home__hero {
+  width: 100%;
+  max-width: 720px;
+  text-align: center;
+}
+.home__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--accent-text);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.home__brand-name {
+  font-size: 15px;
+}
+.home__title {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.home__subtitle {
+  margin: 0 auto;
+  max-width: 52ch;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* ---- 新建 ---- */
+.home__create {
+  width: 100%;
+  max-width: 720px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+}
+.home__create-row {
+  display: flex;
+  gap: var(--space-2);
+}
+.home__create-row .cv-input {
+  flex: 1;
+}
+.home__create-row .cv-btn {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* ---- 最近工程 ---- */
+.home__recent {
+  width: 100%;
+  max-width: 720px;
+}
+.home__recent-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.home__section-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.home__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.home__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 4px 8px 4px 4px;
+}
+.home__item:hover {
+  border-color: var(--accent);
+}
+.home__item-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  padding: 6px 8px;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+.home__item-icon {
+  display: inline-flex;
+  color: var(--accent-text);
+  flex: none;
+}
+.home__item-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.home__item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.home__item-meta {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.home__item-rename {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: 1;
+}
+.home__item-rename .cv-input {
+  flex: 1;
+}
+
+/* ---- 空态 ---- */
+.home__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: var(--space-7) var(--space-4);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--text-dim);
+  text-align: center;
+}
+.home__empty p {
+  margin: 0;
+  max-width: 44ch;
+  font-size: 12.5px;
+  line-height: 1.6;
+}

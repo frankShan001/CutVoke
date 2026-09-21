@@ -1,0 +1,198 @@
+/* 播放器（中区预览）：画布 + 播放控制条。容器在布局中居中，画布按比例/缩放。 */
+
+.player {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--bg);
+}
+.player__stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+.player__canvas-frame {
+  position: relative;
+  background: var(--video-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width var(--motion) var(--ease-standard), height var(--motion) var(--ease-standard);
+}
+.player__canvas-frame--fit {
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 16 / 9;
+  width: auto;
+  height: auto;
+  max-width: calc(100% - 8px);
+  max-height: calc(100% - 8px);
+}
+.player__canvas-frame img,
+.player__canvas-frame video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.player__zoom-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.player__zoom-val {
+  font-size: 11px;
+  color: var(--text-dim);
+  min-width: 42px;
+  text-align: center;
+}
+.player__ratio-val {
+  min-width: 34px;
+}
+.player__mode-badge {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  font-size: 10px;
+  color: var(--text-dim);
+  background: var(--scrim-strong);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1px 8px;
+  pointer-events: none;
+}
+
+/* ---- 中区预览缩略控制 ---- */
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 720px;
+  padding: 6px 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.player-controls__time {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+  min-width: 96px;
+  text-align: center;
+}
+
+/* ---- 共享小件 ---- */
+.player__placeholder {
+  color: var(--text-faint);
+  font-size: 12px;
+  text-align: center;
+  padding: var(--space-3);
+}
+.player__iconbtn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  padding: 2px;
+  display: inline-flex;
+  cursor: pointer;
+}
+.player__iconbtn:hover {
+  color: var(--text);
+}
+.player__iconbtn--on {
+  color: var(--accent);
+}
+.player__icon-flag-out {
+  transform: rotate(180deg);
+}
+.player__play {
+  background: var(--accent);
+  border: none;
+  color: var(--on-video);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.player__play:hover {
+  background: var(--accent-2);
+}
+.player__play:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---- 画布字幕叠层（H01）：拖拽 / 缩放 / 旋转 ---- */
+.caption-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.caption-overlay__box {
+  position: absolute;
+  pointer-events: auto;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 82%;
+  padding: 2px 8px;
+  border: 1px dashed var(--border-focus);
+  border-radius: var(--radius-sm);
+  color: var(--on-video);
+  text-shadow: 0 1px 3px var(--scrim-strong);
+  user-select: none;
+  touch-action: none;
+  transform-origin: center center;
+}
+.caption-overlay__box:active {
+  cursor: grabbing;
+}
+.caption-overlay__box--active {
+  border-style: solid;
+  box-shadow: var(--elev-ring);
+  border-color: var(--accent);
+}
+.caption-overlay__text {
+  pointer-events: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.caption-overlay__handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 1px solid var(--on-video);
+  pointer-events: auto;
+  box-shadow: var(--elev-ring);
+}
+.caption-overlay__handle--scale {
+  right: -7px;
+  bottom: -7px;
+  cursor: nwse-resize;
+}
+.caption-overlay__handle--rotate {
+  right: -7px;
+  top: -7px;
+  cursor: grab;
+}

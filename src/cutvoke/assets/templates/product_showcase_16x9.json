@@ -1,0 +1,27 @@
+{
+  "id": "product_showcase_16x9",
+  "name": "商品展示（横屏 16:9）",
+  "description": "4 个画面溶解切换，配 3 条卖点字幕与价格字幕，轻科技垫乐。适合电商主图视频。",
+  "aspect": "16:9",
+  "category": "展示",
+  "placeholders": ["bg_solid_white", "bg_paper", "bg_grid_dark", "bg_vignette"],
+  "slots": [
+    {"key": "shot1", "kind": "image", "label": "主图", "duration": 2.8},
+    {"key": "shot2", "kind": "image", "label": "细节图 1", "duration": 2.8},
+    {"key": "shot3", "kind": "image", "label": "细节图 2", "duration": 2.8},
+    {"key": "shot4", "kind": "image", "label": "使用场景", "duration": 2.8}
+  ],
+  "transition": {"effectId": "cutvoke.transition.dissolve", "params": {"duration": 0.4}},
+  "captions": [
+    {"text": "卖点一：这里写", "at": 0.4, "duration": 2.2,
+     "style": {"fontSize": 48, "bold": true, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 3}},
+    {"text": "卖点二：这里写", "at": 3.2, "duration": 2.2,
+     "style": {"fontSize": 48, "bold": true, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 3}},
+    {"text": "卖点三：这里写", "at": 6.0, "duration": 2.2,
+     "style": {"fontSize": 48, "bold": true, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 3}},
+    {"text": "限时价 ¥99", "at": 8.8, "duration": 2.4,
+     "style": {"fontSize": 60, "bold": true, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 3}}
+  ],
+  "bgm": {"assetId": "builtin_audio_tech_minimal", "volume": 0.3},
+  "stickers": []
+}

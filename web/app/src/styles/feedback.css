@@ -1,0 +1,250 @@
+/* 状态反馈：底部状态栏 + 右上错误浮窗。 */
+
+/* ---- 状态栏 ---- */
+.statusbar {
+  height: var(--statusbar-h);
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 14px;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
+.statusbar__rev {
+  color: var(--text-dim);
+}
+.statusbar__rev b {
+  color: var(--text);
+  font-weight: 600;
+}
+.statusbar__msg {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.statusbar__msg--ok {
+  color: var(--ok);
+}
+.statusbar__msg--warn {
+  color: var(--warn);
+}
+.statusbar__msg--err {
+  color: var(--err);
+}
+.statusbar__save {
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+.statusbar__save--saving {
+  color: var(--warn);
+}
+.statusbar__save--saved {
+  color: var(--ok);
+}
+.statusbar__save--error {
+  color: var(--err);
+}
+
+/* 「详情」折叠：raw projectId / revision 收在此处 */
+.statusbar__details {
+  position: relative;
+  flex: none;
+}
+.statusbar__details > summary {
+  cursor: pointer;
+  color: var(--text-faint);
+  list-style: none;
+  padding: 0 2px;
+}
+.statusbar__details > summary::-webkit-details-marker {
+  display: none;
+}
+.statusbar__details > summary::before {
+  content: "▸ ";
+}
+.statusbar__details[open] > summary::before {
+  content: "▾ ";
+}
+.statusbar__details-body {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  background: var(--bg-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  box-shadow: 0 10px 30px var(--overlay);
+  white-space: nowrap;
+  z-index: 60;
+}
+
+/* ---- 错误浮窗 ---- */
+.error-modal {
+  position: fixed;
+  top: calc(var(--toolbar-h) + 12px);
+  right: 16px;
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  background: var(--err-bg);
+  border: 1px solid var(--err);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  z-index: 50;
+  box-shadow: 0 10px 40px var(--overlay-strong);
+}
+.error-modal__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--err);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+.error-modal__close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+}
+.error-modal__close:hover {
+  color: var(--text);
+}
+.error-modal__code {
+  font-family: var(--font-mono);
+  background: var(--err-soft-rgba);
+  color: var(--err-text);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+}
+.error-modal__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 6px;
+  font-size: 12px;
+}
+.error-modal__meta .k {
+  color: var(--text-dim);
+}
+.error-modal__detail {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+  margin-top: var(--space-2);
+  max-height: 160px;
+  overflow: auto;
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.error-modal__ok-flag {
+  color: var(--ok);
+}
+.error-modal__err-flag {
+  color: var(--err);
+}
+
+/* ---- 统一导出抽屉 ---- */
+.export-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+.export-dialog__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+}
+.export-dialog__panel {
+  position: relative;
+  z-index: 1;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  background: var(--bg-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: 0 16px 48px var(--overlay-strong);
+}
+.export-dialog__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: 6px;
+}
+.export-dialog__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.export-dialog__close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+}
+.export-dialog__close:hover {
+  color: var(--text);
+}
+.export-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: 14px;
+}
+.export-dialog__result {
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+.export-dialog__result-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ok);
+  margin-bottom: 6px;
+}
+.export-dialog__result--error .export-dialog__result-head {
+  color: var(--err);
+}
+.export-dialog__divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0 12px;
+}
+.export-dialog__cover {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.export-dialog__cover-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}

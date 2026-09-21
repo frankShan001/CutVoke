@@ -1,0 +1,22 @@
+{
+  "id": "photo_album_16x9",
+  "name": "图文相册（横屏 16:9）",
+  "description": "5 张照片依次淡入淡出，开头一张标题卡，配环境垫乐。适合旅行、活动、班级回顾。",
+  "aspect": "16:9",
+  "category": "相册",
+  "placeholders": ["bg_gradient_blue", "bg_gradient_sunset", "bg_gradient_teal", "bg_bokeh", "bg_paper"],
+  "slots": [
+    {"key": "photo1", "kind": "image", "label": "第 1 张图", "duration": 3.2},
+    {"key": "photo2", "kind": "image", "label": "第 2 张图", "duration": 3.2},
+    {"key": "photo3", "kind": "image", "label": "第 3 张图", "duration": 3.2},
+    {"key": "photo4", "kind": "image", "label": "第 4 张图", "duration": 3.2},
+    {"key": "photo5", "kind": "image", "label": "第 5 张图", "duration": 3.2}
+  ],
+  "transition": {"effectId": "cutvoke.transition.crossfade", "params": {"duration": 0.6}},
+  "captions": [
+    {"text": "这里写标题", "at": 0.6, "duration": 2.6,
+     "style": {"fontSize": 64, "bold": true, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 3}}
+  ],
+  "bgm": {"assetId": "builtin_audio_ambient_pad", "volume": 0.35},
+  "stickers": []
+}

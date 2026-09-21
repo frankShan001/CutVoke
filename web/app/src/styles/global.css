@@ -1,0 +1,177 @@
+/* CutVoke 编辑器 — 全局 Design Token 与基础样式。
+   深色专业编辑器基调（延续 M0），全部颜色经 CSS 变量引用，禁止硬编码 hex。 */
+
+:root {
+  /* 表面层级：亮度递进表达层级（深色主题不依赖阴影） */
+  --bg: #0f1115;
+  --bg-2: #171a21;
+  --bg-3: #1e222b;
+  --bg-4: #242a36;
+
+  /* 边框 */
+  --border: #2a2f3a;
+  --border-strong: #363d4a;
+  --border-focus: #4f8cff;
+
+  /* 文本 */
+  --text: #e6e9ef;
+  --text-dim: #9aa3b2;
+  --text-faint: #6b7484;
+
+  /* 品牌强调（NLE 专业蓝） */
+  --accent: #4f8cff;
+  --accent-2: #2f6fe0;
+  --accent-soft: rgba(79, 140, 255, 0.16);
+  --accent-text: #7aa8ff;
+
+  /* 轨道语义色 */
+  --video: #4f8cff;
+  --video-soft: rgba(79, 140, 255, 0.18);
+  --audio: #3ecf8e;
+  --audio-soft: rgba(62, 207, 142, 0.18);
+
+  /* 视频画布底色 / 其上前景（#000、#fff 收敛为 token，便于后续主题化） */
+  --video-bg: #000;
+  --on-video: #fff;
+
+  /* 状态色 */
+  --ok: #3ecf8e;
+  --warn: #f5b94a;
+  --err: #ff6b6b;
+  --err-bg: #2a1316;
+  --err-text: #ffb3b3;
+
+  /* 阴影（深色主题用光晕而非投影） */
+  --elev-ring: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --elev-raised: 0 0 40px rgba(79, 140, 255, 0.08);
+
+  /* 浮层遮罩 */
+  --overlay: rgba(0, 0, 0, 0.5);
+
+  /* 语义色 alpha 变体（状态/徽标/局部强调，token 化避免散落 rgba 字面量） */
+  --ok-soft-rgba: rgba(62, 207, 142, 0.1);
+  --ok-border-rgba: rgba(62, 207, 142, 0.4);
+  --warn-soft-rgba: rgba(245, 185, 74, 0.1);
+  --warn-border-rgba: rgba(245, 185, 74, 0.4);
+  --err-border-rgba: rgba(255, 107, 107, 0.4);
+  --err-soft-rgba: rgba(255, 107, 107, 0.15);
+  --accent-border-rgba: rgba(79, 140, 255, 0.4);
+  --accent-soft-2: rgba(79, 140, 255, 0.5);
+  --accent-soft-3: rgba(79, 140, 255, 0.55);
+  --accent-soft-4: rgba(79, 140, 255, 0.12);
+  --accent-soft-5: rgba(79, 140, 255, 0.1);
+  --accent-soft-6: rgba(79, 140, 255, 0.08);
+  --audio-border-rgba: rgba(62, 207, 142, 0.55);
+  --scrim-strong: rgba(15, 17, 21, 0.72);
+  --scrim-stronger: rgba(15, 17, 21, 0.85);
+  --overlay-strong: rgba(0, 0, 0, 0.55);
+  --white-soft-rgba: rgba(255, 255, 255, 0.2);
+
+  /* 字体 */
+  --font-sans: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei",
+    Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+  /* 圆角体系（有节制：4/6/8/12px） */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* 间距刻度（2px 基全覆盖：2/4/6/8/10/12/14/16/20/24/32/40px） */
+  --space-05: 2px;
+  --space-1: 4px;
+  --space-15: 6px;
+  --space-2: 8px;
+  --space-25: 10px;
+  --space-3: 12px;
+  --space-35: 14px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+
+  /* 动效时长 / 缓动 */
+  --motion-fast: 100ms;
+  --motion: 150ms;
+  --motion-slow: 250ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 布局尺寸 */
+  --toolbar-h: 48px;
+  --statusbar-h: 28px;
+  --timeline-ruler-h: 26px;
+  --track-h: 56px;
+  --track-label-w: 220px;
+  --zone-left-w: 260px;
+  --zone-right-w: 300px;
+  --timeline-h: 300px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+  font-size: 13px;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* 滚动条（深色） */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-4);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 焦点环（键盘可达） */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+}
+
+/* 动效降级 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

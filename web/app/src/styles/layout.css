@@ -1,0 +1,178 @@
+/* 剪映式 4 区布局：顶部工具栏 / 左素材区 / 中预览区 / 右属性区 / 底部时间线（可拖拽高度）。
+   播放器样式见 player.css；素材库见 media.css；顶部工具见 toolbar.css。 */
+
+/* 主工作区：一横排 3 列（左素材 / 中预览+时间线 / 右属性） */
+.workspace {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ---- 左：素材区 ---- */
+.zone-left {
+  width: var(--zone-left-w, 260px);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bg-2);
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+.zone-left__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ---- 中：预览 + 时间线（可拖分隔条） ---- */
+.zone-center {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+.zone-center__top {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.zone-center__preview {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+/* 底部时间线容器：高度由 resizer 状态控制 */
+.zone-center__timeline {
+  height: var(--timeline-h, 300px);
+  min-height: 120px;
+  max-height: 70%;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+/* ---- 时间线高度拖拽条 ---- */
+.tl-resizer {
+  position: relative;
+  height: 6px;
+  flex: none;
+  cursor: ns-resize;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+  touch-action: none;
+}
+.tl-resizer:hover,
+.tl-resizer--active {
+  background: var(--accent-soft);
+}
+.tl-resizer__grip {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--border-strong);
+  overflow: hidden;
+}
+.tl-resizer__grip svg {
+  display: none;
+}
+.tl-resizer:hover .tl-resizer__grip,
+.tl-resizer--active .tl-resizer__grip {
+  background: var(--accent);
+}
+
+/* ---- 右：属性区 ---- */
+.zone-right {
+  width: var(--zone-right-w, 300px);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bg-2);
+  border-left: 1px solid var(--border);
+  overflow: hidden;
+}
+.zone-right__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.zone-right__inner {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 右区内的 Inspector 与面板：卡片化，去掉底部/占满约束 */
+.zone-right__scroll .inspector {
+  flex: none;
+  border-top: none;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+}
+
+/* ---- 右侧 tab ---- */
+.right-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+  padding: 0 10px;
+  flex: none;
+}
+.right-tabs__btn {
+  padding: 7px 10px;
+  font-size: 12.5px;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.right-tabs__btn:hover {
+  color: var(--text);
+}
+.right-tabs__btn--active {
+  color: var(--accent-text);
+  border-bottom-color: var(--accent);
+}
+.right-tabs__btn .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-faint);
+}
+.right-tabs__btn .dot--on {
+  background: var(--accent);
+}

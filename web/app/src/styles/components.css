@@ -1,0 +1,301 @@
+/* 组件层基础样式（BEM，全部走 Design Token）：外壳 / 顶栏 / 面板 / 按钮 / 表单 / 徽标 / 空态。
+   说明：本文件已按职责拆分——状态栏+错误浮窗见 feedback.css；工程列表/右键菜单/轨道/字幕/检查器见 panels.css；
+   布局与分区见 layout.css；播放器见 player.css；素材库见 media.css；顶部工具见 toolbar.css。 */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ---- 顶部工具栏 ---- */
+.topbar {
+  height: var(--toolbar-h);
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+}
+.topbar__title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+.topbar__tag {
+  font-size: 11px;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.04em;
+}
+.topbar__spacer {
+  flex: 1;
+}
+.topbar__sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.topbar__sync .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-strong);
+  transition: background var(--motion) var(--ease-standard);
+}
+.topbar__sync .dot--up {
+  background: var(--ok);
+}
+.topbar__sync .dot--down {
+  background: var(--err);
+}
+
+/* ---- 面板 ---- */
+.cv-panel {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+}
+.cv-panel__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: 10px;
+}
+.cv-panel__head h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.cv-panel__sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+
+/* ---- 按钮 ---- */
+.cv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  transition:
+    background-color var(--motion) var(--ease-standard),
+    border-color var(--motion) var(--ease-standard),
+    color var(--motion) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+  white-space: nowrap;
+}
+.cv-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.cv-btn--sm {
+  height: 26px;
+  padding: 0 var(--space-2);
+  font-size: 12px;
+}
+.cv-btn--md {
+  height: 32px;
+  padding: 0 var(--space-3);
+  font-size: 13px;
+}
+.cv-btn--full {
+  width: 100%;
+}
+.cv-btn--primary {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+}
+.cv-btn--primary:hover:not(:disabled) {
+  background: var(--accent-2);
+}
+.cv-btn--primary:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.cv-btn--secondary {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.cv-btn--secondary:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.cv-btn--ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+}
+.cv-btn--ghost:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--bg-3);
+}
+.cv-btn--danger {
+  background: transparent;
+  border: 1px solid var(--err);
+  color: var(--err);
+}
+.cv-btn--danger:hover:not(:disabled) {
+  background: var(--err-bg);
+}
+
+/* ---- 表单 ---- */
+.cv-field {
+  display: block;
+  margin: var(--space-2) 0 0;
+}
+.cv-field__label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 3px;
+}
+.cv-field__hint {
+  display: block;
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: var(--space-1);
+  line-height: 1.4;
+}
+.cv-input,
+.cv-select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-md);
+  height: 30px;
+  padding: 0 var(--space-2);
+  outline: none;
+  transition: border-color var(--motion) var(--ease-standard);
+}
+.cv-input:focus,
+.cv-select:focus {
+  border-color: var(--border-focus);
+}
+.cv-input--invalid {
+  border-color: var(--err);
+}
+.cv-input::placeholder {
+  color: var(--text-faint);
+}
+
+.cv-row {
+  display: flex;
+  gap: var(--space-2);
+}
+.cv-row > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.cv-mono {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+/* ---- Badge ---- */
+.cv-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.cv-badge--ok {
+  color: var(--ok);
+  border-color: var(--ok-border-rgba);
+  background: var(--ok-soft-rgba);
+}
+.cv-badge--warn {
+  color: var(--warn);
+  border-color: var(--warn-border-rgba);
+  background: var(--warn-soft-rgba);
+}
+.cv-badge--err {
+  color: var(--err);
+  border-color: var(--err-border-rgba);
+  background: var(--err-border-rgba);
+}
+.cv-badge--info {
+  color: var(--accent-text);
+  border-color: var(--accent-border-rgba);
+  background: var(--accent-soft-5);
+}
+.cv-badge--video {
+  color: var(--video);
+  border-color: var(--accent-border-rgba);
+  background: var(--video-soft);
+}
+.cv-badge--audio {
+  color: var(--audio);
+  border-color: var(--ok-border-rgba);
+  background: var(--audio-soft);
+}
+
+/* ---- 空态 / 加载 / 提示 ---- */
+.cv-empty {
+  color: var(--text-dim);
+  font-style: italic;
+  padding: var(--space-2) 0;
+  font-size: 12px;
+}
+/* 紧凑空态：用于密集列表（如轨道/字幕列表），去掉纵向留白 */
+.cv-empty--tight {
+  padding: 0;
+}
+/* 加载态：与 .cv-empty 同族（同色调 / 同圆角 / 同间距），带克制的脉冲动效 */
+.cv-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--text-dim);
+  font-size: 12px;
+  border-radius: var(--radius-md);
+  padding: var(--space-2) 0;
+  animation: cv-loading-pulse 1.4s var(--ease-standard) infinite;
+}
+@keyframes cv-loading-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cv-loading {
+    animation: none;
+  }
+}
+.cv-hint {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: 6px;
+  line-height: 1.45;
+}
+.cv-icon-dim {
+  color: var(--text-dim);
+}

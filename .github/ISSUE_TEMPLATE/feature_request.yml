@@ -1,0 +1,40 @@
+name: Feature request
+description: Suggest a change to the editing workflow or public interfaces
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the editing task that is difficult today.
+    validations:
+      required: true
+
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Expected workflow
+      description: Explain how a person or Agent would use the feature from start to finish.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Where should it be available?
+      multiple: true
+      options:
+        - Web editor
+        - CLI
+        - HTTP API
+        - MCP server
+        - Python API
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Examples or constraints
+      description: Add references, compatibility concerns, or media examples if they help explain the request.

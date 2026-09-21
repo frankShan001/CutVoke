@@ -1,0 +1,226 @@
+/* 时间线外壳：头部/缩放 + 滚动容器 + 标尺 + 播放头 + 底部提示 + 拖拽提示/空态。
+   轨道与片段条块见 timeline-track.css。 */
+
+.timeline {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.timeline__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.timeline__title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+.timeline__meta {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.timeline__spacer {
+  flex: 1;
+}
+.timeline__zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.timeline__zoom-btn {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all var(--motion) var(--ease-standard);
+}
+.timeline__zoom-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+.timeline__zoom-val {
+  min-width: 44px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.timeline__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  position: relative;
+}
+
+/* 滚动容器：左轨道标签固定、内容区横向滚动 */
+.timeline__scroller {
+  min-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  height: 100%;
+}
+.timeline__content {
+  padding: 10px 12px 18px;
+  min-width: max-content;
+  user-select: none;
+  position: relative;
+}
+
+/* 标尺 */
+.timeline-ruler {
+  position: relative;
+  height: var(--timeline-ruler-h);
+  border-bottom: 1px solid var(--border);
+  margin-left: var(--track-label-w);
+  min-width: 0;
+}
+.timeline-ruler__tick {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+}
+.timeline-ruler__line {
+  width: 1px;
+  background: var(--border-strong);
+}
+.timeline-ruler__line--minor {
+  height: 6px;
+  background: var(--border);
+}
+.timeline-ruler__label {
+  font-size: 9px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  margin-top: 2px;
+  white-space: nowrap;
+}
+.timeline-ruler__line--major {
+  height: 10px;
+}
+
+/* 播放头（竖线，贯穿待绘制区域） */
+.timeline-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1.5px solid var(--err);
+  pointer-events: none;
+  z-index: 5;
+}
+.timeline-playhead__head {
+  position: absolute;
+  top: 0;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  background: var(--err);
+  border-radius: 2px 2px 6px 6px;
+}
+.timeline-playhead__drag {
+  position: absolute;
+  top: 0;
+  left: -5px;
+  width: 12px;
+  height: 26px;
+  cursor: ew-resize;
+  pointer-events: auto;
+}
+
+/* 时间线底部提示 */
+.timeline__footer {
+  padding: 6px 12px 10px;
+  color: var(--text-faint);
+  font-size: 11px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* 拖动吸附高亮 + 拖动时间提示 */
+.clip-block--ghost--snapped {
+  border-color: var(--accent);
+  outline: 1.5px solid var(--accent);
+  opacity: 0.85;
+}
+.drag-time-tip {
+  position: absolute;
+  z-index: 8;
+  padding: 2px 6px;
+  background: var(--scrim-stronger);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  pointer-events: none;
+  white-space: nowrap;
+  top: 0;
+  transform: translate(-50%, -100%);
+}
+
+/* 空白拖入区（下方） */
+.timeline__empty-area {
+  height: 48px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--text-faint);
+  transition: all var(--motion) var(--ease-standard);
+}
+.timeline__empty-area--over {
+  border-color: var(--accent);
+  color: var(--accent-text);
+  background: var(--accent-soft-6);
+}
+
+/* 空工程大按钮态 */
+.timeline__emptystate {
+  padding: var(--space-6) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.timeline__emptystate-text {
+  font-size: 13px;
+  color: var(--text-dim);
+  max-width: 30ch;
+}
+.timeline__emptystate-btn {
+  font-size: 13px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--accent-soft-5);
+  gap: 6px;
+}
+.timeline__emptystate-hint {
+  font-size: 11px;
+  color: var(--text-faint);
+}

@@ -1,0 +1,60 @@
+/* 顶部工具切换（V 选择 / C 切割 / 磁吸 / 导出）+ 切割模式光标。 */
+
+.toolbar-tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-left: var(--space-2);
+}
+.toolbar-tools__sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  margin: 0 3px;
+}
+.tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  font-size: 12px;
+  cursor: pointer;
+}
+.tool-btn:hover {
+  color: var(--text);
+  background: var(--bg-3);
+}
+.tool-btn--on {
+  color: var(--accent-text);
+  background: var(--accent-soft-4);
+}
+.tool-btn__key {
+  font-size: 9px;
+  color: var(--text-faint);
+  border: 1px solid var(--border-strong);
+  padding: 0 3px;
+  border-radius: 3px;
+  line-height: 13px;
+}
+.tool-btn--export {
+  color: var(--text);
+  font-weight: 600;
+}
+.tool-btn--export:hover {
+  background: var(--accent-soft-4);
+  color: var(--accent-text);
+}
+
+/* 切割模式：时间线区域十字光标（选择器与 Timeline 的 .timeline--cut 对齐） */
+.timeline--cut .timeline-track__lane,
+.timeline--cut .timeline__body {
+  cursor: crosshair;
+}

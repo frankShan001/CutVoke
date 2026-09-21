@@ -1,0 +1,40 @@
+name: Effect proposal
+description: Propose a video, audio, transition, or color effect
+title: "[Effect] "
+labels: ["effect"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Effect name
+      placeholder: Soft wipe transition
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Intended use
+      description: Describe what the effect should look or sound like and when it is useful.
+    validations:
+      required: true
+
+  - type: textarea
+    id: parameters
+    attributes:
+      label: Parameters
+      description: List the controls, ranges, defaults, and which values should support keyframes.
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: Possible implementation
+      description: Name the FFmpeg filter or another implementation if you already have one in mind.
+
+  - type: textarea
+    id: references
+    attributes:
+      label: References and licensing
+      description: Link to visual references and identify the source and license of any external code, media, font, filter, or binary.
+    validations:
+      required: true

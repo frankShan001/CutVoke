@@ -1,0 +1,295 @@
+/* 资源库（J01 ResourcePanel）与效果条（J01 EffectStackPanel）样式。
+   全部走 Design Token，禁止硬编码色值。 */
+
+/* ---- 资源库：分类 tab ---- */
+.resource-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 8px 0;
+}
+.resource-tabs__btn {
+  padding: 3px 10px;
+  font-size: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  background: var(--bg);
+  cursor: pointer;
+  transition:
+    color var(--motion) var(--ease-standard),
+    border-color var(--motion) var(--ease-standard),
+    background-color var(--motion) var(--ease-standard);
+}
+.resource-tabs__btn:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.resource-tabs__btn--active {
+  color: var(--accent-text);
+  border-color: var(--accent);
+  background: var(--accent-soft-6);
+}
+
+/* ---- 资源库：筛选开关 ---- */
+.resource-filters {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.resource-filters__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  font-size: 11.5px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  background: var(--bg);
+  cursor: pointer;
+  transition:
+    color var(--motion) var(--ease-standard),
+    border-color var(--motion) var(--ease-standard),
+    background-color var(--motion) var(--ease-standard);
+}
+.resource-filters__toggle:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.resource-filters__toggle--on {
+  color: var(--accent-text);
+  border-color: var(--accent);
+  background: var(--accent-soft-6);
+}
+
+/* ---- 资源库：卡片网格 ---- */
+.resource-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.resource-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+.resource-card:hover {
+  border-color: var(--border-strong);
+}
+.resource-card__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.resource-card__icon {
+  display: inline-flex;
+  color: var(--accent-text);
+  flex: none;
+}
+.resource-card__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text);
+}
+.resource-card__fav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  flex: none;
+}
+.resource-card__fav:hover {
+  color: var(--warn);
+  background: var(--warn-soft-rgba);
+}
+.resource-card__fav--on {
+  color: var(--warn);
+}
+.resource-card__desc {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--text-dim);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.resource-card__tag {
+  align-self: flex-start;
+  font-size: 10px;
+  color: var(--accent-text);
+  border: 1px solid var(--accent-border-rgba);
+  border-radius: 8px;
+  padding: 0 6px;
+}
+.resource-card__apply {
+  margin-top: 2px;
+}
+
+/* ---- 效果条：效果栈行 ---- */
+.effect-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.effect-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+/* 旁路降级：整行淡出且主色变灰，但仍可恢复/重排/删除 */
+.effect-row--bypassed {
+  opacity: 0.55;
+  border-left-color: var(--border-strong);
+}
+.effect-row__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.effect-row__idx {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-4);
+  color: var(--text-dim);
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+}
+.effect-row__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  color: var(--text);
+}
+.effect-row__meta {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  flex: none;
+}
+.effect-row__params {
+  font-size: 11px;
+  color: var(--text-dim);
+  padding-left: 24px;
+  line-height: 1.4;
+}
+.effect-row__actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 2px;
+  padding-left: 24px;
+}
+.effect-row__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition:
+    color var(--motion) var(--ease-standard),
+    border-color var(--motion) var(--ease-standard),
+    background-color var(--motion) var(--ease-standard);
+}
+.effect-row__btn:hover:not(:disabled) {
+  color: var(--accent-text);
+  border-color: var(--accent);
+  background: var(--accent-soft-6);
+}
+.effect-row__btn--on {
+  color: var(--warn);
+  border-color: var(--warn-border-rgba);
+  background: var(--warn-soft-rgba);
+}
+.effect-row__btn--danger:hover:not(:disabled) {
+  color: var(--err);
+  border-color: var(--err);
+  background: var(--err-bg);
+}
+.effect-row__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- 效果条：预设 ---- */
+.effect-preset-save {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 4px;
+}
+.effect-preset-save .cv-input {
+  flex: 1;
+}
+.effect-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+.effect-preset {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.effect-preset__name {
+  font-size: 12.5px;
+  color: var(--text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.effect-preset__count {
+  font-size: 10.5px;
+  color: var(--text-faint);
+}
+.effect-preset__actions {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}

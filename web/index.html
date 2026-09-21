@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CutVoke 编辑器 (v0.1 最小可操作版)</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --bg-2: #171a21;
+    --bg-3: #1e222b;
+    --border: #2a2f3a;
+    --text: #e6e9ef;
+    --text-dim: #9aa3b2;
+    --accent: #4f8cff;
+    --accent-2: #2f6fe0;
+    --ok: #3ecf8e;
+    --warn: #f5b94a;
+    --err: #ff6b6b;
+    --video: #4f8cff;
+    --audio: #3ecf8e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+  }
+  header h1 { font-size: 15px; margin: 0; font-weight: 600; }
+  header .tag { font-size: 11px; color: var(--text-dim); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; }
+  header .spacer { flex: 1; }
+
+  .layout { display: grid; grid-template-columns: 320px 1fr; gap: 0; height: calc(100% - 49px); }
+  .sidebar { background: var(--bg-2); border-right: 1px solid var(--border); overflow-y: auto; padding: 14px; }
+  .main { overflow-y: auto; padding: 16px; }
+
+  .panel { background: var(--bg-3); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 14px; }
+  .panel h2 { font-size: 13px; margin: 0 0 10px; color: var(--text); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .panel h2 .sub { font-size: 11px; color: var(--text-dim); font-weight: 400; }
+
+  label { display: block; font-size: 12px; color: var(--text-dim); margin: 8px 0 3px; }
+  input, select, button {
+    font-family: inherit; font-size: 13px;
+  }
+  input[type="text"], input[type="number"], select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 7px 8px;
+    outline: none;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+  input.invalid { border-color: var(--err); }
+
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+
+  button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background .15s;
+  }
+  button:hover { background: var(--accent-2); }
+  button.secondary { background: var(--bg); border: 1px solid var(--border); color: var(--text); }
+  button.secondary:hover { border-color: var(--accent); }
+  button:disabled { background: #2a2f3a !important; color: var(--text-dim); cursor: not-allowed; border: 1px solid var(--border); }
+  .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+
+  .hint { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+  .hint code { background: var(--bg); padding: 1px 4px; border-radius: 3px; color: var(--text); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--text-dim); font-weight: 500; }
+  td.mono, .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 11.5px; }
+  .track-tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 600; }
+  .track-tag.video { background: rgba(79,140,255,.18); color: var(--video); }
+  .track-tag.audio { background: rgba(62,207,142,.18); color: var(--audio); }
+  .clip-card { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px; margin-bottom: 8px; }
+  .clip-card .clip-id { font-family: monospace; color: var(--accent); font-size: 12px; }
+  .clip-card .times { color: var(--text-dim); font-size: 11.5px; margin-top: 4px; }
+  .clip-card .path { color: var(--text); font-size: 11.5px; word-break: break-all; margin-top: 2px; }
+
+  .track-block { margin-bottom: 14px; }
+  .track-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .track-head .name { font-weight: 600; }
+  .empty { color: var(--text-dim); font-style: italic; padding: 8px 0; }
+
+  /* status bar */
+  #statusbar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
+    padding: 6px 16px;
+    display: flex; align-items: center; gap: 14px;
+    font-size: 12px;
+    z-index: 10;
+  }
+  #statusbar .rev { color: var(--text-dim); }
+  #statusbar .rev b { color: var(--text); }
+  #statusbar .msg-ok { color: var(--ok); }
+  #statusbar .msg-err { color: var(--err); }
+  #statusbar .msg-warn { color: var(--warn); }
+  #statusbar .spacer { flex: 1; }
+
+  /* error box */
+  #errorbox {
+    display: none;
+    position: fixed; top: 56px; right: 16px; width: 380px;
+    background: #2a1316; border: 1px solid var(--err); border-radius: 8px;
+    padding: 12px 14px; z-index: 50; box-shadow: 0 8px 30px rgba(0,0,0,.5);
+  }
+  #errorbox h3 { margin: 0 0 8px; color: var(--err); font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  #errorbox .code { font-family: monospace; background: rgba(255,107,107,.15); color: #ffb3b3; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  #errorbox .field { margin-top: 6px; font-size: 12px; }
+  #errorbox .field .k { color: var(--text-dim); }
+  #errorbox .close { position: absolute; top: 8px; right: 10px; background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 16px; padding: 0; }
+  pre.detail { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px; max-height: 160px; overflow: auto; font-size: 11px; color: var(--text-dim); white-space: pre-wrap; word-break: break-all; }
+
+  .pill { font-size: 11px; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--border); color: var(--text-dim); }
+  .pill.on { color: var(--ok); border-color: rgba(62,207,142,.4); }
+  .pill.off { color: var(--text-dim); }
+  .project-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; cursor: pointer; }
+  .project-item:hover { background: var(--bg-3); }
+  .project-item.active { background: var(--bg-3); border: 1px solid var(--accent); }
+  .project-item .pid { font-family: monospace; font-size: 11.5px; color: var(--text); flex: 1; word-break: break-all; }
+  .muted { color: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CutVoke 编辑器</h1>
+  <span class="tag">v0.1 最小可操作版</span>
+  <span class="spacer"></span>
+  <span class="pill off" id="svcPill">后端：未连接</span>
+</header>
+
+<div class="layout">
+  <!-- 侧边栏 -->
+  <div class="sidebar">
+    <div class="panel">
+      <h2>工程 <span class="sub">项目</span></h2>
+      <label>工程名称（留空由后端分配 ID）</label>
+      <input type="text" id="projName" placeholder="例如：我的第一个剪辑" />
+      <div class="row" style="margin-top:8px;">
+        <div>
+          <label>宽度</label>
+          <input type="number" id="projW" value="1920" />
+        </div>
+        <div>
+          <label>高度</label>
+          <input type="number" id="projH" value="1080" />
+        </div>
+        <div>
+          <label>帧率</label>
+          <input type="number" id="projFps" value="30" step="any" />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button id="btnCreate">创建工程</button>
+        <button class="secondary" id="btnRefreshProj">刷新列表</button>
+      </div>
+      <div id="projList" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="panel">
+      <h2>轨道 <span class="sub">track.add</span></h2>
+      <label>轨道类型</label>
+      <select id="trackKind">
+        <option value="video">视频轨道 (video)</option>
+        <option value="audio">音频轨道 (audio)</option>
+      </select>
+      <div class="btn-row">
+        <button id="btnAddTrack">添加轨道</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>媒体导入 <span class="sub">clip.insert · sourcePath</span></h2>
+      <label>本地文件绝对路径</label>
+      <input type="text" id="impPath" placeholder="例如：/Users/me/video.mp4 或 C:\media\a.mp4" />
+      <label>目标轨道</label>
+      <select id="impTrack"></select>
+      <div class="hint">后端暂无独立 import 命令时，直接以 <code>clip.insert</code> 引用本地路径：源起点 0，片段顺序接在轨道末尾（默认长 10s，可在下方精确修改）。</div>
+      <div class="btn-row">
+        <button id="btnImport">导入为片段</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>添加片段 <span class="sub">clip.insert · 精确</span></h2>
+      <label>目标轨道</label>
+      <select id="clipTrack"></select>
+      <div class="row">
+        <div>
+          <label>时间线起点 (秒)</label>
+          <input type="number" id="cStart" value="0" step="any" />
+        </div>
+        <div>
+          <label>时间线终点 (秒)</label>
+          <input type="number" id="cEnd" value="10" step="any" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>源起点 (秒)</label>
+          <input type="number" id="cSrc" value="0" step="any" />
+        </div>
+      </div>
+      <label>源路径 (sourcePath)</label>
+      <input type="text" id="cPath" placeholder="本地媒体绝对路径" />
+      <div class="hint">所有时间以「秒」输入，提交前自动转换为有理数 <code>num/den</code>。</div>
+      <div class="btn-row">
+        <button id="btnAddClip">添加片段</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>历史 <span class="sub">undo / redo</span></h2>
+      <div class="btn-row">
+        <button id="btnUndo">撤销</button>
+        <button id="btnRedo">重做</button>
+      </div>
+      <div class="hint" id="undoHint">后端若无 undo/redo 命令，按钮将自动禁用并标注「待后端」。</div>
+    </div>
+
+    <div class="panel">
+      <h2>导出 <span class="sub">export</span></h2>
+      <label>输出文件路径</label>
+      <input type="text" id="expPath" placeholder="例如：/Users/me/out.mp4" />
+      <div class="btn-row">
+        <button id="btnExport">触发导出</button>
+      </div>
+      <pre class="detail" id="expResult" style="margin-top:10px; display:none;"></pre>
+    </div>
+  </div>
+
+  <!-- 主区 -->
+  <div class="main">
+    <div class="panel">
+      <h2>时间线 <span class="sub">轨道与片段</span></h2>
+      <div id="timeline"><p class="empty">尚未选择工程。请在左侧创建或选择一个工程。</p></div>
+    </div>
+
+    <div class="panel">
+      <h2>工程摘要</h2>
+      <pre class="detail" id="projJson" style="max-height:260px;">（无）</pre>
+    </div>
+  </div>
+</div>
+
+<!-- 错误浮窗 -->
+<div id="errorbox">
+  <button class="close" id="errClose">×</button>
+  <h3>⚠ 操作失败</h3>
+  <div><span class="code" id="errCode">—</span></div>
+  <div class="field"><span class="k">消息：</span><span id="errMsg"></span></div>
+  <div class="field"><span class="k">HTTP：</span><span id="errHttp"></span> · <span class="k">已提交：</span><span id="errCommitted"></span> · <span class="k">可重试：</span><span id="errRetry"></span></div>
+  <div class="field"><span class="k">关联 ID：</span><span id="errCorr" class="mono"></span></div>
+  <div class="field"><span class="k">details：</span></div>
+  <pre class="detail" id="errDetail"></pre>
+</div>
+
+<!-- 状态栏 -->
+<div id="statusbar">
+  <span class="rev">当前工程：<b id="sbProj">—</b></span>
+  <span class="rev">Revision：<b id="sbRev">—</b></span>
+  <span id="sbMsg" class="muted">就绪</span>
+  <span class="spacer"></span>
+  <span class="rev" id="sbEvents">事件：未轮询</span>
+</div>
+
+<script>
+"use strict";
+
+// ============== 配置 ==============
+const API_BASE = "/api/v1";
+
+// ============== 状态 ==============
+const state = {
+  projects: [],          // 列表 [{projectId, ...}]
+  currentProjectId: null,
+  project: null,         // GET 工程返回的完整 JSON
+  revision: null,        // 当前 revision（字符串）
+  undoOk: true,
+  redoOk: true,
+};
+
+// ============== 有理数时间工具 ==============
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a || 1; }
+
+// 秒（字符串/数字）-> 有理数 {num, den}（十进制字符串，已约分）
+function secsToRational(s) {
+  s = String(s).trim();
+  if (s === "") throw new Error("时间不能为空");
+  if (!/^-?\d+(\.\d+)?$/.test(s)) throw new Error("时间必须为数字（秒），例如 3.5");
+  if (s.indexOf(".") === -1) return { num: s, den: "1" };
+  const neg = s.startsWith("-");
+  const body = neg ? s.slice(1) : s;
+  const [ip, fp] = body.split(".");
+  const den = Math.pow(10, fp.length);
+  let num = parseInt(ip + fp, 10);
+  if (neg) num = -num;
+  const g = gcd(num, den);
+  return { num: String(num / g), den: String(den / g) };
+}
+
+// 有理数 -> 秒（数字）
+function rationalToSecs(rt) {
+  if (rt == null) return NaN;
+  if (typeof rt === "number") return rt;
+  if (typeof rt === "string") return Number(rt);
+  if (typeof rt === "object" && rt.num != null && rt.den != null) {
+    return Number(rt.num) / Number(rt.den);
+  }
+  return NaN;
+}
+
+// 格式化为「num/den ≈ x.xxxs」
+function formatTime(rt) {
+  const secs = rationalToSecs(rt);
+  const secsStr = isNaN(secs) ? "?" : secs.toFixed(3) + "s";
+  if (rt && typeof rt === "object" && rt.num != null && rt.den != null) {
+    return rt.num + "/" + rt.den + "  ≈  " + secsStr;
+  }
+  return secsStr;
+}
+
+function genId(prefix) {
+  return prefix + "_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+}
+
+// ============== HTTP 封装 ==============
+async function apiGet(path) {
+  const res = await fetch(API_BASE + path, { method: "GET", headers: { "Accept": "application/json" } });
+  const data = await safeJson(res);
+  if (!res.ok) throw makeError(data, res.status, path);
+  return data;
+}
+
+async function apiPost(path, body) {
+  const res = await fetch(API_BASE + path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await safeJson(res);
+  if (!res.ok) throw makeError(data, res.status, path);
+  return data;
+}
+
+async function safeJson(res) {
+  try { return await res.json(); } catch (e) { return {}; }
+}
+
+// 把后端错误统一成结构化对象
+function makeError(data, status, path) {
+  const err = (data && data.error) || {};
+  return {
+    status: status,
+    code: err.code || ("HTTP_" + status),
+    message: err.message || ("请求失败（" + status + "）"),
+    details: err.details,
+    retryable: err.retryable,
+    committed: err.committed,
+    correlationId: err.correlationId,
+    path: path,
+  };
+}
+
+// ============== 错误展示 ==============
+function showError(e) {
+  const box = document.getElementById("errorbox");
+  document.getElementById("errCode").textContent = e.code || "—";
+  document.getElementById("errMsg").textContent = e.message || "";
+  document.getElementById("errHttp").textContent = e.status != null ? e.status : "—";
+  document.getElementById("errCommitted").textContent = e.committed === undefined ? "—" : (e.committed ? "是" : "否");
+  document.getElementById("errRetry").textContent = e.retryable === undefined ? "—" : (e.retryable ? "是" : "否");
+  document.getElementById("errCorr").textContent = e.correlationId || "—";
+  const d = document.getElementById("errDetail");
+  d.textContent = e.details ? (typeof e.details === "string" ? e.details : JSON.stringify(e.details, null, 2)) : "（无）";
+  box.style.display = "block";
+  // 状态栏也记录错误
+  setStatus("错误：" + (e.code || "") + " — " + (e.message || ""), "err");
+}
+function hideError() { document.getElementById("errorbox").style.display = "none"; }
+document.getElementById("errClose").addEventListener("click", hideError);
+
+// ============== 状态栏 ==============
+function setStatus(text, kind) {
+  const el = document.getElementById("sbMsg");
+  el.textContent = text;
+  el.className = kind === "ok" ? "msg-ok" : kind === "err" ? "msg-err" : kind === "warn" ? "msg-warn" : "muted";
+}
+function updateStatusRev() {
+  document.getElementById("sbProj").textContent = state.currentProjectId || "—";
+  document.getElementById("sbRev").textContent = state.revision != null ? state.revision : "—";
+}
+
+// ============== 工程列表 / 创建 ==============
+async function loadProjects() {
+  try {
+    const data = await apiGet("/projects");
+    state.projects = Array.isArray(data) ? data : (data.projects || []);
+    // 兼容不同返回结构：可能直接是数组，或 {projects:[...]}，或 {items:[...]}
+    if (!Array.isArray(state.projects) && data.items) state.projects = data.items;
+    renderProjectList();
+    setSvc(true);
+  } catch (e) {
+    setSvc(false);
+    showError(e);
+  }
+}
+
+function setSvc(ok) {
+  const p = document.getElementById("svcPill");
+  p.textContent = ok ? "后端：已连接" : "后端：未连接";
+  p.className = ok ? "pill on" : "pill off";
+}
+
+function renderProjectList() {
+  const el = document.getElementById("projList");
+  if (!state.projects.length) { el.innerHTML = '<p class="empty">暂无工程</p>'; return; }
+  el.innerHTML = "";
+  state.projects.forEach(p => {
+    const id = p.projectId || p.id;
+    const div = document.createElement("div");
+    div.className = "project-item" + (id === state.currentProjectId ? " active" : "");
+    div.innerHTML = '<span class="pid">' + escapeHtml(id) + "</span>";
+    div.addEventListener("click", () => selectProject(id));
+    el.appendChild(div);
+  });
+}
+
+async function createProject() {
+  hideError();
+  const name = document.getElementById("projName").value.trim();
+  const width = parseInt(document.getElementById("projW").value, 10) || 1920;
+  const height = parseInt(document.getElementById("projH").value, 10) || 1080;
+  const fps = parseFloat(document.getElementById("projFps").value) || 30;
+  const body = { width: width, height: height, fps: fps };
+  if (name) body.projectId = name.replace(/\s+/g, "_"); // 用名字作预分配 ID 建议
+  try {
+    const res = await apiPost("/projects", body);
+    const pid = res.projectId || (res.project && res.project.projectId) || name;
+    setStatus("工程已创建：" + pid, "ok");
+    await loadProjects();
+    if (pid) await selectProject(pid);
+  } catch (e) { showError(e); }
+}
+
+async function selectProject(id) {
+  hideError();
+  state.currentProjectId = id;
+  renderProjectList();
+  await refreshProject();
+}
+
+// ============== 读取工程并刷新 ==============
+async function refreshProject() {
+  if (!state.currentProjectId) return;
+  try {
+    const data = await apiGet("/projects/" + encodeURIComponent(state.currentProjectId));
+    // 兼容：返回可能是 {project:{...}, revision} 或直接是工程对象
+    state.project = data.project || data;
+    state.revision = (data.revision != null) ? String(data.revision)
+      : (state.project.revision != null ? String(state.project.revision) : state.revision);
+    updateStatusRev();
+    renderTimeline();
+    renderTrackSelects();
+    document.getElementById("projJson").textContent = JSON.stringify(state.project, null, 2);
+  } catch (e) { showError(e); }
+}
+
+// ============== 轨道 ==============
+function renderTrackSelects() {
+  const tracks = (state.project && state.project.tracks) || [];
+  const opts = tracks.map(t => '<option value="' + escapeAttr(t.id) + '">' + escapeHtml(t.id) + " (" + t.kind + ")</option>").join("");
+  document.getElementById("impTrack").innerHTML = opts || '<option value="">（无轨道，请先添加）</option>';
+  document.getElementById("clipTrack").innerHTML = opts || '<option value="">（无轨道，请先添加）</option>';
+}
+
+async function addTrack() {
+  hideError();
+  if (!state.currentProjectId) return warnNoProject();
+  const kind = document.getElementById("trackKind").value;
+  const payload = { trackId: genId("track"), kind: kind };
+  try {
+    const res = await sendCommand("track.add", payload);
+    afterCommand(res, "已添加" + kind + "轨道");
+  } catch (e) { showError(e); }
+}
+
+// ============== 媒体导入 / 添加片段 ==============
+async function importMedia() {
+  hideError();
+  if (!state.currentProjectId) return warnNoProject();
+  const path = document.getElementById("impPath").value.trim();
+  const trackId = document.getElementById("impTrack").value;
+  if (!path) return showError({ code: "INVALID_ARGUMENT", message: "请填写本地文件绝对路径", status: 400 });
+  if (!trackId) return showError({ code: "INVALID_ARGUMENT", message: "请先添加目标轨道", status: 400 });
+  // 计算该轨道当前末尾，作为新片段起点
+  const nextStart = nextTrackEnd(trackId);
+  const payload = {
+    clipId: genId("clip"),
+    trackId: trackId,
+    sourcePath: path,
+    sourceStart: secsToRational(0),
+    timelineStart: secsToRational(nextStart),
+    timelineEnd: secsToRational(nextStart + 10),
+  };
+  try {
+    const res = await sendCommand("clip.insert", payload);
+    afterCommand(res, "已导入片段：" + path);
+    document.getElementById("impPath").value = "";
+  } catch (e) { showError(e); }
+}
+
+async function addClip() {
+  hideError();
+  if (!state.currentProjectId) return warnNoProject();
+  const trackId = document.getElementById("clipTrack").value;
+  const path = document.getElementById("cPath").value.trim();
+  if (!trackId) return showError({ code: "INVALID_ARGUMENT", message: "请先添加目标轨道", status: 400 });
+  if (!path) return showError({ code: "INVALID_ARGUMENT", message: "请填写源路径 sourcePath", status: 400 });
+  let timelineStart, timelineEnd, sourceStart;
+  try {
+    timelineStart = secsToRational(document.getElementById("cStart").value);
+    timelineEnd = secsToRational(document.getElementById("cEnd").value);
+    sourceStart = secsToRational(document.getElementById("cSrc").value);
+  } catch (e) { return showError({ code: "INVALID_ARGUMENT", message: e.message, status: 400 }); }
+  const payload = {
+    clipId: genId("clip"),
+    trackId: trackId,
+    sourcePath: path,
+    sourceStart: sourceStart,
+    timelineStart: timelineStart,
+    timelineEnd: timelineEnd,
+  };
+  try {
+    const res = await sendCommand("clip.insert", payload);
+    afterCommand(res, "已添加片段：" + payload.clipId);
+  } catch (e) { showError(e); }
+}
+
+function nextTrackEnd(trackId) {
+  const tracks = (state.project && state.project.tracks) || [];
+  const t = tracks.find(x => x.id === trackId);
+  let end = 0;
+  if (t && Array.isArray(t.clips)) {
+    t.clips.forEach(c => { const e = rationalToSecs(c.timelineEnd); if (!isNaN(e) && e > end) end = e; });
+  }
+  return end;
+}
+
+// ============== 撤销 / 重做 ==============
+async function undo() {
+  hideError();
+  if (!state.currentProjectId) return warnNoProject();
+  if (!state.undoOk) return;
+  try {
+    const res = await sendCommand("history.undo", {});
+    afterCommand(res, "已撤销");
+  } catch (e) { handleHistoryFailure(e, "undo"); }
+}
+async function redo() {
+  hideError();
+  if (!state.currentProjectId) return warnNoProject();
+  if (!state.redoOk) return;
+  try {
+    const res = await sendCommand("history.redo", {});
+    afterCommand(res, "已重做");
+  } catch (e) { handleHistoryFailure(e, "redo"); }
+}
+
+// 后端若无 undo/redo 命令，则禁用并标注「待后端」
+function handleHistoryFailure(e, which) {
+  const unsupported = /UNSUPPORTED|UNAVAILABLE|NOT_FOUND|NOT_IMPLEMENTED|NO_SUCH/i.test(e.code || "");
+  if (unsupported) {
+    if (which === "undo") { state.undoOk = false; document.getElementById("btnUndo").disabled = true; document.getElementById("btnUndo").textContent = "撤销（待后端）"; }
+    else { state.redoOk = false; document.getElementById("btnRedo").disabled = true; document.getElementById("btnRedo").textContent = "重做（待后端）"; }
+    document.getElementById("undoHint").textContent = "后端未提供 " + which + " 命令，按钮已禁用（标注「待后端」）。";
+  }
+  showError(e);
+}
+
+// ============== 导出 ==============
+async function exportProject() {
+  hideError();
+  if (!state.currentProjectId) return warnNoProject();
+  const outPath = document.getElementById("expPath").value.trim();
+  if (!outPath) return showError({ code: "INVALID_ARGUMENT", message: "请填写输出文件路径", status: 400 });
+  try {
+    const res = await apiPost("/projects/" + encodeURIComponent(state.currentProjectId) + "/export", { outPath: outPath });
+    const box = document.getElementById("expResult");
+    box.style.display = "block";
+    box.textContent = JSON.stringify(res, null, 2);
+    setStatus("导出已触发（见导出结果）", "ok");
+  } catch (e) { showError(e); }
+}
+
+// ============== 命令提交核心 ==============
+async function sendCommand(type, payload, commandId) {
+  const body = {
+    type: type,
+    payload: payload,
+    expectedRevision: state.revision,
+  };
+  body.commandId = commandId || ("cmd_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8));
+  const res = await apiPost("/projects/" + encodeURIComponent(state.currentProjectId) + "/commands", body);
+  return res;
+}
+
+function afterCommand(res, okText) {
+  // 成功结果包含 revision / commandId / changedEntities / warnings
+  if (res && res.revision != null) state.revision = String(res.revision);
+  updateStatusRev();
+  let extra = "";
+  if (res && res.commandId) extra += " · cmd=" + res.commandId;
+  if (res && Array.isArray(res.warnings) && res.warnings.length) extra += " · 警告：" + res.warnings.length;
+  setStatus(okText + extra, "ok");
+  refreshProject();
+}
+
+function warnNoProject() {
+  showError({ code: "NO_PROJECT", message: "请先创建或选择一个工程", status: 400 });
+}
+
+// ============== 时间线渲染 ==============
+function renderTimeline() {
+  const el = document.getElementById("timeline");
+  if (!state.project) { el.innerHTML = '<p class="empty">尚未选择工程。</p>'; return; }
+  const tracks = state.project.tracks || [];
+  if (!tracks.length) { el.innerHTML = '<p class="empty">该工程暂无轨道。请在左侧添加轨道。</p>'; return; }
+  let html = "";
+  tracks.forEach(t => {
+    const kindCls = t.kind === "audio" ? "audio" : "video";
+    html += '<div class="track-block">';
+    html += '<div class="track-head"><span class="track-tag ' + kindCls + '">' + t.kind + '</span><span class="name mono">' + escapeHtml(t.id) + "</span></div>";
+    const clips = Array.isArray(t.clips) ? t.clips : [];
+    if (!clips.length) {
+      html += '<p class="empty">（空轨道）</p>';
+    } else {
+      clips.forEach(c => {
+        html += '<div class="clip-card">';
+        html += '<div class="clip-id">' + escapeHtml(c.id || "(无 ID)") + "</div>";
+        html += '<div class="times">时间线 [' + formatTime(c.timelineStart) + ", " + formatTime(c.timelineEnd) + ") · 源起点 " + formatTime(c.sourceStart) + "</div>";
+        html += '<div class="path">源：' + escapeHtml(c.sourcePath || "—") + "</div>";
+        html += "</div>";
+      });
+    }
+    html += "</div>";
+  });
+  el.innerHTML = html;
+}
+
+// ============== 事件流轮询（用于同步 revision / 他人修改） ==============
+async function pollEvents() {
+  if (!state.currentProjectId) return;
+  try {
+    const since = state.revision != null ? state.revision : "0";
+    const arr = await apiGet("/projects/" + encodeURIComponent(state.currentProjectId) + "/events?since=" + encodeURIComponent(since));
+    document.getElementById("sbEvents").textContent = "事件：已轮询";
+    if (Array.isArray(arr) && arr.length) {
+      const maxRev = arr.reduce((m, e) => Math.max(m, Number(e.revision || 0)), 0);
+      if (maxRev > Number(state.revision || 0)) {
+        refreshProject();
+      }
+    }
+  } catch (e) {
+    document.getElementById("sbEvents").textContent = "事件：轮询失败";
+  }
+}
+
+// ============== 工具：转义 ==============
+function escapeHtml(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+// ============== 绑定事件 ==============
+document.getElementById("btnCreate").addEventListener("click", createProject);
+document.getElementById("btnRefreshProj").addEventListener("click", loadProjects);
+document.getElementById("btnAddTrack").addEventListener("click", addTrack);
+document.getElementById("btnImport").addEventListener("click", importMedia);
+document.getElementById("btnAddClip").addEventListener("click", addClip);
+document.getElementById("btnUndo").addEventListener("click", undo);
+document.getElementById("btnRedo").addEventListener("click", redo);
+document.getElementById("btnExport").addEventListener("click", exportProject);
+
+// ============== 启动 ==============
+loadProjects();
+setInterval(pollEvents, 3000);
+</script>
+</body>
+</html>

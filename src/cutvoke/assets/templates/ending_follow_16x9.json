@@ -1,0 +1,20 @@
+{
+  "id": "ending_follow_16x9",
+  "name": "片尾关注引导（横屏 16:9）",
+  "description": "暗角背景上的大字致谢 + 一行行动号召，配环境垫乐收尾。",
+  "aspect": "16:9",
+  "category": "片头片尾",
+  "placeholders": ["bg_vignette"],
+  "slots": [
+    {"key": "backdrop", "kind": "image", "label": "背景画面", "duration": 4.0}
+  ],
+  "transition": null,
+  "captions": [
+    {"text": "感谢观看", "at": 0.3, "duration": 3.4,
+     "style": {"fontSize": 88, "bold": true, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 3}},
+    {"text": "点赞 · 关注 · 转发", "at": 1.4, "duration": 2.3,
+     "style": {"fontSize": 40, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 2}}
+  ],
+  "bgm": {"assetId": "builtin_audio_ambient_pad", "volume": 0.35},
+  "stickers": []
+}

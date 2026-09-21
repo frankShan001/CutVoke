@@ -1,0 +1,203 @@
+/* 轨道泳道 + 片段条块（含拖拽热区/幽灵/选中态）。时间线外壳见 timeline.css。 */
+
+/* 轨道泳道 */
+.timeline-track {
+  display: flex;
+  height: var(--track-h);
+  margin-top: 6px;
+  position: relative;
+}
+.timeline-track__label {
+  width: var(--track-label-w);
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-right: var(--space-2);
+  min-width: 0;
+}
+.timeline-track__name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.timeline-track__kind {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  flex: none;
+}
+.timeline-track__kind--video {
+  color: var(--video);
+  background: var(--video-soft);
+}
+.timeline-track__kind--audio {
+  color: var(--audio);
+  background: var(--audio-soft);
+}
+.timeline-track__lane {
+  position: relative;
+  flex: 1;
+  height: var(--track-h);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  min-width: max-content;
+}
+.timeline-track__lane--focused {
+  border-color: var(--accent);
+}
+
+/* 片段条块 */
+.clip-block {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+  overflow: hidden;
+  min-width: 0;
+  touch-action: none; /* 拖动时禁止浏览器滚动 */
+  transition:
+    border-color var(--motion) var(--ease-standard),
+    box-shadow var(--motion) var(--ease-standard);
+}
+.clip-block--video {
+  background: var(--video-soft);
+  border-color: var(--accent-soft-3);
+}
+.clip-block--audio {
+  background: var(--audio-soft);
+  border-color: var(--audio-border-rgba);
+}
+.clip-block:hover {
+  box-shadow: var(--elev-raised);
+  border-color: var(--video);
+}
+.clip-block--selected {
+  box-shadow: 0 0 0 2px var(--accent);
+  z-index: 2;
+}
+/* 跨轨拖动幽灵条块（绝对定位在 timeline__content 内） */
+.clip-block--ghost {
+  position: absolute;
+  opacity: 0.55;
+  border-style: dashed;
+  pointer-events: none;
+  z-index: 6;
+  box-shadow: var(--elev-raised);
+}
+/* 片段主标签 = 素材文件名（不再是内部 clip.id） */
+.clip-block__name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.clip-block__meta {
+  font-size: 9px;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.clip-block__drag {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: ew-resize;
+  background: transparent;
+  z-index: 3;
+}
+.clip-block__drag--l {
+  left: 0;
+  border-top-left-radius: var(--radius-sm);
+  border-bottom-left-radius: var(--radius-sm);
+}
+.clip-block__drag--r {
+  right: 0;
+  border-top-right-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+}
+.clip-block__drag:hover {
+  background: var(--white-soft-rgba);
+}
+
+/* 空轨道提示 */
+.timeline-track__lane-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-3);
+  color: var(--text-faint);
+  font-size: 11px;
+  pointer-events: none;
+}
+
+/* 轨道属性切换（锁定 / 静音 / 显隐） */
+.track-toggles {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+}
+.track-toggle {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition:
+    color var(--motion) var(--ease-standard),
+    background var(--motion) var(--ease-standard),
+    border-color var(--motion) var(--ease-standard);
+}
+.track-toggle:hover {
+  color: var(--text);
+  background: var(--bg);
+  border-color: var(--border);
+}
+.track-toggle--on {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-color: var(--accent-border-rgba);
+}
+
+/* 锁定 / 静音：泳道变淡；锁定再禁用片段交互；隐藏：片段不渲染 */
+.timeline-track--locked .timeline-track__lane,
+.timeline-track--muted .timeline-track__lane {
+  opacity: 0.5;
+}
+.timeline-track--locked .clip-block {
+  pointer-events: none;
+}
+.timeline-track--hidden .clip-block {
+  display: none;
+}

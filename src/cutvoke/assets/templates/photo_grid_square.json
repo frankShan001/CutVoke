@@ -1,0 +1,27 @@
+{
+  "id": "photo_grid_square",
+  "name": "方形九宫格（1:1）",
+  "description": "9 张图各 1.2 秒溶解切换，方形画布。适合穿搭、食谱、合集类九图展示。",
+  "aspect": "1:1",
+  "category": "相册",
+  "placeholders": ["bg_paper", "bg_solid_white", "bg_checker", "bg_gradient_blue",
+                   "bg_gradient_teal", "bg_bokeh", "bg_vignette", "bg_grid_dark", "bg_gradient_sunset"],
+  "slots": [
+    {"key": "cell1", "kind": "image", "label": "第 1 格", "duration": 1.2},
+    {"key": "cell2", "kind": "image", "label": "第 2 格", "duration": 1.2},
+    {"key": "cell3", "kind": "image", "label": "第 3 格", "duration": 1.2},
+    {"key": "cell4", "kind": "image", "label": "第 4 格", "duration": 1.2},
+    {"key": "cell5", "kind": "image", "label": "第 5 格", "duration": 1.2},
+    {"key": "cell6", "kind": "image", "label": "第 6 格", "duration": 1.2},
+    {"key": "cell7", "kind": "image", "label": "第 7 格", "duration": 1.2},
+    {"key": "cell8", "kind": "image", "label": "第 8 格", "duration": 1.2},
+    {"key": "cell9", "kind": "image", "label": "第 9 格", "duration": 1.2}
+  ],
+  "transition": {"effectId": "cutvoke.transition.dissolve", "params": {"duration": 0.25}},
+  "captions": [
+    {"text": "九图合集", "at": 0.3, "duration": 2.0,
+     "style": {"fontSize": 56, "bold": true, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 3}}
+  ],
+  "bgm": {"assetId": "builtin_audio_tech_minimal", "volume": 0.25},
+  "stickers": []
+}

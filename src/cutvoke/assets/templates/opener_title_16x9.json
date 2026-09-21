@@ -1,0 +1,20 @@
+{
+  "id": "opener_title_16x9",
+  "name": "片头标题卡（横屏 16:9）",
+  "description": "单画面大字标题 + 副标题，配上升音阶音效。适合给视频开一个干净的头。",
+  "aspect": "16:9",
+  "category": "片头片尾",
+  "placeholders": ["bg_gradient_blue"],
+  "slots": [
+    {"key": "backdrop", "kind": "image", "label": "背景画面", "duration": 3.5}
+  ],
+  "transition": null,
+  "captions": [
+    {"text": "主标题", "at": 0.3, "duration": 3.0,
+     "style": {"fontSize": 88, "bold": true, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 3}},
+    {"text": "副标题或署名", "at": 1.0, "duration": 2.4,
+     "style": {"fontSize": 36, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 2}}
+  ],
+  "bgm": {"assetId": "builtin_audio_riser", "volume": 0.5},
+  "stickers": []
+}

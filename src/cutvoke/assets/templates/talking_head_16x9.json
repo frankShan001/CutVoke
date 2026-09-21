@@ -1,0 +1,20 @@
+{
+  "id": "talking_head_16x9",
+  "name": "口播讲解（横屏 16:9）",
+  "description": "一段 10 秒主讲画面，底部两条下三分之一说明字幕。口播默认不配背景音乐，避免压住人声。",
+  "aspect": "16:9",
+  "category": "口播",
+  "placeholders": ["bg_gradient_teal"],
+  "slots": [
+    {"key": "speaker", "kind": "video", "label": "主讲画面", "duration": 10.0}
+  ],
+  "transition": null,
+  "captions": [
+    {"text": "这里写第一句要点", "at": 0.5, "duration": 4.0,
+     "style": {"fontSize": 40, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 2}},
+    {"text": "这里写第二句要点", "at": 5.0, "duration": 4.0,
+     "style": {"fontSize": 40, "color": "#ffffff", "strokeColor": "#000000", "strokeWidth": 2}}
+  ],
+  "bgm": null,
+  "stickers": []
+}
