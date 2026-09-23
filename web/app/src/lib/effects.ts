@@ -6,7 +6,7 @@ import { ArrowRightLeft, Sparkles, Wand2, Palette, Move, Shapes } from "lucide-r
 import { ApiFailure, API_BASE } from "./api";
 
 /** 效果分类（对应后端 registry category 常量）。 */
-export type EffectCategory = "transition" | "animation" | "fx" | "color" | "transform";
+export type EffectCategory = "transition" | "animation" | "fx" | "color" | "transform" | "text";
 
 export interface EffectParamSpec {
   type?: string;
@@ -233,6 +233,7 @@ export const CATEGORY_ORDER: EffectCategory[] = [
   "fx",
   "color",
   "transform",
+  "text",
 ];
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -241,6 +242,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   fx: "画面特效",
   color: "调色",
   transform: "基础",
+  text: "文字",
 };
 
 export function categoryLabelOf(category: string): string {

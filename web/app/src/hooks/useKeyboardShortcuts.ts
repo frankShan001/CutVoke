@@ -1,5 +1,4 @@
-/** 播放器/时间线辅助工具（无全局快捷键——Web 浏览器会与浏览器快捷键冲突）。
-    仅导出 UI 按钮可调用的纯函数；不挂任何全局 keydown 监听。 */
+/** 播放器/时间线辅助工具。全局快捷键由 AppShell 按编辑器视图、焦点与锁定状态管理。 */
 
 import { frameStep } from "../components/timeline/snap";
 
@@ -15,5 +14,6 @@ export function fpsToStep(fps: { num: string; den: string } | undefined): number
   if (!fps) return 1 / 30;
   const n = Number(fps.num);
   const de = Number(fps.den);
-  return de ? n / de : 30;
+  const rate = n / de;
+  return Number.isFinite(rate) && rate > 0 ? 1 / rate : 1 / 30;
 }

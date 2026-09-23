@@ -11,6 +11,7 @@ import { Panel } from "./ui";
 import { useEditor, showError } from "../store/editor";
 import { getLatestState } from "../store/actions";
 import { addEffectToClip, setFavorite } from "../store/effectEdit";
+import { rationalToSecs } from "../lib/rational";
 import {
   categoryLabelOf,
   iconForCategory,
@@ -39,6 +40,46 @@ export function ResourcePanel({ active }: Props) {
   const [applying, setApplying] = useState<string | null>(null);
 
   const selectedClipId = state.selection?.clipId ?? null;
+  const selectedTrackLocked = !!state.project?.sequence.tracks.find((track) =>
+    track.clips.some((clip) => clip.id === selectedClipId),
+  )?.locked;
+  const selectedClipReadOnly = selectedTrackLocked || !!state.editLock;
+
+  // 与服务端同一语义：静态图片只接受视觉效果；视频片段同时可处理画面与原声。
+  // 资源面板先隐藏不相关的卡片，服务端仍会二次校验，保证 Agent 与人工操作一致。
+  const selectedTargetTypes = useMemo(() => {
+    if (!selectedClipId) return [] as string[];
+    const track = state.project?.sequence.tracks.find((item) =>
+      item.clips.some((clip) => clip.id === selectedClipId),
+    );
+    if (!track) return [] as string[];
+    if (track.kind === "audio") return ["audio"];
+    if (track.kind === "text") return ["text"];
+    const clip = track.clips.find((item) => item.id === selectedClipId);
+    const source = (clip?.assetRef.sourcePath || "").split("?", 1)[0].toLowerCase();
+    if (/\.(avif|bmp|gif|heic|jpe?g|png|tiff?|webp)$/.test(source)) return ["image"];
+    return ["video", "audio"];
+  }, [selectedClipId, state.project]);
+
+  // 转场不是单片段滤镜：它挂在「后一段」上，并且只对紧邻的前一段有语义。
+  // 把约束提前到资源库，避免用户点完才遇到无画面变化或后端错误。
+  const transitionTarget = useMemo(() => {
+    if (!selectedClipId) return { valid: false, reason: "请先选中转场后的片段" };
+    const track = state.project?.sequence.tracks.find((item) =>
+      item.clips.some((clip) => clip.id === selectedClipId),
+    );
+    if (!track || track.kind !== "video") return { valid: false, reason: "转场只能用于视频轨道" };
+    const clips = [...track.clips].sort(
+      (a, b) => rationalToSecs(a.timelineStart) - rationalToSecs(b.timelineStart),
+    );
+    const index = clips.findIndex((clip) => clip.id === selectedClipId);
+    if (index <= 0) return { valid: false, reason: "首个片段前没有可连接的片段" };
+    const previous = clips[index - 1];
+    const current = clips[index];
+    const gap = rationalToSecs(current.timelineStart) - rationalToSecs(previous.timelineEnd);
+    if (Math.abs(gap) > 0.001) return { valid: false, reason: "转场两侧需要首尾相接；请先关闭中间空隙" };
+    return { valid: true, reason: `将连接前一段与当前片段` };
+  }, [selectedClipId, state.project]);
 
   const load = useCallback(
     async (opts: { q: string; cat: EffectCategory | ""; favOnly: boolean; recOnly: boolean }) => {
@@ -82,13 +123,30 @@ export function ResourcePanel({ active }: Props) {
   const refresh = () => void load({ q, cat, favOnly, recOnly });
 
   const filtered = useMemo(
-    () => resources.filter((e) => (favOnly ? e.favorite : true) && (recOnly ? e.recent : true)),
+    () => resources.filter((e) => {
+      if ((favOnly && !e.favorite) || (recOnly && !e.recent)) return false;
+      return selectedTargetTypes.length === 0 || e.appliesTo.some((type) => selectedTargetTypes.includes(type));
+    }),
     // 服务端已按 favoritesOnly/recentOnly 过滤；本地再兜底一层（fav 高亮仍按标记）
-    [resources, favOnly, recOnly],
+    [resources, favOnly, recOnly, selectedTargetTypes],
   );
 
+  const selectionContext = useMemo(() => {
+    if (!selectedClipId) return "先选中时间线片段，再显示适用效果";
+    if (selectedTargetTypes.includes("image")) return "图片片段：仅显示视觉效果";
+    if (selectedTargetTypes.includes("text")) return "文字片段：仅显示文字效果";
+    if (selectedTargetTypes.includes("audio") && !selectedTargetTypes.includes("video")) {
+      return "音频片段：仅显示音频效果";
+    }
+    return "视频片段：显示画面与声音效果";
+  }, [selectedClipId, selectedTargetTypes]);
+
   const applyToSelected = async (effect: ProjectResource) => {
-    if (!selectedClipId) return;
+    if (!selectedClipId || selectedClipReadOnly) return;
+    if (effect.category === "transition" && !transitionTarget.valid) {
+      dispatch({ type: "STATUS_SET", severity: "warn", text: `无法应用转场：${transitionTarget.reason}` });
+      return;
+    }
     if (applying) return;
     setApplying(effect.effectId);
     const st = getLatestState() || state;
@@ -114,6 +172,15 @@ export function ResourcePanel({ active }: Props) {
 
   return (
     <Panel title="资源库" subtitle="效果统一从这里取">
+      {selectedClipReadOnly ? (
+        <p className="cv-hint" role="status">
+          {state.editLock ? "Agent 正在编辑，效果暂不可应用。" : "所选片段所在轨道已锁定，解锁后可应用效果。"}
+        </p>
+      ) : null}
+      <p className="resource-context" role="status">
+        <span>{selectionContext}</span>
+        <span>{filtered.length} / {resources.length} 个效果</span>
+      </p>
       {/* 搜索 */}
       <div className="media-filter">
         <label className="media-filter__search">
@@ -204,13 +271,21 @@ export function ResourcePanel({ active }: Props) {
           {pid ? "没有匹配的效果。试试调整搜索词或分类。" : "请先创建或打开一个工程。"}
         </p>
       ) : filtered.length === 0 ? (
-        <p className="cv-empty">当前筛选下没有效果。</p>
+        <p className="cv-empty">当前素材类型和筛选条件下没有可用效果。</p>
       ) : (
         <div className="resource-grid">
           {filtered.map((e) => {
             const Icon = iconForCategory(e.category);
             const fav = favIds.includes(e.effectId) || e.favorite;
-            const disabled = !selectedClipId;
+            const isTransition = e.category === "transition";
+            const disabled = !selectedClipId || selectedClipReadOnly || (isTransition && !transitionTarget.valid);
+            const applyTitle = state.editLock
+              ? "Agent 正在编辑，暂不可应用效果"
+              : selectedTrackLocked
+                ? "所选片段所在轨道已锁定，解锁后可应用效果"
+                : isTransition && !transitionTarget.valid
+                  ? transitionTarget.reason
+                : "请先在时间线选中一个片段";
             return (
               <div key={e.effectId} className="resource-card">
                 <div className="resource-card__head">
@@ -233,12 +308,17 @@ export function ResourcePanel({ active }: Props) {
                 </div>
                 <p className="resource-card__desc">{e.description || "（无描述）"}</p>
                 {e.recent ? <span className="resource-card__tag">最近</span> : null}
+                {isTransition ? (
+                  <span className="resource-card__tag" title="转场挂在选中片段上，并连接它前面的连续片段">
+                    两段之间
+                  </span>
+                ) : null}
                 <button
                   type="button"
                   className="cv-btn cv-btn--sm cv-btn--secondary resource-card__apply"
                   disabled={disabled || applying === e.effectId}
                   onClick={() => void applyToSelected(e)}
-                  title={disabled ? "请先在时间线选中一个片段" : "应用到选中片段"}
+                  title={disabled ? applyTitle : "应用到选中片段"}
                 >
                   {applying === e.effectId ? (
                     <Loader2 size={12} className="cv-spin" />

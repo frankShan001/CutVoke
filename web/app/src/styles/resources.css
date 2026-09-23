@@ -2,6 +2,20 @@
    全部走 Design Token，禁止硬编码色值。 */
 
 /* ---- 资源库：分类 tab ---- */
+.resource-context {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 2px 0 6px;
+  color: var(--text-dim);
+  font-size: 11px;
+  line-height: 1.35;
+}
+.resource-context span:last-child {
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .resource-tabs {
   display: flex;
   flex-wrap: wrap;

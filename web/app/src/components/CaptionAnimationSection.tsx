@@ -37,7 +37,7 @@ function presetIdOf(animIn: number, animOut: number): string {
   return hit ? hit.id : "none";
 }
 
-export function CaptionAnimationSection({ caption }: { caption: Caption }) {
+export function CaptionAnimationSection({ caption, disabled = false }: { caption: Caption; disabled?: boolean }) {
   const { state, dispatch } = useEditor();
   const currentIn = caption.animIn ?? 0;
   const currentOut = caption.animOut ?? 0;
@@ -73,7 +73,7 @@ export function CaptionAnimationSection({ caption }: { caption: Caption }) {
         aria-label="字幕入场出场动画"
         className="cv-input"
         style={{ height: 28, width: "100%" }}
-        disabled={busy}
+        disabled={busy || disabled}
         onChange={(e) => {
           const preset = ANIM_PRESETS.find((p) => p.id === e.target.value);
           if (preset) void apply(preset);

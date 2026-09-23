@@ -28,13 +28,19 @@
   opacity: 0.5;
 }
 .media-item__name {
-  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 12px;
   color: var(--text);
+}
+.media-item__details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 .media-item__thumb {
   width: 40px;
@@ -53,8 +59,9 @@
 /* ---- 素材搜索 + 类型过滤（D02） ---- */
 .media-filter {
   display: flex;
+  flex-direction: column;
   gap: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 .media-filter__search {
   flex: 1;
@@ -82,20 +89,52 @@
   color: var(--text-faint);
 }
 .media-filter__kinds {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
-  flex: none;
 }
 .media-filter__kind {
   appearance: none;
   height: 30px;
-  padding: 0 8px;
+  min-width: 0;
+  padding: 0 4px;
   font-size: 11px;
   cursor: pointer;
   color: var(--text-faint);
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
+}
+.media-sources {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.media-sources button {
+  min-width: 0;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 0 6px;
+  color: var(--text-dim);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  cursor: pointer;
+}
+.media-sources button span {
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.media-sources button.media-source--active {
+  color: var(--accent-text);
+  border-color: var(--accent);
+  background: var(--accent-soft-5);
 }
 .media-filter__kind--active {
   color: var(--text);

@@ -7,7 +7,7 @@ MP4(H.264 + AAC)。
   - 视频：单轨 concat；多轨 primary 主轴 + 其余轨 overlay（位置默认左上角，可传参）
   - 音频（T16）：
       * 音频轨（kind=='audio'）的可见片段：按 source_start/时长 atrim + asetpts 裁剪，
-        一条音轨内 concat；多条音轨用 amix 混合
+        按时间线绝对位置延迟后用 amix 混合，保留片段之间的静音空白
       * 视频轨片段如果源文件本身带音频（如 av_sine.mp4 含 aac 音轨），默认一并提取其
         音轨，与画面一起导出（每条视频轨的嵌入音频作为一条独立音轨参与 amix）
       * 一个工程完全没有可用音频（视频 clip 无声 + 无音频轨 / 音频轨源无音轨）时，
@@ -459,6 +459,47 @@ def _fx_colorbalance_expr(p: dict) -> str:
     return f"colorbalance={levels}pl={pl}"
 
 
+def _fx_deband_expr(p: dict) -> str:
+    """去色带：四个平面共享受 schema 约束的阈值，避免颜色平面处理不一致。"""
+    threshold = max(0.00003, min(0.5, float(p.get("threshold", 0.02))))
+    sample_range = max(1, min(64, int(p.get("range", 16))))
+    blur = 1 if p.get("blur", True) else 0
+    return (f"deband=1thr={threshold:.6f}:2thr={threshold:.6f}:"
+            f"3thr={threshold:.6f}:4thr={threshold:.6f}:"
+            f"range={sample_range}:blur={blur}")
+
+
+def _fx_lens_expr(p: dict) -> str:
+    """镜头畸变：固定中心与双线性插值，仅开放安全的两档畸变参数。"""
+    k1 = max(-1.0, min(1.0, float(p.get("k1", -0.15))))
+    k2 = max(-1.0, min(1.0, float(p.get("k2", 0.0))))
+    return (f"lenscorrection=cx=0.5:cy=0.5:k1={k1:.6f}:k2={k2:.6f}:"
+            "i=bilinear:fc=black@1")
+
+
+def _fx_film_grain_expr(p: dict) -> str:
+    """固定种子使同一工程的预览和导出一致，temporal 决定颗粒是否逐帧变化。"""
+    strength = max(0, min(100, int(p.get("strength", 8))))
+    flags = "t+u" if p.get("temporal", True) else "u"
+    return f"noise=all_seed=314159:alls={strength}:allf={flags}"
+
+
+def _fx_grid_expr(p: dict) -> str:
+    """网格的颜色来自 manifest enum，避免把任意滤镜语法透传给 ffmpeg。"""
+    cell = max(16, min(512, int(p.get("cell", 96))))
+    thickness = max(1, min(12, int(p.get("thickness", 1))))
+    opacity = max(0.05, min(1.0, float(p.get("opacity", 0.25))))
+    color = str(p.get("color", "white"))
+    colors = {
+        "white": "white",
+        "black": "black",
+        "#0A84FF": "0x0A84FF",
+        "#FFD60A": "0xFFD60A",
+    }
+    return (f"drawgrid=width={cell}:height={cell}:thickness={thickness}:"
+            f"color={colors.get(color, 'white')}@{opacity:.3f}")
+
+
 _FX_STEPS: dict[str, "Callable[[dict], str]"] = {
     "gblur": lambda p: f"gblur=sigma={float(p.get('sigma', 5.0)):.2f}",
     "grayscale": lambda p: "hue=s=0",
@@ -502,6 +543,21 @@ _FX_STEPS: dict[str, "Callable[[dict], str]"] = {
     "mask": _fx_mask_expr,
     # ---- 纯工程批次：R02 形状标注（矩形 drawbox / 椭圆 geq）----
     "shape": _fx_shape_expr,
+    # ---- P1 实用效果扩充：每个键映射到本机 ffmpeg 已确认存在的滤镜 ----
+    "vibrance": lambda p: (
+        f"vibrance=intensity={max(-2.0, min(2.0, float(p.get('intensity', 0.35)))):.4f}"),
+    "colorize": lambda p: (
+        f"colorize=hue={max(0.0, min(360.0, float(p.get('hue', 210.0)))):.3f}:"
+        f"saturation={max(0.0, min(1.0, float(p.get('saturation', 0.55)))):.3f}:"
+        f"lightness={max(0.0, min(1.0, float(p.get('lightness', 0.5)))):.3f}:"
+        f"mix={max(0.0, min(1.0, float(p.get('mix', 0.7)))):.3f}"),
+    "deband": _fx_deband_expr,
+    "lens": _fx_lens_expr,
+    "cas": lambda p: (
+        f"cas=strength={max(0.0, min(1.0, float(p.get('strength', 0.45)))):.4f}"),
+    "vflip": lambda _p: "vflip",
+    "filmgrain": _fx_film_grain_expr,
+    "grid": _fx_grid_expr,
 }
 
 # 需要多输入建图的滤镜（不能内联续接），由 RenderService._fx_one 单独实现
@@ -809,6 +865,41 @@ class RenderService:
             "warnings": warnings,
         }
 
+    def render_preview_window(self, project: Project, out_path: str,
+                              start: float, duration: float) -> dict[str, Any]:
+        """Encode only the requested timeline interval for interactive playback.
+
+        The same compiled video/audio graph drives export. Output-side seeking
+        keeps effects and transitions exact even when the requested interval
+        begins inside a transition or a long clip.
+        """
+        if not (0 <= start and 0 < duration <= 8):
+            raise RenderError("preview window must have start >= 0 and duration in (0, 8]")
+        self._preflight(project, out_path, True)
+        seq = project.sequence
+        graph, inputs, expected, has_audio, _warnings, caption_cwd = self._compile(seq, (0, 0))
+        if start >= expected - 1e-6:
+            raise RenderError("preview window begins after the end of the project")
+        actual_duration = min(duration, expected - start)
+        temp_path = out_path + ".tmp.mp4"
+        try:
+            self._run_ffmpeg(
+                seq, graph, inputs, temp_path, "low", None, has_audio,
+                caption_cwd=caption_cwd, output_start=start,
+                output_duration=actual_duration,
+            )
+            probe = self._verify(temp_path, actual_duration, seq.width, seq.height)
+            os.replace(temp_path, out_path)
+        except BaseException:
+            if os.path.isfile(temp_path):
+                os.remove(temp_path)
+            raise
+        finally:
+            if caption_cwd and os.path.isdir(caption_cwd):
+                shutil.rmtree(caption_cwd, ignore_errors=True)
+        return {"output_path": out_path, "duration": probe["duration"],
+                "windowStart": start, "has_audio": has_audio}
+
     def render_audio_only(self, project: Project, out_path: str,
                           overwrite: bool = False,
                           cancel_event: Optional[threading.Event] = None,
@@ -1008,6 +1099,7 @@ class RenderService:
                     "-f", "image2", tmp_path]
             r = subprocess.run(
                 cmd, capture_output=True, text=True, timeout=timeout,
+                encoding="utf-8", errors="replace",
                 cwd=caption_cwd if caption_cwd else None)
             if r.returncode != 0 or not os.path.isfile(tmp_path):
                 raise RenderError(f"still export failed: {(r.stderr or '')[-400:]}")
@@ -1120,15 +1212,26 @@ class RenderService:
         # 渲染期标志（见 __init__ 注释）：供深层画布构建读取，避免层层传参漏传
         self._render_ctx.alpha = alpha
 
-        # 音频源探测缓存：同一源文件只 probe 一次
-        audio_cache: dict[str, bool] = {}
+        # 媒体流探测缓存：同一源文件只 probe 一次。除了音轨提取，也用于
+        # 容错历史工程中“纯音频被误放进视频轨”的脏数据；这种片段保留声音，
+        # 但不再生成不存在的 [i:v] 引用拖垮整个预览/导出。
+        media_cache: dict[str, dict[str, Any]] = {}
+
+        def media_info(src: str) -> dict[str, Any]:
+            if src in media_cache:
+                return media_cache[src]
+            try:
+                info = self.probe_media(src)
+            except Exception:  # noqa: BLE001 — 预检/后续编译负责给出具体源文件错误
+                info = {"duration": 0.0, "has_video": False, "has_audio": False}
+            media_cache[src] = info
+            return info
 
         def has_audio(src: str) -> bool:
-            if src in audio_cache:
-                return audio_cache[src]
-            ok = self._has_audio_stream(src)
-            audio_cache[src] = ok
-            return ok
+            return bool(media_info(src).get("has_audio"))
+
+        def has_video(src: str) -> bool:
+            return bool(media_info(src).get("has_video"))
 
         # 源素材时长缓存（2026-09-21 修）：音轨的"期望时长"必须按**实际可渲染
         # 时长**算，而不是片段在时间线上的声明时长。反例：模板把 BGM 片段声明成
@@ -1140,10 +1243,7 @@ class RenderService:
         def source_duration(src: str) -> float:
             if src in src_dur_cache:
                 return src_dur_cache[src]
-            try:
-                d = float(self.probe_media(src).get("duration") or 0.0)
-            except Exception:  # noqa: BLE001 — 探测失败时回退到声明时长
-                d = 0.0
+            d = float(media_info(src).get("duration") or 0.0)
             src_dur_cache[src] = d
             return d
 
@@ -1192,8 +1292,18 @@ class RenderService:
             # 复合片段（J08）：把 nested 子序列片段提升到外层时轴
             clips, flat_warnings = _flatten_compound(clips)
             warnings.extend(flat_warnings)
-            if clips:
-                track_clips.append(clips)
+            renderable: list[Clip] = []
+            for clip in clips:
+                src = clip.asset_ref.source_path
+                if has_video(src):
+                    renderable.append(clip)
+                    continue
+                if has_audio(src):
+                    warnings.append(
+                        f"video track {t.id!r} clip {clip.id!r} has no video "
+                        "stream; picture skipped and its audio kept")
+            if renderable:
+                track_clips.append(renderable)
 
         if not track_clips:
             raise RenderError("no visible video track with clips")
@@ -1307,7 +1417,7 @@ class RenderService:
         video_expected = max(track_durs)
 
         # ---- 音频轨收集（T16 混音）----
-        # 每条「音轨」= 一组可 concat 的音频分段：
+        # 每条「音轨」= 一组按绝对时间放置的音频分段：
         #   * 音频轨（kind=='audio'，未静音、可见）的可见片段
         #   * 视频轨的可见片段，若其源文件本身含音轨则一并提取（每条视频轨成一轨道）
         audio_groups: list[list[tuple[str, float, float]]] = []
@@ -1322,7 +1432,8 @@ class RenderService:
                 # 该片段上的音频特效（如 loudnorm），在逐段音频链应用
                 afx = self._enabled_audio_fx(c)
                 segs.append((src, ss, c.duration, c.speed, c.volume,
-                             c.fade_in, c.fade_out, c.pitch, afx))
+                             c.fade_in, c.fade_out, c.pitch, afx,
+                             c.timeline_start))
             return segs
 
         # 音频轨（静音轨不产生音轨）
@@ -1335,7 +1446,7 @@ class RenderService:
 
         # 视频轨：默认提取嵌入音轨
         for t in seq.tracks:
-            if t.kind != "video" or not t.visible:
+            if t.kind != "video" or not t.visible or t.muted:
                 continue
             segs = _collect_audio_segs([c for c in t.clips if not c.hidden])
             if segs:
@@ -1349,7 +1460,8 @@ class RenderService:
             aseg = 0
             for g, segs in enumerate(audio_groups):
                 labels: list[str] = []
-                for (src, ss, tl_dur, speed, vol, fade_in, fade_out, pitch, afx) in segs:
+                for (src, ss, tl_dur, speed, vol, fade_in, fade_out, pitch, afx,
+                     timeline_start) in segs:
                     ai = get_input(src)
                     seg = f"aseg{aseg}"
                     aseg += 1
@@ -1398,6 +1510,9 @@ class RenderService:
                         fn = _AUDIO_FX_STEPS.get(key)
                         if fn is not None:
                             audio_fx += "," + fn(params)
+                    delay_ms = max(0, round(float(timeline_start.to_fraction()) * 1000))
+                    if delay_ms:
+                        audio_fx += f",adelay={delay_ms}:all=1"
                     parts.append(
                         f"[{ai}:a]atrim=start={ss}:duration={src_dur},"
                         f"asetpts=PTS-STARTPTS{speed_filters}{audio_fx}"
@@ -1411,12 +1526,15 @@ class RenderService:
                 else:
                     ins = "".join(f"[{s}]" for s in labels)
                     parts.append(
-                        f"{ins}concat=n={len(labels)}:v=0:a=1[{gtag}]")
+                        f"{ins}amix=inputs={len(labels)}:"
+                        f"duration=longest:normalize=0[{gtag}]")
                 substreams.append(gtag)
-                # 该轨道时长 = 各段**实际可渲染**时长之和（受源素材长度与变速约束，
-                # 不是时间线声明时长——见 effective_audio_dur 的说明）
+                # 音轨时长按绝对起点 + 实际可用源时长计算；片段之间的
+                # 空白是静音，不能被 concat 吞掉。
                 audio_expected = max(
-                    audio_expected, sum(effective_audio_dur(s) for s in segs))
+                    audio_expected,
+                    max(float(s[9].to_fraction()) + effective_audio_dur(s)
+                        for s in segs))
 
             # 多条音轨 amix；单条直接透传 [outa]
             if len(substreams) == 1:
@@ -1432,6 +1550,16 @@ class RenderService:
             warnings.append(
                 "audio track(s) present but no decodable audio stream found in "
                 "their source files; output is silent (no audio mixed)")
+
+        if audio_expected > video_expected + 1e-6:
+            # Keep a real black picture stream while audio continues after the
+            # last visual clip. A frozen last frame would imply a clip still
+            # exists, and short preview windows need decodable video here.
+            tail = audio_expected - video_expected
+            color = "black@0.0" if alpha else "black"
+            parts.append(
+                f"[outv]tpad=stop_mode=add:stop_duration={tail:.6f}:"
+                f"color={color}[outv]")
 
         # V05：透明导出在最后一跳统一回到带 alpha 的格式，避免中途任何
         # 一步（overlay/fps/字幕合成）把 alpha 悄悄降成 yuv420p 后被编码器
@@ -1504,13 +1632,10 @@ class RenderService:
         # 两个游标必须分开（2026-09-21 修）：旧实现只用一个 cum 兼作两种语义，
         # 造成带转场的时间线导出直接失败 + 画面错位。
         #   tl   = 时间线游标：只按片段绝对时间线位置推进，用来判断"真实空白"；
-        #   film = 成片游标：按本轨实际已编长度推进，是 xfade 的 offset 基准与返回时长。
-        # 旧逻辑在转场分支做 `cum += dur - d`（成片确实因两段重叠 d 而少 d），
-        # 随后下一片段的 `abs_start > cum` 判断就把它误当成"时间线空白"而调
-        # _pad_black —— 而 _pad_black 用 tpad start_mode=add 在**已合成流头部**插黑，
-        # 会把前面所有内容整体后移，既产生非预期黑场错位，又因末段转场之后
-        # 没有下一片段来"补"而让成片比时间线短 d（5×3.2s + 4×0.6s 转场 =>
-        # 3.2+4×(3.2-0.6)=15.4s，而时间线是 16.0s）。
+        #   film = 成片游标：始终与绝对时间线同长，是 xfade 的 offset 基准。
+        # 转场不能把工程压短：相邻片段在时间线上没有重叠时，给前段末帧补 d 秒，
+        # 再从剪切点开始与后段前 d 秒混合。这样既不读取源素材范围之外，也保证
+        # 播放器、标尺和导出的绝对时间坐标完全一致。
         current = clip_labels[0]
         first_start = float(clips[0].timeline_start.to_fraction())
         tl = first_start
@@ -1542,9 +1667,10 @@ class RenderService:
                     film += clip_durs[i]
                     tl += clip_durs[i]
                     continue
-                # offset 是成片坐标下 A 流开始混合的时间点；两段重叠 d 秒，
-                # 故成片只增长 (dur - d)，而时间线照常推进 dur。
-                offset = film - d
+                # 时间线上两段首尾相接、没有素材重叠。复制 A 的末帧作为过渡把手，
+                # 从剪切点开始与 B 的前 d 秒混合；总时长仍增加 B 的完整时长。
+                current = self._pad_last_frame(current, d, parts, fps_expr)
+                offset = film
                 out = f"xf{n}_{i}"
                 # xfade 的 transition 名来自效果清单声明（AC18：新增转场无需改内核）
                 xname = xfade_transition_name(clips[i], self.effects)
@@ -1558,7 +1684,7 @@ class RenderService:
                     f"xfade=transition={xname}:offset={offset:.6f}:"
                     f"duration={d:.6f}[{out}]")
                 current = out
-                film = film + clip_durs[i] - d
+                film += clip_durs[i]
                 tl += clip_durs[i]
                 continue
             # 无转场：concat（画布合成轨尺寸已一致）
@@ -1569,6 +1695,17 @@ class RenderService:
         out_label = f"vtk{n}"
         parts.append(f"[{current}]null[{out_label}]")
         return out_label, film
+
+    def _pad_last_frame(self, label: str, pad_secs: float, parts: list[str],
+                        fps_expr: str) -> str:
+        """为无重叠素材的转场复制前段末帧，且不改变绝对时间轴总时长。"""
+        if pad_secs <= 0:
+            return label
+        out = f"hold{len(parts)}"
+        parts.append(
+            f"[{label}]tpad=stop_mode=clone:stop_duration={pad_secs:.6f}"
+            f",fps={fps_expr},setpts=PTS-STARTPTS[{out}]")
+        return out
 
     def _pad_black(self, label: str, pad_secs: float, parts: list[str],
                    fps_expr: str, at_start: bool = False) -> str:
@@ -2298,6 +2435,7 @@ class RenderService:
         ]
         try:
             r = subprocess.run(cmd, capture_output=True, text=True,
+                               encoding="utf-8", errors="replace",
                                timeout=timeout)
         except subprocess.TimeoutExpired as e:
             raise RenderError(f"probe timed out on {src!r}") from e
@@ -2362,6 +2500,7 @@ class RenderService:
         ]
         try:
             r = subprocess.run(cmd, capture_output=True, text=True,
+                               encoding="utf-8", errors="replace",
                                timeout=timeout)
         except subprocess.TimeoutExpired as e:
             raise RenderError(f"thumbnail timed out on {src!r}") from e
@@ -2377,7 +2516,8 @@ class RenderService:
             "-of", "json", src,
         ]
         try:
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            r = subprocess.run(cmd, capture_output=True, text=True,
+                               encoding="utf-8", errors="replace", timeout=30)
         except (OSError, subprocess.SubprocessError):
             return False
         if r.returncode != 0:
@@ -2400,7 +2540,9 @@ class RenderService:
                     video_bitrate_kbps: Optional[int] = None,
                     audio_bitrate_kbps: Optional[int] = None,
                     alpha: bool = False,
-                    color_chain: str = "") -> None:
+                    color_chain: str = "",
+                    output_start: Optional[float] = None,
+                    output_duration: Optional[float] = None) -> None:
         preset = QUALITY_PRESETS.get(quality)
         if preset is None:
             raise RenderError(f"unknown quality preset: {quality!r} "
@@ -2449,10 +2591,11 @@ class RenderService:
             if has_audio:
                 cmd += ["-map", "[outa]", "-c:a", "aac",
                         "-b:a", f"{audio_bitrate_kbps}k" if audio_bitrate_kbps else "192k"]
-            cmd += [
-                "-movflags", "+faststart",
-                out_path,
-            ]
+            if output_start is not None:
+                cmd += ["-ss", f"{output_start:.6f}"]
+            if output_duration is not None:
+                cmd += ["-t", f"{output_duration:.6f}"]
+            cmd += ["-movflags", "+faststart", out_path]
 
         # 取消支持：用 Popen + 看门狗线程，在 cancel_event 置位时终止 ffmpeg
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
@@ -2498,7 +2641,8 @@ class RenderService:
             "-of", "json", path,
         ]
         try:
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+            r = subprocess.run(cmd, capture_output=True, text=True,
+                               encoding="utf-8", errors="replace", timeout=120)
         except subprocess.TimeoutExpired as e:
             raise RenderError(f"ffprobe timed out on {path}") from e
         if r.returncode != 0:

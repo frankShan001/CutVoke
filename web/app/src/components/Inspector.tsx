@@ -23,10 +23,13 @@ export function Inspector() {
   const { project, selection } = state;
   const [speedInput, setSpeedInput] = useState("1");
 
-  // 切换片段时复位调速输入
+  // 切换片段或保存速度后，同步输入框与片段的实际倍速。
   useEffect(() => {
-    setSpeedInput("1");
-  }, [selection?.clipId]);
+    const clip = project?.sequence.tracks
+      .flatMap((track) => track.clips)
+      .find((item) => item.id === selection?.clipId);
+    setSpeedInput(String(clip?.speed ? rationalToSecs(clip.speed) : 1));
+  }, [project, selection?.clipId]);
 
   if (!project) {
     return (
@@ -42,6 +45,7 @@ export function Inspector() {
     const track = selectors.trackById(project, selection.trackId);
     const clip = track?.clips.find((c) => c.id === selection.clipId);
     if (clip) {
+      const clipReadOnly = !!track?.locked || !!state.editLock;
       const tlStart = rationalToSecs(clip.timelineStart);
       const tlEnd = rationalToSecs(clip.timelineEnd);
       const srcStart = rationalToSecs(clip.sourceStart);
@@ -51,6 +55,7 @@ export function Inspector() {
       const fxCount = clip.effects?.length || 0;
 
       const applySpeed = () => {
+        if (clipReadOnly) return;
         const v = parseFloat(speedInput);
         if (isNaN(v) || !v) return;
         const ctx = getLatestState() || state;
@@ -69,50 +74,63 @@ export function Inspector() {
           <Row k="时长" v={`${dur.toFixed(2)} 秒`} />
           <Row k="速度" v={speed === "1/1" ? "正常（1x）" : `${speed}（变速）`} />
 
-          <div className="inspector__subrow">
-            <span className="inspector__key">调速</span>
-            <input
-              type="number"
-              step="0.1"
-              value={speedInput}
-              onChange={(e) => setSpeedInput(e.target.value)}
-              className="cv-input"
-              style={{ width: 80, height: 26 }}
-              aria-label="调速倍率"
-            />
-            <button className="cv-btn cv-btn--sm cv-btn--secondary" onClick={applySpeed}>
-              应用
-            </button>
-          </div>
+          {clipReadOnly ? (
+            <p className="cv-hint" role="status">
+              {state.editLock ? "Agent 正在编辑，片段属性暂时只读。" : "此轨道已锁定，解锁后才能修改片段属性。"}
+            </p>
+          ) : null}
 
-          {/* ---- 音频 / 关键帧 / 动画 / 画面特效 小节（J01 拆分）---- */}
-          <div className="inspector__sep" />
-          <AudioSection clip={clip} />
-          <KeyframeSection clip={clip} />
-          <AnimationSection clip={clip} />
-          <FxSection clip={clip} />
-
-          <div className="inspector__sep" />
-          <div className="inspector__subrow">
-            <span className="inspector__key">效果 ({fxCount})</span>
-            <div style={{ display: "flex", gap: 4 }}>
-              <EffChip label="变换" effectId={BUILTIN_TRANSFORM_ID} clipId={clip.id} />
-              <EffChip label="调色" effectId={BUILTIN_COLOR_ID} clipId={clip.id} />
-              <EffChip label="叠化" effectId={BUILTIN_CROSSFADE_ID} clipId={clip.id} />
+          <fieldset
+            disabled={clipReadOnly}
+            inert={clipReadOnly}
+            aria-label="片段编辑属性"
+            style={{ border: 0, margin: 0, padding: 0, minWidth: 0, opacity: clipReadOnly ? 0.55 : 1, pointerEvents: clipReadOnly ? "none" : undefined }}
+          >
+            <div className="inspector__subrow">
+              <span className="inspector__key">调速</span>
+              <input
+                type="number"
+                step="0.1"
+                value={speedInput}
+                onChange={(e) => setSpeedInput(e.target.value)}
+                className="cv-input"
+                style={{ width: 80, height: 26 }}
+                aria-label="调速倍率"
+              />
+              <button className="cv-btn cv-btn--sm cv-btn--secondary" onClick={applySpeed}>
+                应用
+              </button>
             </div>
-          </div>
-          <div className="inspector__subrow">
-            <span className="inspector__key">删除</span>
-            <button
-              className="cv-btn cv-btn--sm cv-btn--danger"
-              onClick={() => {
-                const ctx = getLatestState() || state;
-                void removeClip(dispatch, ctx, clip.id);
-              }}
-            >
-              删除片段
-            </button>
-          </div>
+
+            {/* ---- 音频 / 关键帧 / 动画 / 画面特效 小节（J01 拆分）---- */}
+            <div className="inspector__sep" />
+            <AudioSection clip={clip} />
+            <KeyframeSection clip={clip} />
+            <AnimationSection clip={clip} />
+            <FxSection clip={clip} trackKind={track!.kind} />
+
+            <div className="inspector__sep" />
+            <div className="inspector__subrow">
+              <span className="inspector__key">效果 ({fxCount})</span>
+              <div style={{ display: "flex", gap: 4 }}>
+                <EffChip label="变换" effectId={BUILTIN_TRANSFORM_ID} clipId={clip.id} />
+                <EffChip label="调色" effectId={BUILTIN_COLOR_ID} clipId={clip.id} />
+                <EffChip label="叠化" effectId={BUILTIN_CROSSFADE_ID} clipId={clip.id} />
+              </div>
+            </div>
+            <div className="inspector__subrow">
+              <span className="inspector__key">删除</span>
+              <button
+                className="cv-btn cv-btn--sm cv-btn--danger"
+                onClick={() => {
+                  const ctx = getLatestState() || state;
+                  void removeClip(dispatch, ctx, clip.id);
+                }}
+              >
+                删除片段
+              </button>
+            </div>
+          </fieldset>
 
           <details className="inspector__adv">
             <summary>高级信息</summary>

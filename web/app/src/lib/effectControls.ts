@@ -7,6 +7,7 @@ export type ParamKind = "number" | "enum" | "boolean" | "string";
 export interface ParamControl {
   name: string;
   label: string;
+  description?: string;
   kind: ParamKind;
   value: unknown;
   min?: number;
@@ -55,7 +56,8 @@ function localizedDescriptor(v: unknown): string {
 }
 
 function paramLabel(name: string, sub: EffectParamSpecLike): string {
-  return localizedDescriptor(sub.description) || PARAM_LABELS[name] || name;
+  const description = localizedDescriptor(sub.description);
+  return PARAM_LABELS[name] || description.split(/[；。:：]/, 1)[0].slice(0, 12) || name;
 }
 
 interface EffectParamSpecLike {
@@ -93,6 +95,7 @@ export function paramControls(
     const ctrl: ParamControl = {
       name,
       label: paramLabel(name, sub),
+      description: localizedDescriptor(sub.description),
       kind,
       value,
       unit: typeof sub.unit === "string" ? sub.unit : undefined,

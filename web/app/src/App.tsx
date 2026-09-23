@@ -3,9 +3,11 @@
       home   → 工程首页（最近工程 / 新建 / 重命名）
       editor → 剪映式四区工作区（顶部工具栏 / 左素材 / 中预览+时间线 / 右属性 / 状态栏）。 */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EditorProvider, useEditor } from "./store/editor";
 import { EditorBridge } from "./components/EditorBridge";
+import { getLatestState, redo, undo } from "./store/actions";
+import { removeClip, removeEffect } from "./store/clipEdit";
 import { TopToolbar } from "./components/TopToolbar";
 import { StatusBar } from "./components/StatusBar";
 import { ErrorModal } from "./components/ErrorModal";
@@ -19,13 +21,14 @@ import { Timeline } from "./components/timeline/Timeline";
 import { TimelineResizer } from "./components/TimelineResizer";
 import { RightPanel } from "./components/RightPanel";
 import { AgentActivityPanel } from "./components/AgentActivityPanel";
+import { notifyTogglePlay } from "./hooks/useKeyboardShortcuts";
 
-function Workspace() {
+function Workspace({ leftPanelOpen, rightPanelOpen }: { leftPanelOpen: boolean; rightPanelOpen: boolean }) {
   const centerRef = useRef<HTMLDivElement | null>(null);
   return (
     <div className="workspace">
       {/* 左：当前工程 + 素材区 */}
-      <aside className="zone-left">
+      <aside className={`zone-left${leftPanelOpen ? "" : " zone-left--collapsed"}`}>
         <div className="zone-left__scroll">
           <ProjectPanel />
           <MediaPanel />
@@ -46,15 +49,67 @@ function Workspace() {
       </main>
 
       {/* 右：属性（上下文切换） */}
-      <aside className="zone-right">
+      <aside className={`zone-right${rightPanelOpen ? "" : " zone-right--collapsed"}`}>
         <RightPanel />
       </aside>
     </div>
   );
 }
 
+type PanelMode = "wide" | "medium" | "compact";
+
+function panelModeForWidth(width: number): PanelMode {
+  if (width <= 900) return "compact";
+  // 中等桌面宽度优先给预览和时间线留空间，素材面板可随时从工具栏打开。
+  if (width <= 1280) return "medium";
+  return "wide";
+}
+
+const SHORTCUT_IGNORE_SELECTOR = [
+  "input",
+  "textarea",
+  "select",
+  "[role='textbox']",
+  "[contenteditable]:not([contenteditable='false'])",
+  "[role='dialog']",
+  "[role='alertdialog']",
+].join(", ");
+
 function AppShell() {
-  const { state } = useEditor();
+  const { state, dispatch } = useEditor();
+  const shortcutStateRef = useRef(state);
+  shortcutStateRef.current = state;
+  const [leftPanelOpen, setLeftPanelOpen] = useState(() =>
+    typeof window === "undefined" || panelModeForWidth(window.innerWidth) === "wide",
+  );
+  const [rightPanelOpen, setRightPanelOpen] = useState(() =>
+    typeof window === "undefined" || panelModeForWidth(window.innerWidth) !== "compact",
+  );
+  const panelPreferencesRef = useRef({ left: true, right: true });
+
+  // 窄窗口优先留出预览与时间线；中等宽度自动收起素材库，保留属性面板。
+  // 手动开关会更新偏好，窗口恢复到桌面宽度后按用户偏好还原。
+  useEffect(() => {
+    let currentMode = panelModeForWidth(window.innerWidth);
+    const handleResize = () => {
+      const nextMode = panelModeForWidth(window.innerWidth);
+      if (nextMode === currentMode) return;
+      currentMode = nextMode;
+
+      if (nextMode === "wide") {
+        setLeftPanelOpen(panelPreferencesRef.current.left);
+        setRightPanelOpen(panelPreferencesRef.current.right);
+      } else if (nextMode === "medium") {
+        setLeftPanelOpen(false);
+        setRightPanelOpen(panelPreferencesRef.current.right);
+      } else {
+        setLeftPanelOpen(false);
+        setRightPanelOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // 全屏遮罩能拦截鼠标，但不能阻止已经聚焦的按钮响应空格/回车，或全局
   // 快捷键继续派发编辑命令。租约期间在捕获阶段统一吞掉键盘输入，避免
@@ -69,6 +124,82 @@ function AppShell() {
     return () => window.removeEventListener("keydown", blockKeyboardEditing, true);
   }, [state.editLock]);
 
+  // 只在编辑器视图注册常用快捷键。输入框/弹窗保留原生键盘行为；
+  // Ctrl/Cmd 只接管撤销/重做，其它组合键仍交给浏览器和系统。
+  useEffect(() => {
+    if (
+      state.view !== "editor" ||
+      state.editLock ||
+      state.error ||
+      state.exportOpen ||
+      state.templateOpen ||
+      state.agentPanelOpen
+    ) return;
+    const handleEditorShortcut = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.repeat || event.isComposing || event.altKey) return;
+      const latest = shortcutStateRef.current;
+      if (latest.view !== "editor" || latest.editLock || latest.error || latest.exportOpen || latest.templateOpen || latest.agentPanelOpen) return;
+
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.isContentEditable || target.closest(SHORTCUT_IGNORE_SELECTOR)) return;
+
+      const key = event.key.toLowerCase();
+      if (event.ctrlKey || event.metaKey) {
+        if (key === "z" && event.shiftKey) {
+          if (latest.currentId && !latest.redoBlocked && !latest.editLock) {
+            event.preventDefault();
+            void redo(dispatch, latest);
+          }
+        } else if (key === "y" && !event.shiftKey) {
+          if (latest.currentId && !latest.redoBlocked && !latest.editLock) {
+            event.preventDefault();
+            void redo(dispatch, latest);
+          }
+        } else if (key === "z" && !event.shiftKey) {
+          if (latest.currentId && !latest.undoBlocked && !latest.editLock) {
+            event.preventDefault();
+            void undo(dispatch, latest);
+          }
+        }
+        return;
+      }
+      if (event.shiftKey) return;
+      if (key === " " && !target.closest("button, a, [role='button'], video")) {
+        event.preventDefault();
+        notifyTogglePlay();
+      } else if ((key === "delete" || key === "backspace") && latest.selection?.clipId) {
+        const selection = latest.selection;
+        const clipId = selection.clipId!;
+        const track = latest.project?.sequence.tracks.find((item) => item.id === selection.trackId);
+        event.preventDefault();
+        if (track?.locked) {
+          dispatch({ type: "STATUS_SET", severity: "warn", text: "轨道已锁定，解锁后才能删除" });
+          return;
+        }
+        const current = getLatestState() || latest;
+        const removal = selection.effectId
+          ? removeEffect(dispatch, current, { clipId, effectId: selection.effectId })
+          : removeClip(dispatch, current, clipId);
+        void removal.then((result) => {
+          if (result.ok) dispatch({ type: "SELECTION_SET", selection: null });
+        });
+      } else if (key === "v" || key === "c") {
+        dispatch({ type: "TOOL_MODE_SET", mode: key === "v" ? "select" : "cut" });
+      }
+    };
+    window.addEventListener("keydown", handleEditorShortcut);
+    return () => window.removeEventListener("keydown", handleEditorShortcut);
+  }, [
+    dispatch,
+    state.agentPanelOpen,
+    state.editLock,
+    state.error,
+    state.exportOpen,
+    state.templateOpen,
+    state.view,
+  ]);
+
   if (state.view === "home") {
     return (
       <div className="app-shell">
@@ -80,8 +211,21 @@ function AppShell() {
   }
   return (
     <div className="app-shell">
-      <TopToolbar />
-      <Workspace />
+      <TopToolbar
+        leftPanelOpen={leftPanelOpen}
+        rightPanelOpen={rightPanelOpen}
+        onToggleLeftPanel={() => setLeftPanelOpen((open) => {
+          const next = !open;
+          panelPreferencesRef.current.left = next;
+          return next;
+        })}
+        onToggleRightPanel={() => setRightPanelOpen((open) => {
+          const next = !open;
+          panelPreferencesRef.current.right = next;
+          return next;
+        })}
+      />
+      <Workspace leftPanelOpen={leftPanelOpen} rightPanelOpen={rightPanelOpen} />
       <StatusBar />
       <ErrorModal />
       {state.exportOpen ? <ExportDialog /> : null}

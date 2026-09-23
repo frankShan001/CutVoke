@@ -28,6 +28,10 @@ media/
 
 # CutVoke local data
 .cutvoke/
+output/playwright/
+.playwright-cli/
+web/app/test-results/
+web/app/playwright-report/
 
 # Web dependencies and build output
 web/app/node_modules/

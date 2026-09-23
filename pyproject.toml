@@ -23,7 +23,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
+dev = ["pytest>=7", "numpy>=1.24", "Pillow>=10"]
 
 [project.scripts]
 cutvoke = "cutvoke.main:main"
@@ -32,6 +32,10 @@ cutvoke-mcp = "cutvoke.core.mcp_server:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
-# Include the built Web editor and bundled media in the wheel.
+# Built Web files are copied into the wheel by setup.py. Keep package data
+# explicit so local __pycache__ files never leak into distributables.
+[tool.setuptools]
+include-package-data = false
+
 [tool.setuptools.package-data]
-cutvoke = ["web/**/*", "assets/**/*"]
+cutvoke = ["assets/*/*.wav", "assets/*/*.png", "assets/*/*.json", "assets/*/*.cube"]

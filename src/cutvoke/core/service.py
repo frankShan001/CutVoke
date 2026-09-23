@@ -33,6 +33,31 @@ from .templates import (load_templates, get_template, build_plan,
                         canvas_for_aspect)
 
 
+_IMAGE_SUFFIXES = frozenset({
+    ".avif", ".bmp", ".gif", ".heic", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp",
+})
+_AUDIO_SUFFIXES = frozenset({
+    ".aac", ".aif", ".aiff", ".alac", ".flac", ".m4a", ".mp3", ".ogg", ".opus", ".wav", ".wma",
+})
+_VIDEO_SUFFIXES = frozenset({
+    ".avi", ".m4v", ".mkv", ".mov", ".mp4", ".mpeg", ".mpg", ".webm", ".wmv",
+})
+
+
+def _source_track_kind(source_path: str) -> Optional[str]:
+    """Return the required timeline track for a known media suffix.
+
+    Unknown/custom containers remain allowed so the renderer can probe them;
+    known audio files must never silently enter a video track (or vice versa).
+    """
+    suffix = os.path.splitext((source_path or "").split("?", 1)[0].split("#", 1)[0])[1].lower()
+    if suffix in _AUDIO_SUFFIXES:
+        return "audio"
+    if suffix in _IMAGE_SUFFIXES or suffix in _VIDEO_SUFFIXES:
+        return "video"
+    return None
+
+
 def _abs_rat(r: "Rational") -> "Rational":
     """返回有理数的绝对值（Rational 是 NamedTuple，无 __neg__）。"""
     return Rational.of(abs(r.num), r.den)
@@ -166,6 +191,23 @@ _NONMUTATING_COMMANDS = frozenset({"export.cover", "export.video",
                                     # J12 模板清单：纯目录扫描，不依赖也不修改工程
                                     "template.list"})
 
+# edit.batch 只组合候选工程上的纯编辑 handler。分析、导出、历史、录音等
+# 会触及工程外状态的命令不能嵌入，否则预演或失败回滚会留下副作用。
+_BATCH_EDIT_COMMANDS = frozenset({
+    "track.add", "track.remove", "track.update",
+    "clip.insert", "clip.trim", "clip.move", "clip.split", "clip.speed",
+    "clip.remove", "clip.duplicate", "clip.audio", "clip.batch",
+    "clip.keyframe", "clip.group", "clip.ungroup", "clip.rippleDelete",
+    "clip.closeGap", "clip.align", "clip.distribute", "asset.swap",
+    "effect.add", "effect.remove", "effect.update", "effect.setAnimation",
+    "effect.setTransition", "effect.bypass",
+    "effect.reorder",
+    "caption.add", "caption.update", "caption.patch", "caption.remove",
+    "caption.batchStyle", "caption.shift", "caption.splitByWords",
+    "marker.add", "marker.remove",
+})
+_BATCH_MAX_COMMANDS = 32
+
 
 def _split_text_units(text: str, unit: str) -> list[str]:
     """把字幕文本按单元拆分（I05 逐字/逐词/逐行）。
@@ -207,8 +249,14 @@ class EditService:
         # 导出队列单例（V02）：懒创建，见 _get_export_queue / close。
         self._export_queue: Optional["ExportQueue"] = None
         self._export_queue_lock = threading.Lock()
+        # 源素材时长是片段可用范围的硬边界。按文件状态缓存 ffprobe 结果，
+        # 避免每次拖动裁剪都重复启动子进程；文件被替换后 mtime/size 会换键。
+        self._source_duration_cache: dict[
+            tuple[str, int, int], Optional[Rational]
+        ] = {}
         # 命令处理器（绑定到实例）
         self._handlers: dict[str, Callable] = {
+            "edit.batch": self._h_edit_batch,
             "track.add": self._h_track_add,
             "track.remove": self._h_track_remove,
             "track.update": self._h_track_update,
@@ -229,6 +277,8 @@ class EditService:
             "clip.ungroup": self._h_clip_ungroup,
             "effect.add": self._h_effect_add,
             "effect.remove": self._h_effect_remove,
+            "effect.setAnimation": self._h_effect_set_animation,
+            "effect.setTransition": self._h_effect_set_transition,
             "effect.bypass": self._h_effect_bypass,
             "effect.reorder": self._h_effect_reorder,
             "resource.favorite": self._h_resource_favorite,
@@ -238,6 +288,7 @@ class EditService:
             "preset.apply": self._h_preset_apply,
             "caption.add": self._h_caption_add,
             "caption.update": self._h_caption_update,
+            "caption.patch": self._h_caption_patch,
             "caption.remove": self._h_caption_remove,
             "caption.batchStyle": self._h_caption_batch_style,
             # K01 字幕扩展：VTT 导入导出 + 批量时间偏移
@@ -291,9 +342,81 @@ class EditService:
             "template.apply": self._h_template_apply,
         }
 
+    def _probe_source_duration(self, source_path: str) -> Optional[Rational]:
+        """返回视频/音频真实时长；静态图片或无法探测时返回 None。
+
+        None 表示不施加有限时长约束（静态图片可任意延长）。这里故意在编辑
+        服务层校验，保证 Web、CLI、MCP 和外部 Agent 都不能制造源外黑帧。
+        """
+        if not source_path:
+            return None
+        ext = os.path.splitext(source_path)[1].lower()
+        if ext in {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tif", ".tiff", ".svg"}:
+            return None
+        try:
+            stat = os.stat(source_path)
+        except OSError:
+            return None
+        key = (os.path.abspath(source_path), stat.st_size, stat.st_mtime_ns)
+        if key in self._source_duration_cache:
+            return self._source_duration_cache[key]
+        cmd = [
+            os.environ.get("CUTVOKE_FFPROBE", "ffprobe"),
+            "-v", "error",
+            "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1",
+            source_path,
+        ]
+        duration: Optional[Rational] = None
+        try:
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=15,
+                encoding="utf-8", errors="replace")
+            seconds = float((result.stdout or "").strip()) if result.returncode == 0 else 0.0
+            if seconds > 0:
+                duration = _rat_seconds(seconds)
+        except (OSError, ValueError, subprocess.TimeoutExpired):
+            duration = None
+        self._source_duration_cache[key] = duration
+        return duration
+
+    def _assert_clip_within_source(self, clip: Clip) -> None:
+        """拒绝读取到素材末尾之外的片段，避免预览/导出产生无意义黑屏。"""
+        if clip.nested is not None or clip.freeze_at is not None:
+            return
+        source_duration = self._probe_source_duration(clip.asset_ref.source_path)
+        if source_duration is None:
+            return
+        if clip.source_start < Rational.of(0, 1):
+            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                            "片段源内入点不能小于 0 秒")
+        consumed = clip.duration * _abs_rat(clip.speed)
+        source_end = clip.source_start + consumed
+        tolerance = Rational.of(1, 1000)
+        if source_end > source_duration + tolerance:
+            available = max(
+                0.0,
+                float((source_duration - clip.source_start).to_fraction()),
+            )
+            speed = max(0.000001, float(_abs_rat(clip.speed).to_fraction()))
+            max_timeline = available / speed
+            raise EditError(
+                ErrorCode.INVALID_ARGUMENT,
+                "片段不能超过源素材末尾："
+                f"当前需要 {float(source_end.to_fraction()):.3f}s，"
+                f"素材只有 {float(source_duration.to_fraction()):.3f}s；"
+                f"当前速度下片段最长 {max_timeline:.3f}s",
+            )
+
     # 命令参数清单（声明式）：HTTP / CLI / MCP 共用，避免硬编码与 _handlers 漂移。
     # 不在本清单中的命令（但存在于 _handlers）仍会进入目录，描述回退为 "(未描述)"。
     COMMAND_PARAM_SPECS: dict[str, dict] = {
+        "edit.batch": {
+            "description": "将 1–32 个安全的工程编辑按顺序原子执行：可 dryRun 预演，一次提交与一次撤销；任何一步失败都不落盘。不可嵌套或包含导出、分析、历史命令。",
+            "params": [
+                {"name": "commands", "description": "按顺序执行的数组，每项 {type, payload}；支持轨道、片段、效果、字幕、标记等纯工程编辑", "required": True},
+            ],
+        },
         "track.add": {
             "description": "新增一条轨道（video 或 audio）。",
             "params": [
@@ -333,9 +456,10 @@ class EditService:
             ],
         },
         "clip.insert": {
-            "description": "从素材向某轨插入一个片段。",
+            "description": "从素材向某轨插入一个片段；可选在同一命令中原子建轨（预演与撤销均以一次编辑计）。",
             "params": [
                 {"name": "trackId", "description": "目标轨道 ID", "required": True},
+                {"name": "createTrackKind", "description": "可选：video 或 audio；目标轨不存在时原子新建轨道并插入片段，若轨道已存在则拒绝", "required": False},
                 {"name": "assetId", "description": "素材引用 ID（sourcePath 缺省时需要）", "required": False},
                 {"name": "sourcePath", "description": "素材绝对路径（assetId 缺省时需要）", "required": False},
                 {"name": "sourceStart", "description": "源内入点 {num,den}", "required": False},
@@ -355,11 +479,14 @@ class EditService:
             ],
         },
         "clip.move": {
-            "description": "移动片段（改时间线起点，可选跨轨）。",
+            "description": "移动片段（改时间线起点，可选跨轨）；mode=reorder 时把完整片段插入指定片段前后。",
             "params": [
                 {"name": "clipId", "description": "片段 ID", "required": True},
                 {"name": "timelineStart", "description": "新时间线起点 {num,den}", "required": False},
                 {"name": "trackId", "description": "目标轨道 ID（缺省同轨）", "required": False},
+                {"name": "mode", "description": "可选；reorder=完整片段重排，缺省维持普通移动", "required": False},
+                {"name": "anchorClipId", "description": "reorder 模式的目标片段 ID", "required": False},
+                {"name": "anchorPosition", "description": "reorder 模式插在锚点 before 或 after", "required": False},
             ],
         },
         "clip.split": {
@@ -516,6 +643,12 @@ class EditService:
                 {"name": "captionId", "description": "字幕 ID", "required": True},
             ],
         },
+        "caption.patch": {
+            "description": "原子修改多条字幕的文本、时间或样式；一次提交、一次撤销，适合 Agent 精修。",
+            "params": [
+                {"name": "updates", "description": "更新数组；每项为 captionId 加 text?/start?/end?/样式字段", "required": True},
+            ],
+        },
         "caption.batchStyle": {
             "description": "批量改字幕样式（指定 captionIds / 时间段 / 全部），复用 caption.update 样式字段。",
             "params": [
@@ -559,6 +692,22 @@ class EditService:
                 {"name": "clipId", "description": "片段 ID", "required": True},
                 {"name": "effectId", "description": "效果 ID", "required": True},
                 {"name": "params", "description": "要合并的参数对象（非空；新键覆盖、旧键保留）", "required": True},
+            ],
+        },
+        "effect.setAnimation": {
+            "description": "原子替换片段上的动画；effectId 为空则移除动画。预演、提交和撤销均以一次编辑计。",
+            "params": [
+                {"name": "clipId", "description": "片段 ID", "required": True},
+                {"name": "effectId", "description": "目标 cutvoke.anim.* 动画 ID；空字符串表示清除", "required": True},
+                {"name": "params", "description": "目标动画参数；缺省使用注册表默认值", "required": False},
+            ],
+        },
+        "effect.setTransition": {
+            "description": "原子替换片段上的转场；effectId 为空则移除转场。一次提交、一次撤销。",
+            "params": [
+                {"name": "clipId", "description": "后一段片段 ID", "required": True},
+                {"name": "effectId", "description": "目标 cutvoke.transition.* ID；空字符串表示清除", "required": True},
+                {"name": "params", "description": "目标转场参数，例如 duration（秒）", "required": False},
             ],
         },
         "marker.add": {
@@ -866,11 +1015,15 @@ class EditService:
             if spec is None:
                 catalog.append({"type": cmd, "description": "(未描述)", "params": []})
             else:
-                catalog.append({
+                entry = {
                     "type": cmd,
                     "description": spec.get("description", "(未描述)"),
                     "params": [dict(p) for p in spec.get("params", [])],
-                })
+                }
+                if cmd == "edit.batch":
+                    entry["allowedCommands"] = sorted(_BATCH_EDIT_COMMANDS)
+                    entry["maxCommands"] = _BATCH_MAX_COMMANDS
+                catalog.append(entry)
         return catalog
 
     def _persist(self, project: Project) -> None:
@@ -1019,6 +1172,138 @@ class EditService:
         if project_id not in self._projects:
             raise EditError(ErrorCode.INVALID_ARGUMENT, f"project not found: {project_id}")
         return self._projects[project_id]
+
+    def project_summary(self, project_id: str) -> dict:
+        """Return a stable, low-token timeline index for an external Agent.
+
+        The summary deliberately omits caption text and effect parameters. They
+        are fetched on demand from the full project only after an Agent has
+        identified the clip or caption it wants to inspect or change.
+        """
+        proj = self.get_project(project_id)
+        sequence = proj.sequence
+        project_end = Rational.of(0, 1)
+        tracks: list[dict] = []
+        for track in sequence.tracks:
+            clips: list[dict] = []
+            for clip in sorted(track.clips, key=lambda item: item.timeline_start):
+                project_end = max(project_end, clip.timeline_end)
+                source = clip.asset_ref.source_path.replace("\\", "/")
+                clips.append({
+                    "clipId": clip.id,
+                    "assetId": clip.asset_ref.asset_id,
+                    "sourceName": source.rsplit("/", 1)[-1],
+                    "timelineStart": clip.timeline_start.to_json(),
+                    "timelineEnd": clip.timeline_end.to_json(),
+                    "sourceStart": clip.source_start.to_json(),
+                    "hidden": clip.hidden,
+                    "effectIds": [
+                        str(effect.get("effectId", ""))
+                        for effect in clip.effects
+                        if effect.get("effectId")
+                    ],
+                })
+            tracks.append({
+                "trackId": track.id,
+                "kind": track.kind,
+                "locked": track.locked,
+                "muted": track.muted,
+                "visible": track.visible,
+                "clipCount": len(clips),
+                "clips": clips,
+            })
+        return {
+            "projectId": proj.project_id,
+            "name": proj.name,
+            "revision": proj.revision,
+            "canvas": {
+                "width": sequence.width,
+                "height": sequence.height,
+                "fps": sequence.fps.to_json(),
+            },
+            "duration": project_end.to_json(),
+            "trackCount": len(tracks),
+            "captionCount": len(sequence.captions),
+            "editLease": self.get_edit_lease(project_id),
+            "tracks": tracks,
+        }
+
+    def project_lookup(self, project_id: str, *, entity_type: str,
+                       entity_id: str = "", text_contains: str = "",
+                       at_seconds: Optional[float] = None,
+                       from_seconds: Optional[float] = None,
+                       to_seconds: Optional[float] = None,
+                       fields: Optional[list[str]] = None,
+                       limit: int = 10) -> dict:
+        """Read only the captions or clips an Agent needs for a local edit."""
+        if entity_type not in ("caption", "clip"):
+            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                            "entityType must be 'caption' or 'clip'")
+        if not isinstance(entity_id, str) or not isinstance(text_contains, str):
+            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                            "entityId and textContains must be strings")
+        if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= 50:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "limit must be 1..50")
+        defaults = ({"id", "text", "start", "end"} if entity_type == "caption"
+                    else {"id", "trackId", "sourceName", "timelineStart", "timelineEnd"})
+        available = ({"id", "text", "start", "end", "fontSize", "color",
+                      "strokeColor", "strokeWidth", "background", "align", "bold",
+                      "animIn", "animOut", "x", "y", "scale", "rotation", "shadow"}
+                     if entity_type == "caption" else
+                     {"id", "trackId", "sourceName", "assetRef", "timelineStart",
+                      "timelineEnd", "sourceStart", "speed", "effects", "linked",
+                      "hidden", "volume", "fadeIn", "fadeOut", "pitch", "freezeAt",
+                      "nested", "keyframes"})
+        if fields is not None and (not isinstance(fields, list) or
+                                   any(not isinstance(f, str) or f not in available
+                                       for f in fields)):
+            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                            "fields contains an unknown field for this entityType")
+        selected = set(fields) if fields is not None else defaults
+        selected.add("id")
+        if entity_type == "clip":
+            selected.add("trackId")
+        try:
+            at = Rational.from_float(float(at_seconds)) if at_seconds is not None else None
+            lower = Rational.from_float(float(from_seconds)) if from_seconds is not None else None
+            upper = Rational.from_float(float(to_seconds)) if to_seconds is not None else None
+        except (TypeError, ValueError, OverflowError):
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "time filters must be finite seconds") from None
+        if lower is not None and upper is not None and lower >= upper:
+            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                            "toSeconds must be greater than fromSeconds")
+
+        project = self.get_project(project_id)
+        found: list[dict] = []
+        needle = text_contains.casefold()
+        if entity_type == "caption":
+            candidates = ((c, c.to_dict()) for c in project.sequence.captions)
+        else:
+            candidates = (
+                (c, {**c.to_dict(), "trackId": track.id,
+                     "sourceName": c.asset_ref.source_path.replace("\\", "/").rsplit("/", 1)[-1]})
+                for track in project.sequence.tracks for c in track.clips
+            )
+        for entity, record in candidates:
+            if entity_id and entity.id != entity_id:
+                continue
+            searchable = entity.text if entity_type == "caption" else record["sourceName"]
+            if needle and needle not in searchable.casefold():
+                continue
+            start = entity.start if entity_type == "caption" else entity.timeline_start
+            end = entity.end if entity_type == "caption" else entity.timeline_end
+            if at is not None and not start <= at < end:
+                continue
+            if lower is not None and end <= lower:
+                continue
+            if upper is not None and start >= upper:
+                continue
+            found.append({key: record[key] for key in selected})
+            if len(found) > limit:
+                break
+        return {"projectId": project.project_id, "revision": project.revision,
+                "entityType": entity_type, "items": found[:limit],
+                "hasMore": len(found) > limit}
 
     # ------------------------------------------------------------------
     # Agent 编辑租约：协调“可见但只读”，智能决策仍在外部 Agent。
@@ -1181,6 +1466,9 @@ class EditService:
             self._undo_stack[pid].append(copy.deepcopy(proj))
             self._redo_stack[pid].clear()
             self._projects[pid] = candidate
+            # 内存态没有 SQLite outbox；必须像 execute() 一样保留事件，
+            # 否则 Web 活动面板与轮询无法观察 SRT 批量导入。
+            self._events[pid].append(event)
         return len(imported)
 
     def get_project_at(self, project_id: str, revision: str) -> Project:
@@ -1200,6 +1488,31 @@ class EditService:
             f"requested revision {revision}, current {proj.revision}",
             retryable=True,
         )
+
+    @staticmethod
+    def _assert_locked_track_clips_unchanged(before: Project, after: Project) -> None:
+        """Prevent every command path from changing clips on a locked track.
+
+        Track mute/visibility and explicit lock/unlock remain available; this guard
+        protects the clips themselves and prevents removal of a locked track.
+        """
+        after_tracks = {track.id: track for track in after.sequence.tracks}
+        for track in before.sequence.tracks:
+            if not track.locked:
+                continue
+            updated = after_tracks.get(track.id)
+            if updated is None:
+                raise EditError(
+                    ErrorCode.INVALID_ARGUMENT,
+                    f"track {track.id} is locked; unlock it before removing or editing its clips",
+                )
+            before_clips = {clip.id: clip.to_dict() for clip in track.clips}
+            after_clips = {clip.id: clip.to_dict() for clip in updated.clips}
+            if before_clips != after_clips:
+                raise EditError(
+                    ErrorCode.INVALID_ARGUMENT,
+                    f"track {track.id} is locked; unlock it before editing its clips",
+                )
 
     def preview_command(self, command: Command) -> dict:
         """试算一个编辑命令（P4 AI 接续）：在候选副本上执行 handler 并校验，
@@ -1227,6 +1540,7 @@ class EditService:
         except Exception as e:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             f"{command.type} failed: {e}") from e
+        self._assert_locked_track_clips_unchanged(proj, candidate)
         validation = validate_project(candidate)
         if not validation.structurally_valid:
             raise EditError(
@@ -1430,6 +1744,7 @@ class EditService:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             f"{command.type} failed: {e}") from e
 
+        self._assert_locked_track_clips_unchanged(proj, candidate)
         validation = validate_project(candidate)
         if not validation.structurally_valid:
             raise EditError(
@@ -1529,6 +1844,42 @@ class EditService:
         return len(self._undo_stack[project_id])
 
     # ---- 命令实现（每类返回 changed_entities） ----
+
+    def _h_edit_batch(self, proj: Project, p: dict) -> list[dict]:
+        """在 execute/preview_command 的同一个候选副本上顺序应用编辑。"""
+        operations = p.get("commands")
+        if not isinstance(operations, list) or not 1 <= len(operations) <= _BATCH_MAX_COMMANDS:
+            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                            f"edit.batch requires 1 to {_BATCH_MAX_COMMANDS} commands")
+        # 先验证整个列表，避免执行到一半才发现不支持的命令。
+        for index, operation in enumerate(operations):
+            if not isinstance(operation, dict):
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                f"edit.batch command {index} must be an object")
+            command_type = operation.get("type")
+            if not isinstance(command_type, str) or command_type not in _BATCH_EDIT_COMMANDS \
+                    or command_type not in self._handlers:
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                f"edit.batch command {index} is not a safe project edit: {command_type!r}")
+            if not isinstance(operation.get("payload"), dict):
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                f"edit.batch command {index} requires a payload object")
+
+        changed: list[dict] = []
+        for index, operation in enumerate(operations):
+            command_type = operation["type"]
+            try:
+                entries = self._handlers[command_type](proj, operation["payload"])
+            except EditError as error:
+                raise EditError(error.code,
+                                f"edit.batch command {index} ({command_type}): {error.message}",
+                                retryable=error.retryable) from error
+            except Exception as error:
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                f"edit.batch command {index} ({command_type}) failed: {error}") from error
+            changed.extend({**entry, "batchIndex": index, "commandType": command_type}
+                           for entry in entries)
+        return changed
 
     def _h_track_add(self, proj: Project, p: dict) -> list[dict]:
         kind = p.get("kind", "video")
@@ -1703,11 +2054,30 @@ class EditService:
         """
         track_id = p["trackId"]
         track = next((t for t in proj.sequence.tracks if t.id == track_id), None)
-        if track is None:
+        create_kind = p.get("createTrackKind")
+        creating_track = create_kind is not None
+        if creating_track:
+            if create_kind not in ("video", "audio"):
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                "createTrackKind must be 'video' or 'audio'")
+            if track is not None:
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                f"track exists: {track_id}")
+            track = Track(id=track_id, kind=create_kind)
+        elif track is None:
             raise EditError(ErrorCode.INVALID_ARGUMENT, f"track not found: {track_id}")
         clip_id = p.get("clipId") or f"clip_{len(track.clips)}"
         asset = p.get("assetId", "")
         source_path = p.get("sourcePath", "")
+        required_track = _source_track_kind(source_path)
+        if required_track is not None and track.kind in ("video", "audio") \
+                and required_track != track.kind:
+            label = "audio" if required_track == "audio" else "visual"
+            article = "an" if required_track == "audio" else "a"
+            raise EditError(
+                ErrorCode.INVALID_ARGUMENT,
+                f"{label} source cannot be inserted into {track.kind} track; "
+                f"use {article} {required_track} track")
         source_start = Rational.from_json(**p["sourceStart"]) if "sourceStart" in p else Rational.of(0, 1)
         start = Rational.from_json(**p["timelineStart"]) if "timelineStart" in p else Rational.of(0, 1)
         end = Rational.from_json(**p["timelineEnd"]) if "timelineEnd" in p else start + Rational.of(1, 1)
@@ -1725,16 +2095,21 @@ class EditService:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             "clip.insert requires timelineEnd > timelineStart")
 
+        clip = Clip(id=clip_id, asset_ref=AssetReference(asset, source_path=source_path),
+                    timeline_start=start, timeline_end=end,
+                    source_start=source_start)
+        self._assert_clip_within_source(clip)
+
         changed: list[dict] = []
+        if creating_track:
+            proj.sequence.tracks.append(track)
+            changed.append({"type": "track", "id": track_id, "change": "created"})
 
         if mode == "insert":
             changed.extend(self._insert_shift(track, start, end - start))
         elif mode == "overwrite":
             changed.extend(self._overwrite_span(track, start, end, clip_id))
 
-        clip = Clip(id=clip_id, asset_ref=AssetReference(asset, source_path=source_path),
-                    timeline_start=start, timeline_end=end,
-                    source_start=source_start)
         track.clips.append(clip)
         changed.append({"type": "clip", "id": clip_id, "change": "created",
                         "mode": mode or "append"})
@@ -1846,6 +2221,7 @@ class EditService:
                         clip.timeline_end = Rational.from_json(**p["timelineEnd"])
                     if "sourceStart" in p:
                         clip.source_start = Rational.from_json(**p["sourceStart"])
+                    self._assert_clip_within_source(clip)
                     return [{"type": "clip", "id": clip_id, "change": "updated"}]
         raise EditError(ErrorCode.INVALID_ARGUMENT, f"clip not found: {clip_id}")
 
@@ -1856,8 +2232,15 @@ class EditService:
           clipId        要移动的片段
           timelineStart 新的时间线起点（可选；缺省保持当前起点）
           trackId       目标轨道（可选；缺省保持当前轨 = 同轨移动）
+          mode           reorder 时把完整片段插入锚点片段前后
+          anchorClipId   reorder 模式的锚点片段
+          anchorPosition before 或 after
         """
         clip_id = p["clipId"]
+        mode = str(p.get("mode") or "move").strip().lower()
+        if mode not in ("move", "reorder"):
+            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                            f"clip.move mode must be 'move' or 'reorder', got {mode!r}")
         new_start = None
         if "timelineStart" in p:
             new_start = Rational.from_json(**p["timelineStart"])
@@ -1890,7 +2273,11 @@ class EditService:
             if dest_track is None:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 f"target track not found: {tid}")
-            if dest_track.kind != src_track.kind:
+            required_track = _source_track_kind(clip.asset_ref.source_path)
+            # 正常片段只能在同类型轨道之间移动；历史版本曾允许纯音频落入
+            # 视频轨，因此给这类脏数据一条可撤销的人工修复路径：只允许移动到
+            # 素材真实需要的轨道，不能借此把正常素材跨类型乱放。
+            if dest_track.kind != src_track.kind and required_track != dest_track.kind:
                 raise EditError(
                     ErrorCode.INVALID_ARGUMENT,
                     f"cannot move {clip_id} from {src_track.kind} track "
@@ -1905,6 +2292,65 @@ class EditService:
                 if c.timeline_start < end and start < c.timeline_end:
                     return True
             return False
+
+        if mode == "reorder":
+            anchor_id = str(p.get("anchorClipId") or "")
+            anchor_position = str(p.get("anchorPosition") or "").lower()
+            if not anchor_id or anchor_id == clip_id:
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                "clip.move reorder requires another anchorClipId")
+            if anchor_position not in ("before", "after"):
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                "clip.move reorder anchorPosition must be 'before' or 'after'")
+            anchor = next((c for c in dest_track.clips if c.id == anchor_id), None)
+            if anchor is None:
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                f"reorder anchor clip not found on target track: {anchor_id}")
+
+            affected_tracks = [src_track] if src_track is dest_track else [src_track, dest_track]
+            before = {
+                c.id: c.timeline_start
+                for track in affected_tracks
+                for c in track.clips
+            }
+
+            # Remove the moving clip and close exactly the duration it occupied.
+            # Existing gaps remain intact; no neighbouring clip is trimmed or split.
+            old_end = clip.timeline_end
+            src_track.clips.remove(clip)
+            for current in src_track.clips:
+                if current.timeline_start >= old_end:
+                    current.timeline_start = current.timeline_start - dur
+                    current.timeline_end = current.timeline_end - dur
+
+            # The anchor may have moved while closing the source slot (same-track
+            # reorder), so derive the insertion boundary only after that step.
+            insert_at = (anchor.timeline_start if anchor_position == "before"
+                         else anchor.timeline_end)
+            for current in dest_track.clips:
+                if current.timeline_start >= insert_at:
+                    current.timeline_start = current.timeline_start + dur
+                    current.timeline_end = current.timeline_end + dur
+
+            clip.timeline_start = insert_at
+            clip.timeline_end = insert_at + dur
+            dest_track.clips.append(clip)
+            src_track.clips.sort(key=lambda item: item.timeline_start)
+            if dest_track is not src_track:
+                dest_track.clips.sort(key=lambda item: item.timeline_start)
+
+            changed: list[dict] = []
+            for track in affected_tracks:
+                for current in track.clips:
+                    previous = before.get(current.id)
+                    if previous is not None and previous != current.timeline_start:
+                        changed.append({
+                            "type": "clip", "id": current.id, "change": "moved",
+                            "from": previous.to_json(),
+                            "to": current.timeline_start.to_json(),
+                            "reason": "reordered",
+                        })
+            return changed
 
         new_end = new_start + dur
         if _overlaps_on(dest_track, new_start, new_end, clip_id):
@@ -1997,6 +2443,7 @@ class EditService:
             for clip in track.clips:
                 if clip.id == clip_id:
                     self._set_clip_speed(clip, p["speed"])
+                    self._assert_clip_within_source(clip)
                     return [{"type": "clip", "id": clip_id, "change": "updated"}]
         raise EditError(ErrorCode.INVALID_ARGUMENT, f"clip not found: {clip_id}")
 
@@ -2085,6 +2532,7 @@ class EditService:
         for clip in targets:
             if "speed" in params:
                 self._set_clip_speed(clip, params["speed"])
+                self._assert_clip_within_source(clip)
             if has_audio:
                 self._set_clip_audio(clip, params)
             if "opacity" in params:
@@ -2143,12 +2591,13 @@ class EditService:
             raise EditError(
                 ErrorCode.INVALID_ARGUMENT,
                 "asset.swap requires 'sourcePath' or 'assetId'")
-        # 选目标片段：clipIds 显式 / trackId 整轨
+        # 选目标片段：clipIds 显式 / trackId 整轨。保留轨道引用，先完整校验
+        # 再修改，确保批量替换不会出现前半成功、后半失败的中间状态。
         if p.get("clipIds"):
             idset = set(p["clipIds"])
-            targets = [c for tr in proj.sequence.tracks for c in tr.clips
-                       if c.id in idset]
-            missing = idset - {c.id for c in targets}
+            target_pairs = [(tr, c) for tr in proj.sequence.tracks for c in tr.clips
+                            if c.id in idset]
+            missing = idset - {c.id for _, c in target_pairs}
             if missing:
                 raise EditError(
                     ErrorCode.INVALID_ARGUMENT,
@@ -2159,18 +2608,33 @@ class EditService:
             if track is None:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 f"track not found: {p['trackId']}")
-            targets = list(track.clips)
+            target_pairs = [(track, clip) for clip in track.clips]
         else:
             raise EditError(
                 ErrorCode.INVALID_ARGUMENT,
                 "asset.swap requires 'clipIds' or 'trackId'")
-        if not targets:
+        if not target_pairs:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             "asset.swap: no target clips")
-        for clip in targets:
+        required_track = _source_track_kind(source_path or "")
+        if required_track is not None:
+            incompatible = [
+                (track.id, clip.id, track.kind)
+                for track, clip in target_pairs
+                if track.kind in ("video", "audio") and track.kind != required_track
+            ]
+            if incompatible:
+                track_id, clip_id, actual_kind = incompatible[0]
+                article = "an" if required_track == "audio" else "a"
+                raise EditError(
+                    ErrorCode.INVALID_ARGUMENT,
+                    f"asset.swap source requires {article} {required_track} track; "
+                    f"clip {clip_id} is on {actual_kind} track {track_id}")
+        for _, clip in target_pairs:
             clip.asset_ref = AssetReference(asset_id, source_path=source_path)
+            self._assert_clip_within_source(clip)
         return [{"type": "clip", "id": c.id, "change": "asset.swapped"}
-                for c in targets]
+                for _, c in target_pairs]
 
     def _h_caption_batch_style(self, proj: Project, p: dict) -> list[dict]:
         """批量改字幕样式：{captionIds?, fromTime?, toTime?, style:{...}}。
@@ -3560,6 +4024,14 @@ class EditService:
             raise EditError(ErrorCode.INVALID_ARGUMENT, str(e)) from e
         version = p.get("version") or spec.version
         clip = self._clip_by_id(proj, clip_id)
+        target_types = self._effect_target_types(proj, clip)
+        if not target_types.intersection(spec.applies_to):
+            target_label = self._effect_target_label(target_types)
+            allowed = "、".join(spec.applies_to) or "无"
+            raise EditError(
+                ErrorCode.INVALID_ARGUMENT,
+                f"效果 {effect_id} 不适用于{target_label}片段（适用对象：{allowed}）",
+            )
         clip.effects.append({"effectId": effect_id, "version": version,
                              "params": params})
         # J01 最近使用：把该效果提到最近列表最前（去重，上限 24）
@@ -3608,6 +4080,38 @@ class EditService:
                 if clip.id == clip_id:
                     return clip
         raise EditError(ErrorCode.INVALID_ARGUMENT, f"clip not found: {clip_id}")
+
+    @staticmethod
+    def _effect_target_types(proj: Project, clip: Clip) -> set[str]:
+        """Return renderable target kinds before adding a clip effect.
+
+        A video clip may also carry audio, so audio filters remain available there.
+        Still images expose only the image path; this turns a silent no-op (for
+        example loudness normalisation on a PNG) into an actionable error.
+        """
+        track = next(
+            (item for item in proj.sequence.tracks if any(c.id == clip.id for c in item.clips)),
+            None,
+        )
+        if track is not None:
+            if track.kind == "audio":
+                return {"audio"}
+            if track.kind == "text":
+                return {"text"}
+        source = clip.asset_ref.source_path.split("?", 1)[0].lower()
+        if os.path.splitext(source)[1] in _IMAGE_SUFFIXES:
+            return {"image"}
+        return {"video", "audio"}
+
+    @staticmethod
+    def _effect_target_label(target_types: set[str]) -> str:
+        if target_types == {"image"}:
+            return "图片"
+        if target_types == {"audio"}:
+            return "音频"
+        if target_types == {"text"}:
+            return "文字"
+        return "视频"
 
     def _require_effect(self, effect_id: str) -> str:
         """校验效果已注册（未注册直接拒绝，不进工程）。"""
@@ -3777,6 +4281,9 @@ class EditService:
         if "start" not in p or "end" not in p:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             "caption.add requires 'start' and 'end'")
+        if not isinstance(p["text"], str) or not p["text"].strip():
+            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                            "caption text must be a non-empty string")
         caption_id = p.get("captionId") or new_id("cap")
         if any(c.id == caption_id for c in proj.sequence.captions):
             raise EditError(ErrorCode.INVALID_ARGUMENT, f"caption exists: {caption_id}")
@@ -3797,6 +4304,9 @@ class EditService:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             f"caption not found: {p['captionId']}")
         if "text" in p:
+            if not isinstance(p["text"], str) or not p["text"].strip():
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                "caption text must be a non-empty string")
             cap.text = p["text"]
         if "start" in p:
             cap.start = Rational.from_json(**p["start"])
@@ -3804,6 +4314,35 @@ class EditService:
             cap.end = Rational.from_json(**p["end"])
         _apply_caption_style(cap, p)
         return [{"type": "caption", "id": cap.id, "change": "updated"}]
+
+    def _h_caption_patch(self, proj: Project, p: dict) -> list[dict]:
+        """原子应用多条字幕补丁：{updates:[{captionId, text?, start?, end?, ...}]}。
+
+        面向外部 Agent 的字幕精修。所有更新都在 execute() 的候选工程上运行，
+        因此任一条字幕不存在或时间非法时，整批不会写入、不会推进 revision。
+        成功时只生成一个 revision 和一个撤销点，减少逐条命令的往返成本。
+        """
+        updates = p.get("updates")
+        if not isinstance(updates, list) or not updates:
+            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                            "caption.patch requires a non-empty 'updates' list")
+
+        seen: set[str] = set()
+        changed: list[dict] = []
+        for update in updates:
+            if not isinstance(update, dict):
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                "caption.patch updates must contain objects")
+            caption_id = update.get("captionId")
+            if not isinstance(caption_id, str) or not caption_id:
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                "caption.patch update requires a non-empty captionId")
+            if caption_id in seen:
+                raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                f"caption.patch repeats captionId: {caption_id}")
+            seen.add(caption_id)
+            changed.extend(self._h_caption_update(proj, update))
+        return changed
 
     def _h_caption_remove(self, proj: Project, p: dict) -> list[dict]:
         """删除字幕：{captionId}。"""
@@ -4005,6 +4544,45 @@ class EditService:
         inst["params"] = self._effects.validate_params(eid, merged)
         return [{"type": "clip", "id": clip.id, "change": "effect.updated",
                  "effectId": inst["effectId"]}]
+
+    def _h_effect_set_animation(self, proj: Project, p: dict) -> list[dict]:
+        return self._h_effect_set_family(
+            proj, p, command_type="effect.setAnimation",
+            prefix="cutvoke.anim.", change="animation.set")
+
+    def _h_effect_set_transition(self, proj: Project, p: dict) -> list[dict]:
+        return self._h_effect_set_family(
+            proj, p, command_type="effect.setTransition",
+            prefix="cutvoke.transition.", change="transition.set")
+
+    def _h_effect_set_family(self, proj: Project, p: dict, *, command_type: str,
+                             prefix: str, change: str) -> list[dict]:
+        """Replace one effect family without exposing a remove/add intermediate state."""
+        clip_id = p.get("clipId")
+        effect_id = p.get("effectId")
+        if not isinstance(clip_id, str) or not clip_id:
+            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                            f"{command_type} requires clipId")
+        if not isinstance(effect_id, str):
+            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                            f"{command_type} requires effectId (empty string clears)")
+        if effect_id and not effect_id.startswith(prefix):
+            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                            f"{command_type} requires a {prefix}* effect")
+
+        clip = self._clip_by_id(proj, clip_id)
+        old_indices = [i for i, effect in enumerate(clip.effects)
+                       if str(effect.get("effectId", "")).startswith(prefix)]
+        insert_at = min(old_indices) if old_indices else len(clip.effects)
+        clip.effects = [effect for effect in clip.effects
+                        if not str(effect.get("effectId", "")).startswith(prefix)]
+        if effect_id:
+            self._h_effect_add(proj, {"clipId": clip_id, "effectId": effect_id,
+                                      "params": p.get("params", {})})
+            added = clip.effects.pop()
+            clip.effects.insert(min(insert_at, len(clip.effects)), added)
+        return [{"type": "clip", "id": clip_id, "change": change,
+                 "effectId": effect_id}]
 
     def _h_marker_add(self, proj: Project, p: dict) -> list[dict]:
         """新增标记：{markerId?, name?, time:{num,den}}。标记用于定位（F11）。"""

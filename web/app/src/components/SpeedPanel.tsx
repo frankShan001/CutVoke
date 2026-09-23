@@ -13,6 +13,10 @@ const PRESETS = [0.25, 0.5, 1, 1.5, 2, 4];
 
 export function SpeedPanel() {
   const { state, dispatch } = useEditor();
+  const selectedTrackLocked = !!state.project?.sequence.tracks.find((track) =>
+    track.clips.some((item) => item.id === state.selection?.clipId),
+  )?.locked;
+  const readOnly = selectedTrackLocked || !!state.editLock;
   const clip = useMemo(() => {
     if (!state.selection?.clipId || !state.project) return null;
     for (const t of state.project.sequence.tracks) {
@@ -35,6 +39,7 @@ export function SpeedPanel() {
   const effDur = Math.abs(currentSpeed) > 0 ? durSecs / Math.abs(currentSpeed) : durSecs;
 
   const apply = (speed: number) => {
+    if (readOnly) return;
     const st = getLatestState() || state;
     void setClipSpeed(dispatch, st, { clipId: clip.id, speed: secsToRational(speed) });
   };
@@ -46,11 +51,17 @@ export function SpeedPanel() {
         <span className="cv-field__label">当前倍速</span>
         <span className="cv-mono" style={{ marginLeft: "auto" }}>{isReversed ? "-" : ""}{Math.abs(currentSpeed).toFixed(2)}x</span>
       </div>
+      {readOnly ? (
+        <p className="cv-hint" role="status">
+          {state.editLock ? "Agent 正在编辑，变速暂不可用。" : "所选片段所在轨道已锁定，解锁后可调整速度。"}
+        </p>
+      ) : null}
       <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 8 }}>
         {PRESETS.map((p) => (
           <button
             key={p}
             className={`cv-chip ${Math.abs(currentSpeed) === p && !isReversed ? "cv-chip--on" : ""}`}
+            disabled={readOnly}
             onClick={() => {
               apply(p);
             }}
@@ -60,6 +71,7 @@ export function SpeedPanel() {
         ))}
         <button
           className={`cv-chip ${isReversed ? "cv-chip--on" : ""}`}
+          disabled={readOnly}
           onClick={() => apply(isReversed ? Math.abs(currentSpeed) || 1 : -(Math.abs(currentSpeed) || 1))}
           title="倒放（负 speed）"
         >

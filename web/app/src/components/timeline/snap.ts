@@ -1,5 +1,5 @@
 /** 磁吸吸附工具：把拖动目标值吸到最近的边缘/播放头。
-    阈值：0.3s（或 8px）。返回 {value, snappedTo: number|null}。 */
+    调用方按缩放把最多 0.3s 换算为约 8px。 */
 
 export const SNAP_THRESHOLD_SECS = 0.3;
 

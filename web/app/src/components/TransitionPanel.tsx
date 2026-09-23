@@ -8,6 +8,7 @@ import { Button, Field, Panel, Select, TextInput, Badge } from "./ui";
 import { useEditor, showError, selectors } from "../store/editor";
 import { getLatestState } from "../store/actions";
 import { applyTransition, removeEffect } from "../store/clipEdit";
+import { rationalToSecs } from "../lib/rational";
 import { findTransitionOnClip, transitionDurationSecs } from "../lib/transitions";
 import {
   effectsByCategory,
@@ -65,14 +66,27 @@ export function TransitionPanel() {
   const trackOptions = selectors.videoTracks(state.project);
   const clipOptions = useMemo(() => {
     const track = trackOptions.find((t) => t.id === trackSel);
-    return track ? track.clips : [];
+    return track
+      ? [...track.clips].sort((a, b) => rationalToSecs(a.timelineStart) - rationalToSecs(b.timelineStart))
+      : [];
   }, [trackOptions, trackSel]);
 
   const currentClip: Clip | null = useMemo(
     () => (clipSel ? clipOptions.find((c) => c.id === clipSel) || null : null),
     [clipOptions, clipSel],
   );
+  const selectedTrackLocked = !!tracks.find((track) => track.id === trackSel)?.locked;
+  const readOnly = selectedTrackLocked || !!state.editLock;
   const currentFx = findTransitionOnClip(currentClip);
+  const transitionTarget = useMemo(() => {
+    if (!currentClip) return { valid: false, reason: "请选择要添加转场的后一段片段" };
+    const index = clipOptions.findIndex((clip) => clip.id === currentClip.id);
+    if (index <= 0) return { valid: false, reason: "首个片段前没有可连接的片段" };
+    const previous = clipOptions[index - 1];
+    const gap = rationalToSecs(currentClip.timelineStart) - rationalToSecs(previous.timelineEnd);
+    if (Math.abs(gap) > 0.001) return { valid: false, reason: "两段之间有空隙，请先关闭间隙再添加转场" };
+    return { valid: true, reason: "转场将连接此前一段与当前片段" };
+  }, [currentClip, clipOptions]);
   const currentName = currentFx
     ? transitions.find((s) => s.effectId === String(currentFx.effectId))?.name ||
       String(currentFx.effectId)
@@ -82,12 +96,17 @@ export function TransitionPanel() {
     new ApiFailure({ status: 400, code: "INVALID_ARGUMENT", message });
 
   const handleApply = async () => {
+    if (readOnly) return;
     if (!state.currentId) {
       showError(dispatch, invalid("请先选择工程"));
       return;
     }
     if (!clipSel) {
       showError(dispatch, invalid("请选择要添加转场的「后一段」片段"));
+      return;
+    }
+    if (!transitionTarget.valid) {
+      showError(dispatch, invalid(transitionTarget.reason));
       return;
     }
     if (!transitionId) {
@@ -106,7 +125,6 @@ export function TransitionPanel() {
       clipId: clipSel,
       effectId: transitionId,
       duration: Math.round(durClamped * 10) / 10,
-      hasExistingTransition: !!currentFx,
     });
     setBusy(false);
     if (res.ok && currentFx) {
@@ -116,13 +134,18 @@ export function TransitionPanel() {
   };
 
   const handleRemove = async () => {
-    if (!clipSel || !currentFx) return;
+    if (readOnly || !clipSel || !currentFx) return;
     const st = getLatestState() || state;
     await removeEffect(dispatch, st, { clipId: clipSel, effectId: String(currentFx.effectId) });
   };
 
   return (
     <Panel title="转场" subtitle="挂在后一段片段上">
+      {readOnly ? (
+        <p className="cv-hint" role="status">
+          {state.editLock ? "Agent 正在编辑，转场暂不可修改。" : "目标片段所在轨道已锁定，解锁后可编辑转场。"}
+        </p>
+      ) : null}
       <Field label="轨道">
         <Select
           value={trackSel}
@@ -161,6 +184,7 @@ export function TransitionPanel() {
             <button
               className="cv-btn cv-btn--sm cv-btn--danger"
               onClick={handleRemove}
+              disabled={readOnly}
               title="移除转场"
               style={{ marginLeft: "auto" }}
             >
@@ -168,6 +192,12 @@ export function TransitionPanel() {
             </button>
           </div>
         </div>
+      ) : null}
+
+      {clipSel ? (
+        <p className={`cv-hint${transitionTarget.valid ? "" : " cv-hint--warn"}`} role="status">
+          {transitionTarget.reason}
+        </p>
       ) : null}
 
       <div style={{ marginTop: 8 }}>
@@ -216,14 +246,14 @@ export function TransitionPanel() {
         variant="primary"
         full
         onClick={handleApply}
-        disabled={busy || !clipSel || !transitionId}
+        disabled={busy || readOnly || !clipSel || !transitionId || !transitionTarget.valid}
         style={{ marginTop: 10 }}
       >
         <Film size={14} />
         {busy ? "应用中…" : currentFx ? "切换转场" : "应用转场"}
       </Button>
       <p className="cv-hint">
-        转场挂在这段上与它前一相邻片段之间。已有转场时应用会先移除旧转场再添加，避免叠加。
+        转场挂在这段上与它前一相邻片段之间。切换转场是一次操作，可以一步撤销。
       </p>
     </Panel>
   );

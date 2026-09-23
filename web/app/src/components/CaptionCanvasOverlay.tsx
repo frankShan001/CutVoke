@@ -27,22 +27,41 @@ const norm = (c: Caption): Geom => ({
 export function CaptionCanvasOverlay() {
   const { state, dispatch } = useEditor();
   const project = state.project;
-  const captions = project?.sequence.captions || [];
+  const draft = !state.editLock && state.captionDraftPreview?.projectId === project?.projectId
+    ? state.captionDraftPreview
+    : null;
+  const captions = (project?.sequence.captions || []).map((caption) => (
+    draft?.captionId === caption.id
+      ? { ...caption, text: draft.text, start: draft.start, end: draft.end }
+      : caption
+  ));
   const projW = project?.sequence.width || 1920;
+  const projH = project?.sequence.height || 1080;
 
   const overlayRef = useRef<HTMLDivElement>(null);
-  const [frameW, setFrameW] = useState(0);
+  const moveStartRef = useRef<{ pointerId: number; x: number; y: number } | null>(null);
+  const [frameSize, setFrameSize] = useState({ width: 0, height: 0 });
   const [gesture, setGesture] = useState<Gesture | null>(null);
   const [preview, setPreview] = useState<Geom | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  // 跟踪画布显示宽度，用于把字幕字号按显示比例换算（仅编辑手感，非渲染契约）。
+  // Agent 在拖拽过程中取得租约时，立即丢弃尚未提交的本地预览；否则用户松开鼠标
+  // 后可能试图把锁前的位置写回。后端仍是最终的权限边界。
+  useEffect(() => {
+    if (!state.editLock) return;
+    moveStartRef.current = null;
+    setGesture(null);
+    setPreview(null);
+  }, [state.editLock]);
+
+  // 跟踪画布显示尺寸；字号沿用导出的 1080p 基准，描边/阴影按工程画布缩放。
   useEffect(() => {
     const el = overlayRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setFrameW(el.clientWidth));
+    const updateFrameSize = () => setFrameSize({ width: el.clientWidth, height: el.clientHeight });
+    const ro = new ResizeObserver(updateFrameSize);
     ro.observe(el);
-    setFrameW(el.clientWidth);
+    updateFrameSize();
     return () => ro.disconnect();
   }, []);
 
@@ -53,23 +72,36 @@ export function CaptionCanvasOverlay() {
   const geomOf = (c: Caption): Geom =>
     gesture && preview && gesture.id === c.id ? preview : norm(c);
 
+  const opacityAt = (c: Caption) => {
+    const now = state.playhead;
+    const start = rationalToSecs(c.start);
+    const end = rationalToSecs(c.end);
+    const fadeIn = c.animIn ? Math.min(1, Math.max(0, ((now - start) * 1000) / c.animIn)) : 1;
+    const fadeOut = c.animOut ? Math.min(1, Math.max(0, ((end - now) * 1000) / c.animOut)) : 1;
+    return Math.min(fadeIn, fadeOut);
+  };
+
   const commit = async (id: string, g: Geom) => {
-    await updateCaption(dispatch, state, {
-      captionId: id,
-      x: g.x,
-      y: g.y,
-      scale: g.scale,
-      rotation: g.rotation,
-    });
+    const caption = captions.find((item) => item.id === id);
+    if (!caption) return;
+    const current = norm(caption);
+    const update: Parameters<typeof updateCaption>[2] = { captionId: id };
+    if (g.x !== current.x) update.x = g.x;
+    if (g.y !== current.y) update.y = g.y;
+    if (g.scale !== current.scale) update.scale = g.scale;
+    if (g.rotation !== current.rotation) update.rotation = g.rotation;
+    if (Object.keys(update).length > 1) await updateCaption(dispatch, state, update);
   };
 
   const beginMove = (e: ReactPointerEvent, c: Caption) => {
+    if (state.editLock) return;
     e.stopPropagation();
     const rect = overlayRef.current?.getBoundingClientRect();
     if (!rect) return;
     const g = norm(c);
     setActiveId(c.id);
     setPreview(g);
+    moveStartRef.current = { pointerId: e.pointerId, x: e.clientX, y: e.clientY };
     setGesture({
       mode: "move",
       id: c.id,
@@ -84,6 +116,7 @@ export function CaptionCanvasOverlay() {
   };
 
   const beginScale = (e: ReactPointerEvent, c: Caption) => {
+    if (state.editLock) return;
     e.stopPropagation();
     const rect = overlayRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -97,6 +130,7 @@ export function CaptionCanvasOverlay() {
   };
 
   const beginRotate = (e: ReactPointerEvent, c: Caption) => {
+    if (state.editLock) return;
     e.stopPropagation();
     const rect = overlayRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -113,6 +147,11 @@ export function CaptionCanvasOverlay() {
   const onMove = (e: ReactPointerEvent) => {
     if (!gesture) return;
     if (gesture.mode === "move") {
+      const start = moveStartRef.current;
+      if (start?.pointerId === e.pointerId) {
+        if (Math.hypot(e.clientX - start.x, e.clientY - start.y) < 6) return;
+        moveStartRef.current = null;
+      }
       const dx = (e.clientX - gesture.startCX) / gesture.rectW;
       const dy = (e.clientY - gesture.startCY) / gesture.rectH;
       setPreview((p) => (p ? { ...p, x: gesture.startNX + dx, y: gesture.startNY + dy } : p));
@@ -127,8 +166,9 @@ export function CaptionCanvasOverlay() {
     }
   };
 
-  const onUp = () => {
+  const onUp = (e: ReactPointerEvent) => {
     if (!gesture) return;
+    if (moveStartRef.current?.pointerId === e.pointerId) moveStartRef.current = null;
     const id = gesture.id;
     const g = preview;
     setGesture(null);
@@ -142,7 +182,14 @@ export function CaptionCanvasOverlay() {
     <div className="caption-overlay" ref={overlayRef}>
       {visible.map((c) => {
         const g = geomOf(c);
-        const baseFont = (c.fontSize || 48) * (frameW / projW || 1);
+        const canvasScale = frameSize.height / projH || frameSize.width / projW || 1;
+        // ASS 先按 sequence 高度把字号从 1080p 基准缩放并取整，再随画布显示比例缩放。
+        const renderFontSize = Math.max(8, Math.round((c.fontSize ?? 32) * projH / 1080));
+        const baseFont = renderFontSize * canvasScale;
+        const stroke = Math.max(0, c.strokeWidth ?? 2) * canvasScale;
+        const shadow = Math.max(0, c.shadow ?? 1) * canvasScale;
+        const align = c.align === "left" || c.align === "right" ? c.align : "center";
+        const anchorX = align === "left" ? "0" : align === "right" ? "-100" : "-50";
         return (
           <div
             key={c.id}
@@ -150,15 +197,31 @@ export function CaptionCanvasOverlay() {
             style={{
               left: `${g.x * 100}%`,
               top: `${g.y * 100}%`,
-              transform: `translate(-50%, -50%) rotate(${g.rotation}deg) scale(${g.scale})`,
+              transform: `translate(${anchorX}%, -100%) rotate(${g.rotation}deg) scale(${g.scale})`,
+              transformOrigin: `${align} bottom`,
               fontSize: `${baseFont}px`,
+              textAlign: align,
+              justifyContent: align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center",
+              backgroundColor: c.background || "transparent",
+              opacity: opacityAt(c),
             }}
-            onPointerDown={(e) => beginMove(e, c)}
-            onPointerMove={onMove}
-            onPointerUp={onUp}
+            onPointerDown={state.editLock ? undefined : (e) => beginMove(e, c)}
+            onPointerMove={state.editLock ? undefined : onMove}
+            onPointerUp={state.editLock ? undefined : onUp}
           >
-            <span className="caption-overlay__text">{c.text}</span>
-            {c.id === activeId ? (
+            <span
+              className="caption-overlay__text"
+              style={{
+                color: c.color || "#ffffff",
+                fontWeight: c.bold ? 700 : 400,
+                WebkitTextStroke: stroke ? `${stroke}px ${c.strokeColor || "#000000"}` : undefined,
+                // ASS Shadow 是无模糊的右下偏移，颜色取 BackColour；保持预览与导出一致。
+                textShadow: shadow ? `${shadow}px ${shadow}px 0 ${c.background || "#000000"}` : "none",
+              }}
+            >
+              {c.text}
+            </span>
+            {c.id === activeId && !state.editLock ? (
               <>
                 <span
                   className="caption-overlay__handle caption-overlay__handle--scale"

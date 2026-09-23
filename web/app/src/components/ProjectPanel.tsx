@@ -24,6 +24,15 @@ export function ProjectPanel() {
       setName(state.projectName || "");
       return;
     }
+    if (state.editLock) {
+      setName(state.projectName || "");
+      dispatch({
+        type: "STATUS_SET",
+        severity: "warn",
+        text: `Agent ${state.editLock.owner} 正在编辑，页面暂时只读`,
+      });
+      return;
+    }
     void renameProject(dispatch, state.currentId, trimmed);
   };
 
@@ -39,7 +48,7 @@ export function ProjectPanel() {
           }}
           onBlur={commit}
           placeholder="给这个工程起个名字"
-          disabled={!state.currentId}
+          disabled={!state.currentId || Boolean(state.editLock)}
           aria-label="当前工程名称"
         />
       </Field>
@@ -48,7 +57,7 @@ export function ProjectPanel() {
           variant="secondary"
           full
           onClick={commit}
-          disabled={!state.currentId || !dirty}
+          disabled={!state.currentId || !dirty || Boolean(state.editLock)}
           aria-label="保存工程名称"
         >
           <Pencil size={14} />

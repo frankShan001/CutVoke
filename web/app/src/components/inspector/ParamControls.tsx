@@ -10,7 +10,7 @@ export function ParamControls({
   controls: ParamControl[];
   onChange: (name: string, value: unknown) => void;
   /** 数值输入失焦时提交（枚举/布尔即时提交）。 */
-  onCommit?: () => void;
+  onCommit?: (change?: { name: string; value: unknown }) => void;
 }) {
   if (controls.length === 0) return null;
   return (
@@ -21,16 +21,17 @@ export function ParamControls({
           style={{ gap: 4, alignItems: "center" }}
           key={c.name}
         >
-          <span className="inspector__key">{c.label}</span>
+          <span className="inspector__key" title={c.description}>{c.label}</span>
           {c.kind === "enum" ? (
             <select
               className="cv-input"
               style={{ height: 26 }}
               aria-label={c.label}
+              aria-description={c.description}
               value={String(c.value ?? "")}
               onChange={(e) => {
                 onChange(c.name, e.target.value);
-                onCommit?.();
+                onCommit?.({ name: c.name, value: e.target.value });
               }}
             >
               {(c.options || []).map((o) => (
@@ -43,10 +44,11 @@ export function ParamControls({
             <input
               type="checkbox"
               aria-label={c.label}
+              aria-description={c.description}
               checked={!!c.value}
               onChange={(e) => {
                 onChange(c.name, e.target.checked);
-                onCommit?.();
+                onCommit?.({ name: c.name, value: e.target.checked });
               }}
             />
           ) : c.kind === "number" ? (
@@ -55,6 +57,7 @@ export function ParamControls({
               className="cv-input"
               style={{ width: 76, height: 26 }}
               aria-label={c.label}
+              aria-description={c.description}
               value={c.value === undefined || c.value === null ? "" : String(c.value)}
               min={c.min}
               max={c.max}
@@ -71,6 +74,7 @@ export function ParamControls({
               className="cv-input"
               style={{ height: 26 }}
               aria-label={c.label}
+              aria-description={c.description}
               value={String(c.value ?? "")}
               onChange={(e) => onChange(c.name, e.target.value)}
               onBlur={() => onCommit?.()}

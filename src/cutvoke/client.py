@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any, Optional
 
@@ -63,6 +64,12 @@ class CutVokeClient:
             return {}
         return json.loads(raw.decode("utf-8"))
 
+    @staticmethod
+    def _project_path(project_id: str) -> str:
+        """Encode one project identifier as a path segment, never as route text."""
+
+        return f"/api/v1/projects/{urllib.parse.quote(project_id, safe='')}"
+
     # ---- 工程 ----
     def list_projects(self) -> list[dict]:
         return self._request("GET", "/api/v1/projects").get("projects", [])
@@ -77,52 +84,113 @@ class CutVokeClient:
         return self._request("POST", "/api/v1/projects", body)
 
     def get_project(self, project_id: str) -> dict:
-        return self._request("GET", f"/api/v1/projects/{project_id}")
+        return self._request("GET", self._project_path(project_id))
+
+    def get_project_summary(self, project_id: str) -> dict:
+        """读取低成本的时间线索引；完整对象按需使用 get_project() 获取。"""
+        return self._request("GET", self._project_path(project_id) + "/summary")
+
+    def project_lookup(self, project_id: str, entity_type: str, *,
+                       entity_id: str = "", text_contains: str = "",
+                       at_seconds: Optional[float] = None,
+                       from_seconds: Optional[float] = None,
+                       to_seconds: Optional[float] = None,
+                       fields: Optional[list[str]] = None,
+                       limit: int = 10) -> dict:
+        """按需读取目标字幕或片段及指定字段，并取得可直接用于写入的 revision。"""
+        query: dict[str, Any] = {"entityType": entity_type, "limit": limit}
+        if entity_id:
+            query["entityId"] = entity_id
+        if text_contains:
+            query["textContains"] = text_contains
+        for key, value in (("atSeconds", at_seconds),
+                           ("fromSeconds", from_seconds),
+                           ("toSeconds", to_seconds)):
+            if value is not None:
+                query[key] = value
+        if fields is not None:
+            query["fields"] = ",".join(fields)
+        return self._request(
+            "GET", self._project_path(project_id) + "/lookup?" +
+            urllib.parse.urlencode(query),
+        )
 
     def rename_project(self, project_id: str, name: str,
                        edit_lease_id: Optional[str] = None) -> dict:
         body: dict[str, Any] = {"name": name}
         if edit_lease_id:
             body["editLeaseId"] = edit_lease_id
-        return self._request("PATCH", f"/api/v1/projects/{project_id}",
+        return self._request("PATCH", self._project_path(project_id),
                              body)
 
     # ---- 命令 ----
     def command(self, project_id: str, cmd_type: str, payload: dict,
                 expected_revision: Optional[str] = None,
-                edit_lease_id: Optional[str] = None) -> dict:
+                edit_lease_id: Optional[str] = None,
+                actor: Optional[dict[str, str]] = None) -> dict:
+        """提交编辑命令；actor 可用于把外部 Agent 身份写入活动记录。"""
         if expected_revision is None:
-            expected_revision = self.get_project(project_id).get("revision", "")
+            expected_revision = self.get_project_summary(project_id).get("revision", "")
         body = {"type": cmd_type, "payload": payload,
                 "expectedRevision": expected_revision}
         if edit_lease_id:
             body["editLeaseId"] = edit_lease_id
-        return self._request("POST", f"/api/v1/projects/{project_id}/commands",
+        if actor is not None:
+            body["actor"] = actor
+        return self._request("POST", f"{self._project_path(project_id)}/commands",
                              body)
+
+    def patch_captions(
+        self,
+        project_id: str,
+        updates: list[dict],
+        expected_revision: Optional[str] = None,
+        edit_lease_id: Optional[str] = None,
+        actor: Optional[dict[str, str]] = None,
+    ) -> dict:
+        """原子修改多条字幕；成功后只生成一个 revision 与一个撤销点。"""
+        return self.command(
+            project_id,
+            "caption.patch",
+            {"updates": updates},
+            expected_revision=expected_revision,
+            edit_lease_id=edit_lease_id,
+            actor=actor,
+        )
 
     def edit_lock(self, project_id: str, action: str = "acquire",
                   lease_id: Optional[str] = None, owner: str = "agent",
                   ttl_seconds: float = 30) -> dict:
         """获取/续租/释放 Agent 编辑租约。"""
+        routes = {"acquire": "", "renew": "/renew", "release": "/release"}
+        action = str(action).lower()
+        if action not in routes:
+            raise ValueError("action must be acquire, renew, or release")
         body: dict[str, Any] = {"action": action, "owner": owner,
                                 "ttlSeconds": ttl_seconds}
         if lease_id:
             body["leaseId"] = lease_id
-        return self._request("POST", f"/api/v1/projects/{project_id}/edit-lock", body)
+        return self._request(
+            "POST", f"{self._project_path(project_id)}/edit-lock{routes[action]}", body
+        )
+
+    def get_edit_lock(self, project_id: str) -> dict:
+        """查询当前 Agent 编辑租约；不会改变租约状态。"""
+        return self._request("GET", f"{self._project_path(project_id)}/edit-lock")
 
     def dry_run(self, project_id: str, cmd_type: str, payload: dict,
                 expected_revision: Optional[str] = None) -> dict:
         """试算命令（不提交），返回会发生什么（changedEntities）。"""
         if expected_revision is None:
-            expected_revision = self.get_project(project_id).get("revision", "")
+            expected_revision = self.get_project_summary(project_id).get("revision", "")
         body = {"type": cmd_type, "payload": payload,
                 "expectedRevision": expected_revision, "dryRun": True}
-        return self._request("POST", f"/api/v1/projects/{project_id}/commands",
+        return self._request("POST", f"{self._project_path(project_id)}/commands",
                              body)
 
     # ---- 导出 ----
     def export(self, project_id: str, out: str, quality: str = "high") -> dict:
-        return self._request("POST", f"/api/v1/projects/{project_id}/export",
+        return self._request("POST", f"{self._project_path(project_id)}/export",
                              {"outPath": out, "quality": quality})
 
     # ---- 能力发现 ----
@@ -143,4 +211,4 @@ class CutVokeClient:
         return self._request("GET", "/api/v1/assets").get("assets", [])
 
     def probe(self, path: str) -> dict:
-        return self._request("GET", f"/api/v1/probe?path={path}")
+        return self._request("GET", "/api/v1/probe?" + urllib.parse.urlencode({"path": path}))

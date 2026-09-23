@@ -32,6 +32,10 @@ export function EffectStackPanel({ active }: Props) {
   const { state, dispatch } = useEditor();
   const pid = state.currentId;
   const selectedClipId = state.selection?.clipId ?? null;
+  const selectedTrackLocked = !!state.project?.sequence.tracks.find((track) =>
+    track.clips.some((clip) => clip.id === selectedClipId),
+  )?.locked;
+  const readOnly = selectedTrackLocked || !!state.editLock;
 
   const [catalog, setCatalog] = useState<EffectSpec[]>([]);
   const [presets, setPresets] = useState<Preset[]>([]);
@@ -113,6 +117,11 @@ export function EffectStackPanel({ active }: Props) {
 
   return (
     <Panel title="效果条" subtitle="顺序即渲染合成顺序">
+      {selectedClipId && readOnly ? (
+        <p className="cv-hint" role="status">
+          {state.editLock ? "Agent 正在编辑，效果栈暂时只读。" : "所选片段所在轨道已锁定，解锁后可调整效果。"}
+        </p>
+      ) : null}
       {!selectedClipId ? (
         <p className="cv-empty">先在时间线选中一个片段，这里会列出它的完整效果栈。</p>
       ) : clipEffects.length === 0 ? (
@@ -126,8 +135,9 @@ export function EffectStackPanel({ active }: Props) {
               index={i}
               total={clipEffects.length}
               catalog={catalog}
-              busy={anyBusy}
+              busy={anyBusy || readOnly}
               onMove={(dir) => {
+                if (readOnly) return;
                 const st = getLatestState() || state;
                 void run(
                   () =>
@@ -140,6 +150,7 @@ export function EffectStackPanel({ active }: Props) {
                 );
               }}
               onBypass={() => {
+                if (readOnly) return;
                 const st = getLatestState() || state;
                 void run(
                   () =>
@@ -152,6 +163,7 @@ export function EffectStackPanel({ active }: Props) {
                 );
               }}
               onRemove={() => {
+                if (readOnly) return;
                 const st = getLatestState() || state;
                 void run(
                   () =>
@@ -211,7 +223,7 @@ export function EffectStackPanel({ active }: Props) {
       </div>
       <PresetList
         presets={presets}
-        hasClip={!!selectedClipId}
+        hasClip={!!selectedClipId && !readOnly}
         busyId={busyId}
         onApply={(p, mode) => {
           if (!selectedClipId) return;

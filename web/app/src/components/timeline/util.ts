@@ -1,6 +1,6 @@
 /** 时间线布局工具：标尺刻度、缩放、范围计算。 */
 
-import type { Clip, Track } from "../../types/api";
+import type { Clip, Rational, Track } from "../../types/api";
 import { rationalToSecs } from "../../lib/rational";
 
 /** px 每秒的缩放档。 */
@@ -75,10 +75,44 @@ export function toSecs(px: number, pxPerSec: number): number {
   return px / pxPerSec;
 }
 
-/** 拖拽像素位移 → 时间位移（秒），取整到 0.1s，避免抖动提交。 */
-export function pxToSecSnapped(dx: number, pxPerSec: number): number {
+/** 秒值对齐到最近一帧；缺少有效帧率时沿用 0.1s 的安全步长。 */
+export function snapSecsToFrame(secs: number, frameRate?: Rational): number {
+  const fpsNum = Number(frameRate?.num);
+  const fpsDen = Number(frameRate?.den);
+  if (!Number.isFinite(secs)) return 0;
+  if (!Number.isFinite(fpsNum) || !Number.isFinite(fpsDen) || fpsNum <= 0 || fpsDen <= 0) {
+    return Math.round(secs * 10) / 10;
+  }
+  const frame = Math.round((secs * fpsNum) / fpsDen);
+  return (frame * fpsDen) / fpsNum;
+}
+
+/** 最近一帧的时长（秒）；旧/不完整工程回退到 0.1s。 */
+export function frameDurationSecs(frameRate?: Rational): number {
+  const fpsNum = Number(frameRate?.num);
+  const fpsDen = Number(frameRate?.den);
+  return Number.isFinite(fpsNum) && Number.isFinite(fpsDen) && fpsNum > 0 && fpsDen > 0
+    ? fpsDen / fpsNum
+    : 0.1;
+}
+
+/** 秒值 → 精确帧时长有理数；不把 1/30s 粗略舍入到 0.1s。 */
+export function secsToFrameRatString(secs: number, frameRate?: Rational): { num: string; den: string } {
+  const fpsNum = Number(frameRate?.num);
+  const fpsDen = Number(frameRate?.den);
+  if (!Number.isFinite(secs) || !Number.isFinite(fpsNum) || !Number.isFinite(fpsDen) || fpsNum <= 0 || fpsDen <= 0) {
+    return secsToRatString(secs);
+  }
+  const frame = Math.round((secs * fpsNum) / fpsDen);
+  const numerator = frame * fpsDen;
+  const divisor = gcd(numerator, fpsNum);
+  return { num: String(numerator / divisor), den: String(fpsNum / divisor) };
+}
+
+/** px 位移 → 时间位移，并吸附到当前工程帧边界。 */
+export function pxToSecSnapped(dx: number, pxPerSec: number, frameRate?: Rational): number {
   const raw = dx / pxPerSec;
-  return Math.round(raw * 10) / 10;
+  return snapSecsToFrame(raw, frameRate);
 }
 
 /** 从首帧位移前的原始值计算新值（move：start+offset；trim：边界+offset）。 */
@@ -117,4 +151,15 @@ export function fmtTime(secs: number): string {
   const s = Math.floor(secs % 60);
   const ms = Math.floor((secs - Math.floor(secs)) * 10);
   return `${m}:${String(s).padStart(2, "0")}.${ms}`;
+}
+
+/** 播放头毫秒显示：保留帧级微调的可见反馈，片段总时长仍使用紧凑格式。 */
+export function fmtTimePrecise(secs: number): string {
+  if (!Number.isFinite(secs) || secs < 0) return "0:00.000";
+  const totalMs = Math.round(secs * 1000);
+  const totalSecs = Math.floor(totalMs / 1000);
+  const m = Math.floor(totalSecs / 60);
+  const s = totalSecs % 60;
+  const ms = totalMs % 1000;
+  return `${m}:${String(s).padStart(2, "0")}.${String(ms).padStart(3, "0")}`;
 }

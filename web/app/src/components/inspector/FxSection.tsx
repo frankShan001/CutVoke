@@ -1,11 +1,10 @@
-/** 画面特效小节（J01 数据驱动）：滤镜清单 + 参数全部来自注册表 category=fx。
- *  滤镜可叠加：每个 toggle 独立增删（按 effectId 精确）；调参走「先 remove 再 add」
- *  保证该 effectId 只有一个实例（沿用 Inspector 旧逻辑）。 */
+/** 片段特效小节：按素材适用类型筛选；调参一次原子更新。 */
 import { useEffect, useMemo, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { showError, useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
 import { addEffect, removeEffect } from "../../store/clipEdit";
+import { updateEffect } from "../../store/effectEdit";
 import {
   effectsByCategory,
   getEffectCatalog,
@@ -14,12 +13,18 @@ import {
 } from "../../lib/effects";
 import { paramControls } from "../../lib/effectControls";
 import { ParamControls } from "./ParamControls";
+import { inferKind } from "../../lib/assetStore";
 import type { Clip } from "../../types/api";
 
-export function FxSection({ clip }: { clip: Clip }) {
+export function FxSection({ clip, trackKind }: { clip: Clip; trackKind: string }) {
   const { state, dispatch } = useEditor();
   const [specs, setSpecs] = useState<EffectSpec[]>([]);
   const [busy, setBusy] = useState(false);
+  const mediaKind = inferKind(clip.assetRef.sourcePath, false, false);
+  const targetTypes = trackKind === "audio" ? ["audio"]
+    : trackKind === "text" ? ["text"]
+    : mediaKind === "image" ? ["image"]
+    : ["video", "audio"];
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +41,9 @@ export function FxSection({ clip }: { clip: Clip }) {
   }, [dispatch]);
 
   const isActive = (id: string) => clip.effects?.some((e) => e.effectId === id) ?? false;
+  const applicableSpecs = specs.filter(
+    (spec) => spec.appliesTo.some((type) => targetTypes.includes(type)) || isActive(spec.effectId),
+  );
   const paramsOf = (id: string) =>
     (clip.effects?.find((e) => e.effectId === id)?.params as Record<string, unknown>) ?? {};
 
@@ -55,58 +63,59 @@ export function FxSection({ clip }: { clip: Clip }) {
     setBusy(false);
   };
 
-  const setParams = async (spec: EffectSpec, params: Record<string, unknown>) => {
-    if (busy) return;
+  const setParams = async (spec: EffectSpec, params: Record<string, unknown>): Promise<boolean> => {
+    if (busy) return false;
     setBusy(true);
     const ctx = getLatestState() || state;
-    const r = await removeEffect(dispatch, ctx, { clipId: clip.id, effectId: spec.effectId });
-    if (r.ok) {
-      const ctx2 = getLatestState() || ctx;
-      await addEffect(dispatch, ctx2, {
-        clipId: clip.id,
-        effectId: spec.effectId,
-        params,
-      });
-    }
+    const result = await updateEffect(dispatch, ctx, {
+      clipId: clip.id, effectId: spec.effectId, params,
+    });
     setBusy(false);
+    return result.ok;
   };
 
   const Icon = iconForCategory("fx");
-  const activeSpecs = specs.filter((s) => isActive(s.effectId));
+  const activeSpecs = applicableSpecs.filter((s) => isActive(s.effectId));
+  const sectionLabel = trackKind === "audio" ? "音频特效" : mediaKind === "image" ? "画面特效" : "片段特效";
 
   return (
     <>
       <div className="inspector__sep" />
-      <div className="inspector__subrow">
-        <span className="inspector__key">
-          <SlidersHorizontal size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />
-          画面特效
-        </span>
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 4 }}>
-        {specs.map((s) => {
-          const on = isActive(s.effectId);
-          return (
-            <button
-              key={s.effectId}
-              type="button"
-              aria-label={s.name}
-              aria-pressed={on}
-              className={"cv-chip" + (on ? " cv-chip--on" : "")}
-              title={s.description}
-              onClick={() => void toggle(s)}
-            >
-              <Icon size={12} /> {s.name}
-            </button>
-          );
-        })}
-      </div>
+      <details className="inspector__adv inspector__fx-picker">
+        <summary style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <span className="inspector__key">
+            <SlidersHorizontal size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />
+            {sectionLabel}
+          </span>
+          <span className="cv-hint">
+            {applicableSpecs.length ? `${activeSpecs.length}/${applicableSpecs.length} 已启用` : "展开添加"}
+          </span>
+        </summary>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+          {applicableSpecs.map((s) => {
+            const on = isActive(s.effectId);
+            return (
+              <button
+                key={s.effectId}
+                type="button"
+                aria-label={s.name}
+                aria-pressed={on}
+                className={"cv-chip" + (on ? " cv-chip--on" : "")}
+                title={s.description}
+                onClick={() => void toggle(s)}
+              >
+                <Icon size={12} /> {s.name}
+              </button>
+            );
+          })}
+        </div>
+      </details>
       {activeSpecs.map((s) => (
         <FxParams
           key={s.effectId}
           spec={s}
           params={paramsOf(s.effectId)}
-          onCommit={(p) => void setParams(s, p)}
+          onCommit={(p) => setParams(s, p)}
         />
       ))}
     </>
@@ -121,7 +130,7 @@ function FxParams({
 }: {
   spec: EffectSpec;
   params: Record<string, unknown>;
-  onCommit: (next: Record<string, unknown>) => void;
+  onCommit: (next: Record<string, unknown>) => Promise<boolean>;
 }) {
   const [local, setLocal] = useState<Record<string, unknown>>(params);
   const paramKey = JSON.stringify(params);
@@ -141,7 +150,17 @@ function FxParams({
         else next[name] = value;
         setLocal(next);
       }}
-      onCommit={() => onCommit(local)}
+      onCommit={(change) => {
+        const next = { ...local };
+        if (change) {
+          if (change.value === undefined) delete next[change.name];
+          else next[change.name] = change.value;
+        }
+        if (JSON.stringify(next) === JSON.stringify(params)) return;
+        void onCommit(next).then((ok) => {
+          if (!ok) setLocal(params);
+        });
+      }}
     />
   );
 }

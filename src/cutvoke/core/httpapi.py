@@ -10,6 +10,7 @@
   POST /api/v1/projects                    创建工程
   GET  /api/v1/projects/{id}               读工程 JSON
   GET  /api/v1/projects/{id}/summary       工程摘要
+  GET  /api/v1/projects/{id}/lookup        按需读取字幕或片段
   POST /api/v1/projects/{id}/commands      提交编辑命令
   POST /api/v1/projects/{id}/export        触发导出（同步阻塞，等结果）
   POST /api/v1/projects/{id}/exports       提交异步导出任务（V02，返回 202+jobId）
@@ -33,7 +34,7 @@ import threading
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Optional
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, unquote
 import uuid
 
 from .service import EditService, EditError
@@ -48,6 +49,12 @@ from .security import (ORIGIN_MESSAGES, GovernanceError, Limits, ResourceLimiter
                        SessionToken, PathEscapeError, check_origin,
                        check_request_token, safe_path, resolve_binding)
 from .diagnostics import JsonlLogger
+
+
+# Bump when preview rendering changes so neither disk cache nor browser ETag can
+# treat media produced by an older renderer as current for the same project data.
+PREVIEW_RENDER_CACHE_VERSION = 5
+PREVIEW_WINDOW_SECONDS = 8
 
 
 class HttpApi:
@@ -106,8 +113,12 @@ class HttpApi:
         snapshot = preview_project.to_dict()
         for key in ("revision", "name", "favorites", "recentEffects", "presets"):
             snapshot.pop(key, None)
+        digest_source = {
+            "rendererVersion": PREVIEW_RENDER_CACHE_VERSION,
+            "project": snapshot,
+        }
         digest = hashlib.sha256(
-            json.dumps(snapshot, sort_keys=True, ensure_ascii=False).encode("utf-8")
+            json.dumps(digest_source, sort_keys=True, ensure_ascii=False).encode("utf-8")
         ).hexdigest()[:32]
         with self._preview_lock:
             cached = self._preview_cache.get(digest)
@@ -148,6 +159,121 @@ class HttpApi:
                     os.remove(old["path"])
             return out_path, digest, result.get("duration")
 
+    def _preview_window_file(self, project, index: int) -> tuple[str, str, float]:
+        """Render/cache one playback window instead of an entire changed project."""
+        if index < 0:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "preview window index must be >= 0")
+        seq = project.sequence
+        visible = [clip for track in seq.tracks if track.kind == "video" and track.visible
+                   for clip in track.clips if not clip.hidden]
+        if not visible:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "project has no visible video")
+        audible = [clip for track in seq.tracks
+                   if track.kind == "audio" and track.visible and not track.muted
+                   for clip in track.clips if not clip.hidden]
+        timeline_end = max(clip.timeline_end for clip in visible + audible)
+        start = Rational.of(index * PREVIEW_WINDOW_SECONDS)
+        if start >= timeline_end:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "preview window is past the media end")
+        stop = min(start + Rational.of(PREVIEW_WINDOW_SECONDS), timeline_end)
+        duration = float((stop - start).to_fraction())
+        preview_project = copy.deepcopy(project)
+        for sequence in preview_project.sequences:
+            sequence.captions = []
+        preview_project.sequence.captions = []
+
+        # The common case (one plain clip covering the whole window) can be
+        # compiled from that source interval alone. A distant edit then keeps
+        # this window's cache key and does not trigger another encode.
+        active_video_tracks = [track for track in seq.tracks
+                               if track.kind == "video" and track.visible and
+                               any(not clip.hidden for clip in track.clips)]
+        active_audio_tracks = [track for track in seq.tracks
+                               if track.kind == "audio" and track.visible and
+                               not track.muted and any(not clip.hidden for clip in track.clips)]
+        local = False
+        if len(active_video_tracks) == 1 and not active_audio_tracks and not seq.multicam:
+            covering = [clip for clip in active_video_tracks[0].clips
+                        if not clip.hidden and clip.timeline_start <= start and clip.timeline_end >= stop]
+            if len(covering) == 1:
+                clip = covering[0]
+                if (not clip.effects and not clip.keyframes and not clip.nested and
+                        clip.freeze_at is None and clip.fade_in == Rational.of(0) and
+                        clip.fade_out == Rational.of(0) and clip.speed > Rational.of(0)):
+                    sliced = copy.deepcopy(clip)
+                    sliced.source_start = clip.source_start + (start - clip.timeline_start) * clip.speed
+                    sliced.timeline_start = Rational.of(0)
+                    sliced.timeline_end = stop - start
+                    track = copy.deepcopy(active_video_tracks[0])
+                    track.clips = [sliced]
+                    preview_project.sequence.tracks = [track]
+                    local = True
+
+        digest_project = preview_project
+        future_canvas_mode = None
+        if (not local and len(active_video_tracks) == 1 and not seq.multicam and
+                hasattr(self.render, "_clip_needs_canvas")):
+            # Only prior clips can contribute to an already-output window.
+            # A future clip can still switch the track's global compile mode.
+            future_canvas_mode = any(
+                not clip.hidden and self.render._clip_needs_canvas(clip)
+                for clip in active_video_tracks[0].clips)
+            digest_project = copy.deepcopy(preview_project)
+            for track in digest_project.sequence.tracks:
+                track.clips = [clip for clip in track.clips
+                               if clip.timeline_start < stop]
+        snapshot = digest_project.to_dict()
+        for key in ("revision", "name", "favorites", "recentEffects", "presets"):
+            snapshot.pop(key, None)
+        paths = {clip.asset_ref.source_path for track in digest_project.sequence.tracks
+                 for clip in track.clips if clip.asset_ref.source_path}
+        source_stats = []
+        for path in sorted(paths):
+            try:
+                stat = os.stat(path)
+                source_stats.append((path, stat.st_size, stat.st_mtime_ns))
+            except OSError:
+                source_stats.append((path, None, None))
+        digest = hashlib.sha256(json.dumps({
+            "rendererVersion": PREVIEW_RENDER_CACHE_VERSION,
+            "window": index, "local": local, "duration": duration,
+            "project": snapshot, "sourceStats": source_stats,
+            "futureCanvasMode": future_canvas_mode,
+        }, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:32]
+        with self._preview_lock:
+            cached = self._preview_cache.get(digest)
+            if cached and os.path.isfile(cached["path"]):
+                return cached["path"], digest, duration
+            cache_dir = os.path.join(self.media_dir, ".preview-cache")
+            os.makedirs(cache_dir, exist_ok=True)
+            out_path = os.path.join(cache_dir, f"window_{digest}.mp4")
+            if os.path.isfile(out_path) and os.path.getsize(out_path) > 0:
+                self._preview_cache[digest] = {"path": out_path, "duration": duration}
+                return out_path, digest, duration
+            temp_path = out_path + ".building.mp4"
+            with contextlib.suppress(OSError):
+                os.remove(temp_path)
+            try:
+                if local:
+                    self.render.render(preview_project, temp_path, quality="low", overwrite=True)
+                else:
+                    self.render.render_preview_window(preview_project, temp_path,
+                                                      float(start.to_fraction()), duration)
+                os.replace(temp_path, out_path)
+            except BaseException:
+                with contextlib.suppress(OSError):
+                    os.remove(temp_path)
+                raise
+            self._preview_cache[digest] = {"path": out_path, "duration": duration}
+            while len(self._preview_cache) > self._preview_cache_limit:
+                old_key, old = next(iter(self._preview_cache.items()))
+                if old_key == digest:
+                    break
+                self._preview_cache.pop(old_key, None)
+                with contextlib.suppress(OSError):
+                    os.remove(old["path"])
+            return out_path, digest, duration
+
     def save_asset(self, asset_id: str, filename: str, raw: bytes) -> str:
         """把上传的素材字节落到媒体目录，返回落盘绝对路径。
 
@@ -169,15 +295,20 @@ class HttpApi:
     def _infer_kind(name: str, has_video: bool, has_audio: bool) -> str:
         """由文件名扩展名与探测结果推断素材类别（与前端 inferKind 同口径）。"""
         lower = name.lower()
-        if ".png" in lower or ".jpg" in lower or ".jpeg" in lower or ".gif" in lower or \
-           ".webp" in lower or ".bmp" in lower or ".apng" in lower or ".avif" in lower:
+        if lower.endswith((".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp",
+                           ".svg", ".apng", ".avif", ".heic", ".tif", ".tiff")):
             return "image"
+        # 音频文件可能含封面图，ffprobe 会同时报告 video+audio。已知音频
+        # 扩展名必须先于流类型判断，否则会被错误记入视频素材与视频轨。
+        if lower.endswith((".mp3", ".wav", ".flac", ".aac", ".m4a", ".ogg",
+                           ".opus", ".wma", ".aif", ".aiff", ".alac")):
+            return "audio"
+        if lower.endswith((".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v",
+                           ".mpeg", ".mpg", ".wmv")):
+            return "video"
         if has_video:
             return "video"
         if has_audio:
-            return "audio"
-        if ".mp3" in lower or ".wav" in lower or ".flac" in lower or \
-           ".aac" in lower or ".m4a" in lower or ".ogg" in lower:
             return "audio"
         return "unknown"
 
@@ -245,6 +376,14 @@ class HttpApi:
 
     def handle(self, method: str, path: str, body: dict,
                *, inline_media: bool = True) -> tuple[int, dict]:
+        # JSON 允许顶层数组/字符串，但本 API 的每一条路由都使用命名字段。
+        # 在统一入口拒绝非对象请求，避免各分支 body.get(...) 变成 500，给外部
+        # Agent 一个可修复的参数错误。
+        if not isinstance(body, dict):
+            return 400, {"error": {
+                "code": "INVALID_ARGUMENT",
+                "message": "request body must be a JSON object",
+            }}
         try:
             return self._dispatch(method, path, body, inline_media=inline_media)
         except EditError as e:
@@ -263,7 +402,11 @@ class HttpApi:
 
     def _dispatch(self, method: str, path: str, body: dict,
                   *, inline_media: bool = True) -> tuple[int, dict]:
-        parts = [p for p in path.split("/") if p]
+        # BaseHTTPRequestHandler / urlparse 保留 percent-encoded path；若不在
+        # 这里按段解码，前端对中文、空格或 % 的 projectId 使用
+        # encodeURIComponent 后，后续 GET/commands 会找不到刚创建的工程。
+        # 按段解码而不是解码整条路径，避免 %2F 被误当成路由分隔符。
+        parts = [unquote(p) for p in path.split("/") if p]
         # parts 形如 ['api','v1','projects',...]
 
         # ---- 能力与效果发现（AC18：UI/CLI/HTTP/MCP 都能列出效果）----
@@ -512,24 +655,36 @@ class HttpApi:
                     and parts[4] == "edit-lock" and parts[5] == "release":
                 released = self.service.release_edit_lease(
                     pid, body.get("leaseId", ""))
-                return 200, {"locked": not released,
-                             "released": released}
+                # released=false 既可能是“别人的租约仍存在”，也可能只是本租约
+                # 已过期。必须回读真实状态，不能把失败释放一律报告成仍被锁定。
+                lease = self.service.get_edit_lease(pid)
+                return 200, {"locked": lease is not None,
+                             "lease": lease, "released": released}
 
             if method == "GET" and len(parts) == 4:
                 proj = self.service.get_project(pid)
                 return 200, proj.to_dict()
 
             if method == "GET" and len(parts) == 5 and parts[4] == "summary":
-                proj = self.service.get_project(pid)
-                return 200, {
-                    "projectId": proj.project_id,
-                    "revision": proj.revision,
-                    "trackCount": len(proj.sequence.tracks),
-                    "clipCount": sum(len(t.clips) for t in proj.sequence.tracks),
-                    "width": proj.sequence.width,
-                    "height": proj.sequence.height,
-                    "fps": proj.sequence.fps.to_json(),
-                }
+                return 200, self.service.project_summary(pid)
+
+            if method == "GET" and len(parts) == 5 and parts[4] == "lookup":
+                try:
+                    limit = int(body.get("limit", 10))
+                except (TypeError, ValueError):
+                    raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                    "limit must be 1..50") from None
+                raw_fields = body.get("fields")
+                fields = raw_fields.split(",") if isinstance(raw_fields, str) else None
+                return 200, self.service.project_lookup(
+                    pid, entity_type=body.get("entityType", ""),
+                    entity_id=body.get("entityId", ""),
+                    text_contains=body.get("textContains", ""),
+                    at_seconds=body.get("atSeconds"),
+                    from_seconds=body.get("fromSeconds"),
+                    to_seconds=body.get("toSeconds"),
+                    fields=fields, limit=limit,
+                )
 
             if method == "POST" and len(parts) == 5 and parts[4] == "commands":
                 cmd = self._make_command(pid, body)
@@ -567,13 +722,18 @@ class HttpApi:
                 proj = self.service.get_project(pid)
                 return 200, {"__text__": self.service.export_srt(pid)}
 
-            # SRT 导入（D05 F23）：POST /projects/{id}/captions/import，body 为 SRT 文本
-            if method == "POST" and len(parts) == 5 and parts[4] == "captions":
+            # SRT 导入：前端与公开约定使用 /captions/import；保留早期
+            # /captions 作为兼容别名，避免已接入的外部 Agent 突然失效。
+            is_srt_import = (
+                len(parts) == 6 and parts[4] == "captions" and parts[5] == "import"
+            ) or (len(parts) == 5 and parts[4] == "captions")
+            if method == "POST" and is_srt_import:
                 srt_text = body.get("srt", "")
                 if not srt_text.strip():
                     return 400, {"error": {"code": "INVALID_ARGUMENT",
                                            "message": "captions import requires 'srt' text"}}
-                actor = Actor("http", "srt-import")
+                actor = self._actor_from_body(
+                    body, default_kind="http", default_id="srt-import")
                 n = self.service.import_srt(
                     pid, srt_text, actor=actor,
                     edit_lease_id=body.get("editLeaseId", ""))
@@ -830,6 +990,30 @@ class HttpApi:
                     return 500, {"error": {"code": "PREVIEW_MEDIA_ERROR",
                                            "message": str(e)}}
 
+            if method == "GET" and len(parts) == 5 and parts[4] == "preview-window":
+                try:
+                    index = int(body.get("index", "0"))
+                except (TypeError, ValueError):
+                    raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                    "preview window index must be an integer") from None
+                from .render import RenderError as _RE
+                try:
+                    proj = self.service.get_project(pid)
+                    path, etag, duration = self._preview_window_file(proj, index)
+                    result = {"__video_path__": path, "__video_etag__": etag,
+                              "duration": duration,
+                              "windowStart": index * PREVIEW_WINDOW_SECONDS}
+                    if inline_media:
+                        with open(path, "rb") as video:
+                            result["__video__"] = video.read()
+                    return 200, result
+                except EditError:
+                    raise
+                except _RE as e:
+                    return 422, {"error": {"code": "PREVIEW_FAILED", "message": str(e)}}
+                except Exception as e:  # noqa: BLE001
+                    return 500, {"error": {"code": "PREVIEW_WINDOW_ERROR", "message": str(e)}}
+
         # ------------------------------------------------------------------
         # 资源包：打开 / 只读检查（J10 资源包 Web 化）
         # 这两类端点的路径前缀是 /api/v1/packages，与 /projects 平级，
@@ -940,14 +1124,26 @@ class HttpApi:
             ) from e
         return str(candidate)
 
+    @staticmethod
+    def _actor_from_body(body: dict, *, default_kind: str = "http",
+                         default_id: str = "client") -> Actor:
+        """读取审计身份；认证不依赖此字段，畸形输入退化为端点默认身份。"""
+        raw = body.get("actor")
+        raw = raw if isinstance(raw, dict) else {}
+        kind = raw.get("kind")
+        actor_id = raw.get("id")
+        return Actor(
+            kind=str(kind or default_kind)[:40],
+            id=str(actor_id or default_id)[:200],
+        )
+
     def _make_command(self, pid: str, body: dict) -> Command:
         kwargs: dict[str, Any] = {
             "type": body["type"],
             "payload": body.get("payload", {}),
             "project_id": pid,
             "expected_revision": body.get("expectedRevision", ""),
-            "actor": Actor(kind=body.get("actor", {}).get("kind", "http"),
-                           id=body.get("actor", {}).get("id", "client")),
+            "actor": self._actor_from_body(body),
             "edit_lease_id": body.get("editLeaseId", ""),
         }
         # 只有显式提供 commandId 才传，否则用默认生成的（幂等键由服务端或客户端提供）
@@ -968,6 +1164,14 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
         server_version = "CutVoke/0.1"
 
         # ---------------- 响应 ----------------
+
+        def _write_body(self, data: bytes) -> None:
+            # A browser may cancel an obsolete preview request while switching
+            # windows. The response is already gone; this is not a server fault.
+            try:
+                self.wfile.write(data)
+            except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+                pass
 
         def _cors_headers(self) -> dict[str, str]:
             """CORS 收敛：只回显回环来源，不再使用通配符 *（T31）。"""
@@ -993,7 +1197,7 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             for k, v in self._cors_headers().items():
                 self.send_header(k, v)
             self.end_headers()
-            self.wfile.write(payload)
+            self._write_body(payload)
 
         def _respond_bytes(self, status: int, data: bytes,
                            ctype: str = "application/octet-stream") -> None:
@@ -1003,7 +1207,7 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             for k, v in self._cors_headers().items():
                 self.send_header(k, v)
             self.end_headers()
-            self.wfile.write(data)
+            self._write_body(data)
 
         def _respond_video_file(self, path: str, etag: str = "") -> None:
             """按浏览器 Range 请求流式返回预览 MP4，不把整片读入内存。"""
@@ -1106,7 +1310,7 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                 self.send_header("Content-Type", ctype)
                 self.send_header("Content-Length", str(len(data)))
                 self.end_headers()
-                self.wfile.write(data)
+                self._write_body(data)
             except OSError:
                 self._respond(404, {"error": {"code": "NOT_FOUND", "message": "file not found"}})
 
@@ -1195,7 +1399,9 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             if "size" in qs:
                 body["size"] = qs["size"][0]
             for key in ("category", "effectId", "lang", "path", "w",
-                        "q", "appliesTo", "favoritesOnly", "recentOnly", "rev"):
+                        "q", "appliesTo", "favoritesOnly", "recentOnly", "rev",
+                        "entityType", "entityId", "textContains", "atSeconds",
+                        "fromSeconds", "toSeconds", "fields", "limit", "index"):
                 if key in qs:
                     body[key] = qs[key][0]
             if self._reject_if_unauthorized(qs):

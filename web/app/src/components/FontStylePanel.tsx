@@ -12,7 +12,7 @@ import {
   type FontStylePreset,
 } from "../lib/fontStyles";
 
-export function FontStylePanel({ captionId }: { captionId: string | null }) {
+export function FontStylePanel({ captionId, disabled = false }: { captionId: string | null; disabled?: boolean }) {
   const { state, dispatch } = useEditor();
 
   const applyPreset = (preset: FontStylePreset) => {
@@ -47,6 +47,7 @@ export function FontStylePanel({ captionId }: { captionId: string | null }) {
             onClick={() => applyPreset(p)}
             title={p.description}
             aria-label={`套用花字样式 ${p.name}`}
+            disabled={disabled}
           >
             <span
               className="font-style-card__preview"
@@ -71,6 +72,7 @@ export function FontStylePanel({ captionId }: { captionId: string | null }) {
           full
           onClick={clearStyle}
           aria-label="清除字幕样式"
+          disabled={disabled}
         >
           <Eraser size={13} />
           清除样式

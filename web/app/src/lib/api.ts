@@ -435,7 +435,7 @@ export async function applyTemplate(
 ): Promise<TemplateApplyResult> {
   return post<TemplateApplyResult>(
     `/projects/${encodeURIComponent(projectId)}/templates/apply`,
-    body,
+    { ...body, actor: body.actor ?? { kind: "human", id: "ui" } },
   );
 }
 

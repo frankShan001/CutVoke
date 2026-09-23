@@ -411,6 +411,9 @@ def _builtin_specs() -> list[EffectSpec]:
                         EFFECT_FX_CROP,
                         EFFECT_FX_TRAIL, EFFECT_FX_HSL, EFFECT_FX_COLORBALANCE,
                         EFFECT_FX_MASK, EFFECT_FX_SHAPE,
+                        EFFECT_FX_VIBRANCE, EFFECT_FX_COLORIZE, EFFECT_FX_DEBAND,
+                        EFFECT_FX_LENS, EFFECT_FX_CAS, EFFECT_FX_VFLIP,
+                        EFFECT_FX_FILM_GRAIN, EFFECT_FX_GRID,
                         EFFECT_FADE_WHITE, EFFECT_SLIDE_UP, EFFECT_SLIDE_DOWN,
                         EFFECT_WIPE_UP, EFFECT_WIPE_DOWN, EFFECT_DISSOLVE,
                         EFFECT_CIRCLE_OPEN, EFFECT_DIAGONAL, EFFECT_PIXELIZE,
@@ -436,16 +439,22 @@ def _builtin_specs() -> list[EffectSpec]:
                 "position": {
                     "type": "object",
                     "properties": {
-                        "x": {"type": "integer", "default": TRANSFORM_DEFAULTS["position"]["x"]},
-                        "y": {"type": "integer", "default": TRANSFORM_DEFAULTS["position"]["y"]},
+                        "x": {"type": "integer", "default": TRANSFORM_DEFAULTS["position"]["x"],
+                              "description": {"zh-CN": "画面左上角相对画布左边的水平位置（像素）"}},
+                        "y": {"type": "integer", "default": TRANSFORM_DEFAULTS["position"]["y"],
+                              "description": {"zh-CN": "画面左上角相对画布顶部的垂直位置（像素）"}},
                     },
+                    "description": {"zh-CN": "画面在画布中的位置（像素）"},
                     "additionalProperties": False,
                 },
                 "scale": {"type": "number", "exclusiveMinimum": 0.0,
-                          "default": TRANSFORM_DEFAULTS["scale"]},
-                "rotation": {"type": "number", "default": TRANSFORM_DEFAULTS["rotation"]},
+                          "default": TRANSFORM_DEFAULTS["scale"],
+                          "description": {"zh-CN": "画面缩放倍率；1 为原始大小"}},
+                "rotation": {"type": "number", "default": TRANSFORM_DEFAULTS["rotation"],
+                             "description": {"zh-CN": "画面旋转角度（度）"}},
                 "opacity": {"type": "number", "minimum": 0.0, "maximum": 1.0,
                             "default": TRANSFORM_DEFAULTS["opacity"],
+                            "description": {"zh-CN": "画面不透明度；0 完全透明，1 完全不透明"},
                             "x-cutvoke-animatable": True},
             },
             "additionalProperties": False,
@@ -471,11 +480,14 @@ def _builtin_specs() -> list[EffectSpec]:
             "type": "object",
             "properties": {
                 "brightness": {"type": "number", "minimum": -1.0, "maximum": 1.0,
-                               "default": COLOR_DEFAULTS["brightness"]},
+                               "default": COLOR_DEFAULTS["brightness"],
+                               "description": {"zh-CN": "亮度；负值变暗，正值变亮"}},
                 "contrast": {"type": "number", "minimum": 0.0, "maximum": 3.0,
-                             "default": COLOR_DEFAULTS["contrast"]},
+                             "default": COLOR_DEFAULTS["contrast"],
+                             "description": {"zh-CN": "对比度；1 为原始对比度"}},
                 "saturation": {"type": "number", "minimum": 0.0, "maximum": 3.0,
-                               "default": COLOR_DEFAULTS["saturation"]},
+                               "default": COLOR_DEFAULTS["saturation"],
+                               "description": {"zh-CN": "饱和度；0 为黑白，1 为原始饱和度"}},
             },
             "additionalProperties": False,
         },
@@ -889,7 +901,8 @@ def _builtin_specs() -> list[EffectSpec]:
                          "default": 1.0, "unit": "s",
                          "description": {"zh-CN": "动画时长（秒）"}},
             "easing": {"type": "string", "enum": ["linear", "ease-in", "ease-out"],
-                       "default": "ease-out"},
+                       "default": "ease-out",
+                       "description": {"zh-CN": "速度曲线：匀速、缓入或缓出"}},
         }
         if extra_props:
             props.update(extra_props)
@@ -1491,6 +1504,82 @@ def _builtin_specs() -> list[EffectSpec]:
         applies_to=("video",),
     )
 
+    # P1 实用画面效果：每个滤镜都由 render.py 的 _FX_STEPS 实际编译，
+    # 并在参数 schema 层限制取值，让 UI 与外部 Agent 拿到的是可直接执行的能力。
+    fx_vibrance = _fx("自然增色", "Vibrance", EFFECT_FX_VIBRANCE, "vibrance",
+                      "优先提升低饱和区域，避免整体饱和度一刀切，适合日常素材提气色。",
+                      ["增色", "鲜艳", "自然", "饱和度", "vibrance"],
+                      {"intensity": {"type": "number", "minimum": -2.0, "maximum": 2.0,
+                                     "default": 0.35,
+                                     "description": {"zh-CN": "活力强度（负值降低色彩）"}}})
+    fx_colorize = _fx("单色染色", "Colorize", EFFECT_FX_COLORIZE, "colorize",
+                      "把画面压进指定色相，适合统一氛围或制作标题背景。",
+                      ["染色", "色相", "氛围", "单色", "colorize"],
+                      {"hue": {"type": "number", "minimum": 0.0, "maximum": 360.0,
+                                 "default": 210.0, "unit": "°",
+                                 "description": {"zh-CN": "目标色相"}},
+                       "saturation": {"type": "number", "minimum": 0.0, "maximum": 1.0,
+                                      "default": 0.55,
+                                      "description": {"zh-CN": "染色饱和度"}},
+                       "lightness": {"type": "number", "minimum": 0.0, "maximum": 1.0,
+                                     "default": 0.5,
+                                     "description": {"zh-CN": "染色明度"}},
+                       "mix": {"type": "number", "minimum": 0.0, "maximum": 1.0,
+                               "default": 0.7,
+                               "description": {"zh-CN": "保留原画面亮度比例"}}})
+    fx_deband = _fx("色带修复", "Deband", EFFECT_FX_DEBAND, "deband",
+                    "减轻天空、渐变背景或压缩视频中的条带，保持画面更平滑。",
+                    ["色带", "渐变", "修复", "平滑", "deband"],
+                    {"threshold": {"type": "number", "minimum": 0.00003, "maximum": 0.5,
+                                    "default": 0.02,
+                                    "description": {"zh-CN": "去色带阈值"}},
+                     "range": {"type": "integer", "minimum": 1, "maximum": 64,
+                               "default": 16,
+                               "description": {"zh-CN": "采样范围（像素）"}},
+                     "blur": {"type": "boolean", "default": True,
+                              "description": {"zh-CN": "是否平滑处理边缘"}}})
+    fx_lens = _fx("镜头畸变", "Lens distortion", EFFECT_FX_LENS, "lens",
+                  "模拟桶形或枕形镜头畸变，为主观镜头与转场前后增加空间感。",
+                  ["镜头", "畸变", "鱼眼", "桶形", "枕形", "lens"],
+                  {"k1": {"type": "number", "minimum": -1.0, "maximum": 1.0,
+                            "default": -0.15,
+                            "description": {"zh-CN": "一阶畸变（负值桶形、正值枕形）"}},
+                   "k2": {"type": "number", "minimum": -1.0, "maximum": 1.0,
+                            "default": 0.0,
+                            "description": {"zh-CN": "二阶畸变微调"}}})
+    fx_cas = _fx("细节增强", "Detail enhance", EFFECT_FX_CAS, "cas",
+                 "按局部对比度自适应锐化，比普通锐化更适合纹理与边缘细节。",
+                 ["细节", "清晰", "自适应锐化", "增强", "cas"],
+                 {"strength": {"type": "number", "minimum": 0.0, "maximum": 1.0,
+                               "default": 0.45,
+                               "description": {"zh-CN": "细节增强强度"}}})
+    fx_vflip = _fx("垂直翻转", "Vertical flip", EFFECT_FX_VFLIP, "vflip",
+                   "上下翻转画面，可用于倒影、镜面与风格化构图。",
+                   ["翻转", "上下", "倒影", "镜面", "vflip"])
+    fx_film_grain = _fx("胶片颗粒", "Film grain", EFFECT_FX_FILM_GRAIN, "filmgrain",
+                        "以固定随机种子添加可复现的细颗粒；默认强度轻，需要时再用。",
+                        ["胶片", "颗粒", "噪点", "质感", "film", "grain"],
+                        {"strength": {"type": "integer", "minimum": 0, "maximum": 100,
+                                      "default": 8,
+                                      "description": {"zh-CN": "颗粒强度（0 为无效果）"}},
+                         "temporal": {"type": "boolean", "default": True,
+                                      "description": {"zh-CN": "是否让颗粒逐帧变化"}}})
+    fx_grid = _fx("网格叠加", "Grid overlay", EFFECT_FX_GRID, "grid",
+                  "在画面上叠加半透明网格，用于科技感、构图参考或动态信息背景。",
+                  ["网格", "科技", "构图", "辅助线", "grid"],
+                  {"cell": {"type": "integer", "minimum": 16, "maximum": 512,
+                              "default": 96,
+                              "description": {"zh-CN": "网格单元大小（像素）"}},
+                   "thickness": {"type": "integer", "minimum": 1, "maximum": 12,
+                                 "default": 1,
+                                 "description": {"zh-CN": "线条粗细（像素）"}},
+                   "opacity": {"type": "number", "minimum": 0.05, "maximum": 1.0,
+                               "default": 0.25,
+                               "description": {"zh-CN": "网格不透明度"}},
+                   "color": {"type": "string", "enum": ["white", "black", "#0A84FF", "#FFD60A"],
+                             "default": "white",
+                             "description": {"zh-CN": "网格颜色"}}})
+
     # ---- 文字图层轨（J04）：text 轨片段的内容标记效果 ----
     # 纯描述性（不入画面滤镜链）：渲染层把带此效果的 text 轨 clip 按
     # clip 时间与参数转成 Caption 进 ASS 字幕轨道（字体/颜色/描边/对齐）。
@@ -1551,21 +1640,47 @@ def _builtin_specs() -> list[EffectSpec]:
              fx_loudnorm, fx_crop,
              fx_equalizer, fx_compressor, fx_flicker,
              fx_pan, fx_trail, fx_hsl, fx_colorbalance, fx_mask, fx_shape,
+             fx_vibrance, fx_colorize, fx_deband, fx_lens, fx_cas, fx_vflip,
+             fx_film_grain, fx_grid,
              fx_text]
 
-    # 统一补齐元数据：动画与画面特效同时适用于图片和视频（1.5 六类能力里
-    # 「图片动画」「视频动画」「图片特效」「视频特效」共用同一批效果）；
-    # 转场只适用于视频（它是两段之间的关系，图片没有「相邻段」概念）。
+    # 统一补齐元数据。图片与视频都能进入视觉渲染链，因此画面变换、调色、
+    # 动画、视觉特效和转场均可用于这两类片段；转场仍由时间线层保证它发生在
+    # 同一视频轨道的相邻片段之间。音频滤镜可用于音频片段，也可用于带原声的
+    # 视频片段，但不能误加到图片上；文字图层只用于 text 轨片段。
     from dataclasses import replace as _replace
+    audio_effect_ids = {
+        EFFECT_FX_LOUDNORM,
+        EFFECT_FX_EQ,
+        EFFECT_FX_COMPRESSOR,
+        EFFECT_FX_PAN,
+    }
     out: list[EffectSpec] = []
     for s in specs:
-        if s.category in (CATEGORY_ANIMATION, CATEGORY_FX) and \
-                s.id != EFFECT_FX_LOUDNORM:
-            # 画面特效 + 动画默认同时适用于图片与视频；loudnorm 是音频滤镜，
-            # 仅作用于视频片段的嵌入音轨（图片无音频），保留其声明的 video 适用。
+        if s.category == CATEGORY_ANIMATION:
+            # 早期动画与组合动画没有统一走 _anim，集中补齐同名参数的说明，
+            # 保证 Web 属性面板和 Agent 能力清单都能解释每一个字段。
+            properties = s.parameters.get("properties", {})
+            descriptions = {
+                "duration": "动画持续时长（秒）",
+                "easing": "速度曲线：匀速、缓入或缓出",
+                "toScale": "动画结束时的画面缩放倍率",
+            }
+            missing = {name: description for name, description in descriptions.items()
+                       if name in properties and not properties[name].get("description")}
+            if missing:
+                updated = {**properties}
+                for name, description in missing.items():
+                    updated[name] = {**properties[name],
+                                     "description": {"zh-CN": description}}
+                s = _replace(s, parameters={**s.parameters, "properties": updated})
+        if s.id in audio_effect_ids:
+            s = _replace(s, applies_to=("audio", "video"))
+        elif s.id == EFFECT_TEXT:
+            s = _replace(s, applies_to=("text",))
+        elif s.category in (CATEGORY_TRANSFORM, CATEGORY_COLOR,
+                            CATEGORY_ANIMATION, CATEGORY_FX, CATEGORY_TRANSITION):
             s = _replace(s, applies_to=("image", "video"))
-        elif s.category == CATEGORY_TRANSITION:
-            s = _replace(s, applies_to=("video",))
         out.append(s)
     return out
 

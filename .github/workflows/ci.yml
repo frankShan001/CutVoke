@@ -49,6 +49,7 @@ jobs:
           python -m compileall -q src
           python -c "import cutvoke; from cutvoke.core import model, protocol, rational, render, service, store"
           python scripts/check_layering.py
+          python -m unittest discover -s tests -v
 
       - name: Build Web editor
         working-directory: web/app
@@ -63,3 +64,29 @@ jobs:
           python -m build --wheel --outdir dist
           python -m pip install --force-reinstall --no-deps dist/*.whl
           cutvoke doctor --json
+          python -c "from pathlib import Path; import cutvoke; assert (Path(cutvoke.__file__).parent / 'web' / 'index.html').is_file()"
+
+  browser:
+    name: Browser editing workflow
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/app/package-lock.json
+      - name: Install renderer and project package
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install -e .
+      - name: Install browser and run editor scenarios
+        working-directory: web/app
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run test:e2e

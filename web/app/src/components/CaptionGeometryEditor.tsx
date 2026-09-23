@@ -1,7 +1,7 @@
 /** 字幕几何精确编辑（H01 画布的补充）：x/y 归一化 0~1、scale 0.1~5、rotation -180~180。
     数值输入提交到 caption.update；越界由后端拒绝（runCommand 反馈错误），不前端夹紧。 */
 
-import { useEffect, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Move, Maximize2, RotateCw } from "lucide-react";
 import { Field } from "./ui";
 import { useEditor } from "../store/editor";
@@ -24,15 +24,25 @@ function toForm(c: Caption): Form {
   };
 }
 
-export function CaptionGeometryEditor({ caption }: { caption: Caption }) {
+export function CaptionGeometryEditor({ caption, disabled = false }: { caption: Caption; disabled?: boolean }) {
   const { state, dispatch } = useEditor();
   const [form, setForm] = useState<Form>(() => toForm(caption));
+  const captionSnapshot = useRef<string | null>(null);
 
   useEffect(() => {
+    // 只在选中字幕或它的服务端几何实际变化时重置。这样不相关刷新不会打断输入，
+    // 但 Agent 改了当前字幕时，旧几何草稿不能在解锁后覆盖远端结果。
+    const snapshot = JSON.stringify({
+      id: caption.id,
+      x: caption.x ?? 0.5,
+      y: caption.y ?? 0.5,
+      scale: caption.scale ?? 1,
+      rotation: caption.rotation ?? 0,
+    });
+    if (captionSnapshot.current === snapshot) return;
     setForm(toForm(caption));
-    // 仅在选中的字幕切换时同步，不覆盖正在输入的本地值
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caption.id]);
+    captionSnapshot.current = snapshot;
+  }, [caption]);
 
   const commit = () => {
     const x = Number(form.x);
@@ -43,13 +53,12 @@ export function CaptionGeometryEditor({ caption }: { caption: Caption }) {
       dispatch({ type: "STATUS_SET", severity: "warn", text: "几何值须为数字" });
       return;
     }
-    void updateCaption(dispatch, state, {
-      captionId: caption.id,
-      x,
-      y,
-      scale,
-      rotation,
-    });
+    const update: Parameters<typeof updateCaption>[2] = { captionId: caption.id };
+    if (x !== (caption.x ?? 0.5)) update.x = x;
+    if (y !== (caption.y ?? 0.5)) update.y = y;
+    if (scale !== (caption.scale ?? 1)) update.scale = scale;
+    if (rotation !== (caption.rotation ?? 0)) update.rotation = rotation;
+    if (Object.keys(update).length > 1) void updateCaption(dispatch, state, update);
   };
 
   const onEnter = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -77,6 +86,7 @@ export function CaptionGeometryEditor({ caption }: { caption: Caption }) {
             max="1"
             value={form.x}
             aria-label="字幕X坐标"
+            disabled={disabled}
             onChange={set("x")}
             onBlur={commit}
             onKeyDown={onEnter}
@@ -91,6 +101,7 @@ export function CaptionGeometryEditor({ caption }: { caption: Caption }) {
             max="1"
             value={form.y}
             aria-label="字幕Y坐标"
+            disabled={disabled}
             onChange={set("y")}
             onBlur={commit}
             onKeyDown={onEnter}
@@ -105,6 +116,7 @@ export function CaptionGeometryEditor({ caption }: { caption: Caption }) {
             max="5"
             value={form.scale}
             aria-label="字幕缩放"
+            disabled={disabled}
             onChange={set("scale")}
             onBlur={commit}
             onKeyDown={onEnter}
@@ -119,6 +131,7 @@ export function CaptionGeometryEditor({ caption }: { caption: Caption }) {
             max="180"
             value={form.rotation}
             aria-label="字幕旋转"
+            disabled={disabled}
             onChange={set("rotation")}
             onBlur={commit}
             onKeyDown={onEnter}

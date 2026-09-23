@@ -81,7 +81,7 @@ export async function updateEffect(
     effectId: input.effectId,
     params: input.params,
   });
-  if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: "已更新文字位置" });
+  if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: "已更新效果参数" });
   return res;
 }
 

@@ -84,6 +84,9 @@
   background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
 }
 .player-controls__time {
   font-family: var(--font-mono);
@@ -91,6 +94,8 @@
   color: var(--text);
   min-width: 96px;
   text-align: center;
+  flex: none;
+  white-space: nowrap;
 }
 
 /* ---- 共享小件 ---- */
@@ -106,6 +111,7 @@
   color: var(--text-dim);
   padding: 2px;
   display: inline-flex;
+  flex: none;
   cursor: pointer;
 }
 .player__iconbtn:hover {
@@ -125,6 +131,7 @@
   height: 28px;
   border-radius: 50%;
   display: inline-flex;
+  flex: none;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -135,6 +142,39 @@
 .player__play:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+@media (max-width: 1180px) {
+  .player-controls {
+    gap: 2px;
+    padding: 5px 6px;
+  }
+  .player__iconbtn {
+    padding: 1px;
+  }
+  .player-controls__time {
+    min-width: 0;
+    font-size: 10px;
+  }
+  .player__zoom-val {
+    min-width: 28px;
+    font-size: 10px;
+  }
+  .player__ratio-val {
+    min-width: 24px;
+  }
+  .player__zoom-bar {
+    gap: 1px;
+  }
+}
+
+@media (max-width: 480px) {
+  .player-controls {
+    overflow-x: hidden;
+  }
+  .player-controls__loop,
+  .player-controls__view {
+    display: none;
+  }
 }
 
 /* ---- 画布字幕叠层（H01）：拖拽 / 缩放 / 旋转 ---- */
@@ -155,7 +195,9 @@
   line-height: 1.2;
   max-width: 82%;
   padding: 2px 8px;
-  border: 1px dashed var(--border-focus);
+  /* 默认是成片预览，不把所有字幕都画成可编辑的虚线框；当前拖拽字幕才由
+     .caption-overlay__box--active 显示编辑边界。 */
+  border: 1px dashed transparent;
   border-radius: var(--radius-sm);
   color: var(--on-video);
   text-shadow: 0 1px 3px var(--scrim-strong);

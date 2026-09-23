@@ -108,6 +108,15 @@ EFFECT_FX_HSL = "cutvoke.fx.hsl"              # HSL 调节（huesaturation，O02
 EFFECT_FX_COLORBALANCE = "cutvoke.fx.colorbalance"  # 色彩平衡（colorbalance，O02）
 EFFECT_FX_MASK = "cutvoke.fx.mask"            # 几何蒙版（geq 矩形/椭圆，N02）
 EFFECT_FX_SHAPE = "cutvoke.fx.shape"          # 形状标注（drawbox 矩形 / geq 椭圆，R02）
+# P1 实用效果补充：每个 ID 都有 render.py 中经本机 ffmpeg 验证的真实滤镜桥接。
+EFFECT_FX_VIBRANCE = "cutvoke.fx.vibrance"    # 自然增色（vibrance）
+EFFECT_FX_COLORIZE = "cutvoke.fx.colorize"    # 单色染色（colorize）
+EFFECT_FX_DEBAND = "cutvoke.fx.deband"        # 色带修复（deband）
+EFFECT_FX_LENS = "cutvoke.fx.lens"            # 镜头畸变（lenscorrection）
+EFFECT_FX_CAS = "cutvoke.fx.cas"              # 自适应锐化（cas）
+EFFECT_FX_VFLIP = "cutvoke.fx.vflip"          # 垂直翻转（vflip）
+EFFECT_FX_FILM_GRAIN = "cutvoke.fx.filmgrain" # 可控胶片颗粒（noise，固定种子）
+EFFECT_FX_GRID = "cutvoke.fx.grid"            # 网格叠加（drawgrid）
 
 # 文字图层轨（J04）：text 轨片段上的内容标记效果。参数含文本内容与样式，
 # 渲染层把带此效果的 text 轨 clip 转成 Caption 进 ASS（不入画面滤镜链）。
@@ -204,6 +213,14 @@ ALL_FX = (
     EFFECT_FX_COLORBALANCE,
     EFFECT_FX_MASK,
     EFFECT_FX_SHAPE,
+    EFFECT_FX_VIBRANCE,
+    EFFECT_FX_COLORIZE,
+    EFFECT_FX_DEBAND,
+    EFFECT_FX_LENS,
+    EFFECT_FX_CAS,
+    EFFECT_FX_VFLIP,
+    EFFECT_FX_FILM_GRAIN,
+    EFFECT_FX_GRID,
     # 备注：EFFECT_FX_LOUDNORM 为音频滤镜，不计入画面特效 ALL_FX，
     # 仅在音频渲染链生效（见 render.py 的 _AUDIO_FX_STEPS）。
 )
@@ -460,7 +477,7 @@ class Caption:
     # 文字几何（H01 画布文字编辑）：x/y 为画布归一化比例（0~1，默认 0.5=水平/垂直居中），
     # scale 缩放（0.1~5，默认 1）；rotation 旋转角（-180~180，默认 0）。
     # 默认值 = 旧渲染行为（居中、原始字号、不旋转），旧工程反序列化零变化，
-    # 渲染端默认不发 ASS 几何标签，保证既有成片逐字节不变。
+    # 渲染端始终把归一化坐标映射为 ASS \pos，保证导出与网页叠层一致。
     x: float = 0.5
     y: float = 0.5
     scale: float = 1.0

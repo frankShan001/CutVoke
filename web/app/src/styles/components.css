@@ -21,10 +21,12 @@
   border-bottom: 1px solid var(--border);
 }
 .topbar__title {
+  flex: none;
   font-size: 15px;
   font-weight: 600;
   margin: 0;
   letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 .topbar__tag {
   font-size: 11px;
@@ -38,11 +40,13 @@
   flex: 1;
 }
 .topbar__sync {
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
   color: var(--text-dim);
+  white-space: nowrap;
 }
 .topbar__sync .dot {
   width: 8px;
@@ -56,6 +60,45 @@
 }
 .topbar__sync .dot--down {
   background: var(--err);
+}
+@media (max-width: 1280px) {
+  .topbar {
+    gap: 5px;
+    padding: 0 8px;
+  }
+  .topbar__title {
+    font-size: 13px;
+  }
+  .topbar__tag,
+  .topbar__btn-label,
+  .topbar__sync-label,
+  .topbar__sync-time,
+  .tool-btn__label {
+    display: none;
+  }
+  .toolbar-tools {
+    margin-left: 0;
+  }
+  .topbar .cv-btn--sm {
+    flex: none;
+    padding-inline: 7px;
+  }
+  .topbar__sync {
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) var(--bg-2);
+    touch-action: pan-x;
+  }
+  .topbar__spacer {
+    flex: 0 0 8px;
+  }
 }
 
 /* ---- 面板 ---- */

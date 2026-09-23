@@ -739,6 +739,19 @@ class ProjectStore:
     # 保存：原子写（事务）
     # ------------------------------------------------------------------
 
+    def _next_project_updated_at(self) -> float:
+        """Return a strictly increasing project timestamp inside a write transaction.
+
+        On Windows, consecutive ``time.time()`` calls can share the same clock
+        tick. Keep list ordering deterministic even when that happens.
+        """
+        row = self._conn.execute(
+            "SELECT MAX(updated_at) FROM projects"
+        ).fetchone()
+        previous = float(row[0]) if row and row[0] is not None else None
+        now = time.time()
+        return max(now, previous + 1e-6) if previous is not None else now
+
     @_synchronized
     def save(self, project: Project) -> None:
         """原子保存工程快照。
@@ -764,6 +777,7 @@ class ProjectStore:
         json.loads(payload)
 
         with self._transaction():  # 显式事务：异常 ROLLBACK，成功 COMMIT
+            updated_at = self._next_project_updated_at()
             self._conn.execute(
                 """
                 INSERT INTO projects
@@ -785,7 +799,7 @@ class ProjectStore:
                     sequence_json,
                     payload,
                     project.name,
-                    time.time(),
+                    updated_at,
                 ),
             )
 
@@ -876,9 +890,10 @@ class ProjectStore:
         ).fetchone() is None:
             return False
         with self._transaction():
+            updated_at = self._next_project_updated_at()
             self._conn.execute(
                 "UPDATE projects SET name=?, updated_at=? WHERE project_id=?",
-                (name, time.time(), project_id),
+                (name, updated_at, project_id),
             )
         return True
 

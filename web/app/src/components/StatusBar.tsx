@@ -26,8 +26,8 @@ export function StatusBar() {
 
   return (
     <footer className="statusbar">
-      <span className="statusbar__rev">
-        当前工程 <b>{name}</b>
+      <span className="statusbar__rev statusbar__project" title={`当前工程：${name}`}>
+        <span className="statusbar__project-label">当前工程 </span><b>{name}</b>
       </span>
       <span className={`statusbar__save statusbar__save--${state.syncState}`}>
         {saveLabel(state.syncState, state.lastSync)}
@@ -35,7 +35,7 @@ export function StatusBar() {
       <span className="statusbar__rev">
         轨道 <b>{tracks.length}</b> · 片段 <b>{clipCount}</b>
       </span>
-      <span className={`statusbar__msg statusbar__msg--${state.status.severity}`}>
+      <span className={`statusbar__msg statusbar__msg--${state.status.severity}`} title={state.status.text}>
         {state.status.text}
       </span>
       <details className="statusbar__details">

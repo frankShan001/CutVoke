@@ -7,54 +7,98 @@ import { showError } from "./editor";
 import { ApiFailure } from "../lib/api";
 import { getLatestState, runCommand, type ActionResult } from "./actions";
 import { probeMedia } from "../lib/mediaApi";
-import { secsToRational } from "../lib/rational";
+import { rationalToSecs, secsToRational } from "../lib/rational";
 import type { Rational, KeyframeInterpolation } from "../types/api";
 
-/** 素材拖入时间线：探测真实时长（失败按 2s），在当前 track 时间点插入 clip。 */
+/** Dragging library media onto a clip means before/after the whole clip. */
+export function resolveInsertStart(state: EditorState, trackId: string, requestedSeconds: number): Rational {
+  const at = Math.max(0, requestedSeconds);
+  const track = state.project?.sequence.tracks.find((item) => item.id === trackId);
+  const occupied = track?.clips.find((clip) => {
+    const start = rationalToSecs(clip.timelineStart);
+    const end = rationalToSecs(clip.timelineEnd);
+    return at > start + 1e-6 && at < end - 1e-6;
+  });
+  if (occupied) {
+    const start = rationalToSecs(occupied.timelineStart);
+    const end = rationalToSecs(occupied.timelineEnd);
+    return at < (start + end) / 2 ? occupied.timelineStart : occupied.timelineEnd;
+  }
+  const fps = state.project?.sequence.fps;
+  const rate = fps ? Number(fps.num) / Number(fps.den) : 30;
+  if (Number.isFinite(rate) && rate > 0) {
+    return { num: String(Math.round(at * rate) * Number(fps?.den || 1)), den: String(Number(fps?.num || 30)) };
+  }
+  return secsToRational(at);
+}
+
+function addRational(left: Rational, right: Rational): Rational {
+  return {
+    num: String(BigInt(left.num) * BigInt(right.den) + BigInt(right.num) * BigInt(left.den)),
+    den: String(BigInt(left.den) * BigInt(right.den)),
+  };
+}
+
+/** 素材拖入时间线：探测真实时长（失败按 2s），始终在完整片段边界插入。 */
 export async function insertClipFromDrop(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { trackId: string; sourcePath: string; timelineStartSecs: number },
+  input: { trackId: string; sourcePath: string; timelineStartSecs: number; createTrackKind?: "video" | "audio" },
 ): Promise<ActionResult> {
-  const start = Math.max(0, Math.round(input.timelineStartSecs * 10) / 10);
   let dur = 2;
   const probe = await probeMedia(input.sourcePath);
   if (probe.kind === "ok" && probe.data.duration > 0) {
-    dur = Math.round(probe.data.duration * 10) / 10;
+    dur = probe.data.duration;
     dispatch({ type: "STATUS_SET", severity: "ok", text: `已探测素材 ${dur.toFixed(1)}s` });
   } else {
     dispatch({ type: "STATUS_SET", severity: "warn", text: "未能探测素材时长，按 2s 导入（可稍后 trim）" });
   }
+  const current = getLatestState() || state;
+  const start = resolveInsertStart(current, input.trackId, input.timelineStartSecs);
+  const fps = current.project?.sequence.fps;
+  const fpsNum = Number(fps?.num || 30);
+  const fpsDen = Number(fps?.den || 1);
+  const frames = Math.max(1, Math.floor(dur * fpsNum / fpsDen + 1e-6));
+  const duration: Rational = { num: String(frames * fpsDen), den: String(fpsNum) };
   const clipId = `clip_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
-  return runCommand(dispatch, state, "clip.insert", {
+  const result = await runCommand(dispatch, current, "clip.insert", {
     clipId,
     trackId: input.trackId,
+    ...(input.createTrackKind ? { createTrackKind: input.createTrackKind } : {}),
     sourcePath: input.sourcePath,
     sourceStart: secsToRational(0),
-    timelineStart: secsToRational(start),
-    timelineEnd: secsToRational(start + dur),
+    timelineStart: start,
+    timelineEnd: addRational(start, duration),
+    // 后续片段整体右移；落点先对齐边界，因此不会切开鼠标下的片段。
+    mode: "insert",
   });
+  if (result.ok) {
+    const changes = result.command?.changedEntities || [];
+    const moved = changes.filter((change) => change.type === "clip" && change.change === "moved").length;
+    const details = [
+      moved ? `${moved} 个后续片段已后移` : "",
+    ].filter(Boolean);
+    dispatch({
+      type: "STATUS_SET",
+      severity: "ok",
+      text: details.length ? `已插入素材，${details.join("，")}` : "已插入素材",
+    });
+  }
+  return result;
 }
 
-/** 素材拖到轨道区空白 → 自动新建视频轨 + 插入该素材（剪映自动建轨交互）。 */
+/** 素材拖到轨道区空白 → 按素材类型自动新建轨道并插入（剪映自动建轨交互）。 */
 export async function insertClipAutoTrack(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { sourcePath: string },
+  input: { sourcePath: string; trackKind: "video" | "audio" },
 ): Promise<ActionResult> {
   const trackId = `track_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
-  const st = state;
-  // 建轨
-  const r = await runCommand(dispatch, st, "track.add", { trackId, kind: "video" });
-  if (!r.ok) return r;
-  // 把建轨后的新 revision 交给第二步，避免必然的一次 409 往返
-  const fresh = getLatestState();
-  const st2 = fresh && fresh.currentId === st.currentId ? fresh : { ...st, revision: r.command?.revision ?? st.revision };
-  // 插入素材到新轨起点 0
-  return insertClipFromDrop(dispatch, st2, {
+  return insertClipFromDrop(dispatch, state, {
     trackId,
     sourcePath: input.sourcePath,
     timelineStartSecs: 0,
+    createTrackKind: input.trackKind,
   });
 }
 
@@ -64,15 +108,29 @@ export async function insertClipAutoTrack(
 export async function moveClip(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { clipId: string; timelineStart?: Rational; trackId?: string },
+  input: {
+    clipId: string;
+    timelineStart?: Rational;
+    trackId?: string;
+    mode?: "reorder";
+    anchorClipId?: string;
+    anchorPosition?: "before" | "after";
+  },
 ): Promise<ActionResult> {
   const payload: Record<string, unknown> = { clipId: input.clipId };
   if (input.timelineStart) payload.timelineStart = input.timelineStart;
   if (input.trackId) payload.trackId = input.trackId;
+  if (input.mode) payload.mode = input.mode;
+  if (input.anchorClipId) payload.anchorClipId = input.anchorClipId;
+  if (input.anchorPosition) payload.anchorPosition = input.anchorPosition;
   const res = await runCommand(dispatch, state, "clip.move", payload);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已移动片段" });
+    if (input.mode === "reorder") {
+      dispatch({ type: "STATUS_SET", severity: "ok", text: "已调整片段顺序" });
+    } else {
+      dispatch({ type: "STATUS_SET", severity: "ok", text: "已移动片段" });
+    }
   }
   return res;
 }
@@ -191,7 +249,18 @@ export async function updateCaption(
   const res = await runCommand(dispatch, state, "caption.update", payload);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已更新字幕样式" });
+    const changedContent = input.text !== undefined || input.start !== undefined || input.end !== undefined;
+    const changedGeometry = input.x !== undefined || input.y !== undefined
+      || input.scale !== undefined || input.rotation !== undefined;
+    dispatch({
+      type: "STATUS_SET",
+      severity: "ok",
+      text: changedContent
+        ? "已更新字幕文字与时间"
+        : changedGeometry
+          ? "已更新字幕位置与变换"
+          : "已更新字幕样式",
+    });
   }
   return res;
 }
@@ -425,7 +494,7 @@ export async function removeEffect(
   return res;
 }
 
-/** 应用转场：换用新类型前先移除旧转场（后端 effect.add 是追加，避免叠两个转场）。 */
+/** 原子替换转场：一次提交，失败时原转场不变。 */
 export async function applyTransition(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
@@ -433,19 +502,15 @@ export async function applyTransition(
     clipId: string;
     effectId: string;
     duration: number;
-    hasExistingTransition: boolean;
   },
 ): Promise<ActionResult> {
-  if (input.hasExistingTransition) {
-    // 先移除旧转场（任意类型）
-    const old = await removeTransitionAny(dispatch, state, input.clipId);
-    if (!old.ok) return old;
-  }
-  return addEffect(dispatch, state, {
+  const result = await runCommand(dispatch, state, "effect.setTransition", {
     clipId: input.clipId,
     effectId: input.effectId,
     params: { duration: input.duration },
   });
+  if (result.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: "已应用转场" });
+  return result;
 }
 
 /** 应用动画（1.5-A / 1.5-B）：入场 / 出场 / 循环共 6 个内置动画。
@@ -469,90 +534,41 @@ export async function applyAnimation(
     params?: Record<string, unknown>;
   },
 ): Promise<ActionResult> {
-  const old = await removeAnimationAny(dispatch, state, input.clipId);
-  if (!old.ok) return old;
-  if (!input.animationId) return { ok: true };
+  const current = findClip(state, input.clipId);
+  const existing = current?.effects?.filter((effect) => String(effect.effectId).startsWith("cutvoke.anim.")) || [];
+  if (!input.animationId && existing.length === 0) return { ok: true };
   const id = input.animationId;
-  if (input.params) {
-    return addEffect(dispatch, state, {
-      clipId: input.clipId,
-      effectId: id,
-      params: { ...input.params },
-    });
-  }
-  const params: Record<string, unknown> = {};
-  if (id === "cutvoke.anim.fadeIn") {
+  const params: Record<string, unknown> = input.params ? { ...input.params } : {};
+  if (!input.params && id === "cutvoke.anim.fadeIn") {
     params.duration = input.duration;
     params.easing = "linear";
-  } else if (id === "cutvoke.anim.zoomIn") {
+  } else if (!input.params && id === "cutvoke.anim.zoomIn") {
     params.duration = input.duration;
     params.easing = "ease-out";
     params.fromScale = input.scale ?? 0.8;
-  } else if (id === "cutvoke.anim.slideIn") {
+  } else if (!input.params && id === "cutvoke.anim.slideIn") {
     params.duration = input.duration;
     params.easing = "ease-out";
-  } else if (id === "cutvoke.anim.fadeOut") {
+  } else if (!input.params && id === "cutvoke.anim.fadeOut") {
     params.duration = input.duration;
     params.easing = "linear";
-  } else if (id === "cutvoke.anim.zoomOut") {
+  } else if (!input.params && id === "cutvoke.anim.zoomOut") {
     params.duration = input.duration;
     params.easing = "ease-out";
     params.toScale = input.scale ?? 1.0;
-  } else if (id === "cutvoke.anim.breathe") {
+  } else if (!input.params && id === "cutvoke.anim.breathe") {
     params.amplitude = input.amplitude ?? 0.05;
     params.period = input.period ?? 2;
   }
-  return addEffect(dispatch, state, {
+  if (existing.length === 1 && existing[0].effectId === id
+    && JSON.stringify(existing[0].params || {}) === JSON.stringify(params)) return { ok: true };
+  const result = await runCommand(dispatch, state, "effect.setAnimation", {
     clipId: input.clipId,
     effectId: id,
     params,
   });
-}
-
-/** 移除片段上所有入场动画（遍历效果栈删所有 cutvoke.anim.*）。无动画时静默成功。 */
-async function removeAnimationAny(
-  dispatch: Dispatch<EditorAction>,
-  state: EditorState,
-  clipId: string,
-): Promise<ActionResult> {
-  const clip = findClip(state, clipId);
-  const fxList = clip?.effects || [];
-  const animIds = new Set(
-    fxList
-      .map((e) => String(e.effectId))
-      .filter((id) => id.startsWith("cutvoke.anim.")),
-  );
-  if (animIds.size === 0) return { ok: true };
-  for (const effectId of animIds) {
-    const r = await runCommand(dispatch, state, "effect.remove", { clipId, effectId });
-    if (!r.ok) return r;
-  }
-  dispatch({ type: "UNDO_SET", blocked: false });
-  dispatch({ type: "STATUS_SET", severity: "ok", text: "已移除旧动画" });
-  return { ok: true };
-}
-
-/** 移除片段上所有转场（遍历效果栈删所有 cutvoke.transition.*）。无转场时静默成功。 */
-async function removeTransitionAny(
-  dispatch: Dispatch<EditorAction>,
-  state: EditorState,
-  clipId: string,
-): Promise<ActionResult> {
-  const clip = findClip(state, clipId);
-  const fxList = clip?.effects || [];
-  const transitionIds = new Set(
-    fxList
-      .map((e) => String(e.effectId))
-      .filter((id) => id.startsWith("cutvoke.transition.")),
-  );
-  if (transitionIds.size === 0) return { ok: true };
-  for (const effectId of transitionIds) {
-    const r = await runCommand(dispatch, state, "effect.remove", { clipId, effectId });
-    if (!r.ok) return r;
-  }
-  dispatch({ type: "UNDO_SET", blocked: false });
-  dispatch({ type: "STATUS_SET", severity: "ok", text: "已移除旧转场" });
-  return { ok: true };
+  if (result.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: id ? "已应用动画" : "已移除动画" });
+  return result;
 }
 
 function findClip(state: EditorState, clipId: string) {

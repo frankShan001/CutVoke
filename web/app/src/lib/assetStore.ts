@@ -15,11 +15,14 @@ export interface SessionAsset {
 
 /** 根据扩展名/探测结果推断类型。 */
 export function inferKind(name: string, hasVideo: boolean, hasAudio: boolean): SessionAsset["kind"] {
-  const lower = name.toLowerCase();
-  if (/\.(png|jpe?g|gif|webp|bmp)/.test(lower)) return "image";
+  const lower = name.split(/[?#]/, 1)[0].toLowerCase();
+  // 文件扩展名优先于流探测：MP3/M4A 常带封面图，ffprobe 会同时报告
+  // video+audio；它仍然应该进入音频轨，而不是被封面图误判为视频。
+  if (/\.(png|jpe?g|gif|webp|bmp|svg|apng|avif|heic|tiff?)$/.test(lower)) return "image";
+  if (/\.(mp3|wav|flac|aac|m4a|ogg|opus|wma|aiff?|alac)$/.test(lower)) return "audio";
+  if (/\.(mp4|mov|mkv|webm|avi|m4v|mpeg|mpg|wmv)$/.test(lower)) return "video";
   if (hasVideo) return "video";
   if (hasAudio) return "audio";
-  if (/\.(mp3|wav|flac|aac|m4a|ogg)/.test(lower)) return "audio";
   return "unknown";
 }
 
@@ -42,7 +45,13 @@ export function addSessionAsset(a: SessionAsset): void {
  */
 export function hydrateAssets(serverAssets: SessionAsset[]): void {
   const existing = new Set(assets.map((a) => a.path));
-  const incoming = serverAssets.filter((a) => !existing.has(a.path));
+  const incoming = serverAssets
+    .filter((a) => !existing.has(a.path))
+    .map((a) => ({
+      ...a,
+      // 修正旧资产账本中“带封面的音频被记成视频”的历史分类。
+      kind: inferKind(a.path || a.name, a.kind === "video", a.kind === "audio"),
+    }));
   if (incoming.length === 0) return;
   assets = [...incoming, ...assets];
   emit();

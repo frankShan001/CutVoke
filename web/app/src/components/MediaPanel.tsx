@@ -1,6 +1,6 @@
 /** 素材库面板（左区）：文件导入 + 素材列表（会话资产 + 工程内源文件），可拖到时间线。
     导入：POST /api/v1/assets?name= → {assetId, path} → probe 时长 → 入素材库（独立资产库）。
-    拖放协议：dataTransfer text/cutvoke-media = JSON {sourcePath, assetId?}。 */
+    拖放协议：dataTransfer text/cutvoke-media = JSON {sourcePath, assetId?, kind}。 */
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Film, FileVideo, Music, Image as ImageIcon, Upload, Loader2, Search, Replace } from "lucide-react";
@@ -8,18 +8,19 @@ import { Panel, Button } from "./ui";
 import { useEditor } from "../store/editor";
 import { sourceBasename } from "../lib/media";
 import { getSessionAssets, subscribeAssets, hydrateAssets } from "../lib/assetStore";
-import { uploadFiles } from "../lib/importMedia";
+import { mediaFitsTrack, uploadFiles } from "../lib/importMedia";
 import { listAssets, assetThumbnailUrl } from "../lib/mediaApi";
 import { swapClipAsset } from "../store/clipEdit";
 
 interface ClipAsset {
   sourcePath: string;
   name: string;
-  kind: "video" | "audio" | "unknown";
+  kind: "video" | "audio" | "image" | "unknown";
   duration: number | null;
 }
 
 type KindFilter = "all" | "video" | "audio" | "image";
+type SourceFilter = "mine" | "builtin";
 const KIND_FILTERS: { value: KindFilter; label: string }[] = [
   { value: "all", label: "全部" },
   { value: "video", label: "视频" },
@@ -29,11 +30,13 @@ const KIND_FILTERS: { value: KindFilter; label: string }[] = [
 
 export function MediaPanel() {
   const { state, dispatch } = useEditor();
+  const editLocked = Boolean(state.editLock);
   const [dragging, setDragging] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   const [swappingPath, setSwappingPath] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [kindFilter, setKindFilter] = useState<KindFilter>("all");
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>("mine");
   const [, force] = useState(0); // 监听会话资产变化
   const fileRef = useRef<HTMLInputElement | null>(null);
 
@@ -63,12 +66,18 @@ export function MediaPanel() {
 
   // 全局「打开文件导入」事件（时间线空态大按钮等触发）
   useEffect(() => {
-    const open = () => fileRef.current?.click();
+    const open = () => {
+      if (editLocked) return;
+      fileRef.current?.click();
+    };
     window.addEventListener("cutvoke:open-import", open);
     return () => window.removeEventListener("cutvoke:open-import", open);
-  }, []);
+  }, [editLocked]);
 
-  const openImport = () => fileRef.current?.click();
+  const openImport = () => {
+    if (editLocked) return;
+    fileRef.current?.click();
+  };
 
   // 工程 clips 提取的源文件（复用已有素材）
   const clipAssets = useMemo<ClipAsset[]>(() => {
@@ -78,7 +87,7 @@ export function MediaPanel() {
       for (const c of t.clips || []) {
         const p = c.assetRef?.sourcePath;
         if (!p) continue;
-        const kind = t.kind === "audio" ? "audio" : "video";
+        const kind = inferAssetKind(p, t.kind === "audio" ? "audio" : "video");
         if (!map.has(p)) {
           map.set(p, { sourcePath: p, name: sourceBasename(p), kind, duration: null });
         }
@@ -88,17 +97,32 @@ export function MediaPanel() {
   }, [state.project]);
 
   const sessionAssets = getSessionAssets();
-  const assets: { path: string; name: string; kind: string; duration: number | null; assetId?: string }[] = useMemo(() => {
+  const assets: { path: string; name: string; kind: ClipAsset["kind"]; duration: number | null; assetId?: string; builtIn: boolean }[] = useMemo(() => {
     // 会话资产优先；工程 clips 里未导入过的源文件也展示
     const seen = new Set(sessionAssets.map((a) => a.path));
     const extra = clipAssets
       .filter((a) => !seen.has(a.sourcePath))
-      .map((a) => ({ path: a.sourcePath, name: a.name, kind: a.kind, duration: a.duration }));
+      .map((a) => ({
+        path: a.sourcePath,
+        name: a.name,
+        kind: a.kind,
+        duration: a.duration,
+        builtIn: isBuiltInAsset(a.name, a.sourcePath),
+      }));
     return [
-      ...sessionAssets.map((a) => ({ path: a.path, name: a.name, kind: a.kind, duration: a.duration, assetId: a.assetId })),
+      ...sessionAssets.map((a) => ({
+        path: a.path,
+        name: a.name,
+        kind: a.kind,
+        duration: a.duration,
+        assetId: a.assetId,
+        builtIn: isBuiltInAsset(a.name, a.path),
+      })),
       ...extra,
     ];
   }, [sessionAssets, clipAssets]);
+  const mineCount = assets.filter((a) => !a.builtIn).length;
+  const builtInCount = assets.length - mineCount;
 
   // 已用判定：素材的 path / assetId 出现在任意轨道 clip 的 assetRef 中（D02）。
   const usedRefs = useMemo(() => {
@@ -122,27 +146,50 @@ export function MediaPanel() {
         used: usedRefs.paths.has(a.path) || (a.assetId ? usedRefs.ids.has(a.assetId) : false),
       }))
       .filter((a) => {
+        if (a.builtIn !== (sourceFilter === "builtin")) return false;
         if (q && !a.name.toLowerCase().includes(q)) return false;
         if (kindFilter !== "all" && a.kind !== kindFilter) return false;
         return true;
       });
-  }, [assets, query, kindFilter, usedRefs]);
+  }, [assets, query, kindFilter, sourceFilter, usedRefs]);
 
   const handleFiles = async (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
+    if (editLocked) {
+      dispatch({ type: "STATUS_SET", severity: "warn", text: "Agent 正在编辑，素材导入已暂停" });
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
     setImporting(true);
-    const ok = await uploadFiles(
-      Array.from(fileList),
-      () => {},
-      (name, message) => dispatch({ type: "STATUS_SET", severity: "warn", text: `导入 ${name} 失败：${message}` }),
-    );
-    setImporting(false);
-    if (ok > 0) dispatch({ type: "STATUS_SET", severity: "ok", text: `已导入 ${ok} 个素材` });
-    if (fileRef.current) fileRef.current.value = "";
+    try {
+      const ok = await uploadFiles(
+        Array.from(fileList),
+        () => {},
+        (name, message) => dispatch({ type: "STATUS_SET", severity: "warn", text: `导入 ${name} 失败：${message}` }),
+      );
+      if (ok > 0) dispatch({ type: "STATUS_SET", severity: "ok", text: `已导入 ${ok} 个素材` });
+    } catch (error) {
+      dispatch({
+        type: "STATUS_SET",
+        severity: "err",
+        text: `素材导入失败：${error instanceof Error ? error.message : String(error)}`,
+      });
+    } finally {
+      setImporting(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
   };
 
-  const startDrag = (e: React.DragEvent, a: { sourcePath: string; assetId?: string }) => {
-    e.dataTransfer.setData("text/cutvoke-media", JSON.stringify({ sourcePath: a.sourcePath, assetId: a.assetId }));
+  const startDrag = (e: React.DragEvent, a: { sourcePath: string; assetId?: string; kind: ClipAsset["kind"] }) => {
+    if (editLocked) {
+      e.preventDefault();
+      return;
+    }
+    e.dataTransfer.setData("text/cutvoke-media", JSON.stringify({
+      sourcePath: a.sourcePath,
+      assetId: a.assetId,
+      kind: a.kind,
+    }));
     e.dataTransfer.effectAllowed = "copy";
     setDragging(a.sourcePath);
   };
@@ -150,27 +197,45 @@ export function MediaPanel() {
 
   // 选中片段 id（时间线选中才能换图套版）
   const selectedClipId = state.selection?.clipId;
+  const selectedTrack = state.project?.sequence.tracks.find((track) => track.id === state.selection?.trackId);
+  const selectedTrackLocked = Boolean(selectedTrack?.locked);
+
+  const swapDisabledReason = (kind: ClipAsset["kind"]): string | null => {
+    if (editLocked) return "Agent 正在编辑，暂不可替换素材";
+    if (!selectedClipId || !selectedTrack) return "请先在时间线选中片段";
+    if (selectedTrackLocked) return "所选轨道已锁定，解锁后才能替换素材";
+    if (!mediaFitsTrack(kind, selectedTrack.kind)) {
+      return selectedTrack.kind === "audio"
+        ? "音频轨只能替换为音频素材"
+        : "视频轨不能替换为音频素材";
+    }
+    return null;
+  };
 
   // 换图套版：对当前选中片段调 asset.swap，仅替换素材引用，保留时长/动画/效果。
-  const handleSwap = async (a: { path: string; assetId?: string }) => {
-    if (!selectedClipId || swappingPath) return;
+  const handleSwap = async (a: { path: string; assetId?: string; kind: ClipAsset["kind"] }) => {
+    const blocked = swapDisabledReason(a.kind);
+    if (blocked || !selectedClipId || swappingPath) return;
     setSwappingPath(a.path);
-    await swapClipAsset(dispatch, state, {
-      clipIds: [selectedClipId],
-      sourcePath: a.path,
-      assetId: a.assetId,
-    });
-    setSwappingPath(null);
+    try {
+      await swapClipAsset(dispatch, state, {
+        clipIds: [selectedClipId],
+        sourcePath: a.path,
+        assetId: a.assetId,
+      });
+    } finally {
+      setSwappingPath(null);
+    }
   };
 
   return (
-    <Panel title="我的素材" subtitle={`${assets.length} 个文件`}>
+    <Panel title="素材库" subtitle={`${mineCount} 个素材 · ${builtInCount} 个内置资源`}>
       <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
         <Button
           variant="primary"
           full
           onClick={openImport}
-          disabled={importing}
+          disabled={importing || editLocked}
           style={{ height: 30 }}
           aria-label="导入素材"
         >
@@ -185,6 +250,26 @@ export function MediaPanel() {
           style={{ display: "none" }}
           onChange={(e) => handleFiles(e.target.files)}
         />
+      </div>
+      <div className="media-sources" role="tablist" aria-label="素材来源">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={sourceFilter === "mine"}
+          className={sourceFilter === "mine" ? "media-source--active" : ""}
+          onClick={() => setSourceFilter("mine")}
+        >
+          我的素材 <span>{mineCount}</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={sourceFilter === "builtin"}
+          className={sourceFilter === "builtin" ? "media-source--active" : ""}
+          onClick={() => setSourceFilter("builtin")}
+        >
+          内置资源 <span>{builtInCount}</span>
+        </button>
       </div>
       <div className="media-filter">
         <label className="media-filter__search">
@@ -217,20 +302,26 @@ export function MediaPanel() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="media-empty">
-          <p className="cv-empty">没有匹配的素材。试试调整搜索词或类型筛选。</p>
+          <p className="cv-empty">
+            {sourceFilter === "mine" && mineCount === 0
+              ? "还没有导入自己的素材。内置背景和贴纸可在“内置资源”中查看。"
+              : "没有匹配的素材。试试调整搜索词或类型筛选。"}
+          </p>
         </div>
       ) : (
         <div className="media-panel">
-          {filtered.map((a) => (
+          {filtered.map((a) => {
+            const disabledReason = swapDisabledReason(a.kind);
+            return (
             <div
               key={a.path + a.name}
               className={`media-item ${dragging === a.path ? "media-item--dragging" : ""}`}
-              draggable
-              onDragStart={(e) => startDrag(e, { sourcePath: a.path, assetId: a.assetId })}
+              draggable={!editLocked}
+              onDragStart={(e) => startDrag(e, { sourcePath: a.path, assetId: a.assetId, kind: a.kind })}
               onDragEnd={endDrag}
-              title={a.path}
+              title={`${a.name}\n${a.path}${disabledReason && selectedClipId ? `\n${disabledReason}` : ""}`}
             >
-              {a.assetId ? (
+              {a.assetId && (a.kind === "image" || a.kind === "video") ? (
                 <img
                   className="media-item__thumb"
                   src={assetThumbnailUrl(a.assetId)}
@@ -249,25 +340,19 @@ export function MediaPanel() {
               ) : (
                 <Film size={14} className="cv-ic--video" />
               )}
-              <span className="media-item__name">{a.name}</span>
-              <span className="media-item__meta">
-                {a.duration ? `${a.duration.toFixed(1)}s` : a.kind}
-              </span>
-              {a.used ? (
-                <span className="media-badge" aria-label="已用">已用</span>
-              ) : (
-                <span className="media-badge media-badge--unused" aria-label="未用">未用</span>
-              )}
+              <div className="media-item__details">
+                <span className="media-item__name">{a.name}</span>
+                <span className="media-item__meta">
+                  {a.duration ? `${a.duration.toFixed(1)}s` : assetKindLabel(a.kind)}
+                </span>
+              </div>
+              {a.used ? <span className="media-badge" aria-label="已用">已用</span> : null}
               <button
                 type="button"
-                className={`media-item__swap ${!selectedClipId ? "media-item__swap--disabled" : ""}`}
-                disabled={!selectedClipId || swappingPath === a.path}
-                aria-label="替换选中片段"
-                title={
-                  selectedClipId
-                    ? "换图不换布局：保留时长/动画/效果，仅替换素材画面"
-                    : "请先在时间线选中片段"
-                }
+                className={`media-item__swap ${disabledReason ? "media-item__swap--disabled" : ""}`}
+                disabled={Boolean(disabledReason) || swappingPath === a.path}
+                aria-label={disabledReason || "替换选中片段"}
+                title={disabledReason || "替换素材，保留片段的时长与效果"}
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={() => handleSwap(a)}
               >
@@ -278,12 +363,33 @@ export function MediaPanel() {
                 )}
               </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
       <p className="cv-hint" style={{ marginTop: 8 }}>
-        拖拽素材到时间线某条轨道即可导入（自动探测时长，失败按 2s）。
+        拖到轨道上即可插入，后续片段会顺延（时长识别失败按 2 秒）；拖到下方空白可自动建轨。
       </p>
     </Panel>
   );
+}
+
+function inferAssetKind(path: string, fallback: ClipAsset["kind"]): ClipAsset["kind"] {
+  const cleanPath = path.split(/[?#]/, 1)[0].toLowerCase();
+  const ext = cleanPath.split(".").pop() || "";
+  if (["png", "jpg", "jpeg", "gif", "webp", "bmp", "svg", "avif"].includes(ext)) return "image";
+  if (["mp3", "wav", "flac", "aac", "m4a", "ogg", "opus"].includes(ext)) return "audio";
+  if (["mp4", "mov", "m4v", "webm", "mkv", "avi", "mpeg", "mpg"].includes(ext)) return "video";
+  return fallback;
+}
+
+function isBuiltInAsset(name: string, path: string): boolean {
+  return name.startsWith("内置·") || /(?:^|[\\/])cutvoke[\\/]assets[\\/]/i.test(path);
+}
+
+function assetKindLabel(kind: string): string {
+  if (kind === "image") return "图片";
+  if (kind === "audio") return "音频";
+  if (kind === "video") return "视频";
+  return "未知类型";
 }

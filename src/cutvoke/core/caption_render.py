@@ -21,6 +21,7 @@ Windows 关键陷阱：subtitles / ass 滤镜传 Windows 绝对路径（含 C:�
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import tempfile
 from fractions import Fraction
@@ -143,19 +144,31 @@ def _ass_escape(text: str) -> str:
     return text
 
 
-def _ass_color_hex_to_bgr(hex_color: str) -> str:
-    """把 #RRGGBB 转成 ASS 的 &HAABBGGRR 格式（BGR 顺序 + 00 alpha）。
+def _ass_color_hex_to_bgr(color: str) -> str:
+    """把 #RRGGBB 或 rgba(...) 转成 ASS 的 &HAABBGGRR 颜色。
 
-    非法输入回退为白色 #ffffff。
+    ASS 的 alpha 与 CSS 相反（00=不透明）。花字预设可用半透明 CSS 背景，
+    导出和网页预览必须保留同一透明度；非法输入仍回退为不透明白色。
     """
-    c = (hex_color or "#ffffff").strip().lstrip("#")
-    if len(c) != 6:
-        c = "ffffff"
-    try:
-        r, g, b = c[0:2], c[2:4], c[4:6]
-        return f"&H00{b}{g}{r}".upper()
-    except Exception:
+    value = (color or "#ffffff").strip()
+    rgba = re.fullmatch(
+        r"rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})"
+        r"(?:\s*,\s*(0(?:\.\d+)?|1(?:\.0+)?))?\s*\)",
+        value,
+        flags=re.IGNORECASE,
+    )
+    if rgba:
+        r, g, b = (int(rgba.group(i)) for i in range(1, 4))
+        if all(0 <= channel <= 255 for channel in (r, g, b)):
+            alpha = float(rgba.group(4) or "1")
+            if 0 <= alpha <= 1:
+                return f"&H{round((1 - alpha) * 255):02X}{b:02X}{g:02X}{r:02X}"
+
+    c = value.lstrip("#")
+    if not re.fullmatch(r"[0-9a-fA-F]{6}", c):
         return "&H00FFFFFF"
+    r, g, b = c[0:2], c[2:4], c[4:6]
+    return f"&H00{b}{g}{r}".upper()
 
 
 def build_ass(captions: List[Caption], width: int, height: int,
@@ -201,7 +214,8 @@ def build_ass(captions: List[Caption], width: int, height: int,
             outline = _ass_color_hex_to_bgr(cap.strokeColor or "#000000")
             back = _ass_color_hex_to_bgr(cap.background or "#000000")
             bold = "-1" if cap.bold else "0"
-            outline_w = cap.strokeWidth if cap.strokeWidth else 2
+            # 0 是用户明确选择的“无描边”，不能回退为默认 2px。
+            outline_w = max(0, cap.strokeWidth)
             align_map = {"left": "1", "center": "2", "right": "3"}
             align = align_map.get(cap.align, "2")
             # 有 background 时用 BackColour + BorderStyle=3（不透明背景盒）
@@ -209,8 +223,8 @@ def build_ass(captions: List[Caption], width: int, height: int,
             lines.append(
                 f"Style: {name},{font_family},{fs},"
                 f"{primary},&H000000FF,{outline},{back},"
-                f"{bold},0,0,0,100,100,0,0,{border_style},{outline_w},1,"
-                f"{align},20,20,40,{cap.shadow}")
+                f"{bold},0,0,0,100,100,0,0,{border_style},{outline_w},{cap.shadow},"
+                f"{align},20,20,40,1")
         return style_names[key]
 
     lines.append("")
@@ -227,24 +241,17 @@ def build_ass(captions: List[Caption], width: int, height: int,
         # 文字动画（1.5-C）：\fad(淡入ms,淡出ms) 参数化入出场
         if cap.animIn or cap.animOut:
             text = f"{{\\fad({cap.animIn},{cap.animOut})}}{text}"
-        # 文字几何（H01 画布编辑）：仅非默认才发标签——默认值（x=0.5/y=0.5
-        # 居中、scale=1、rotation=0）不发任何标签，保证旧工程逐字节不变。
-        # \pos 用 PlayRes 像素（x/y 为归一化比例 → 居中=0.5 映射到 50% 处，
-        # 对齐已由 Style 的 Alignment 处理，\pos 是文本锚点坐标）；
+        # 文字几何（H01 画布编辑）：x/y 在数据模型中始终是归一化画布锚点，
+        # 默认 0.5/0.5 也必须显式落在画布中心，才能与无需重编码的网页叠层一致。
         # \fscx\fscy 为百分比缩放，\frz 为旋转角。
-        has_geo = False
-        if (cap.x != 0.5 or cap.y != 0.5):
-            px = round(cap.x * width)
-            py = round(cap.y * height)
-            text = f"{{\\pos({px},{py})}}{text}"
-            has_geo = True
+        px = round(cap.x * width)
+        py = round(cap.y * height)
+        text = f"{{\\pos({px},{py})}}{text}"
         if cap.scale != 1.0:
             pct = round(cap.scale * 100)
             text = f"{{\\fscx{pct}\\fscy{pct}}}{text}"
-            has_geo = True
         if cap.rotation != 0.0:
             text = f"{{\\frz({cap.rotation:.2f})}}{text}"
-            has_geo = True
         lines.append(f"Dialogue: 0,{start},{end},{style},,0,0,0,,{text}")
     lines.append("")
     return "\n".join(lines)

@@ -27,6 +27,18 @@ export type Severity = "idle" | "ok" | "warn" | "err";
 export interface Selection {
   trackId: string;
   clipId?: string;
+  /** 时间线上的效果对象；存在时 clipId 仍指向效果所属片段。 */
+  effectId?: string;
+  effectKind?: "transition" | "effect";
+}
+
+/** 未保存的字幕草稿只用于本地画布预览，不进入工程或版本历史。 */
+export interface CaptionDraftPreview {
+  projectId: string;
+  captionId: string;
+  text: string;
+  start: Rational;
+  end: Rational;
 }
 
 export type ToolMode = "select" | "cut";
@@ -70,6 +82,8 @@ export interface EditorState {
   templateOpen: boolean;
   /** 当前 Agent 编辑租约；存在时整个工作区只读但仍可观察工程变化。 */
   editLock: EditLease | null;
+  /** CaptionPanel 的临时画布预览态；保存/放弃/锁定后清空。 */
+  captionDraftPreview: CaptionDraftPreview | null;
 }
 
 export type EditorAction =
@@ -95,7 +109,8 @@ export type EditorAction =
   | { type: "EXPORT_OPEN_SET"; open: boolean }
   | { type: "AGENT_PANEL_OPEN_SET"; open: boolean }
   | { type: "TEMPLATE_OPEN_SET"; open: boolean }
-  | { type: "EDIT_LOCK_SET"; lease: EditLease | null };
+  | { type: "EDIT_LOCK_SET"; lease: EditLease | null }
+  | { type: "CAPTION_DRAFT_PREVIEW_SET"; preview: CaptionDraftPreview | null };
 
 const initialState: EditorState = {
   projects: [],
@@ -120,7 +135,37 @@ const initialState: EditorState = {
   agentPanelOpen: false,
   templateOpen: false,
   editLock: null,
+  captionDraftPreview: null,
 };
+
+function sameLeaseIdentity(current: EditLease | null, next: EditLease | null): boolean {
+  if (current === next) return true;
+  if (!current || !next) return false;
+  // expiresAt may move forward on each heartbeat, but the UI only cares whether
+  // the active lease/owner changed. Avoid rerendering the whole editor per poll.
+  return (
+    current.projectId === next.projectId &&
+    current.leaseId === next.leaseId &&
+    current.owner === next.owner
+  );
+}
+
+function reconcileSelection(project: Project, selection: Selection | null): Selection | null {
+  if (!selection) return null;
+  if (!selection.clipId) {
+    return project.sequence.tracks.some((track) => track.id === selection.trackId)
+      ? selection : null;
+  }
+  for (const track of project.sequence.tracks) {
+    const clip = track.clips.find((item) => item.id === selection.clipId);
+    if (!clip) continue;
+    if (selection.effectId && !clip.effects?.some((effect) => effect.effectId === selection.effectId)) {
+      return null;
+    }
+    return track.id === selection.trackId ? selection : { ...selection, trackId: track.id };
+  }
+  return null;
+}
 
 function reducer(state: EditorState, action: EditorAction): EditorState {
   switch (action.type) {
@@ -131,13 +176,16 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
         ...state,
         currentId: action.projectId,
         projectName: action.name !== undefined ? action.name : state.projectName,
+        selection: null,
         editLock: null,
+        captionDraftPreview: null,
       };
     case "PROJECT_LOADED":
       return {
         ...state,
         project: action.project,
         revision: action.project.revision,
+        selection: reconcileSelection(action.project, state.selection),
         lastSync: Date.now(),
         syncState: "saved",
       };
@@ -178,7 +226,14 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
     case "TEMPLATE_OPEN_SET":
       return { ...state, templateOpen: action.open };
     case "EDIT_LOCK_SET":
-      return { ...state, editLock: action.lease };
+      if (sameLeaseIdentity(state.editLock, action.lease)) return state;
+      return {
+        ...state,
+        editLock: action.lease,
+        captionDraftPreview: action.lease ? null : state.captionDraftPreview,
+      };
+    case "CAPTION_DRAFT_PREVIEW_SET":
+      return { ...state, captionDraftPreview: action.preview };
     case "RESET_SELECTION_FOR":
       if (!action.trackId) {
         return { ...state, selection: null };

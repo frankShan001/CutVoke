@@ -5,7 +5,12 @@ import { Volume2 } from "lucide-react";
 import { useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
 import { setClipAudio } from "../../store/clipEdit";
-import type { Clip } from "../../types/api";
+import { rationalToSecs } from "../../lib/rational";
+import type { Clip, Rational } from "../../types/api";
+
+function valueOrDefault(value: Rational | undefined, fallback: number): number {
+  return value ? rationalToSecs(value) : fallback;
+}
 
 export function AudioSection({ clip }: { clip: Clip }) {
   const { state, dispatch } = useEditor();
@@ -14,9 +19,9 @@ export function AudioSection({ clip }: { clip: Clip }) {
   const [fadeOutSec, setFadeOutSec] = useState(0);
 
   useEffect(() => {
-    setVolPct(Math.round((clip.volume ?? 1) * 100));
-    setFadeInSec(clip.fadeIn ?? 0);
-    setFadeOutSec(clip.fadeOut ?? 0);
+    setVolPct(Math.round(valueOrDefault(clip.volume, 1) * 100));
+    setFadeInSec(valueOrDefault(clip.fadeIn, 0));
+    setFadeOutSec(valueOrDefault(clip.fadeOut, 0));
   }, [clip.id, clip.volume, clip.fadeIn, clip.fadeOut]);
 
   // 提交音频：合并发送 volume/fadeIn/fadeOut（拖动/输入只改本地态，这里才发命令）

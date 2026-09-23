@@ -5,19 +5,20 @@ import { useRef } from "react";
 import { useEditor } from "../../store/editor";
 import { toPx } from "./util";
 
-const LABEL_W = 190; // 与 --track-label-w 一致
-
-export function Playhead({ pxPerSec }: { pxPerSec: number }) {
+export function Playhead({ pxPerSec, maxSecs }: { pxPerSec: number; maxSecs: number }) {
   const { state, dispatch } = useEditor();
   const dragging = useRef(false);
 
-  const left = LABEL_W + toPx(state.playhead, pxPerSec);
+  const playheadSecs = Math.max(0, Math.min(maxSecs, state.playhead));
+  const left = `calc(var(--timeline-content-inset-x, 12px) + var(--track-label-w) + var(--space-2) + ${toPx(playheadSecs, pxPerSec)}px)`;
 
   const moveTo = (clientX: number, target: HTMLElement) => {
     const content = target.closest(".timeline__content") as HTMLElement | null;
     if (!content) return;
-    const rect = content.getBoundingClientRect();
-    const secs = Math.max(0, (clientX - rect.left - LABEL_W) / pxPerSec);
+    const ruler = content.querySelector(".timeline-ruler");
+    if (!ruler) return;
+    const rect = ruler.getBoundingClientRect();
+    const secs = Math.max(0, Math.min(maxSecs, (clientX - rect.left) / pxPerSec));
     dispatch({ type: "PLAYHEAD_SET", t: secs });
   };
 

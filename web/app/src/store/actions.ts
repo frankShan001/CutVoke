@@ -63,7 +63,6 @@ export async function refreshProject(
     const project = await getProject(projectId);
     dispatch({ type: "PROJECT_LOADED", project });
     dispatch({ type: "REVISION_SET", revision: project.revision });
-    dispatch({ type: "RESET_SELECTION_FOR", trackId: null });
     dispatch({ type: "SVC_UP", up: true });
     dispatch({ type: "STATUS_SET", severity: "ok", text: "就绪" });
     return true;
@@ -175,6 +174,20 @@ export async function runCommand(
     };
     if (autoShow) showError(dispatch, err);
     return { ok: false, error: err as ApiFailure };
+  }
+  // 覆盖层会拦截正常的人机操作；这里再守住所有复用此入口的命令。
+  // 后端租约仍是权威校验，这一层只避免人工在已知 Agent 窗口内制造失败请求。
+  if (state.editLock) {
+    const err = new ApiFailure({
+      status: 423,
+      code: "EDIT_LOCKED",
+      message: "Agent " + state.editLock.owner + " 正在编辑，页面暂时只读",
+      retryable: true,
+    });
+    if (autoShow) {
+      dispatch({ type: "STATUS_SET", severity: "warn", text: err.message });
+    }
+    return { ok: false, error: err };
   }
   const projectId = state.currentId;
   const doPost = async (expected: string) =>

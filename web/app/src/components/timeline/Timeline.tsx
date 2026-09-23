@@ -2,21 +2,26 @@
     持有共享拖拽系统（useTimelineDrag），拖动片段时渲染幽灵条块覆盖所有轨道。
     不做全局快捷键（Web 环境与浏览器冲突）；缩放走工具条按钮。 */
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ZoomIn, ZoomOut, Plus } from "lucide-react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Maximize2, ZoomIn, ZoomOut, Plus } from "lucide-react";
 import { useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
 import { insertClipAutoTrack, duplicateClip } from "../../store/clipEdit";
-import { uploadFiles } from "../../lib/importMedia";
+import { trackKindForMedia, uploadFiles } from "../../lib/importMedia";
+import { inferKind, type SessionAsset } from "../../lib/assetStore";
 import { Ruler } from "./Ruler";
 import { TrackRow } from "./TrackRow";
+import { EffectTrackRow } from "./EffectTrackRow";
 import { Playhead } from "./Playhead";
 import { useTimelineDrag } from "./useTimelineDrag";
-import { niceMajorStep, timelineLengthSecs, toPx, ZOOM_LEVELS, zoomLabel, fmtTime } from "./util";
+import { niceMajorStep, timelineLengthSecs, trackEndSecs, toPx, ZOOM_LEVELS, zoomLabel, fmtTime, fmtTimePrecise } from "./util";
+import { playbackEndSecs } from "../playerUtils";
+import { getEffectCatalog, type EffectSpec } from "../../lib/effects";
 
 export function Timeline() {
   const { state, dispatch } = useEditor();
   const [zoomIdx, setZoomIdx] = useState(3); // 40px/s 默认
+  const [effectSpecs, setEffectSpecs] = useState<EffectSpec[]>([]);
 
   const tracks = state.project?.sequence.tracks || [];
   const pxPerSec = ZOOM_LEVELS[zoomIdx];
@@ -33,6 +38,17 @@ export function Timeline() {
       const sel = cur.selection;
       if (sel?.clipId) {
         e.preventDefault();
+        const selectedTrack = cur.project?.sequence.tracks.find((track) => track.id === sel.trackId);
+        if (selectedTrack?.locked || cur.editLock) {
+          dispatch({
+            type: "STATUS_SET",
+            severity: "warn",
+            text: selectedTrack?.locked
+              ? "所选片段所在轨道已锁定，解锁后才能复制"
+              : "Agent 正在编辑，暂不能复制片段",
+          });
+          return;
+        }
         void duplicateClip(dispatch, cur, { clipId: sel.clipId, trackId: sel.trackId });
       }
     };
@@ -41,6 +57,8 @@ export function Timeline() {
   }, [dispatch, state]);
 
   const lengthSecs = useMemo(() => timelineLengthSecs(tracks), [tracks]);
+  const contentEndSecs = useMemo(() => Math.max(0, ...tracks.map(trackEndSecs)), [tracks]);
+  const playableEndSecs = useMemo(() => playbackEndSecs(tracks), [tracks]);
   // 人类可读轨道名：按同类型出现顺序编号（视频轨 1 / 音频轨 1），替代内部 track.id
   const displayNames = useMemo(() => {
     const map = new Map<string, string>();
@@ -52,11 +70,52 @@ export function Timeline() {
     return map;
   }, [tracks]);
   const widthPx = toPx(lengthSecs, pxPerSec);
-  const totalSecs = lengthSecs;
   const playheadSecs = state.playhead;
 
   const dragApi = useTimelineDrag();
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const fittedProjectRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getEffectCatalog()
+      .then((items) => {
+        if (!cancelled) setEffectSpecs(items);
+      })
+      .catch(() => {
+        // 时间轴仍可用 effectId 回退显示；详细错误由资源/属性面板负责呈现。
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const zoomToFit = useCallback(() => {
+    const scroller = scrollerRef.current?.querySelector(".timeline__scroller") as HTMLElement | null;
+    const ruler = scrollerRef.current?.querySelector(".timeline-ruler") as HTMLElement | null;
+    if (!scroller || !ruler) return false;
+    const axisStart = ruler.getBoundingClientRect().left - scroller.getBoundingClientRect().left + scroller.scrollLeft;
+    const axisWidth = Math.max(0, scroller.clientWidth - axisStart);
+    const fitDurationSecs = contentEndSecs > 0 ? contentEndSecs : lengthSecs;
+    const fitIndex = ZOOM_LEVELS.reduce(
+      (best, level, index) => (level * fitDurationSecs <= axisWidth ? index : best),
+      0,
+    );
+    setZoomIdx(fitIndex);
+    scroller.scrollLeft = 0;
+    return true;
+  }, [contentEndSecs, lengthSecs]);
+
+  // On first entry, show as much of the project as the current viewport allows.
+  // Subsequent content updates do not override a zoom level chosen by the user.
+  useEffect(() => {
+    const projectId = state.currentId;
+    if (!projectId || state.project?.projectId !== projectId || fittedProjectRef.current === projectId) return;
+    const frameId = window.requestAnimationFrame(() => {
+      if (zoomToFit()) fittedProjectRef.current = projectId;
+    });
+    return () => window.cancelAnimationFrame(frameId);
+  }, [state.currentId, state.project?.projectId, zoomToFit]);
 
   if (!state.project) {
     return (
@@ -81,16 +140,21 @@ export function Timeline() {
     <section className={`timeline ${state.toolMode === "cut" ? "timeline--cut" : ""}`}>
       <header className="timeline__head">
         <h2 className="timeline__title">时间线</h2>
-        <span className="timeline__meta">
-          <span className="cv-mono">
-            {fmtTime(playheadSecs)} / {fmtTime(totalSecs)}
-          </span>
-          <span style={{ marginLeft: 10 }}>
+        <span
+          className="timeline__meta"
+          title="时间码显示播放头与最后一个片段的结束点；标尺会额外预留空白，便于继续添加片段。"
+        >
+          <span className="timeline__duration-label">播放头 / 片段末尾</span>
+          <span className="cv-mono">{fmtTimePrecise(playheadSecs)} / {fmtTime(contentEndSecs)}</span>
+          <span className="timeline__format">
             {state.project.sequence.width}×{state.project.sequence.height} · {state.project.sequence.fps.num}/{state.project.sequence.fps.den}
           </span>
         </span>
         <span className="timeline__spacer" />
         <div className="timeline__zoom">
+          <button className="timeline__zoom-btn" onClick={zoomToFit} aria-label="适应工程" title="缩放至完整显示当前工程">
+            <Maximize2 size={14} />
+          </button>
           <button className="timeline__zoom-btn" onClick={zoomOut} disabled={zoomIdx === 0} aria-label="缩小">
             <ZoomOut size={14} />
           </button>
@@ -103,9 +167,14 @@ export function Timeline() {
 
       <div className="timeline__body" ref={scrollerRef}>
         <div className="timeline__scroller">
-          <div className="timeline__content" style={{ width: widthPx + 80 }}>
-            <Ruler lengthSecs={lengthSecs} pxPerSec={pxPerSec} />
-            <Playhead pxPerSec={pxPerSec} />
+          <div
+            className="timeline__content"
+            style={{
+              width: `calc(${widthPx + 80}px + var(--track-label-w) + var(--space-2) + var(--timeline-content-inset-x) + var(--timeline-content-inset-x))`,
+            }}
+          >
+            <Ruler lengthSecs={lengthSecs} maxSeekSecs={playableEndSecs} pxPerSec={pxPerSec} />
+            <Playhead pxPerSec={pxPerSec} maxSecs={playableEndSecs} />
             {tracks.length === 0 ? (
               <div className="timeline__emptystate">
                 <div className="timeline__emptystate-text">
@@ -122,27 +191,51 @@ export function Timeline() {
               </div>
             ) : (
               tracks.map((t) => (
-                <TrackRow
-                  key={t.id}
-                  track={t}
-                  displayName={displayNames.get(t.id) || "轨道"}
-                  pxPerSec={pxPerSec}
-                  dragApi={dragApi}
-                />
+                <Fragment key={t.id}>
+                  <TrackRow
+                    track={t}
+                    displayName={displayNames.get(t.id) || "轨道"}
+                    pxPerSec={pxPerSec}
+                    dragApi={dragApi}
+                    effectSpecs={effectSpecs}
+                  />
+                  {t.kind === "video" ? (
+                    <EffectTrackRow
+                      track={t}
+                      displayName={`效果轨 ${videoTrackOrdinal(tracks, t.id)}`}
+                      pxPerSec={pxPerSec}
+                      effectSpecs={effectSpecs}
+                    />
+                  ) : null}
+                </Fragment>
               ))
             )}
             {/* 素材拖到轨道区下方空白 → 自动建轨 */}
             <TimelineEmptyDrop />
             {ghost ? (
               <div
-                className={`clip-block clip-block--${ghostKind} clip-block--ghost ${ghost.snapped ? "clip-block--ghost--snapped" : ""}`}
+                className={`clip-block clip-block--${ghostKind} clip-block--ghost ${ghost.snapped ? "clip-block--ghost--snapped" : ""} ${ghost.reorderMode ? "clip-block--ghost--reorder" : ""} ${ghost.invalidReason ? "clip-block--ghost--invalid" : ""}`}
                 style={{ left: ghost.ghostLeft, width: ghost.widthPx, top: ghost.ghostTop }}
+                title={ghost.invalidReason || `${ghost.reorderMode ? "插入片段间隙" : "放置位置"}：${fmtTime(ghost.startSecs)}`}
+                aria-hidden="true"
+              />
+            ) : null}
+            {ghost?.reorderMode && ghost.insertLeft !== undefined ? (
+              <div
+                className="timeline-insert-caret"
+                style={{ left: ghost.insertLeft, top: ghost.ghostTop - 6 }}
                 aria-hidden="true"
               />
             ) : null}
             {ghost ? (
-              <span className="drag-time-tip" style={{ left: ghost.ghostLeft }}>
-                {fmtTime(ghost.startSecs)}
+              <span
+                className={`drag-time-tip ${ghost.reorderMode ? "drag-time-tip--reorder" : ""} ${ghost.invalidReason ? "drag-time-tip--invalid" : ""}`}
+                style={{
+                  left: ghost.reorderMode && ghost.insertLeft !== undefined ? ghost.insertLeft : ghost.ghostLeft,
+                  top: Math.max(0, ghost.ghostTop - 5),
+                }}
+              >
+                {ghost.invalidReason || `${ghost.reorderMode ? "插入到这里 · " : ""}${fmtTime(ghost.startSecs)}`}
               </span>
             ) : null}
           </div>
@@ -151,7 +244,10 @@ export function Timeline() {
 
       <footer className="timeline__footer">
         <span>主刻度 {niceMajorStep(pxPerSec)}s</span>
-        <span>{state.toolMode === "cut" ? "切割模式：点击片段在播放头分割" : "拖拽移动/跨轨 · 边缘裁剪 · 磁吸吸附"}</span>
+        <span title="单击选中片段；拖动片段可移动或跨轨，拖动边缘可裁剪；Delete/Backspace 删除所选片段或效果。磁吸可在顶部工具栏切换。">
+          {state.toolMode === "cut" ? "切割模式：点击片段在播放头分割" : "单击选中 · 拖动移动/跨轨 · 边缘裁剪 · Delete 删除"}
+        </span>
+        <span title="聚焦片段后按 Alt+← 或 Alt+→，可把整段移到相邻片段之前或之后。">Alt+←/→ 调整片段顺序</span>
         <span style={{ flex: 1 }} />
         <span>{tracks.length} 轨道 · {clipCount(tracks)} 片段</span>
       </footer>
@@ -180,17 +276,24 @@ function TimelineEmptyDrop() {
     e.preventDefault();
     e.stopPropagation();
     if (hasFiles) {
-      // OS 文件拖入：每个文件自动建一条视频轨并插入
+      // OS 文件拖入：按探测到的素材类型自动创建视频轨或音频轨。
       void uploadFiles(
         Array.from(files),
-        (media) => insertClipAutoTrack(dispatch, getLatestState() || state, { sourcePath: media.path }),
+        (media) => insertClipAutoTrack(dispatch, getLatestState() || state, {
+          sourcePath: media.path,
+          trackKind: trackKindForMedia(media.kind),
+        }),
         (name, message) => dispatch({ type: "STATUS_SET", severity: "warn", text: `导入 ${name} 失败：${message}` }),
       );
       return;
     }
     try {
-      const { sourcePath } = JSON.parse(raw) as { sourcePath: string };
-      void insertClipAutoTrack(dispatch, getLatestState() || state, { sourcePath });
+      const payload = JSON.parse(raw) as { sourcePath: string; kind?: SessionAsset["kind"] };
+      const kind = payload.kind ?? inferKind(payload.sourcePath, false, false);
+      void insertClipAutoTrack(dispatch, getLatestState() || state, {
+        sourcePath: payload.sourcePath,
+        trackKind: trackKindForMedia(kind),
+      });
     } catch {
       /* ignore */
     }
@@ -202,7 +305,7 @@ function TimelineEmptyDrop() {
       onDragLeave={() => setOver(false)}
       onDrop={handleDrop}
     >
-      <Plus size={12} /> 拖素材或文件到此处，自动创建视频轨道
+      <Plus size={12} /> 拖素材或文件到此处，自动创建对应类型轨道
     </div>
   );
 }
@@ -220,4 +323,9 @@ function ImportFileIcon() {
       <line x1="12" y1="3" x2="12" y2="15" />
     </svg>
   );
+}
+
+function videoTrackOrdinal(tracks: { id: string; kind: string }[], trackId: string): number {
+  const index = tracks.filter((track) => track.kind === "video").findIndex((track) => track.id === trackId);
+  return Math.max(1, index + 1);
 }

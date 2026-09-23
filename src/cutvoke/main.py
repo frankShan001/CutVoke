@@ -38,7 +38,9 @@ DEFAULT_DATA_DIR = os.path.join(os.path.expanduser("~"), ".cutvoke", "data")
 
 
 def _json_out(obj: dict) -> None:
-    print(json.dumps(obj, ensure_ascii=False))
+    # ASCII-escaped JSON is valid on every Windows console code page and stays
+    # deterministic when another process decodes CLI output as UTF-8.
+    print(json.dumps(obj, ensure_ascii=True))
 
 
 def _json_err(code: str, msg: str, exit_code: int) -> int:

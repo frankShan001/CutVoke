@@ -67,6 +67,7 @@ export function EffectRow({
         <button
           type="button"
           className={`effect-row__btn effect-row__btn--bypass ${!enabled ? "effect-row__btn--on" : ""}`}
+          disabled={busy}
           aria-pressed={!enabled}
           aria-label={`${enabled ? "旁路" : "恢复"} ${effectLabel(catalog, id)}`}
           title={enabled ? "旁路（保留在栈中但不参与渲染）" : "恢复该效果"}

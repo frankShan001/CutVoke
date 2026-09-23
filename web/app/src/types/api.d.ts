@@ -39,12 +39,12 @@ export interface Clip {
   timelineEnd: Rational;
   sourceStart: Rational;
   speed?: Rational;
-  /** 相对音量（1.0=原声，0=静音，可 >1）。clip.audio 设置。 */
-  volume?: number;
-  /** 淡入时长（秒）。clip.audio 设置。 */
-  fadeIn?: number;
-  /** 淡出时长（秒）。clip.audio 设置。 */
-  fadeOut?: number;
+  /** 相对音量有理数（1.0=原声，0=静音，可 >1）。clip.audio 设置。 */
+  volume?: Rational;
+  /** 淡入时长（秒，有理数）。clip.audio 设置。 */
+  fadeIn?: Rational;
+  /** 淡出时长（秒，有理数）。clip.audio 设置。 */
+  fadeOut?: Rational;
   effects?: EffectInstance[];
   linked?: boolean;
   hidden?: boolean;
@@ -97,6 +97,8 @@ export interface Caption {
   scale?: number;
   /** 画布几何（H01）：旋转角度 -180~180，默认 0。 */
   rotation?: number;
+  /** 文字阴影宽度（像素）；0=无阴影。 */
+  shadow?: number;
 }
 
 export interface Marker {
@@ -230,6 +232,8 @@ export interface TemplateApplyBody {
   /** 默认 false（追加，不破坏已有时间线）。 */
   clearExisting?: boolean;
   expectedRevision?: string;
+  /** 网页编辑器默认 human/ui；外部调用方可显式标记 Agent 身份。 */
+  actor?: { kind: string; id: string };
 }
 
 /** template_applied 汇总事件（changedEntities 内）。 */

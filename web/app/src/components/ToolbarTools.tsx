@@ -13,6 +13,8 @@ export function ToolbarTools() {
         onClick={() => dispatch({ type: "TOOL_MODE_SET", mode: "select" })}
         title="选择工具 (V)"
         aria-label="选择工具"
+        aria-pressed={state.toolMode === "select"}
+        aria-keyshortcuts="V"
       >
         <MousePointer2 size={14} />
         <span className="tool-btn__key">V</span>
@@ -22,6 +24,8 @@ export function ToolbarTools() {
         onClick={() => dispatch({ type: "TOOL_MODE_SET", mode: "cut" })}
         title="切割工具 (C)：点击时间线在播放头分割"
         aria-label="切割工具"
+        aria-pressed={state.toolMode === "cut"}
+        aria-keyshortcuts="C"
       >
         <Scissors size={14} />
         <span className="tool-btn__key">C</span>
@@ -32,6 +36,7 @@ export function ToolbarTools() {
         onClick={() => dispatch({ type: "SNAP_TOGGLE" })}
         title="磁吸吸附（片段边缘/播放头）"
         aria-label="磁吸开关"
+        aria-pressed={state.snapEnabled}
       >
         <Magnet size={14} />
       </button>
@@ -43,7 +48,7 @@ export function ToolbarTools() {
         aria-label="导出"
       >
         <Upload size={14} />
-        导出
+        <span className="tool-btn__label">导出</span>
       </button>
     </div>
   );

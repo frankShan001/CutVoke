@@ -17,6 +17,20 @@ export type UploadOneResult =
   | { ok: true; media: UploadedMedia }
   | { ok: false; name: string; message: string };
 
+export type TimelineTrackKind = "video" | "audio";
+
+/** 图片属于视频画面轨；纯音频使用音频轨。 */
+export function trackKindForMedia(kind: SessionAsset["kind"]): TimelineTrackKind {
+  return kind === "audio" ? "audio" : "video";
+}
+
+/** 防止素材静默落入错误类型轨道。 */
+export function mediaFitsTrack(kind: SessionAsset["kind"], trackKind: string): boolean {
+  if (trackKind === "audio") return kind === "audio";
+  if (trackKind === "video") return kind !== "audio";
+  return false;
+}
+
 /** 上传单个文件：POST /assets → probe → 写入会话素材库。 */
 export async function uploadOneFile(file: File): Promise<UploadOneResult> {
   const up = await uploadAsset(file);

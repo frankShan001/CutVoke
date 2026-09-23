@@ -19,7 +19,7 @@ import { getLatestState, undo } from "../store/actions";
 import { listEvents } from "../lib/api";
 import type { ChangedEntity, Project, ProjectEvent } from "../types/api";
 
-const AGENT_KINDS = new Set(["http", "mcp", "cli"]);
+const AGENT_KINDS = new Set(["agent", "http", "mcp", "cli"]);
 
 const ENTITY_LABEL: Record<string, string> = {
   clip: "片段",
@@ -42,7 +42,7 @@ const CHANGE_VERB: Record<string, string> = {
 
 const MAX_UNDO_STEPS = 20;
 
-/** 判断 actor 是否为 Agent（http/mcp/cli 归为 Agent；缺省或未知归为人工）。 */
+/** 判断 actor 是否为 Agent（协议中的 agent 及 http/mcp/cli 归为 Agent）。 */
 function isAgentActor(actor?: { kind: string; id: string }): boolean {
   return !!actor && AGENT_KINDS.has(actor.kind);
 }

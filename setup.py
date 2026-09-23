@@ -1,31 +1,28 @@
-"""Build CutVoke and include the compiled Web editor in the wheel.
-
-Run `npm run build` in `web/app` before building a distributable wheel.
-Backend-only development still works when `web/dist` is absent.
-"""
+"""Bundle the already-built browser editor into distributable Python wheels."""
 
 from pathlib import Path
+from shutil import copytree, rmtree
 
 from setuptools import setup
 from setuptools.command.build_py import build_py
 
-ROOT = Path(__file__).resolve().parent
-DIST = ROOT / "web" / "dist"
 
-
-class BuildPyWithWeb(build_py):
-    def run(self):
+class BuildWithEditor(build_py):
+    def run(self) -> None:
         super().run()
-        if not DIST.is_dir():
-            print("[build_py] web/dist is missing; building without the Web UI")
+        # Editable installs resolve web/dist from the source checkout at runtime.
+        if getattr(self, "editable_mode", False):
             return
-        import shutil
-        pkg_root = Path(self.build_lib) / "cutvoke"
-        target = pkg_root / "web"
-        if target.is_dir():
-            shutil.rmtree(target)
-        shutil.copytree(DIST, target)
-        print(f"[build_py] copied Web UI: {DIST} -> {target}")
+        source = Path(__file__).resolve().parent / "web" / "dist"
+        if not (source / "index.html").is_file():
+            raise RuntimeError(
+                "Web editor is missing: run `npm ci` and `npm run build` "
+                "in web/app before building a CutVoke wheel"
+            )
+        target = Path(self.build_lib) / "cutvoke" / "web"
+        if target.exists():
+            rmtree(target)
+        copytree(source, target)
 
 
-setup(cmdclass={"build_py": BuildPyWithWeb})
+setup(cmdclass={"build_py": BuildWithEditor})

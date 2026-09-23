@@ -34,12 +34,14 @@ export function EditorBridge() {
     };
   }, [dispatch]);
 
-  // 3 秒轮询 events：用 ref 读取最新状态，避免 interval 频繁重建
+  // 常态 3 秒轮询；Agent 持锁期间缩短到 1 秒，使用户能观察工程变化，
+  // 同时不把高频刷新施加在普通人工编辑上。
+  const eventPollMs = state.editLock ? 1000 : 3000;
   useEffect(() => {
     let alive = true;
     const id = setInterval(() => {
       if (alive) void pollEvents(dispatch, stateRef.current);
-    }, 3000);
+    }, eventPollMs);
     // 挂载后立即执行首轮
     void pollEvents(dispatch, stateRef.current);
 
@@ -47,7 +49,7 @@ export function EditorBridge() {
       alive = false;
       clearInterval(id);
     };
-  }, [dispatch]);
+  }, [dispatch, eventPollMs]);
 
   return null;
 }

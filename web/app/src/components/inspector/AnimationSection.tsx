@@ -63,6 +63,10 @@ export function AnimationSection({ clip }: { clip: Clip }) {
     if (res.ok) {
       setAnimId(nextId);
       setParams(nextParams);
+    } else {
+      const existing = clip.effects?.find((effect) => String(effect.effectId).startsWith(ANIM_PREFIX));
+      setAnimId(existing ? String(existing.effectId) : "");
+      setParams(existing?.params ? { ...existing.params } : {});
     }
     setBusy(false);
   };
@@ -107,7 +111,17 @@ export function AnimationSection({ clip }: { clip: Clip }) {
         <ParamControls
           controls={controls}
           onChange={changeParam}
-          onCommit={() => void apply(animId, params)}
+          onCommit={(change) => {
+            const next = { ...params };
+            if (change) {
+              if (change.value === undefined) delete next[change.name];
+              else next[change.name] = change.value;
+            }
+            const existing = clip.effects?.find((effect) => String(effect.effectId).startsWith(ANIM_PREFIX));
+            if (existing?.effectId === animId
+              && JSON.stringify(existing.params || {}) === JSON.stringify(next)) return;
+            void apply(animId, next);
+          }}
         />
       ) : null}
       <p className="cv-hint" style={{ marginTop: 4 }}>

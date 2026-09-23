@@ -4,7 +4,7 @@
 复用 EditService 的同一套能力，与 CLI/HTTP/Web UI 行为一致。
 
 M1 落地 stdio 传输（Line-delimited JSON-RPC 2.0），无第三方依赖。
-工具集：create_project / project_query / command_apply / export / capabilities。
+工具集：create_project / project_query / project_summary / command_apply / export / capabilities。
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ import sys
 from typing import Any, Optional
 
 from .service import EditService, EditError
-from .protocol import Command, CommandResult, ErrorCode
+from .protocol import Actor, Command, CommandResult, ErrorCode
 from .rational import Rational
 from .render import RenderService, RenderError
 
@@ -62,8 +62,40 @@ class MCPServer:
                 },
             },
             {
+                "name": "project_summary",
+                "description": "读取适合 Agent 规划的小型工程摘要：revision、画布、租约、轨道与片段时间、效果 ID。不会返回完整字幕或效果参数；需要细节时再用 project_query，可显著减少上下文开销。",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "projectId": {"type": "string"},
+                    },
+                    "required": ["projectId"],
+                },
+            },
+            {
+                "name": "project_lookup",
+                "description": "按 ID、文字或时间范围读取少量字幕/片段，返回 revision 与指定字段。修改一句字幕时先用此工具定位，无需读取整个工程。",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "projectId": {"type": "string"},
+                        "entityType": {"type": "string", "enum": ["caption", "clip"]},
+                        "entityId": {"type": "string"},
+                        "textContains": {"type": "string", "description": "字幕正文或素材文件名包含的文字"},
+                        "atSeconds": {"type": "number"},
+                        "fromSeconds": {"type": "number"},
+                        "toSeconds": {"type": "number"},
+                        "fields": {"type": "array", "items": {"type": "string"},
+                                   "description": "可选；只返回指定字段，id 与片段 trackId 始终返回"},
+                        "limit": {"type": "integer", "minimum": 1, "maximum": 50,
+                                  "default": 10},
+                    },
+                    "required": ["projectId", "entityType"],
+                },
+            },
+            {
                 "name": "command_apply",
-                "description": "提交一条编辑命令（支持的命令类型以 capabilities 工具的 commands 列表为准）。返回新 revision。",
+                "description": "提交一条编辑命令（支持的命令类型以 capabilities 工具的 commands 列表为准）。返回新 revision。对会明显改变时间线的操作，先使用 command_preview 再提交。",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -71,6 +103,24 @@ class MCPServer:
                         "type": {"type": "string", "description": "命令类型"},
                         "payload": {"type": "object", "description": "命令参数，时间用有理数 {\"num\":\"1\",\"den\":\"2\"}"},
                         "expectedRevision": {"type": "string", "description": "当前 revision（乐观并发）"},
+                        "editLeaseId": {"type": "string", "description": "通过 edit_lock 获取的租约 ID；Agent 持锁编辑时必填"},
+                        "actorId": {"type": "string", "description": "可选，写入活动记录的 Agent 标识"},
+                        "commandId": {"type": "string", "description": "可选幂等命令 ID；网络重试时复用同一值"},
+                    },
+                    "required": ["projectId", "type", "payload", "expectedRevision"],
+                },
+            },
+            {
+                "name": "command_preview",
+                "description": "在当前 revision 上试算一条编辑命令，不写工程、不占 revision、不产生渲染。返回会改变的对象；适合 Agent 在锁定前或批量编辑前检查时间线、素材时长和参数。",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "projectId": {"type": "string"},
+                        "type": {"type": "string", "description": "命令类型"},
+                        "payload": {"type": "object", "description": "命令参数；时间用有理数 {\"num\":\"1\",\"den\":\"2\"}"},
+                        "expectedRevision": {"type": "string", "description": "当前 revision（乐观并发）"},
+                        "actorId": {"type": "string", "description": "可选，仅用于诊断身份"},
                     },
                     "required": ["projectId", "type", "payload", "expectedRevision"],
                 },
@@ -105,11 +155,12 @@ class MCPServer:
             },
             {
                 "name": "effects_list",
-                "description": "列出当前可用的效果（转场/变换/调色等），含参数 schema、默认值与可动画参数。新增效果只需安装清单，无需改内核。",
+                "description": "列出当前可用的效果（转场/变换/调色等），含参数 schema、默认值与可动画参数。可按分类或适用对象过滤，避免 Agent 读取无关效果。新增效果只需安装清单，无需改内核。",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
-                        "category": {"type": "string", "description": "可选，按分类过滤：transition / transform / color"},
+                        "category": {"type": "string", "description": "可选，按分类过滤：transition / animation / fx / color / transform / text"},
+                        "appliesTo": {"type": "string", "description": "可选，按适用对象过滤：image / video / audio / text"},
                         "effectId": {"type": "string", "description": "可选，只查单个效果详情"},
                         "lang": {"type": "string", "default": "zh-CN"},
                     },
@@ -132,8 +183,14 @@ class MCPServer:
                 return self._create_project(arguments)
             if name == "project_query":
                 return self._project_query(arguments)
+            if name == "project_summary":
+                return self._project_summary(arguments)
+            if name == "project_lookup":
+                return self._project_lookup(arguments)
             if name == "command_apply":
                 return self._command_apply(arguments)
+            if name == "command_preview":
+                return self._command_preview(arguments)
             if name == "edit_lock":
                 return self._edit_lock(arguments)
             if name == "export":
@@ -165,17 +222,44 @@ class MCPServer:
         proj = self.service.get_project(a["projectId"])
         return {"ok": True, "revision": proj.revision, "project": proj.to_dict()}
 
+    def _project_summary(self, a: dict) -> dict:
+        return {"ok": True, **self.service.project_summary(a["projectId"])}
+
+    def _project_lookup(self, a: dict) -> dict:
+        return {"ok": True, **self.service.project_lookup(
+            a["projectId"], entity_type=a["entityType"],
+            entity_id=a.get("entityId", ""),
+            text_contains=a.get("textContains", ""),
+            at_seconds=a.get("atSeconds"),
+            from_seconds=a.get("fromSeconds"),
+            to_seconds=a.get("toSeconds"),
+            fields=a.get("fields"), limit=a.get("limit", 10),
+        )}
+
     def _command_apply(self, a: dict) -> dict:
-        cmd = Command(
-            type=a["type"], payload=a.get("payload", {}),
-            project_id=a["projectId"], expected_revision=a["expectedRevision"],
-            edit_lease_id=a.get("editLeaseId", ""),
-        )
+        command_kwargs: dict[str, Any] = {
+            "type": a["type"], "payload": a.get("payload", {}),
+            "project_id": a["projectId"], "expected_revision": a["expectedRevision"],
+            "actor": Actor("mcp", str(a.get("actorId") or "agent")[:200]),
+            "edit_lease_id": a.get("editLeaseId", ""),
+        }
+        if a.get("commandId"):
+            command_kwargs["command_id"] = str(a["commandId"])
+        cmd = Command(**command_kwargs)
         result = self.service.execute(cmd)
         return {"ok": True, "revision": result.revision,
                 "previousRevision": result.previous_revision,
                 "changedEntities": result.changed_entities,
                 "transactionId": result.transaction_id}
+
+    def _command_preview(self, a: dict) -> dict:
+        """MCP 的无副作用命令试算，复用 HTTP dry-run 与核心 preview_command 语义。"""
+        cmd = Command(
+            type=a["type"], payload=a.get("payload", {}),
+            project_id=a["projectId"], expected_revision=a["expectedRevision"],
+            actor=Actor("mcp", str(a.get("actorId") or "agent")[:200]),
+        )
+        return {"ok": True, **self.service.preview_command(cmd)}
 
     def _edit_lock(self, a: dict) -> dict:
         action = a.get("action", "")
@@ -220,9 +304,19 @@ class MCPServer:
                                                "message": str(e)}}
             return {"ok": True, "effect": spec.to_dict(lang)}
         cat = a.get("category")
-        if cat:
-            items = [s.to_dict(lang) for s in self.service._effects.by_category(cat)]
-            return {"ok": True, "category": cat, "effects": items, "count": len(items)}
+        target = a.get("appliesTo")
+        if cat or target:
+            items = [
+                spec.to_dict(lang)
+                for spec in self.service._effects.search(category=cat, applies_to=target)
+            ]
+            return {
+                "ok": True,
+                "category": cat,
+                "appliesTo": target,
+                "effects": items,
+                "count": len(items),
+            }
         return {"ok": True, **caps}
 
     def _capabilities(self, a: dict) -> dict:

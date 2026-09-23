@@ -25,6 +25,7 @@ type Tab = "inspect" | "transition" | "caption" | "speed" | "resource" | "stack"
 export function RightPanel() {
   const { state } = useEditor();
   const [tab, setTab] = useState<Tab>("inspect");
+  const [captionMounted, setCaptionMounted] = useState(false);
   const hasClip = !!state.selection?.clipId;
   const hasTrack = !!state.selection?.trackId && !state.selection?.clipId;
 
@@ -40,25 +41,36 @@ export function RightPanel() {
 
   return (
     <div className="zone-right__inner">
-      <div className="right-tabs" role="tablist">
+      <div className="right-tabs" role="tablist" aria-label="工程编辑面板">
         {tabs.map((t) => (
           <button
             key={t.id}
+            type="button"
+            id={`${t.id}-tab`}
             role="tab"
             aria-selected={tab === t.id}
+            aria-controls="right-panel-content"
+            title={t.label}
             className={`right-tabs__btn ${tab === t.id ? "right-tabs__btn--active" : ""}`}
-            onClick={() => setTab(t.id)}
+            onClick={() => {
+              if (t.id === "caption") setCaptionMounted(true);
+              setTab(t.id);
+            }}
           >
             {t.icon}
-            {t.label}
+            <span className="right-tabs__label">{t.label}</span>
           </button>
         ))}
       </div>
-      <div className="zone-right__scroll">
+      <div className="zone-right__scroll" id="right-panel-content" role="tabpanel" aria-labelledby={`${tab}-tab`} tabIndex={0}>
         {tab === "inspect" ? <Inspector /> : null}
         {tab === "speed" ? <SpeedPanel /> : null}
         {tab === "transition" ? <TransitionPanel /> : null}
-        {tab === "caption" ? <CaptionPanel /> : null}
+        {captionMounted ? (
+          <div hidden={tab !== "caption"}>
+            <CaptionPanel />
+          </div>
+        ) : null}
         {tab === "resource" ? <ResourcePanel active /> : null}
         {tab === "stack" ? <EffectStackPanel active /> : null}
         {tab === "audio" ? <AudioAnalyzePanel /> : null}
