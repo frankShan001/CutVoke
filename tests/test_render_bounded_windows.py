@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import inspect
+import json
 import shutil
 import subprocess
 import tempfile
@@ -189,8 +190,15 @@ class RealWindowRendering(unittest.TestCase):
                 with self.subTest(frame=i):
                     self.assertLess(sum(abs(x-y) for x,y in zip(a[i],b[i]))/len(a[i]),3)
             def pcm(path):
+                # FFmpeg 6.1 decodes the complete final AAC block, including
+                # encoder padding beyond the MP4 stream's declared end. Check
+                # that end independently, then compare the exact audible span.
+                metadata=json.loads(subprocess.run(["ffprobe","-v","error",
+                    "-select_streams","a:0","-show_entries","stream=duration",
+                    "-of","json",str(path)],check=True,capture_output=True).stdout)
+                self.assertAlmostEqual(float(metadata["streams"][0]["duration"]),13,places=6)
                 raw=subprocess.run(["ffmpeg","-v","error","-i",str(path),"-vn",
-                    "-ar","48000","-ac","1","-f","s16le","pipe:1"],check=True,capture_output=True).stdout
+                    "-t","13","-ar","48000","-ac","1","-f","s16le","pipe:1"],check=True,capture_output=True).stdout
                 values=array("h");values.frombytes(raw);return values
             aa,bb=pcm(actual),pcm(reference)
             self.assertEqual(len(aa),13*48000)
