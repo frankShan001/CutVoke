@@ -1031,6 +1031,7 @@ test("eight creative domains share keyboard navigation and preserve the selected
   // expensive scan per panel and starving unrelated catalog requests.
   await expect.poll(() => auditRequests).toEqual({ packs: 1, presets: 1 });
   finishAudit();
+  await expect(page.getByRole("region", { name: "内置预设库" })).toBeVisible();
 
   await current.press("Home");
   current = creativeTabs.getByRole("tab", { name: "素材" });
@@ -1062,12 +1063,12 @@ test("eight creative domains share keyboard navigation and preserve the selected
   await creativeTabs.getByRole("tab", { name: "特效" }).click();
   await expect.poll(() => refreshRequests).toBeGreaterThan(0);
   await expect(page.locator(".resource-grid:visible:not(.resource-preset-grid) .resource-card").first()).toBeVisible();
-  finishRefresh();
-  await expect(page.locator(".resource-grid:visible:not(.resource-preset-grid)")
-    .getByText("Fresh catalog proof", { exact: true })).toBeVisible();
   await expect(effectSearch).toHaveValue("cutvoke.fx");
   await expect.poll(() => leftScroll.evaluate((element) => element.scrollTop)).toBe(effectScroll);
   await expect(page.locator(".resource-context:visible")).toContainText("视频片段");
+  finishRefresh();
+  await expect(page.locator(".resource-grid:visible:not(.resource-preset-grid)")
+    .getByText("Fresh catalog proof", { exact: true })).toBeVisible();
   await page.unroute(/\/api\/v1\/projects\/[^/]+\/resources$/);
   const pending: Array<{ release: () => void; done: Promise<void> }> = [];
   await page.route(/\/api\/v1\/projects\/[^/]+\/resources$/, async (route) => {
