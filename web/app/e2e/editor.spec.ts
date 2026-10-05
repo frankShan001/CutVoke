@@ -1951,6 +1951,9 @@ test("buffering keeps the video position and size fixed", async ({ page, request
   expect(before).toBeTruthy();
   // Exercise the real waiting/canplay handlers even on a fully cached window.
   await page.getByRole("button", { name: "播放", exact: true }).click();
+  // Native playing/canplay can otherwise arrive after the synthetic waiting
+  // event and immediately clear it. Wait for the play promise to settle first.
+  await video.evaluate((element) => (element as HTMLVideoElement).play());
   await video.dispatchEvent("waiting");
   await expect(page.getByText("播放缓冲中…", { exact: true })).toBeVisible();
   const waiting = await video.boundingBox();
