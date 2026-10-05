@@ -136,7 +136,9 @@ class TransitionTimelineDurationTests(unittest.TestCase):
 
         graph = ";".join(parts)
         self.assertAlmostEqual(duration, 10.0, places=6)
-        self.assertIn("tpad=stop_mode=clone:stop_duration=0.800000", graph)
+        # The resampler gets one extra frame, then the hold is bounded to 0.8s.
+        self.assertIn("tpad=stop_mode=clone:stop_duration=0.833333333", graph)
+        self.assertIn("trim=duration=5.800000000", graph)
         self.assertIn("zoompan=z='max(1\\,1.2800-0.2800*on/24)'", graph)
         self.assertIn("xfade=transition=fade:offset=5.000000:duration=0.800000", graph)
 
