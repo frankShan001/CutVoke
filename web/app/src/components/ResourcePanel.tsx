@@ -147,6 +147,7 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
   const pid = state.currentId;
 
   const [resources, setResources] = useState<ProjectResource[]>([]);
+  const resourcesProject = useRef<string | null>(null);
   const [builtinPresets, setBuiltinPresets] = useState<BuiltinPresetCatalog | null>(null);
   const [presetLoading, setPresetLoading] = useState(false);
   const [presetLoadError, setPresetLoadError] = useState<string | null>(null);
@@ -298,6 +299,7 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
         // 保留完整目录，搜索与两级分类在本地筛选；切分类不会让其它分类消失。
         const res = await listProjectResources(pid);
         setResources(res.effects);
+        resourcesProject.current = pid;
         setFavIds(res.favorites);
       } catch (err) {
         setResources([]);
@@ -1235,7 +1237,7 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
       ) : null}
 
       {/* 列表 */}
-      {loading ? (
+      {loading && (resources.length === 0 || resourcesProject.current !== pid) ? (
         <div className="cv-loading" role="status">
           <Loader2 size={13} className="cv-spin" /> 加载中…
         </div>
