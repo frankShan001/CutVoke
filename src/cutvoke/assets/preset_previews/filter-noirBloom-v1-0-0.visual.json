@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.noirBloom",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.grayscale",
+  "params": {
+    "strength": 1.0
+  },
+  "subcategory": "黑白",
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Neutral grayscale highlights bloom softly; no chroma tint remains.",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "coverSha256": "4f5bd64ff1b7f74e4368ecf5ee073b1b67484f0576b49212fc5c93a0da11428e",
+  "motionPreviewSha256": "ab4cb4490a3d709a8bc92d174545c43b3ef75eb6ec9819cd6b4389fb647ee812",
+  "auditSha256": "a9057f7db656f714b54870bdc24474b1c85d726c5aa66db3b7a5cd61704baedc"
+}

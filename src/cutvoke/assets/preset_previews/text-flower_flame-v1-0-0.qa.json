@@ -1,0 +1,37 @@
+{
+  "presetId": "cutvoke.preset.text.flower_flame",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.text",
+      "version": "1.0.0",
+      "params": {
+        "content": "创作标题",
+        "animIn": 300,
+        "animOut": 200,
+        "scale": 1.8,
+        "fontSize": 146,
+        "color": "#ffb21e",
+        "strokeColor": "#a91d1d",
+        "strokeWidth": 8,
+        "bold": true,
+        "shadow": 6,
+        "rotation": 4,
+        "y": 0.43,
+        "align": "center",
+        "background": "",
+        "x": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.5,
+  "firstLastMeanRgbDifference": 6.755,
+  "coverSha256": "c16a1c4879e3b7932fcc3682072c8fae2ce4b78750902bfd53603760a739e9da",
+  "previewSha256": "98b22709b81f3723558e0057b0961cdb48d997f17d767c0788fe328104becef5",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

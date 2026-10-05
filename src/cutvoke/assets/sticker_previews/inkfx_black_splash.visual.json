@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_black_splash",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "Irregular black ink bloom with round droplets; its scattered silhouette is distinct from the separate droplet trail and remains clear on the pale part of the composite.",
+  "sourceSha256": "88dd5eddcec40eb900208deb4c2aae36b9065026f6da6b59dbf36065a93c8ca6",
+  "previewSha256": "a1eb6442c4815a486d12165f9a7cc4cbcde95cd35cdf7632321c55a030370b49",
+  "auditSha256": "b6790a5f1cc48b2f4521fb1c712c906f98a0d855ed25b2e00f171b9d39964619"
+}

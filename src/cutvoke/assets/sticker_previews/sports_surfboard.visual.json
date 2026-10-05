@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_surfboard",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "青绿色冲浪板与卷起的白蓝浪花形成清楚组合，浪花边缘与板尖均完整。",
+  "sourceSha256": "20c50b4590a2f9ed09a6be4ab9cc9b5ab9ecc492e49abc331373741c7b20f59d",
+  "previewSha256": "e984f3e830cdd8ca5dcb0a4c708380d6837d9a2003bce96e830634010f4e21d3",
+  "auditSha256": "34290593e8cee88ca666a6a74b9c1225dbd573571e721f67557c1a1d68e7a2ea"
+}

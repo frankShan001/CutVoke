@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_dna",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4dd41b9cc66d2c895a93773e8c242f7b18b2f90d266b5918a03bbdf2753b7ecc",
+  "previewSha256": "90ea0234087cd88d3a685786d815174c1afb147ab139d372a2cbe0c536234b2d",
+  "preview": "learn_dna.mp4",
+  "bytes": 3978,
+  "visiblePixels": 1180,
+  "changedPixels": 0,
+  "motionVisible": false
+}

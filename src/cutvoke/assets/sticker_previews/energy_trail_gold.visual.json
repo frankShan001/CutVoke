@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.energy_trail_gold",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T08:40:43+00:00",
+  "observation": "The short gold trail has a clear curved path and a compact bright head.",
+  "method": "Reviewed all extracted RGBA overlays on dark and light checkerboard contacts and inspected the rendered player preview contact sheet. Checked silhouette clarity, alpha cleanup, edge safety, contrast, and use as a timeline compositing overlay.",
+  "sourceSha256": "bdc4ef9c14f2c4dec643d65e16ddb43af09db12cd783244ee3ec7404929b5d99",
+  "previewSha256": "3457f266198a4bcef11a36df40e61e7a45f1d8f68977ce1b03a0866bfd3706c7",
+  "auditSha256": "647448b6e52659f519caad92b759de61f2431e8e910fd9feaf8f9dee8df65a2d"
+}

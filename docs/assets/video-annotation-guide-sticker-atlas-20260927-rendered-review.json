@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/review_video_annotation_guide_previews.py",
+  "contactSheet": "docs/assets/video-annotation-guide-sticker-atlas-20260927-rendered-review.png",
+  "items": [
+    {
+      "stem": "guide_pointer_arrow",
+      "preview": "guide_pointer_arrow.mp4",
+      "previewSha256": "79730162798bdf3aa436c3d0729069c1317b8d5b6f7af3ca0974086c90a45a76",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_measure_double_arrow",
+      "preview": "guide_measure_double_arrow.mp4",
+      "previewSha256": "a1f5855f2501dc4f76fd9280375530551490fd08990d12cdd07fe4e9922a70dc",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_emphasis_circle",
+      "preview": "guide_emphasis_circle.mp4",
+      "previewSha256": "7b43f68097e51a100558a6e4948693d02be36d023d4bc1e395aaba2dd318fd57",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_selection_box",
+      "preview": "guide_selection_box.mp4",
+      "previewSha256": "44fcd292ae2464d190ba3535ebc011ebefbc39bb1521551007b2887bf4ba8ef6",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_focus_brackets",
+      "preview": "guide_focus_brackets.mp4",
+      "previewSha256": "168c50c9e31846586505bd05ac4e29891c006bdb81d4c64c2435a84585e5f1e4",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_highlight_stroke",
+      "preview": "guide_highlight_stroke.mp4",
+      "previewSha256": "7beef7abb881d4a3d9379e00ead176f0ce0cac4da293279aaf2bd6fa051af9d4",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_dotted_route",
+      "preview": "guide_dotted_route.mp4",
+      "previewSha256": "1b44fb004621cc0cb69a43128e8282808ab999c1c0b4443448b2a40c04c3c8d8",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_zoom_plus",
+      "preview": "guide_zoom_plus.mp4",
+      "previewSha256": "cfe2a13d78059362af59b71dc87b66d9189e37ca54fa83ad0955f7f65176bae9",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_spotlight",
+      "preview": "guide_spotlight.mp4",
+      "previewSha256": "1bfdd65eb97420983b1f88c31afb25c6bc95454f1dc6f7d3d90baa86483474e9",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_target_reticle",
+      "preview": "guide_target_reticle.mp4",
+      "previewSha256": "ab9b321410ac12dcf6bda12e0b7146b030ddec3a39395cd3f8fff654f68b1e5a",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_check_badge",
+      "preview": "guide_check_badge.mp4",
+      "previewSha256": "a0c673c98622038b6a0c0212e7b01c257efd73446c36aaf6fef3acf3c5a5e39d",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_comment_bubble",
+      "preview": "guide_comment_bubble.mp4",
+      "previewSha256": "28f1dbcad530c66a2664344050f77b00f68da63436eecf69e9e5588af63dfdb4",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_branch_nodes",
+      "preview": "guide_branch_nodes.mp4",
+      "previewSha256": "807dd0a79e27a972e49185726ec1ddb90fac3eb11ffcb299c85d407078eda3ac",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_burst_highlight",
+      "preview": "guide_burst_highlight.mp4",
+      "previewSha256": "e7fc893d366b5c98cac58875cf5df06dd3a48bc636a15616bd15cded6a140aa2",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_crop_rotate",
+      "preview": "guide_crop_rotate.mp4",
+      "previewSha256": "35ca763a5694e4969b4e4fbe902667d300f135b0d60fd7877934e88fdc8cc8ff",
+      "frameAtSeconds": 1.0
+    },
+    {
+      "stem": "guide_split_compare",
+      "preview": "guide_split_compare.mp4",
+      "previewSha256": "973e5d24097eb4079ae4aea5212fdf2159e506d39df77382a37dfbae9cbe5641",
+      "frameAtSeconds": 1.0
+    }
+  ]
+}

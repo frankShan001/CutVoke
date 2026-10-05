@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_instant_camera",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1b0e86877bebec66fbe40e047191bb30b87a19857749bef46aba1e2ee333ce38",
+  "previewSha256": "ce3647de03b0c2981177e054081c7384471408a28414b23048d1bddbc5734d59",
+  "preview": "travel_instant_camera.mp4",
+  "bytes": 4200,
+  "visiblePixels": 1668,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -16,6 +16,7 @@ import { Button } from "./ui";
 import { useEditor } from "../store/editor";
 import { loadProjects, redo, refreshProject, undo } from "../store/actions";
 import { ToolbarTools } from "./ToolbarTools";
+import { CacheSettings } from "./CacheSettings";
 
 export function TopToolbar({
   leftPanelOpen,
@@ -89,6 +90,7 @@ export function TopToolbar({
         <span className="topbar__btn-label">模板库</span>
       </Button>
       <span className="topbar__spacer" />
+      <CacheSettings />
       <Button
         variant="ghost"
         size="sm"

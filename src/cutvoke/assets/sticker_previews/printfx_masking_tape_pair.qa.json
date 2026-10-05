@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_masking_tape_pair",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d8e3a2e2fc79b7d54be4fbc51cab181a778ea4bd00d493c87d834288945f4ce4",
+  "previewSha256": "46e9563e228f799c24854f72a483c3053e555630fbb5ab4fa89748f9ae9f6529",
+  "preview": "printfx_masking_tape_pair.mp4",
+  "bytes": 11060,
+  "visiblePixels": 10358,
+  "changedPixels": 0,
+  "motionVisible": false
+}

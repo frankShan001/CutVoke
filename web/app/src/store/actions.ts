@@ -1,10 +1,10 @@
 /** 领域动作：封装 API 调用 + 状态派发。组件只调用这些动作，不含业务逻辑。 */
 
 import type { Dispatch } from "react";
-import { ApiFailure, type CommandResult } from "../lib/api";
+import { ApiFailure, type CommandResult, type ExportRange } from "../lib/api";
 import {
   createProject as apiCreate,
-  exportProject as apiExport,
+  enqueueExportProject as apiEnqueueExport,
   getEditLock,
   type ExportQuality,
   getProject,
@@ -61,12 +61,13 @@ export async function refreshProject(
 ): Promise<boolean> {
   try {
     const project = await getProject(projectId);
+    if (latestState && latestState.currentId !== projectId) return false;
     dispatch({ type: "PROJECT_LOADED", project });
-    dispatch({ type: "REVISION_SET", revision: project.revision });
     dispatch({ type: "SVC_UP", up: true });
     dispatch({ type: "STATUS_SET", severity: "ok", text: "就绪" });
     return true;
   } catch (err) {
+    if (latestState && latestState.currentId !== projectId) return false;
     dispatch({ type: "SYNC_STATE_SET", syncState: "error" });
     showError(dispatch, err);
     return false;
@@ -150,6 +151,25 @@ export async function renameProject(
  * 使 runCommand 的冲突重试能读到最新 revision（不受闭包陈旧状态影响）。
  */
 let latestState: EditorState | null = null;
+const recentLocalCommandIds = new Map<string, Map<string, number>>();
+
+function rememberLocalCommand(projectId: string, commandId: string): void {
+  const now = Date.now();
+  const commands = recentLocalCommandIds.get(projectId) || new Map<string, number>();
+  for (const [id, createdAt] of commands) {
+    if (now - createdAt > 10 * 60_000) commands.delete(id);
+  }
+  commands.set(commandId, now);
+  recentLocalCommandIds.set(projectId, commands);
+}
+
+function forgetLocalCommand(projectId: string, commandId: string): void {
+  const commands = recentLocalCommandIds.get(projectId);
+  if (!commands) return;
+  commands.delete(commandId);
+  if (commands.size === 0) recentLocalCommandIds.delete(projectId);
+}
+
 export function bindLatestState(s: EditorState) {
   latestState = s;
 }
@@ -190,13 +210,26 @@ export async function runCommand(
     return { ok: false, error: err };
   }
   const projectId = state.currentId;
-  const doPost = async (expected: string) =>
-    sendCommand(projectId, type, payload, expected, newCommandId());
+  const doPost = async (expected: string) => {
+    const commandId = newCommandId();
+    rememberLocalCommand(projectId, commandId);
+    try {
+      return await sendCommand(projectId, type, payload, expected, commandId);
+    } catch (err) {
+      forgetLocalCommand(projectId, commandId);
+      throw err;
+    }
+  };
 
   dispatch({ type: "SYNC_STATE_SET", syncState: "saving" });
   try {
     const result = await doPost(state.revision);
     dispatch({ type: "REVISION_SET", revision: result.revision });
+    if (!type.startsWith("history.") && result.revision !== state.revision) {
+      dispatch({ type: "UNDO_SET", blocked: false });
+      dispatch({ type: "REDO_SET", blocked: true });
+      dispatch({ type: "HISTORY_HINT", hint: "" });
+    }
     await refreshProject(dispatch, projectId);
     return { ok: true, command: result };
   } catch (err) {
@@ -210,6 +243,11 @@ export async function runCommand(
         try {
           const result = await doPost(currentRev2);
           dispatch({ type: "REVISION_SET", revision: result.revision });
+          if (!type.startsWith("history.") && result.revision !== currentRev2) {
+            dispatch({ type: "UNDO_SET", blocked: false });
+            dispatch({ type: "REDO_SET", blocked: true });
+            dispatch({ type: "HISTORY_HINT", hint: "" });
+          }
           await refreshProject(dispatch, projectId);
           return { ok: true, command: result };
         } catch (err2) {
@@ -302,8 +340,7 @@ export async function redo(dispatch: Dispatch<EditorAction>, state: EditorState)
   return res;
 }
 
-/** 导出结果（区分同步完成 / 进行中 / 失败）。202 in_flight 时 ok=true 但 inFlight=true，
-    需由调用方轮询 GET /exports 获取最终状态。 */
+/** 导出结果（区分排队中 / 完成 / 失败）；提交任务后由调用方轮询状态接口。 */
 export interface ExportOutcome {
   ok: boolean;
   result?: ExportResult;
@@ -317,6 +354,7 @@ export async function doExport(
   state: EditorState,
   outPath: string,
   quality: ExportQuality = "high",
+  range?: ExportRange,
 ): Promise<ExportOutcome> {
   if (!state.currentId) {
     const err = new ApiFailure({ status: 400, code: "NO_PROJECT", message: "请先选择工程" });
@@ -324,15 +362,9 @@ export async function doExport(
     return { ok: false, error: err };
   }
   try {
-    const res = await apiExport(state.currentId, outPath, quality);
-    // 202 in_flight：同一导出键已在运行，仅回 {jobId, status:"running"}（无 output_path）。
-    const anyRes = res as ExportResult & { status?: string; jobId?: string };
-    if (anyRes.status === "running" && anyRes.jobId) {
-      dispatch({ type: "STATUS_SET", severity: "ok", text: "同一导出任务进行中，正在轮询状态…" });
-      return { ok: true, inFlight: true, jobId: anyRes.jobId };
-    }
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "导出完成（见结果面板）" });
-    return { ok: true, result: res, jobId: anyRes.jobId };
+    const job = await apiEnqueueExport(state.currentId, outPath, quality, range);
+    dispatch({ type: "STATUS_SET", severity: "ok", text: "导出任务已加入队列，正在等待成片…" });
+    return { ok: true, inFlight: true, jobId: job.jobId };
   } catch (err) {
     const f = showError(dispatch, err);
     return { ok: false, error: f };
@@ -349,7 +381,14 @@ export async function pollEvents(
   try {
     const events = await listEvents(state.currentId, since);
     if (events.length) {
-      const maxRev = events.reduce((m, e) => Math.max(m, Number(e.revision || 0)), 0);
+      const localCommands = recentLocalCommandIds.get(state.currentId);
+      const externalEvents = events.filter((event) => {
+        if (!localCommands?.has(event.commandId)) return true;
+        localCommands.delete(event.commandId);
+        return false;
+      });
+      if (localCommands?.size === 0) recentLocalCommandIds.delete(state.currentId);
+      const maxRev = externalEvents.reduce((m, e) => Math.max(m, Number(e.revision || 0)), 0);
       if (maxRev > Number(state.revision || 0)) {
         await refreshProject(dispatch, state.currentId);
         dispatch({

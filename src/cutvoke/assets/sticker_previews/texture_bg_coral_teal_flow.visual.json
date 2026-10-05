@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_coral_teal_flow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "Coral and teal blend smoothly across the frame with a readable central region and no visible seam.",
+  "sourceSha256": "7c8d9c4a130737404bf320615b040fe576292e00b5cc81f34bedcd28d79323e0",
+  "previewSha256": "cc9f7878b82f135d972b206c53effa273b291b218bebb3ff998b12556c7b4cd0",
+  "auditSha256": "84dfbb303cec4ba4e0073674077636cc4ac188a6b422f10ab7a171abf05da826"
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_foliage_dapple",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "090eb84c4a02fdc65bd660f91f90a2f568b2e03d11a0293285faa6c91900d346",
+  "previewSha256": "7474ff11cb23f19a82685929db81b4934aaf29bbed369515cbf74f3b51f9f0da",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 15120,
+  "visiblePixels": 18479,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 6192,
+    "steady_entry": 18488,
+    "steady_exit": 18488,
+    "exit": 6148
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 6192,
+      "withoutFade": 18484
+    },
+    "steady_entry": {
+      "withFade": 18488,
+      "withoutFade": 18483
+    },
+    "steady_exit": {
+      "withFade": 18488,
+      "withoutFade": 18488
+    },
+    "exit": {
+      "withFade": 6148,
+      "withoutFade": 18488
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.118,
+    0.116
+  ],
+  "auditExport": "natural_light_foliage_dapple.audit.mp4",
+  "auditExportSha256": "275cd7de25bae88ece94dddf8e4b3d82ff620e6a44cba47ad4a9f6f0aa7a0353"
+}

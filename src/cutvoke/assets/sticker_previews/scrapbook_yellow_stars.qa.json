@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_yellow_stars",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "79ff1235e510b0d43717d14fbde3c9fce412c98d286b58164a12a160a263534a",
+  "previewSha256": "4129ca34a9c52ccfb68a38126f0bd5c13780df8035c72c37fe04021087f45af4",
+  "preview": "scrapbook_yellow_stars.mp4",
+  "bytes": 3048,
+  "visiblePixels": 294,
+  "changedPixels": 0,
+  "motionVisible": false
+}

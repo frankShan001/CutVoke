@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_low_fog",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "低位银雾集中在画面下沿，上方保留清晰区域，浅底柔和、深底可读。",
+  "sourceSha256": "8dddd924162557df875f529ae49bbc1e737ad4cb85f5e7b645a4b19940afedfc",
+  "previewSha256": "c00fb84f2472ef98d53e77092eebe9747fdb4c56bb03e5f98b07510d87e0136f",
+  "auditSha256": "5adfd24f666b77dd1582af2f3a90d7d80795a545f627d53eb27d8d8059d1afcb"
+}

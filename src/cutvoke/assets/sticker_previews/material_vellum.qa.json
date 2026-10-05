@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_vellum",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e201491773b23317f90b8be6462bcdf576fd143200a6f5ab549c9010f3dae752",
+  "previewSha256": "652da7754c6d8f6bca8a12127e371e989a75458a3d92e39d6afacbbeab2f5842",
+  "preview": "material_vellum.mp4",
+  "bytes": 8917,
+  "visiblePixels": 11663,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_golden_dust_beam",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Amber dust motes stay within a diagonal beam, with visible but not excessive round flecks.",
+  "sourceSha256": "b74ccabcea5219d753d1dc69ae4b8be6762752f8de972df9b8cea56403ab18f5",
+  "previewSha256": "a0a4f3df3d5414d69a5deb548c57ce23de81e4eef1c88bbfe972daa0a003a57e",
+  "auditSha256": "c0ff26e3b7f529f552c2191fa906d1b7a745ffae198bc164afa11799a5208478"
+}

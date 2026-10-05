@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.hrwind",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.385,
+  "exportSha256": "181063b72322dd5fb9d1b5d79bab313bd83925b7fc09c4badd25dfa2c4032880",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "181063b72322dd5fb9d1b5d79bab313bd83925b7fc09c4badd25dfa2c4032880",
+  "auditExport": "transition-hrwind-v1-0-0.audit.mp4"
+}

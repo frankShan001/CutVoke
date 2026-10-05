@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_paper_crown",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "皇冠顶部彩球和底部轮廓完整，装饰宝石清楚。",
+  "sourceSha256": "17ab39be47d9a96ea37f95d8d99d979823c9b547f6bd7ee10d20e379d97d061a",
+  "previewSha256": "0b6b448cf6a4379cfc379c6972a0ca2a3457f255a34015c5ed5af2892f934f1e",
+  "auditSha256": "0667bcf22d56921d111e457e0086c01d5935921ac29fe11ce17884d82857f75b"
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_storm_flash",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "22e45ca14d1ff6d248b18658dda9672fb1b5869d8ac7c68df5af98370b48f992",
+  "previewSha256": "1504e0522cdc9dfedaf4b903573c95acf3d6f9af76263e6f9f286b85e5e9f12e",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 16934,
+  "visiblePixels": 23558,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 8539,
+    "steady_entry": 23582,
+    "steady_exit": 23578,
+    "exit": 8501
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 8539,
+      "withoutFade": 23574
+    },
+    "steady_entry": {
+      "withFade": 23582,
+      "withoutFade": 23568
+    },
+    "steady_exit": {
+      "withFade": 23578,
+      "withoutFade": 23581
+    },
+    "exit": {
+      "withFade": 8501,
+      "withoutFade": 23582
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.397,
+    0.394
+  ],
+  "auditExport": "natural_light_storm_flash.audit.mp4",
+  "auditExportSha256": "ff039d7d7704b5998c75c0fd53ee468609b90f0fa9cd0045be8d479c39e6d7d1"
+}

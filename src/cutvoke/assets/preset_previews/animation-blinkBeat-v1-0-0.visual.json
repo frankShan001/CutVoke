@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.blinkBeat",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.blink",
+  "params": {
+    "amplitude": 0.7,
+    "period": 2.0
+  },
+  "subcategory": "循环",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "明暗闪现按周期变化，暗段与亮段为该预设的节奏设计，位置和画幅保持稳定。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "7f1fbe2f02d264fbcdebf13b3f52ac933bc359ececc702266f5dea81f8d2ea0a",
+  "motionPreviewSha256": "678cfb1882e7c122125b9174f38b4c2c93a239a594e21ba78dbf756d66fd4215",
+  "auditSha256": "d75c4b0eb6b8e732fa5839e3b8866bbcc3c1d2ad45ad8798e9a9b697edb09632",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_blinkBeat.png",
+  "libraryReviewSheetSha256": "781419de8d2be8b0c9378bbd3c10bf67fb6a2e67147ebe03dcde01426da4cf23"
+}

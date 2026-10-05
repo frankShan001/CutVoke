@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_waveform_teal_coral",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "A compact teal-and-coral waveform ribbon has two clear color bands and a smooth oscillating silhouette; it remains visible at overlay scale.",
+  "sourceSha256": "56a37c8db31cb7e99df45c716ec50cfb39306fb6ec67b3f1f6ea7c2187f2e02d",
+  "previewSha256": "2c3166d88bde2c0067e86a9c4e1201e3df1d2f0b435b18828ee0bbf992f67109",
+  "auditSha256": "737f28f541c6f8dcc091e484173636e93724349619ef83d24f60c71b89228171"
+}

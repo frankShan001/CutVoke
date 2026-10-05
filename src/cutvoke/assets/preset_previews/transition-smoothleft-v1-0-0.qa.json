@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.transition.smoothleft",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.smoothleft",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 97.78,
+  "maxSampledMeanRgbDifference": 97.78,
+  "coverSha256": "3bbae660572d22da50d08463bdf29e568e4e0f6af650aae4240d0460f472b24e",
+  "previewSha256": "4e298564afe3d412b2ef06cc1afedb6fba4eeaac13141e13e11393d9616e5a3b",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

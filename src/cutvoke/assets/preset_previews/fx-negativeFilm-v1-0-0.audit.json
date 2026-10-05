@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.negativeFilm",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "intensity",
+    "value": 1.15
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "4524ebfa23950576c489582c072eefcef96cfec047154fc9cd95b03dd2cc0c7d",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "4524ebfa23950576c489582c072eefcef96cfec047154fc9cd95b03dd2cc0c7d",
+  "auditExport": "fx-negativeFilm-v1-0-0.audit.mp4"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_cone_hat",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "派对帽尖顶、毛球和底部装饰完整，条纹边缘清楚。",
+  "sourceSha256": "304b4c58653175959c608a112d6db38752360a52d2dd100efd9be08a93f168e6",
+  "previewSha256": "0e66b384ed6f6a182d4224086467000131ced5ea80ba66d6303bf1182eb7ee71",
+  "auditSha256": "d4c5c8f3e04ead1bd13729b4c34c0a01316641166833bd555aafceaa4697f148"
+}

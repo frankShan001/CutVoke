@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_channel_corner",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "cf691716eda0887120f8f323091c980974789107d372d428eacf0f805c599523",
+  "previewSha256": "a5b05c8df0389d63049815285809513c38960b553c1537cf8bccb8a127f3e76f",
+  "preview": "glitch_channel_corner.mp4",
+  "bytes": 7451,
+  "visiblePixels": 3849,
+  "changedPixels": 0,
+  "motionVisible": false
+}

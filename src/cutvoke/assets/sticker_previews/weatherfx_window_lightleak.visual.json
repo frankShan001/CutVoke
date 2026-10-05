@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_window_lightleak",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "琥珀窗格光斑和横向漏光集中在一侧，与放射光束形态不同。",
+  "sourceSha256": "cef3086020b1ae9e7077d1f28ae78c2b7f3f359f86bdb46d4c702c4bb2e25b77",
+  "previewSha256": "cf1631488307db9ae501fd987f8bcd574d80608b139cb2ba0ffbda2b2ee44d93",
+  "auditSha256": "0c92f8b52cf09a11dbfeac05fee547a239666d4cd14050256241707989e6aa55"
+}

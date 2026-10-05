@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_blue_coral_ink_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f2605d1e1a4a1b64c8386deffc34caddfcfe65552e1e97ea02f5f5fac44e9ced",
+  "previewSha256": "fec468717b1f776fb8453197a71fe59481c62605f890ee8bf42571a3213d62e3",
+  "preview": "manga_v2_blue_coral_ink_burst.mp4",
+  "bytes": 14146,
+  "visiblePixels": 7825,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_zoom_plus",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Blue magnifier silhouette and plus mark are both clear at the editor preview size.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "c77b52fd92f9d4e3067defdccded0e2069b39e6453c15a4de6585d274d1db48c",
+  "previewSha256": "cfe2a13d78059362af59b71dc87b66d9189e37ca54fa83ad0955f7f65176bae9",
+  "auditSha256": "876465c5dd5c79ca82c43c3440746fa6538bd77cdba3d82645655dfae1234512"
+}

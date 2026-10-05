@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_wildflowers",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "9628e0d54fbfee847ef538de8d0e84f314a28ca7549ad495dd641358dcac2fbe",
+  "previewSha256": "f922a248403ee179121203ade4b6d91073aa062f63c52a4464ece93be78da1c4",
+  "preview": "botanical_wildflowers.mp4",
+  "bytes": 5030,
+  "visiblePixels": 2389,
+  "changedPixels": 0,
+  "motionVisible": false
+}

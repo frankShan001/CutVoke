@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_portal",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ff8a365a00aadf5ec0e76d5b08b469c073f465066358a79a6a3c022b11871e8c",
+  "previewSha256": "7dd41ab46f39d0c991b10d0bf7dc337a52c810e0e16ba08446a1a883ec3a2477",
+  "preview": "fxoverlay_pixel_portal.mp4",
+  "bytes": 13594,
+  "visiblePixels": 11274,
+  "changedPixels": 0,
+  "motionVisible": false
+}

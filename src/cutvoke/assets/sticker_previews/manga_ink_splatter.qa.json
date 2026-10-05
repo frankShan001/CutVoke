@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_ink_splatter",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "8f4709a81fc54067afbcf85ef5719d8de9d325bdfc63e76278331758823fc1f3",
+  "previewSha256": "bb85cde0ffefddd80fac367482ffc6deeb98058cd8bcb5ab24f678f9deb7163a",
+  "preview": "manga_ink_splatter.mp4",
+  "bytes": 6447,
+  "visiblePixels": 2690,
+  "changedPixels": 0,
+  "motionVisible": false
+}

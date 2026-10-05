@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.sports_basketball",
+      "decision": "approved",
+      "sourceSha256": "96e70282741ad6c69fc43ee914d5bed7393c259c330b90f25c1a0bdc50b4359e",
+      "previewSha256": "56e409d493d055080c4569a9e599941f9c391aaebff54f50afb9bae6f26a2087",
+      "observation": "圆形橙色篮球与黑色分缝清晰，白色描边完整，棋盘底与实际画布合成均无杂点或裁切。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_soccer_ball",
+      "decision": "approved",
+      "sourceSha256": "962a6a1afceecd8e3bbf7902aa3f214a36cc38dac80e0863d3002b0dd1762e9f",
+      "previewSha256": "4447449ab8d3b514b340898d92b5fa11d1d2c62d2f06a07a37d04fa1d4d55d10",
+      "observation": "黑白足球面片分布完整，圆形轮廓居中，外描边在棋盘底和合成画面中保持干净。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_volleyball",
+      "decision": "approved",
+      "sourceSha256": "9a4e99893936bc21517973d423566e3bf6cebbb9a85268b73fc3b174da3aacd8",
+      "previewSha256": "acccc0ed4277721b0c0b6f482004a100d27792ee159b40468d5d3bc150206f4c",
+      "observation": "蓝黄白排球色带完整且彼此区分，球体无扁平变形，缩略图边缘没有串格痕迹。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_tennis_racket",
+      "decision": "approved",
+      "sourceSha256": "1d4a0703acc0cb5606b4505074f16c82da40e634721b4e27754a5571e73df1ca",
+      "previewSha256": "e6eb21df5aee72a1455d3b1d7e67eba7813ced89a7897bb10ca7a789a07c1304",
+      "observation": "网球拍线床与绿色网球分离可辨，球拍柄和拍框全部保留，画面合成无透明边缘污染。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_badminton",
+      "decision": "approved",
+      "sourceSha256": "1e1610b3dc9e6136761dddb274b5f0da4ea41d4de15b754c135d3fb39eaf2af2",
+      "previewSha256": "97ea4c6cd1e982e9f1a9f9ab953214441a818b9485b2a10899207acbb14e2c92",
+      "observation": "蓝框羽毛球拍与白色羽毛球轮廓清楚，两件小物在同格内完整，棋盘底上没有邻格残片。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_baseball",
+      "decision": "approved",
+      "sourceSha256": "95b2e2840b3016fe8e8166d44bf0bde6df7ca68e00c8e5bd71d0174a2c369d7b",
+      "previewSha256": "85cb3e20725c7a0ee4edf5f718965c32f09e335db092ebd96f783d46e829a59a",
+      "observation": "棒球棒、带红缝的白球和棕色手套均可辨认，组合未被裁切，缩放后边缘仍干净。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_golf",
+      "decision": "approved",
+      "sourceSha256": "86d0d18f7d6a90d9dbe5f8bad7c4a481f6c2621ce79bbf5cd9150d61b0b740c2",
+      "previewSha256": "c816006f378b0254ab5c3b37ce86eacaceab8d0db292b4f15613c2ceba37b909",
+      "observation": "高尔夫球杆、球与红色球座均在画面内，灰色杆头和白球分离明确，合成预览没有底色块。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_boxing_gloves",
+      "decision": "approved",
+      "sourceSha256": "d2ead3415bd698d5b0c5fa9db213b55314ab3eed854c723519c0d6038462de2c",
+      "previewSha256": "e180f5b4b333b215dd2daf4fd6f24dbb9229c4a58e032c7bacda4f3ba6d390b3",
+      "observation": "一对红色拳击手套形状明确，黑色腕带细节完整，白描边干净且未碰到裁切边。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_trophy",
+      "decision": "approved",
+      "sourceSha256": "00ccec732a735643c7c52012f946f48a819feaf24e2d4de8277bb96c20f86100",
+      "previewSha256": "c0c5313636608df8ecf043497f668353f08b2d03e44850cbb6537ac877a08f61",
+      "observation": "金色奖杯的杯口、双耳和底座结构完整，缩小后仍易识别，未出现背景残色。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_medal",
+      "decision": "approved",
+      "sourceSha256": "21ff37f9665c8e9a6e8706e24cb72d6a32d70f07b9cfb0afbc1ee02a9f3bb33e",
+      "previewSha256": "91d126333ca0979c8ffb2889d0cb716d7486c86acd23c5c8c1433b2e0217b266",
+      "observation": "蓝金绶带和圆形奖章均完整，叶冠浮雕在缩略图中可见，底部没有裁切。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_running_shoe",
+      "decision": "approved",
+      "sourceSha256": "a0b3fc408232fcefff0bb8f6aabd89b7e1de46c18359f7043eed76c2b65e7ce2",
+      "previewSha256": "fe2697c9639f8436e9218ebb788153e42dff9f36cf0669928a55b4582a366976",
+      "observation": "白色跑鞋的珊瑚色装饰、鞋带和鞋底轮廓清楚，横向构图完整且适合画面叠加。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_dumbbell",
+      "decision": "approved",
+      "sourceSha256": "bcda0273402b85b232490c57d4c932f442eb6305c74a8f3236a7687c58a5b3ad",
+      "previewSha256": "f33ad5abaaa2292a5e5481e929e7403b9e42e750ba7f187340a297612a2fa9fc",
+      "observation": "哑铃两端配重与中间金属杆连续完整，红色端盖对应一致，缩小预览仍易辨认。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_skateboard",
+      "decision": "approved",
+      "sourceSha256": "de24447f7b36032ecd80545751efe6bb5959af1e8a2e40ed0c1d2ef4943678e0",
+      "previewSha256": "9dfdf61209723a991e64374223d31ce618af1fb46cd8b1c2b1a91cbc5c1c034a",
+      "observation": "彩色滑板板面、支架和四轮结构可辨，倾斜轮廓完整，透明背景中无孤立杂点。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_surfboard",
+      "decision": "approved",
+      "sourceSha256": "20c50b4590a2f9ed09a6be4ab9cc9b5ab9ecc492e49abc331373741c7b20f59d",
+      "previewSha256": "e984f3e830cdd8ca5dcb0a4c708380d6837d9a2003bce96e830634010f4e21d3",
+      "observation": "青绿色冲浪板与卷起的白蓝浪花形成清楚组合，浪花边缘与板尖均完整。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_whistle",
+      "decision": "approved",
+      "sourceSha256": "c83623e9c143c89048ed30e3c49450652b5ed385fa00f32634b5bf7e13e66b6a",
+      "previewSha256": "081b8fe5eae2ddf6456e65c21fbc2c4a94251d760b860c9473e5d3647abad41a",
+      "observation": "银色裁判哨、吹口和红色挂绳层次清楚，挂绳完整，实际合成没有白底或黑边。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.sports_stopwatch",
+      "decision": "approved",
+      "sourceSha256": "2dded051960ad0c4d8471ea88872cdfadbff0545b066c5641856ba9e54233bf2",
+      "previewSha256": "238c9635f20f1f59b71b945509148f3ea4f83447497a9ce00070464029a446e6",
+      "observation": "红白秒表外壳、表盘刻度和指针清楚，顶部按钮保留，圆形外缘未被裁切。"
+    }
+  ]
+}

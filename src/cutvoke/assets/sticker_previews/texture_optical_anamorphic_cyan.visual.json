@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_anamorphic_cyan",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "青色横向光束颜色与金色版本明显区分，透明边缘干净，画面中段可辨识。",
+  "sourceSha256": "838d2a7559bbfd54dc6163d7aeb77c8188c40938a75ed4837e0af64d59be1e2b",
+  "previewSha256": "cc5c0db09ab83f456574872eec0cd8dc2ab5750fcd528c8737301d3405e8480d",
+  "auditSha256": "c4e7c744bd28e8d9235ee8eb534ce3d2e4bd4713f20d21ddac5a8de5ed4d73a6"
+}

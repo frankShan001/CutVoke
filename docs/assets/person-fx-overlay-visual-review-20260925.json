@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.personfx_aura_amber",
+      "decision": "approved",
+      "sourceSha256": "bab3bfcaa16e25515f072eeb4a98c9a5643f80cb3445fc121d91a0fcc8a34d01",
+      "previewSha256": "e02ba3f0b0608f807ef15fdb18506914783e7e9e18fd8a7b5b37c0bd2ffd86ea",
+      "observation": "Warm amber arc remains crisp on both dark and light backgrounds, with intentional open space at the top."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_halo_cyan",
+      "decision": "approved",
+      "sourceSha256": "123dd79fff624643c639d78789a8bbca41c6ca149f3b15513f753e5f189a13d0",
+      "previewSha256": "173dc4bcd26587643774f1ffa0eeef1812eb1868727f34535c9892a131b34b33",
+      "observation": "Cyan neon ring is clean and even, and its thin glow stays legible across the light and dark halves."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_bokeh_halo",
+      "decision": "approved",
+      "sourceSha256": "3f87eae726f958551bef39ca5354c4d6d2932b15af652073354fec9c5dd452a7",
+      "previewSha256": "fc158d9a59d9e15c4ba6857bee3759b17152eda6dae7a3391dcbd2661312a9b2",
+      "observation": "Soft peach and lilac bokeh forms a distinct open halo without an opaque center or background."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_arc_electric",
+      "decision": "approved",
+      "sourceSha256": "f82f78196b20d3b59ba084cf2e745da4c582e12ddbc979b8d31f8c12d4216032",
+      "previewSha256": "76e0ed9e040c3b2c1e58b22dd727b1c1ecda3f73e14dae11467cb9cf1d7261f9",
+      "observation": "Cyan-violet electric arcs are clearly separated from the smoother rings and retain clean alpha edges."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_orbit_motes",
+      "decision": "approved",
+      "sourceSha256": "c6147177f104a9082d3c9634eb80ddebcc816dafd12103d4076ab1970c378609",
+      "previewSha256": "c94997091c60d03b1c19a351b1f0471ab3adc42c97f5bd6ec0036bb7c5eb488b",
+      "observation": "Sparse amber motes read as separate orbiting points, with restrained glow and no cell-edge bleed."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_manga_rays",
+      "decision": "approved",
+      "sourceSha256": "f25c1d7cb2f386684ac701a7ef0d0679dd2b59c5a41cd217e2d812f10a0475da",
+      "previewSha256": "d983a613f9ce2ba6db7f1df7cb78722dc19bdf31fd0461df2a4ba0ecb1bb5aad",
+      "observation": "High-contrast manga rays are distinct from the luminous overlays and remain visible on the light preview half."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_energy_crescent",
+      "decision": "approved",
+      "sourceSha256": "a1f64adcbf42e5a02e5a197b31070df9637c26d554738d8e64282365abe46349",
+      "previewSha256": "39bc15a7246e4f65f8a6ef32a76fa336ae2c370175db9cb0cfea25b7f362bb8b",
+      "observation": "Pearl crescent strokes have a clean silhouette and show strongly on the dark side of the composited preview."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_pulse_rings",
+      "decision": "approved",
+      "sourceSha256": "86cdbf6115f9b7a3097b2a6221689e8084169337ec39007261e5a045afa987f2",
+      "previewSha256": "335053bc72324efa97d4816eaaab9ffb1321476ece69b244ad50277c5103a5bc",
+      "observation": "Cyan scan-like pulse rings are clearly visible over both halves and differ from the single halo assets."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_scan_bands",
+      "decision": "approved",
+      "sourceSha256": "29d18c4cb883f3585ab7877dac29917de556c6dee0e3138f8f68059181e5bae0",
+      "previewSha256": "5b92e2fd0781bae1e4f704deb68dd07d91b3424690d6ab9fa7d9b00a3e1b70d7",
+      "observation": "Horizontal holographic bands have distinct broken scan marks and remain transparent between the rings."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_prismatic_ribbons",
+      "decision": "approved",
+      "sourceSha256": "caeaaa70de67c64fddf5ab7c7e42079c3b21b1c032fbc7f6be53a373ee0b7072",
+      "previewSha256": "e73966730d0e5ea82fc84a0a2b1794df3bfb49f5edbeb8446f8126197a7d4e91",
+      "observation": "Prismatic ribbon strokes have a separate flowing silhouette and avoid filling the frame with an opaque color wash."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_orbit_constellation",
+      "decision": "approved",
+      "sourceSha256": "e4296dd08788976198c44938b1c0a9f5803cc77228a98b7f4e61cf38bb3d0e28",
+      "previewSha256": "99e1054b2f341eeaba246ddde45d6d7b7a946e76792b6df8dfdfcd6321c4e71b",
+      "observation": "Blue orbit path and colored points are individually legible and do not merge with the bokeh halo."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_spotlight_violet",
+      "decision": "approved",
+      "sourceSha256": "8ed0c15ca7b8afed5c42b8a978c792575d187aa57cacaafde5ccb4d4edb8b8ad",
+      "previewSha256": "b63ab1f5d0a013e8c4138c86f01d722d5898c05cfe00ddf2d0c4db465dcdf68b",
+      "observation": "Violet spotlight has a clear downward beam and elliptical base, with smooth transparency outside its glow."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_chromatic_afterimage",
+      "decision": "approved",
+      "sourceSha256": "cc7bca49fca6b4da5fb136c9c1e6d3da175200ff0ea2598b1086b01fef9b9a7c",
+      "previewSha256": "64c3d38153bea8f3d04426eaa31cd85ae1dbf97c6faefc51fbc598392794ea04",
+      "observation": "Short cyan and magenta streaks remain separated and read as directional afterimages on both backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_energy_ribbons",
+      "decision": "approved",
+      "sourceSha256": "a02b503d6dca61cf6d80e22ae337495b4bec19c344105ae94ea3f02c552a64a7",
+      "previewSha256": "9766cc36b645f86dc025ac5edd405bcd52ac97f6a1ff7081af8d19106844bfb1",
+      "observation": "Paired teal ribbons frame an empty center and keep their edges distinct against both checkerboard tones."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_shockwave_gold",
+      "decision": "approved",
+      "sourceSha256": "e590f95972bfa8b0f392d9487667eea370ca4cc0881b3fc7873e45a127aa53ac",
+      "previewSha256": "a86241d0501097540e368f97cf82c0c1a50f7d0410d96a7a879fa9fcfee5be89",
+      "observation": "Thin golden concentric waves have a clear center and remain separate from the amber aura ring."
+    },
+    {
+      "stickerId": "cutvoke.sticker.personfx_pixel_shards",
+      "decision": "approved",
+      "sourceSha256": "8e64d2ef16b222479b7b5608ccc67c29bb7c4df32e622db7270a1f50019a7814",
+      "previewSha256": "7224ca08433755cf15086af0a3c0d90a25d78411641461452573d6ab8a5b7b79",
+      "observation": "The cyan-violet shards are varied in size, cleanly isolated, and visibly distinct from the smooth line effects."
+    }
+  ]
+}

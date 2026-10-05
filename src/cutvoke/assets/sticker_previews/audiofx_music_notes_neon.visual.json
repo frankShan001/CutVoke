@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_music_notes_neon",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "Cyan and magenta note forms follow a curved path and read as a distinct music accent.",
+  "sourceSha256": "386c55d1d612715faa77fa8d96c322aa6edcf26ed8e3d475aa9296a81417c7e3",
+  "previewSha256": "63488978972adb25c0d2ea7097b1ad04873bb224cf96c5ba08928fe36d61a86d",
+  "auditSha256": "a91d0e70753c858a51ba1ce201e56e99eef4646c73fa3832afc5a7894cf0fea2"
+}

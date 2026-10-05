@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.wipeup",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.939,
+  "exportSha256": "43518553e7ec7e11c634662a64baae4a717ee658ba583d37e77fe219f3b24d04",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "43518553e7ec7e11c634662a64baae4a717ee658ba583d37e77fe219f3b24d04",
+  "auditExport": "transition-wipeup-v1-0-0.audit.mp4"
+}

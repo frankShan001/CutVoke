@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_joy",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Bright yellow smiling face with rays; facial expression reads clearly at sticker scale.",
+  "sourceSha256": "f6d189896766a658ca25c42cb0ca7d44952e593ecc70e261aa068cf3164a46fe",
+  "previewSha256": "3858ad55a7202930e8988eb95e4ea400fc91d67f0b373040c4a1d95de0e8f178",
+  "auditSha256": "773c7f508076f94abf30e207f5ae21017cd9e353d8595a3c74d29011e2024de2"
+}

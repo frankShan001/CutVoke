@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_rainbow",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5b121bfa6c89e0c69ae89b659974c36f03b2d6e117557d70f7480a7748794c36",
+  "previewSha256": "407e5863999ac08f891bfcbb14963d30b999e07b49ef755a0df3d72dccf7e80d",
+  "preview": "decor_rainbow.mp4",
+  "bytes": 4457,
+  "visiblePixels": 2027,
+  "changedPixels": 0,
+  "motionVisible": false
+}

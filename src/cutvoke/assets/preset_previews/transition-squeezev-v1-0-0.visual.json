@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.squeezev",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.squeezev",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "运镜",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "纵向压缩方向与名称相符；在0.5–1.033s逐步压为中央细条，f31完整到新画面，没有末帧残条/黑缝。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "86cf84cb04fd0ce113dc11a540337d482a94661577699f1f07be806993dfd32f",
+  "motionPreviewSha256": "d29aa10a1be2df8c1dd9bfe62ce0e4ae16a95e8c70de9854b786a255053a8c5a",
+  "auditSha256": "bd502457e6c61b07e086113a73fdb6ac2e33bfae881a4946a03c7dcf378b9378",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_transition_squeezev.png",
+  "libraryReviewSheetSha256": "55ea68a72eae7c920b1b9060efe7e8d1ec533b93683fc08cd7cb0e3632f4a67c"
+}

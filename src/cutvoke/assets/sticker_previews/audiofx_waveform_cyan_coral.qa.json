@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_waveform_cyan_coral",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "8861bce21af1dcb174902beb3e9e46c1367a86a74a3e9c834b9c3be714c682e3",
+  "previewSha256": "15c620e83967f0776456d3745a3c7b9f80b2612493a776d11b8ce8b162ca1174",
+  "preview": "audiofx_waveform_cyan_coral.mp4",
+  "bytes": 7962,
+  "visiblePixels": 4277,
+  "changedPixels": 0,
+  "motionVisible": false
+}

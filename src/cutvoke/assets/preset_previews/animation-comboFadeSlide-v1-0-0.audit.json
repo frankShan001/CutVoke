@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.comboFadeSlide",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "71623edd78b58951eaf88586aab134a79d3da524d0e63180933ddc38b3826b13",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "71623edd78b58951eaf88586aab134a79d3da524d0e63180933ddc38b3826b13",
+  "auditExport": "animation-comboFadeSlide-v1-0-0.audit.mp4"
+}

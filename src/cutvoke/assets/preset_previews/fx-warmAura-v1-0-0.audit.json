@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.warmAura",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "intensity",
+    "value": 0.8
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "c2ff79aa93760a2873ac1703350c7b0ce3c998c735f058c8f089cb04b545e1bf",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "c2ff79aa93760a2873ac1703350c7b0ce3c998c735f058c8f089cb04b545e1bf",
+  "auditExport": "fx-warmAura-v1-0-0.audit.mp4"
+}

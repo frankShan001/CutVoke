@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "检查 alpha 原图、浅深背景合成与 FFmpeg 渲染器样片；确认高对比边缘、透明间隙和格边留白。复杂实拍画面验收另计。",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.manga_speed_impact",
+      "decision": "approved",
+      "sourceSha256": "33bf5a23d866da7c65bd9b3307ead20e11f4546db7f60aafd84e1d1ee7a1b822",
+      "previewSha256": "08d3987ca458da216ed2ff2798d8efd8f82cf3c12c65595507af031610959792",
+      "observation": "青蓝与金黄主爆点在缩小后仍集中清楚，珊瑚尖刺和暖白边缘在浅深底均可辨认，透明间隙与裁切边界正常。"
+    }
+  ]
+}

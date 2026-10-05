@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bokeh_pastel",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "Separated translucent pastel bokeh discs with varied sizes; the loose cluster reads as optical light rather than confetti.",
+  "sourceSha256": "f4d1e2582f394d49fa6371fd60650ff5c10859ae12036ccd5bb9af4fa7e11f0f",
+  "previewSha256": "ad8ea34be8d53e478d88ae18dc00422ff0596fe1881f0790a810956843c2474a",
+  "auditSha256": "cfc4b6d3b7816830fc11c9d54ec07dace03d830eaf25beb10415d941d0895037"
+}

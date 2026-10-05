@@ -1,0 +1,25 @@
+{
+  "presetId": "cutvoke.preset.transition.crossfade",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.crossfade",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 91.927,
+  "maxSampledMeanRgbDifference": 91.927,
+  "coverSha256": "7cfe58c31c3f4797089a9a2fbebbc53ff6652a502892818937d600241cdcae2b",
+  "previewSha256": "41ae9600af50b777bc2e0492dc40c8d11c9f757bd1bae0a580ed8d88451dfd91",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

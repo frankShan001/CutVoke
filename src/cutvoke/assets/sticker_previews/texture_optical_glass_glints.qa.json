@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_glass_glints",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "b0e2751ef3e267b368df772cafef81550caaa9060cff4fdb1a9351503ae4f9bf",
+  "previewSha256": "c63041f0ff96fbc261a4cc7fee1b13e00f943dc7c062bbf95edcb2148d5dfc49",
+  "preview": "texture_optical_glass_glints.mp4",
+  "bytes": 7847,
+  "visiblePixels": 5371,
+  "changedPixels": 0,
+  "motionVisible": false
+}

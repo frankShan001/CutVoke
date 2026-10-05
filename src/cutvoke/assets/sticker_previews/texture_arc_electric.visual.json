@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_arc_electric",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "A clean branching cyan electric arc with sharp bends and visible glow; silhouette remains distinct on both dark and light backgrounds.",
+  "sourceSha256": "0f13a556e966166c6716f88444196ec9f9b3019b6e06533af01fac7a4e0afa2b",
+  "previewSha256": "8bdb818d2645b9bf27ece7a684ab218d0aca83cc83644c115ef9cc2adf30c4eb",
+  "auditSha256": "e32a7b06e273dc20b633fb716c0d6726f842c001bbd1a812ebbbee9118662e5e"
+}

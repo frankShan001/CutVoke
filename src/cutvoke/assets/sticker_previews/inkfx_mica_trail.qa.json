@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_mica_trail",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "70e3123b8dc1e015cabfe7918cf77fe0263262608a3451df9ba941148270c74c",
+  "previewSha256": "dae88c4cdd0d3acc929265555a7b70dca82b4595a9b2134fc94673b43a2962eb",
+  "preview": "inkfx_mica_trail.mp4",
+  "bytes": 11130,
+  "visiblePixels": 4618,
+  "changedPixels": 0,
+  "motionVisible": false
+}

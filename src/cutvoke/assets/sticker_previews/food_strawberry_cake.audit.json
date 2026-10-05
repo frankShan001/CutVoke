@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_strawberry_cake",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "25d943293c7d4f7b64ff5e4c05d722aeba43b209c7827459f363e01a62628cb5",
+  "previewSha256": "216405e01df83c4f95cea0115d7b5fc9a9368c283bda96a69f73eebbca555183",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6332,
+  "visiblePixels": 4971,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3221,
+    "steady_entry": 4971,
+    "steady_exit": 4971,
+    "exit": 3222
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3221,
+      "withoutFade": 4971
+    },
+    "steady_entry": {
+      "withFade": 4971,
+      "withoutFade": 4971
+    },
+    "steady_exit": {
+      "withFade": 4971,
+      "withoutFade": 4971
+    },
+    "exit": {
+      "withFade": 3222,
+      "withoutFade": 4971
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.22,
+    0.222
+  ],
+  "auditExport": "food_strawberry_cake.audit.mp4",
+  "auditExportSha256": "eceaf8b2d06855bcd8b42141e5919e98dd8f2ce2641aba4356c0d6d4a5c60550"
+}

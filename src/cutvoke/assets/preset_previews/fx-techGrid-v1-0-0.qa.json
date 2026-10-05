@@ -1,0 +1,27 @@
+{
+  "presetId": "cutvoke.preset.fx.techGrid",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.grid",
+      "version": "1.0.0",
+      "params": {
+        "cell": 48,
+        "thickness": 3,
+        "opacity": 0.8,
+        "color": "white"
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 17.063,
+  "maxSampledMeanRgbDifference": 17.063,
+  "coverSha256": "4994970fedbae2be36896e170b32b8a60bdb03a5ef2394690070eeb001970843",
+  "previewSha256": "320f02d88c1e2451e4c68286b2925f335b8a07cebf38f618a543c38243af093b",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

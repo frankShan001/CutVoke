@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.circleAperture",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.mask",
+  "params": {
+    "shape": "circle",
+    "x": 0.5,
+    "y": 0.5,
+    "w": 0.68,
+    "h": 0.84,
+    "aspectMode": "circle",
+    "feather": 0.025,
+    "invert": false
+  },
+  "subcategory": "基础",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "修复后默认 aspectMode=circle；中央聚焦视窗为真圆，面积较 circleMask 更大，边缘平滑、外围正确隐藏，12 时点无形状或位置闪跳。 实际库预览的 0–0.6s 为原图对照，0.7–1.0s 可清晰看到相应效果。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "cbc2784dbdaedc0d4bde79329b84206c90a0f9b012ca98919cabff36e1620065",
+  "motionPreviewSha256": "47545f4c9c07313803db16f974ca612e097189bba64d10999b1167400d4123fa",
+  "auditSha256": "5bd2e667293cdf4871499494a7516bd9737097e3f1060eb1c77b47ab83bf73de",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_fx_circleAperture.png",
+  "libraryReviewSheetSha256": "a098ea17356e00702695ff1a8c7973e97da222428c63f93196c0752ecdeabf0b"
+}

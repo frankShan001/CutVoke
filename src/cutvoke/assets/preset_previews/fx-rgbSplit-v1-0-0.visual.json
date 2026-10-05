@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.rgbSplit",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.rgbsplit",
+  "params": {
+    "offset": 14
+  },
+  "subcategory": "动感",
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "observation": "红蓝通道仅作水平分离，绿色几何线维持基准位置；和对角色差预设有明确视觉区别。",
+  "method": "Manual comparison of full dynamic previews and aligned motion sheets",
+  "coverSha256": "98ba0087919f41dafbfde3fdcaf9e3ca4d61f6082a0a0e80464c9c6b3b0cc463",
+  "motionPreviewSha256": "3f3903d7f35c0922912314c7db42db403b9b94ee6bf99ea0725a3fab3719257d",
+  "auditSha256": "5227b561aecf3978cdd380e768021c11858b72fb0c1fbff94bd076949a7426f0"
+}

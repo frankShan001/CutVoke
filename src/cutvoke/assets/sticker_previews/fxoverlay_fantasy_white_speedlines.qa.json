@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_white_speedlines",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d3fad09c61e4c3f5b02b8a2df478b8f484b30429c2daa7fc5d6940c82cd83d91",
+  "previewSha256": "00977bd8c757e0fcea7bcf62c91fea19e5834ff370ac0712f567df8ae72f77e8",
+  "preview": "fxoverlay_fantasy_white_speedlines.mp4",
+  "bytes": 10082,
+  "visiblePixels": 5352,
+  "changedPixels": 0,
+  "motionVisible": false
+}

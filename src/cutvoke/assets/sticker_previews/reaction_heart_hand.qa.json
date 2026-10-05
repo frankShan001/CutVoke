@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_heart_hand",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "9819143a07d761a09111430b012efa064d012bc6fea85248f9e679bb6221fb43",
+  "previewSha256": "3ea3cc6c09fa2bd2d314028d4f617ad55306f9a9c46b59387aee820bc6cba5a8",
+  "preview": "reaction_heart_hand.mp4",
+  "bytes": 4377,
+  "visiblePixels": 1993,
+  "changedPixels": 0,
+  "motionVisible": false
+}

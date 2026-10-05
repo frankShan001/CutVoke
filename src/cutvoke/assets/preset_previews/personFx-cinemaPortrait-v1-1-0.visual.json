@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.cinemaPortrait",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.tint",
+  "params": {
+    "hue": 165,
+    "saturation": 0.82,
+    "intensity": 0.16,
+    "lightness": false
+  },
+  "subcategory": "人物色彩",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A darker teal-and-rose cinematic grade is visible on the treated subject and differs from the brighter cool look.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "5960622df5a3da2ccb0191db217bd086045f0b580792085c27ef13e95047726a",
+  "motionPreviewSha256": "b5d55ff3459cda324b4938dccb10f7b540568770906c2588b19494a3c76e281c",
+  "auditSha256": "88415fccd55e9fdc43d587d2ecd6341defff2ba30bbfa2319f4de71133173251"
+}

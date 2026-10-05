@@ -4,6 +4,9 @@ import {
   createContext,
   useContext,
   useReducer,
+  useMemo,
+  useRef,
+  useEffect,
   type ReactNode,
   type Dispatch,
 } from "react";
@@ -21,6 +24,7 @@ import { secsToRational } from "../lib/rational";
 import type { ProjectListItem } from "../lib/api";
 import type { EditLease } from "../lib/api";
 import type { ExportResult, Project, Rational } from "../types/api";
+import type { PreparedPreview } from "../lib/previewPreparation";
 
 export type Severity = "idle" | "ok" | "warn" | "err";
 
@@ -29,6 +33,8 @@ export interface Selection {
   clipId?: string;
   /** 时间线上的效果对象；存在时 clipId 仍指向效果所属片段。 */
   effectId?: string;
+  /** 效果栈下标，用于区分同一片段上相同 effectId 的多个实例。 */
+  effectIndex?: number;
   effectKind?: "transition" | "effect";
 }
 
@@ -53,6 +59,8 @@ export interface EditorState {
   projects: ProjectListItem[];
   currentId: string | null;
   project: Project | null;
+  opening: boolean;
+  preparedPreview: PreparedPreview | null;
   revision: string;
   serverUp: boolean;
   undoBlocked: boolean;
@@ -61,13 +69,19 @@ export interface EditorState {
   error: ApiFailure | null;
   status: { severity: Severity; text: string };
   selection: Selection | null;
+  /** 当前由字幕列表或预览画布选中的字幕；纯 UI 状态，不写入工程。 */
+  selectedCaptionId: string | null;
   lastSync: number;
   /** 播放头时间（秒），Player 与时间线标尺共享。 */
   playhead: number;
+  /** 标尺或播放头正在拖动；只影响预览调度，不写入工程。 */
+  scrubbing: boolean;
   /** 剪映式工具模式：select 选择 / cut 切割。 */
   toolMode: ToolMode;
   /** 磁吸吸附开关（默认开）。 */
   snapEnabled: boolean;
+  /** 主视频轨自动贴合：移动片段时按插入顺序压紧主轨；关闭后保留空隙。 */
+  mainTrackAutoFitEnabled: boolean;
   /** 当前顶层视图（首页 / 编辑器）。 */
   view: View;
   /** 当前工程的人类可读名称（空则回退 projectId）。 */
@@ -90,6 +104,9 @@ export type EditorAction =
   | { type: "PROJECTS_LOADED"; projects: ProjectListItem[] }
   | { type: "PROJECT_SELECTED"; projectId: string; name?: string }
   | { type: "PROJECT_LOADED"; project: Project }
+  | { type: "PREPARED_PREVIEW_SET"; preview: PreparedPreview | null }
+  | { type: "PROJECT_OPEN_READY"; projectId: string }
+  | { type: "PROJECT_CLOSED" }
   | { type: "REVISION_SET"; revision: string }
   | { type: "SVC_UP"; up: boolean }
   | { type: "UNDO_SET"; blocked: boolean }
@@ -101,8 +118,10 @@ export type EditorAction =
   | { type: "SYNC" }
   | { type: "RESET_SELECTION_FOR"; trackId: string | null }
   | { type: "PLAYHEAD_SET"; t: number }
+  | { type: "SCRUBBING_SET"; active: boolean }
   | { type: "TOOL_MODE_SET"; mode: ToolMode }
   | { type: "SNAP_TOGGLE" }
+  | { type: "MAIN_TRACK_AUTO_FIT_TOGGLE" }
   | { type: "VIEW_SET"; view: View }
   | { type: "PROJECT_NAME_SET"; name: string }
   | { type: "SYNC_STATE_SET"; syncState: SyncState }
@@ -110,12 +129,15 @@ export type EditorAction =
   | { type: "AGENT_PANEL_OPEN_SET"; open: boolean }
   | { type: "TEMPLATE_OPEN_SET"; open: boolean }
   | { type: "EDIT_LOCK_SET"; lease: EditLease | null }
-  | { type: "CAPTION_DRAFT_PREVIEW_SET"; preview: CaptionDraftPreview | null };
+  | { type: "CAPTION_DRAFT_PREVIEW_SET"; preview: CaptionDraftPreview | null }
+  | { type: "CAPTION_SELECTION_SET"; captionId: string | null };
 
 const initialState: EditorState = {
   projects: [],
   currentId: null,
   project: null,
+  opening: false,
+  preparedPreview: null,
   revision: "",
   serverUp: false,
   undoBlocked: false,
@@ -124,10 +146,13 @@ const initialState: EditorState = {
   error: null,
   status: { severity: "idle", text: "启动中…" },
   selection: null,
+  selectedCaptionId: null,
   lastSync: 0,
   playhead: 0,
+  scrubbing: false,
   toolMode: "select",
   snapEnabled: true,
+  mainTrackAutoFitEnabled: true,
   view: "home",
   projectName: "",
   syncState: "idle",
@@ -175,20 +200,40 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
       return {
         ...state,
         currentId: action.projectId,
+        project: null,
+        revision: "",
+        playhead: 0,
+        scrubbing: false,
+        error: null,
+        opening: true,
+        preparedPreview: null,
         projectName: action.name !== undefined ? action.name : state.projectName,
         selection: null,
+        selectedCaptionId: null,
         editLock: null,
         captionDraftPreview: null,
       };
     case "PROJECT_LOADED":
+      if (action.project.projectId !== state.currentId) return state;
       return {
         ...state,
         project: action.project,
         revision: action.project.revision,
         selection: reconcileSelection(action.project, state.selection),
+        selectedCaptionId: (action.project.sequence.captions || []).some(
+          (caption) => caption.id === state.selectedCaptionId,
+        ) ? state.selectedCaptionId : null,
         lastSync: Date.now(),
         syncState: "saved",
       };
+    case "PREPARED_PREVIEW_SET":
+      if (action.preview && action.preview.projectId !== state.currentId) return state;
+      return { ...state, preparedPreview: action.preview };
+    case "PROJECT_OPEN_READY":
+      return action.projectId === state.currentId ? { ...state, opening: false } : state;
+    case "PROJECT_CLOSED":
+      return { ...state, currentId: null, project: null, revision: "", playhead: 0,
+        scrubbing: false, preparedPreview: null, opening: false, error: null, editLock: null, view: "home" };
     case "REVISION_SET":
       return { ...state, revision: action.revision };
     case "SVC_UP":
@@ -209,12 +254,17 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
       return { ...state, lastSync: Date.now() };
     case "PLAYHEAD_SET":
       return { ...state, playhead: action.t };
+    case "SCRUBBING_SET":
+      return state.scrubbing === action.active ? state : { ...state, scrubbing: action.active };
     case "TOOL_MODE_SET":
       return { ...state, toolMode: action.mode };
     case "SNAP_TOGGLE":
       return { ...state, snapEnabled: !state.snapEnabled };
+    case "MAIN_TRACK_AUTO_FIT_TOGGLE":
+      return { ...state, mainTrackAutoFitEnabled: !state.mainTrackAutoFitEnabled };
     case "VIEW_SET":
-      return { ...state, view: action.view };
+      return { ...state, view: action.view,
+        ...(action.view === "home" ? { preparedPreview: null, opening: false, scrubbing: false } : {}) };
     case "PROJECT_NAME_SET":
       return { ...state, projectName: action.name };
     case "SYNC_STATE_SET":
@@ -234,6 +284,17 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
       };
     case "CAPTION_DRAFT_PREVIEW_SET":
       return { ...state, captionDraftPreview: action.preview };
+    case "CAPTION_SELECTION_SET": {
+      const draftCaptionId = state.captionDraftPreview?.captionId;
+      if (draftCaptionId && draftCaptionId === state.selectedCaptionId
+          && action.captionId !== state.selectedCaptionId) {
+        return {
+          ...state,
+          status: { severity: "warn", text: "当前字幕有未保存的文字或时间修改，请先保存或放弃" },
+        };
+      }
+      return { ...state, selectedCaptionId: action.captionId };
+    }
     case "RESET_SELECTION_FOR":
       if (!action.trackId) {
         return { ...state, selection: null };
@@ -253,18 +314,33 @@ interface EditorContextValue {
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
+const EditingContext = createContext<EditorContextValue | null>(null);
 
 export function EditorProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  useEffect(() => {
+    const url = state.preparedPreview?.url;
+    return () => { if (url?.startsWith("blob:")) URL.revokeObjectURL(url); };
+  }, [state.preparedPreview?.url]);
+  const editingState = useRef(state);
+  // Playback and polling clocks must not invalidate thousands of asset/clip rows.
+  // This snapshot updates for every editing change; event handlers read the live
+  // playhead through getLatestState() when they need a clock value.
+  if ((Object.keys(state) as (keyof EditorState)[]).some((key) =>
+    key !== "playhead" && key !== "lastSync" && state[key] !== editingState.current[key])) {
+    editingState.current = state;
+  }
+  const editingValue = useMemo(() => ({ state: editingState.current, dispatch }), [editingState.current, dispatch]);
   return (
     <EditorContext.Provider value={{ state, dispatch }}>
-      {children}
+      <EditingContext.Provider value={editingValue}>{children}</EditingContext.Provider>
     </EditorContext.Provider>
   );
 }
 
-export function useEditor(): EditorContextValue {
-  const ctx = useContext(EditorContext);
+/** subscribeToClock=false is for lists/toolbars that do not display a live clock. */
+export function useEditor(options?: { subscribeToClock?: boolean }): EditorContextValue {
+  const ctx = useContext(options?.subscribeToClock === false ? EditingContext : EditorContext);
   if (!ctx) throw new Error("useEditor must be used within EditorProvider");
   return ctx;
 }

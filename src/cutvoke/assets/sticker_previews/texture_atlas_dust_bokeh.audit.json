@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_dust_bokeh",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "431002098597770124c5f014ae38879c59f6094a634c4f0b376070f41bae8f10",
+  "previewSha256": "96c74a006d3645ef4c0a487e507f2430f3c3b8f48170e2219062d8c2b402da8f",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1246,
+  "visiblePixels": 978,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 196,
+    "steady_entry": 978,
+    "steady_exit": 977,
+    "exit": 196
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 196,
+      "withoutFade": 978
+    },
+    "steady_entry": {
+      "withFade": 978,
+      "withoutFade": 978
+    },
+    "steady_exit": {
+      "withFade": 977,
+      "withoutFade": 978
+    },
+    "exit": {
+      "withFade": 196,
+      "withoutFade": 978
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.076,
+    0.088
+  ],
+  "auditExport": "texture_atlas_dust_bokeh.audit.mp4",
+  "auditExportSha256": "e147844b9bee03240207bf233c6d93c44d1913ba5ce53c7db82dc9fa979cb60a"
+}

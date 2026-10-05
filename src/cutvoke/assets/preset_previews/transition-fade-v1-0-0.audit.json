@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.fade",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 3.059,
+  "exportSha256": "0e9b8cefa73bfed681b73eccd77b1ba97bdba5b711effaaf6a78294f359a7140",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "0e9b8cefa73bfed681b73eccd77b1ba97bdba5b711effaaf6a78294f359a7140",
+  "auditExport": "transition-fade-v1-0-0.audit.mp4"
+}

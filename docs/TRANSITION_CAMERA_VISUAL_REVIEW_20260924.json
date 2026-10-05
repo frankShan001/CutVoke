@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:46:00+08:00",
+  "method": "Manual comparison of 320x180 rendered covers and five transition frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; zoom excluded for poor middle-frame composition",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.transition.smoothright",
+      "decision": "approved",
+      "motionPreviewSha256": "534fdbe87a3ff41892fce2f870b26d8fd44d33f9585c053ea953659a8fbba1c0",
+      "observation": "0.55 至 0.95 秒旧画面向右平滑推走，新画面随之露出；与硬边滑动转场的清晰拼接线不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.smoothup",
+      "decision": "approved",
+      "motionPreviewSha256": "e076b8483f6a870e26cc88a13f0a21d3c2125cf3d23af631ef6916a82a575929",
+      "observation": "旧画面向上平滑推移，交界区域有过渡混合；方向及边缘表现均区别于右向平滑推移。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.squeezev",
+      "decision": "approved",
+      "motionPreviewSha256": "2372b7a47626b7c3d48c81828c4f622e1db19107645f7bbdce8478f03badef8d",
+      "observation": "旧画面从两侧向中间纵向收窄，露出新画面；中段保留细窄竖条，形态区别于滑入。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.slide",
+      "decision": "approved",
+      "motionPreviewSha256": "e14f7f2f237f7da574a0c8e7b56823ebc6ca22c330e605708cdf7fca46fe9787",
+      "observation": "左右两幅画面沿水平硬边交接，中段可见双方并排；与带混合边缘的平滑推移不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.slidedown",
+      "decision": "approved",
+      "motionPreviewSha256": "f11dcef3ac2345c777bf1ed9e74b1a9101d292ac124590bb4bdff9fc57aebdb9",
+      "observation": "新旧画面以水平硬边自上而下交接，中段上方先显示新画面；不同于上滑转场的反方向。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.slideup",
+      "decision": "approved",
+      "motionPreviewSha256": "876ad20fa1c5c9790c517f1310be5522146047bf40e49dc35e27549f4003b56e",
+      "observation": "新旧画面以水平硬边自下而上交接，中段下方先显示新画面；不同于平滑上移的混合边缘。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.smoothleft",
+      "decision": "approved",
+      "motionPreviewSha256": "4e298564afe3d412b2ef06cc1afedb6fba4eeaac13141e13e11393d9616e5a3b",
+      "observation": "旧画面向左平滑推走，新画面从右侧渐入；与右向平滑推移的进入方向相反。"
+    }
+  ]
+}

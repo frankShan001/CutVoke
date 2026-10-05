@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_soft_serve",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "fab395a94d7d6760c580d832cb06e7045fbb73f7a2f47e5e25a68953dc5a33a1",
+  "previewSha256": "aa38105e242bcf84b3563f93111440ad56108b45eaec4cddcc0575cfd7a1c0fa",
+  "preview": "food_soft_serve.mp4",
+  "bytes": 4673,
+  "visiblePixels": 2129,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_blue_paperclip",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "81b9450a6279c30e8d2b3fef4436c4de06e5877c6336c34c7cf025215cfd496e",
+  "previewSha256": "ace2398de9ccf7e3d1a11ab206f8243ebf79c5ee094ec019967461cb6def9fbf",
+  "preview": "scrapbook_blue_paperclip.mp4",
+  "bytes": 2990,
+  "visiblePixels": 296,
+  "changedPixels": 0,
+  "motionVisible": false
+}

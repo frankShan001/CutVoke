@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.dreamEcho",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.echo",
+  "params": {
+    "frames": 12,
+    "decay": 0.46
+  },
+  "subcategory": "人物残影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A long translucent drift follows the figure, with a softer and more gradual fade than the crisp echoes.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "dfb2aa179c7000552ca75a7f034e270e4c337b6b872213b9c3232f249caec744",
+  "motionPreviewSha256": "02494b5f1e953edd34291a9462ba88dd429c0fe822d37f30b457b03eec4cc126",
+  "auditSha256": "4a148e14f7750e74f2a48e7c2e2f1fa1002b0b58e313a1aa40505a6373c42fc0"
+}

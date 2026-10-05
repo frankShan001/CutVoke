@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_seafoam_refraction",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "df68a15bdfd0a9c5f0a942eb5b0a14b20acbc42e099cbd5224af5aa2deb75c2d",
+  "previewSha256": "cab2d9e7765027604ce52ed73eadb0037ccd08501d12ed75a1bf1e6e48e72b58",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6549,
+  "visiblePixels": 6474,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 4971,
+    "steady_entry": 6474,
+    "steady_exit": 6474,
+    "exit": 4952
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 4971,
+      "withoutFade": 6474
+    },
+    "steady_entry": {
+      "withFade": 6474,
+      "withoutFade": 6474
+    },
+    "steady_exit": {
+      "withFade": 6474,
+      "withoutFade": 6474
+    },
+    "exit": {
+      "withFade": 4952,
+      "withoutFade": 6474
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.129,
+    0.138
+  ],
+  "auditExport": "texture_bg_seafoam_refraction.audit.mp4",
+  "auditExportSha256": "8f641f05832d2ab823277f2e504b0a99d939304c7d0ec969022407b686c5e586"
+}

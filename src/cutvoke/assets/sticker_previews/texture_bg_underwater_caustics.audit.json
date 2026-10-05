@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_underwater_caustics",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "4ad54b9c50a93a155254d3cd5d6519a4a0b18da7c7fa07339fd54a595fef20bb",
+  "previewSha256": "fd0fe94884e36fbafdfc7bd5023132e41b033f4618fadab9b0a26eacebc8dbf5",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 7025,
+  "visiblePixels": 6555,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 6250,
+    "steady_entry": 6555,
+    "steady_exit": 6555,
+    "exit": 6250
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 6250,
+      "withoutFade": 6555
+    },
+    "steady_entry": {
+      "withFade": 6555,
+      "withoutFade": 6555
+    },
+    "steady_exit": {
+      "withFade": 6555,
+      "withoutFade": 6555
+    },
+    "exit": {
+      "withFade": 6250,
+      "withoutFade": 6555
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.257,
+    0.26
+  ],
+  "auditExport": "texture_bg_underwater_caustics.audit.mp4",
+  "auditExportSha256": "44d9a9a27babc6f9b393deea4de725faf86bdeae2b1ef58a9c65e6e56493664a"
+}

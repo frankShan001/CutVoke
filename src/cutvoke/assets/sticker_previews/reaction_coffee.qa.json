@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_coffee",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "036087da79d0e52e3771256858917535022af9f652b08fb9592267a4f952f2cc",
+  "previewSha256": "bed3d87f47bac6c0c38e9510276227fe4669d3cb3270aaf9a91623267c5c6dc4",
+  "preview": "reaction_coffee.mp4",
+  "bytes": 4168,
+  "visiblePixels": 2135,
+  "changedPixels": 0,
+  "motionVisible": false
+}

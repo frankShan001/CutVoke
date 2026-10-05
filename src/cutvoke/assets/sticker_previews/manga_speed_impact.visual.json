@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_speed_impact",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项比对透明原图、浅色/深色合成底图与实际渲染器样片，检查造型辨识、格线串入、边缘裁切、透明通道和背景对比；本次不代表复杂实拍素材的商业观感验收。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿，单独复审，原批次记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿并复审，原 13 项记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另纳入 2026-09-24 的 2×2 高对比图集审核记录。",
+  "observation": "青蓝与金黄主爆点在缩小后仍集中清楚，珊瑚尖刺和暖白边缘在浅深底均可辨认，透明间隙与裁切边界正常。",
+  "sourceSha256": "33bf5a23d866da7c65bd9b3307ead20e11f4546db7f60aafd84e1d1ee7a1b822",
+  "previewSha256": "08d3987ca458da216ed2ff2798d8efd8f82cf3c12c65595507af031610959792",
+  "auditSha256": "07a3c8c7cd9971f2912c86e78bb833a6baaabcc6b1f5a6d2d513a2aa81926df4"
+}

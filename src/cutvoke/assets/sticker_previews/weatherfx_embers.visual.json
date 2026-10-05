@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_embers",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "橙色短焰粒子有明暗核心，方向和大小变化可见。",
+  "sourceSha256": "3bc6b823db6e3fd2ec587d2a865dedb779ee3c0e0d5caf056658cbea054d4a36",
+  "previewSha256": "6a265ff5c9663cf67b77f0a89f2d3faa6de0061af289094d00f08339895b9782",
+  "auditSha256": "d0f96edd33fbeedcc224543c61526b0de12a624b4f5ea446792f38264882b84f"
+}

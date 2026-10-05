@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_spark_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "b0300f1d48788274cce66c50dfb51c8169ffab5c529bfa0c0d2843d8fce50527",
+  "previewSha256": "baf5d303fff891a67ad50b5856a46e47dac014d37a21ed472bd3365ee3330681",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3076,
+  "visiblePixels": 1984,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1509,
+    "steady_entry": 1984,
+    "steady_exit": 1984,
+    "exit": 1515
+  },
+  "previewExportMeanRgbDifferences": [
+    0.268,
+    0.238
+  ],
+  "auditExport": "manga_spark_burst.audit.mp4",
+  "auditExportSha256": "3adc1b5ebc04f299a0b958fe8c44488ad7c3f913541ce2535406079dad1d5793"
+}

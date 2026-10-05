@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_rose_satin",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "The rose satin folds have smooth highlights and clear depth without clipping into neighboring atlas cells.",
+  "sourceSha256": "0ddc4288a1f179d296b39ed607c28491bac74aaa930e7537bfc7198206642237",
+  "previewSha256": "a49b5536e76b2f52ac1c8f26e7f4434731f4e8806ea27952b5105a77f45411a7",
+  "auditSha256": "d6265bae501ea86df324a2674ce1fb3da870603b53740240859a20e40175aa18"
+}

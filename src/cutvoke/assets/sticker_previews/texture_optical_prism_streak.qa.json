@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_prism_streak",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "edf499f6b1fdb5c404b99326efaa1c61ae20672c45dc38a611d54b21f63d6580",
+  "previewSha256": "4f19641b7b3aa62ce23ce9b0462bbf648b9c43855616831d1d18fa29376c9593",
+  "preview": "texture_optical_prism_streak.mp4",
+  "bytes": 6727,
+  "visiblePixels": 2818,
+  "changedPixels": 0,
+  "motionVisible": false
+}

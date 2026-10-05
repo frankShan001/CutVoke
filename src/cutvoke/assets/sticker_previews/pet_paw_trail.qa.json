@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_paw_trail",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "36744b4e176dd80bd3c61869ba3670757c4b4059923e25224177bbfce694a7cb",
+  "previewSha256": "35adc69b5b6139bd5262c4acf4174659e461c67a1d11a3bcd80047f1282155b0",
+  "preview": "pet_paw_trail.mp4",
+  "bytes": 3481,
+  "visiblePixels": 520,
+  "changedPixels": 0,
+  "motionVisible": false
+}

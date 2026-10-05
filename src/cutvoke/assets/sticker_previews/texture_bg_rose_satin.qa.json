@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_rose_satin",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0ddc4288a1f179d296b39ed607c28491bac74aaa930e7537bfc7198206642237",
+  "previewSha256": "a49b5536e76b2f52ac1c8f26e7f4434731f4e8806ea27952b5105a77f45411a7",
+  "preview": "texture_bg_rose_satin.mp4",
+  "bytes": 16388,
+  "visiblePixels": 57600,
+  "changedPixels": 0,
+  "motionVisible": false
+}

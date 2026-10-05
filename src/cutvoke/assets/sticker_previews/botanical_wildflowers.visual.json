@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_wildflowers",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "白、黄、蓝紫小花形成有层次的花束，主体集中，缩小预览仍容易辨认。",
+  "sourceSha256": "9628e0d54fbfee847ef538de8d0e84f314a28ca7549ad495dd641358dcac2fbe",
+  "previewSha256": "f922a248403ee179121203ade4b6d91073aa062f63c52a4464ece93be78da1c4",
+  "auditSha256": "5635602f5afc9e305b966528ee1e2346be7320bdba3f89eeeccc2cc8184bfd3f"
+}

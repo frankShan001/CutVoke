@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_halation_peach",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6a99b083fe70d06a3de7f908538c58cef9024cbd74ffc97c2fba9e4a93df2fdf",
+  "previewSha256": "d244f3cc8dc0b157f0a200caf56dc0db53b685e5f4eb246df28ab50395c38ce5",
+  "preview": "cinematic_optical_halation_peach.mp4",
+  "bytes": 6291,
+  "visiblePixels": 4632,
+  "changedPixels": 0,
+  "motionVisible": false
+}

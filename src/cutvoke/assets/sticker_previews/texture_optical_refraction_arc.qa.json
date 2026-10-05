@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_refraction_arc",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "75c8618cf21bdb6ead54d48fb3d8b1e6dbe121257d378a99e6b7082cbd12244e",
+  "previewSha256": "bff4450acd43ff47bc87f5c906a6f04979e16a4acb740c7cf7547b38d78ec5bf",
+  "preview": "texture_optical_refraction_arc.mp4",
+  "bytes": 6365,
+  "visiblePixels": 3208,
+  "changedPixels": 0,
+  "motionVisible": false
+}

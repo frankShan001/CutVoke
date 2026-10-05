@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Manual comparison of five rendered frames per preset and full MP4 decode",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.fx.mirrorSwing",
+      "decision": "approved",
+      "motionPreviewSha256": "470e766d0ead8f59708de59ef33c506facddc23c406a5523079f331c9146d03e",
+      "observation": "The whole composition is horizontally reversed: the sun occupies the left side, and the frame rocks in the opposite visual direction from rhythm swing. The mirrored geography remains visible in both late motion frames, not merely a changed speed."
+    },
+    {
+      "presetId": "cutvoke.preset.fx.solarBeat",
+      "decision": "approved",
+      "motionPreviewSha256": "24e96b9a26ae76526523165e53c3798a4c2716f33b3a5115bc09763d66962d62",
+      "observation": "The late frames reduce the scene to broad warm amber and yellow blocks, then brighten in a distinct beat; this differs from full-color brightness flicker and black-and-white contour strobe."
+    }
+  ]
+}

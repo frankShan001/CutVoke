@@ -1,0 +1,31 @@
+{
+  "presetId": "cutvoke.preset.fx.splitLeft",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.mask",
+      "version": "1.0.0",
+      "params": {
+        "shape": "rect",
+        "x": 0,
+        "y": 0,
+        "w": 0.5,
+        "h": 1,
+        "feather": 0,
+        "invert": false
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 77.469,
+  "maxSampledMeanRgbDifference": 77.469,
+  "coverSha256": "658f027473f335048b803f7149c5731ce216542ae055bf6d889730cfcceeef35",
+  "previewSha256": "7fce9cd12f51ce534c5c2f6511277966be2f3dc9cb25132ecd1d75edb23052c2",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

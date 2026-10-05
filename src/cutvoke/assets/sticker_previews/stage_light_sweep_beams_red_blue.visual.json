@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_sweep_beams_red_blue",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "The red and blue fans stay separated around the central crossing.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "4030792374561228c3b34f76f529ccaa1c92be4233d51569abad4a05e8a6d1e5",
+  "previewSha256": "7955d321d1a812a04bc43f35aefdba69577599375cc3981f92104f382ec0eac4",
+  "auditSha256": "51e4813a8d32f7bfb3d72a0334aa87e54584e1d77f229d7c9bff02ca5c52100d"
+}

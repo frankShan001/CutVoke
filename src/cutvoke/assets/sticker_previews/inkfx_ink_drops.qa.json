@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_ink_drops",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "921da815c7a7a8ae74f5019e053bd224d1b0849ee2cf586cafd675389e050cff",
+  "previewSha256": "0ee28d1714451e89c276cde9f93bf34a5b5ace1c1ab15977fbebd93d8ad9bb42",
+  "preview": "inkfx_ink_drops.mp4",
+  "bytes": 8680,
+  "visiblePixels": 5166,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.motion_scale_retreat",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 1417,
+  "exportSha256": "357925e90f986616b09f9afd736e7ecafd1dd05605a7b6b228dbb1850581b387",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "357925e90f986616b09f9afd736e7ecafd1dd05605a7b6b228dbb1850581b387",
+  "auditExport": "text-motion_scale_retreat-v1-0-0.audit.mp4"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_sunflower",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "向日葵花盘、金色花瓣和叶片层次明确，缩至画布预览后主体仍醒目。",
+  "sourceSha256": "c185266d6da21500a6dc2bd1a20b12ce70448759e682178bfcf280c1beef8cf9",
+  "previewSha256": "61a72645631230321b69999eefbf492119fe3e70e2491aeb57f24a2f05a31941",
+  "auditSha256": "2712f16308eedf3dc0a19a69e322d01ce778258357ee531f77e844a148c46169"
+}

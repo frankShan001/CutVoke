@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_heart_bowl",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "食盆外轮廓、蓝边和爱心符号清楚，缩放后仍保持辨识度。",
+  "sourceSha256": "ce239dd6028f24942cac746c134a48a27d411f45b44cfbacb4b8fb8844c66d59",
+  "previewSha256": "527a5f148fee75b7fbda3ff0ab7fb0238f86ae1a6254f4676b67124e715a0807",
+  "auditSha256": "069f430af4f7ce85f3ed6de276088291b03ddee931184f0caa5896cdf6247810"
+}

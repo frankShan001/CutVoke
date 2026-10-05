@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_coral_impact_crack",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0a77d67b06c6330f095406e1acaa0ce3774e1b9bc8ab5395f060e9fc9f6a7c52",
+  "previewSha256": "6ca07233bf6231bdd8fb305ab78cfc579770eececd6c7cff1b83a5fbfb597984",
+  "preview": "manga_v2_coral_impact_crack.mp4",
+  "bytes": 12812,
+  "visiblePixels": 5172,
+  "changedPixels": 0,
+  "motionVisible": false
+}

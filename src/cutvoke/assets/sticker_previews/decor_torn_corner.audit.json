@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_torn_corner",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "3f094efd3869fb5a2f72519d464adc6d9ffd91dd0fb4c5808f3892dd7c399fb6",
+  "previewSha256": "97311d9d43f6b76585f4dba055c626253a47495a97e34898862e89f5c005f8f5",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5040,
+  "visiblePixels": 4015,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2400,
+    "steady_entry": 4015,
+    "steady_exit": 4014,
+    "exit": 2400
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "decor_torn_corner.audit.mp4",
+  "auditExportSha256": "8cfa8a2b087e51007c814792d44b06c4b9601431d4c518f2c3df36bac363abd6"
+}

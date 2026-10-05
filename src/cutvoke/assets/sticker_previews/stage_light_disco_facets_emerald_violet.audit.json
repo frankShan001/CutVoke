@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_disco_facets_emerald_violet",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "6b88e5ffd3475925d288e43b6c3bb1c9596cd0999aadbddb4d62a4f2a42913da",
+  "previewSha256": "b747571ce8e92f50db5e535b7ff71aab9977852493cf140b5c4962297d673457",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 8189,
+  "visiblePixels": 10051,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 7268,
+    "steady_entry": 10055,
+    "steady_exit": 10052,
+    "exit": 7281
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 7268,
+      "withoutFade": 10053
+    },
+    "steady_entry": {
+      "withFade": 10055,
+      "withoutFade": 10055
+    },
+    "steady_exit": {
+      "withFade": 10052,
+      "withoutFade": 10055
+    },
+    "exit": {
+      "withFade": 7281,
+      "withoutFade": 10055
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.55,
+    0.54
+  ],
+  "auditExport": "stage_light_disco_facets_emerald_violet.audit.mp4",
+  "auditExportSha256": "4e8e243f1ab0aa18ffa67962f20412b4d017c8732cb37fd9c3a4d5310c92ac66"
+}

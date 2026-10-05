@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_emerald_geode",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e1d5b916d3a4addca1314a20bf61c11765c54f5cf79cacd67c9b2c75a3bfd2d7",
+  "previewSha256": "b13ae30bf4bdb27d91fe6a79276586fcd149d4c1fb0984bc43cb2b632359447b",
+  "preview": "fxoverlay_refraction_emerald_geode.mp4",
+  "bytes": 18409,
+  "visiblePixels": 15931,
+  "changedPixels": 0,
+  "motionVisible": false
+}

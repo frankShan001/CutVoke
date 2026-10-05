@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_sparkles",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "cebca6e1ea8cfc07961a9002806fecfb2dfa3d12836b62980a84b4e9f23adc8a",
+  "previewSha256": "c9ca7396bcef7121a502136edb68933d41c37e45ff1f8f93d0049a9303448af5",
+  "preview": "decor_sparkles.mp4",
+  "bytes": 3969,
+  "visiblePixels": 851,
+  "changedPixels": 0,
+  "motionVisible": false
+}

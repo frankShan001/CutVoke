@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_bell_collar",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "8960dfba02feb53940582e807eeae106ec5929ba48e089e8ff755b292e951b59",
+  "previewSha256": "2424ccc921674b66fb1fb130b531d65898f6a2b8d07689802015b301c921fabf",
+  "preview": "pet_bell_collar.mp4",
+  "bytes": 3936,
+  "visiblePixels": 1488,
+  "changedPixels": 0,
+  "motionVisible": false
+}

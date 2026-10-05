@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_lime_spiral_motion",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "青柠绿螺旋粗细交替，中心收拢、外围断笔，渐变预览中边缘保持清晰。",
+  "sourceSha256": "3347e906cde7e8ecf6c9454342275256cd24b07d558c5e673fc20f6a7cf58730",
+  "previewSha256": "65d8e46fcc2a0ef3f5b9b5adaaa79ca4453de0c66ced994b748c7401f35fb86f",
+  "auditSha256": "186cdcf30fcb8d55145fd7b04f95174fb761110934f3dce11a9078c540c299e4"
+}

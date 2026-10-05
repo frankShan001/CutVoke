@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_rain_drops",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "705777f155d72206c525c39a5b09c913053dc5291805e7ee5148d20b155ef04d",
+  "previewSha256": "e265545fea86482bb6a5ecb19b49a47d4304828ae1fd9431b46e7948ba2a4c88",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2548,
+  "visiblePixels": 1747,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 651,
+    "steady_entry": 1749,
+    "steady_exit": 1749,
+    "exit": 652
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_v2_rain_drops.audit.mp4",
+  "auditExportSha256": "d69c59b69bbc15734f02809c9d7c48340b1564c8a999279e903888221ce2e639"
+}

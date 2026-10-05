@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_vermilion_eddy",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "96d769cfb16182a3e0c9c13c38b67f71c2d46d0f380a79a640665074e410c971",
+  "previewSha256": "f334fb90b9d8958d677917ed09900e6f4cb524383548fc06de6124235eeccdd6",
+  "preview": "inkfx_vermilion_eddy.mp4",
+  "bytes": 18678,
+  "visiblePixels": 14780,
+  "changedPixels": 16,
+  "motionVisible": false
+}

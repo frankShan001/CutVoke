@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_glass_wave",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "133633e4b3c0dd11c03753c22f561976db02101d4e73c57982349dcdd6e84114",
+  "previewSha256": "0ba07b95a5e2272731a5a4de4ad22c7d0b38deb2fd0ed6c5f79e5d7ed2f2da0f",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 9925,
+  "visiblePixels": 8728,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 2450,
+    "steady_entry": 8734,
+    "steady_exit": 8732,
+    "exit": 2456
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2450,
+      "withoutFade": 8734
+    },
+    "steady_entry": {
+      "withFade": 8734,
+      "withoutFade": 8734
+    },
+    "steady_exit": {
+      "withFade": 8732,
+      "withoutFade": 8730
+    },
+    "exit": {
+      "withFade": 2456,
+      "withoutFade": 8734
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.043,
+    0.047
+  ],
+  "auditExport": "promo_glass_wave.audit.mp4",
+  "auditExportSha256": "77cec1d2845f21253ff468b367afe580b5e0f8c1c8f2789a718bcd25503fbb6d"
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.iceAura",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.glow",
+  "params": {
+    "intensity": 1.5
+  },
+  "subcategory": "光影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "画面压成冷蓝和青色调，亮部保留蓝色光晕；编辑发光强度后边缘亮度改变，色相与暖光漫射清楚区分。",
+  "method": "Viewed the full-size fx-光影 cover contact sheet and aligned untreated/default/edited frames from every generated MP4; compared each visual to its category siblings and confirmed numeric editing changes the actual rendered frame.",
+  "coverSha256": "9e2acf9903692081c56d696127b2d81ab964c49f4ab7504c9a045ebe7555afc1",
+  "motionPreviewSha256": "ead074e3ad521edfe54af3665ea54a521fe9b3ba7636ebfc3c3664cf3ab109ab",
+  "auditSha256": "5f3261ac13ca3b0261752bc3fb032e3f3ffe79bfa4d80f4c6a0d07fbd15922a8"
+}

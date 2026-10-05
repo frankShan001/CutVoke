@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.animation.blinkBeat",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.blink",
+      "version": "1.0.0",
+      "params": {
+        "amplitude": 0.7,
+        "period": 2.0
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 78.904,
+  "maxSampledMeanRgbDifference": 78.902,
+  "coverSha256": "7f1fbe2f02d264fbcdebf13b3f52ac933bc359ececc702266f5dea81f8d2ea0a",
+  "previewSha256": "678cfb1882e7c122125b9174f38b4c2c93a239a594e21ba78dbf756d66fd4215",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_dust_motes",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "6be2cefe8fbdc7bcee4fd3050036e63318a4163ffc9504f257b9f00f66c29a39",
+  "previewSha256": "8909597ee05fdee6f9bc11d844b5f0bcad70598dca6906ad97802a95838912bc",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3837,
+  "visiblePixels": 3467,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1102,
+    "steady_entry": 3473,
+    "steady_exit": 3473,
+    "exit": 1099
+  },
+  "previewExportMeanRgbDifferences": [
+    0.163,
+    0.163
+  ],
+  "auditExport": "texture_v2_dust_motes.audit.mp4",
+  "auditExportSha256": "1580cd6b59d433e7302f870775e2ef367c2a65baf4c42724949e87d4accf6792"
+}

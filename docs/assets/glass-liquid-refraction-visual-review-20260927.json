@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_caustics_turquoise",
+      "decision": "approved",
+      "sourceSha256": "39976c2ec259b50ba64c5009769734b784a38c2ed6102b07400c338036954dd7",
+      "previewSha256": "dfffedfdfa2b6a774d1ff8443c267241b0e7559aca8c26f02b36ceff51805fc9",
+      "observation": "青绿色水纹焦散呈连续网状高光，在深浅渐变上均清晰；适合水面或折射叠加。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_liquidglass_violet",
+      "decision": "approved",
+      "sourceSha256": "318aac75f19ba8606625417594cb32caf4de0b331d3e0615831308f3ae63bc4e",
+      "previewSha256": "0e450f265c40a95d644d5a868955a83e21afef685743a1ce160fbb06be778427",
+      "observation": "紫色玻璃带有多处透明空隙和柔和高光，卷曲轮廓明确，和规则水纹不同。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_oilslick_iridescent",
+      "decision": "approved",
+      "sourceSha256": "c5c3e97c5d6f5d3cc5b4865123b7b6ac55b070c4b6ff78171f1490854e789a6f",
+      "previewSha256": "04755f571b86db78998451dd949ee2dffc5180a4878b0fb67ed97828c4f43159",
+      "observation": "虹彩油膜以薄膜形态呈现，多色过渡可辨；深色背景上边缘更鲜明。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_icefracture_cyan",
+      "decision": "approved",
+      "sourceSha256": "640fcd1a90921eb66a1cef8fe4be2cef9c64107b40f44455052cabf9e763c337",
+      "previewSha256": "b3ecea2ee3f48b7722a113d0045ad7fe373419748a38560a05e0092c16377fbc",
+      "observation": "冰晶分枝锐利、放射方向清楚；在浅色素材上对比偏低，应优先用于暗画面。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_molten_amber",
+      "decision": "approved",
+      "sourceSha256": "3831519bf8afd4e79851251b2ea892654ef6e27f4d8ff37aa9614e0f659d68bf",
+      "previewSha256": "25414f01cce55a163c79c5b6659f3f7f5a2adb7a4035e458db21769a23131d8e",
+      "observation": "琥珀熔璃形成高反差网状裂纹，橙金亮部和透明孔洞在两种背景上都可见。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_pearl_sheen",
+      "decision": "approved",
+      "sourceSha256": "27c8cb1a09f0caa5ee5b591b2a1464310374dd51439b549aef3f8e26c08a05b2",
+      "previewSha256": "b6a63119e2571226a906a710c3d40f0715cadca4e8c60d519608d60204b8b615",
+      "observation": "珍珠母贝弧线柔亮、半透明，作为柔光装饰可辨；浅色画面中存在感较弱。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_prism_shards",
+      "decision": "approved",
+      "sourceSha256": "240132c9c1f1da6af7edc011e729b7bc712543933aa9088fa8d7ad395827da13",
+      "previewSha256": "6389d3a184c1285d041aeb8640ec3a8bc06024c58001f5dc50bba20ccb12388c",
+      "observation": "棱镜碎片具有独立棱面和散布小晶片，中心结构清楚，颜色与其它光效区分明显。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_glass_ripples",
+      "decision": "approved",
+      "sourceSha256": "3bed47cce5977a885bd37876c0c1c5443ed0ee09dae2d43022d792e51c84305a",
+      "previewSha256": "84f309dc28c2ac71b688c263036019328aeddf9a4e1eeb5cea44316e68fd29db",
+      "observation": "透明玻璃涟漪由数层同心水纹构成，边缘细线在深色与浅色背景上均可识别。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_underwater_blue",
+      "decision": "approved",
+      "sourceSha256": "7feb6dbc1196044bd1678e22d71125381959ad840e10a7790d20e2b5d4247bb3",
+      "previewSha256": "a67e010434888f63b31bedb2491881ab64caa92e892c5ea6268499359267681a",
+      "observation": "深蓝焦散与青绿色水纹同属水下主题但色温更冷，纹理更密；适合作为明显的蓝色变体。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_holo_foil",
+      "decision": "approved",
+      "sourceSha256": "2ef3b72dcad9135302279d12f9c53530c4460a85b8ddee9eae8d8435a1ac5bfb",
+      "previewSha256": "fabc598f756d56cf392460f8bd385cde1922be5962b13cc559304a4eecde1085",
+      "observation": "青紫全息箔呈大块折叠面，青色与洋红高光分区清楚，可覆盖主体后方或画面边缘。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_heat_haze",
+      "decision": "approved",
+      "sourceSha256": "7d60d6f6fd23e76e7f7d003bd9281a4cf1c6b150b796dd929e9a020939e366d1",
+      "previewSha256": "d0eb3d6685e80ad75b09f8010fc24fec228937d1e10e1b8927cbcba176cf3000",
+      "observation": "橙色热浪表现为轻薄扭曲光带，暖色线条在渐变底上可见，适合作为局部热扰动。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_emerald_geode",
+      "decision": "approved",
+      "sourceSha256": "e1d5b916d3a4addca1314a20bf61c11765c54f5cf79cacd67c9b2c75a3bfd2d7",
+      "previewSha256": "b13ae30bf4bdb27d91fe6a79276586fcd149d4c1fb0984bc43cb2b632359447b",
+      "observation": "祖母绿晶簇呈立体碎晶集合，中心高光和深绿阴影清晰；主体较集中，适合局部点缀。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_brushed_silver",
+      "decision": "approved",
+      "sourceSha256": "1e9a11d5291cf74b65d10f1b52926afeb0dfca3ad830a0d13acd7f78709b9e8f",
+      "previewSha256": "e581e2104f8557bea60b1abe91302fb23e278588ff803f27073d4fd6deea939a",
+      "observation": "银色拉丝纹理有连续方向性的金属褶面，浅底对比偏弱，深色画面效果更明显。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_soapfilm_bubbles",
+      "decision": "approved",
+      "sourceSha256": "689644f92e671fa498237d0e2ca4d3d6892ca32917485428c704282e7e5596e1",
+      "previewSha256": "02f8788886bee71accd56e2601f8fa50d7531c311e89f7935ab602c0eeaca195",
+      "observation": "肥皂膜泡泡大小有层次，虹彩边缘明确且中心保持半透明，适合轻盈氛围叠加。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_liquid_chrome_rose",
+      "decision": "approved",
+      "sourceSha256": "db03fe18bdc48763156133956b12cb276f525578273e130abcbb07275ee4db9e",
+      "previewSha256": "2932f88da92787487918181eb40084412ba048a44c8977ac86da7b7904ec8049",
+      "observation": "玫瑰金液态铬呈动态飞溅轮廓，镜面高光清楚；较强反光适合短时强调。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_refraction_rainbow_caustics",
+      "decision": "approved",
+      "sourceSha256": "4a6f26f15b1a50f6e2772ceaeee9b36868b4d2eb0595889735b00922458c1e25",
+      "previewSha256": "b4f351faf5575875a3c6ba223f3b616dd8839060dc65bdbec19a7dfb170e45fa",
+      "observation": "彩虹边缘焦散由多组细长折射光带组成，颜色饱和且结构独立，适合镜头边缘点亮。"
+    }
+  ]
+}

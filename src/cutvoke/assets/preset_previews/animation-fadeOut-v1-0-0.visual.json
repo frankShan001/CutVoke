@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.fadeOut",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.fadeOut",
+  "params": {
+    "duration": 1.0,
+    "easing": "linear"
+  },
+  "subcategory": "出场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "前半段保持正常画面，最后一秒逐帧变暗，片段结束前接近全暗，后续镜头正常。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "8e211eb852b9b514c525313f4e0c49f9c657f3c527bcbfdbcd9c1157d045ee02",
+  "motionPreviewSha256": "491e3038c12775cdfe487eed75130e1459ec3345628463ec004d669e4a82e27e",
+  "auditSha256": "de60348a54ddbc9f1cf4f34c8aab068d29abde6a90dd9500693c8c66159d2d5c",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_fadeOut.png",
+  "libraryReviewSheetSha256": "3e5ca2921c68028651efb0abfffff0f784342cce79bad665350e3bc719c3b74a"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_vermilion_slashes",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ee6ebcef0f2a58e6c6ad87bcb8a5062001ab60bbd3b1c1ab9bddbd15bfcab616",
+  "previewSha256": "5be83be433d309c0caa6bb514e37ad0ff9885bbbb6e81c00827006f1fa52babe",
+  "preview": "manga_v2_vermilion_slashes.mp4",
+  "bytes": 13416,
+  "visiblePixels": 6416,
+  "changedPixels": 0,
+  "motionVisible": false
+}

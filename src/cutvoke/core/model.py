@@ -15,6 +15,7 @@ from typing import Optional
 
 from .rational import Rational
 from .keyframes import Keyframe
+from .speed_curve import SpeedCurve
 
 
 def new_id(prefix: str) -> str:
@@ -49,6 +50,12 @@ EFFECT_ANIM_SLIDE_IN = "cutvoke.anim.slideIn"
 # 出场 / 循环动画（1.5-B）：与入场同一条关键帧展开链。
 EFFECT_ANIM_FADE_OUT = "cutvoke.anim.fadeOut"
 EFFECT_ANIM_ZOOM_OUT = "cutvoke.anim.zoomOut"
+EFFECT_ANIM_SLIDE_OUT_LEFT = "cutvoke.anim.slideOutLeft"
+EFFECT_ANIM_SLIDE_OUT_RIGHT = "cutvoke.anim.slideOutRight"
+EFFECT_ANIM_SLIDE_OUT_UP = "cutvoke.anim.slideOutUp"
+EFFECT_ANIM_SLIDE_OUT_DOWN = "cutvoke.anim.slideOutDown"
+EFFECT_ANIM_ROTATE_OUT = "cutvoke.anim.rotateOut"
+EFFECT_ANIM_FLIP_OUT = "cutvoke.anim.flipOut"
 EFFECT_ANIM_BREATHE = "cutvoke.anim.breathe"
 
 # 动画家族扩充（1.5-B 计划 5.2：方向移动/旋转/弹性/翻转/遮罩显现/漂浮/摇摆/组合）。
@@ -62,6 +69,11 @@ EFFECT_ANIM_BACK_IN = "cutvoke.anim.backIn"          # 回弹（先过冲再归�
 EFFECT_ANIM_REVEAL = "cutvoke.anim.reveal"           # 遮罩显现（自左向右揭示）
 EFFECT_ANIM_FLOAT = "cutvoke.anim.float"             # 漂浮循环（缓慢上下位移）
 EFFECT_ANIM_SWAY = "cutvoke.anim.sway"               # 摇摆循环（左右轻摆）
+EFFECT_ANIM_ROCK = "cutvoke.anim.rock"               # 往复倾斜
+EFFECT_ANIM_BOUNCE = "cutvoke.anim.bounce"           # 单向弹跳
+EFFECT_ANIM_ORBIT = "cutvoke.anim.orbit"             # 椭圆环绕
+EFFECT_ANIM_HEARTBEAT = "cutvoke.anim.heartbeat"     # 双拍脉冲
+EFFECT_ANIM_BLINK = "cutvoke.anim.blink"             # 明灭循环
 # 组合动画（E04）：一次叠加两个入场动画（如淡入+上滑），渲染层合成状态相乘/相加。
 EFFECT_ANIM_COMBO = "cutvoke.anim.combo"
 # 组合运镜预设（D04）：把两个入场动画固化成「起点→终点」复合运动预设，
@@ -104,6 +116,8 @@ EFFECT_FX_PAN = "cutvoke.fx.pan"               # 声像（pan 双声道平衡，
 EFFECT_FX_RGBSPLIT = "cutvoke.fx.rgbsplit"    # 色差 RGB 偏移（rgbashift）
 EFFECT_FX_CROP = "cutvoke.fx.crop"            # 自由裁切（crop 滤镜，图片/视频通用）
 EFFECT_FX_TRAIL = "cutvoke.fx.trail"          # 拖影（tmix 多帧混合，F02）
+EFFECT_FX_SWING = "cutvoke.fx.swing"          # 逐帧画面摆动
+EFFECT_FX_SHAKE = "cutvoke.fx.shake"          # 逐帧取景框震动
 EFFECT_FX_HSL = "cutvoke.fx.hsl"              # HSL 调节（huesaturation，O02）
 EFFECT_FX_COLORBALANCE = "cutvoke.fx.colorbalance"  # 色彩平衡（colorbalance，O02）
 EFFECT_FX_MASK = "cutvoke.fx.mask"            # 几何蒙版（geq 矩形/椭圆，N02）
@@ -137,26 +151,49 @@ EFFECT_SMOOTH_LEFT = "cutvoke.transition.smoothleft"  # 平滑推移
 EFFECT_RADIAL = "cutvoke.transition.radial"           # 径向（旋转感）
 EFFECT_SQUEEZE = "cutvoke.transition.squeeze"         # 横向挤压
 
-# 全部转场效果 ID（用于遍历/判断 & 前后端统一）
+# Built-in transition IDs. Keep synchronized with effects.py's built-in manifests.
 ALL_TRANSITIONS = (
+    EFFECT_BLUR,
+    "cutvoke.transition.centerblur",
+    EFFECT_CIRCLE_OPEN,
+    "cutvoke.transition.crossblur",
     EFFECT_CROSSFADE,
+    "cutvoke.transition.diagblurdown",
+    "cutvoke.transition.diagblurup",
+    EFFECT_DIAGONAL,
+    EFFECT_DISSOLVE,
+    "cutvoke.transition.distance",
+    "cutvoke.transition.edgeblur",
     EFFECT_FADE,
     EFFECT_FADE_WHITE,
-    EFFECT_WIPE,
-    EFFECT_WIPE_UP,
-    EFFECT_WIPE_DOWN,
-    EFFECT_SLIDE,
-    EFFECT_SLIDE_UP,
-    EFFECT_SLIDE_DOWN,
-    EFFECT_SMOOTH_LEFT,
-    EFFECT_BLUR,
-    EFFECT_SQUEEZE,
-    EFFECT_ZOOM,
-    EFFECT_RADIAL,
-    EFFECT_DISSOLVE,
-    EFFECT_CIRCLE_OPEN,
-    EFFECT_DIAGONAL,
+    "cutvoke.transition.fadefast",
+    "cutvoke.transition.fadegrays",
+    "cutvoke.transition.fadeslow",
+    "cutvoke.transition.hlslice",
+    "cutvoke.transition.hlwind",
+    "cutvoke.transition.hrslice",
+    "cutvoke.transition.hrwind",
     EFFECT_PIXELIZE,
+    EFFECT_RADIAL,
+    "cutvoke.transition.radialblur",
+    EFFECT_SLIDE,
+    EFFECT_SLIDE_DOWN,
+    EFFECT_SLIDE_UP,
+    EFFECT_SMOOTH_LEFT,
+    "cutvoke.transition.smoothright",
+    "cutvoke.transition.smoothup",
+    EFFECT_SQUEEZE,
+    "cutvoke.transition.squeezev",
+    "cutvoke.transition.vblur",
+    "cutvoke.transition.vdslice",
+    "cutvoke.transition.vdwind",
+    "cutvoke.transition.vuslice",
+    "cutvoke.transition.vuwind",
+    EFFECT_WIPE,
+    EFFECT_WIPE_DOWN,
+    "cutvoke.transition.wiperight",
+    EFFECT_WIPE_UP,
+    EFFECT_ZOOM,
 )
 
 # 全部动画效果 ID（1.5-B 计划 5.2 动画家族）
@@ -173,9 +210,20 @@ ALL_ANIMATIONS = (
     EFFECT_ANIM_REVEAL,
     EFFECT_ANIM_FADE_OUT,
     EFFECT_ANIM_ZOOM_OUT,
+    EFFECT_ANIM_SLIDE_OUT_LEFT,
+    EFFECT_ANIM_SLIDE_OUT_RIGHT,
+    EFFECT_ANIM_SLIDE_OUT_UP,
+    EFFECT_ANIM_SLIDE_OUT_DOWN,
+    EFFECT_ANIM_ROTATE_OUT,
+    EFFECT_ANIM_FLIP_OUT,
     EFFECT_ANIM_BREATHE,
     EFFECT_ANIM_FLOAT,
     EFFECT_ANIM_SWAY,
+    EFFECT_ANIM_ROCK,
+    EFFECT_ANIM_BOUNCE,
+    EFFECT_ANIM_ORBIT,
+    EFFECT_ANIM_HEARTBEAT,
+    EFFECT_ANIM_BLINK,
     EFFECT_ANIM_COMBO,
     EFFECT_ANIM_COMBO_PUSH_RIGHT,
     EFFECT_ANIM_COMBO_PULL_UP,
@@ -221,8 +269,10 @@ ALL_FX = (
     EFFECT_FX_VFLIP,
     EFFECT_FX_FILM_GRAIN,
     EFFECT_FX_GRID,
-    # 备注：EFFECT_FX_LOUDNORM 为音频滤镜，不计入画面特效 ALL_FX，
-    # 仅在音频渲染链生效（见 render.py 的 _AUDIO_FX_STEPS）。
+    "cutvoke.fx.shake",
+    "cutvoke.fx.swing",
+    # Audio processing effects are exposed separately from visual ALL_FX.
+    # See render.py's _AUDIO_FX_STEPS.
 )
 
 # 变换 / 调色参数的默认值（渲染时按此补齐，保证可查询、可组合）
@@ -255,15 +305,21 @@ class AssetReference:
     asset_id: str
     source_path: str = ""
     fingerprint: str = ""  # 内容身份（哈希策略 M1 冻结）
+    resource_ref: Optional[dict] = None
 
     def to_dict(self) -> dict:
-        return {"assetId": self.asset_id, "sourcePath": self.source_path,
+        data = {"assetId": self.asset_id, "sourcePath": self.source_path,
                 "fingerprint": self.fingerprint}
+        if self.resource_ref is not None:
+            data["resourceRef"] = dict(self.resource_ref)
+        return data
 
     @classmethod
     def from_dict(cls, d: dict) -> "AssetReference":
         return cls(asset_id=d["assetId"], source_path=d.get("sourcePath", ""),
-                   fingerprint=d.get("fingerprint", ""))
+                   fingerprint=d.get("fingerprint", ""),
+                   resource_ref=(dict(d["resourceRef"])
+                                 if isinstance(d.get("resourceRef"), dict) else None))
 
 
 @dataclass
@@ -276,8 +332,10 @@ class Clip:
     timeline_end: Rational        # 工程时间终点（exclusive）
     source_start: Rational        # 素材时间起点
     speed: Rational = field(default_factory=lambda: Rational.of(1, 1))
+    preserve_pitch: bool = True  # 变速时维持原有音高；False 时音高随速度变化
     effects: list[dict] = field(default_factory=list)
     linked: bool = True           # 音视频联动
+    attached_to_clip_id: Optional[str] = None  # 显式时间线锚点；独立音轨缺省不关联
     hidden: bool = False
     # 参数关键帧：按参数名分组（先支持 opacity）。渲染生效留 M2 完整版（T22）。
     keyframes: dict[str, list[Keyframe]] = field(default_factory=dict)
@@ -294,10 +352,37 @@ class Clip:
     # asset_ref 允许为空（内容在 nested 内）。统一用 Optional[Sequence]，
     # 向后兼容：旧工程无 nested 字段时取 None，照常序列化。
     nested: Optional["Sequence"] = None
+    # 视觉层语义独立于轨道的媒体解码类型；贴纸仍由视频合成链渲染。
+    role: str = ""
+    speed_curve: Optional[SpeedCurve] = None  # None = constant speed
+    frame_interpolation: str = "none"  # slow-motion frame synthesis: none | motion
 
     @property
     def duration(self) -> Rational:
         return self.timeline_end - self.timeline_start
+
+    @property
+    def consumed_source_duration(self) -> Rational:
+        if self.speed_curve is not None:
+            return self.speed_curve.source_duration
+        speed = (self.speed if self.speed >= Rational.of(0)
+                 else Rational.of(-self.speed.num, self.speed.den))
+        return self.duration * speed
+
+    @property
+    def has_slow_motion(self) -> bool:
+        """Whether any part of this clip plays below normal speed."""
+        if self.speed_curve is not None:
+            return any(point.speed < Rational.of(1) for point in self.speed_curve.points)
+        magnitude = (self.speed if self.speed >= Rational.of(0)
+                     else Rational.of(-self.speed.num, self.speed.den))
+        return magnitude < Rational.of(1)
+
+    def source_offset_at_timeline(self, elapsed: Rational) -> Rational:
+        if self.speed_curve is not None:
+            return Rational.of(round(self.speed_curve.source_at_timeline(
+                float(elapsed.to_fraction())) * 1_000_000), 1_000_000)
+        return elapsed * self.speed
 
     # ------------------------------------------------------------------
     # 效果查询（F14/F18/F20）：从 effects 列表里按 effectId 提取并合并参数
@@ -360,15 +445,19 @@ class Clip:
         return fx[0] if fx else None
 
     def to_dict(self) -> dict:
-        return {
+        data = {
             "id": self.id,
             "assetRef": self.asset_ref.to_dict(),
             "timelineStart": self.timeline_start.to_json(),
             "timelineEnd": self.timeline_end.to_json(),
             "sourceStart": self.source_start.to_json(),
             "speed": self.speed.to_json(),
+            "speedCurve": self.speed_curve.to_dict() if self.speed_curve else None,
+            "frameInterpolation": self.frame_interpolation,
+            "preservePitch": self.preserve_pitch,
             "effects": self.effects,
             "linked": self.linked,
+            "attachedToClipId": self.attached_to_clip_id,
             "hidden": self.hidden,
             "volume": self.volume.to_json(),
             "fadeIn": self.fade_in.to_json(),
@@ -381,6 +470,9 @@ class Clip:
                 for name, kfs in self.keyframes.items()
             },
         }
+        if self.role:
+            data["role"] = self.role
+        return data
 
     @classmethod
     def from_dict(cls, d: dict) -> "Clip":
@@ -396,8 +488,12 @@ class Clip:
             timeline_end=Rational.from_json(**d["timelineEnd"]),
             source_start=Rational.from_json(**d["sourceStart"]),
             speed=Rational.from_json(**d["speed"]) if d.get("speed") else Rational.of(1, 1),
+            speed_curve=SpeedCurve.from_dict(d["speedCurve"]) if d.get("speedCurve") else None,
+            frame_interpolation=d.get("frameInterpolation", "none"),
+            preserve_pitch=d.get("preservePitch", True),
             effects=d.get("effects", []),
             linked=d.get("linked", True),
+            attached_to_clip_id=d.get("attachedToClipId"),
             hidden=d.get("hidden", False),
             volume=Rational.from_json(**d["volume"]) if d.get("volume") else Rational.of(1, 1),
             fade_in=Rational.from_json(**d["fadeIn"]) if d.get("fadeIn") else Rational.of(0, 1),
@@ -407,6 +503,7 @@ class Clip:
                        if d.get("freezeAt") else None),
             keyframes=keyframes,
             nested=Sequence.from_dict(d["nested"]) if d.get("nested") else None,
+            role=d.get("role", ""),
         )
 
 
@@ -420,18 +517,22 @@ class Track:
     locked: bool = False
     muted: bool = False
     visible: bool = True
+    role: str = ""
 
     def to_dict(self) -> dict:
-        return {"id": self.id, "kind": self.kind,
+        data = {"id": self.id, "kind": self.kind,
                 "clips": [c.to_dict() for c in self.clips],
                 "locked": self.locked, "muted": self.muted, "visible": self.visible}
+        if self.role:
+            data["role"] = self.role
+        return data
 
     @classmethod
     def from_dict(cls, d: dict) -> "Track":
         return cls(id=d["id"], kind=d["kind"],
                    clips=[Clip.from_dict(c) for c in d.get("clips", [])],
                    locked=d.get("locked", False), muted=d.get("muted", False),
-                   visible=d.get("visible", True))
+                   visible=d.get("visible", True), role=d.get("role", ""))
 
 
 @dataclass
@@ -449,6 +550,29 @@ class EffectInstance:
     def from_dict(cls, d: dict) -> "EffectInstance":
         return cls(effect_id=d["effectId"], version=d.get("version", "1.0.0"),
                    params=d.get("params", {}))
+
+
+@dataclass
+class CaptionWord:
+    """One word-aligned range inside a subtitle cue (absolute timeline time)."""
+
+    text: str
+    start: Rational
+    end: Rational
+
+    def __post_init__(self) -> None:
+        if not self.text.strip() or self.end <= self.start:
+            raise ValueError("caption word requires text and a positive time range")
+
+    def to_dict(self) -> dict:
+        return {"text": self.text, "start": self.start.to_json(),
+                "end": self.end.to_json()}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "CaptionWord":
+        return cls(text=data["text"],
+                   start=Rational.from_json(**data["start"]),
+                   end=Rational.from_json(**data["end"]))
 
 
 @dataclass
@@ -474,6 +598,10 @@ class Caption:
     # 文字动画（1.5-C 参数化入出场）：淡入/淡出时长（毫秒，0=无）
     animIn: int = 0
     animOut: int = 0
+    animInStyle: str = "fade"       # fade / scale / typewriter / none
+    animOutStyle: str = "fade"      # fade / scale / none
+    animLoopStyle: str = "none"     # none / pulse / blink
+    animLoopMs: int = 1000
     # 文字几何（H01 画布文字编辑）：x/y 为画布归一化比例（0~1，默认 0.5=水平/垂直居中），
     # scale 缩放（0.1~5，默认 1）；rotation 旋转角（-180~180，默认 0）。
     # 默认值 = 旧渲染行为（居中、原始字号、不旋转），旧工程反序列化零变化，
@@ -484,6 +612,23 @@ class Caption:
     rotation: float = 0.0
     # 文字阴影（H04）：0=无阴影，>0 为 ASS Shadow 宽度（像素，默认 1 对齐旧渲染）
     shadow: int = 1
+    # 独立标题复用 ASS 渲染器；旧字幕缺省沿用无衬线与自然行距。
+    fontFamily: str = "Noto Sans SC"
+    lineSpacing: float = 1.0
+    # 标题可选独立背景条；0 保持旧版随文字边界的背景盒行为。
+    panelWidth: float = 0.0
+    panelHeight: float = 0.0
+    # ASR word timing is absolute timeline time; empty color disables karaoke highlight.
+    words: list[CaptionWord] = field(default_factory=list)
+    wordHighlightColor: str = ""
+
+    def __post_init__(self) -> None:
+        previous_end = self.start
+        for word in self.words:
+            if (word.start < self.start or word.end > self.end or
+                    word.start < previous_end):
+                raise ValueError("caption words must be ordered within their cue")
+            previous_end = word.end
 
     @property
     def duration(self) -> Rational:
@@ -496,9 +641,15 @@ class Caption:
                 "strokeColor": self.strokeColor, "strokeWidth": self.strokeWidth,
                 "background": self.background, "align": self.align,
                 "bold": self.bold, "animIn": self.animIn, "animOut": self.animOut,
+                "animInStyle": self.animInStyle, "animOutStyle": self.animOutStyle,
+                "animLoopStyle": self.animLoopStyle, "animLoopMs": self.animLoopMs,
                 "x": self.x, "y": self.y,
                 "scale": self.scale, "rotation": self.rotation,
-                "shadow": self.shadow}
+                "shadow": self.shadow,
+                "fontFamily": self.fontFamily, "lineSpacing": self.lineSpacing,
+                "panelWidth": self.panelWidth, "panelHeight": self.panelHeight,
+                "words": [word.to_dict() for word in self.words],
+                "wordHighlightColor": self.wordHighlightColor}
 
     @classmethod
     def from_dict(cls, d: dict) -> "Caption":
@@ -514,9 +665,19 @@ class Caption:
                    bold=d.get("bold", False),
                    animIn=d.get("animIn", 0),
                    animOut=d.get("animOut", 0),
+                   animInStyle=d.get("animInStyle", "fade"),
+                   animOutStyle=d.get("animOutStyle", "fade"),
+                   animLoopStyle=d.get("animLoopStyle", "none"),
+                   animLoopMs=d.get("animLoopMs", 1000),
                    x=d.get("x", 0.5), y=d.get("y", 0.5),
                    scale=d.get("scale", 1.0), rotation=d.get("rotation", 0.0),
-                   shadow=d.get("shadow", 1))
+                   shadow=d.get("shadow", 1),
+                   fontFamily=d.get("fontFamily", "Noto Sans SC"),
+                   lineSpacing=d.get("lineSpacing", 1.0),
+                   panelWidth=d.get("panelWidth", 0.0),
+                   panelHeight=d.get("panelHeight", 0.0),
+                   words=[CaptionWord.from_dict(word) for word in d.get("words", [])],
+                   wordHighlightColor=d.get("wordHighlightColor", ""))
 
 
 @dataclass
@@ -556,6 +717,8 @@ class Sequence:
     # 结构：{"groupId": str, "trackIds": [trackId...],
     #        "activeTrackId": str, "sync": "time"}
     multicam: Optional[dict] = None
+    # 画布背景色；只影响透明片段和未覆盖区域，默认黑色。旧工程缺省为黑色。
+    background_color: str = "#000000"
 
     def to_dict(self) -> dict:
         return {"id": self.id, "width": self.width, "height": self.height,
@@ -564,7 +727,8 @@ class Sequence:
                 "captions": [c.to_dict() for c in self.captions],
                 "markers": [m.to_dict() for m in self.markers],
                 "name": self.name,
-                "multicam": self.multicam}
+                "multicam": self.multicam,
+                "backgroundColor": self.background_color}
 
     @classmethod
     def from_dict(cls, d: dict) -> "Sequence":
@@ -575,7 +739,8 @@ class Sequence:
                    captions=[Caption.from_dict(c) for c in d.get("captions", [])],
                    markers=[Marker.from_dict(m) for m in d.get("markers", [])],
                    name=d.get("name", ""),
-                   multicam=d.get("multicam", None))
+                   multicam=d.get("multicam", None),
+                   background_color=d.get("backgroundColor", "#000000"))
 
 
 @dataclass

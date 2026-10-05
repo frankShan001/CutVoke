@@ -108,12 +108,17 @@ def cmd_serve(args) -> int:
             print("提示：尚未创建会话令牌，先运行 `cutvoke token create` 再启动。",
                   file=sys.stderr)
     # 结构化日志（T31）：默认写入 ~/.cutvoke/logs/，可用 --log 覆盖
-    logger = JsonlLogger(getattr(args, "log", None))
+    logger = JsonlLogger(getattr(args, "log", None) or
+                         os.path.join(os.path.dirname(os.path.abspath(db_path)), "logs", "serve.jsonl"))
     logger.info("serve.boot", detail={"data": db_path, "restored": loaded})
     # 素材落盘目录（WP-03/A07）：与数据库同级，保证自定义 --db 时数据与素材同处一地
     media_dir = os.path.join(os.path.dirname(os.path.abspath(db_path)), "media")
     api = HttpApi(service, RenderService(), logger=logger, session=session,
                   media_dir=media_dir)
+    from datetime import datetime, timezone
+    from .runtime import runtime_identity
+    api.runtime_info = {**runtime_identity(db_path),
+                        "startedAt": datetime.now(timezone.utc).isoformat()}
     # J07：首次启动把内置声音资产登记进素材账本（幂等，与用户素材共存同表）
     from .core.builtin_assets import (ensure_builtin_audio, ensure_builtin_stickers,
                                        ensure_builtin_backgrounds)
@@ -136,17 +141,9 @@ def cmd_serve(args) -> int:
     # Web UI 静态目录解析，兼容两种安装形态：
     #   1) wheel 安装：走包内 src/cutvoke/web/（pyproject package-data 打进）
     #   2) 仓库开发：走项目根 web/dist（Vite 产物）> web/（旧单文件）
-    web_dir = None
-    _in_pkg = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
-    if os.path.isdir(_in_pkg):
-        web_dir = _in_pkg
-    else:
-        pkg_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        for cand in ("web/dist", "web"):
-            d = os.path.join(pkg_dir, cand)
-            if os.path.isdir(d):
-                web_dir = d
-                break
+    from .runtime import web_directory
+    built_web = web_directory()
+    web_dir = str(built_web) if built_web else None
     if web_dir is None:
         print("警告：未找到 web/ 目录，serve 将不带 Web UI（仅 API）", file=sys.stderr)
     print(f"CutVoke serve: data at {db_path} (restored {loaded} projects)", file=sys.stderr)
@@ -154,28 +151,72 @@ def cmd_serve(args) -> int:
         _json_out({"ok": True, "host": args.host, "port": args.port, "data": db_path,
                    "restoredProjects": loaded, "tokenRequired": session is not None,
                    "log": str(logger.path)})
-    serve(api, host=args.host, port=args.port, web_dir=web_dir,
-          allow_non_loopback=bool(getattr(args, "allow_non_loopback", False)))
+    try:
+        serve(api, host=args.host, port=args.port, web_dir=web_dir,
+              allow_non_loopback=bool(getattr(args, "allow_non_loopback", False)))
+    finally:
+        api.close()
+        store.close()
     return 0
 
 
 def cmd_doctor(args) -> int:
     """环境诊断。"""
-    import platform
-    import shutil
-    info = {
-        "ok": True,
-        "platform": platform.platform(),
-        "python": platform.python_version(),
-        "ffmpeg": shutil.which("ffmpeg"),
-        "ffprobe": shutil.which("ffprobe"),
-    }
+    from .runtime import diagnose_environment
+    info = diagnose_environment()
     if getattr(args, 'json', False):
         _json_out(info)
     else:
         for k, v in info.items():
             print(f"{k}: {v}")
-    return 0
+    return 0 if info["ok"] else 2
+
+
+def cmd_runtime(args) -> int:
+    from .runtime import check_running_service, runtime_identity
+    if getattr(args, "check", False):
+        result = check_running_service("127.0.0.1", args.port, _resolve_db(args))
+    else:
+        result = {"ok": True, **runtime_identity(_resolve_db(args))}
+    _json_out(result)
+    return 0 if result["ok"] else 3
+
+
+def cmd_launch(args) -> int:
+    """Start or safely reuse this exact build and data directory."""
+    from .runtime import check_running_service, diagnose_environment
+    check = check_running_service("127.0.0.1", args.port, _resolve_db(args))
+    if not check["ok"]:
+        _json_out(check)
+        print(check["message"], file=sys.stderr)
+        return 3
+    open_browser = not args.no_browser and os.environ.get("CUTVOKE_NO_BROWSER") != "1"
+    if check["status"] == "current":
+        _json_out(check)
+        if open_browser:
+            import webbrowser
+            webbrowser.open(check["url"])
+        return 0
+    report = diagnose_environment()
+    if not report["ok"]:
+        _json_out(report)
+        return 2
+    if open_browser:
+        import threading
+        import time
+        import urllib.request
+        import webbrowser
+        def open_when_ready():
+            for _ in range(60):
+                try:
+                    with urllib.request.urlopen(check["url"], timeout=1):
+                        webbrowser.open(check["url"])
+                        return
+                except OSError:
+                    time.sleep(0.5)
+        threading.Thread(target=open_when_ready, daemon=True).start()
+    args.host = "127.0.0.1"
+    return cmd_serve(args)
 
 
 def cmd_effects_list(args) -> int:
@@ -230,6 +271,8 @@ def cmd_capabilities(args) -> int:
                     else [s.to_dict(lang) for s in reg.all()],
         "qualityPresets": ["high", "medium", "low"],
     }
+    from .runtime import runtime_identity
+    result["runtime"] = runtime_identity(str(_store.path))
     _json_out(result)
     return 0
 
@@ -599,7 +642,13 @@ def cmd_mcp(args) -> int:
         print(f"内置资产登记失败（忽略）：{e}", file=sys.stderr)
     print(f"CutVoke MCP: data at {_resolve_db(args)} "
           f"(restored {len(store.list_all())} projects)", file=sys.stderr)
-    server.run_stdio()
+    from .runtime import runtime_identity
+    server.runtime_info = runtime_identity(_resolve_db(args))
+    try:
+        server.run_stdio()
+    finally:
+        server.close()
+        store.close()
     return 0
 
 
@@ -630,6 +679,18 @@ def build_parser() -> argparse.ArgumentParser:
     p_doctor = sub.add_parser("doctor", help="diagnose environment")
     # 不再单独定义 --json：顶层开关已覆盖，且重复定义会覆盖顶层的解析结果。
     p_doctor.set_defaults(func=cmd_doctor)
+
+    p_launch = sub.add_parser("launch", help="start or reuse the current build + data directory")
+    p_launch.add_argument("--port", type=int, default=os.environ.get("CUTVOKE_PORT", "8787"))
+    p_launch.add_argument("--data", help="SQLite store path or data directory")
+    p_launch.add_argument("--no-browser", action="store_true")
+    p_launch.set_defaults(func=cmd_launch)
+
+    p_runtime = sub.add_parser("runtime", help="inspect local identity or compare a running service")
+    p_runtime.add_argument("--check", action="store_true")
+    p_runtime.add_argument("--port", type=int, default=8787)
+    p_runtime.add_argument("--data", help="expected SQLite store path or data directory")
+    p_runtime.set_defaults(func=cmd_runtime)
 
     # 效果发现（AC18：CLI 与 UI / HTTP / MCP 共用同一份能力清单）
     p_eff = sub.add_parser("effects", help="list and inspect available effects")

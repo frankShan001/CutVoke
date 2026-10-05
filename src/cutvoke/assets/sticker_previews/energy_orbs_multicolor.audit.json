@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.energy_orbs_multicolor",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "8d330bb21b273ea2adf5c58eedc1ad7b672b1b385c3fc34ea387fb915c60bd20",
+  "previewSha256": "526811f670b4088167f3720e0ff48d7bd44eb51ff879a5887c1ffe07d154edb8",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3019,
+  "visiblePixels": 2273,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 1276,
+    "steady_entry": 2276,
+    "steady_exit": 2276,
+    "exit": 1300
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1276,
+      "withoutFade": 2274
+    },
+    "steady_entry": {
+      "withFade": 2276,
+      "withoutFade": 2276
+    },
+    "steady_exit": {
+      "withFade": 2276,
+      "withoutFade": 2276
+    },
+    "exit": {
+      "withFade": 1300,
+      "withoutFade": 2276
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.146,
+    0.15
+  ],
+  "auditExport": "energy_orbs_multicolor.audit.mp4",
+  "auditExportSha256": "dcd1d894e5c41554b59689538e7be7e40db93ad7a9e6638380979d9e08ab1dea"
+}

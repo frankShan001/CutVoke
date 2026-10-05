@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_orbit_motes",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c6147177f104a9082d3c9634eb80ddebcc816dafd12103d4076ab1970c378609",
+  "previewSha256": "c94997091c60d03b1c19a351b1f0471ab3adc42c97f5bd6ec0036bb7c5eb488b",
+  "preview": "personfx_orbit_motes.mp4",
+  "bytes": 7635,
+  "visiblePixels": 1852,
+  "changedPixels": 0,
+  "motionVisible": false
+}

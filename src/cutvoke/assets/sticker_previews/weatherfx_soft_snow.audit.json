@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_soft_snow",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "0f0d092decea1790798648f452d29ab75bb9f17038234182feeb9c9d97830392",
+  "previewSha256": "22cb36f1ad5836cb397fefd0fff1b51e85dc19a53f5efc2c3b13ba3c8da80085",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2481,
+  "visiblePixels": 1521,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 593,
+    "steady_entry": 1523,
+    "steady_exit": 1523,
+    "exit": 593
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 593,
+      "withoutFade": 1523
+    },
+    "steady_entry": {
+      "withFade": 1523,
+      "withoutFade": 1523
+    },
+    "steady_exit": {
+      "withFade": 1523,
+      "withoutFade": 1523
+    },
+    "exit": {
+      "withFade": 593,
+      "withoutFade": 1523
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "weatherfx_soft_snow.audit.mp4",
+  "auditExportSha256": "20f2a8b37750c5c49fe12ba70a8c0582e826bcfac5eebed737c66864faffd3e8"
+}

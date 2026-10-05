@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_diffraction_violet",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "紫色衍射星芒有清晰中心和细长光线，边缘留白完整，没有邻格残像。",
+  "sourceSha256": "d27b68d8d992249a29ba845512f2110e7bb8d18ba7bb42eb6acb07b005950bc1",
+  "previewSha256": "a04abdb0839fbaa7e6e3c49f93439339956cee4aafeeac209623c81d6fbdb2dd",
+  "auditSha256": "c2d7d562afabe6ac71a0dedc4ec506b5808dbbaa1108727bdeff80ef6f13630d"
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.amberEdge",
+  "version": "1.4.0",
+  "effectId": "cutvoke.person.halo",
+  "params": {
+    "sigma": 20,
+    "hueShift": 28,
+    "saturation": 1.45,
+    "opacity": 0.92
+  },
+  "subcategory": "人物轮廓",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A warm amber-red halo is clearly visible around the moving figure and differs from the pink and green treatments.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "dc9f0adfd97d4c68607cc8fe5766b6c474a3e1d12c111defa48d856f8cafc45b",
+  "motionPreviewSha256": "a3f6279d1569a60dec918968389e57ddfc6c94746f331e9e2813bb2a6cb9af6b",
+  "auditSha256": "667fbfafe54e32cf7c324a5f46558c46deb2251d59940811f476a6997b33774d"
+}

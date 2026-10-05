@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_scan_bands",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "29d18c4cb883f3585ab7877dac29917de556c6dee0e3138f8f68059181e5bae0",
+  "previewSha256": "5b92e2fd0781bae1e4f704deb68dd07d91b3424690d6ab9fa7d9b00a3e1b70d7",
+  "preview": "personfx_scan_bands.mp4",
+  "bytes": 8542,
+  "visiblePixels": 3849,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_candle_cake",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "三支点燃蜡烛和蛋糕主体均完整，彩色装饰清晰。",
+  "sourceSha256": "75b66c7df5b026865f75536af8be4bbd07a0872ee9aa855a55daa6bf2ca7b86f",
+  "previewSha256": "889cf0cf38b866c443a2425a19ffb9bf0815e5e3eb19b9bae609a945ac8edb97",
+  "auditSha256": "302e04f2a3caf2669102c80aa58ac32e6eb308b5c3abd1d5405eb90683b6fe10"
+}

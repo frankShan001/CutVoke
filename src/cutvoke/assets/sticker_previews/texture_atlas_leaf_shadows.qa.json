@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_leaf_shadows",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "eb23ca2bbddb3d450dcc2dd30e7e3ed700e6e1a94e1a49a237c3964a66d61d77",
+  "previewSha256": "1663a16349700dca4d730bcdf9caf403786ad1c464a8ee13fdb8b38cfd3d981d",
+  "preview": "texture_atlas_leaf_shadows.mp4",
+  "bytes": 6817,
+  "visiblePixels": 5704,
+  "changedPixels": 0,
+  "motionVisible": false
+}

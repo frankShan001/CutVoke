@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.rounded_blue",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "蓝色圆角牌外形规整，保持空白无文字，四角和描边完整。",
+  "sourceSha256": "5628451fb6a5959ecbf0a9f7822d55d5e0f929080b0d739f6c009847ee3a1f17",
+  "previewSha256": "0da3304d5642ce029a97abbda901cec8a7e3403b99b520d63dc5cd13343c03c4",
+  "auditSha256": "0b2cfcc0da1d28363acb561c81357de06eef1b62175896f8d5f18d2af31c95f4"
+}

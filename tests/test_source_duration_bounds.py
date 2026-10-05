@@ -78,6 +78,31 @@ class SourceDurationBoundsTests(unittest.TestCase):
 
 
 class TransitionTimelineDurationTests(unittest.TestCase):
+    def test_transition_on_a_broken_seam_does_not_blend_across_black_gap(self) -> None:
+        first = Clip(
+            id="a", asset_ref=AssetReference("", source_path="a.png"),
+            timeline_start=Rational.of(0, 1), timeline_end=Rational.of(3, 1),
+            source_start=Rational.of(0, 1),
+        )
+        second = Clip(
+            id="b", asset_ref=AssetReference("", source_path="b.png"),
+            timeline_start=Rational.of(4, 1), timeline_end=Rational.of(7, 1),
+            source_start=Rational.of(0, 1),
+            effects=[{"effectId": "cutvoke.transition.zoom", "version": "1.0.0",
+                      "params": {"duration": 0.8}}],
+        )
+        sequence = Sequence(id="main", width=1920, height=1080,
+                            fps=Rational.of(30, 1))
+        parts: list[str] = []
+        _label, duration = RenderService()._build_video_track(
+            [first, second], sequence, 0, lambda _path: 0,
+            parts, [0], (0, 0),
+        )
+        graph = ";".join(parts)
+        self.assertAlmostEqual(duration, 7.0, places=6)
+        self.assertNotIn("xfade=", graph)
+        self.assertNotIn("tpad=stop_mode=clone", graph)
+
     def test_transition_keeps_absolute_timeline_duration(self) -> None:
         first = Clip(
             id="a",
@@ -110,7 +135,8 @@ class TransitionTimelineDurationTests(unittest.TestCase):
         graph = ";".join(parts)
         self.assertAlmostEqual(duration, 10.0, places=6)
         self.assertIn("tpad=stop_mode=clone:stop_duration=0.800000", graph)
-        self.assertIn("xfade=transition=zoomin:offset=5.000000:duration=0.800000", graph)
+        self.assertIn("zoompan=z='max(1\\,1.2800-0.2800*on/24)'", graph)
+        self.assertIn("xfade=transition=fade:offset=5.000000:duration=0.800000", graph)
 
 
 if __name__ == "__main__":

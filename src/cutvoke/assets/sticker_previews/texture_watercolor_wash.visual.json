@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_watercolor_wash",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器浅底合成预览；只批准结构和颜色在缩略图中清楚、可与同类区分的素材。批准仅覆盖贴图本身的可辨识度，不代表复杂实拍成片验收。",
+  "observation": "蓝粉橙色水彩形块轮廓完整，颜色分层清晰且未出现裁切串格。",
+  "sourceSha256": "5af4b4891594a4a78d9ac8c8e62d26a169ef9e68e2c346f5ca90f7ca461dc404",
+  "previewSha256": "31edaacc147d380351ddfdc5e8bc7bbf713f81b0269cd84ccb84c77eeaf07be2",
+  "auditSha256": "2e9e2f9764af3f90cc5da42600f4848e50e2f1831c0724c567eb6368a7b7736f"
+}

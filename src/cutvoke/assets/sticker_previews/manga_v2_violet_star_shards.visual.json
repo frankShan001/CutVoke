@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_violet_star_shards",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "紫色星屑环绕旋涡，星形和弧线组合与绿色旋涡有明显轮廓差异。",
+  "sourceSha256": "f7eeed1f9e511a4f64cf67bac3fe84de1bb3da3950d62e32ca70889650a39e85",
+  "previewSha256": "c84cdf5accdfdd9aebf8963161081e2b2581b9499b76316f70c2db37f8da68a2",
+  "auditSha256": "b78d5d66c5f46946ca6b408681863da7ea8b6cb482138b358167d071bc3eee25"
+}

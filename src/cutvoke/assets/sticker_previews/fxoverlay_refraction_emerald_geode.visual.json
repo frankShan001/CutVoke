@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_emerald_geode",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "observation": "祖母绿晶簇呈立体碎晶集合，中心高光和深绿阴影清晰；主体较集中，适合局部点缀。",
+  "sourceSha256": "e1d5b916d3a4addca1314a20bf61c11765c54f5cf79cacd67c9b2c75a3bfd2d7",
+  "previewSha256": "b13ae30bf4bdb27d91fe6a79276586fcd149d4c1fb0984bc43cb2b632359447b",
+  "auditSha256": "e8b17aecef4a161ea71a1820ca20b520a46f004b94d4b3c984a161c753860981"
+}

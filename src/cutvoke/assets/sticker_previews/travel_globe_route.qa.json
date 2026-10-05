@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_globe_route",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6ca964d84f95f91549e2c521ff68bcac7600cc76fff32c9cab4f10558ca7adfd",
+  "previewSha256": "97e9b9f2978d2cc9b10b1229d41fac9347aa48598df761fbc8d5b061459a7ea8",
+  "preview": "travel_globe_route.mp4",
+  "bytes": 4192,
+  "visiblePixels": 1591,
+  "changedPixels": 0,
+  "motionVisible": false
+}

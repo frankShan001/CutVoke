@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.ghostTrail",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.shake",
+  "params": {
+    "pixels": 16.0,
+    "hz": 2.2
+  },
+  "subcategory": "动感",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "The late frames retain several offset translucent outlines of the foreground while the sun edge smears across positions. Unlike handheld shake, the previous positions remain visibly layered, creating a recognizable ghost trail.",
+  "method": "Manual comparison of five rendered frames per preset, nearest-neighbor report, and full MP4 decode",
+  "coverSha256": "57eee00fe2d5cd951c39a798d32e9efc04592db7324bf5e55895ce78fdb50b44",
+  "motionPreviewSha256": "96f99ce56b74c3a1e7c487e62e6915b00e5f2095ba1fecec54bbec223e784765",
+  "auditSha256": "7d48e139ae423be953bdb0ab12cd9c6b4dde0b40a3eee1b22fca638f3178a5f3"
+}

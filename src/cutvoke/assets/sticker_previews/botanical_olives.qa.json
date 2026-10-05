@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_olives",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c721a91037c7fe3b1123b7bf667c10879a6a89785caffdfa85e3c9920cbb7247",
+  "previewSha256": "593e5095802f8c67113b43cabaef49c2164f9acab00ba07a6cee40c8256dd2d8",
+  "preview": "botanical_olives.mp4",
+  "bytes": 4723,
+  "visiblePixels": 2062,
+  "changedPixels": 0,
+  "motionVisible": false
+}

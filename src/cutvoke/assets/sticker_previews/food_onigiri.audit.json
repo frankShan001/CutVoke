@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_onigiri",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "88df29c980d00d9728c8d90204e28f17346adea0bbb1f6bf60fa6ab74e475a78",
+  "previewSha256": "d43c98a07ce84d63caeaebcc601c59b3aba4b1663e2cb08c836e131fd2a38380",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5348,
+  "visiblePixels": 4356,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1749,
+    "steady_entry": 4356,
+    "steady_exit": 4356,
+    "exit": 1746
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1749,
+      "withoutFade": 4356
+    },
+    "steady_entry": {
+      "withFade": 4356,
+      "withoutFade": 4356
+    },
+    "steady_exit": {
+      "withFade": 4356,
+      "withoutFade": 4356
+    },
+    "exit": {
+      "withFade": 1746,
+      "withoutFade": 4356
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.01,
+    0.01
+  ],
+  "auditExport": "food_onigiri.audit.mp4",
+  "auditExportSha256": "be62789ae3661b9d1788a5f37ed7d6e01344fa9cb3fff8b24b049fe8af96ee07"
+}

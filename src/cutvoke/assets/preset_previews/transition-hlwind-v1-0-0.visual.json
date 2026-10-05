@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.hlwind",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.hlwind",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "故障",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Fine horizontal streaks pull from the right toward the left and feather the scene boundary, unlike the thick discrete vertical bars of leftward slicing.",
+  "method": "Manual comparison of five actual rendered frames per transition, neighboring presets, and complete MP4 decode",
+  "coverSha256": "01a5822a4174e66a48eb103affc9d648e4934af1ba2564b7a56796b4e55a3e2c",
+  "motionPreviewSha256": "65638df4394b1759b326d8f85ce1870c8849504353ec5bbc6f318b3d1b757695",
+  "auditSha256": "f7761356e0674918e8548aa1232b245da30825f1bcebc13841ffcdf7faa75bb7"
+}

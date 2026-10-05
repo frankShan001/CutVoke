@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.comboPushRight",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.comboPushRight",
+  "params": {
+    "duration": 1.0,
+    "easing": "ease-out",
+    "distance": 0.3,
+    "primary": "zoomIn",
+    "secondary": "slideIn",
+    "fromScale": 0.8
+  },
+  "subcategory": "组合",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "缩放与横向位移同时连续进入，组合画幅从小到大平稳恢复原位，末尾没有跳变。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "4f6032af72a8abb2ef91d2c7ed629257df5d05d0295810fbb45fafa5dcd39f10",
+  "motionPreviewSha256": "eca331f608bc3ad6ddde4c04d3fa37c0b97731b680eebb44544e049f6057d861",
+  "auditSha256": "bc7de5d02ee0200f15ddd1c2fb2a4545fc6db68973ce5e47cf37341026e2f453",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_comboPushRight.png",
+  "libraryReviewSheetSha256": "4e94a1b86c23532cb5b75a0f576eb3f078f59751c25dab5fab8e7a9c37d5e732"
+}

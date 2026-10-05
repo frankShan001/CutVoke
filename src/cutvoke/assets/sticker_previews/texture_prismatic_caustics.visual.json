@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_prismatic_caustics",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器浅底合成预览；只批准结构和颜色在缩略图中清楚、可与同类区分的素材。批准仅覆盖贴图本身的可辨识度，不代表复杂实拍成片验收。",
+  "observation": "彩色折射光线与星点高光清楚，分布稀疏，作为光学叠层有辨识度。",
+  "sourceSha256": "249fc410bf7f21ce02946edc99df74eb2a631b8ba4bcbc93b93d886ae498677f",
+  "previewSha256": "88bd66f4c1c4560769a5a6d88608869afbc1d43f05345ee5638f914da5b8697f",
+  "auditSha256": "a08d1477df4270c2b24c9cf164e7e032f8176235036b08b4c07cb1344681c94a"
+}

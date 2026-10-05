@@ -1,0 +1,640 @@
+{
+  "schemaVersion": 1,
+  "source": "digital-glitch-overlay-texture-sheet-20260925.png",
+  "sourceSha256": "d6c1c22c45a25fb0593a63735904ded635f043e790f4822dc4087af27d50260a",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4",
+  "extraction": "proportional full-cell crops; alpha preserved; fit within 288px and centered on 320px transparent PNG canvases",
+  "generationSource": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+  "license": "MIT",
+  "contactSheet": "digital-glitch-overlay-texture-contact-sheet-20260925.png",
+  "items": [
+    {
+      "index": 1,
+      "stem": "glitch_horizontal_tear",
+      "name": "横向撕裂",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "横向",
+        "色散",
+        "信号干扰"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 24559,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        34,
+        112,
+        288,
+        237
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "29857a2341bcf58f365dcfe9a8dbed249868384dda067ccddffaf9398041682f",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 2,
+      "stem": "glitch_rgb_blocks",
+      "name": "RGB色块错位",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "RGB",
+        "像素",
+        "错位"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 26887,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        43,
+        71,
+        284,
+        273
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "0adcc63cd8d9d1210270f53b77de0bc3039aa47ff881cc728bb16c42b68046da",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 3,
+      "stem": "glitch_scan_bars",
+      "name": "扫描光条",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "扫描线",
+        "光条",
+        "赛博"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 45923,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        42,
+        73,
+        281,
+        265
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "3ea1b2bd4bb7bb25e0e130637f5637dbdef0a4c4de887f475eb1464702bd0e61",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 4,
+      "stem": "glitch_data_slices",
+      "name": "数据切片",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "切片",
+        "数据",
+        "横向"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 27106,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        40,
+        73,
+        278,
+        259
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "72c398ccb9a7bbeefcad556a3d85287be5b0a574dc1fb30735e3718164ce5c71",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 5,
+      "stem": "glitch_frame_echo",
+      "name": "跳帧残影",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "跳帧",
+        "残影",
+        "色差"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 37686,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        38,
+        55,
+        284,
+        242
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "7d58f00354c8cfff2fbdda8809a6169ec2e85d09c7973bf5bc00de0fbfd49eab",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 6,
+      "stem": "glitch_pixel_dissolve",
+      "name": "像素溶解",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "像素",
+        "溶解",
+        "碎片"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 20267,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        47,
+        36,
+        282,
+        274
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4b040fde1e1168c43530d02fc00aed043ccd4ea6e8ac65a91af2c7fe39ec65ac",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 7,
+      "stem": "glitch_channel_corner",
+      "name": "分色角芒",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "分色",
+        "角落",
+        "光效"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 18355,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        45,
+        41,
+        289,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "cf691716eda0887120f8f323091c980974789107d372d428eacf0f805c599523",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 8,
+      "stem": "glitch_sync_roll",
+      "name": "纵向同步漂移",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "同步",
+        "纵向",
+        "扫描"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 51693,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        54,
+        29,
+        269,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "7ef77903b1e1a91705234079bd90dc9657f5fc97edcdee8da9ff227fc06a3f1a",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 9,
+      "stem": "glitch_prism_shard",
+      "name": "棱镜碎片",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "棱镜",
+        "碎片",
+        "折射"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 36728,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        44,
+        35,
+        283,
+        285
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "ad1c2103cee6276e8d73d0605d249093e809a74060a6146531823eaaf215f2ca",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 10,
+      "stem": "glitch_signal_break",
+      "name": "信号断裂",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "信号",
+        "断裂",
+        "色块"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 28813,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        33,
+        79,
+        288,
+        249
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "01e5baa858419fd5b408365f6ca4431d9ab84b52bb1e4cd10bdc60a6a02eb39d",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 11,
+      "stem": "glitch_wave_interrupt",
+      "name": "波形中断",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "波形",
+        "中断",
+        "干扰"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 27474,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        33,
+        55,
+        289,
+        269
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "756599f8f79333671a5282c9ddc39438c9b937b63f13cb0a10104d52af376ece",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 12,
+      "stem": "glitch_tracking_brackets",
+      "name": "霓虹追踪框",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "追踪框",
+        "霓虹",
+        "取景"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 14266,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        43,
+        46,
+        276,
+        272
+      ],
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "6b1d5b3aae0bb6597eb2354caa4a7b2a83374b641c956a742f2617e65f1299b7",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 13,
+      "stem": "glitch_packet_streaks",
+      "name": "数据斜掠",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "数据",
+        "斜线",
+        "速度"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 32385,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        41,
+        34,
+        287,
+        273
+      ],
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "sha256": "5d185a0162c9f5b682cbb9002af0700214893f251c28e40028b6a9f04a9d3589",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 14,
+      "stem": "glitch_mosaic_tiles",
+      "name": "马赛克跳变",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "马赛克",
+        "像素",
+        "跳变"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 39347,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        42,
+        58,
+        282,
+        259
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "6c6c2c51dddad5e717a2ea9ebf3cb52359f7e9f54728a55049c491e5ad04a52b",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 15,
+      "stem": "glitch_double_image",
+      "name": "双影错帧",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "双影",
+        "错帧",
+        "残像"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 41650,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        36,
+        41,
+        285,
+        273
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "430860109114c5d02ec246c90deb2a4edb4d8c9497b8027d39ed9f1e057ace64",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    },
+    {
+      "index": 16,
+      "stem": "glitch_chromatic_edges",
+      "name": "色差分离",
+      "subcategory": "数码故障",
+      "keywords": [
+        "数码故障",
+        "色差",
+        "边缘",
+        "分色"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 31187,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        41,
+        47,
+        286,
+        260
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "936a884bc2b7369b90af3557789a7dff522759b28eb81724d4f2095f0d1c3ecc",
+      "source": "Generated with OpenAI built-in image generation on 2026-09-25 as one 4x4 transparent digital-glitch atlas; deterministically cropped by scripts/extract_digital_glitch_texture_sheet.py.",
+      "license": "MIT"
+    }
+  ]
+}

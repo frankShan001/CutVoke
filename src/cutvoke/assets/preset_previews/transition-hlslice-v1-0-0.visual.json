@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.hlslice",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.hlslice",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "故障",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Vertical bars of the incoming shot tear in from the right and shift left; the bars remain clearly separated at the midpoint, unlike pixel blocks or fine wind streaks.",
+  "method": "Manual comparison of five actual rendered frames per transition, neighboring presets, and complete MP4 decode",
+  "coverSha256": "0f4626a2772ee1a2a79ac620a48f6d8afa39a1652b239b04dbc9dde2a96cb253",
+  "motionPreviewSha256": "12a9b00bfa2dc3f7b39a5240c7af00bc04f65f23ea4fce049c2b7d3cf050a224",
+  "auditSha256": "aa6b78e592a750f03d9611bd237e8c0c1d6b43451baebefa83e319d0270bfe46"
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_hud_scan_cyan",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "0804e81d946d5eaba82832f4674057f3fb0f5799156284842c9fa5ed162a6479",
+  "previewSha256": "10aa4e01811bf73e658e139b02de129a7ad9762b36a8c8f7b83c13485af7de09",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2788,
+  "visiblePixels": 1822,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1044,
+    "steady_entry": 1822,
+    "steady_exit": 1817,
+    "exit": 1044
+  },
+  "previewExportMeanRgbDifferences": [
+    0.301,
+    0.302
+  ],
+  "auditExport": "texture_hud_scan_cyan.audit.mp4",
+  "auditExportSha256": "6fe90b6d87b874dd845581cf3ad8050bd0a6efcf633fbc5e71141b91b40512e7"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_happy_dog",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "aec8e1351c7529b4441b8e59dfb24310eb1f91a1b86f105bee8bbd7524830127",
+  "previewSha256": "6225caa8f3effd0a40d5c5237467c9bb365b260e271b0ba02bd4ad3758a1467c",
+  "preview": "pet_happy_dog.mp4",
+  "bytes": 4845,
+  "visiblePixels": 2739,
+  "changedPixels": 0,
+  "motionVisible": false
+}

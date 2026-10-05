@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_icefracture_cyan",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "640fcd1a90921eb66a1cef8fe4be2cef9c64107b40f44455052cabf9e763c337",
+  "previewSha256": "b3ecea2ee3f48b7722a113d0045ad7fe373419748a38560a05e0092c16377fbc",
+  "preview": "fxoverlay_refraction_icefracture_cyan.mp4",
+  "bytes": 14465,
+  "visiblePixels": 10059,
+  "changedPixels": 0,
+  "motionVisible": false
+}

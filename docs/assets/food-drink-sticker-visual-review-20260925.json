@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.food_bubble_tea",
+      "decision": "approved",
+      "sourceSha256": "74322726b30b04e6a9cbf0e0c6f5fcacbb02245d03181c51fbe1adbd069bf663",
+      "previewSha256": "eec6f2c71dcebfc3d1385f75be267ab0ed0b43e4360ea2ea4d68c7ff99f5abf8",
+      "observation": "The cup, striped straw, face and tapioca pearls remain distinct against the preview background."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_strawberry_cake",
+      "decision": "approved",
+      "sourceSha256": "25d943293c7d4f7b64ff5e4c05d722aeba43b209c7827459f363e01a62628cb5",
+      "previewSha256": "216405e01df83c4f95cea0115d7b5fc9a9368c283bda96a69f73eebbca555183",
+      "observation": "The layered cake slice and whole strawberry on the cream top stay readable at preview size."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_croissant",
+      "decision": "approved",
+      "sourceSha256": "5ad37c5770ca60ff61e808be69e6c5794096e7e71f42b4403e8fc193e7860f92",
+      "previewSha256": "afa8b1f5d9eae91159c8725436fb0804aa9ca8ccce54363c23ba839cbfbb41e1",
+      "observation": "The crescent body and layered folds form a clean, recognizable silhouette without nearby-cell spill."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_matcha_latte",
+      "decision": "approved",
+      "sourceSha256": "490a02fe8fc07a40560e0f3bef59047d6c63f79b3c6587cfb6abbc95833da74f",
+      "previewSha256": "389a3deea4768c91a93efcc518f3322050d7acfe162b7e3fce2b36e2fd837ef7",
+      "observation": "The handled cup and green matcha surface are distinct, with no detached crop fragments."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_ramen",
+      "decision": "approved",
+      "sourceSha256": "e33529b98c401fba2b9757b3dfaa451b928a3daabb5ea266f95c918ac2328c93",
+      "previewSha256": "e7d1cd8197a726959059b4f31019262a8da5ff6789e4205504ac76a0feef2980",
+      "observation": "The bowl, noodles, chopsticks and toppings remain visually separated in the composited frame."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_onigiri",
+      "decision": "approved",
+      "sourceSha256": "88df29c980d00d9728c8d90204e28f17346adea0bbb1f6bf60fa6ab74e475a78",
+      "previewSha256": "d43c98a07ce84d63caeaebcc601c59b3aba4b1663e2cb08c836e131fd2a38380",
+      "observation": "The triangular rice shape, dark seaweed and facial details remain recognizable at preview size."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_dumplings",
+      "decision": "approved",
+      "sourceSha256": "1c59ebf6477e2f5eee3e8ffa20611dce417063f869cb4424a54c446e92c77dad",
+      "previewSha256": "f310a21bae0b1230c3790ebfe6ef0141dc1b4684c1ccba74c085f7ade874cdb7",
+      "observation": "The three dumplings retain separate edges and clear green garnish without crop leakage."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_sushi",
+      "decision": "approved",
+      "sourceSha256": "d6ae209b8931e4a847b39cb38a11f71c18f5618eb5ec227d68cce08d83a3d01f",
+      "previewSha256": "86c504a44be32a03b6a9d337a4c33d766480275fc0964994b175bdbd1b8a5692",
+      "observation": "The salmon and tuna pieces remain distinct over the rice base in the small preview."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_taiyaki",
+      "decision": "approved",
+      "sourceSha256": "a9620b226ce562bf97f82ed37be8e4d173c5772fb8a4307e3df11062942c736b",
+      "previewSha256": "5bef40b6a981cea03c7f150bae8be2ad4ace8b4ee9943cf833445a6d56523dc5",
+      "observation": "The fish-shaped pastry keeps a clear head, body scales and tail silhouette in the preview."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_soft_serve",
+      "decision": "approved",
+      "sourceSha256": "fab395a94d7d6760c580d832cb06e7045fbb73f7a2f47e5e25a68953dc5a33a1",
+      "previewSha256": "aa38105e242bcf84b3563f93111440ad56108b45eaec4cddcc0575cfd7a1c0fa",
+      "observation": "The cream swirl and waffle cone read as one clean sticker after trimming the neighboring-cell fragment."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_egg_tart",
+      "decision": "approved",
+      "sourceSha256": "4fc79d87e0e58d07fae07fa3e0e79e47d5600c2485873307432e7486ce15225e",
+      "previewSha256": "ac05daf8f3fe7526826d92090b23f7a892728a2b3dedb6bae65ceecacef34e22",
+      "observation": "The custard center and ridged pastry shell stay distinct with a clean outer outline."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_tanghulu",
+      "decision": "approved",
+      "sourceSha256": "affc51782817fb4dd95af2fbdf38dfa667e9e02af756d258e6dfeeeb4b7d878a",
+      "previewSha256": "2f9c197f1fc8b0949ab0b39fef9c23efceca37c301a2c2d7de7330e8df43bf05",
+      "observation": "The three red fruit pieces and diagonal skewer remain separated and recognizable at preview size."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_peach",
+      "decision": "approved",
+      "sourceSha256": "4a796393a3d6892d17338f5722f7f6b26846e29e577b11e09f68e2bd2ae2e368",
+      "previewSha256": "f8493bee6534878fb15695a1931e1cceba18ee02a89da160f748cb11d448bff3",
+      "observation": "The paired peach lobes and green leaf form a clear fruit silhouette without stray fragments."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_lemon_tea",
+      "decision": "approved",
+      "sourceSha256": "da75ff5261f4bc3b2bd6d09da7a4dd4f8ee27d7a26c8e88ce5f89371ba6b41ec",
+      "previewSha256": "38d65e82f695551fe8820c9af2e462e2bc155cf673eb74c816ad954aba382e34",
+      "observation": "The lemon wheels, iced tea, green-striped straw and mint remain distinct after top-edge cleanup."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_burger_fries",
+      "decision": "approved",
+      "sourceSha256": "2e97c456ac9c52e6f5c0f0f6aa9ecaa9d08ca3ac031775528371da1c55f3e2be",
+      "previewSha256": "4eddbcfd5236836f1a9997a05d778738a3b7be76cdcd393a304acc65054fe9af",
+      "observation": "The burger layers and side fries remain readable as one deliberate food combination."
+    },
+    {
+      "stickerId": "cutvoke.sticker.food_donut",
+      "decision": "approved",
+      "sourceSha256": "1930702f68a7caa17df03a5112398100a5d95a7d4c32c32571c3415f7c51ca99",
+      "previewSha256": "6051f3961a42f913463f27b1ad1862061bab8bc4d54b1c6a25309e03358fa173",
+      "observation": "The pink icing, central hole and colored sprinkles stay distinct over the dough outline."
+    }
+  ]
+}

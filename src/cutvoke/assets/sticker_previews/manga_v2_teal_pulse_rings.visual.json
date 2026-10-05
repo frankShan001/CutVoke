@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_teal_pulse_rings",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "青绿色双环保持中心透明，外缘尖脉冲均匀，适合作为人物或物件强调圈。",
+  "sourceSha256": "93f9409e68d3fc9f7648d8127c9b93e1803fd5e4660a99b19cf265839a52cf48",
+  "previewSha256": "dbb81c89a4ae149ed992c7eb741a06b0cac257b1b4028b9c27c8a91509ef895a",
+  "auditSha256": "08d04045187c89873ef9f39c75caf86b01c232f746426938d0679db1b1401ab5"
+}

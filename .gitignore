@@ -12,6 +12,9 @@ venv/
 .pytest_cache/
 .coverage
 htmlcov/
+/test-results/
+/tmp/
+/output/
 
 # Editors / OS
 .idea/
@@ -35,4 +38,5 @@ web/app/playwright-report/
 
 # Web dependencies and build output
 web/app/node_modules/
+desktop/node_modules/
 web/app/dist/

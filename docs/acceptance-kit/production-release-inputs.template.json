@@ -1,0 +1,10 @@
+{
+  "publisherId": "",
+  "catalogUrl": "",
+  "hostingProvider": "",
+  "cdnOrOrigin": "",
+  "domainOwnerRole": "",
+  "signingKeyStorage": "local-keychain-or-ci-secret-store",
+  "publicKeyFingerprint": "",
+  "notes": "Do not put private keys, access tokens, or credentials in this file."
+}

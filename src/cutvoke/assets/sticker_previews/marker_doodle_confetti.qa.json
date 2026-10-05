@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.marker_doodle_confetti",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c13f1e2adaa0accdfa044883ff461a8b91cbd9f8916bef3250103ce71085df51",
+  "previewSha256": "56a109e42ab0174dcd17f191969385d2a97db7650e23af3a6d78ab7ec0805b9d",
+  "preview": "marker_doodle_confetti.mp4",
+  "bytes": 4832,
+  "visiblePixels": 1423,
+  "changedPixels": 0,
+  "motionVisible": false
+}

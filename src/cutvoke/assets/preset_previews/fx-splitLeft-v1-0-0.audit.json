@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.splitLeft",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "x",
+    "value": 0.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "cfa4cda5583405209ccd3230d6f69efbbc2e8e9853ecc0464894c2a853e8d26c",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "cfa4cda5583405209ccd3230d6f69efbbc2e8e9853ecc0464894c2a853e8d26c",
+  "auditExport": "fx-splitLeft-v1-0-0.audit.mp4"
+}

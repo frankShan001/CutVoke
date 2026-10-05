@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.marker_doodle_sparkle_cluster",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ae373921842c85eaa8f473377fe2ad325f24b98397493651625ee4b49265fc1e",
+  "previewSha256": "25ff7e8b12713ab8f4aeddb9505e97ab57acef9bfb2a1d49188d8e495bdf711c",
+  "preview": "marker_doodle_sparkle_cluster.mp4",
+  "bytes": 4011,
+  "visiblePixels": 1012,
+  "changedPixels": 0,
+  "motionVisible": false
+}

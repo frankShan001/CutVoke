@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_ice_frosted_glass",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "Icy blue frosted texture is soft and legible across the frame without hard crop edges or color contamination.",
+  "sourceSha256": "977fb3b76ea58f69ca064b45d85c6354fd4e4438d6881ad0df039e4f43cb2661",
+  "previewSha256": "153db87d23e7ef007866be6b3a7c28201024a981b1def902cd3b6cf7fc14703a",
+  "auditSha256": "34458a70971f4735b23209042ca7655e268b53bdd8b517719633f6888bf52d7b"
+}

@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>多人身份逐帧复核</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root { color-scheme: dark; font: 15px/1.5 "Segoe UI", "Microsoft YaHei", sans-serif; background:#101318; color:#e8edf4; }
+    * { box-sizing:border-box; }
+    body { margin:0; }
+    main { max-width:1320px; margin:0 auto; padding:24px; }
+    h1 { margin:0 0 8px; font-size:24px; }
+    h2 { margin:0 0 12px; font-size:17px; }
+    p { margin:6px 0 12px; color:#b9c3d1; }
+    .notice { border:1px solid #806b34; background:#302916; padding:12px 14px; border-radius:8px; margin:14px 0 18px; }
+    .notice strong { color:#ffe49a; }
+    .grid { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr); gap:18px; align-items:start; }
+    section { background:#191e26; border:1px solid #2a3340; border-radius:10px; padding:16px; }
+    label { display:block; color:#cbd5e1; font-size:13px; margin:8px 0 4px; }
+    input,select,textarea,button { font:inherit; color:inherit; }
+    input[type="text"],input[type="number"],select,textarea { width:100%; background:#0f1319; border:1px solid #3a4656; border-radius:6px; padding:8px 9px; }
+    input[type="file"] { max-width:100%; color:#cbd5e1; }
+    textarea { min-height:70px; resize:vertical; }
+    button,.button { display:inline-block; border:1px solid #40536b; background:#26384d; padding:7px 11px; border-radius:6px; cursor:pointer; text-decoration:none; }
+    button:hover,.button:hover { background:#314760; }
+    button:disabled { opacity:.45; cursor:not-allowed; }
+    button.primary { background:#176b57; border-color:#258b70; }
+    button.active { outline:2px solid #8dd8bc; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .row > label { margin:0; }
+    .row input[type="checkbox"] { accent-color:#56c49f; }
+    .video-shell { position:relative; width:100%; aspect-ratio:16/9; margin:10px 0; background:#050608; overflow:hidden; border-radius:6px; }
+    video,.overlay { position:absolute; inset:0; width:100%; height:100%; }
+    video { object-fit:contain; }
+    .overlay { pointer-events:none; }
+    .overlay.draw-mode { pointer-events:auto; cursor:crosshair; touch-action:none; }
+    .controls { display:grid; grid-template-columns:auto auto auto minmax(80px,1fr) auto; gap:8px; align-items:center; }
+    .controls input { width:100%; }
+    .time { min-width:110px; text-align:center; font-variant-numeric:tabular-nums; }
+    .status { min-height:24px; color:#8fd3bd; font-size:13px; margin-top:6px; }
+    .status.warn { color:#ffd477; }
+    .small { font-size:12px; color:#aeb9c7; }
+    .person-buttons button { min-width:56px; }
+    .fields { display:grid; grid-template-columns:1fr 1fr; gap:2px 10px; }
+    .fields .wide { grid-column:1 / -1; }
+    .checkline { margin-top:12px; }
+    .table-wrap { max-height:340px; overflow:auto; margin-top:12px; border:1px solid #2d3745; border-radius:6px; }
+    table { width:100%; border-collapse:collapse; font-size:12px; }
+    th,td { padding:6px 8px; border-bottom:1px solid #2a3340; text-align:left; white-space:nowrap; }
+    th { position:sticky; top:0; background:#202733; }
+    td button { padding:3px 7px; font-size:11px; }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    @media(max-width:900px) { .grid { grid-template-columns:1fr; } main { padding:14px; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>多人身份逐帧复核</h1>
+  <p>在本机打开视频并逐帧修订 A/B 边界框、交叉事件和遮挡状态，导出与验收模板相同列的 CSV。</p>
+  <div class="notice"><strong>标注要求：</strong>导入的 AI 候选框不是参考真值。请先独立查看原视频，再用自己的匿名复核代号保存已核实的行；身份不确定时选“uncertain”并留空边界框。视频不会上传。</div>
+
+  <div class="grid">
+    <section>
+      <h2>1. 载入本地视频</h2>
+      <label for="videoFile">选择待复核视频</label>
+      <input id="videoFile" type="file" accept="video/*">
+      <div id="sourceStatus" class="status">尚未载入视频。</div>
+      <div class="video-shell" id="videoShell">
+        <video id="video" playsinline preload="metadata"></video>
+        <canvas id="overlay" class="overlay" aria-label="人物边界框绘制区域"></canvas>
+      </div>
+      <div class="controls">
+        <button id="play" type="button">播放</button>
+        <button id="prevFrame" type="button" aria-label="上一帧">−1 帧</button>
+        <button id="nextFrame" type="button" aria-label="下一帧">+1 帧</button>
+        <input id="seek" type="range" min="0" max="0" step="0.033333" value="0" aria-label="视频时间">
+        <span id="time" class="time">00:00.000</span>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <label for="fps" style="margin:0">帧率</label>
+        <input id="fps" type="number" min="1" max="240" step="0.001" value="30" style="width:90px">
+        <button id="snapSecond" type="button">定位到最近整秒</button>
+        <button id="drawToggle" type="button">框选人物</button>
+        <span id="frame" class="small">帧 —</span>
+      </div>
+      <p class="small">快捷键：空格播放/暂停，左右方向键逐帧，A/B 切换目标，D 开关框选。视频用本机文件播放。</p>
+    </section>
+
+    <section>
+      <h2>2. 复核当前帧</h2>
+      <label for="reviewer">匿名复核代号（例如 REVIEWER-01）</label>
+      <input id="reviewer" type="text" autocomplete="off" placeholder="请填写独立复核者代号">
+      <div class="row person-buttons" style="margin-top:12px">
+        <span class="small">当前目标</span>
+        <button id="personA" type="button" class="active">A</button>
+        <button id="personB" type="button">B</button>
+        <span id="currentFrame" class="small">—</span>
+      </div>
+      <div class="fields">
+        <div>
+          <label for="occlusion">可见/遮挡状态</label>
+          <select id="occlusion">
+            <option value="clear">clear：可见</option>
+            <option value="partial">partial：部分遮挡</option>
+            <option value="full">full：完全遮挡</option>
+            <option value="uncertain">uncertain：身份不确定</option>
+          </select>
+        </div>
+        <div>
+          <label for="confidence">身份置信度 1–5</label>
+          <select id="confidence"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+        </div>
+        <div class="wide">
+          <label for="cue">稳定视觉提示（不记录姓名或脸部身份）</label>
+          <input id="cue" type="text" placeholder="例如：黑色外套、白色下摆、深色长裤">
+        </div>
+        <div class="wide">
+          <label for="event">交叉/遮挡事件</label>
+          <input id="event" type="text" placeholder="例如：crossing_start、partial_occlusion、recovered">
+        </div>
+        <div class="wide">
+          <label for="notes">复核说明</label>
+          <textarea id="notes" placeholder="身份连续性、框不确定原因或需要二次检查的细节"></textarea>
+        </div>
+      </div>
+      <div class="row checkline">
+        <input id="reviewed" type="checkbox">
+        <label for="reviewed">我已在原视频中核对当前帧的人物身份和可见范围</label>
+      </div>
+      <div class="actions">
+        <button id="saveRow" class="primary" type="button">保存此帧标注</button>
+        <button id="deleteCurrent" type="button">删除此帧此目标</button>
+      </div>
+      <div id="saveStatus" class="status"></div>
+    </section>
+  </div>
+
+  <section style="margin-top:18px">
+    <h2>3. 导入候选行并导出复核结果</h2>
+    <div class="row">
+      <label for="csvFile" style="margin:0">导入 CSV</label>
+      <input id="csvFile" type="file" accept=".csv,text/csv">
+      <a class="button" href="../../output/acceptance/jy-r20-person-identities-singapore-20260927/candidate-ab-preannotation.csv" download>下载 AI 候选 CSV</a>
+      <button id="exportCsv" type="button">导出复核 CSV</button>
+      <button id="clearRows" type="button">清空本机标注</button>
+      <span id="rowCount" class="small">0 行</span>
+    </div>
+    <p class="small">导入后，逐帧修订候选行并使用新的复核代号保存。完全遮挡或不确定时不画框。导入的 B-candidate 会映射为模板中的 B。导出只包含人工复核代号保存的行；未复核候选行不会进入真值 CSV。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>时间</th><th>目标</th><th>状态</th><th>复核者</th><th>操作</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script>
+(() => {
+  const EXPECTED_SHA = "b70cd61e8dfdfda213e833b20271981e1dc8de2678390ca359e0e78fb29a670f";
+  const FIELDS = ["reviewer_code","frame_index","timestamp_seconds","person_id","visual_cue","bbox_x_min_norm","bbox_y_min_norm","bbox_x_max_norm","bbox_y_max_norm","occlusion_state","event","identity_confidence_1_to_5","notes"];
+  const $ = (id) => document.getElementById(id);
+  const video = $("video"), canvas = $("overlay"), ctx = canvas.getContext("2d");
+  let objectUrl = null, selectedPerson = "A", drawing = false, startPoint = null, pendingBox = null, sourceHash = "", rows = [];
+  const keyFor = (frame, person) => `${frame}:${person}`;
+  const fps = () => Math.max(1, Number($("fps").value) || 30);
+  const frameIndex = () => Math.max(0, Math.round(video.currentTime * fps()));
+  const timeLabel = (seconds) => {
+    const ms = Math.max(0, Math.round(seconds * 1000));
+    return `${String(Math.floor(ms / 60000)).padStart(2,"0")}:${String(Math.floor(ms / 1000) % 60).padStart(2,"0")}.${String(ms % 1000).padStart(3,"0")}`;
+  };
+  const personColor = (person) => person === "A" ? "#48e29a" : "#ffc34d";
+  const currentRow = () => rows.find((r) => Number(r.frame_index) === frameIndex() && r.person_id === selectedPerson);
+  const isHumanReviewed = (row) => Boolean(row.reviewer_code?.trim()) && row.reviewer_code.trim().toLowerCase() !== "codex-ai-preannotation";
+  function normalizeRows(input) {
+    return input.map((source)=>{
+      const row={...source};
+      if(row.person_id==="B-candidate")row.person_id="B";
+      if(!["A","B"].includes(row.person_id))throw new Error(`不支持的 person_id：${row.person_id}`);
+      return row;
+    });
+  }
+  function saveLocal() {
+    if (!sourceHash) return;
+    try { localStorage.setItem(`jy-r20-review:${sourceHash}`, JSON.stringify(rows)); }
+    catch (error) { setStatus(`浏览器无法保存本机草稿（${error.message}）。请及时导出 CSV。`, true); }
+  }
+  function setStatus(message, warn=false) { $("saveStatus").textContent = message; $("saveStatus").classList.toggle("warn", warn); }
+  function syncCurrentForm() {
+    const row = currentRow();
+    $("currentFrame").textContent = `${timeLabel(video.currentTime)} · frame ${frameIndex()}`;
+    $("reviewed").checked = false;
+    pendingBox = null;
+    $("occlusion").value = row?.occlusion_state || "clear";
+    $("confidence").value = row?.identity_confidence_1_to_5 || "3";
+    $("cue").value = row?.visual_cue || (selectedPerson === "A" ? "黑色上衣/外套，白色下摆，深色长裤，及肩偏红棕色头发" : "浅色长袖衬衫，深色长裤，戴口罩的过街行人");
+    $("event").value = row?.event || "";
+    $("notes").value = row?.notes || "";
+    const cannotBox = ["full","uncertain"].includes($("occlusion").value);
+    $("drawToggle").disabled = !video.videoWidth || cannotBox;
+    $("drawToggle").classList.toggle("active", drawing && !cannotBox);
+    canvas.classList.toggle("draw-mode", drawing && !cannotBox);
+    setStatus(row ? "此帧已有标注；核对视频后再勾选并保存。" : "在视频上框选人物，或将状态改为完全遮挡/不确定。");
+    redraw();
+  }
+  function fitCanvas() {
+    if (!video.videoWidth || !video.videoHeight) return;
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    $("videoShell").style.aspectRatio = `${video.videoWidth} / ${video.videoHeight}`;
+    redraw();
+  }
+  function syncTimeline() {
+    $("seek").value=String(video.currentTime||0);
+    $("time").textContent=timeLabel(video.currentTime||0);
+    $("frame").textContent=`帧 ${frameIndex()}`;
+  }
+  function rowBox(row) {
+    const values = [row.bbox_x_min_norm,row.bbox_y_min_norm,row.bbox_x_max_norm,row.bbox_y_max_norm].map(Number);
+    if (values.some((n) => !Number.isFinite(n))) return null;
+    return { x:values[0]*canvas.width, y:values[1]*canvas.height, w:(values[2]-values[0])*canvas.width, h:(values[3]-values[1])*canvas.height };
+  }
+  function paintBox(box, person, label, dashed=false) {
+    if (!box) return;
+    ctx.save(); ctx.strokeStyle=personColor(person); ctx.fillStyle=personColor(person); ctx.lineWidth=Math.max(3,canvas.width/500); if(dashed) ctx.setLineDash([10,7]);
+    ctx.strokeRect(box.x,box.y,box.w,box.h); ctx.font=`bold ${Math.max(18,canvas.width/55)}px sans-serif`;
+    const text=`${person} ${label}`; const pad=7; const height=Math.max(27,canvas.width/42); const width=ctx.measureText(text).width+pad*2;
+    ctx.fillRect(box.x,Math.max(0,box.y-height),width,height); ctx.fillStyle="#111820"; ctx.fillText(text,box.x+pad,Math.max(18,box.y-7)); ctx.restore();
+  }
+  function redraw() {
+    if (!canvas.width || !canvas.height) return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const sameFrame = rows.filter((r) => Number(r.frame_index) === frameIndex());
+    for (const row of sameFrame) paintBox(rowBox(row), row.person_id, row.occlusion_state || "clear");
+    if (pendingBox) paintBox(pendingBox,selectedPerson,"预览",true);
+    if (startPoint && drawing) {
+      const point = canvasPoint(window.lastPointerEvent);
+      if(point) paintBox({x:Math.min(startPoint.x,point.x),y:Math.min(startPoint.y,point.y),w:Math.abs(point.x-startPoint.x),h:Math.abs(point.y-startPoint.y)},selectedPerson,"预览",true);
+    }
+  }
+  function canvasPoint(event) {
+    if(!event || !canvas.width) return null;
+    const rect=canvas.getBoundingClientRect();
+    return {x:Math.min(canvas.width,Math.max(0,(event.clientX-rect.left)*canvas.width/rect.width)),y:Math.min(canvas.height,Math.max(0,(event.clientY-rect.top)*canvas.height/rect.height))};
+  }
+  function renderRows() {
+    const body=$("rows"); body.replaceChildren();
+    const sorted=[...rows].sort((a,b)=>Number(a.frame_index)-Number(b.frame_index)||String(a.person_id).localeCompare(String(b.person_id)));
+    for(const row of sorted){
+      const tr=document.createElement("tr");
+      const time=document.createElement("td"); time.textContent=`${Number(row.timestamp_seconds).toFixed(3)}s · ${row.frame_index}`;
+      const person=document.createElement("td"); person.textContent=row.person_id;
+      const state=document.createElement("td"); state.textContent=row.occlusion_state;
+      const reviewer=document.createElement("td"); reviewer.textContent=row.reviewer_code;
+      const actions=document.createElement("td");
+      const jump=document.createElement("button"); jump.type="button"; jump.textContent="定位"; jump.onclick=()=>{video.currentTime=Number(row.timestamp_seconds);selectedPerson=row.person_id.startsWith("B")?"B":"A";updatePersonButtons();syncCurrentForm();};
+      const del=document.createElement("button"); del.type="button"; del.textContent="删除"; del.onclick=()=>{rows=rows.filter((item)=>keyFor(item.frame_index,item.person_id)!==keyFor(row.frame_index,row.person_id));saveLocal();renderRows();redraw();};
+      actions.append(jump,del); tr.append(time,person,state,reviewer,actions); body.append(tr);
+    }
+    const reviewedCount=rows.filter(isHumanReviewed).length;
+    $("rowCount").textContent=`${rows.length} 行 · 人工复核 ${reviewedCount} 行`;
+    redraw();
+  }
+  function updatePersonButtons(){ $("personA").classList.toggle("active",selectedPerson==="A"); $("personB").classList.toggle("active",selectedPerson==="B"); }
+  function setTime(seconds){ if(!video.videoWidth)return; video.currentTime=Math.max(0,Math.min(video.duration||0,seconds)); }
+  function csvEscape(value){ const text=String(value??""); return /[",\r\n]/.test(text)?`"${text.replaceAll('"','""')}"`:text; }
+  function exportCsv(){
+    const reviewed=rows.filter(isHumanReviewed);
+    if(!reviewed.length){setStatus("当前没有人工复核行；AI 候选不会导出为真值。",true);return;}
+    const sorted=[...reviewed].sort((a,b)=>Number(a.frame_index)-Number(b.frame_index)||String(a.person_id).localeCompare(String(b.person_id)));
+    const content="\ufeff"+FIELDS.join(",")+"\r\n"+sorted.map((r)=>FIELDS.map((field)=>csvEscape(r[field])).join(",")).join("\r\n")+"\r\n";
+    const url=URL.createObjectURL(new Blob([content],{type:"text/csv;charset=utf-8"})); const a=document.createElement("a"); a.href=url; a.download="multi-person-identity-annotations-reviewed.csv"; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  function parseCsv(text){
+    const records=[]; let row=[],field="",quoted=false;
+    for(let i=0;i<text.length;i++){const ch=text[i]; if(quoted){if(ch==='"'&&text[i+1]==='"'){field+='"';i++;}else if(ch==='"')quoted=false;else field+=ch;}else if(ch==='"')quoted=true;else if(ch===','){row.push(field);field="";}else if(ch==='\n'){row.push(field.replace(/\r$/,""));records.push(row);row=[];field="";}else field+=ch;}
+    if(field.length||row.length){row.push(field.replace(/\r$/,""));records.push(row);}
+    const headers=(records.shift()||[]).map((x)=>x.replace(/^\ufeff/,""));
+    return records.filter((r)=>r.some((x)=>x!=="")).map((values)=>Object.fromEntries(headers.map((name,index)=>[name,values[index]??""])));
+  }
+  $("videoFile").addEventListener("change",async(event)=>{
+    const file=event.target.files?.[0]; if(!file)return;
+    if(objectUrl)URL.revokeObjectURL(objectUrl); objectUrl=URL.createObjectURL(file); video.src=objectUrl; video.load();
+    sourceHash=""; rows=[]; renderRows(); setStatus("");
+    $("sourceStatus").textContent=`已选择 ${file.name}（${(file.size/1048576).toFixed(2)} MiB）；正在计算 SHA-256…`;
+    if(file.size>512*1024*1024){$("sourceStatus").textContent="视频已载入；文件超过 512 MiB，跳过浏览器内存中的 SHA-256 计算。请人工确认视频与标注对应；此文件的草稿不会跨会话保存。";$("sourceStatus").classList.add("warn");return;}
+    try{
+      sourceHash=[...new Uint8Array(await crypto.subtle.digest("SHA-256",await file.arrayBuffer()))].map((b)=>b.toString(16).padStart(2,"0")).join("");
+      const match=sourceHash===EXPECTED_SHA;
+      $("sourceStatus").textContent=`SHA-256 ${match?"匹配候选源":"与候选源不同"}：${sourceHash}${match?"":"。请确认视频和导入标注确实对应。"}`;
+      $("sourceStatus").classList.toggle("warn",!match);
+      try{const saved=localStorage.getItem(`jy-r20-review:${sourceHash}`);rows=saved?normalizeRows(JSON.parse(saved)):[];}
+      catch(error){rows=[];setStatus(`无法读取本机草稿（${error.message}）。`,true);}
+      renderRows();
+    }catch(error){sourceHash="";rows=[];renderRows();$("sourceStatus").textContent=`视频已载入；浏览器未能计算 SHA-256（${error.message}）。标注可导出，但不会自动保存草稿。`;$("sourceStatus").classList.add("warn");}
+  });
+  video.addEventListener("loadedmetadata",()=>{$("seek").max=String(video.duration||0);$("seek").step=String(1/fps());fitCanvas();syncTimeline();syncCurrentForm();});
+  video.addEventListener("timeupdate",()=>{syncTimeline();redraw();});
+  video.addEventListener("seeked",()=>{syncTimeline();syncCurrentForm();});
+  video.addEventListener("ended",()=>{$("play").textContent="播放";});
+  $("play").onclick=async()=>{if(!video.videoWidth)return;if(video.paused){await video.play();$("play").textContent="暂停";}else{video.pause();$("play").textContent="播放";}};
+  $("seek").oninput=()=>setTime(Number($("seek").value));
+  $("prevFrame").onclick=()=>setTime(video.currentTime-1/fps()); $("nextFrame").onclick=()=>setTime(video.currentTime+1/fps());
+  $("snapSecond").onclick=()=>setTime(Math.round(video.currentTime));
+  $("fps").onchange=()=>{$("seek").step=String(1/fps());$("frame").textContent=`帧 ${frameIndex()}`;syncCurrentForm();};
+  $("personA").onclick=()=>{selectedPerson="A";updatePersonButtons();syncCurrentForm();}; $("personB").onclick=()=>{selectedPerson="B";updatePersonButtons();syncCurrentForm();};
+  $("occlusion").onchange=()=>{const blocked=["full","uncertain"].includes($("occlusion").value);if(blocked){drawing=false;pendingBox=null;}$("drawToggle").disabled=blocked||!video.videoWidth;canvas.classList.toggle("draw-mode",drawing&&!blocked);$("drawToggle").classList.toggle("active",drawing&&!blocked);redraw();};
+  $("drawToggle").onclick=()=>{if(!video.videoWidth)return;drawing=!drawing;canvas.classList.toggle("draw-mode",drawing);$("drawToggle").classList.toggle("active",drawing);$("drawToggle").textContent=drawing?"结束框选":"框选人物";};
+  canvas.addEventListener("pointerdown",(event)=>{if(!drawing)return;event.preventDefault();startPoint=canvasPoint(event);canvas.setPointerCapture(event.pointerId);window.lastPointerEvent=event;});
+  canvas.addEventListener("pointermove",(event)=>{if(startPoint){window.lastPointerEvent=event;redraw();}});
+  canvas.addEventListener("pointerup",(event)=>{if(!startPoint)return;const end=canvasPoint(event),start=startPoint;startPoint=null;window.lastPointerEvent=null;if(end&&Math.abs(end.x-start.x)>5&&Math.abs(end.y-start.y)>5){pendingBox={x:Math.min(start.x,end.x),y:Math.min(start.y,end.y),w:Math.abs(end.x-start.x),h:Math.abs(end.y-start.y)};}redraw();});
+  $("saveRow").onclick=()=>{
+    const reviewer=$("reviewer").value.trim();if(!reviewer||reviewer.toLowerCase()==="codex-ai-preannotation"){setStatus("请填写独立复核代号，且不能使用 AI 预标注代号。",true);return;}
+    if(!$("reviewed").checked){setStatus("请先核对当前视频帧并勾选确认。",true);return;}
+    const state=$("occlusion").value, existing=currentRow(); let box=null;
+    if(["full","uncertain"].includes(state)) box=null;
+    else if(pendingBox) box=pendingBox;
+    else if(existing){const b=rowBox(existing);if(b)box=b;}
+    if(!["full","uncertain"].includes(state)&&!box){setStatus("当前状态需要边界框；请框选人物，或改为 full/uncertain。",true);return;}
+    const normalized=box?{bbox_x_min_norm:(box.x/canvas.width).toFixed(6),bbox_y_min_norm:(box.y/canvas.height).toFixed(6),bbox_x_max_norm:((box.x+box.w)/canvas.width).toFixed(6),bbox_y_max_norm:((box.y+box.h)/canvas.height).toFixed(6)}:{bbox_x_min_norm:"",bbox_y_min_norm:"",bbox_x_max_norm:"",bbox_y_max_norm:""};
+    const record={reviewer_code:reviewer,frame_index:String(frameIndex()),timestamp_seconds:video.currentTime.toFixed(3),person_id:selectedPerson,visual_cue:$("cue").value.trim(),...normalized,occlusion_state:state,event:$("event").value.trim(),identity_confidence_1_to_5:$("confidence").value,notes:$("notes").value.trim()};
+    const key=keyFor(record.frame_index,record.person_id);rows=rows.filter((r)=>keyFor(r.frame_index,r.person_id)!==key);rows.push(record);pendingBox=null;$("reviewed").checked=false;saveLocal();renderRows();setStatus(`已保存 ${selectedPerson} · ${record.timestamp_seconds}s（frame ${record.frame_index}），数据只保存在当前浏览器。`);
+  };
+  $("deleteCurrent").onclick=()=>{const key=keyFor(frameIndex(),selectedPerson);rows=rows.filter((r)=>keyFor(r.frame_index,r.person_id)!==key);saveLocal();renderRows();syncCurrentForm();};
+  $("csvFile").addEventListener("change",async(event)=>{const file=event.target.files?.[0];if(!file)return;try{const imported=parseCsv(await file.text());if(!imported.length||FIELDS.some((field)=>!(field in imported[0])))throw new Error("CSV 表头与多人身份标注模板不匹配。");rows=normalizeRows(imported.map((r)=>Object.fromEntries(FIELDS.map((f)=>[f,r[f]??""]))));saveLocal();renderRows();setStatus(`已导入 ${rows.length} 行；B-candidate 已映射为 B。仅人工复核行会导出。`);}catch(error){setStatus(`CSV 读取失败：${error.message}`,true);}});
+  $("exportCsv").onclick=exportCsv;
+  $("clearRows").onclick=()=>{if(!confirm("清空当前浏览器内保存的所有标注？"))return;rows=[];saveLocal();renderRows();setStatus("本机标注已清空。");};
+  window.addEventListener("keydown",(event)=>{if(event.target instanceof HTMLInputElement||event.target instanceof HTMLTextAreaElement||event.target instanceof HTMLSelectElement)return;if(event.code==="Space"){event.preventDefault();$("play").click();}else if(event.key==="ArrowLeft")$("prevFrame").click();else if(event.key==="ArrowRight")$("nextFrame").click();else if(event.key.toLowerCase()==="a")$("personA").click();else if(event.key.toLowerCase()==="b")$("personB").click();else if(event.key.toLowerCase()==="d")$("drawToggle").click();});
+  renderRows();
+})();
+</script>
+</body>
+</html>

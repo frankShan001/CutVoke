@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_lavender",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "紫色穗状花与长茎清楚，轮廓细节保留，适合作为竖向边缘装饰。",
+  "sourceSha256": "1b6b29e50adbbf80991662fb3005ebc553a0229f3e775916b0a38eafa1cd10f6",
+  "previewSha256": "5d106312e70a20bf327dd3b0c0d3519530a2b5e7722b916dc816d154ebc52969",
+  "auditSha256": "00991605e233c8cf9eac2beaaa2d08a5aa86c505469ad4543e7f8fece17afd4c"
+}

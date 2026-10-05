@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_gold_sunburst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2cc8d3c39e1a26f2c88826feeff591e08bf4987d0d56bf7ff6b78ffc97d39fc5",
+  "previewSha256": "366a5986a8d6395610a9e9f1e59924a07c3a6fe6c8c100bdc7df9df5a05aa352",
+  "preview": "fxoverlay_gold_sunburst.mp4",
+  "bytes": 10674,
+  "visiblePixels": 9147,
+  "changedPixels": 0,
+  "motionVisible": false
+}

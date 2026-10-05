@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.transition.blur",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.blur",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 90.08,
+  "maxSampledMeanRgbDifference": 90.08,
+  "coverSha256": "7e42960db8d29570b6eef101eea40dc00e4002e3c535924b1d7b6d3fb534d774",
+  "previewSha256": "98dfed562b870fe79c918703ec5f5bde6fa6fda4d84fd1a04d93f7d1f6ce35de",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

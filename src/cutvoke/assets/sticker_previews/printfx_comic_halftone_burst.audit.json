@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_comic_halftone_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "859f09331cf672143e0479fb86bbb8d838ea4488d182db1452a71d23d4704c0c",
+  "previewSha256": "758b4bc5ca7f87511c53da26293a137c0252ded98930db543099e14d75a3bf5b",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 10076,
+  "visiblePixels": 12431,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 7592,
+    "steady_entry": 12451,
+    "steady_exit": 12446,
+    "exit": 7592
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 7592,
+      "withoutFade": 12449
+    },
+    "steady_entry": {
+      "withFade": 12451,
+      "withoutFade": 12423
+    },
+    "steady_exit": {
+      "withFade": 12446,
+      "withoutFade": 12441
+    },
+    "exit": {
+      "withFade": 7592,
+      "withoutFade": 12446
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.509,
+    0.534
+  ],
+  "auditExport": "printfx_comic_halftone_burst.audit.mp4",
+  "auditExportSha256": "099e364a20f12374a3a6ad686680e1c19f758b736774ab08da472c04a54f8b76"
+}

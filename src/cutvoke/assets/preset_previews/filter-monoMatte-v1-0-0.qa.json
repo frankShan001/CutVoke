@@ -1,0 +1,39 @@
+{
+  "presetId": "cutvoke.preset.filter.monoMatte",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.filmgrain",
+      "version": "1.0.0",
+      "params": {
+        "strength": 100,
+        "temporal": false
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.grayscale",
+      "version": "1.0.0",
+      "params": {
+        "strength": 1
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.curves",
+      "version": "1.0.0",
+      "params": {
+        "preset": "strong_contrast"
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 43.84,
+  "maxSampledMeanRgbDifference": 43.84,
+  "coverSha256": "08d503d7e61a60b7fe2d94258f1e87a6a3ff807b7cecbdfbd674aa840edf052f",
+  "previewSha256": "9daf3cf7a58227c63c12d7ff506453a72fed589891da26db99999ce4b7a89abd",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -6,7 +6,7 @@ import { ArrowRightLeft, Sparkles, Wand2, Palette, Move, Shapes } from "lucide-r
 import { ApiFailure, API_BASE } from "./api";
 
 /** 效果分类（对应后端 registry category 常量）。 */
-export type EffectCategory = "transition" | "animation" | "fx" | "color" | "transform" | "text";
+export type EffectCategory = "transition" | "animation" | "fx" | "filter" | "audio" | "color" | "transform" | "text" | "personFx";
 
 export interface EffectParamSpec {
   type?: string;
@@ -34,6 +34,8 @@ export interface EffectSpec {
   version: string;
   name: string;
   category: EffectCategory;
+  browseCategory: EffectCategory;
+  subcategory: string;
   description: string;
   keywords: string[];
   appliesTo: string[];
@@ -42,6 +44,7 @@ export interface EffectSpec {
   animatable: string[];
   preview: string;
   source: string;
+  license: string;
   dependencies: string[];
 }
 
@@ -61,6 +64,49 @@ export interface Preset {
   effects: PresetEffect[];
 }
 
+export interface BuiltinPresetSummary {
+  presetId: string;
+  effectId: string;
+  name: string;
+  family: string;
+  subcategory: string;
+  params: Record<string, unknown>;
+  effects: { effectId: string; version: string; params: Record<string, unknown> }[];
+  version: string;
+  defaultDuration: number | null;
+  appliesTo: string[];
+  cover: string;
+  motionPreview: string;
+  license: string;
+  source?: string;
+  downloadState: "bundled" | "available" | "missing";
+  mediaAvailable: boolean;
+  status: "candidate" | "approved" | "retired";
+  qualified: boolean;
+}
+
+export function builtinPresetMediaUrl(presetId: string, kind: "cover" | "preview"): string {
+  return `${API_BASE}/presets/${encodeURIComponent(presetId)}/${kind}`;
+}
+
+export interface BuiltinPresetCatalog {
+  presets: BuiltinPresetSummary[];
+  candidateCount: number;
+  qualifiedCount: number;
+  resourcePack?: {
+    packId: string;
+    version: string;
+    manifestSha256: string;
+    resourceCount: number;
+    presetCount: number;
+    stickerCount: number;
+    fileCount: number;
+    offlineAvailable: boolean;
+    missingFiles: string[];
+    invalidFiles?: string[];
+  };
+}
+
 export interface ProjectResources {
   effects: ProjectResource[];
   favorites: string[];
@@ -70,6 +116,7 @@ export interface ProjectResources {
 export interface ResourceQuery {
   q?: string;
   category?: EffectCategory | "";
+  subcategory?: string;
   appliesTo?: string;
   favoritesOnly?: boolean;
   recentOnly?: boolean;
@@ -150,6 +197,8 @@ function normalizeEffect(raw: unknown): EffectSpec {
     version: String(r.version ?? ""),
     name: localized(r.name) || id,
     category: (r.category as EffectCategory) ?? "fx",
+    browseCategory: (r.browseCategory as EffectCategory) ?? (r.category as EffectCategory) ?? "fx",
+    subcategory: typeof r.subcategory === "string" ? r.subcategory : "基础",
     description: localized(r.description),
     keywords: strArr(r.keywords),
     appliesTo: strArr(r.appliesTo, ["video"]),
@@ -158,6 +207,7 @@ function normalizeEffect(raw: unknown): EffectSpec {
     animatable: strArr(r.animatable),
     preview: typeof r.preview === "string" ? r.preview : "",
     source: typeof r.source === "string" ? r.source : "",
+    license: typeof r.license === "string" ? r.license : "",
     dependencies: strArr(r.dependencies),
   };
 }
@@ -187,6 +237,7 @@ export async function listEffects(opts: ResourceQuery = {}): Promise<EffectSpec[
   const data = await getJson<{ effects?: unknown[] }>("/effects", {
     q: opts.q,
     category: opts.category,
+    subcategory: opts.subcategory,
     appliesTo: opts.appliesTo,
   });
   return (data.effects || []).map(normalizeEffect);
@@ -201,6 +252,7 @@ export async function listProjectResources(
     {
       q: opts.q,
       category: opts.category,
+      subcategory: opts.subcategory,
       appliesTo: opts.appliesTo,
       favoritesOnly: opts.favoritesOnly ? "1" : undefined,
       recentOnly: opts.recentOnly ? "1" : undefined,
@@ -224,6 +276,43 @@ export async function listPresets(projectId: string): Promise<Preset[]> {
   return (data.presets || []).map(normalizePreset);
 }
 
+/** 内置内容审核状态，与工程内个人 preset.save 分账。 */
+export async function listBuiltinPresets(): Promise<BuiltinPresetCatalog> {
+  const data = await getJson<{ presets?: BuiltinPresetSummary[]; candidateCount?: number; qualifiedCount?: number;
+    resourcePack?: BuiltinPresetCatalog["resourcePack"] }>("/presets");
+  return {
+    presets: data.presets || [],
+    candidateCount: data.candidateCount || 0,
+    qualifiedCount: data.qualifiedCount || 0,
+    resourcePack: data.resourcePack,
+  };
+}
+
+/** 在所选片段上试用同一效果与默认参数；服务端只渲染工程深拷贝。 */
+export async function fetchResourcePreview(
+  projectId: string,
+  clipId: string,
+  effectId: string,
+  signal?: AbortSignal,
+  duration?: number,
+): Promise<{ kind: "frame"; url: string } | { kind: "empty" } | { kind: "error"; message: string }> {
+  const query = new URLSearchParams({ clipId, effectId });
+  if (duration !== undefined) query.set("duration", String(duration));
+  const url = `${API_BASE}/projects/${encodeURIComponent(projectId)}/resource-preview?${query}`;
+  try {
+    const res = await fetch(url, { headers: { Accept: "image/png" }, signal });
+    if (res.status === 204) return { kind: "empty" };
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({})) as { error?: { message?: string } };
+      return { kind: "error", message: body.error?.message || `预览失败（HTTP ${res.status}）` };
+    }
+    return { kind: "frame", url: URL.createObjectURL(await res.blob()) };
+  } catch (error) {
+    if (signal?.aborted) return { kind: "empty" };
+    return { kind: "error", message: error instanceof Error ? error.message : "预览网络错误" };
+  }
+}
+
 // ---------------------------------------------------------------------------
 // 分类派生（tab / 文案 / 图标）—— 从 category 枚举派生，不写死效果 ID
 // ---------------------------------------------------------------------------
@@ -231,6 +320,9 @@ export const CATEGORY_ORDER: EffectCategory[] = [
   "transition",
   "animation",
   "fx",
+  "personFx",
+  "filter",
+  "audio",
   "color",
   "transform",
   "text",
@@ -240,7 +332,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   transition: "转场",
   animation: "动画",
   fx: "画面特效",
-  color: "调色",
+  personFx: "人物特效",
+  filter: "滤镜",
+  audio: "音频效果",
+  color: "调节",
   transform: "基础",
   text: "文字",
 };
@@ -257,6 +352,10 @@ export function iconForCategory(category: string): LucideIcon {
       return Sparkles;
     case "fx":
       return Wand2;
+    case "filter":
+      return Palette;
+    case "audio":
+      return Sparkles;
     case "color":
       return Palette;
     case "transform":

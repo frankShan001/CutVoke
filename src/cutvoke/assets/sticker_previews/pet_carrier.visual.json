@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_carrier",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "航空箱网格、开口和垫子可辨，主体与透明画布边界分开。",
+  "sourceSha256": "1d4a8dabc21e660f088e3da8469dafaf03e041aa40f0ba23902d70afa93955fe",
+  "previewSha256": "64d326e94e8c6be5560f3cc1fe12f79a1e14fc9a8ddb929c604d5881cabd3588",
+  "auditSha256": "228545257c0b9237de62eb8d9aa96d202805db1d79719d16ed9676aa92eb325a"
+}

@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:38:00+08:00",
+  "method": "Manual comparison of 320x180 rendered covers and five aligned frames at 0.08, 0.30, 0.55, 0.85, 1.15 seconds; small neutral stage only",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.text.minimal_white",
+      "decision": "approved",
+      "motionPreviewSha256": "918987756103b65c3639be91347f556852675e9cf0e04fae09d65e450835fe7c",
+      "observation": "画面中央为放大的白色无衬线正题，无色块；相对左对齐引言和底部短题，锚点与字形重量均不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.minimal_ink",
+      "decision": "approved",
+      "motionPreviewSha256": "f6002a05611060dfab7e4875657ee2247b7d99f45bff2acddffd8bde1e7d034d",
+      "observation": "中央浅米白文字卡配深色宋体，形成完整矩形底；与奶油卡片的暖黄底和棕字可直接区分。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.minimal_left",
+      "decision": "approved",
+      "motionPreviewSha256": "3e48437c066e609aae47ab7f752ca4aec2c1bd6d41d1a3def913035cf04cf63e",
+      "observation": "白色宋体标题左对齐并靠画面左上部，和居中的留白正题在位置及衬线笔画上不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.minimal_vertical",
+      "decision": "approved",
+      "motionPreviewSha256": "cd84e3bb7dbc85190d5f0e04e83dba1d1d94e87d1de114962a4ca3365d056197",
+      "observation": "标题逆时针旋转成左侧竖向细题；五帧始终在画布内，与其余七项水平排版不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.minimal_lower",
+      "decision": "approved",
+      "motionPreviewSha256": "1e67f10fd7f289558399a9bfac49ab89bb1307d0610bb4e831e11ceb21a4b253",
+      "observation": "白字黑描边标题沿画面底部排列，与中部留白正题和左侧引言的锚点明显不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.minimal_slate",
+      "decision": "approved",
+      "motionPreviewSha256": "d525e7a119480b7562663b100e2ac64c350a32a9b1fb4045bb16d8b9a734b1d6",
+      "observation": "偏右上方的冷灰蓝文字卡与浅色宋体构成石板感，区别于奶油卡片的暖底深字。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.minimal_cream",
+      "decision": "approved",
+      "motionPreviewSha256": "3cb34980f0016b327b8f05a6dd42fefcd403163182c636981e3778e892009632",
+      "observation": "中央暖奶油色完整卡片配深棕宋体，底色、字色及构图均区别于白底黑字。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.minimal_coral",
+      "decision": "approved",
+      "motionPreviewSha256": "8b1688235ab31617dc8fcfedde142ec3852808c55cf7025012b9a227cd613b1d",
+      "observation": "中央珊瑚粉字配深色描边，没有背景盒；与白色正题具有明确色相区别。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.label_navy",
+      "decision": "approved",
+      "motionPreviewSha256": "ac33f4a444674a64b8c0df2031fca91ba13dd6280c70ad558798b27af1a73680",
+      "observation": "宽幅深蓝色条置于画面底部，白字居中；和窄红提示牌及深灰提示牌在宽度、色相上不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.label_lime",
+      "decision": "approved",
+      "motionPreviewSha256": "28369be0111cd495e21ff2fbc78b7e31bcdf8447f062808dd6cec08c1bbabe6b",
+      "observation": "荧绿色短条置于左上角，深色左对齐文字；与右上角紫色直播牌的位置、对比关系不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.label_red",
+      "decision": "approved",
+      "motionPreviewSha256": "3e3d366a679ed93fd4d1572a2935a49e28f73b3ec937ce7bd699cd4c3c2e3421",
+      "observation": "偏右下角的紧凑红色提示牌，白字居中；相对橙色强调条更短且更靠右。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.label_black",
+      "decision": "approved",
+      "motionPreviewSha256": "231e97d9c784905a8e1b5724169f5e15541bc3ad5902beaae350b5f14d2d2684",
+      "observation": "近全宽白色底条置于画面下部，深色宋体靠左；黑白新闻视觉和深蓝/橙色下条明显分离。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.label_teal",
+      "decision": "approved",
+      "motionPreviewSha256": "8e624534e43d2d13bd461f1c42708347557e9b40aee81504171cc2d09b9f9480",
+      "observation": "画面上方居中青绿色章节条，深青文字；与左上荧绿角标有不同宽度和位置。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.label_orange",
+      "decision": "approved",
+      "motionPreviewSha256": "dd5174cda43d2ae4c4124611fce5b14093e4bea4f40b36d965c4d3d01741622f",
+      "observation": "画面左下区域橙黄宽条配深字；与右下红色提示牌在色相、宽度和水平位置上不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.label_purple",
+      "decision": "approved",
+      "motionPreviewSha256": "8a086f5cc45e9e989d554212625fb551a137cee7c690cc4e96aac767a9cc3777",
+      "observation": "紫色紧凑牌位于右上角，白字居中；与其余上部青色和荧绿牌的色相及位置不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.text.label_outline",
+      "decision": "approved",
+      "motionPreviewSha256": "dd31ae23c2c6dc3689be97ee1ecbb0877ddfd5d75d6018caa7e94decb4cfb537",
+      "observation": "深灰中宽提示牌在画面下部，白字有深色描边；比深蓝条窄且色调中性。"
+    }
+  ]
+}

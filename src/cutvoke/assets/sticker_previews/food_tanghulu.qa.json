@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_tanghulu",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "affc51782817fb4dd95af2fbdf38dfa667e9e02af756d258e6dfeeeb4b7d878a",
+  "previewSha256": "2f9c197f1fc8b0949ab0b39fef9c23efceca37c301a2c2d7de7330e8df43bf05",
+  "preview": "food_tanghulu.mp4",
+  "bytes": 5033,
+  "visiblePixels": 2337,
+  "changedPixels": 0,
+  "motionVisible": false
+}

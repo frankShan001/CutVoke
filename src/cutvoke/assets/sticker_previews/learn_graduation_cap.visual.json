@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_graduation_cap",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "帽顶、帽檐和流苏清晰连贯，没有文字伪影，缩小预览仍易辨认。",
+  "sourceSha256": "18e842fe7be136f8328f45f6636f5f52ad80cf05baed967d3d249634eb74f07d",
+  "previewSha256": "ab46090a15a77741ce2067f307fddc3105690c3cf0b6cbd00a87aafe3c731f4f",
+  "auditSha256": "e722635f213d704211675b0db55d21c4824ad8294eb783e45402c8937658959b"
+}

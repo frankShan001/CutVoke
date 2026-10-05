@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_whistle",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "c83623e9c143c89048ed30e3c49450652b5ed385fa00f32634b5bf7e13e66b6a",
+  "previewSha256": "081b8fe5eae2ddf6456e65c21fbc2c4a94251d760b860c9473e5d3647abad41a",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1569,
+  "visiblePixels": 1000,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 648,
+    "steady_entry": 1000,
+    "steady_exit": 1000,
+    "exit": 648
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 648,
+      "withoutFade": 1000
+    },
+    "steady_entry": {
+      "withFade": 1000,
+      "withoutFade": 1000
+    },
+    "steady_exit": {
+      "withFade": 1000,
+      "withoutFade": 1000
+    },
+    "exit": {
+      "withFade": 648,
+      "withoutFade": 1000
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.041,
+    0.041
+  ],
+  "auditExport": "sports_whistle.audit.mp4",
+  "auditExportSha256": "e911f4c6ffc560031e0ee62dc5e964325d5ef85b22132f5e94351739e65f2081"
+}

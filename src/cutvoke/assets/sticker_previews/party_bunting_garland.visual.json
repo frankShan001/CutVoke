@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_bunting_garland",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "四面三角旗和顶部悬挂线完整，旗片彼此分开。",
+  "sourceSha256": "147aa8b081b4efc955a64b5ba0d9e6c6414ea6dea0d057be66b3e2308fbbb2f7",
+  "previewSha256": "4002a1828d11e331337f00447ae5282f5d43d52cf922b1251c87829a2a5c97d2",
+  "auditSha256": "0b77cd41ee68b06d48c06044da4508d21bd7e9062411eee2d26cfb10100c27d7"
+}

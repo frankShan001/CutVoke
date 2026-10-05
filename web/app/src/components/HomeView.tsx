@@ -7,6 +7,7 @@ import { Clapperboard, Plus, FolderOpen, Pencil, Check, X, RefreshCw, PackageOpe
 import { useEditor, showError } from "../store/editor";
 import { createProject, loadProjects, renameProject, selectProject } from "../store/actions";
 import { openPackage } from "../lib/api";
+import { CacheSettings } from "./CacheSettings";
 
 const DEFAULT_W = 1920;
 const DEFAULT_H = 1080;
@@ -117,8 +118,9 @@ export function HomeView() {
         <div className="home__brand">
           <Clapperboard size={22} />
           <span className="home__brand-name">CutVoke</span>
+          <CacheSettings />
         </div>
-        <h1 className="home__title">在浏览器里剪片，交给 Agent 精修</h1>
+        <h1 className="home__title">本地剪片，交给 Agent 精修</h1>
         <p className="home__subtitle">
           本地优先的视频编辑器：拖入素材、在时间线上直接剪，所有编辑都是可继续精修的时间线对象。
         </p>

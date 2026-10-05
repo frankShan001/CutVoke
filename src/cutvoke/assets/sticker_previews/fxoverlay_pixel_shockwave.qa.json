@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_shockwave",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0235160854c2eceaf04fa9950cb2c3a7656bcb083995ba298a1b6ea3d4c3a098",
+  "previewSha256": "9907eeb666c5691269f13eedb820868b0c3c974cf6837c4d6615fc202b059ab1",
+  "preview": "fxoverlay_pixel_shockwave.mp4",
+  "bytes": 12319,
+  "visiblePixels": 8233,
+  "changedPixels": 0,
+  "motionVisible": false
+}

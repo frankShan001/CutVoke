@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_medal",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "蓝金绶带和圆形奖章均完整，叶冠浮雕在缩略图中可见，底部没有裁切。",
+  "sourceSha256": "21ff37f9665c8e9a6e8706e24cb72d6a32d70f07b9cfb0afbc1ee02a9f3bb33e",
+  "previewSha256": "91d126333ca0979c8ffb2889d0cb716d7486c86acd23c5c8c1433b2e0217b266",
+  "auditSha256": "34a1b8443669140f3e5cc190a2886d1b4c8c4eb3ea62e7ed496232fb7413df3b"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_portal_violet",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "A violet incomplete portal arc with a bright inner edge and a few detached glow points; the broken ring remains legible and distinct from the orbital loop.",
+  "sourceSha256": "bbcad44008e356bcaf9c011b92c9600c87f31a9616f9aef6d639f0bd1e5b4df0",
+  "previewSha256": "0cd1348862df296ef3d1b7e364abb43cebef9d5c27a639c12f831b64b8745913",
+  "auditSha256": "05741b0da5f0f7faa3c663ef1828dcfe25aebbaf0e9dc1f7c2f7c094f5669f8b"
+}

@@ -1,0 +1,700 @@
+{
+  "generator": "OpenAI ImageGen",
+  "source": "scrapbook-decor-atlas-20260927-v2.png",
+  "sourceSha256": "be90d9c690c2d601b1d47ae77f8498a7f227d62f32fef897ffc6fef2e3dae71c",
+  "layout": "4x4 equal square cells",
+  "subcategory": "装饰",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "alphaThreshold": 8,
+  "safetyGutterPixels": 8,
+  "items": [
+    {
+      "stem": "scrapbook_corner_sprig",
+      "name": "鼠尾草折角纸片",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "植物",
+        "折角",
+        "纸艺"
+      ],
+      "row": 0,
+      "column": 0,
+      "nominalGridCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        114,
+        108,
+        290,
+        290
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 20684,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "cef9cd830fe3c1bf4b7615655210fdd9188e4def94f9c64362238c4488fa1b05"
+    },
+    {
+      "stem": "scrapbook_crossed_washi",
+      "name": "交叉和纸胶带",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "胶带",
+        "拼贴",
+        "纸艺"
+      ],
+      "row": 0,
+      "column": 1,
+      "nominalGridCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        62,
+        106,
+        285,
+        293
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 26563,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "3bb3db4cf5af168e3fc9ae96daeb4b0e235dca0e558fddb3d8a8add9a6afea27"
+    },
+    {
+      "stem": "scrapbook_coral_torn_corner",
+      "name": "珊瑚色撕纸框角",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "撕纸",
+        "边角",
+        "拼贴"
+      ],
+      "row": 0,
+      "column": 2,
+      "nominalGridCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        62,
+        102,
+        248,
+        281
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 17425,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "a64b60b4662f897a009c6c4d48ec2cb17a9246aae93d3b8b8045253275b6fd3c"
+    },
+    {
+      "stem": "scrapbook_blue_vellum_ribbon",
+      "name": "天蓝描图纸飘带",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "飘带",
+        "透明纸",
+        "装饰"
+      ],
+      "row": 0,
+      "column": 3,
+      "nominalGridCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        78,
+        103,
+        198,
+        293
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 15906,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "0585afb83c4315636878f618e325c85efe633d547fc41f1f7f41713126379b8d"
+    },
+    {
+      "stem": "scrapbook_kraft_stitched_label",
+      "name": "牛皮纸缝线空白标签",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "标签",
+        "牛皮纸",
+        "空白"
+      ],
+      "row": 1,
+      "column": 0,
+      "nominalGridCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        114,
+        53,
+        267,
+        268
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 30468,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "f533ca47a156fa5ae9ad4eb2e6c013896b1e7eaf16db07b679fc27e9ef6ddfa6"
+    },
+    {
+      "stem": "scrapbook_lavender_curl",
+      "name": "薰衣草色卷曲纸带",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "飘带",
+        "纸艺",
+        "薰衣草"
+      ],
+      "row": 1,
+      "column": 1,
+      "nominalGridCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        73,
+        73,
+        279,
+        261
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 14035,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4a6c8c0456a117fccca87633dbb2aa6b39e11054f66f8f0696cc7b5cb0a05fa1"
+    },
+    {
+      "stem": "scrapbook_layered_flower",
+      "name": "珊瑚奶油叠层纸花",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "花朵",
+        "拼贴",
+        "装饰"
+      ],
+      "row": 1,
+      "column": 2,
+      "nominalGridCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        58,
+        59,
+        262,
+        267
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 30698,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "6ff26c2402f3c8e4e3feddce13b9f76155002d3fb3f98e55a4a9d30f5d7182a3"
+    },
+    {
+      "stem": "scrapbook_yellow_stars",
+      "name": "奶油黄剪纸星星组",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "星星",
+        "剪纸",
+        "装饰"
+      ],
+      "row": 1,
+      "column": 3,
+      "nominalGridCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        60,
+        68,
+        212,
+        258
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 9442,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "79ff1235e510b0d43717d14fbde3c9fce412c98d286b58164a12a160a263534a"
+    },
+    {
+      "stem": "scrapbook_sage_leaf",
+      "name": "鼠尾草叶片贴纸",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "植物",
+        "叶片",
+        "装饰"
+      ],
+      "row": 2,
+      "column": 0,
+      "nominalGridCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        126,
+        39,
+        263,
+        246
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 16326,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "41bd1ca0212a7f292b144d1a79440e271d606e7a25ea682b85d29f56e879c13b"
+    },
+    {
+      "stem": "scrapbook_scalloped_edge",
+      "name": "奶油色扇形纸边",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "纸边",
+        "边框",
+        "装饰"
+      ],
+      "row": 2,
+      "column": 1,
+      "nominalGridCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        61,
+        101,
+        290,
+        177
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 13949,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4105fcc49973a1162525bdda81a58f080a49a73f9718ca3eab91bf7debdc4afa"
+    },
+    {
+      "stem": "scrapbook_charcoal_loops",
+      "name": "炭黑手绘双圈",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "涂鸦",
+        "圈选",
+        "标记"
+      ],
+      "row": 2,
+      "column": 2,
+      "nominalGridCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        62,
+        66,
+        263,
+        200
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 9677,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "504f819176f48911ae66879bef3ca790b0bab8a01b4735525c3d032bdd76af31"
+    },
+    {
+      "stem": "scrapbook_blue_paperclip",
+      "name": "天蓝回形针与珊瑚珠",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "回形针",
+        "文具",
+        "装饰"
+      ],
+      "row": 2,
+      "column": 3,
+      "nominalGridCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        75,
+        35,
+        209,
+        244
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 10202,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "81b9450a6279c30e8d2b3fef4436c4de06e5877c6336c34c7cf025215cfd496e"
+    },
+    {
+      "stem": "scrapbook_kraft_torn_patch",
+      "name": "牛皮纸撕边空白贴片",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "牛皮纸",
+        "撕纸",
+        "空白"
+      ],
+      "row": 3,
+      "column": 0,
+      "nominalGridCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        80,
+        26,
+        293,
+        190
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 30705,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "32f6aa2bcc3df3bad330d94de845bce3556b3ba9f65345a9c3bdd6a68e3c982d"
+    },
+    {
+      "stem": "scrapbook_matte_confetti",
+      "name": "哑光箔纸屑组合",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "纸屑",
+        "箔片",
+        "装饰"
+      ],
+      "row": 3,
+      "column": 1,
+      "nominalGridCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "sourceCell": [
+        314,
+        920,
+        627,
+        1254
+      ],
+      "extraTopRecoveredPixels": 20,
+      "visibleBounds": [
+        88,
+        20,
+        267,
+        203
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 14020,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "92526b9824038e13b2c593d71f44462df1a7ef4f725ea4421672ada8536ac135"
+    },
+    {
+      "stem": "scrapbook_double_bookmark",
+      "name": "薰衣草奶油双层书签",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "书签",
+        "拼贴",
+        "装饰"
+      ],
+      "row": 3,
+      "column": 2,
+      "nominalGridCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "sourceCell": [
+        627,
+        920,
+        940,
+        1254
+      ],
+      "extraTopRecoveredPixels": 20,
+      "visibleBounds": [
+        103,
+        19,
+        210,
+        210
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 18428,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "df180b0746714dd043ecf6c47beb7f0b0611e388956710d8e85c34cd52616a08"
+    },
+    {
+      "stem": "scrapbook_coral_bow",
+      "name": "珊瑚色纸艺蝴蝶结",
+      "subcategory": "装饰",
+      "keywords": [
+        "手帐",
+        "蝴蝶结",
+        "纸艺",
+        "装饰"
+      ],
+      "row": 3,
+      "column": 3,
+      "nominalGridCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "extraTopRecoveredPixels": 0,
+      "visibleBounds": [
+        27,
+        21,
+        253,
+        201
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 25403,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "a106cdffde477cb575208cbf093b88d46a5064b19ee7406ec7d33bfc5d5194e9"
+    }
+  ]
+}

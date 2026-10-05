@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_ivy_vine",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d8c68d830e91227687709739f088c494c24105875eaa324c070270163632e53b",
+  "previewSha256": "99995294fe088d3c07b10cb4b7d39f1fe107152f9367f5e518f772dc9d107d07",
+  "preview": "botanical_ivy_vine.mp4",
+  "bytes": 4579,
+  "visiblePixels": 1746,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_molten_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3831519bf8afd4e79851251b2ea892654ef6e27f4d8ff37aa9614e0f659d68bf",
+  "previewSha256": "25414f01cce55a163c79c5b6659f3f7f5a2adb7a4035e458db21769a23131d8e",
+  "preview": "fxoverlay_refraction_molten_amber.mp4",
+  "bytes": 16562,
+  "visiblePixels": 9719,
+  "changedPixels": 0,
+  "motionVisible": false
+}

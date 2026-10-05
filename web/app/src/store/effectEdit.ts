@@ -9,6 +9,7 @@ import type { Dispatch } from "react";
 import type { EditorAction, EditorState } from "./editor";
 import { runCommand, type ActionResult } from "./actions";
 import { addEffect, removeEffect } from "./clipEdit";
+import type { EffectInstance } from "../types/api";
 
 /** 应用一个效果到片段（effect.add）。params 缺省用后端默认值（空对象由后端补齐）。 */
 export async function addEffectToClip(
@@ -74,14 +75,40 @@ export async function reorderEffect(
 export async function updateEffect(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { clipId: string; effectId: string; params: Record<string, unknown> },
+  input: {
+    clipId: string;
+    effectId: string;
+    effectIndex?: number;
+    params?: Record<string, unknown>;
+    range?: EffectInstance["range"];
+  },
 ): Promise<ActionResult> {
-  const res = await runCommand(dispatch, state, "effect.update", {
+  const payload: Record<string, unknown> = {
     clipId: input.clipId,
     effectId: input.effectId,
-    params: input.params,
-  });
-  if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: "已更新效果参数" });
+  };
+  if (input.effectIndex !== undefined) payload.effectIndex = input.effectIndex;
+  if (input.params && Object.keys(input.params).length) payload.params = input.params;
+  if (input.range) payload.range = input.range;
+  const res = await runCommand(dispatch, state, "effect.update", payload);
+  if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: "已更新效果" });
+  return res;
+}
+
+/** Copy the current visual look to several clips in one revision and undo step. */
+export async function copyVisualEffects(
+  dispatch: Dispatch<EditorAction>,
+  state: EditorState,
+  input: { sourceClipId: string; targetClipIds: string[]; mode: "replace" | "merge" },
+): Promise<ActionResult> {
+  const res = await runCommand(dispatch, state, "effect.copyVisual", input);
+  if (res.ok) {
+    dispatch({
+      type: "STATUS_SET",
+      severity: "ok",
+      text: `已把画面效果复制到 ${input.targetClipIds.length} 个片段（一次撤销）`,
+    });
+  }
   return res;
 }
 
@@ -89,13 +116,13 @@ export async function updateEffect(
 export async function setFavorite(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { effectId: string; favorite: boolean },
+  input: ({ effectId: string; stickerId?: never } | { stickerId: string; effectId?: never }) & { favorite: boolean },
 ): Promise<ActionResult> {
   const res = await runCommand(
     dispatch,
     state,
     input.favorite ? "resource.favorite" : "resource.unfavorite",
-    { effectId: input.effectId },
+    "stickerId" in input ? { stickerId: input.stickerId } : { effectId: input.effectId },
   );
   if (res.ok) {
     dispatch({

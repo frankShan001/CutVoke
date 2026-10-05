@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.goldPortrait",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.tint",
+  "params": {
+    "hue": 34,
+    "saturation": 1.0,
+    "intensity": 0.26,
+    "lightness": false
+  },
+  "subcategory": "人物色彩",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "The subject takes on a saturated gold stage look, distinct from the subtler warm portrait treatment.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "f642be3c7abf9061c5c793c39038d7f6124ec350036263555a0bea29fb6df598",
+  "motionPreviewSha256": "158f2e1764c0f7fc9da175885b05f3bce541d96877865af3fc9ba6d7a95ee734",
+  "auditSha256": "225adc95ad9d9746f1742badf33fef7f87218e73a898df4d7cc520afb4b8ba46"
+}

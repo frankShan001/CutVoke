@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_portal_violet",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "bbcad44008e356bcaf9c011b92c9600c87f31a9616f9aef6d639f0bd1e5b4df0",
+  "previewSha256": "0cd1348862df296ef3d1b7e364abb43cebef9d5c27a639c12f831b64b8745913",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3729,
+  "visiblePixels": 2396,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1042,
+    "steady_entry": 2398,
+    "steady_exit": 2398,
+    "exit": 1039
+  },
+  "previewExportMeanRgbDifferences": [
+    0.168,
+    0.155
+  ],
+  "auditExport": "texture_portal_violet.audit.mp4",
+  "auditExportSha256": "8d42ed3282cd7bc2f7518af414ebfa4f56220631a485291f4a8f7a5767fab626"
+}

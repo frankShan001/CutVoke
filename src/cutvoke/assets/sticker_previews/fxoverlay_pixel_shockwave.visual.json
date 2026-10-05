@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_shockwave",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex 视觉审阅",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切联系表和 320x180 浅深渐变实景合成联系表，并结合逐张机器应用/编辑/保存重开/撤销重做/入出场动画/MP4 预览与导出审计；只批准轮廓完整、边界干净、可见且彼此可辨的条目。",
+  "observation": "洋红冲击波由同心环和断续方粒组成，与其他爆发图案有明显区别。",
+  "sourceSha256": "0235160854c2eceaf04fa9950cb2c3a7656bcb083995ba298a1b6ea3d4c3a098",
+  "previewSha256": "9907eeb666c5691269f13eedb820868b0c3c974cf6837c4d6615fc202b059ab1",
+  "auditSha256": "d45af4487e110c691033f6cfc560d111d8c250d9eb353ee15abfe4f4061501c1"
+}

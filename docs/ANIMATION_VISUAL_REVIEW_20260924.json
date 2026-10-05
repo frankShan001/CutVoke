@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual motion-sheet review",
+  "reviewedAt": "2026-09-24",
+  "method": "Compared five aligned frames for each entrance, exit, combination and loop animation; reviewed extra loop motion sheets, checked machine audit reports, and rendered an animated upper layer over a lower video track to verify uncovered areas are transparent.",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.animation.backIn",
+      "decision": "approved",
+      "motionPreviewSha256": "d3e408390e23ff9a8ed67e743777eebfcbf41f23e0ee7e16d732f91793307865",
+      "observation": "Dark small opening rebounds into full size with a short overshoot."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.fadeIn",
+      "decision": "approved",
+      "motionPreviewSha256": "2c000a5ea62556bc03ee7a8bd3aab54ee1a6256f74043a64f55dec1d1af93d7b",
+      "observation": "Only opacity rises from dark to full picture; no spatial movement."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.flipIn",
+      "decision": "approved",
+      "motionPreviewSha256": "f5c001627e2df98a4cc1da4b5f46ab133abcf40218c5d64f626eb776b47b66ab",
+      "observation": "A thin centered vertical strip unfolds horizontally."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.reveal",
+      "decision": "approved",
+      "motionPreviewSha256": "b8e10bd2d7a4e7cbf028e9568ebccca18d4069032378f5d8f524d1d3d9d99a55",
+      "observation": "A narrow left-anchored strip expands across the width."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.rotateIn",
+      "decision": "approved",
+      "motionPreviewSha256": "280fdce3db60e9544440d5f43eca5553cd1d9f0cfb767bef5e17600380a8f4f8",
+      "observation": "A tilted image rotates and brightens into alignment."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.slideDown",
+      "decision": "approved",
+      "motionPreviewSha256": "7090dde8881eaaabea6540417db2d383c2318432f621405a4eb41fd20e488139",
+      "observation": "The image descends from above while the lower edge is uncovered."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.slideRight",
+      "decision": "approved",
+      "motionPreviewSha256": "c58a116c4d07859d82bb367d0a7bac2e624749e1f358a2de3bd30f4e8447997a",
+      "observation": "The image enters from the right with an uncovered left edge."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.zoomIn",
+      "decision": "approved",
+      "motionPreviewSha256": "7899a28d41a6befcb53bb16006bb22092667f7c534e30fa0524bedcf28459560",
+      "observation": "A centered small image grows into the full frame."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.fadeOut",
+      "decision": "approved",
+      "motionPreviewSha256": "4f26098fb113436aa098ba1e1290d7f8ff80a83161c7dd1866ead6ac49481a0b",
+      "observation": "The whole picture dims without changing geometry."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.zoomOut",
+      "decision": "approved",
+      "motionPreviewSha256": "7ece6c6df5163cfc88ffbc9e401612e1cfa0c36c217233f14e53654e1cbf862b",
+      "observation": "The picture shrinks toward the center, exposing the background on all sides."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.slideOutLeft",
+      "decision": "approved",
+      "motionPreviewSha256": "2671dfeb4de808ca5a04ad3e7f541d904f6250f2360812959a7a2c31fe5cdd03",
+      "observation": "The picture leaves toward the left, exposing the right side."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.slideOutRight",
+      "decision": "approved",
+      "motionPreviewSha256": "70e70c315c3943ee2920c45e2f0673a3d0c6480953f3d1bd8190a31d4d01e33b",
+      "observation": "The picture leaves toward the right, exposing the left side."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.slideOutUp",
+      "decision": "approved",
+      "motionPreviewSha256": "6f219cf10a7a3b5c8a1087e9d95e81f0833c37784c588e1c7d3089321c5d81ec",
+      "observation": "The picture exits through the top edge."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.slideOutDown",
+      "decision": "approved",
+      "motionPreviewSha256": "1770893d6e1c2b42f01142b7fe32cacf8b8dd0d18201293c738c8cb3137b09ac",
+      "observation": "The picture exits through the bottom edge."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.rotateOut",
+      "decision": "approved",
+      "motionPreviewSha256": "1f6e75c344df456485a6d8b45ac5cd1b288ade1336d519367a9faa0582797ec5",
+      "observation": "The picture tilts and fades away."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.flipOut",
+      "decision": "approved",
+      "motionPreviewSha256": "a29aeb36a163f5a683768e45845cd30280b5d2f3cbff9a4b05beec83c50d39bd",
+      "observation": "The picture folds into a thin centered vertical strip."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.comboPushRight",
+      "decision": "approved",
+      "motionPreviewSha256": "0743cfb91b012872aca1bf5b6d0f63b2f181cb2b9ebc42e82c9d0dbfabac05d1",
+      "observation": "A smaller frame moves from the left while expanding to full size."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.comboPullUp",
+      "decision": "approved",
+      "motionPreviewSha256": "4261a012465129df28b82b9484a0e9c2feb01ccf94e90a47b827c0c39c34320e",
+      "observation": "The frame moves upward while contracting in scale."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.comboRotateZoom",
+      "decision": "approved",
+      "motionPreviewSha256": "943cb92993f526a289cf54761e0d7c754eefe5b5054f10144c28af941f9f3741",
+      "observation": "A tilted small frame grows and straightens into place."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.comboBannerIn",
+      "decision": "approved",
+      "motionPreviewSha256": "ca884b41ef49fa9b81a51e9b24a9502e1deda9109b7e68a2d5a6672745815494",
+      "observation": "The frame moves in from the left while its opacity rises."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.comboCardIn",
+      "decision": "approved",
+      "motionPreviewSha256": "ac5ff80f465e8e4b7553e7794b19fc71b48adc5f40947f6930e9ff23c500fcf1",
+      "observation": "A narrow card unfolds while shifting rightward."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.comboDriftLeft",
+      "decision": "approved",
+      "motionPreviewSha256": "c2af6ae2fcae5e0a91fa6fb0df93b2a0f801f29374f8d6e500189f50ea494167",
+      "observation": "A small frame drifts in from the right and grows."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.comboFadeSlide",
+      "decision": "approved",
+      "motionPreviewSha256": "d64c284f34a2fd76126f57a9aa916662432038d22dc74a21c4fa3965ff8b1cb6",
+      "observation": "The frame descends from the top while fading in."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.comboZoomFlip",
+      "decision": "approved",
+      "motionPreviewSha256": "90472978c56542c139f7bb8418c3fe799f23038a86a3c8f748909c1d86ae89fc",
+      "observation": "A narrow card unfolds and zooms into the canvas."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.breathingFrame",
+      "decision": "approved",
+      "motionPreviewSha256": "229de090865358a8714e468973dd04d30843cb94312def9483e256f988b38485",
+      "observation": "Smooth, continuous scale breathing differs from the double pulse."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.floatingFrame",
+      "decision": "approved",
+      "motionPreviewSha256": "5fd81d01a4c5952a6ce082ba43636c699dd155242bb7583f0aab1ded45359d83",
+      "observation": "The image moves up and down without horizontal travel."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.sideSway",
+      "decision": "approved",
+      "motionPreviewSha256": "a1705f60fbb04bddbea7752b66d452119e9267afb1ad1b1860e16b3c28d4ddc4",
+      "observation": "The image travels left and right without vertical motion."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.gentleRock",
+      "decision": "approved",
+      "motionPreviewSha256": "c33a9baccadfd2686c234475cd19b657447a80ef5f635bc1dd3cb5e30871d89e",
+      "observation": "The image tilts alternately around its center."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.rhythmBounce",
+      "decision": "approved",
+      "motionPreviewSha256": "af0257ddc2bfd205a2c8a4e6e44dfe8f40a05a3c976608dd5743a62a247f028c",
+      "observation": "The image rises in a beat and briefly squashes on landing."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.ellipseOrbit",
+      "decision": "approved",
+      "motionPreviewSha256": "42f5a8a15b787c54a3c5edd8a665f4c20fe4d1af982def8a601db59e28f27746",
+      "observation": "The image moves in both axes around an elliptical path."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.doubleHeartbeat",
+      "decision": "approved",
+      "motionPreviewSha256": "efc9486110837e226fd45fa9582b4dafce19a39772e774f16378e120e9fd1e95",
+      "observation": "Two short scale pulses occur within each cycle, unlike smooth breathing."
+    },
+    {
+      "presetId": "cutvoke.preset.animation.blinkBeat",
+      "decision": "approved",
+      "motionPreviewSha256": "678cfb1882e7c122125b9174f38b4c2c93a239a594e21ba78dbf756d66fd4215",
+      "observation": "The whole image briefly darkens then returns to full brightness."
+    }
+  ]
+}

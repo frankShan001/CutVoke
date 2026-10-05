@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.vuwind",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.602,
+  "exportSha256": "1221ad07c96142a572cff38b1947986209a75318e0380673abd104b7cd7becb7",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "1221ad07c96142a572cff38b1947986209a75318e0380673abd104b7cd7becb7",
+  "auditExport": "transition-vuwind-v1-0-0.audit.mp4"
+}

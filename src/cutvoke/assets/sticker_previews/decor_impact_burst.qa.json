@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_impact_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "27d647973977627f176d4f6dae20dc31a21326c71b347cce8b79efb433604917",
+  "previewSha256": "1855fe0e17a9868a40884cc49a80b33450601d6a4dcc60f3af117ebb4d663e4a",
+  "preview": "decor_impact_burst.mp4",
+  "bytes": 5347,
+  "visiblePixels": 2727,
+  "changedPixels": 0,
+  "motionVisible": false
+}

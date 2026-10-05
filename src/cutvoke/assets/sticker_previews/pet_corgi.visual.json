@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_corgi",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "低趴姿态及短腿轮廓清晰，横向构图缩放后没有裁切。",
+  "sourceSha256": "b66c16fbaf6f19a0a02a07294d7fd5045476148d2c49de7f8fddbe40731648f4",
+  "previewSha256": "8cd92623f3a5de320978f9577e32036256da9d6191fbf977236012480f69d003",
+  "auditSha256": "6d794ef9ca81d0392d984df4c319a251c641de64a92784628750b2223673f995"
+}

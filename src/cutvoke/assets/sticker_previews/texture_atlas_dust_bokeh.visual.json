@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_atlas_dust_bokeh",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "金色散景点大小有层次且保留透明空区，暗部和亮部上均有可见光点。",
+  "sourceSha256": "431002098597770124c5f014ae38879c59f6094a634c4f0b376070f41bae8f10",
+  "previewSha256": "96c74a006d3645ef4c0a487e507f2430f3c3b8f48170e2219062d8c2b402da8f",
+  "auditSha256": "1c5a77810fcb0338bf20590498661ee4a205911357f93e75a8c127e773d4f52e"
+}

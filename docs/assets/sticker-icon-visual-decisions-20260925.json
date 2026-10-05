@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared each transparent PNG with its actual composited MP4 preview on a neutral background; checked silhouette, edge/crop quality, legibility at preview size, and distinct utility within its category.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.arrow_down",
+      "decision": "approved",
+      "sourceSha256": "d3b3f90c0c287dde2d4fb57ff1d42abf90ea73218c04872279db7006e8f8c9b6",
+      "previewSha256": "2f25c12030cc23036796c4731b25414acd1f5a6255491b8ccd007d35ba5f2ffa",
+      "observation": "Downward arrow has a complete silhouette, clean rounded shaft, and clear direction at preview size."
+    },
+    {
+      "stickerId": "cutvoke.sticker.arrow_left",
+      "decision": "approved",
+      "sourceSha256": "a23e452087981d65bfbd8ecf4d26ed30732e20ea269066b8eac8365584e1c81b",
+      "previewSha256": "bd3d8eb7a8a46c0dce502e875a3855439d5ff132c8d2f9e9bf1ca17af0b30f19",
+      "observation": "Left arrow remains distinct from the existing diagonal arrow and has clean, uncropped edges."
+    },
+    {
+      "stickerId": "cutvoke.sticker.arrow_nw",
+      "decision": "approved",
+      "sourceSha256": "17cc390e4d44b90132dd7c57db4cf2e7808e5e28a2e39a78603c78524c45fbab",
+      "previewSha256": "80368a76477aa3da9ceac13d1aa836af26eaea7c24103549bc9a37d5b37ebf03",
+      "observation": "Northwest arrow adds a clear diagonal direction; its angled shaft and head remain legible at preview size."
+    },
+    {
+      "stickerId": "cutvoke.sticker.arrow_right",
+      "decision": "approved",
+      "sourceSha256": "c8c411cf9ded6ffaf78f4b74dbc9822f45fb59df64e54e18a438e40d405c238f",
+      "previewSha256": "1d568f351d36bb1a9da83e34b6d329475b356f4c8d81dd7c693020ac4b518814",
+      "observation": "Right arrow has a clean silhouette and fills a common direction missing from the approved set."
+    },
+    {
+      "stickerId": "cutvoke.sticker.arrow_up",
+      "decision": "approved",
+      "sourceSha256": "c07778a142530819326732862b5f86e58c7313a54a9c8450f984dfd4ae980170",
+      "previewSha256": "8d30ac3914eda1372e9270cb94c4c443bf6652153fd9e1caf0db4c3d778ad016",
+      "observation": "Upward arrow has a complete, legible silhouette with no neighboring-cell pixels or edge clipping."
+    },
+    {
+      "stickerId": "cutvoke.sticker.exclaim_yellow",
+      "decision": "approved",
+      "sourceSha256": "73a63eb920baefc393a76dfb2cef9c187754d9ed3ed71df7ae342e6294434c47",
+      "previewSha256": "02361857b7af14edb2cd103daa7c2d4404355bd34fd8608c12693e6da3d3e25d",
+      "observation": "Yellow exclamation mark is immediately readable and has a different silhouette from the warning triangle."
+    },
+    {
+      "stickerId": "cutvoke.sticker.heart",
+      "decision": "approved",
+      "sourceSha256": "e8f36f526e73894eca67f426b85716207af318768b7936fff029b862845267c4",
+      "previewSha256": "1992c250df9d6542e5c3d7559ddc0dfca73cec0b0fcf8e2b8cffb28b07c20ef4",
+      "observation": "Red heart has a complete, balanced outline and provides a static option alongside the animated heart."
+    },
+    {
+      "stickerId": "cutvoke.sticker.moon",
+      "decision": "approved",
+      "sourceSha256": "e5e83ae6626affb6ba728fa04c782f70ee9d6b5631d6f0fc3fc0bedf96d23c80",
+      "previewSha256": "c0214dff9550e18cb9c9e706f5698b358fa88e6ad49d1b7dbd5107c804750b9d",
+      "observation": "Blue crescent has a clean inner cutout and remains recognizable as a static atmosphere sticker."
+    },
+    {
+      "stickerId": "cutvoke.sticker.question",
+      "decision": "approved",
+      "sourceSha256": "cdc708e01161314d4ac9f73be085cd388917a61e83463b65b7f26a09406ccc5c",
+      "previewSha256": "afa872be9b1559d20b99ed7bc1eaf6ebacafb4e65c5b208e081c364eff449d89",
+      "observation": "White question mark is legible against the purple disc; the circular outline is complete."
+    },
+    {
+      "stickerId": "cutvoke.sticker.star_burst",
+      "decision": "approved",
+      "sourceSha256": "ed6794cefaae98313a6f1a5f7ac05e76ed9fc7aa7ac92a069037b1be2f23d12b",
+      "previewSha256": "a2250c6b77fe92621c57651659630aa7d0b058ceebadde3f0a337a321bc009ba",
+      "observation": "Four-point starburst is cleanly separated from the ordinary star silhouette and remains readable at preview size."
+    },
+    {
+      "stickerId": "cutvoke.sticker.timer",
+      "decision": "approved",
+      "sourceSha256": "b8d1726ef52292430f5811e3858218bf3644fdbd116e2abfc7f4064a037aa73c",
+      "previewSha256": "b73cfbe31ab00f84865ba67a4e89293a41ddfabdbc9955cb00d9450fcddf1a93",
+      "observation": "Stopwatch crown and hand are clear, distinguishing it from the round clock sticker."
+    },
+    {
+      "stickerId": "cutvoke.sticker.warning",
+      "decision": "approved",
+      "sourceSha256": "ab468a6527e080bc72401eb472b992c9e5fbe609b383ab5e26cd352486a3dd48",
+      "previewSha256": "51535ff1cbe04b54e9ad2051ca84f2d367653ea1500b4c79e887d5d24d14b2be",
+      "observation": "Yellow warning triangle has a complete dark outline and can be used without the pulse animation."
+    },
+    {
+      "stickerId": "cutvoke.sticker.circle_green",
+      "decision": "approved",
+      "sourceSha256": "859f76b51810a109e0664abfdd2c79ddae3223401d9b99e1ddc5a9c6c6c1dfc2",
+      "previewSha256": "f72ad80ca34ee3a84a00818c7e97459bcce7ad69cb8d66b067c6154e99f41867",
+      "observation": "Green target ring keeps its center transparent and has even, complete circular outlines."
+    },
+    {
+      "stickerId": "cutvoke.sticker.gift",
+      "decision": "approved",
+      "sourceSha256": "d9098bc7de3c1a990f81f54d734b87aacef28157bb0c0b88908d80ca7bb20eb7",
+      "previewSha256": "5b663b5d3a3e207fbe8277e9ef38653f84f6de91f83e448d34e0a9fc3cde21a3",
+      "observation": "Pink gift box and cross ribbon are legible, with no crop leakage at the lid or bow."
+    },
+    {
+      "stickerId": "cutvoke.sticker.rounded_blue",
+      "decision": "approved",
+      "sourceSha256": "462d9e754e82e46ce115f60d23e2efe1c60030a6908068d88078baf72e0fa8dd",
+      "previewSha256": "e2824fd2b86a62bfcd03acffa55571214b18ded7f7f4a608e1ca29b2660cb719",
+      "observation": "Blue rounded frame has smooth corners and a transparent center for use as a compact callout border."
+    }
+  ]
+}

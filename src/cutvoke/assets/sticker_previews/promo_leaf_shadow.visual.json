@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.promo_leaf_shadow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "observation": "Two jade leaves remain separately outlined with translucent centers and no clipped tips.",
+  "sourceSha256": "2cf1a074c436d18b9c068a4de4857755bed379c48a132289e4b7a169301c37fa",
+  "previewSha256": "6a83f44582abfcaa0631d01e648fdf0eff45fb475fb44eb913f553bf500e04d2",
+  "auditSha256": "dd0f4f0da9a5beca9043ae5f27d5f11f0175e30459e0ff47ca64e28e44a20038"
+}

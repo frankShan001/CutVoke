@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_yarn_ball",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "多色编织线团层次清楚，短线头保留为造型细节，不影响主体辨识。",
+  "sourceSha256": "6acf3990ae9a619bfdb82fc9923d69406663ec85f4bcf6234b9e2f820669c130",
+  "previewSha256": "267d78f3c093505cd0983683a57ad4ff2d7091a99e564431624f2e70a781a514",
+  "auditSha256": "2d583927956a52b59f2a1b289f0c0f3eed649779bf23255afc5f1359d05548e4"
+}

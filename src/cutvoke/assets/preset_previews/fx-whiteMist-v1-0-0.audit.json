@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.whiteMist",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "sigma",
+    "value": 3.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "a51a412f85a1a243499cc3903a1bc013c28cabb6cf4671d3322f38da3423f07f",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "a51a412f85a1a243499cc3903a1bc013c28cabb6cf4671d3322f38da3423f07f",
+  "auditExport": "fx-whiteMist-v1-0-0.audit.mp4"
+}

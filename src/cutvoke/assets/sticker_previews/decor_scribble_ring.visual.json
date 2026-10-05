@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.decor_scribble_ring",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed transparent 4x3 artwork contact sheet and actual composited frames for every sticker, compared silhouettes, palette, use and edge quality against the existing sticker library.",
+  "observation": "紫色多笔圆环中间留透明孔洞，可直接圈选主体；黄色和青色小笔触与红色实心螺旋区分。",
+  "sourceSha256": "d22dcf0a9d486bbb11798861ee5a6ad55a5a70eaaf8a1cfd21793325e4ab58ee",
+  "previewSha256": "12968f17c1bdcd0f4f2a8511682f099dc6a77b9c8d167b96ec93bfb78ae6afc6",
+  "auditSha256": "7249538598e187f59d2736ebb19e6e4f71df12486ecd626b6fb81c0912330b23"
+}

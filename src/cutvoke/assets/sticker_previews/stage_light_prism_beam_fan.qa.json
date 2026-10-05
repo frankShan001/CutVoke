@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_prism_beam_fan",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2c56325c5aec8b6fc649e6d65f17a82afeb60b30b8e04176f4a186b3cdd75b93",
+  "previewSha256": "cbacf7edc4a2070209383ece110ae11246f8a7ae0620f2b083a63037d4248a89",
+  "preview": "stage_light_prism_beam_fan.mp4",
+  "bytes": 9610,
+  "visiblePixels": 9409,
+  "changedPixels": 0,
+  "motionVisible": false
+}

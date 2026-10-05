@@ -1,0 +1,27 @@
+{
+  "presetId": "cutvoke.preset.animation.backIn",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.backIn",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "overshoot": 0.14,
+        "easing": "ease-out"
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 67.234,
+  "maxSampledMeanRgbDifference": 67.234,
+  "coverSha256": "3a7a6ecbf0f9731fbdb29620ebceefebd7bb2867ad0792b963e807112793cb93",
+  "previewSha256": "cf8ea0c4deaa835462d362e9b71428a3aa0113ae25ff11345a31af804a31991b",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

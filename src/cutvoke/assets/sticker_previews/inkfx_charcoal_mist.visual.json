@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_charcoal_mist",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "A low-contrast diffuse charcoal wash has soft wispy edges and broad transparency, serving a subtle atmospheric role distinct from dark droplets.",
+  "sourceSha256": "704af31bf7158727d1cfe29af2f0f3261db5c77cea9629fed9c1b8d102cb0020",
+  "previewSha256": "7b0b840972603a45964f82039ac60842835fef5c96c37f1f3cbc01cf42b0acf5",
+  "auditSha256": "c755beafd41de29b074d621893ab53474cd5c76d736885554ddc59ef3040b12c"
+}

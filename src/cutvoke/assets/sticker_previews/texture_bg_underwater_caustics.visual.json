@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_underwater_caustics",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "Blue underwater caustic lines remain distinct across the full frame; no magenta crop gutter, text, or stray marks are visible.",
+  "sourceSha256": "4ad54b9c50a93a155254d3cd5d6519a4a0b18da7c7fa07339fd54a595fef20bb",
+  "previewSha256": "fd0fe94884e36fbafdfc7bd5023132e41b033f4618fadab9b0a26eacebc8dbf5",
+  "auditSha256": "0359f8bcc1fcf45f66e19c4af5f0011121e28dc555fffa83292208c79b5f98db"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.printfx_screenprint_splatter",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-26T22:26:35+08:00",
+  "method": "Inspected the original 4x4 RGBA atlas, transparent crop contact sheet, and all 16 actual composited sticker previews on light and dark neutral backgrounds at normal display size. Checked cell identity, crop boundaries, alpha edges, silhouette/readability at sticker scale, and uniqueness; subtle dust and scratch assets were judged at their intended low opacity.",
+  "observation": "黑色墨核伴青色和朱红飞溅，碎点外缘透明且构图不与其它贴图混淆。",
+  "sourceSha256": "73946589e1f0a8382bb548762c9078f33758a3c392c2a2a93043dae5c63009fe",
+  "previewSha256": "e93798ec2b7a6ee6db1243fb88907687e79fb59d49b03bd9bd295d9ee255a96f",
+  "auditSha256": "28f7acb132e8cc0509b1773eb871016ee107a06b67ad7e54373a3562e97a48ec"
+}

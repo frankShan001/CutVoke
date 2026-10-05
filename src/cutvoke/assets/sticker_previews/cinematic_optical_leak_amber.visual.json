@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_leak_amber",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "暖琥珀光从画面左缘向内渐隐，保留透明中心用于叠加实拍。",
+  "sourceSha256": "42248dea73a153e19b89bcb1802d4257ef53765639dbcd249a898621b6871b24",
+  "previewSha256": "f5814058d6fbb01c474f84bd65470e35eb1e70c3aec55e171cf5d635a56249f4",
+  "auditSha256": "a1d5bd205d7b4df1d5c705cb5125489792388ae9d76fdd3a7118822991f9e0d8"
+}

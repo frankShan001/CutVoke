@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_atlas_low_fog",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "浅蓝薄雾集中在画面下沿，羽化自然，上方画面保持通透。",
+  "sourceSha256": "56850bfb6424b11bed43f84c7f95e5cfc4263661a6486b91dfc9894635b7bcdc",
+  "previewSha256": "07f4bf1fdd1b05b2b73658ddc619465281b78113e3a1a8b81619a3a899bbedf8",
+  "auditSha256": "e0bea29bccc9d567ad6c59fd7908919a49df0a507f81d0c9ae71ce4d99251a14"
+}

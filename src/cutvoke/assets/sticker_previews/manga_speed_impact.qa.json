@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_speed_impact",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "33bf5a23d866da7c65bd9b3307ead20e11f4546db7f60aafd84e1d1ee7a1b822",
+  "previewSha256": "08d3987ca458da216ed2ff2798d8efd8f82cf3c12c65595507af031610959792",
+  "preview": "manga_speed_impact.mp4",
+  "bytes": 4651,
+  "visiblePixels": 1477,
+  "changedPixels": 0,
+  "motionVisible": false
+}

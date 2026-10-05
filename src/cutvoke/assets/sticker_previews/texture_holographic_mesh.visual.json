@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_holographic_mesh",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器浅底合成预览；只批准结构和颜色在缩略图中清楚、可与同类区分的素材。批准仅覆盖贴图本身的可辨识度，不代表复杂实拍成片验收。",
+  "observation": "彩虹网格有连续波形与色带，浅底上仍保留清楚的全息网格结构。",
+  "sourceSha256": "d302fa26bb75a36aac854738658bc45c43eaea4e451101404f1cf4053a3c1122",
+  "previewSha256": "9565023317d0fa26b3d75cd5ff7c12dfdf8171ccfc2b2762d813a2171b7ff550",
+  "auditSha256": "4fcd8679ca549ad29e70ccf16314e3e8cc85b5b5ffa71134bdfd55c3a0069848"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_double_bookmark",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "薰衣草与奶油双层书签轮廓完整，底部 V 形切口清楚。",
+  "sourceSha256": "df180b0746714dd043ecf6c47beb7f0b0611e388956710d8e85c34cd52616a08",
+  "previewSha256": "c8a517857bcf7ef3967b157698fb9fbdfe2aeaf5f81ca96b6a2288251ec63d5c",
+  "auditSha256": "a550eb953fd9da2d2ed602e4aceb620feaa2c4e8b354835c09f31a216bca2b21"
+}

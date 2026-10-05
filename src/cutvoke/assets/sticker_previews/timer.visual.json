@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.timer",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "青绿色计时器旋钮、刻度和指针可辨，边缘完整且无数字干扰。",
+  "sourceSha256": "f5f5d1b3d26e4d78dbb5001cedf0c6fc634bb20cf49d7ac35808423b3ed9bdd6",
+  "previewSha256": "01f43a54cc4b93840c41ff1d2fc2ae3a3676ec1ea15fa6f60b5a53bc48f0bf63",
+  "auditSha256": "17bf5b396b0b91fd1abdd3556bc5ef2fa67cf64f861b076657e73d4a26cb8ead"
+}

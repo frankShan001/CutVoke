@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.filter.sepiaTone",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.sepia",
+      "version": "1.0.0",
+      "params": {
+        "strength": 1.0
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 33.238,
+  "maxSampledMeanRgbDifference": 33.238,
+  "coverSha256": "933b095e5091119e5f5c3f649805a0e9b0b0f436f131d543262ca43bc6bbbabd",
+  "previewSha256": "6a1d4b0f2afbae2055ace0322c21d6f5dcd099d997ad3d9c13afa4da9d507fc2",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_ivy_vine",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "常春藤卷曲枝条与叶片层级清楚，开放构图适合作为画面角落装饰。",
+  "sourceSha256": "d8c68d830e91227687709739f088c494c24105875eaa324c070270163632e53b",
+  "previewSha256": "99995294fe088d3c07b10cb4b7d39f1fe107152f9367f5e518f772dc9d107d07",
+  "auditSha256": "ba92c232ab0004b073cd4837876f47f634546410cad1ebd9ec4754ede6647863"
+}

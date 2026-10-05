@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_film_dust_specks",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "796a4c7c632ce48e72b93f5c91bebe63e7b76fe1b1280c90c5102e280bb02d60",
+  "previewSha256": "249d5663fd201f9a20d8cc8394cb993b3451dd1fd7e30bb311a04e3ceaf5adb5",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 718,
+  "visiblePixels": 418,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 148,
+    "steady_entry": 417,
+    "steady_exit": 418,
+    "exit": 148
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 148,
+      "withoutFade": 418
+    },
+    "steady_entry": {
+      "withFade": 417,
+      "withoutFade": 418
+    },
+    "steady_exit": {
+      "withFade": 418,
+      "withoutFade": 418
+    },
+    "exit": {
+      "withFade": 148,
+      "withoutFade": 418
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "printfx_film_dust_specks.audit.mp4",
+  "auditExportSha256": "47bdf377e0dd33165f2a90dfc4f3198c0d727d18e372e5b0a99c96a886d54043"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_curled_streamer",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "卷曲彩带保留完整的弯折形状，边缘没有残留背景。",
+  "sourceSha256": "65dbac48f50bcc66e8b83d0ee3a5cf8b83a4af3af2f5b5411fadc6fa886616e2",
+  "previewSha256": "8607ab505f752940ec6f372b7651f604c9c8c01efb00d82007b86ed3bfca6eb3",
+  "auditSha256": "9a1c8ea5e86d8a5aff8e186db94f17674fd95c308929fa10709487ab1c038d2e"
+}

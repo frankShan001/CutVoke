@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Manual comparison of five actual rendered frames per transition, neighboring presets, and complete MP4 decode",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.transition.hlslice",
+      "decision": "approved",
+      "motionPreviewSha256": "12a9b00bfa2dc3f7b39a5240c7af00bc04f65f23ea4fce049c2b7d3cf050a224",
+      "observation": "Vertical bars of the incoming shot tear in from the right and shift left; the bars remain clearly separated at the midpoint, unlike pixel blocks or fine wind streaks."
+    },
+    {
+      "presetId": "cutvoke.preset.transition.hrslice",
+      "decision": "approved",
+      "motionPreviewSha256": "9acfb1713ddea58504c4c860fa9709e1743459fa824ded9a343510dd9ef69f71",
+      "observation": "Vertical incoming bars progress from the left toward the right, reversing the horizontal slice direction while keeping a visibly segmented transition midpoint."
+    },
+    {
+      "presetId": "cutvoke.preset.transition.vuslice",
+      "decision": "approved",
+      "motionPreviewSha256": "6db58971e770b156025a9b05228476b00f8398f3916c971848b92e6bf14427e4",
+      "observation": "Several horizontal stripes reveal the incoming scene upward, with discrete hard band edges that differ from vertical-bar slicing and fine wind streaks."
+    },
+    {
+      "presetId": "cutvoke.preset.transition.vdslice",
+      "decision": "approved",
+      "motionPreviewSha256": "c81e214f4eccf23544cf26217f3cb178772629770aeb7e1ea84bed89ec2a2942",
+      "observation": "Horizontal stripes sweep downward with separate bands of old and new scenes; its direction is visibly opposite the upward stripe variant."
+    },
+    {
+      "presetId": "cutvoke.preset.transition.hlwind",
+      "decision": "approved",
+      "motionPreviewSha256": "65638df4394b1759b326d8f85ce1870c8849504353ec5bbc6f318b3d1b757695",
+      "observation": "Fine horizontal streaks pull from the right toward the left and feather the scene boundary, unlike the thick discrete vertical bars of leftward slicing."
+    },
+    {
+      "presetId": "cutvoke.preset.transition.hrwind",
+      "decision": "approved",
+      "motionPreviewSha256": "c1584b208b91862cda8322a8597e3b37704d0d3f2ddd2671ff2a52b071f66104",
+      "observation": "Fine horizontal streaks pull from the left toward the right, with the old and new shots interleaving at a moving rightward boundary."
+    },
+    {
+      "presetId": "cutvoke.preset.transition.vuwind",
+      "decision": "approved",
+      "motionPreviewSha256": "d0e6d7aa7eb3fdff496a7cd474fde9526038b0b4181f1515775e5c3f49d8ea9e",
+      "observation": "Fine vertical streaks rise from the lower edge, producing a soft comb-shaped vertical reveal rather than hard horizontal stripes."
+    },
+    {
+      "presetId": "cutvoke.preset.transition.vdwind",
+      "decision": "approved",
+      "motionPreviewSha256": "eefe63fe2fb8b1b17b54ceafaea0c25e61b6bca3b5f31dcd2bc94e500abb557a",
+      "observation": "Fine vertical streaks descend from the upper edge, with the comb boundary moving opposite the upward wind variant."
+    }
+  ]
+}

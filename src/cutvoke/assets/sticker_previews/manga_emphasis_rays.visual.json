@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_emphasis_rays",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项比对透明原图、浅色/深色合成底图与实际渲染器样片，检查造型辨识、格线串入、边缘裁切、透明通道和背景对比；本次不代表复杂实拍素材的商业观感验收。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿，单独复审，原批次记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿并复审，原 13 项记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另纳入 2026-09-24 的 2×2 高对比图集审核记录。",
+  "observation": "金色短射线围出留白中心，适合对主体作放射式强调；透明留白完整。",
+  "sourceSha256": "464f27cddd7220564068542d35ed8ac0407055d13bfacce84b77a111bd1fb52d",
+  "previewSha256": "4e025311599356724fc52051802061b997102acf38db7b43e61feac5746689d6",
+  "auditSha256": "2ea42b1c092c2eb3d55e985e04ae642df69a699034c69ee0605d70bcf1e41443"
+}

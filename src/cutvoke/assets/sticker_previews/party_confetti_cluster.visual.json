@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_confetti_cluster",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "彩纸碎片作为一组独立装饰保留，单片之间没有粘连。",
+  "sourceSha256": "2cb6b6aaf14b586987bf92bede4e73a1df2f981920265030be467c84bcba239f",
+  "previewSha256": "5b763184c5601ed182118dfdac463fab029a168a818aafd23e472f12db114cc1",
+  "auditSha256": "9648f50e8fd450720f4ad21be4cd8f8bc133adb957e317a555e5e650cabd8641"
+}

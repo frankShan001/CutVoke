@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.colorEdge",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.edge",
+  "params": {
+    "mode": "colormix",
+    "low": 0.0784314,
+    "high": 0.196078
+  },
+  "subcategory": "风格",
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Thin warm color outlines preserve much of the source scene, unlike blue wireframe.",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "coverSha256": "c749cd91b78b350889319574cfeba4012a625dee8d6041c8137b991f89242e63",
+  "motionPreviewSha256": "f7bdf80817b93d593de2c0b065a08d27d8cb47b49601ede34a4b84fe1fbc7eb7",
+  "auditSha256": "49e1de4a68d77234e1afe03ad376e9d5ef4661cfc0f18e66fe728bca084ea06e"
+}

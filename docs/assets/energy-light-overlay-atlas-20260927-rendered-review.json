@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/review_energy_light_previews_20260927.py",
+  "contactSheet": "docs/assets/energy-light-overlay-atlas-20260927-rendered-review.png",
+  "contactSheetSha256": "a83eef5967eb893d5f8c368f631361a1000cde59cadcadefd8056763e9593356",
+  "items": [
+    {
+      "stickerId": "cutvoke.sticker.energy_arc_cyan",
+      "sourceSha256": "7e52dd1d21b26389479e4e02c2c4a07019f030fe7e0c2ee12b869dcc323a2f4b",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_arc_cyan.mp4",
+      "previewSha256": "1249bdcb645adc14163fa33831bd243f2807b0adceebde8ba4a47713cc3c64bf",
+      "frameSha256": "fc0b34f49983de043aa7fd738c8a9dd12aa94803dfa3b1f5f8a059cf691fa840",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_ribbon_violet",
+      "sourceSha256": "55d1012d1828ba946521199e3d9ff3fe6241e99b0d7381322f46df498ff40151",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_ribbon_violet.mp4",
+      "previewSha256": "41cc51d7a960ad25c878d647ddc55bb994c5b2961429181854f99dcf0a377250",
+      "frameSha256": "04a7e1e81f4ba6f534511c9c6a9acbb9a164a98f6269190d43d59969a4b8b01f",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_trail_gold",
+      "sourceSha256": "bdc4ef9c14f2c4dec643d65e16ddb43af09db12cd783244ee3ec7404929b5d99",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_trail_gold.mp4",
+      "previewSha256": "3457f266198a4bcef11a36df40e61e7a45f1d8f68977ce1b03a0866bfd3706c7",
+      "frameSha256": "5a5fe81ca05f088aad294dfb429bed9af4957d568bf495ed96f539771338fc8d",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_prism_flare_magenta",
+      "sourceSha256": "824fbeca7dd5796520ea5992ff1aa078fd7a0181dea8e91a9fa161e4cf35f30a",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_prism_flare_magenta.mp4",
+      "previewSha256": "5df324799cdf9bb286b532f866f84fb9c6e2f6d1751b826c023f1f6e06e2af45",
+      "frameSha256": "56f3691434da278da3dd0237bfbd638eb67b8563faaba5eb80950b928b425e05",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_aurora_emerald",
+      "sourceSha256": "2d22bba1ce0f641987be4f939591aa72f37b48f62a606e33f30426a69c839396",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_aurora_emerald.mp4",
+      "previewSha256": "194b3af59f6267f82ae8538c992f85ab2a252409ce09522fc43e1114944fda82",
+      "frameSha256": "331d2df6872d3fa9a5d45e185f5edde2e2fe39f5e546b8582a059b88457ca854",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_burst_cobalt",
+      "sourceSha256": "b063bfde9f5aaf7c46d79e9e2a1f94ac4ae48531481de39285e0bb33e697a798",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_burst_cobalt.mp4",
+      "previewSha256": "ab8674c19e9daecaa2c5a97f52cb281033c12c462e225b226ffb9a047daba123",
+      "frameSha256": "00f1b45a3bf43285ff4bdb547ec123063fb77d326b1284ec323f77714e56498c",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_rainbow_arc",
+      "sourceSha256": "0ebbb81f7ad18b29e8f6183a56f21c8500d604b329cff66773419ac0f20e9615",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_rainbow_arc.mp4",
+      "previewSha256": "7f509c7016a80c73a9dcc44dba7b12b0105b2803976bd20c88793713fa93d94f",
+      "frameSha256": "9a7f7095d97cbea856576d1dfe6f05ae41edbb75e4985963f24c61519a286449",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_halo_pearl",
+      "sourceSha256": "cbf343d0681579e507b5d66ab96d5a40125d1fdf4595947c1acc357de203c91e",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_halo_pearl.mp4",
+      "previewSha256": "450f84ccb8046bab7f589da18ea7fd12a2263f5955447849ce9e10956847c828",
+      "frameSha256": "9072308668f06572cfe427ac1487fa0db99e5b6e1fecf224f111b1440f9139a1",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_orbs_multicolor",
+      "sourceSha256": "8d330bb21b273ea2adf5c58eedc1ad7b672b1b385c3fc34ea387fb915c60bd20",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_orbs_multicolor.mp4",
+      "previewSha256": "526811f670b4088167f3720e0ff48d7bd44eb51ff879a5887c1ffe07d154edb8",
+      "frameSha256": "bf0c282cc341034557f0f8c21e3bc46dc4bcb255b58e607cdd9298724c41cd13",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_shards_crystal",
+      "sourceSha256": "b9921866876bea12ad9ce04ef225ee6bf969802ab7dc3265580b376781595b79",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_shards_crystal.mp4",
+      "previewSha256": "cfe44e0fb541cd5fcbad0ae14225682c3c4edd06a7334a4cb3ca1f0dfb52e7b3",
+      "frameSha256": "07674436ebfe0b33082866b7897a91245918fd75995d713a21d74360166b4434",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_ribbons_dual",
+      "sourceSha256": "c9d2feb6b1baddefe40a3f85de6811e1500831d1615bf2724fd766ba3d3fc98c",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_ribbons_dual.mp4",
+      "previewSha256": "e350f46c30b89034011a40a4fb695c5d867e6138c90228e9bc577d0f36c3ac71",
+      "frameSha256": "e48525930e6f178df57f2f1462349a672ddbf484a86696db553a0ffb7ffb27a9",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_loop_golden",
+      "sourceSha256": "2f09f74d83187ce37cc9b9c1a20360ab9259b68d82c6f3fb6061865769f85926",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_loop_golden.mp4",
+      "previewSha256": "cb35b4f3202aa2883cf52eb47a72e2b175a0cafd09148c5e2ad1beb515210929",
+      "frameSha256": "43b4039e316c3f0f7edf0fd383fb91344874b1812ce4f5dc56321ba4bcc80e2f",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_stars_falling",
+      "sourceSha256": "c8384b8f15569b5673439cd421b400e522a43725b9a0d2d814ab7349f55ca6e2",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_stars_falling.mp4",
+      "previewSha256": "e7bc0f1847c2310fac2d817cea32e733837d745f3896e80e0029d267e14ab394",
+      "frameSha256": "876ffe88ea2e96c32655873a5b0cffdcf3d4e391c0db69bff337c128d9604891",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_curtain_violet",
+      "sourceSha256": "e07e059e0205210f8683b9da5e05047c68344eb14e9d2fdbc9e9818ff080ebf7",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_curtain_violet.mp4",
+      "previewSha256": "5faaa0780a4b0e8fea6016c8f6d29d757ecc54bd7ae1f5410dee8548e49988d0",
+      "frameSha256": "c35460c5b78e67c6ee7262cd2761ed7f508cf21286cf6ff806ea5d1b500952b5",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_wave_coral",
+      "sourceSha256": "d43a68726129ba46fcd34f82a8dbc84085104deca1a09edf65941c53d824beac",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_wave_coral.mp4",
+      "previewSha256": "d7a1fa08c9e8fd5419e66272ea7ff4b721c196829630734c877679f6112d51dc",
+      "frameSha256": "1369fbdef13cee6807ce5ecd052112ea75e4f44e604d3bc85c4727e4ec35d603",
+      "frameAtSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.energy_zigzag_gold",
+      "sourceSha256": "8e699c1af5c2e4197e4fc0ed987b3d454757601c0469d8b1b20ee5a608218560",
+      "preview": "src/cutvoke/assets/sticker_previews/energy_zigzag_gold.mp4",
+      "previewSha256": "74e9e93e9fa7dca4507bf80581cfed78dffdbf8b6ee67ba6a5b850dc3f739dcf",
+      "frameSha256": "13311231f4e20e30df15aa3ae005596a21e1107a13a838578aa8bdb84b990519",
+      "frameAtSeconds": 0.8
+    }
+  ]
+}

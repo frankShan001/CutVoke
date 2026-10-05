@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_denim",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "fa8e8e646e57f3e682bc25fc3cec43e26024e00bc7fcf4f43c11493d091931c0",
+  "previewSha256": "4871f676bf0d4abd7731876447cae04bf6d4a347e3de9b7d801f63f4bd640a26",
+  "preview": "material_denim.mp4",
+  "bytes": 5032,
+  "visiblePixels": 3796,
+  "changedPixels": 0,
+  "motionVisible": false
+}

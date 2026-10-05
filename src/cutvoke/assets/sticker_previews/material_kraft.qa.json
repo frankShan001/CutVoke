@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_kraft",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a0e01b6a94d67bd3fe46cfe0efecdb1af87e49fbe0dc3f2e6d3920afd79d035b",
+  "previewSha256": "ffc8cb7df56b445641dd1ab11cbcce8d2420292015f1e6203ce61455795a0787",
+  "preview": "material_kraft.mp4",
+  "bytes": 5044,
+  "visiblePixels": 3847,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_corner_grid_cyan",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "3c7785d307ce234f3f002a27036d7be0f9a6abf0056bf928874e4259910e80a4",
+  "previewSha256": "091926d2f3a74dcf5a1f45797b3a4b1f2dc72a60f70f4b3a0a6c9e44f473cd47",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1370,
+  "visiblePixels": 808,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 566,
+    "steady_entry": 808,
+    "steady_exit": 804,
+    "exit": 566
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_corner_grid_cyan.audit.mp4",
+  "auditExportSha256": "9103f8a24bd823b6ea9608602518c299e58a1c6198f1ff99063889574436dbb3"
+}

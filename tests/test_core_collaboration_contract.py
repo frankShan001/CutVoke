@@ -110,6 +110,81 @@ class CollaborationContractTests(unittest.TestCase):
         self.assertEqual(undone.previous_revision, inserted.revision)
         self.assertEqual(service.get_project(project.project_id).sequence.tracks, [])
 
+    def test_agent_dry_run_reports_time_ranges_for_speed_curves_and_attached_moves(self) -> None:
+        service = EditService()
+        project = service.create_project("dry-run-timeline-ranges")
+        actor = Actor("agent", "timeline-range-agent")
+
+        def apply(command_type: str, payload: dict, serial: int) -> None:
+            current = service.get_project(project.project_id)
+            service.execute(command(
+                command_type, payload,
+                project_id=project.project_id,
+                revision=current.revision,
+                command_id=f"timeline-range-{serial}",
+                actor=actor,
+            ))
+
+        apply("track.add", {"trackId": "video", "kind": "video"}, 1)
+        apply("clip.insert", {
+            "trackId": "video", "clipId": "parent", "sourcePath": "parent.mp4",
+            "timelineStart": {"num": 0, "den": 1},
+            "timelineEnd": {"num": 4, "den": 1},
+        }, 3)
+        apply("clip.insert", {
+            "trackId": "overlay", "createTrackKind": "video",
+            "createTrackRole": "sticker", "role": "sticker",
+            "clipId": "title", "sourcePath": "title.png",
+            "timelineStart": {"num": 1, "den": 1},
+            "timelineEnd": {"num": 2, "den": 1},
+            "attachedToClipId": "parent",
+        }, 4)
+        before = service.get_project(project.project_id)
+
+        curve_preview = service.preview_command(command(
+            "clip.speed", {"clipId": "parent", "curve": {"points": [
+                {"at": 0, "speed": 0.5}, {"at": 1, "speed": 0.5},
+            ]}},
+            project_id=project.project_id,
+            revision=before.revision,
+            command_id="dry-run-speed-curve",
+            actor=actor,
+        ))
+        curve_impact = next(item for item in curve_preview["changedEntities"]
+                            if item["id"] == "parent")
+        self.assertEqual(curve_impact["timelineRange"]["before"], {
+            "start": {"num": "0", "den": "1"},
+            "end": {"num": "4", "den": "1"},
+        })
+        self.assertGreater(
+            int(curve_impact["timelineRange"]["after"]["end"]["num"]) /
+            int(curve_impact["timelineRange"]["after"]["end"]["den"]), 4)
+        self.assertEqual(service.get_project(project.project_id).revision, before.revision)
+
+        move_preview = service.preview_command(command(
+            "clip.move", {"clipId": "parent", "timelineStart": {"num": 6, "den": 1}},
+            project_id=project.project_id,
+            revision=before.revision,
+            command_id="dry-run-attached-move",
+            actor=actor,
+        ))
+        moved = {item["id"]: item for item in move_preview["changedEntities"]}
+        self.assertEqual(moved["parent"]["timelineRange"], {
+            "before": {"start": {"num": "0", "den": "1"},
+                       "end": {"num": "4", "den": "1"}},
+            "after": {"start": {"num": "6", "den": "1"},
+                      "end": {"num": "10", "den": "1"}},
+        })
+        self.assertEqual(moved["title"]["timelineRange"], {
+            "before": {"start": {"num": "1", "den": "1"},
+                       "end": {"num": "2", "den": "1"}},
+            "after": {"start": {"num": "7", "den": "1"},
+                      "end": {"num": "8", "den": "1"}},
+        })
+        self.assertEqual(service.get_project(project.project_id).revision, before.revision)
+        self.assertEqual(service.get_project(project.project_id).sequence.tracks[0].clips[0].timeline_end,
+                         Rational.of(4))
+
     def test_failed_atomic_clip_insert_does_not_leave_an_empty_track(self) -> None:
         service = EditService()
         project = service.create_project("failed-auto-track")
@@ -355,7 +430,7 @@ class CollaborationContractTests(unittest.TestCase):
         self.assertIn("&H73000000", ass)
         style = next(line for line in ass.splitlines() if line.startswith("Style: C0,"))
         style_fields = style.removeprefix("Style: ").split(",")
-        self.assertEqual(style_fields[17], "1")  # ASS Shadow
+        self.assertEqual(float(style_fields[17]), 1.0)  # ASS Shadow
         self.assertEqual(style_fields[22], "1")  # ASS Encoding
         # 0.5/0.5 是工程模型的默认画布锚点，不能被导出端静默改成底部 MarginV。
         self.assertIn(r"{\pos(960,540)}半透明背景，无描边", ass)
@@ -373,7 +448,7 @@ class CollaborationContractTests(unittest.TestCase):
                 ass = build_ass([caption], 1920, 1080)
                 style = next(line for line in ass.splitlines() if line.startswith("Style: C0,"))
                 style_fields = style.removeprefix("Style: ").split(",")
-                self.assertEqual(style_fields[17], str(shadow))
+                self.assertEqual(float(style_fields[17]), float(shadow))
                 self.assertEqual(style_fields[22], "1")
 
     def test_caption_font_size_scales_from_1080p_reference(self) -> None:
@@ -384,9 +459,11 @@ class CollaborationContractTests(unittest.TestCase):
             end=Rational.of(1, 1),
             fontSize=32,
         )
-        for width, height, expected_size in ((1280, 720, "21"), (3840, 2160, "64")):
+        # Domain CSS em pixels are scaled/rounded first, then converted using
+        # the actual bundled Noto Sans SC Win height (1448 / 1000).
+        for width, height, expected_size in ((1280, 720, "30.408"), (3840, 2160, "92.672")):
             with self.subTest(height=height):
-                ass = build_ass([caption], width, height)
+                ass = build_ass([caption], width, height, css_caption_ids={caption.id})
                 style = next(line for line in ass.splitlines() if line.startswith("Style: C0,"))
                 style_fields = style.removeprefix("Style: ").split(",")
                 self.assertEqual(style_fields[2], expected_size)

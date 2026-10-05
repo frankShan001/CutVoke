@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_blue_shockwave",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T01:05:55+00:00",
+  "observation": "The icy ring has a readable hollow center, with crystal fragments separated around its perimeter.",
+  "method": "Reviewed each extracted RGBA PNG on dark and light contact sheets, then checked the actual RenderService preview contact sheet. Examined distinct silhouettes, cell-edge clipping, alpha fringes, visibility on both tones, and usefulness as a compositing overlay.",
+  "sourceSha256": "817e492e9376298c93a02c70fe8f3306259364222e99f79dd091ddf53863458d",
+  "previewSha256": "0ee8bece222716db7768e59195b518405201ccb6c66f04d9a763f9945124bd01",
+  "auditSha256": "35c7f6ee34b4dea77fa2696db673cb63e959eb0674a047e21515313e3f5a216c"
+}

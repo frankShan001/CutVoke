@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_mouse_toy",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "逗猫棒、铃铛与灰色玩具鼠均可辨；细长尾线在实际贴纸尺寸下仍清晰。",
+  "sourceSha256": "ea97dcc94cd3296fdca8760f17ac9bb47b58a83efef38ecffe0c8c2c95d5d291",
+  "previewSha256": "7e5baca0698b11319097beaeebe58c45d4c466572446d1f51cae103662cd846f",
+  "auditSha256": "434735e2b984652a52cbf0e6565344a470abcba846585a1b61ea974147d3530f"
+}

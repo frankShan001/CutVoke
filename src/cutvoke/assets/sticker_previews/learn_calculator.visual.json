@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_calculator",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "空白屏幕、按键矩阵和外壳边界完整，没有可读伪字或边缘杂点。",
+  "sourceSha256": "d3593610bb108795a0bc9e3b3e9b6ad8681727154ff71c4c3632568415188a26",
+  "previewSha256": "e411122a06cebf46eb0c2dd465e6beb41a4f8b26c4df36c3efb9dcf915996e12",
+  "auditSha256": "cb468688943c4bc73e773ce027272674c3431d9794b6572fc46f88f2f998b50d"
+}

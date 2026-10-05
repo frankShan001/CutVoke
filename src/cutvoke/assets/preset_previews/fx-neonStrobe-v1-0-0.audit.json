@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.neonStrobe",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "hz",
+    "value": 2.45
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.857,
+  "exportSha256": "b54cf37179820fe7b7ca1ab13d2d2312075d630fcdcb6829bf8364b328ad4090",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "b54cf37179820fe7b7ca1ab13d2d2312075d630fcdcb6829bf8364b328ad4090",
+  "auditExport": "fx-neonStrobe-v1-0-0.audit.mp4"
+}

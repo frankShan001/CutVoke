@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Reviewed all 16 effect overlay items on a split dark/light neutral contact sheet and checked the full transparent artwork for distinct shape, color and contrast.",
+  "reviewSheet": "docs/assets/editor-effect-overlay-visual-review-20260926.png",
+  "limitations": [
+    "Gold, pale smoke and some white-blue glows lose contrast on light footage; use against appropriately contrasting footage.",
+    "Review establishes asset visibility and visual distinction in this contact sheet, not quality on every real source clip."
+  ],
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_cyan_aura_ring",
+      "decision": "approved",
+      "observation": "A continuous cyan circular aura with small motes is clearly visible on dark footage; its pale glow loses contrast on very light footage.",
+      "sourceSha256": "9a4c8597059af827131f92100cc4c12354e671dbdabc318eecf004daefa0fe41",
+      "previewSha256": "7283cef8612f7116bf1d091dca13e54b9b5806167c9bebc01f7c309c58774b9f",
+      "auditSha256": "53ba7a5c94a991cc624a031c77455f239903b812264bcbebdcd51639e68249a8"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_violet_energy_halo",
+      "decision": "approved",
+      "observation": "A bright violet oval ring produces a contained energy halo distinct from the round cyan aura.",
+      "sourceSha256": "453d6613cf1e3e630074c9b86487ac875f92a6db0f1a2f4d93c05ac8727fc36d",
+      "previewSha256": "fbfe584b8d3f5b668bdfb3ce8532ee45d4de4e03f1a24752b40606a41c6bc848",
+      "auditSha256": "ee4ef74bcc81033fbf6c8215a1a475008706ac93f62e515a1eb995c99a4cb7ba"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_gold_sunburst",
+      "decision": "approved",
+      "observation": "Fine golden radial rays form a centered starburst with a much sharper geometry than the bokeh.",
+      "sourceSha256": "2cc8d3c39e1a26f2c88826feeff591e08bf4987d0d56bf7ff6b78ffc97d39fc5",
+      "previewSha256": "366a5986a8d6395610a9e9f1e59924a07c3a6fe6c8c100bdc7df9df5a05aa352",
+      "auditSha256": "4726f20a9b870fb800196112fba935a047cff24c5f7811329a449ad552d31419"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_blue_lens_flare",
+      "decision": "approved",
+      "observation": "A compact blue-white star flare has long horizontal rays and a bright center, distinct from the crystal burst.",
+      "sourceSha256": "86a072110abf807f2b129680b7a81f524d574f7ea7ac5eae6486ae6907469d34",
+      "previewSha256": "4303ab512098f9f6ae216ef361343b745e4868cd74d553d2c3d7b1e5261c232a",
+      "auditSha256": "5889ce53e60875e96113c2d864ebb21d6a2af334bb20105ff049d8aa1c9be837"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_magenta_sparkles",
+      "decision": "approved",
+      "observation": "Discrete magenta star points with varied sizes are separated across the transparent canvas.",
+      "sourceSha256": "c27c7001e837f030ee48d71b113d67e56611fe1d3702acc268fbc7bf0dbc356f",
+      "previewSha256": "8eb822899136a9a51dddbc95f027be10c18a891fa332e05a4544e791caa1d9e0",
+      "auditSha256": "d7c3fb3ce40d7bb1a1911e89f38ec60cf84ef1f78a7eb15d185e65693410607e"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_gold_bokeh",
+      "decision": "approved",
+      "observation": "Scattered warm-gold bokeh discs read as soft particles rather than a single burst; the light particles need a darker background.",
+      "sourceSha256": "9a00da6bcea2cd8aff90f1b84b8038e6689b96546d42630f55fb09d7bfa9dbe8",
+      "previewSha256": "19fe109d0b4846a76057d23107e49e53ca6d7b668b17762ea4ff643f19af55c3",
+      "auditSha256": "0eef297c37233ba808c0ccc016d55a3bc370289ac0427151f17beb447a91b91a"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_teal_orbit_motes",
+      "decision": "approved",
+      "observation": "A tilted teal orbit line and glowing nodes make a clear elliptical path distinct from the closed aura ring.",
+      "sourceSha256": "dd9b81b914c27975bfd9faa918163f068af62dd5de78d12cb32932c8f7ee730f",
+      "previewSha256": "5917f20622fe176cf50ad95aa0123f5d375cfc09686b5f4b5e6833426685d400",
+      "auditSha256": "0f17bc08394e9f3a5873fccbf3daee51ff5addbc00e8fd5fd529cf1731094d8f"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pink_heart_trail",
+      "decision": "approved",
+      "observation": "Small pink outline hearts follow a curved rising path with clear spacing between motifs.",
+      "sourceSha256": "9487605c29c201c52bbc69340f34722280703a089a2ab9213cb88d9fce56788c",
+      "previewSha256": "4e491e2b8ac90674ea5dfb3ab653b818a6ade894bf918a0b519627f767e834c6",
+      "auditSha256": "a1e3239a462f8ea8461b28059a58b4ee171a67721e33ca37a365cf1927e306ee"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_ice_speed_streaks",
+      "decision": "approved",
+      "observation": "Several horizontal blue-white speed streaks create directional movement and remain distinguishable from the gold and cyan effects.",
+      "sourceSha256": "8dc7e462336f899a3e7ea9f7da6d1bf8725d276b07e646f6ed396e4e25bbd41a",
+      "previewSha256": "0f9fdcdce892e3c3d45fbe72383cd3df691a7389475778f071c46cdf7592fa57",
+      "auditSha256": "3bbbdb0de8408d872fa7abb0988e8a41316c22d228d12868be753d1276529be5"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_gold_swoosh",
+      "decision": "approved",
+      "observation": "A curved golden comet stroke sweeps across the frame with trailing sparks; the line remains readable on dark footage.",
+      "sourceSha256": "7dfc100994ae309c0c2ca258a9f871cf64a00772e18bcfd41615db61c50158d3",
+      "previewSha256": "5a26a975d4404532a046215795674c33cb85a7244af696ab2b9ead9e993f66c0",
+      "auditSha256": "4d7843975441bf548dbc847406542f34eccbf71c27fc1362dac7e0f91c311b8a"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_violet_magic_ribbon",
+      "decision": "approved",
+      "observation": "A continuous violet S-shaped ribbon has a flowing path unlike the closed energy halo.",
+      "sourceSha256": "bf8e1ceaaf9f46738093f123607e689fd1ff63ec6bb2943038103fa9358d37a6",
+      "previewSha256": "eeaed26eade25fd53df5254b88884e45c34592a6f9f8be5e9982337011bb7c5a",
+      "auditSha256": "e3210bac88add0f1d17b89535b5a5898d2bc7bae6fc0112e7bcbbef43949afff"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_cyan_electric_arc",
+      "decision": "approved",
+      "observation": "A branching cyan lightning path has a jagged silhouette and bright nodes, visibly different from the circular aura.",
+      "sourceSha256": "e89e1b0ccac4a9eded05fc33c27fb8f3f65ea57bcca54b50a38c8b237eae8eef",
+      "previewSha256": "e9a8be4ed5447b8afb5f4ff33d163ffaaf84f307e35b06c822545ef9b58f45c1",
+      "auditSha256": "7f3a93f467b9d9f1b94959308bc7a71d90292680cc40f94f8dfeba06a6efe4e1"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pale_smoke_wisps",
+      "decision": "approved",
+      "observation": "Pale lavender smoke clusters have a soft cloud texture and remain legible on dark panels; contrast is intentionally low on light panels.",
+      "sourceSha256": "2a2ecbcdab4870e78c85d54516f7b80c54300e64a3b4d1570007fcacd0dcc01d",
+      "previewSha256": "405a445e11555cb86064f0b3afba689740457c611c553d22974a9428e8c894e8",
+      "auditSha256": "4f3cbe88991dc686f605255e1a42b3c102c749b4151e31b7c0678ab0aa3443e2"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_golden_dust_burst",
+      "decision": "approved",
+      "observation": "A dense central burst of gold dust and glitter is distinct from the cleaner radial sunburst.",
+      "sourceSha256": "4b34cd812cb7dec3d02cd36ad627eea77a3f0485fb77d9af849952a7e10b3d03",
+      "previewSha256": "0c026c9445e82e34e61de8cdae72a2cef151d848e73dc7ffbae7b5fc6b311848",
+      "auditSha256": "699ea0f0ce9972e9dcb2b4f19fb2128ed5e89b72fe5f67867d90dcc8c9416e31"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_blue_crystal_burst",
+      "decision": "approved",
+      "observation": "Angular icy-blue crystal shards radiate outward; the facets and blue highlights remain distinct on both dark and light panels.",
+      "sourceSha256": "b102a74ddadd02e16d87d0c4137f85c85372b02ed547757aa28bf41e8e6a12df",
+      "previewSha256": "e39c7613418711e5e959146985de2ce37e6a340a77227c973079a18bce57cda5",
+      "auditSha256": "a82b6cc5edd82359aa0fa0996341d2665f1588a9814709edde92c1422cedb041"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_rainbow_confetti",
+      "decision": "approved",
+      "observation": "Bright multicolor confetti fragments create a high-energy scattered pattern unlike the single-hue overlays.",
+      "sourceSha256": "dc668cc2472149670bd0767294e514b2895489a064dd789faf3d8b9554fafa00",
+      "previewSha256": "209471ea48bca00a442d3cf6a917d150c879f308d42c11c1dcb345140008920d",
+      "auditSha256": "c4da475fa6b9122512dfd8897dc2460e59c3510da97bd44fed86b1aa1216ca6a"
+    }
+  ]
+}

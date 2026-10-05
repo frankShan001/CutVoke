@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_window_blind_bands",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Parallel window-blind bands remain individually legible and show useful gaps for the base footage.",
+  "sourceSha256": "837c87f5837ad932598b7f9e8ab8d43585c6aa8850b11a042375003773767004",
+  "previewSha256": "ac4c76c1f4538929c5ec1eb03e411ced588ed1e7ed1e1cee8257fc4327dc22c9",
+  "auditSha256": "62a1fbfcdce59eaa48cd22c3119e759b6e2a7d0bccc247a3dba303b550194553"
+}

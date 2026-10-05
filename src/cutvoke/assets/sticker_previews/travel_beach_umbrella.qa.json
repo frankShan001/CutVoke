@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_beach_umbrella",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "be11d647389aaa1e7fc39ac98ff47f0a8749f253ef6d54168cb2828336c2bae9",
+  "previewSha256": "c72b4308e1231f50bbb6cc734365850b562e4871afba16fe6a426b06c4825fd8",
+  "preview": "travel_beach_umbrella.mp4",
+  "bytes": 4142,
+  "visiblePixels": 1407,
+  "changedPixels": 0,
+  "motionVisible": false
+}

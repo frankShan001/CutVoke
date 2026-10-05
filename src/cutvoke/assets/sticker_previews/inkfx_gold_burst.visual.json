@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_gold_burst",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "Layered antique-gold rays and foil flecks form a centered radial burst, clearly different from the thin gold ribbon and dust trail.",
+  "sourceSha256": "c82bf916a58c52df32c4bf55a701bf922bd6c6c1cfe2412d723733f4e572bcf5",
+  "previewSha256": "328eba7fba76b15bbdd1c87edd77f4781b1fc783a64a41653e7b4128bd2f1e85",
+  "auditSha256": "efac0235921e7ab8d5c343ea7d64c0ddf35cf88795cb6ca05f30fcd9376d0098"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_leak_rose",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "玫瑰色斜向角落光束在右下收束，形态区别于两款侧缘漏光。",
+  "sourceSha256": "af0e602765cc368a9bb84886a96b7dbae850ff5c8f13516a352f8f65e1281571",
+  "previewSha256": "b7406f291373b177a11771ba39d3f43bc5e97958d6743f44d5dd85d095b08ea6",
+  "auditSha256": "445d1fb6f940501e37af0f6149364f23354d254d09aa2986012244dd4b1b599e"
+}

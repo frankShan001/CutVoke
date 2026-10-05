@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_mountain_sun",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "b70d1d1477123ba3bc2aef323b9c443dcce07776dac34be25e0bc8010001d2f1",
+  "previewSha256": "27d4c46ca3a742b5554eed18a4a82b683e4b759e5cb58372f69551fa8e5bbcba",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3206,
+  "visiblePixels": 2286,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1860,
+    "steady_entry": 2286,
+    "steady_exit": 2286,
+    "exit": 1863
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1860,
+      "withoutFade": 2286
+    },
+    "steady_entry": {
+      "withFade": 2286,
+      "withoutFade": 2286
+    },
+    "steady_exit": {
+      "withFade": 2286,
+      "withoutFade": 2286
+    },
+    "exit": {
+      "withFade": 1863,
+      "withoutFade": 2286
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.162,
+    0.168
+  ],
+  "auditExport": "travel_mountain_sun.audit.mp4",
+  "auditExportSha256": "ad718478496bccda4406d6d8208f07b37b37d649af6e9d4ecd8b8402c3cd4a0c"
+}

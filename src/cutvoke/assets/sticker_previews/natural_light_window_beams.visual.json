@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_window_beams",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Broad amber shafts have a clean alpha fade and remain distinct over both dark and pale backplates.",
+  "sourceSha256": "674351e800acffada34e667c5c7bb98c60064b20a38d33fd4f02662aba5e1dc7",
+  "previewSha256": "7f5951a33d760b03a1632302215c8f49c9f62e1026447bb4a3a25ef758750a88",
+  "auditSha256": "1e45733c0b46df798c9bd33aeacc91ef45a8b79f0dcbb94fc0149574af85e20f"
+}

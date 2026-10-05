@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_suitcase",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "21998d2b64393c3de888945bda2f8425727cf6dca7c4e52e95d56b30307495c5",
+  "previewSha256": "46d8aea9860384e10e9d19b35f71a2f751f0e60ef6e12c85040eb390c92b07a0",
+  "preview": "travel_suitcase.mp4",
+  "bytes": 3589,
+  "visiblePixels": 1400,
+  "changedPixels": 0,
+  "motionVisible": false
+}

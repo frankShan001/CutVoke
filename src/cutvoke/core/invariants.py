@@ -11,10 +11,15 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 
 from .model import Project, Track, Clip
 from .rational import Rational
+
+_IMAGE_SUFFIXES = frozenset({
+    ".avif", ".bmp", ".gif", ".heic", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp",
+})
 
 
 @dataclass
@@ -45,6 +50,12 @@ def validate_project(project: Project) -> ValidationResult:
 
     seq = project.sequence
 
+    background_color = getattr(seq, "background_color", "#000000")
+    if (not isinstance(background_color, str) or len(background_color) != 7
+            or background_color[0] != "#"
+            or any(char not in "0123456789abcdefABCDEF" for char in background_color[1:])):
+        errors.append("sequence backgroundColor must be an opaque #RRGGBB value")
+
     # 1. ID 唯一性（所有对象在同一命名空间，含嵌套复合片段内的子对象）
     seen_ids: dict[str, str] = {}
     def _check_id(obj_id: str, kind: str) -> None:
@@ -56,6 +67,7 @@ def validate_project(project: Project) -> ValidationResult:
     # 递归校验一组轨道（外层序列或复合片段内的子序列）：ID/时长/重叠/类型。
     # 复合片段（clip.nested 非 None）内部要满足同规则（J08）。
     def _validate_tracks(tracks: list, scope: str) -> None:
+        clips_by_id = {clip.id: (track, clip) for track in tracks for clip in track.clips}
         for track in tracks:
             _check_id(track.id, f"track[{scope}]")
             # 同轨视频片段不重叠（7.3）
@@ -78,12 +90,39 @@ def validate_project(project: Project) -> ValidationResult:
             # 片段级校验 + 递归复合片段
             for clip in track.clips:
                 _check_id(clip.id, f"clip[{scope}]")
+                if clip.attached_to_clip_id is not None:
+                    anchor = clips_by_id.get(clip.attached_to_clip_id)
+                    if (anchor is None or anchor[0].kind != "video" or
+                            anchor[0].role == "sticker" or anchor[1].role == "sticker" or
+                            anchor[1].id == clip.id or anchor[0].id == track.id or
+                            (track.kind == "video" and track.role != "sticker")):
+                        errors.append(f"clip {clip.id}[{scope}]: invalid attachedToClipId "
+                                      f"{clip.attached_to_clip_id}")
                 if clip.timeline_end <= clip.timeline_start:
                     errors.append(f"clip {clip.id}[{scope}]: invalid duration "
                                   f"(start={clip.timeline_start}, end={clip.timeline_end})")
                 if clip.speed == Rational.of(0, 1):
                     errors.append(f"clip {clip.id}[{scope}]: invalid speed {clip.speed} "
                                   f"(cannot be zero)")
+                if clip.speed_curve is not None:
+                    if clip.speed < Rational.of(0) or not clip.preserve_pitch:
+                        errors.append(f"clip {clip.id}[{scope}]: curve speed requires "
+                                      "forward playback and preservePitch")
+                    difference = abs(float((clip.duration -
+                                            clip.speed_curve.timeline_duration).to_fraction()))
+                    if difference > 0.002:
+                        errors.append(f"clip {clip.id}[{scope}]: curve timeline duration "
+                                      f"differs by {difference:.6f}s")
+                if clip.frame_interpolation not in ("none", "motion"):
+                    errors.append(f"clip {clip.id}[{scope}]: unknown frame interpolation "
+                                  f"{clip.frame_interpolation!r}")
+                elif clip.frame_interpolation == "motion":
+                    if (track.kind != "video" or clip.nested is not None
+                            or clip.freeze_at is not None or not clip.has_slow_motion
+                            or os.path.splitext(clip.asset_ref.source_path)[1].lower()
+                            in _IMAGE_SUFFIXES):
+                        errors.append(f"clip {clip.id}[{scope}]: motion interpolation requires "
+                                      "a non-frozen video clip with a speed interval below 1x")
                 if clip.source_start < Rational.of(0, 1):
                     errors.append(f"clip {clip.id}[{scope}]: negative source_start "
                                   f"{clip.source_start}")
@@ -99,9 +138,10 @@ def validate_project(project: Project) -> ValidationResult:
             errors.append(f"caption {cap.id}: invalid range ({cap.start}, {cap.end})")
 
     structurally_valid = len(errors) == 0
-    # 可渲染性：所有视频轨片段必须有素材路径（M0 简化判断）
+    # 文字图层由结构化参数渲染，没有源文件；视频与音频片段才需要路径。
     renderable = structurally_valid and all(
-        clip.asset_ref.source_path != "" for track in seq.tracks for clip in track.clips
+        clip.asset_ref.source_path != ""
+        for track in seq.tracks if track.kind in ("video", "audio") for clip in track.clips
     )
 
     return ValidationResult(

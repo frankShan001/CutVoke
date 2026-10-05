@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_bokeh_ice",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "冰蓝散景由大小圆点组成，色相和排列均区别于金色散景。",
+  "sourceSha256": "2f4030e159e6f43ef9ddfbc25e22dea2dee8ef35e9d24204691459566876b659",
+  "previewSha256": "11e097263e8d9edd1c5e5d53fe981cee812fbb768ef1748e0f77b988eaab0cf3",
+  "auditSha256": "07579eeb350db4a26ff493ddc2f2dbf6ab0febbbfaa9b01a4e24feae85950eea"
+}

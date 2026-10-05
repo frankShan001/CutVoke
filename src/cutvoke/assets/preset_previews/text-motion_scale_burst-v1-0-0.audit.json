@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.motion_scale_burst",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 1947,
+  "exportSha256": "b85f37ece5839914d90ce0cf07b7ae3e9297e78abdd961857ea5c7a323a37118",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "b85f37ece5839914d90ce0cf07b7ae3e9297e78abdd961857ea5c7a323a37118",
+  "auditExport": "text-motion_scale_burst-v1-0-0.audit.mp4"
+}

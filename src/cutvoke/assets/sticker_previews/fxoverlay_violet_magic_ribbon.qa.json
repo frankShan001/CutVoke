@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_violet_magic_ribbon",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "bf8e1ceaaf9f46738093f123607e689fd1ff63ec6bb2943038103fa9358d37a6",
+  "previewSha256": "eeaed26eade25fd53df5254b88884e45c34592a6f9f8be5e9982337011bb7c5a",
+  "preview": "fxoverlay_violet_magic_ribbon.mp4",
+  "bytes": 11594,
+  "visiblePixels": 12713,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_beach_umbrella",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "be11d647389aaa1e7fc39ac98ff47f0a8749f253ef6d54168cb2828336c2bae9",
+  "previewSha256": "c72b4308e1231f50bbb6cc734365850b562e4871afba16fe6a426b06c4825fd8",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2977,
+  "visiblePixels": 2010,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1401,
+    "steady_entry": 2010,
+    "steady_exit": 2010,
+    "exit": 1402
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1401,
+      "withoutFade": 2010
+    },
+    "steady_entry": {
+      "withFade": 2010,
+      "withoutFade": 2010
+    },
+    "steady_exit": {
+      "withFade": 2010,
+      "withoutFade": 2010
+    },
+    "exit": {
+      "withFade": 1402,
+      "withoutFade": 2009
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.04,
+    0.04
+  ],
+  "auditExport": "travel_beach_umbrella.audit.mp4",
+  "auditExportSha256": "709ad1cb07854de92d0fb1db5aecfccad932a8178cea20b91cb9ba8e9c1a73ee"
+}

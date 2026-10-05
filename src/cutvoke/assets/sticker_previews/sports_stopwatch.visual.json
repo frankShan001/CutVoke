@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_stopwatch",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "红白秒表外壳、表盘刻度和指针清楚，顶部按钮保留，圆形外缘未被裁切。",
+  "sourceSha256": "2dded051960ad0c4d8471ea88872cdfadbff0545b066c5641856ba9e54233bf2",
+  "previewSha256": "238c9635f20f1f59b71b945509148f3ea4f83447497a9ce00070464029a446e6",
+  "auditSha256": "39a9b552d800fe6fb8d21f478cd9a59bd08836ebd3466b257ceb3df756d7e95a"
+}

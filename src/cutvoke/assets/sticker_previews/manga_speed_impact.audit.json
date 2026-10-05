@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_speed_impact",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "33bf5a23d866da7c65bd9b3307ead20e11f4546db7f60aafd84e1d1ee7a1b822",
+  "previewSha256": "08d3987ca458da216ed2ff2798d8efd8f82cf3c12c65595507af031610959792",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2960,
+  "visiblePixels": 2001,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1308,
+    "steady_entry": 2001,
+    "steady_exit": 2001,
+    "exit": 1308
+  },
+  "previewExportMeanRgbDifferences": [
+    0.102,
+    0.102
+  ],
+  "auditExport": "manga_speed_impact.audit.mp4",
+  "auditExportSha256": "e388be34cb90eacaac704139f101f945065b0d5bc7a6068657654e6b2047a9b1"
+}

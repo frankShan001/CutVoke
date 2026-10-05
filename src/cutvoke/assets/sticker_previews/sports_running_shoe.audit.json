@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_running_shoe",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "a0b3fc408232fcefff0bb8f6aabd89b7e1de46c18359f7043eed76c2b65e7ce2",
+  "previewSha256": "fe2697c9639f8436e9218ebb788153e42dff9f36cf0669928a55b4582a366976",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1401,
+  "visiblePixels": 943,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 362,
+    "steady_entry": 944,
+    "steady_exit": 943,
+    "exit": 363
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 362,
+      "withoutFade": 944
+    },
+    "steady_entry": {
+      "withFade": 944,
+      "withoutFade": 944
+    },
+    "steady_exit": {
+      "withFade": 943,
+      "withoutFade": 943
+    },
+    "exit": {
+      "withFade": 363,
+      "withoutFade": 943
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.079,
+    0.079
+  ],
+  "auditExport": "sports_running_shoe.audit.mp4",
+  "auditExportSha256": "00369f854b3c1d3eadd47d6efadb7ec318eaecdd7c930f492d2b3338cff067a0"
+}

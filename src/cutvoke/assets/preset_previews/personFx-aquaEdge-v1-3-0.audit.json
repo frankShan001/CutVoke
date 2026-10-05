@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.aquaEdge",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "sigma",
+    "value": 9.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.083,
+  "exportSha256": "ed5d9b60623ac0e06da9b21cf8e7783f5dbfaa57e38b12e34074b5d2bcbe510b",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "ed5d9b60623ac0e06da9b21cf8e7783f5dbfaa57e38b12e34074b5d2bcbe510b",
+  "auditExport": "personFx-aquaEdge-v1-3-0.audit.mp4"
+}

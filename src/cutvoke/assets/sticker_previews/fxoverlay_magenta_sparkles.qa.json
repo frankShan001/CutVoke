@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_magenta_sparkles",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c27c7001e837f030ee48d71b113d67e56611fe1d3702acc268fbc7bf0dbc356f",
+  "previewSha256": "8eb822899136a9a51dddbc95f027be10c18a891fa332e05a4544e791caa1d9e0",
+  "preview": "fxoverlay_magenta_sparkles.mp4",
+  "bytes": 9889,
+  "visiblePixels": 6636,
+  "changedPixels": 0,
+  "motionVisible": false
+}

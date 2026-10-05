@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_liquid_chrome_rose",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "db03fe18bdc48763156133956b12cb276f525578273e130abcbb07275ee4db9e",
+  "previewSha256": "2932f88da92787487918181eb40084412ba048a44c8977ac86da7b7904ec8049",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 15352,
+  "visiblePixels": 12170,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 6572,
+    "steady_entry": 12170,
+    "steady_exit": 12170,
+    "exit": 6607
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 6572,
+      "withoutFade": 12168
+    },
+    "steady_entry": {
+      "withFade": 12170,
+      "withoutFade": 12169
+    },
+    "steady_exit": {
+      "withFade": 12170,
+      "withoutFade": 12169
+    },
+    "exit": {
+      "withFade": 6607,
+      "withoutFade": 12171
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.504,
+    0.616
+  ],
+  "auditExport": "fxoverlay_refraction_liquid_chrome_rose.audit.mp4",
+  "auditExportSha256": "7647b6c3847b9b8993d9dd1012555c05f19dc7237a997c20ef7318b8843911f0"
+}

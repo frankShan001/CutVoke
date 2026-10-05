@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_scribble_ring",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d22dcf0a9d486bbb11798861ee5a6ad55a5a70eaaf8a1cfd21793325e4ab58ee",
+  "previewSha256": "12968f17c1bdcd0f4f2a8511682f099dc6a77b9c8d167b96ec93bfb78ae6afc6",
+  "preview": "decor_scribble_ring.mp4",
+  "bytes": 4523,
+  "visiblePixels": 1380,
+  "changedPixels": 0,
+  "motionVisible": false
+}

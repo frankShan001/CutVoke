@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.fadegrays",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.fadegrays",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "叠化",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "中间关键帧明显转为灰度，前后镜头在亮度和颜色变化中叠合；与常规透明叠化、闪白及黑场转场均有可辨认差异。",
+  "method": "Viewed aligned five-frame motion sheets for all eight 叠化 candidates and compared their intermediate frames with adjacent presets. Approved only four transitions with clearly different visible motion or color behavior.",
+  "coverSha256": "782cb5903b4a30edb88c190abb0631e2de2f4ebd14707a0540b09785f10b23f0",
+  "motionPreviewSha256": "c971b296035345f3ec1fe4946fc718cc8a1d760a9c0f7ff698093e052b8ed99b",
+  "auditSha256": "0b22b3a66a0ff007910369ad3ff45b8db4cb74105d43b60801d51c8f39d3e2ed"
+}

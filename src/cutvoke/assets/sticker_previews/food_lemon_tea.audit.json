@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_lemon_tea",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "da75ff5261f4bc3b2bd6d09da7a4dd4f8ee27d7a26c8e88ce5f89371ba6b41ec",
+  "previewSha256": "38d65e82f695551fe8820c9af2e462e2bc155cf673eb74c816ad954aba382e34",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5827,
+  "visiblePixels": 4214,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3380,
+    "steady_entry": 4214,
+    "steady_exit": 4214,
+    "exit": 3380
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3380,
+      "withoutFade": 4214
+    },
+    "steady_entry": {
+      "withFade": 4214,
+      "withoutFade": 4214
+    },
+    "steady_exit": {
+      "withFade": 4214,
+      "withoutFade": 4214
+    },
+    "exit": {
+      "withFade": 3380,
+      "withoutFade": 4214
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.226,
+    0.234
+  ],
+  "auditExport": "food_lemon_tea.audit.mp4",
+  "auditExportSha256": "28f97970cc22e659b93cd5c8b9a36b4b188a25d039fc246470ae6cb9dfcfcc23"
+}

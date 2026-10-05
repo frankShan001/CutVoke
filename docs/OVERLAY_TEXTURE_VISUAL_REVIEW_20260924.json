@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.texture_lens_flare_amber",
+      "decision": "approved",
+      "sourceSha256": "daf994fd51dd02bf54eeae0639e70c373bff1304136a363726752470a3efce96",
+      "previewSha256": "13653ba5c5431b6f0cd44bfcea2415382a31482c21d4b3d9445a0614a45d7cff",
+      "observation": "A distinct thin amber horizontal flare with a bright center and subdued circular lens ghosts; remains recognizable at the rendered overlay size."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_light_leak_duotone",
+      "decision": "approved",
+      "sourceSha256": "a0339078f38edcf4a1dc7e568f660e54be6d07d4d2f90ff39b902e980316d973",
+      "previewSha256": "e8cf2bd92099776aa8e1ee0c686d7fefd99faa6175bb2474b2148c2a17435980",
+      "observation": "A narrow magenta-to-cyan vertical light leak with soft luminous edges; clearly differs from the point flare and keeps its transparent surround."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bokeh_pastel",
+      "decision": "approved",
+      "sourceSha256": "f4d1e2582f394d49fa6371fd60650ff5c10859ae12036ccd5bb9af4fa7e11f0f",
+      "previewSha256": "ad8ea34be8d53e478d88ae18dc00422ff0596fe1881f0790a810956843c2474a",
+      "observation": "Separated translucent pastel bokeh discs with varied sizes; the loose cluster reads as optical light rather than confetti."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_arc_electric",
+      "decision": "approved",
+      "sourceSha256": "0f13a556e966166c6716f88444196ec9f9b3019b6e06533af01fac7a4e0afa2b",
+      "previewSha256": "8bdb818d2645b9bf27ece7a684ab218d0aca83cc83644c115ef9cc2adf30c4eb",
+      "observation": "A clean branching cyan electric arc with sharp bends and visible glow; silhouette remains distinct on both dark and light backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_orbit_magic",
+      "decision": "approved",
+      "sourceSha256": "b76104bf443f37be3d1791ed0b2b7750a6c34f944cbe9bc261cdb5d4c43d8573",
+      "previewSha256": "46f2e6c6e622b5c44963a9d74b28610f2c788c2f0f6e04a1db707bb48dc0e3d5",
+      "observation": "A violet elliptical orbit with sparse gold star glints; the open center and varied orbit marks distinguish it from the portal ring."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_speedlines_white",
+      "decision": "approved",
+      "sourceSha256": "a169eba011dbb389c55c568d1a58105cabc4bc502cee59341e0f8aff66155567",
+      "previewSha256": "bd8d016d57a9a833ab0387b28dd2dbe9431888a3802f2f52decb2a0aa6360958",
+      "observation": "A diagonal fan of pale speed lines that reads strongly on dark footage and intentionally stays subtle on pale footage; no backing plate is present."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_halftone_blue",
+      "decision": "approved",
+      "sourceSha256": "4ea7355cc6714e36eb4b71f06c70e936125a4f24adb8cfc9c184836114e8523a",
+      "previewSha256": "b60f33ace74bbc52f83a93b81a3766c3c6cbf0fb5e7295101fff9c1e3d3f51b4",
+      "observation": "Blue-to-violet halftone dots fade outward in a compact oval patch; individual dots stay crisp and the pattern is not confused with grain."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_swoosh_pink",
+      "decision": "approved",
+      "sourceSha256": "b2bc3660462adebe19cfd8b91388f6f4ed05bc29bf53eb20f18a061ce97f5fcf",
+      "previewSha256": "2d42dfa5e1983a7fefd477b196385ec90cab0a5c4d5f5db1bc2240c46fb1bb3b",
+      "observation": "One saturated pink curved swoosh with a tapered tail; the clean ribbon form is easy to distinguish from the straight light leak."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_sunbeam_gold",
+      "decision": "approved",
+      "sourceSha256": "0cb5f787578c69d1fa90f67d208da2f04a2b49bd0c87801950b868df59f1ba53",
+      "previewSha256": "104e9c2f1cddea65448c168db7225868095edd0eff4e50d21b61494a553eb0f7",
+      "observation": "Warm gold rays spread from an upper corner with smooth falloff; it functions as an edge-bleed light texture and overlays dark footage cleanly."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_hud_scan_cyan",
+      "decision": "approved",
+      "sourceSha256": "0804e81d946d5eaba82832f4674057f3fb0f5799156284842c9fa5ed162a6479",
+      "previewSha256": "10aa4e01811bf73e658e139b02de129a7ad9762b36a8c8f7b83c13485af7de09",
+      "observation": "Separated cyan scanning arcs with small ticks form a technical HUD ring; the interrupted circular structure differs from the four-corner focus frame."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_focus_brackets_lime",
+      "decision": "approved",
+      "sourceSha256": "1435b7b45785150e85834ed9e5663c1ec58ecb80af0c5c0c79b6725bbc83640b",
+      "previewSha256": "6218f2828be4f7aec9324e1659664eb9bcc675dc81d7a3b2c4ad7f35745602ec",
+      "observation": "Four lime corner brackets remain separate with no box fill; the minimal focus mark is legible over both sample backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_waveform_teal_coral",
+      "decision": "approved",
+      "sourceSha256": "56a37c8db31cb7e99df45c716ec50cfb39306fb6ec67b3f1f6ea7c2187f2e02d",
+      "previewSha256": "2c3166d88bde2c0067e86a9c4e1201e3df1d2f0b435b18828ee0bbf992f67109",
+      "observation": "A compact teal-and-coral waveform ribbon has two clear color bands and a smooth oscillating silhouette; it remains visible at overlay scale."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_spark_trail_amber",
+      "decision": "approved",
+      "sourceSha256": "7d5390004e578315b66be7888b6333a86c6ebed8b5f845e39eae8a85a78d669d",
+      "previewSha256": "530f5c66ab7bb8c7d33de49ed4ccc84dedb7f9d71929223bf2c30c75eae8481b",
+      "observation": "A rising curved amber trail uses individually visible glowing particles; direction and warm color separate it from the golden ray fan."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_portal_violet",
+      "decision": "approved",
+      "sourceSha256": "bbcad44008e356bcaf9c011b92c9600c87f31a9616f9aef6d639f0bd1e5b4df0",
+      "previewSha256": "0cd1348862df296ef3d1b7e364abb43cebef9d5c27a639c12f831b64b8745913",
+      "observation": "A violet incomplete portal arc with a bright inner edge and a few detached glow points; the broken ring remains legible and distinct from the orbital loop."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_corner_grid_cyan",
+      "decision": "approved",
+      "sourceSha256": "3c7785d307ce234f3f002a27036d7be0f9a6abf0056bf928874e4259910e80a4",
+      "previewSha256": "091926d2f3a74dcf5a1f45797b3a4b1f2dc72a60f70f4b3a0a6c9e44f473cd47",
+      "observation": "Four blue-cyan technical corner marks with small segmented details form a frame cue; denser than the simple lime focus brackets."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_glint_pearl",
+      "decision": "approved",
+      "sourceSha256": "1ca5d66f5a266577ef2211a787cbd399fe5d43aa17bbc8960a888cc126314228",
+      "previewSha256": "ecc3de77a58976e82602ad8007266f6a4bde6ea28618adce9dd3252bdf830cf7",
+      "observation": "A small pearl-white cluster of four-point lens glints has restrained pale-blue halos; it reads on dark footage and avoids a visible opaque tile."
+    }
+  ]
+}

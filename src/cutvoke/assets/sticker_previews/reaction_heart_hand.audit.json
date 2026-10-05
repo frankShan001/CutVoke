@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_heart_hand",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "9819143a07d761a09111430b012efa064d012bc6fea85248f9e679bb6221fb43",
+  "previewSha256": "3ea3cc6c09fa2bd2d314028d4f617ad55306f9a9c46b59387aee820bc6cba5a8",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3617,
+  "visiblePixels": 2791,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2535,
+    "steady_entry": 2791,
+    "steady_exit": 2791,
+    "exit": 2546
+  },
+  "previewExportMeanRgbDifferences": [
+    0.06,
+    0.063
+  ],
+  "auditExport": "reaction_heart_hand.audit.mp4",
+  "auditExportSha256": "7f8cf6543bb163d9876b49e9f3d97590b49dee88f5085c0cf389ba02167a484a"
+}

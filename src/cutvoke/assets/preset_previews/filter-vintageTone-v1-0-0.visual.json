@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.vintageTone",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.vintage",
+  "params": {
+    "strength": 1.0
+  },
+  "subcategory": "胶片",
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Soft warm fading keeps source colors while reducing their saturation.",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "coverSha256": "a3602dd0617cdd5176e0fecd9ff9e06f1a6ecbfa3777fe59c87e82fa01526e60",
+  "motionPreviewSha256": "4373707f1ff7c848fb446f830048276dd249e6d58289d091eda9a0b8495db638",
+  "auditSha256": "6ad5d98aa9b32e28baf42ee006172136710b64c8dd7ea7cb70da471651fb4809"
+}

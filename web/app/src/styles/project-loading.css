@@ -1,0 +1,35 @@
+.project-loading {
+  position: fixed; inset: 0; z-index: 2000;
+  display: grid; place-items: center; overflow: auto; padding: 32px 20px;
+  background: var(--bg); color: var(--text);
+}
+.project-loading__card { width: min(100%, 500px); text-align: center; }
+.project-loading__icon {
+  display: grid; place-items: center; width: 72px; height: 72px; margin: 0 auto 28px;
+  color: var(--accent-text); background: var(--accent-soft); border-radius: 20px;
+}
+.project-loading__icon--error { color: var(--text); background: var(--bg-3); }
+.project-loading__eyebrow { font-size: 11px; letter-spacing: 0.14em; color: var(--text-dim); }
+.project-loading h1 { margin: 12px 0; font-size: 24px; font-weight: 600; }
+.project-loading__name { margin: 0 0 30px; color: var(--text-dim); overflow-wrap: anywhere; }
+.project-loading__progress { height: 6px; background: var(--bg-4); border-radius: 4px; overflow: hidden; }
+.project-loading__progress > div { height: 100%; background: var(--accent); transition: width 180ms ease; }
+.project-loading__detail { display: flex; justify-content: space-between; gap: 16px; margin: 12px 0 26px; color: var(--text-dim); font-size: 12px; }
+.project-loading__steps { display: flex; justify-content: space-between; gap: 12px; padding: 0; margin: 0; list-style: none; font-size: 12px; color: var(--text-faint); }
+.project-loading__steps li { display: flex; align-items: center; gap: 6px; }
+.project-loading__steps li > span { width: 15px; height: 15px; border: 1px solid var(--border-strong); border-radius: 50%; }
+.project-loading__steps [data-active="true"] { color: var(--text); }
+.project-loading__steps [data-active="true"] svg { animation: project-loading-spin 1s linear infinite; }
+.project-loading__steps [data-done="true"] { color: var(--accent-text); }
+.project-loading__hint { margin: 30px 0 24px; font-size: 12px; line-height: 1.8; color: var(--text-dim); }
+.project-loading__error { font-size: 13px; line-height: 1.8; padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-2); overflow-wrap: anywhere; max-height: 30vh; overflow: auto; text-align: left; }
+.project-loading__actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+@keyframes project-loading-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .project-loading__steps [data-active="true"] svg { animation: none; }
+  .project-loading__progress > div { transition: none; }
+}
+@media (max-width: 420px) {
+  .project-loading h1 { font-size: 21px; }
+  .project-loading__steps { gap: 8px; font-size: 11px; }
+}

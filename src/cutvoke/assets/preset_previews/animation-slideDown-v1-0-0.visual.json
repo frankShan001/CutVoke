@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.slideDown",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.slideDown",
+  "params": {
+    "duration": 1.0,
+    "distance": 0.45,
+    "easing": "ease-out"
+  },
+  "subcategory": "入场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "画面从上方逐帧下滑回到原位，边界连续收敛，完成后不继续漂移。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "d0ed72da45095065eeeb87fcf9c41ba72ba226c2170946400fcedaeb15116d95",
+  "motionPreviewSha256": "750979b39bd87439579292420fb6d1633cbc40a1a99073ab0af2e47e3abaa435",
+  "auditSha256": "cc1157dc8e15b290960d0827d2eb70eefba3bd19b8f8c5d37533e3089444de07",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_slideDown.png",
+  "libraryReviewSheetSha256": "4e659597ff0cf43516df36929e3ae3011c74831267d596c3ce34587bd7433ac4"
+}

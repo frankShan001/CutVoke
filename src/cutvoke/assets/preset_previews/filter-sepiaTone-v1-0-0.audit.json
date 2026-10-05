@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.sepiaTone",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 0.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "a3689a5455e6204ebf9e4d3dd34c5aad6b30d7cd455990b75816c177bdc9db87",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "a3689a5455e6204ebf9e4d3dd34c5aad6b30d7cd455990b75816c177bdc9db87",
+  "auditExport": "filter-sepiaTone-v1-0-0.audit.mp4"
+}

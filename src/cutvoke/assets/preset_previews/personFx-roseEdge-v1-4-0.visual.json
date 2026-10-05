@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.roseEdge",
+  "version": "1.4.0",
+  "effectId": "cutvoke.person.halo",
+  "params": {
+    "sigma": 22,
+    "hueShift": -20,
+    "saturation": 1.4,
+    "opacity": 0.9
+  },
+  "subcategory": "人物轮廓",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A broad soft rose halo is visible around the silhouette and is less sharp than the violet and neon treatments.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "82d053d95c59889d65091be434d52cc9219f8fc65f53122a3af54c15b7651177",
+  "motionPreviewSha256": "e2a7e8f861b2519b9c4320dd1993bd614a85430b1b35bd281567c85d7d472b4b",
+  "auditSha256": "0de1e956ddecaf0cbdd1fc2964acd88d8172a23ee1dca841169df90007f1ca8a"
+}

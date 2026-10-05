@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.violetPortrait",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.tint",
+  "params": {
+    "hue": -80,
+    "saturation": 0.9,
+    "intensity": -0.08,
+    "lightness": false
+  },
+  "subcategory": "人物色彩",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A strong violet-magenta cast is visible across the subject and differs from the rose and cinema looks.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "91bf40f0351bc9ee8ceeea767c2924a86c6b211bf69f41ae1a5dbd95883086cf",
+  "motionPreviewSha256": "42c6428f80a1200d08da70a5013077c9caedceafb6a78b16c3c3a64d4404497d",
+  "auditSha256": "71e7e0886afadba8b5cb28d0ee2ada1c3859cb2d6aad66080d9f725d3a85706e"
+}

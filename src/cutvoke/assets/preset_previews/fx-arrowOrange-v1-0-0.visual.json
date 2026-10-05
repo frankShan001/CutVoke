@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.arrowOrange",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.shape",
+  "params": {
+    "shape": "arrow",
+    "mode": "fill",
+    "x": 0.5,
+    "y": 0.7,
+    "w": 0.75,
+    "h": 0.35,
+    "strokeWidth": 24,
+    "color": "#FF9F0A",
+    "opacity": 1
+  },
+  "subcategory": "构图",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "橙色粗方向箭头在画面中部清晰指向右侧，入段前无箭头；编辑水平位置后箭头明显移动，与蓝色矩形边框区分。",
+  "method": "Viewed the full-size composition cover contact sheet and aligned 0.10s/0.95s frames from each generated MP4; compared audited edited-X export frames to default frames and confirmed visible movement or boundary shift.",
+  "coverSha256": "456b3a766aa7053d4214a6993ac492973cc068599f471142f24092ce5fc12942",
+  "motionPreviewSha256": "29cc49314d9d2d126bb4ec1f627c42d3613c3d38a3bd40e154ef3af3fb689e0e",
+  "auditSha256": "47829b3f1456036a78bd41adc609ff9c785b0623636a11542d8abfed820f81a9"
+}

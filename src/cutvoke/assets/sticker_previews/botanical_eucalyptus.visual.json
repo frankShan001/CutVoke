@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_eucalyptus",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "银灰圆叶与细枝结构清楚，深底对比更好，适合中深色画面上的柔和装饰。",
+  "sourceSha256": "e2491627e0898d97210ec2ae5ccd6cd63ad79147b37045b5aa15205ac7b1d538",
+  "previewSha256": "de4498f6ae5f0256c9d37fc5074ab4e9c48f9b3a3f5e7c92ccef7e28f4ff27d7",
+  "auditSha256": "c2aa09e2d76f60f0ab059c8cc53da12c5f6c4ef1febe0d494d96f051c5944332"
+}

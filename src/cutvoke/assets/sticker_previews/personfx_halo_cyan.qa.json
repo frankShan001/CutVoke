@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_halo_cyan",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "123dd79fff624643c639d78789a8bbca41c6ca149f3b15513f753e5f189a13d0",
+  "previewSha256": "173dc4bcd26587643774f1ffa0eeef1812eb1868727f34535c9892a131b34b33",
+  "preview": "personfx_halo_cyan.mp4",
+  "bytes": 8310,
+  "visiblePixels": 6681,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.centerblur",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.56,
+  "exportSha256": "91b54da95b5c994b65b62d83d33f5af186c65cf799555f2fd21fdb5621602925",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "91b54da95b5c994b65b62d83d33f5af186c65cf799555f2fd21fdb5621602925",
+  "auditExport": "transition-centerblur-v1-0-0.audit.mp4"
+}

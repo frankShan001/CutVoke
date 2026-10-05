@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.mistEcho",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "frames",
+    "value": 11
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.402,
+  "exportSha256": "5b964ce48f0ab346d4860d9423697566520271297427dc817179472c439967b6",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "5b964ce48f0ab346d4860d9423697566520271297427dc817179472c439967b6",
+  "auditExport": "personFx-mistEcho-v1-0-0.audit.mp4"
+}

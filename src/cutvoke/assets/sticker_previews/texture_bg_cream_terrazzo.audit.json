@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_cream_terrazzo",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "9c1cc6c9fb35f93fdc07717ef34b63cb27da1bc5465d6743806648fa8c6fac8f",
+  "previewSha256": "cd41462a11a5b03066f1fba1c557a8385da6de964c9642655868b115455492d7",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6276,
+  "visiblePixels": 6557,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1168,
+    "steady_entry": 6557,
+    "steady_exit": 6557,
+    "exit": 1165
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1168,
+      "withoutFade": 6557
+    },
+    "steady_entry": {
+      "withFade": 6557,
+      "withoutFade": 6557
+    },
+    "steady_exit": {
+      "withFade": 6557,
+      "withoutFade": 6557
+    },
+    "exit": {
+      "withFade": 1165,
+      "withoutFade": 6557
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_bg_cream_terrazzo.audit.mp4",
+  "auditExportSha256": "a5d96d25a24890d0147e76c7da8f8d14704f4163deceb09d4378643411ecfcf8"
+}

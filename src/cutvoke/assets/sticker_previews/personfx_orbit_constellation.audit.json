@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_orbit_constellation",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "e4296dd08788976198c44938b1c0a9f5803cc77228a98b7f4e61cf38bb3d0e28",
+  "previewSha256": "99e1054b2f341eeaba246ddde45d6d7b7a946e76792b6df8dfdfcd6321c4e71b",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1570,
+  "visiblePixels": 1099,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 207,
+    "steady_entry": 1100,
+    "steady_exit": 1100,
+    "exit": 205
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 207,
+      "withoutFade": 1100
+    },
+    "steady_entry": {
+      "withFade": 1100,
+      "withoutFade": 1099
+    },
+    "steady_exit": {
+      "withFade": 1100,
+      "withoutFade": 1100
+    },
+    "exit": {
+      "withFade": 205,
+      "withoutFade": 1100
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.092,
+    0.085
+  ],
+  "auditExport": "personfx_orbit_constellation.audit.mp4",
+  "auditExportSha256": "fb69307f7fd558ed2359916fca95f3996117873184db0102b8b63511c945a7c7"
+}

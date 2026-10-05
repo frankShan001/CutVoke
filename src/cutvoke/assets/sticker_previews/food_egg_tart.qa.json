@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_egg_tart",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4fc79d87e0e58d07fae07fa3e0e79e47d5600c2485873307432e7486ce15225e",
+  "previewSha256": "ac05daf8f3fe7526826d92090b23f7a892728a2b3dedb6bae65ceecacef34e22",
+  "preview": "food_egg_tart.mp4",
+  "bytes": 5719,
+  "visiblePixels": 3414,
+  "changedPixels": 0,
+  "motionVisible": false
+}

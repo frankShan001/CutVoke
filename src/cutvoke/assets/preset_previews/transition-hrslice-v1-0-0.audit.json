@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.hrslice",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.051,
+  "exportSha256": "fd1c61735ea576ca162053d7843999ccc6a29fa18479908f276f26fa49df74ec",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "fd1c61735ea576ca162053d7843999ccc6a29fa18479908f276f26fa49df74ec",
+  "auditExport": "transition-hrslice-v1-0-0.audit.mp4"
+}

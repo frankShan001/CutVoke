@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_anamorphic_amber",
+      "decision": "approved",
+      "sourceSha256": "4b502576defb533e9023374007e0cec8f560b0a36ae85aa91c5ab87851863bf8",
+      "previewSha256": "65f193f50a1cab3f030086bae4a1ea0f0b8d790116bdb4b23daf7b78c046c927",
+      "observation": "金色横向宽银幕光晕在明暗渐变背景上轮廓清楚，中心星点与两侧柔光过渡平滑。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_anamorphic_cyan",
+      "decision": "approved",
+      "sourceSha256": "838d2a7559bbfd54dc6163d7aeb77c8188c40938a75ed4837e0af64d59be1e2b",
+      "previewSha256": "cc5c0db09ab83f456574872eec0cd8dc2ab5750fcd528c8737301d3405e8480d",
+      "observation": "青色横向光束颜色与金色版本明显区分，透明边缘干净，画面中段可辨识。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_diffraction_violet",
+      "decision": "approved",
+      "sourceSha256": "d27b68d8d992249a29ba845512f2110e7bb8d18ba7bb42eb6acb07b005950bc1",
+      "previewSha256": "a04abdb0839fbaa7e6e3c49f93439339956cee4aafeeac209623c81d6fbdb2dd",
+      "observation": "紫色衍射星芒有清晰中心和细长光线，边缘留白完整，没有邻格残像。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_diffraction_pearl",
+      "decision": "approved",
+      "sourceSha256": "c9299dcb544f801588319f77b06a47df483f11743aa90879a7a32777d3e2f629",
+      "previewSha256": "fb8bb34ca9845dd0f398aa8254c4ef2d104569e712e88d4a1883c1c1956e2df7",
+      "observation": "珍珠白八芒星与紫色星芒形状一致但亮度和色温不同，透明羽化自然。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_ghost_amber",
+      "decision": "approved",
+      "sourceSha256": "db5b7af5759efda8ec904156687dfe1a716d3cd2d0107ce72992026219ae2d75",
+      "previewSha256": "baab32854b3211f214ed9fb8a062bc96121eda33dc0f868995a5452e9b0fbb6d",
+      "observation": "琥珀色椭圆鬼影沿对角线逐渐变小，亮斑间距清楚，尾端没有裁断。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_ghost_teal",
+      "decision": "approved",
+      "sourceSha256": "a7a93453f533795068a91151ee071a493000fce2b693419195ffc67fedcb1c40",
+      "previewSha256": "cf2a5a6947d96195902f5fb6ab6267b9214eab75a438b43d7641fd53b487b028",
+      "observation": "青绿色鬼影保留与琥珀版本相同的递减轨迹，冷色亮斑在渐变背景上清楚可见。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_prism_streak",
+      "decision": "approved",
+      "sourceSha256": "edf499f6b1fdb5c404b99326efaa1c61ae20672c45dc38a611d54b21f63d6580",
+      "previewSha256": "4f19641b7b3aa62ce23ce9b0462bbf648b9c43855616831d1d18fa29376c9593",
+      "observation": "彩虹棱镜斜向光束色带连续，主体集中且四周透明，不含格线。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_prism_flare",
+      "decision": "approved",
+      "sourceSha256": "3f61869723b7836d996cebaa1de04caac450ccb9f16dea42d1fd2b51d890b733",
+      "previewSha256": "e0fec5140df31c041238f30e902565aa1ff1e92c451ce5b6727ee4f5b464f140",
+      "observation": "棱镜闪光由中心向多方向折射，颜色分散明显，和直线光束用途不同。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_bokeh_amber",
+      "decision": "approved",
+      "sourceSha256": "3dbd0028b20b60fbabe9c094e70b8122546e98e5d01f2b375bc02ca0cefd2602",
+      "previewSha256": "8860903df09670a46cff41ddf123e0f0206e06fae70ca04a1fb636b6f8b18ff3",
+      "observation": "琥珀散景由大小不一的柔焦圆组成，叠加后层次可辨且没有硬边。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_bokeh_aqua",
+      "decision": "approved",
+      "sourceSha256": "12a8a24747d29e4c16aac8b0272419e81daa27f9cb8930986342882e9de95f15",
+      "previewSha256": "0540191a99e031208701dc1a708659596853b2a98cd26403fc637888175ad0ed",
+      "observation": "海蓝散景圆点与琥珀版本保持相近密度，颜色明快，透明过渡完整。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_bokeh_ring",
+      "decision": "approved",
+      "sourceSha256": "485326d6bb4dba7a48d75737f95ab3b2aed563d5913b601c99b48dbbee918759",
+      "previewSha256": "d914c57b4fa1d6940e22a356457223d63617e0fd42d016811eb16a493138bc0c",
+      "observation": "玫紫光斑构成闭合环形，圆环中心留空，裁切后上下边缘没有串格碎片。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_flashline_pearl",
+      "decision": "approved",
+      "sourceSha256": "d6ff0fb532d46aa260c00e51fe57f4932b59b74cf445955566c186962117557d",
+      "previewSha256": "aec08c6c99448789b799faa7ff5d5fe07e42beb6b54300984daee54b547102a3",
+      "observation": "珍珠色闪耀光带呈横向细线，中心和两侧星点可区分，未见原图格线。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_refraction_arc",
+      "decision": "approved",
+      "sourceSha256": "75c8618cf21bdb6ead54d48fb3d8b1e6dbe121257d378a99e6b7082cbd12244e",
+      "previewSha256": "bff4450acd43ff47bc87f5c906a6f04979e16a4acb740c7cf7547b38d78ec5bf",
+      "observation": "彩虹折射弧沿画面边缘弯曲，颜色由蓝绿过渡到暖黄，透明区域足够。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_glass_glints",
+      "decision": "approved",
+      "sourceSha256": "b0e2751ef3e267b368df772cafef81550caaa9060cff4fdb1a9351503ae4f9bf",
+      "previewSha256": "c63041f0ff96fbc261a4cc7fee1b13e00f943dc7c062bbf95edcb2148d5dfc49",
+      "observation": "玻璃折射闪点由多枚独立亮片组成，在深浅背景上均可见，未与相邻格连在一起。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_spotlight_dust",
+      "decision": "approved",
+      "sourceSha256": "a8147ed0a9b423585fa82e68b21549960455a468d0ce31029273a66de87c0805",
+      "previewSha256": "8570f0b9f31ddebb1ecd57679c8d6c3e7310d65ce37e3471bfe6d7d0d7e94b78",
+      "observation": "柔光聚光锥内有细小尘点，亮度从中心向下柔和衰减，主体边界完整。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_optical_chromatic_corners",
+      "decision": "approved",
+      "sourceSha256": "d3805c6d69e6e650e358ee886d3b79542924bc65ac88f811bd3c50a0eeb9ef87",
+      "previewSha256": "70e51d340d075fe876981479a86206de441be05fb33e1c411757091b26a71c44",
+      "observation": "红色与青色角光分置对角，形成明确色差叠加效果，中心区域保持透明。"
+    }
+  ]
+}

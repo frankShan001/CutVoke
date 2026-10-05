@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_robot",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "机器人面屏、手臂和书本均完整，手臂抱书关系清楚，深浅底均可读。",
+  "sourceSha256": "d43d14d1fa9f497a784c129dae8d131e98f030c4b3477916d224863079ffeccc",
+  "previewSha256": "70f7835bbea0d0a951a4f6203eb0e348ee2ccd982c9b208047e516f1ca523ece",
+  "auditSha256": "0532490a55ef92967ea882800ef88a69f37245f5430372e98f0fd7345824c868"
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.flame_sway",
+  "version": "1.1.0",
+  "effectId": "cutvoke.anim.sway",
+  "params": {
+    "amplitude": 0.12,
+    "period": 1.4
+  },
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-10-02T19:42:50+00:00",
+  "method": "Codex actually inspected all 30 chronological continuous frames (15fps, 2 seconds) from this regenerated library sample using view_image, checking motion, alpha edges, shape preservation and canvas containment. Preview QA and full apply/edit/saveReload/undo/export machine audits were rerun before binding.",
+  "observation": "火焰图标按默认1.4秒周期左右平移摇曳，换向连续；火苗尖部及黄橙内焰保持清楚，没有被拉伸、越界或套入不透明底框。",
+  "sourceSha256": "9e0f2a17def4b5013caa8f3405472a134c1138f785b4717875b437566c675709",
+  "previewSha256": "ab343f5409a3f66cccd9c2450976ba9fe9553ea6d84c4f5f25516bd89cef4f29",
+  "auditSha256": "47032bd6dd8115eebd2539949d1450ff06e10ba0eced9780e419c03f670f9788",
+  "rendererSha256": "019717a0438118bdb3a8a852d000a065e8eac7be52fecea1e33090128fcc318a",
+  "evidencePaths": [
+    "E:/myproject/opencut/output/acceptance/effects-visual-review-20261003/sticker-library/flame_sway-continuous.png"
+  ]
+}

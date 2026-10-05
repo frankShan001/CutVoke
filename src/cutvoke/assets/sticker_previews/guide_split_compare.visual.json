@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_split_compare",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Magenta and orange chevrons face opposite sides of a complete divider.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "99ae5238bed705442254e3ad9f29752ce916ee7a6c6732ea3eb4904e07d3d36d",
+  "previewSha256": "973e5d24097eb4079ae4aea5212fdf2159e506d39df77382a37dfbae9cbe5641",
+  "auditSha256": "4da30b554b5bb5870fadd96268dbe51be35f14d08ea43b63f690c2c35967c510"
+}

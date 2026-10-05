@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_postcard",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d64261add7adb13fe49a27098639c0a51eb46b669d94b9f14ebec4c6340858bc",
+  "previewSha256": "97f1efaf38874fad2c5dc44ba00e435e914ab4921db18e302558041393ae4a99",
+  "preview": "travel_postcard.mp4",
+  "bytes": 3889,
+  "visiblePixels": 1789,
+  "changedPixels": 0,
+  "motionVisible": false
+}

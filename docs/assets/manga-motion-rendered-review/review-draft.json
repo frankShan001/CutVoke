@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "",
+  "reviewedAt": "",
+  "method": "Manual comparison of transparent artwork and actual composited preview",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.manga_impact_burst",
+      "decision": "pending",
+      "sourceSha256": "f62cf66a68bc88eeac1d1aa24c988117ecde33430e81bcf5abd74939e4e253a8",
+      "previewSha256": "e0f9f8d1e62390e2cd7d75d1e9ee3e16028d016b3191ab4ca3d1735d95d5edac",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_speedline_cobalt",
+      "decision": "pending",
+      "sourceSha256": "2bef8aba707d3af8d8b8fc0eee23b843a2f20603afe1e61b4bad8dca51259252",
+      "previewSha256": "6f7775a5a2fbbfac1a81519d938049fd9c97ed187ca165f98a0cf7dfe1516be0",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_lightning_cluster",
+      "decision": "pending",
+      "sourceSha256": "5e00caae982a6744a2c669e1caffd5b540b32cff5f7f43d7efff9b9ed34ba036",
+      "previewSha256": "0be9f25f781722cc88163353863cc31b95417968843fad7a233b6ab2122f3268",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_halftone_cloud",
+      "decision": "pending",
+      "sourceSha256": "ec03cd3ce0f7c8cb7347ff7990081ff69d715a92a1b369be49e47abd9c1cefd4",
+      "previewSha256": "e92ea07299c8df20927067b3f618afba3b8cb16bc72a327cbe12e07dfd4ada87",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_motion_curl",
+      "decision": "pending",
+      "sourceSha256": "4d80acc995c13bdb138f583a48245cf80c779187feab9cf35fb9c93ca3fd997b",
+      "previewSha256": "0561cff734b51199e44b5749f9b3df916b8151134b1dc482ea3cc907fc165265",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_slash_trails",
+      "decision": "pending",
+      "sourceSha256": "115fcfa806e7a6f53e93050985cb3a735cb1446ad4b6873b5ee739c731a53d30",
+      "previewSha256": "983e4b079861d78006f008678335d76579b88ed4ddd842e1975ad1a33a24c18f",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_emphasis_rays",
+      "decision": "pending",
+      "sourceSha256": "464f27cddd7220564068542d35ed8ac0407055d13bfacce84b77a111bd1fb52d",
+      "previewSha256": "4e025311599356724fc52051802061b997102acf38db7b43e61feac5746689d6",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_shockwave_shards",
+      "decision": "pending",
+      "sourceSha256": "7f8e04ad97f44704d8bdaa332d2821f9879ba414254617a9552b16ffa7e7d2ea",
+      "previewSha256": "9d3a563b40edd349b679fa951aea7149a16b751812ff6c87675b448be376c5a9",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_ink_splatter",
+      "decision": "pending",
+      "sourceSha256": "7044a58f89c53af51fecee8e7bfc00c7c860ca667ea115da30cb805b981150a8",
+      "previewSha256": "39b2aeeddd52ad51a89276b56ae8d1352efe8957d3d3daa531ab3fa5efdfc633",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_shock_rings",
+      "decision": "pending",
+      "sourceSha256": "3b11f7886c113157116463a3b061add02bb067d9f1cd9afca6b2abd569b0088a",
+      "previewSha256": "d13d6230707692f0f46b1b349a0f5016aa5d19b687db2a81ae1d359c05387ea4",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_motion_arc",
+      "decision": "pending",
+      "sourceSha256": "66b63a714339cc402b445cbf77040797af02e67b075219f7b1b7e427534da445",
+      "previewSha256": "4267b5ca52fed4453a95c08a42376ba13b402345fd069d7ddf45be47fa9747cf",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_wind_ribbons",
+      "decision": "pending",
+      "sourceSha256": "415e255d87ebc156e3aa404dd73dcc1d4ca1597e9babbe3388b7298ca4afddb0",
+      "previewSha256": "56c57b6d7cf927f59677a2a3302f12f9ba7f6d621ecebb99a774ff3bbbb7fe0d",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_crosshatch_burst",
+      "decision": "pending",
+      "sourceSha256": "5d6864ada4455c130c86d886c98141018a5cfc475597e25b5f526d13cfa8be8d",
+      "previewSha256": "841fec9ca30f2b1134eddbdca4a07bde8795510456aa577b4154cf8ac876aa9c",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_energy_trail",
+      "decision": "pending",
+      "sourceSha256": "949272c431b515cf70065fb81420264f611bb4ec299ea29d66154ab0575b9ad4",
+      "previewSha256": "aefd56b071734d23d4af876731932607722fb83544baaa1261c05ceba0000351",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_spark_burst",
+      "decision": "pending",
+      "sourceSha256": "b0300f1d48788274cce66c50dfb51c8169ffab5c529bfa0c0d2843d8fce50527",
+      "previewSha256": "baf5d303fff891a67ad50b5856a46e47dac014d37a21ed472bd3365ee3330681",
+      "observation": ""
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_glass_streaks",
+      "decision": "pending",
+      "sourceSha256": "1fe8565e5f5aeb0c838b3d6531e80a7bfaca4431c839c59e1f8a0dccbe045160",
+      "previewSha256": "7820ca0218bd448092624dcf3190f44057b559c1f6e11f91243bbf55198cf234",
+      "observation": ""
+    }
+  ]
+}

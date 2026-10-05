@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_delphinium",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a291efe8b8247af03f7878ddc02f189a291ae3cb3a6d14f633859a3d890727a3",
+  "previewSha256": "62a4719fbef88192310a08cae283e499a42b3b542f1053bb625bc53dc733281b",
+  "preview": "botanical_delphinium.mp4",
+  "bytes": 4694,
+  "visiblePixels": 1754,
+  "changedPixels": 0,
+  "motionVisible": false
+}

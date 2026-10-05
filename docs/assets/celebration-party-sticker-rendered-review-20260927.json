@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "generator": "FFmpeg frames from CutVoke RenderService sticker audit exports",
+  "frameTimeSeconds": 0.75,
+  "items": [
+    {
+      "stem": "party_balloon_bouquet",
+      "auditExport": "party_balloon_bouquet.audit.mp4",
+      "auditExportSha256": "b75bf6bd8e26521a9c0f9ca2d41913f378990775d5b6f45dde31e5b0fac5ddf1",
+      "frameSha256": "532a80fde70edb0d596c64fc66ef764bcba51f9b1741e3dee8d4cb1b87b1d6fa",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_confetti_popper",
+      "auditExport": "party_confetti_popper.audit.mp4",
+      "auditExportSha256": "a5f20c12db97d4497b0dbe5e9b4b13ddd4aad681914ff3c84b61c6e01b3256df",
+      "frameSha256": "05877882f89fde6fa8520a15eee6c3105d02a65d6b1b5ff90b3f956a45d0a9a3",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_candle_cake",
+      "auditExport": "party_candle_cake.audit.mp4",
+      "auditExportSha256": "7fcf03ba0c6eb8c3194470f074a97e90096f1d115ad7780af483057cd38f8c5b",
+      "frameSha256": "edc1d7302b611ea00e2a9f268d09099217882c127c46aa600ce2aa3257f0e31e",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_gift_box",
+      "auditExport": "party_gift_box.audit.mp4",
+      "auditExportSha256": "309f36ac573851a34d3df84500cbcd68277792f89e0dc4d631a14206b7bf7429",
+      "frameSha256": "36322eb4528e61fc59e53d0c0325c44cf22575544fe025346cdc56ecd0cb5afd",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_cone_hat",
+      "auditExport": "party_cone_hat.audit.mp4",
+      "auditExportSha256": "16633df627b9bc0b7fa078bc2d7670d7bf6262eaf1b4b685de6c1714fa5099d3",
+      "frameSha256": "c963d3eb41a1718848000f4ed0d937e6dd4be54db75fadb8c691705b62dbeefd",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_curled_streamer",
+      "auditExport": "party_curled_streamer.audit.mp4",
+      "auditExportSha256": "6104f5b8c40023a19da493379bf28d315ce989b70c11f69a649f982567386219",
+      "frameSha256": "fe1ddde32ce98154db3af2a3a62b2320efb8ef21fb3563e7e5eb90fdbc22883c",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_starburst",
+      "auditExport": "party_starburst.audit.mp4",
+      "auditExportSha256": "a7b6d1a28850cc76649b37fd3078b54c6870c365f8326847d9b23da01b894229",
+      "frameSha256": "cc033542e5f3258648c7d6ba0b5326db07c9a171d7c7477fbcde8a223fd63b03",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_juice_cheers",
+      "auditExport": "party_juice_cheers.audit.mp4",
+      "auditExportSha256": "9e01c576dd4695844348ee1db1d7515dd3708a95f0576aaee131b45baa80ea85",
+      "frameSha256": "cb5fa33942c27551d249aa7964074f5e89de59bb0544df9130df4ca18dd022f8",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_rosette_badge",
+      "auditExport": "party_rosette_badge.audit.mp4",
+      "auditExportSha256": "036ebc39690dd49bcea1ee7b20d97d8d9d05fa28fc40b30278da7333b548d0b1",
+      "frameSha256": "9009ee06726e203652747e75bba0e31d3c0ad80c0a79d61b2f2fe0c06d2b3c72",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_paper_crown",
+      "auditExport": "party_paper_crown.audit.mp4",
+      "auditExportSha256": "906907d844dc92a46f12271d3b5e787bb40b72f1c3d2c72805598b8ad6f051f1",
+      "frameSha256": "a0c2ec38a6762f9c20506a6676708f58dd589559ae06a541a3e628a72cdd9010",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_cupcake",
+      "auditExport": "party_cupcake.audit.mp4",
+      "auditExportSha256": "70ba1eec7c73fc65601eb03d59591426f01bf6380b33b958b5e7d27817d09608",
+      "frameSha256": "0f26839a7d19b4edfaeeb7cc044c5e5e5df756c9f9b1f3965a49a3174717375f",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_horn",
+      "auditExport": "party_horn.audit.mp4",
+      "auditExportSha256": "ed67c565b9d72652345e2841b0d20dc9019f2e0ed4f1e4dab1cd72ccfeba511b",
+      "frameSha256": "bef5a701100a0384fce34cfbe34efdd805a655a9f9f008de2c0d72284505c288",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_fireworks",
+      "auditExport": "party_fireworks.audit.mp4",
+      "auditExportSha256": "05c5449e266134473b4cfdef7c1985fcc709cf19c1f87cff3ff0c723c6170ac6",
+      "frameSha256": "8ee63223f94b6c1e019a317361b2073608aa6a675ffd18e3d6beffde75811e24",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_bunting_garland",
+      "auditExport": "party_bunting_garland.audit.mp4",
+      "auditExportSha256": "90eb328ae56a98b3a8d00f12106f19ec1f687d35f6f1e78d00957a09a14c18e5",
+      "frameSha256": "3fa2cc1eb6a4bd4a8637c31e89fa3100078a4a04095303c7dcc30d021ff00e6a",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_confetti_cluster",
+      "auditExport": "party_confetti_cluster.audit.mp4",
+      "auditExportSha256": "c7662db130827b473dc7e1467be55931cb87f9b529a00f5be8c961fd090aeb12",
+      "frameSha256": "d901ed0aad3eabf816db7506d44b144d95c16e035e20b0a7e363f3094d6c21bd",
+      "frameTimeSeconds": 0.75
+    },
+    {
+      "stem": "party_sparklers",
+      "auditExport": "party_sparklers.audit.mp4",
+      "auditExportSha256": "364c258c628e601f315b8d77da7f6cd6abd8c600b22ad923dee38d731872a802",
+      "frameSha256": "2d07c28dd428247dd7bfb7ac41ce20f1e1e83dda8b7dc9225bf378935b81644f",
+      "frameTimeSeconds": 0.75
+    }
+  ],
+  "contactSha256": "7a5ec83c0c3c538413404a449ea6e9e1f565ee91f40f7fc3d7db01453cf5de15"
+}

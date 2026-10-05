@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.glitch_horizontal_tear",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项检查4×4透明贴图裁切表和4×4真实画面合成表；确认Alpha通道、裁切边缘、深浅背景对比、缩略图可辨性与每项轮廓差异。",
+  "observation": "青粉色横向撕裂由多层细条组成，透明边缘干净，画面中线效果清晰。",
+  "sourceSha256": "29857a2341bcf58f365dcfe9a8dbed249868384dda067ccddffaf9398041682f",
+  "previewSha256": "871882fe3a60bff7d58d4fdc31d3d3987f50d64837bdaf930df610a9ae4537d8",
+  "auditSha256": "24ab2b2f6f88d5e51fcc47b99420d16893d76cf7e2786c3daa8065678cdc7284"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_shock_rings",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3b11f7886c113157116463a3b061add02bb067d9f1cd9afca6b2abd569b0088a",
+  "previewSha256": "d13d6230707692f0f46b1b349a0f5016aa5d19b687db2a81ae1d359c05387ea4",
+  "preview": "manga_shock_rings.mp4",
+  "bytes": 6518,
+  "visiblePixels": 2231,
+  "changedPixels": 18,
+  "motionVisible": false
+}

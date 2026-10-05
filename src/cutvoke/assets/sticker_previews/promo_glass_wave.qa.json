@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_glass_wave",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "133633e4b3c0dd11c03753c22f561976db02101d4e73c57982349dcdd6e84114",
+  "previewSha256": "0ba07b95a5e2272731a5a4de4ad22c7d0b38deb2fd0ed6c5f79e5d7ed2f2da0f",
+  "preview": "promo_glass_wave.mp4",
+  "bytes": 7979,
+  "visiblePixels": 4465,
+  "changedPixels": 0,
+  "motionVisible": false
+}

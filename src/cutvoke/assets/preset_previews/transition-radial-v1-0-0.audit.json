@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.radial",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.255,
+  "exportSha256": "0053ec425a1ed75d65292cf7349fd6aa5e7bbcbbc1d6d4ea781ea99ef4b23229",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "0053ec425a1ed75d65292cf7349fd6aa5e7bbcbbc1d6d4ea781ea99ef4b23229",
+  "auditExport": "transition-radial-v1-0-0.audit.mp4"
+}

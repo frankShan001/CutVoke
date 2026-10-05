@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_spotlight_bloom_gold",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "aa600002d7d2e79dd3b7b037b4d4d7f302c4d661316f26b274dd268cceb4c213",
+  "previewSha256": "cd16db84fcac4fa2f4f3390159dac9d04e6453c9480ca9dd3e440ab8ebc03a97",
+  "preview": "stage_light_spotlight_bloom_gold.mp4",
+  "bytes": 7434,
+  "visiblePixels": 8151,
+  "changedPixels": 0,
+  "motionVisible": false
+}

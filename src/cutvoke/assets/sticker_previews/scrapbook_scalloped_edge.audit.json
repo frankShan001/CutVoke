@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_scalloped_edge",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "4105fcc49973a1162525bdda81a58f080a49a73f9718ca3eab91bf7debdc4afa",
+  "previewSha256": "6dffbe851d01c2bdf97f7a635f5ff04c5d460ff216f22e29600279ae6175e009",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 819,
+  "visiblePixels": 474,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 13,
+    "steady_entry": 474,
+    "steady_exit": 474,
+    "exit": 13
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 13,
+      "withoutFade": 474
+    },
+    "steady_entry": {
+      "withFade": 474,
+      "withoutFade": 474
+    },
+    "steady_exit": {
+      "withFade": 474,
+      "withoutFade": 474
+    },
+    "exit": {
+      "withFade": 13,
+      "withoutFade": 474
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "scrapbook_scalloped_edge.audit.mp4",
+  "auditExportSha256": "c55a924d79a94349ea0085b5fcd59ccf44e84b158054f37c9a3bc84c4c83db0a"
+}

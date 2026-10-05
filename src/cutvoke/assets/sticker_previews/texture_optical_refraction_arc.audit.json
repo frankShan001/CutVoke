@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_refraction_arc",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "75c8618cf21bdb6ead54d48fb3d8b1e6dbe121257d378a99e6b7082cbd12244e",
+  "previewSha256": "bff4450acd43ff47bc87f5c906a6f04979e16a4acb740c7cf7547b38d78ec5bf",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1898,
+  "visiblePixels": 1262,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 483,
+    "steady_entry": 1262,
+    "steady_exit": 1262,
+    "exit": 488
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 483,
+      "withoutFade": 1262
+    },
+    "steady_entry": {
+      "withFade": 1262,
+      "withoutFade": 1262
+    },
+    "steady_exit": {
+      "withFade": 1262,
+      "withoutFade": 1262
+    },
+    "exit": {
+      "withFade": 488,
+      "withoutFade": 1262
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.018,
+    0.024
+  ],
+  "auditExport": "texture_optical_refraction_arc.audit.mp4",
+  "auditExportSha256": "fd6975bbe59d4e5691b5bbe6ccca0530d84e8f7a116451e774d6bf7f0b5e5462"
+}

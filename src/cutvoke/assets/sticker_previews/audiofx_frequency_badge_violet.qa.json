@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_frequency_badge_violet",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c67434e0302dd149cd65cab82c5723b043fb5fa051a012291424eb93527f3d05",
+  "previewSha256": "365f7794c4e3ea18b201cf8b5b884a8724273de5cca04b93d42b7dd805c281c0",
+  "preview": "audiofx_frequency_badge_violet.mp4",
+  "bytes": 8645,
+  "visiblePixels": 6950,
+  "changedPixels": 0,
+  "motionVisible": false
+}

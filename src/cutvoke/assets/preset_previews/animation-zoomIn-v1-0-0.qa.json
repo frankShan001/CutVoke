@@ -1,0 +1,27 @@
+{
+  "presetId": "cutvoke.preset.animation.zoomIn",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.zoomIn",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "fromScale": 0.55,
+        "easing": "ease-out"
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 97.615,
+  "maxSampledMeanRgbDifference": 97.615,
+  "coverSha256": "101bb9e99b2550fa8c037fc4b0e9d33fe9ed4eb4ec42340d7d93ac51b4e6ab98",
+  "previewSha256": "ddbf7c6c7b4e805f7e15e8f6e001c2602e2063b902bfe5803b44a40b8c187ee4",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

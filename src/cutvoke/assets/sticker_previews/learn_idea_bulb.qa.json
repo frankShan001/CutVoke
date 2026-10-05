@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_idea_bulb",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "765e42a451c8fd34a756fd4cd23210bd6b3613d6975a8002023f904b723b5cc6",
+  "previewSha256": "e9ad1efdd737274bbfb1d473aa1e01ffa166fe4a70de9615b6fb7ca8c40da557",
+  "preview": "learn_idea_bulb.mp4",
+  "bytes": 3889,
+  "visiblePixels": 1522,
+  "changedPixels": 0,
+  "motionVisible": false
+}

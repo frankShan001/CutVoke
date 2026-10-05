@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "generator": "RenderService output sampled with ffmpeg",
+  "background": "editor preview's dark-to-light gradient",
+  "contactSheet": "docs/assets/fantasy-energy-overlay-atlas-20260927-rendered-review.png",
+  "contactSheetSha256": "65c866c060f27aa1f2eb4332cb15c7b5ec2390669a309ac365a7983f3cee70f6",
+  "items": [
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_amber_arc",
+      "name": "琥珀熔光弧",
+      "sourceSha256": "98f44aef7d05299722c759793fcd6bff96d149d5b2fc8d298ab30af6ead1e6e7",
+      "preview": "fxoverlay_fantasy_amber_arc.mp4",
+      "previewSha256": "b394b97e9d6e900657931b11e32b179eef1dda065b1088f2f51f3898f4abbeaf",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_violet_portal",
+      "name": "紫晶传送门碎片",
+      "sourceSha256": "4171ec0a8ea2fd01a1f0253b26abb87f05f231c64087dfab507de682a83f3c76",
+      "preview": "fxoverlay_fantasy_violet_portal.mp4",
+      "previewSha256": "763ae7347a0cc72925667f2f86bd3da30a99e5405ff708056dfe3d83fa6850e8",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_cyan_electric",
+      "name": "青蓝能量电弧",
+      "sourceSha256": "03a9125d18447134250633ca0002844116833352d2368b0106a211edf9a8a18b",
+      "preview": "fxoverlay_fantasy_cyan_electric.mp4",
+      "previewSha256": "d96052996eaab044b4e36f14337b0ad7b44480c368639927f9609a941ef51d8c",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_gold_pulse",
+      "name": "金色脉冲光环",
+      "sourceSha256": "3f50c2f242219a1fee365c79640336dffdac84751829f0fd8a2589099c5406ef",
+      "preview": "fxoverlay_fantasy_gold_pulse.mp4",
+      "previewSha256": "09a57c087183b2a9b9940bfc4433f92cf322af75b24cf3748d0dfd9245a3daef",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_aqua_ribbon",
+      "name": "青碧玻璃光带",
+      "sourceSha256": "d98481ca9ff85548dfc52aeec27e7de6d2e08d8d0eca2511dfa216732bb68628",
+      "preview": "fxoverlay_fantasy_aqua_ribbon.mp4",
+      "previewSha256": "52b0f9e2ac47b7e673b45346c64b0161c986854763425f510b5db2c5cd70caa5",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_blue_shockwave",
+      "name": "冰蓝冲击波",
+      "sourceSha256": "817e492e9376298c93a02c70fe8f3306259364222e99f79dd091ddf53863458d",
+      "preview": "fxoverlay_fantasy_blue_shockwave.mp4",
+      "previewSha256": "0ee8bece222716db7768e59195b518405201ccb6c66f04d9a763f9945124bd01",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_indigo_smoke",
+      "name": "靛蓝烟雾旋涡",
+      "sourceSha256": "a3f9483dce10cc97b3a9aec6c7ed4af56a0608c241bdbf004bef789e4aaa2100",
+      "preview": "fxoverlay_fantasy_indigo_smoke.mp4",
+      "previewSha256": "cdf18235bcbecb4e14873d88c67e21456393f0954886d211b8f6e15991ac2ffa",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_magenta_spiral",
+      "name": "洋红星尘旋涡",
+      "sourceSha256": "60372ff66814099ddb4ca207ddb91c556e108fa84a98a3834feaadd59162c231",
+      "preview": "fxoverlay_fantasy_magenta_spiral.mp4",
+      "previewSha256": "5d7a949d836c72e8e150b4a48c37ca60dd915d491b72492f1892347b74f375b6",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_lens_glow",
+      "name": "青金镜头辉光",
+      "sourceSha256": "8233c1fe16ffdea001ad4dbee66c4af3b15eb39a5cc0c072fe6bcc1e4d986947",
+      "preview": "fxoverlay_fantasy_lens_glow.mp4",
+      "previewSha256": "ed202aba9ba914b64f3ed2583dd9202532b7d35ada80dc5b7fed963213698285",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_pearl_glints",
+      "name": "珍珠菱形闪光",
+      "sourceSha256": "ef2c43b38cf6aea87e3f0b146fb68282a1f11cf9da520b8b043404ad4b648bc8",
+      "preview": "fxoverlay_fantasy_pearl_glints.mp4",
+      "previewSha256": "393b6db495b41b08bcf5528d46feb730f2ab831dca13690f5afb2be2fff1aae7",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_cyan_shards",
+      "name": "冰青多边碎片",
+      "sourceSha256": "13d768fb4ca3920f2faae372ad5b6242356749acc0cb798671ef68ac2342f3be",
+      "preview": "fxoverlay_fantasy_cyan_shards.mp4",
+      "previewSha256": "668c2954e1792a4d5564de4023ac929a255ac276c37afbe928f09d90433a3376",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_crimson_afterimage",
+      "name": "绯红色差残影",
+      "sourceSha256": "8379c03e030f8e8f284e136024f75a8aa3a93750bc05c6b8fd7ac95c44d19f13",
+      "preview": "fxoverlay_fantasy_crimson_afterimage.mp4",
+      "previewSha256": "c3f241b516a6d59621303f8f2229378b05270300f614fe96acf96c4fc7b8a00c",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_aqua_caustic",
+      "name": "水青折射波纹",
+      "sourceSha256": "e2988ab76367658b4d264cfa8a748835d324b6909ebfdd713e28abce301d7524",
+      "preview": "fxoverlay_fantasy_aqua_caustic.mp4",
+      "previewSha256": "f45871dbb426ce6614cbc2972b6e189609ff7ada1b168543a10ae5a28737fb5e",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_gold_comet",
+      "name": "金色彗星星尘",
+      "sourceSha256": "a7c3bbdea6efad198e43b88db6acbbdf75dca6aa21e2bb51ab1bae5c1e94dacc",
+      "preview": "fxoverlay_fantasy_gold_comet.mp4",
+      "previewSha256": "2e209925faf10cbf4b81c57a50ea194db929866584924caa2064773cbe75b5d6",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_violet_flame",
+      "name": "紫色幽光火焰",
+      "sourceSha256": "7dcf1da6f306e2d908c5a46de57b60b0a460e33fac0ec600a32c48feb699bc78",
+      "preview": "fxoverlay_fantasy_violet_flame.mp4",
+      "previewSha256": "cd6201e76db6a2ae1e723180c33808759f6d51500df5f9419a6e74c822793552",
+      "sampleTimeSeconds": 0.8
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_fantasy_white_speedlines",
+      "name": "白色动感放射线",
+      "sourceSha256": "d3fad09c61e4c3f5b02b8a2df478b8f484b30429c2daa7fc5d6940c82cd83d91",
+      "preview": "fxoverlay_fantasy_white_speedlines.mp4",
+      "previewSha256": "00977bd8c757e0fcea7bcf62c91fea19e5834ff370ac0712f567df8ae72f77e8",
+      "sampleTimeSeconds": 0.8
+    }
+  ]
+}

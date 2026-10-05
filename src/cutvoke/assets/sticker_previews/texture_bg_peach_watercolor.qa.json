@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_peach_watercolor",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "38cccbbfcbd7ba3fef92f805e9005f2835303c972922a8e8939afcbbc073a45b",
+  "previewSha256": "263947534dd6bf7c6256e9917857393b13036fa92582731062b65467719e7f32",
+  "preview": "texture_bg_peach_watercolor.mp4",
+  "bytes": 20326,
+  "visiblePixels": 57487,
+  "changedPixels": 0,
+  "motionVisible": false
+}

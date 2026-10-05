@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.marker_doodle_round_frame",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "82be943d868f3bde90f7a9d209267354900a60ac6adb210d9771072d96f63cde",
+  "previewSha256": "29da5c0e3462d576d8fa6b2550930287bf0b661c7c22a7c75e3803059f359942",
+  "preview": "marker_doodle_round_frame.mp4",
+  "bytes": 4149,
+  "visiblePixels": 1409,
+  "changedPixels": 0,
+  "motionVisible": false
+}

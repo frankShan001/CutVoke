@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_beat_stars_cyan",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e2f379b1aa0ebd33fae3ce6880c2e57f05b32258bd3a1b42d7997c5457013c85",
+  "previewSha256": "918c3263be254d88374114988148e4ae6765c14f9b4c7f9aa3a4a3555acea78e",
+  "preview": "audiofx_beat_stars_cyan.mp4",
+  "bytes": 7992,
+  "visiblePixels": 3901,
+  "changedPixels": 0,
+  "motionVisible": false
+}

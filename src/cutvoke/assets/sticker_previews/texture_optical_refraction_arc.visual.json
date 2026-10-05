@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_refraction_arc",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "彩虹折射弧沿画面边缘弯曲，颜色由蓝绿过渡到暖黄，透明区域足够。",
+  "sourceSha256": "75c8618cf21bdb6ead54d48fb3d8b1e6dbe121257d378a99e6b7082cbd12244e",
+  "previewSha256": "bff4450acd43ff47bc87f5c906a6f04979e16a4acb740c7cf7547b38d78ec5bf",
+  "auditSha256": "7434be09f6c5c63ec58cdf8ca001edc76d3ce1300e7874ae0f009564e1777be4"
+}

@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.mirrorSwing",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "degrees",
+    "value": 3.75
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.131,
+  "exportSha256": "c1495ac2393c248b2a75abe2548b4e06617668ae672040b9f9581372310a8ca3",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "c1495ac2393c248b2a75abe2548b4e06617668ae672040b9f9581372310a8ca3",
+  "auditExport": "fx-mirrorSwing-v1-0-0.audit.mp4"
+}

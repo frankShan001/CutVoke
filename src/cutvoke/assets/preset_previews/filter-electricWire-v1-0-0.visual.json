@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.electricWire",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.edge",
+  "params": {
+    "mode": "wire",
+    "low": 0.0784314,
+    "high": 0.196078
+  },
+  "subcategory": "风格",
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Narrow light blue contours appear on a deep blue field.",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "coverSha256": "150ad415e3f147285e011f393a9ad8e8a59b23513d34c178394368553101f0fd",
+  "motionPreviewSha256": "195b8de849a9eec01827d45ca416b948015b030e1e2e35ac240a0fc451b3bbe3",
+  "auditSha256": "d796bdf9fef3584a62c9e360e117780668ec557cd8b79e2cebd501f2adc9b722"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_lilac_pearl",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a6e00d5a416cf54de4cf7835ec497a2606124941399849a6aab8127d8c427ef2",
+  "previewSha256": "e25e2d52101ec00245982d8052d399305a001867e2033b05a5a694fa8aa1921d",
+  "preview": "texture_bg_lilac_pearl.mp4",
+  "bytes": 23925,
+  "visiblePixels": 57528,
+  "changedPixels": 0,
+  "motionVisible": false
+}

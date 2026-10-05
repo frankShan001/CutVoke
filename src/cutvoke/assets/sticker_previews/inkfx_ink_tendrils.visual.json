@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_ink_tendrils",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "A vertical S-shaped ink plume has diffuse curling tendrils and a smoke-like profile, distinct from the low horizontal charcoal mist.",
+  "sourceSha256": "94e959b07dc7c2830eda4dac5d51a2d76ff37a5701f13ad1ac7b3be8c9d88904",
+  "previewSha256": "2865d9fbff4f7680169abb609b553f2da54991f596b8f5e4fd91bf0d3f3bee39",
+  "auditSha256": "a6eb92aca3b7aa357f969045cf63e7e1e28e1f0711497fa3ecdd94399ca43cea"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_matte_confetti",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "92526b9824038e13b2c593d71f44462df1a7ef4f725ea4421672ada8536ac135",
+  "previewSha256": "977bcfd81e4bd66f49321e4a88b646673262ca9f1c58d2955be9e97c43bbc5a8",
+  "preview": "scrapbook_matte_confetti.mp4",
+  "bytes": 3058,
+  "visiblePixels": 390,
+  "changedPixels": 0,
+  "motionVisible": false
+}

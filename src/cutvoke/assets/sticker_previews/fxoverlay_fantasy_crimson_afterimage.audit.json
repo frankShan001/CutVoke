@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_crimson_afterimage",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "8379c03e030f8e8f284e136024f75a8aa3a93750bc05c6b8fd7ac95c44d19f13",
+  "previewSha256": "c3f241b516a6d59621303f8f2229378b05270300f614fe96acf96c4fc7b8a00c",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 14783,
+  "visiblePixels": 14418,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 9799,
+    "steady_entry": 14417,
+    "steady_exit": 14414,
+    "exit": 9808
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 9799,
+      "withoutFade": 14417
+    },
+    "steady_entry": {
+      "withFade": 14417,
+      "withoutFade": 14419
+    },
+    "steady_exit": {
+      "withFade": 14414,
+      "withoutFade": 14416
+    },
+    "exit": {
+      "withFade": 9808,
+      "withoutFade": 14419
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.647,
+    0.725
+  ],
+  "auditExport": "fxoverlay_fantasy_crimson_afterimage.audit.mp4",
+  "auditExportSha256": "a0a3c5fe80fd120ccf7c83de63661f5d835e2d7c262a7c1d6cf7e9395c86a44d"
+}

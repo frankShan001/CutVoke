@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_velvet",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器合成预览；只批准纹理特征清晰、边缘完整且缩略图可辨的素材。批准仅覆盖贴图本身的识别度，不代表复杂实拍成片验收。",
+  "observation": "酒红色绒面褶皱有连续高光和阴影，材质与其它布面区分明显。",
+  "sourceSha256": "534736d9fab06356202cea0b1efe8f84744a2985c6290000cecc065f5156cfef",
+  "previewSha256": "e264ae24aa4e3afdb43d497752bf116661cde48961ec1eed22d88c344dcee65d",
+  "auditSha256": "178245b068e627a6889081c5941d3ba2f25334e90d28139840de3de9d267a8b5"
+}

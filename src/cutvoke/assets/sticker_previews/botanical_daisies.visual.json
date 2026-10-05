@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_daisies",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "两朵白色雏菊、花苞和细叶分层清楚，缩小后仍可辨，透明边缘无残底。",
+  "sourceSha256": "c55330120e01f9d33e8bb809514ee00fda0d35bbf26b2389a6c3262b790d87f1",
+  "previewSha256": "0654458187d96f053a737139d848019f2ad857dd3b65cd9018bc360228c4af79",
+  "auditSha256": "692d83e23f4c4a6b4ba75d98e242cb22b5511725099a0a749b3713ffa817c23e"
+}

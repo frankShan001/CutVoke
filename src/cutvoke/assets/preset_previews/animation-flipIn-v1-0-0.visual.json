@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.flipIn",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.flipIn",
+  "params": {
+    "duration": 1.0,
+    "easing": "ease-out"
+  },
+  "subcategory": "入场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "居中的窄条连续展开成整幅，翻牌形变符合预设，完成后比例恢复正常。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "a796602cf7b4926dc359ac111e05d95ef5d4032285ee56d9ee763b5bfb361864",
+  "motionPreviewSha256": "0e2b62640b975385036df6e1360528552ef946ac960762102e95e20f66066f46",
+  "auditSha256": "0861a6712c782e16c8a459c938bf31326d33486ca480d6290ceba1331ce42f5c",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_flipIn.png",
+  "libraryReviewSheetSha256": "12e5c7277ceebe4f55d323afbcf0dba25b8e46307bbbffc45af43612f6ef2437"
+}

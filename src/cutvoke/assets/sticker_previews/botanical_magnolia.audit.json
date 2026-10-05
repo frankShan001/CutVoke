@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_magnolia",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "f05e00c7f05669920919f6c468aa180177ef9fa6d07957324f6cad3d067d6e8f",
+  "previewSha256": "3f60ec447a897619b445d30bdc0660351f0508690907265e3dd3ded22b0b598c",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4980,
+  "visiblePixels": 4002,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1649,
+    "steady_entry": 4002,
+    "steady_exit": 4002,
+    "exit": 1653
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1649,
+      "withoutFade": 4002
+    },
+    "steady_entry": {
+      "withFade": 4002,
+      "withoutFade": 4002
+    },
+    "steady_exit": {
+      "withFade": 4002,
+      "withoutFade": 4002
+    },
+    "exit": {
+      "withFade": 1653,
+      "withoutFade": 4002
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.026,
+    0.026
+  ],
+  "auditExport": "botanical_magnolia.audit.mp4",
+  "auditExportSha256": "4370cc7cadd488fd6d44ebff10b16806e08f9508c2012835d84c2e1e49a743f0"
+}

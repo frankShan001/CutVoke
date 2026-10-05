@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.promo_sparkle_glints",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "observation": "Three pearl glints remain separated, with no stray fourth star or generated lettering.",
+  "sourceSha256": "19504765c9412187fc17a1d17c89ffd96b796991c2d41c37515f0e7eb2d2b5e1",
+  "previewSha256": "113654ea0816557c49e773ee0a90339fa76a409fe82d063ab1e4b2519343a02a",
+  "auditSha256": "70d2a74fcf06f1212f4efafae4f93c909d5d1fb99c73c9efe5195f8c9b02a45d"
+}

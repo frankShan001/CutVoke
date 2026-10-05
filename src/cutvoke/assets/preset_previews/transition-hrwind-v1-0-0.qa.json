@@ -1,0 +1,25 @@
+{
+  "presetId": "cutvoke.preset.transition.hrwind",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.hrwind",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 98.42,
+  "maxSampledMeanRgbDifference": 98.42,
+  "coverSha256": "b3e869b3d7bed7cfc6d32674b781f54c79710077803b4277523bc80faa73a23f",
+  "previewSha256": "c1584b208b91862cda8322a8597e3b37704d0d3f2ddd2671ff2a52b071f66104",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.glitchBurst",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "amount",
+    "value": 0.35
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "3d9fe18825b9bad109a9c623fd05185adbe4f846ba79ccf9785e74d69500c6af",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "3d9fe18825b9bad109a9c623fd05185adbe4f846ba79ccf9785e74d69500c6af",
+  "auditExport": "fx-glitchBurst-v1-0-0.audit.mp4"
+}

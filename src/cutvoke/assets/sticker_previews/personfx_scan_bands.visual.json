@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_scan_bands",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "Horizontal holographic bands have distinct broken scan marks and remain transparent between the rings.",
+  "sourceSha256": "29d18c4cb883f3585ab7877dac29917de556c6dee0e3138f8f68059181e5bae0",
+  "previewSha256": "5b92e2fd0781bae1e4f704deb68dd07d91b3424690d6ab9fa7d9b00a3e1b70d7",
+  "auditSha256": "4e6bc4d9f7ed9710032bde88d4d700f21466e4aa05f5b519878fabcf742e476c"
+}

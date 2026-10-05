@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.exclaim_yellow",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "黄色提示爆闪轮廓规则，感叹号居中，深色边线提高对比。",
+  "sourceSha256": "0905e0f7ec4dd1d8f6522e6c9563d9988c35e9d1b6315cc566340a58d7cfbb3e",
+  "previewSha256": "74247d6a8d435bdfa28ffe50405404d9de7ba5ef6d456eb373dcee5d1289f9f7",
+  "auditSha256": "9437eddaf481f1f7faf3e102119e5c89679ee03df34a5b982420ffd87f5a0da2"
+}

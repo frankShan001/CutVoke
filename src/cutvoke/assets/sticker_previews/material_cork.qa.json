@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_cork",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6e8f6e86bdbf9b78447e9b937157bb8aa487e0bb9611e86757f310047e47ebc8",
+  "previewSha256": "67831ae73558304bd4d2e8423c4d807a216167430dbc3efaeb11ac78c56d1249",
+  "preview": "material_cork.mp4",
+  "bytes": 5133,
+  "visiblePixels": 3509,
+  "changedPixels": 0,
+  "motionVisible": false
+}

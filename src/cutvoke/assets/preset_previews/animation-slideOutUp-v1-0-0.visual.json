@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.slideOutUp",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.slideOutUp",
+  "params": {
+    "duration": 1.0,
+    "distance": 0.55,
+    "easing": "ease-out"
+  },
+  "subcategory": "出场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "出场阶段逐帧向上移动，下侧背景按动作露出，运动方向与配置一致。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "9262cb081d5cd874363b6b09339b620f5b1d5c26f02f713cb29cea5a362dbf2d",
+  "motionPreviewSha256": "06a003cb4c1ba2971b1506937929b1d3105e26ce9523eaa48aa1c2373b3c3af0",
+  "auditSha256": "4b6bbe972233c36df41e08389442ec797eb9043f70c73f58cdfdce3351ec9503",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_slideOutUp.png",
+  "libraryReviewSheetSha256": "d04f9ffe07812f1145dee430da1c538ca33104c273035d110671002f923d4953"
+}

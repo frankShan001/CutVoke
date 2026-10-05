@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_wool_felt",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "97a0ec7ae7385a7ac6489180e0f969f6a06848657d6264a66076cd7f681dab8b",
+  "previewSha256": "75ccba151da996a33ddafdaa7e0f4a683accfe68c94e6caed01316ef089b25e7",
+  "preview": "material_wool_felt.mp4",
+  "bytes": 11823,
+  "visiblePixels": 10732,
+  "changedPixels": 0,
+  "motionVisible": false
+}

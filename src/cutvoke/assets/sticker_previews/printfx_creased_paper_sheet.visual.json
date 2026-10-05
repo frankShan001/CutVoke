@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.printfx_creased_paper_sheet",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-26T22:26:35+08:00",
+  "method": "Inspected the original 4x4 RGBA atlas, transparent crop contact sheet, and all 16 actual composited sticker previews on light and dark neutral backgrounds at normal display size. Checked cell identity, crop boundaries, alpha edges, silhouette/readability at sticker scale, and uniqueness; subtle dust and scratch assets were judged at their intended low opacity.",
+  "observation": "整张旧纸边界完整，横竖折痕可辨；作为纸张叠加素材保留实体纸面。",
+  "sourceSha256": "fa4d34f35d33eb4fc25875b0ea37ea5124cecc28322a9d800d8339b20e5c6056",
+  "previewSha256": "63b922026fac4a77097309b28a5af6e6dcc0b9f10a943dd9e44b2709b5c5f4f2",
+  "auditSha256": "ba39c35a8b2ad0bccaeb7d15b74dd06b4e0472486ea3a0979abc70710406b42d"
+}

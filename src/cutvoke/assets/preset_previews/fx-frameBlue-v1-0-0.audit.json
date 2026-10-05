@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.frameBlue",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "x",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "9a96db8eebed730353cc76b8c4bea907f2dc19f5d0e49c7129ccf12c97157e22",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "9a96db8eebed730353cc76b8c4bea907f2dc19f5d0e49c7129ccf12c97157e22",
+  "auditExport": "fx-frameBlue-v1-0-0.audit.mp4"
+}

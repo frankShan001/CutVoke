@@ -1,0 +1,42 @@
+{
+  "presetId": "cutvoke.preset.fx.solarBeat",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.flicker",
+      "version": "1.0.0",
+      "params": {
+        "hz": 2.1
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.posterize",
+      "version": "1.0.0",
+      "params": {
+        "levels": 3
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.colorize",
+      "version": "1.0.0",
+      "params": {
+        "hue": 34.0,
+        "saturation": 0.78,
+        "lightness": 0.6,
+        "mix": 0.72
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 57.852,
+  "maxSampledMeanRgbDifference": 57.852,
+  "coverSha256": "2e43441c21f15e47a5421f4c32845b14f6d403af8daaaf67c97270d866f65e00",
+  "previewSha256": "24e96b9a26ae76526523165e53c3798a4c2716f33b3a5115bc09763d66962d62",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

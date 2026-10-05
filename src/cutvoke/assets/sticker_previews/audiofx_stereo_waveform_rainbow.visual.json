@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_stereo_waveform_rainbow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "Compact rainbow peaks create a balanced stereo waveform with clear multicolor separation.",
+  "sourceSha256": "f4711d404306b4747f89d618c9cdbf40ed80a6b55c79a0eb729e279542295021",
+  "previewSha256": "be534aa5ffa72d9a90925cac3b9872c1a218892fcb6b1dad0b69d901f9b75a30",
+  "auditSha256": "f5a932b1072d5834e353031b8ebd189665642f45d1f4ed4c07f731813875fc5e"
+}

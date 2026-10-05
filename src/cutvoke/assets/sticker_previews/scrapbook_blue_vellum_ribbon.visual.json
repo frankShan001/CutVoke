@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_blue_vellum_ribbon",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "天蓝透明纸飘带折面完整；浅色画面上对比偏弱，深色画面更清楚。",
+  "sourceSha256": "0585afb83c4315636878f618e325c85efe633d547fc41f1f7f41713126379b8d",
+  "previewSha256": "950a51375ff923a6ebf44cf29eb4375b4f71bdda0655c4c8ccededfa8171ccd5",
+  "auditSha256": "5537873a70d1f10b957715d1e11337d67ef1b71ba84383406caa01e052728f06"
+}

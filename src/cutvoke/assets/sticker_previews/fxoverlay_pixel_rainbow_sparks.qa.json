@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_rainbow_sparks",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "9ef2ae62b51455887444289f6dea5daa6e7e4c5875e8aa1984f8c92948909bfc",
+  "previewSha256": "c40a75e6ba629f6721ad97d7b90f96afac38663a00f9fc16d24fcae9da9daef6",
+  "preview": "fxoverlay_pixel_rainbow_sparks.mp4",
+  "bytes": 10574,
+  "visiblePixels": 4280,
+  "changedPixels": 0,
+  "motionVisible": false
+}

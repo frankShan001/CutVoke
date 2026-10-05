@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_layered_flower",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6ff26c2402f3c8e4e3feddce13b9f76155002d3fb3f98e55a4a9d30f5d7182a3",
+  "previewSha256": "b87d54b7f6edda68d286e45968af4ea0590db64494a509fa08366024e84719bc",
+  "preview": "scrapbook_layered_flower.mp4",
+  "bytes": 3445,
+  "visiblePixels": 791,
+  "changedPixels": 0,
+  "motionVisible": false
+}

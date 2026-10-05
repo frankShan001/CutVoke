@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_portal_violet",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "bbcad44008e356bcaf9c011b92c9600c87f31a9616f9aef6d639f0bd1e5b4df0",
+  "previewSha256": "0cd1348862df296ef3d1b7e364abb43cebef9d5c27a639c12f831b64b8745913",
+  "preview": "texture_portal_violet.mp4",
+  "bytes": 4400,
+  "visiblePixels": 1757,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual sticker artwork and rendered-preview review",
+  "reviewedAt": "2026-09-24",
+  "method": "Compared category contact sheets of transparent PNG artwork, actual 320x180 composited frames, and four timed frames for dynamic variants; checked shape, naming, clipping and category distinctness.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.arrow_red",
+      "decision": "approved",
+      "sourceSha256": "eee364ee1ff33f568d5ba9d7bde70d217259aecfc886698b4c21f50673313770",
+      "previewSha256": "f52317a9aa537a1ce48a94a94487c4c6ba2fa477a8c112d1430339882b75e9a9",
+      "observation": "A wide red rightward arrow stays readable on the pale composite and differs in direction, color and weight from the animated blue arrow."
+    },
+    {
+      "stickerId": "cutvoke.sticker.arrow_ne",
+      "decision": "approved",
+      "sourceSha256": "829f1b040ab97d97d8e164eee39dbf1e3857be69c32df79fef3b2c799dd5804c",
+      "previewSha256": "960f844672fb33bd882b6fe5b2720d6c492b482614964955ad162b5e43822944",
+      "observation": "The blue diagonal arrow clearly points up and right; its angled silhouette differs from the horizontal red arrow and symbol stickers."
+    },
+    {
+      "stickerId": "cutvoke.sticker.cross",
+      "decision": "approved",
+      "sourceSha256": "acd0873817cec3fb4337bee701d45884055defbef557d41a34504d7722111c76",
+      "previewSha256": "d05e5963a7073bc795a91110af3e11873a3daa2c07a44259508c5d083c69fdfe",
+      "observation": "A large red X provides a clear reject mark with no confusing overlap with the directional arrows."
+    },
+    {
+      "stickerId": "cutvoke.sticker.location",
+      "decision": "approved",
+      "sourceSha256": "5bee2b3e7dc78414e128339c067d10fe0536c2fd25366af1238c16f8ccec87f6",
+      "previewSha256": "8437b69026052de99571ef54083e4762fc12cccff16316d13451fa90ef752fde",
+      "observation": "The red map pin has a white center and dark outline; its pointed bottom reads as a location marker at preview scale."
+    },
+    {
+      "stickerId": "cutvoke.sticker.magnifier",
+      "decision": "approved",
+      "sourceSha256": "0a591fc76b1635254ade81ebf15cf11b0317cd33c02d88c420787790258f5c1d",
+      "previewSha256": "182392c3985f157ee8c30ac0651d0516bf2414a04af9763bb9c7814c1f978455",
+      "observation": "A thin turquoise ring with a diagonal handle remains visible on the pale stage and reads as search or inspection."
+    },
+    {
+      "stickerId": "cutvoke.sticker.minus",
+      "decision": "approved",
+      "sourceSha256": "ca44f9112412d92bba0dde2fd30e31607ca4315c6e95c4998d9825ff441ba6bb",
+      "previewSha256": "7632f103b4017ed64c625ba389e3aba91ac844163e220cd578f37936fde7b6a5",
+      "observation": "The short orange horizontal bar is a clear decrease symbol, distinct from the green plus and arrow shapes."
+    },
+    {
+      "stickerId": "cutvoke.sticker.plus",
+      "decision": "approved",
+      "sourceSha256": "856e90fea4558a9f452905fb596bbe9006fae7a3d0a4263a34f100e91729134f",
+      "previewSha256": "ce41894ed3f4e44fd8d7ba01baed82b3a3fd990d79e561ac8d75a39e9ebee8f1",
+      "observation": "A green upright plus has balanced arms and clear contrast, distinct from the orange minus and red cross."
+    },
+    {
+      "stickerId": "cutvoke.sticker.arrow_sway",
+      "decision": "approved",
+      "sourceSha256": "c8c411cf9ded6ffaf78f4b74dbc9822f45fb59df64e54e18a438e40d405c238f",
+      "previewSha256": "da18e4bc80fccc04be81212627c414df8749e109d42ac7fecb4c72a6f716e9f9",
+      "observation": "The blue rightward arrow shifts horizontally across the four sampled moments while staying inside the canvas; it is visibly dynamic unlike the static red arrow."
+    },
+    {
+      "stickerId": "cutvoke.sticker.bolt_orange",
+      "decision": "approved",
+      "sourceSha256": "95f1b6495a1639082753278b58cd30f47c1ef1353982fd4fd92be66763663459",
+      "previewSha256": "c1288d998689cf7ded99f2c08dc6f65a4a363e034242a9ad3ca25bd3941a527b",
+      "observation": "A narrow orange zigzag reads as energy or speed and has a separate silhouette from flame and warning shapes."
+    },
+    {
+      "stickerId": "cutvoke.sticker.clock",
+      "decision": "approved",
+      "sourceSha256": "8573b47b536502b073a2bc3748583a124f7ac3da29aa75b7fe02fcb5698d2f4b",
+      "previewSha256": "b5b45f9938fcfd6d49761e56b2bcf63e6837e40c117cca40c605be2960fcad7c",
+      "observation": "The dark round face and white hands make time readable at preview scale; it differs from the blue crescent and yellow sun."
+    },
+    {
+      "stickerId": "cutvoke.sticker.flame",
+      "decision": "approved",
+      "sourceSha256": "59903a75b478f23cbb5fee3e17ea54e58e48a2f3fbea838f9b2decb0f0248d7b",
+      "previewSha256": "f1fca253689dbaa7cf6a27badcc7ada385199b95a4157142794bf6d1b8e5a6cd",
+      "observation": "Two orange flame layers form a pointed upward silhouette, separate from the straight lightning bolt."
+    },
+    {
+      "stickerId": "cutvoke.sticker.heart_pulse",
+      "decision": "approved",
+      "sourceSha256": "e8f36f526e73894eca67f426b85716207af318768b7936fff029b862845267c4",
+      "previewSha256": "8833a88b36f66478ca6b95d6789cff9c466819951cf77c0b25dcf979cb65e280",
+      "observation": "The red outlined heart grows and shrinks across sampled frames without clipping; its motion and shape differ from the other atmosphere icons."
+    },
+    {
+      "stickerId": "cutvoke.sticker.moon_float",
+      "decision": "approved",
+      "sourceSha256": "e5e83ae6626affb6ba728fa04c782f70ee9d6b5631d6f0fc3fc0bedf96d23c80",
+      "previewSha256": "1a6bb754591b259ee574d7b0f5b34c8a030bce52382e8b00b47e72d662a600a5",
+      "observation": "A blue crescent moves vertically through sampled moments and remains fully inside the canvas, unlike the static circular clock."
+    },
+    {
+      "stickerId": "cutvoke.sticker.star",
+      "decision": "approved",
+      "sourceSha256": "c1a0932e1b1719e7747f5856bf3ca880d47d1010dd262c72df99aaab65d28c36",
+      "previewSha256": "8cae8174b626f42a0a85c8d7569ddcdd1525c13398851abccf5a2aaf5b3f4a54",
+      "observation": "The filled yellow eight-point star is distinct from the yellow sun disk with thin external rays."
+    },
+    {
+      "stickerId": "cutvoke.sticker.sun",
+      "decision": "approved",
+      "sourceSha256": "c0dd3f00dabc6c9da90e58f2ec6b2c785c94ac80153b30b6826d218de6ffa8e7",
+      "previewSha256": "77d7ead147fc8a231e743b3b7e688cbfb214fa269162fd4d630ad0e9502af922",
+      "observation": "A round yellow center with separate fine rays reads as daytime sun and differs from the solid star."
+    },
+    {
+      "stickerId": "cutvoke.sticker.warning_pulse",
+      "decision": "approved",
+      "sourceSha256": "ab468a6527e080bc72401eb472b992c9e5fbe609b383ab5e26cd352486a3dd48",
+      "previewSha256": "20f825bbef0a9611213df96534866da3185537fcb00be29cec8caea108895714",
+      "observation": "The yellow outlined warning triangle with an exclamation mark changes size across preview frames without leaving the canvas."
+    },
+    {
+      "stickerId": "cutvoke.sticker.check_green",
+      "decision": "approved",
+      "sourceSha256": "698b294bd379cfb01d4c5200bf226d98a45c81a377ec602a001872f0054766ea",
+      "previewSha256": "469f9f29849f0a5ca771fc9e54e88ab6f7cc9626cb818d11b99370f664cc72d2",
+      "observation": "A single green check mark clearly conveys completion, separate from the circular dot and shield."
+    },
+    {
+      "stickerId": "cutvoke.sticker.dot",
+      "decision": "approved",
+      "sourceSha256": "ec46c0ebc73ef15d2c7e997e1c6f36a4e77325c438dd55ea16f6f43f2c88a5b3",
+      "previewSha256": "ec88e39d23d3d6afda84a1581bcfed59a4e33201e6dae5884f56a2cb5d534dc5",
+      "observation": "A filled pink disk with dark border reads as a marker point and contrasts with the green check and teal numbered badge."
+    },
+    {
+      "stickerId": "cutvoke.sticker.music_note",
+      "decision": "approved",
+      "sourceSha256": "f8613e1805e9eff663af310355e24bb44c8a74bdba5626743bbe2e22506fb6a3",
+      "previewSha256": "5a58bfd244eb0a0b8808b4e2e49ae14e143a7d9317a53b8c8fb67bcf3cc459d9",
+      "observation": "The purple note has a visible stem and flag, providing a music marker distinct from the gift and callout icons."
+    },
+    {
+      "stickerId": "cutvoke.sticker.number_bubble",
+      "decision": "approved",
+      "sourceSha256": "dbbc3b49f225c414ea5e01b7c82cac608dfcf8ceac2ae21e32fea1266a288494",
+      "previewSha256": "cc16686e1d72f6b8e9899862dad7f359e5de2a11a65d1ebb5eaf8a9d156ee65d",
+      "observation": "A teal circular badge with a readable white numeral one provides a step marker, unlike the plain pink dot."
+    },
+    {
+      "stickerId": "cutvoke.sticker.shield",
+      "decision": "approved",
+      "sourceSha256": "6c4b693e2f3ebc9357c6d8885c1636fc41e18eff2d40c9eb11496fee4249e894",
+      "previewSha256": "8d8a793811ad24b1bcb206a2b543c8e6f69a4b536443ce70dcad97e27c8ebdae",
+      "observation": "A solid green shield with dark outline reads as protection and differs from the thin check mark."
+    },
+    {
+      "stickerId": "cutvoke.sticker.speech_bubble",
+      "decision": "approved",
+      "sourceSha256": "29f91085a145b9a6b0b5e310fe9930570f7031faa3ebd8dfb112c3fc82f7b1de",
+      "previewSha256": "0ac53e4be7189d426ae5530af8bd50a774415e69c3a35ff9be5075ec456dcc41",
+      "observation": "A blue rounded callout with a pointed tail reads as dialogue; its shape differs from the angled orange tag."
+    },
+    {
+      "stickerId": "cutvoke.sticker.tag",
+      "decision": "approved",
+      "sourceSha256": "302230b7641d4bc1b9e0fbda271c4d15ff91ae71da58153ab2f5ad9f9b909105",
+      "previewSha256": "07e87005d4708a55fc47b3468081c89c0748dc0220f6ae5c51f278fc51ad237d",
+      "observation": "The orange angled tag has a white eyelet and separate price-label silhouette, unlike the blue dialogue bubble."
+    },
+    {
+      "stickerId": "cutvoke.sticker.gift_float",
+      "decision": "approved",
+      "sourceSha256": "d9098bc7de3c1a990f81f54d734b87aacef28157bb0c0b88908d80ca7bb20eb7",
+      "previewSha256": "6a15bfbcaa185dd22b5fb55ef407ed10a6ed64adafa811e35d599016d84ce030",
+      "observation": "The pink ribboned present moves vertically in the sampled preview while remaining fully visible; it is distinct from the flat badge and tag."
+    }
+  ]
+}

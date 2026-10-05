@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_balloon_bouquet",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3364dfb56b8f7b9d91365aaa2c7b000cf41f89583619600bd6c6e450e7c72379",
+  "previewSha256": "d06c7fa7376e6da36cb12207d678b6a3cd8d75d75854f079cf8077a45812c371",
+  "preview": "party_balloon_bouquet.mp4",
+  "bytes": 4722,
+  "visiblePixels": 2351,
+  "changedPixels": 0,
+  "motionVisible": false
+}

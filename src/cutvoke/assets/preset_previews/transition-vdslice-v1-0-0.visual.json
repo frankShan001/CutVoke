@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.vdslice",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.vdslice",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "故障",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Horizontal stripes sweep downward with separate bands of old and new scenes; its direction is visibly opposite the upward stripe variant.",
+  "method": "Manual comparison of five actual rendered frames per transition, neighboring presets, and complete MP4 decode",
+  "coverSha256": "bfe1e8bfe1d9e6b998f295133ad603bc5906fe704ae9f68f77281b4fe43b39f6",
+  "motionPreviewSha256": "c81e214f4eccf23544cf26217f3cb178772629770aeb7e1ea84bed89ec2a2942",
+  "auditSha256": "373978d3a6d14ace92881ac3b77db9e9ce2ba14861a00a6059553604bf3b2f3a"
+}

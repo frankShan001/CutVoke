@@ -1,0 +1,32 @@
+{
+  "presetId": "cutvoke.preset.fx.circleAperture",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.mask",
+      "version": "1.0.0",
+      "params": {
+        "shape": "circle",
+        "x": 0.5,
+        "y": 0.5,
+        "w": 0.68,
+        "h": 0.84,
+        "aspectMode": "circle",
+        "feather": 0.025,
+        "invert": false
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 79.651,
+  "maxSampledMeanRgbDifference": 79.651,
+  "coverSha256": "cbc2784dbdaedc0d4bde79329b84206c90a0f9b012ca98919cabff36e1620065",
+  "previewSha256": "47545f4c9c07313803db16f974ca612e097189bba64d10999b1167400d4123fa",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

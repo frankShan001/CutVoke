@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_onigiri",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "88df29c980d00d9728c8d90204e28f17346adea0bbb1f6bf60fa6ab74e475a78",
+  "previewSha256": "d43c98a07ce84d63caeaebcc601c59b3aba4b1663e2cb08c836e131fd2a38380",
+  "preview": "food_onigiri.mp4",
+  "bytes": 4845,
+  "visiblePixels": 2955,
+  "changedPixels": 0,
+  "motionVisible": false
+}

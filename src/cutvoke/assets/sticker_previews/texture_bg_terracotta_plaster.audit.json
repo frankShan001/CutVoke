@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_terracotta_plaster",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "5feb742b79f369e59e7f2d18d963ec0143fa48bc99d1aed2e608030266d8136d",
+  "previewSha256": "019b817405ce0ae6382a3ef42f8d4cb7589ca98db33266c6607765b9f4c228c9",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5497,
+  "visiblePixels": 6558,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 6341,
+    "steady_entry": 6558,
+    "steady_exit": 6558,
+    "exit": 6341
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 6341,
+      "withoutFade": 6558
+    },
+    "steady_entry": {
+      "withFade": 6558,
+      "withoutFade": 6558
+    },
+    "steady_exit": {
+      "withFade": 6558,
+      "withoutFade": 6558
+    },
+    "exit": {
+      "withFade": 6341,
+      "withoutFade": 6558
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.024,
+    0.024
+  ],
+  "auditExport": "texture_bg_terracotta_plaster.audit.mp4",
+  "auditExportSha256": "eba995547ac2f106d30e45b27728a366e0c2d3afe6b29f515e5abe3a2814f108"
+}

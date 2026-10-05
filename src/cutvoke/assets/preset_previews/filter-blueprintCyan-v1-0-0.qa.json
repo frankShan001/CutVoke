@@ -1,0 +1,36 @@
+{
+  "presetId": "cutvoke.preset.filter.blueprintCyan",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.edge",
+      "version": "1.0.0",
+      "params": {
+        "mode": "canny",
+        "low": 0.04,
+        "high": 0.14
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.colorize",
+      "version": "1.0.0",
+      "params": {
+        "hue": 186,
+        "saturation": 1,
+        "mix": 0.92,
+        "lightness": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 83.015,
+  "maxSampledMeanRgbDifference": 83.015,
+  "coverSha256": "27e5c5f9bb87cdd53004e7f4eaa0ceb0065693088ae6fe67fdbdb0ef0e0204ce",
+  "previewSha256": "e84fc42e035aca694a8e2e8357f5244989c8752e09cf7b63702abef9000def44",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

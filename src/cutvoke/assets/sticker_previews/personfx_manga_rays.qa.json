@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_manga_rays",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f25c1d7cb2f386684ac701a7ef0d0679dd2b59c5a41cd217e2d812f10a0475da",
+  "previewSha256": "d983a613f9ce2ba6db7f1df7cb78722dc19bdf31fd0461df2a4ba0ecb1bb5aad",
+  "preview": "personfx_manga_rays.mp4",
+  "bytes": 7067,
+  "visiblePixels": 2544,
+  "changedPixels": 0,
+  "motionVisible": false
+}

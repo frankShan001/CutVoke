@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_airplane_route",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "33ca1b115f14f0f44a3fc5bf67204145ea2ca6e2ac565adc88d533bc0bb287b2",
+  "previewSha256": "56563eda58995e343dc1aecd128161eecd246d52f4ffa5be1ab4bb8c8fdd33e0",
+  "preview": "travel_airplane_route.mp4",
+  "bytes": 3588,
+  "visiblePixels": 669,
+  "changedPixels": 0,
+  "motionVisible": false
+}

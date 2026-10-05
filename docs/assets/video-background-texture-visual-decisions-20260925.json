@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_underwater_caustics",
+      "decision": "approved",
+      "sourceSha256": "4ad54b9c50a93a155254d3cd5d6519a4a0b18da7c7fa07339fd54a595fef20bb",
+      "previewSha256": "fd0fe94884e36fbafdfc7bd5023132e41b033f4618fadab9b0a26eacebc8dbf5",
+      "observation": "Blue underwater caustic lines remain distinct across the full frame; no magenta crop gutter, text, or stray marks are visible."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_champagne_glass",
+      "decision": "approved",
+      "sourceSha256": "7a5ed1df1e941f53e9fd982d4bdd157b3dba764cc628a6db9febd4139ff1499a",
+      "previewSha256": "8f176887a43486b0f9fb4e0c8f6ffa7fb66bc0eedfa1cd0a5b106c5be1bd3f27",
+      "observation": "Fine champagne vertical brushing stays even and restrained across the frame, leaving a quiet surface for title overlays."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_rose_satin",
+      "decision": "approved",
+      "sourceSha256": "0ddc4288a1f179d296b39ed607c28491bac74aaa930e7537bfc7198206642237",
+      "previewSha256": "a49b5536e76b2f52ac1c8f26e7f4434731f4e8806ea27952b5105a77f45411a7",
+      "observation": "The rose satin folds have smooth highlights and clear depth without clipping into neighboring atlas cells."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_sage_leaf_shadows",
+      "decision": "approved",
+      "sourceSha256": "1fecd8b5a31ac86be141f841bfafe48ece5dcd9a95a7b99b5075f64861a398b8",
+      "previewSha256": "4b8fbf429feb467333c67322cc8c3c87d2304bb606a3a1a73a7c4f990563f834",
+      "observation": "Soft sage leaf shadows read as a natural light pattern while keeping broad pale areas clear for titles."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_emerald_velvet",
+      "decision": "approved",
+      "sourceSha256": "cced6d7fcac49ba878626b72a9edbb74b2a167daedbe36d814c09226fe1868c6",
+      "previewSha256": "dd4721c652006ebba941664d3746913e000ed90e9972a7f1f934e82f0311f118",
+      "observation": "Deep emerald folds remain visible against the dark base and have no unexpected text or crop artifacts."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_lilac_pearl",
+      "decision": "approved",
+      "sourceSha256": "a6e00d5a416cf54de4cf7835ec497a2606124941399849a6aab8127d8c427ef2",
+      "previewSha256": "e25e2d52101ec00245982d8052d399305a001867e2033b05a5a694fa8aa1921d",
+      "observation": "The lilac pearl wash has gentle iridescent color variation and stays uncluttered enough for foreground text."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_terracotta_plaster",
+      "decision": "approved",
+      "sourceSha256": "5feb742b79f369e59e7f2d18d963ec0143fa48bc99d1aed2e608030266d8136d",
+      "previewSha256": "019b817405ce0ae6382a3ef42f8d4cb7589ca98db33266c6607765b9f4c228c9",
+      "observation": "Terracotta plaster has subtle surface relief with an even warm tone; the crop contains no atlas divider."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_charcoal_gold",
+      "decision": "approved",
+      "sourceSha256": "0e9ecfeb3564271f88c5629c7a5c1c92daffdc0c75a990ea617c97fdd303640d",
+      "previewSha256": "ccf09254f6252c810360ba4298e516cb414044be6bb6d270ebd74a48f1189f32",
+      "observation": "Thin gold geometry is clean against charcoal, with no lettering and enough open dark space for titles."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_ice_frosted_glass",
+      "decision": "approved",
+      "sourceSha256": "977fb3b76ea58f69ca064b45d85c6354fd4e4438d6881ad0df039e4f43cb2661",
+      "previewSha256": "153db87d23e7ef007866be6b3a7c28201024a981b1def902cd3b6cf7fc14703a",
+      "observation": "Icy blue frosted texture is soft and legible across the frame without hard crop edges or color contamination."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_coral_teal_flow",
+      "decision": "approved",
+      "sourceSha256": "7c8d9c4a130737404bf320615b040fe576292e00b5cc81f34bedcd28d79323e0",
+      "previewSha256": "cc9f7878b82f135d972b206c53effa273b291b218bebb3ff998b12556c7b4cd0",
+      "observation": "Coral and teal blend smoothly across the frame with a readable central region and no visible seam."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_peach_watercolor",
+      "decision": "approved",
+      "sourceSha256": "38cccbbfcbd7ba3fef92f805e9005f2835303c972922a8e8939afcbbc073a45b",
+      "previewSha256": "263947534dd6bf7c6256e9917857393b13036fa92582731062b65467719e7f32",
+      "observation": "The pale peach watercolor texture is calm and evenly blended, with no generated text or isolated artifacts."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_plum_silk",
+      "decision": "approved",
+      "sourceSha256": "ec76d6390cacbb24a5808c0235a3fec2045cdbfd55e7745cac4d078fea1bc599",
+      "previewSha256": "69075d1ecc3f1613a271e32070dd3440dba5ecb19d0af11d8e246cf41364e1de",
+      "observation": "The plum silk folds keep rich contrast and smooth highlights across the canvas, without unwanted streaks."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_seafoam_refraction",
+      "decision": "approved",
+      "sourceSha256": "df68a15bdfd0a9c5f0a942eb5b0a14b20acbc42e099cbd5224af5aa2deb75c2d",
+      "previewSha256": "cab2d9e7765027604ce52ed73eadb0037ccd08501d12ed75a1bf1e6e48e72b58",
+      "observation": "Seafoam refraction gives a distinct cyan caustic pattern; the bright lines remain clear over the full frame."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_cream_terrazzo",
+      "decision": "approved",
+      "sourceSha256": "9c1cc6c9fb35f93fdc07717ef34b63cb27da1bc5465d6743806648fa8c6fac8f",
+      "previewSha256": "cd41462a11a5b03066f1fba1c557a8385da6de964c9642655868b115455492d7",
+      "observation": "Sparse terrazzo chips are distributed cleanly over cream and remain visually separate at full-frame scale."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_twilight_clouds",
+      "decision": "approved",
+      "sourceSha256": "9ab5ed20b944dd5995eaaf2041169c90c764f97b319f32e7aa40b69e9143545f",
+      "previewSha256": "a1d109e2f8624927ab17c0c1a3f39903e8dd5a9f344cc465e660f467612d2ada",
+      "observation": "Blue and rose twilight clouds form a coherent cinematic background while leaving the upper area open."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_bg_amber_glass",
+      "decision": "approved",
+      "sourceSha256": "2d376ddaa1d764b67c33e8c8005096722d4dd8e2249e6cdf3f31dfc793352430",
+      "previewSha256": "86cbd691bcb086b1aea13636a735a421e2f98a90c8ea7872a4edf1d363d6d1eb",
+      "observation": "Warm amber glass has clean flowing highlights, no text, and no magenta divider residue at the crop edges."
+    }
+  ]
+}

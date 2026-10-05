@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_dna",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "红蓝双螺旋和横向连接连续，底端干净；缩小后仍能辨认主题。",
+  "sourceSha256": "4dd41b9cc66d2c895a93773e8c242f7b18b2f90d266b5918a03bbdf2753b7ecc",
+  "previewSha256": "90ea0234087cd88d3a685786d815174c1afb147ab139d372a2cbe0c536234b2d",
+  "auditSha256": "e66ab786f7e9d3da645cb41e6c91041808db4ba83c8ab9686fa01d6ae9eee559"
+}

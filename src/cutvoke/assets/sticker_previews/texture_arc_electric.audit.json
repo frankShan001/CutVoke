@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_arc_electric",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "0f13a556e966166c6716f88444196ec9f9b3019b6e06533af01fac7a4e0afa2b",
+  "previewSha256": "8bdb818d2645b9bf27ece7a684ab218d0aca83cc83644c115ef9cc2adf30c4eb",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3052,
+  "visiblePixels": 1976,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1232,
+    "steady_entry": 1980,
+    "steady_exit": 1976,
+    "exit": 1232
+  },
+  "previewExportMeanRgbDifferences": [
+    0.102,
+    0.11
+  ],
+  "auditExport": "texture_arc_electric.audit.mp4",
+  "auditExportSha256": "b41f6cb74fd458056eb01585604e4043d32133bc20248504c29fc124e39f37c4"
+}

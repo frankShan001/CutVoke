@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_comment_bubble",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Purple bubble has a clean tail and three clear dots without generated lettering.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "3eecd39f66e64a1323af6df47e16f30f9559272fa13ae7955b4a39f7b7122d83",
+  "previewSha256": "28f1dbcad530c66a2664344050f77b00f68da63436eecf69e9e5588af63dfdb4",
+  "auditSha256": "bfa445ab4685f8fa38fe710adeea1837d70e451ab8059b34509a44a30071514f"
+}

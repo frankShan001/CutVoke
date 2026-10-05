@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_instant_camera",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "相机与照片层次分明，镜头和按键细节清楚，透明边缘干净。",
+  "sourceSha256": "1b0e86877bebec66fbe40e047191bb30b87a19857749bef46aba1e2ee333ce38",
+  "previewSha256": "ce3647de03b0c2981177e054081c7384471408a28414b23048d1bddbc5734d59",
+  "auditSha256": "c1013967b51893d28c64a12942ce341a31481a05408d64166bdcc417caa180b8"
+}

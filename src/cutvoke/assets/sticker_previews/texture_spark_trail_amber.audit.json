@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_spark_trail_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "7d5390004e578315b66be7888b6333a86c6ebed8b5f845e39eae8a85a78d669d",
+  "previewSha256": "530f5c66ab7bb8c7d33de49ed4ccc84dedb7f9d71929223bf2c30c75eae8481b",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3209,
+  "visiblePixels": 2017,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1514,
+    "steady_entry": 2018,
+    "steady_exit": 2017,
+    "exit": 1514
+  },
+  "previewExportMeanRgbDifferences": [
+    0.121,
+    0.12
+  ],
+  "auditExport": "texture_spark_trail_amber.audit.mp4",
+  "auditExportSha256": "380545baa925ecd7ba6b1c06b37bc032c79b28fb7f6f11920e67d7d700ae4fb0"
+}

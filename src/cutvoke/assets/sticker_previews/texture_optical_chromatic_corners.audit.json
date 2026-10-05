@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_chromatic_corners",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "d3805c6d69e6e650e358ee886d3b79542924bc65ac88f811bd3c50a0eeb9ef87",
+  "previewSha256": "70e51d340d075fe876981479a86206de441be05fb33e1c411757091b26a71c44",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2714,
+  "visiblePixels": 1742,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 989,
+    "steady_entry": 1743,
+    "steady_exit": 1743,
+    "exit": 989
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 989,
+      "withoutFade": 1742
+    },
+    "steady_entry": {
+      "withFade": 1743,
+      "withoutFade": 1744
+    },
+    "steady_exit": {
+      "withFade": 1743,
+      "withoutFade": 1743
+    },
+    "exit": {
+      "withFade": 989,
+      "withoutFade": 1743
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_optical_chromatic_corners.audit.mp4",
+  "auditExportSha256": "32bbe54da0de67b422dafddf62f5c69345ddb7dfc1e8ca45925f6ab1b9429407"
+}

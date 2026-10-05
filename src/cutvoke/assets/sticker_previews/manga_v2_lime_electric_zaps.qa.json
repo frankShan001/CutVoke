@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_lime_electric_zaps",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0b01cd54184f5d1fba940d102c7ffaa655f92f23b21fdcdcb623b46283d55c18",
+  "previewSha256": "2ac55a080a468b149e5b21436777084ab33cc29778b8ad2526d18cedf6733a03",
+  "preview": "manga_v2_lime_electric_zaps.mp4",
+  "bytes": 13208,
+  "visiblePixels": 7716,
+  "changedPixels": 0,
+  "motionVisible": false
+}

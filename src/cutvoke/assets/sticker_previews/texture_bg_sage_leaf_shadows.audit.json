@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_sage_leaf_shadows",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "1fecd8b5a31ac86be141f841bfafe48ece5dcd9a95a7b99b5075f64861a398b8",
+  "previewSha256": "4b8fbf429feb467333c67322cc8c3c87d2304bb606a3a1a73a7c4f990563f834",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6942,
+  "visiblePixels": 6556,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2326,
+    "steady_entry": 6556,
+    "steady_exit": 6556,
+    "exit": 2329
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2326,
+      "withoutFade": 6556
+    },
+    "steady_entry": {
+      "withFade": 6556,
+      "withoutFade": 6556
+    },
+    "steady_exit": {
+      "withFade": 6556,
+      "withoutFade": 6556
+    },
+    "exit": {
+      "withFade": 2329,
+      "withoutFade": 6556
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.06,
+    0.061
+  ],
+  "auditExport": "texture_bg_sage_leaf_shadows.audit.mp4",
+  "auditExportSha256": "f0582fb1df0bae5c5291b0d1d5d309692a3585751bfdeb5d37c6b81105b98615"
+}

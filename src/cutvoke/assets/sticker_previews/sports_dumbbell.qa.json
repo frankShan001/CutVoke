@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_dumbbell",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "bcda0273402b85b232490c57d4c932f442eb6305c74a8f3236a7687c58a5b3ad",
+  "previewSha256": "f33ad5abaaa2292a5e5481e929e7403b9e42e750ba7f187340a297612a2fa9fc",
+  "preview": "sports_dumbbell.mp4",
+  "bytes": 3399,
+  "visiblePixels": 733,
+  "changedPixels": 0,
+  "motionVisible": false
+}

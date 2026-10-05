@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.animation.gentleRock",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.rock",
+      "version": "1.0.0",
+      "params": {
+        "amplitude": 0.07,
+        "period": 1.5
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 18.532,
+  "maxSampledMeanRgbDifference": 19.847,
+  "coverSha256": "6eddbc7b4a1c8465ed7e75118cf39213c2b7c7fdca515e63821fbb8e6c83fd90",
+  "previewSha256": "bc6015815c09d0c8ad8fef44113d8b29ab0cf74602429d9d98e87d0e084056c8",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

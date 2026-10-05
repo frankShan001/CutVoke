@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_walnut",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "87554286121a0e275bc9d55cfccdc2f751552f54a71ce26c397441a87ef49864",
+  "previewSha256": "82fbc2cac5e82a05c1588e7f5082c2405f1c921f45460235ffcbd9979d3d6396",
+  "preview": "material_walnut.mp4",
+  "bytes": 4600,
+  "visiblePixels": 3838,
+  "changedPixels": 0,
+  "motionVisible": false
+}

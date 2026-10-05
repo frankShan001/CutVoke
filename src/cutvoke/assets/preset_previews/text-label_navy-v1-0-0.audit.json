@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.label_navy",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 512,
+  "exportSha256": "da0edde6fd3217fce86a3d56e8603c3edd1b3d2dfab658ddbadb4d680f33f871",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "da0edde6fd3217fce86a3d56e8603c3edd1b3d2dfab658ddbadb4d680f33f871",
+  "auditExport": "text-label_navy-v1-0-0.audit.mp4"
+}

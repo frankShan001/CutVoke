@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_bunting_garland",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "147aa8b081b4efc955a64b5ba0d9e6c6414ea6dea0d057be66b3e2308fbbb2f7",
+  "previewSha256": "4002a1828d11e331337f00447ae5282f5d43d52cf922b1251c87829a2a5c97d2",
+  "preview": "party_bunting_garland.mp4",
+  "bytes": 3901,
+  "visiblePixels": 1107,
+  "changedPixels": 0,
+  "motionVisible": false
+}

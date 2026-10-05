@@ -1,0 +1,467 @@
+{
+  "source": "person-fx-overlay-atlas-20260925.png",
+  "sourceSha256": "a557a0eebf168734dcfbb8ff9dda75ab2f7496afac322a5d59e468301312bcc9",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "normalizationCrop": [
+    0,
+    0,
+    1254,
+    1254
+  ],
+  "layout": "4x4",
+  "edgeInsetPx": 0,
+  "extraction": "proportional cell crops with edge inset, centered square padding, alpha preserved",
+  "items": [
+    {
+      "stem": "personfx_aura_amber",
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBounds": [
+        39,
+        52,
+        306,
+        308
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 34732,
+      "visiblePixelsWithin12pxBoundary": 381,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "bab3bfcaa16e25515f072eeb4a98c9a5643f80cb3445fc121d91a0fcc8a34d01"
+    },
+    {
+      "stem": "personfx_halo_cyan",
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "visibleBounds": [
+        33,
+        68,
+        299,
+        271
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 32142,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "123dd79fff624643c639d78789a8bbca41c6ca149f3b15513f753e5f189a13d0"
+    },
+    {
+      "stem": "personfx_bokeh_halo",
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "visibleBounds": [
+        27,
+        56,
+        284,
+        296
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 37313,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "3f87eae726f958551bef39ca5354c4d6d2932b15af652073354fec9c5dd452a7"
+    },
+    {
+      "stem": "personfx_arc_electric",
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "visibleBounds": [
+        23,
+        57,
+        272,
+        303
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 34450,
+      "visiblePixelsWithin12pxBoundary": 14,
+      "alphaExtrema": [
+        0,
+        248
+      ],
+      "sha256": "f82f78196b20d3b59ba084cf2e745da4c582e12ddbc979b8d31f8c12d4216032"
+    },
+    {
+      "stem": "personfx_orbit_motes",
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "visibleBounds": [
+        45,
+        47,
+        294,
+        281
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 14153,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "c6147177f104a9082d3c9634eb80ddebcc816dafd12103d4076ab1970c378609"
+    },
+    {
+      "stem": "personfx_manga_rays",
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "visibleBounds": [
+        39,
+        57,
+        297,
+        232
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 18429,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        247
+      ],
+      "sha256": "f25c1d7cb2f386684ac701a7ef0d0679dd2b59c5a41cd217e2d812f10a0475da"
+    },
+    {
+      "stem": "personfx_energy_crescent",
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "visibleBounds": [
+        23,
+        27,
+        289,
+        282
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 17054,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        232
+      ],
+      "sha256": "a1f64adcbf42e5a02e5a197b31070df9637c26d554738d8e64282365abe46349"
+    },
+    {
+      "stem": "personfx_pulse_rings",
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "visibleBounds": [
+        8,
+        36,
+        283,
+        266
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 21621,
+      "visiblePixelsWithin12pxBoundary": 113,
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "sha256": "86cdbf6115f9b7a3097b2a6221689e8084169337ec39007261e5a045afa987f2"
+    },
+    {
+      "stem": "personfx_scan_bands",
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "visibleBounds": [
+        54,
+        53,
+        292,
+        247
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 27473,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        248
+      ],
+      "sha256": "29d18c4cb883f3585ab7877dac29917de556c6dee0e3138f8f68059181e5bae0"
+    },
+    {
+      "stem": "personfx_prismatic_ribbons",
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "visibleBounds": [
+        38,
+        31,
+        275,
+        272
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 33740,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "caeaaa70de67c64fddf5ab7c7e42079c3b21b1c032fbc7f6be53a373ee0b7072"
+    },
+    {
+      "stem": "personfx_orbit_constellation",
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "visibleBounds": [
+        26,
+        49,
+        299,
+        267
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 21367,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "e4296dd08788976198c44938b1c0a9f5803cc77228a98b7f4e61cf38bb3d0e28"
+    },
+    {
+      "stem": "personfx_spotlight_violet",
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "visibleBounds": [
+        27,
+        17,
+        268,
+        289
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 41079,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "8ed0c15ca7b8afed5c42b8a978c792575d187aa57cacaafde5ccb4d4edb8b8ad"
+    },
+    {
+      "stem": "personfx_chromatic_afterimage",
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "visibleBounds": [
+        41,
+        38,
+        281,
+        251
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 19764,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "cc7bca49fca6b4da5fb136c9c1e6d3da175200ff0ea2598b1086b01fef9b9a7c"
+    },
+    {
+      "stem": "personfx_energy_ribbons",
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "visibleBounds": [
+        33,
+        30,
+        280,
+        274
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 23553,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "sha256": "a02b503d6dca61cf6d80e22ae337495b4bec19c344105ae94ea3f02c552a64a7"
+    },
+    {
+      "stem": "personfx_shockwave_gold",
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "visibleBounds": [
+        11,
+        53,
+        302,
+        233
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 29949,
+      "visiblePixelsWithin12pxBoundary": 23,
+      "alphaExtrema": [
+        0,
+        232
+      ],
+      "sha256": "e590f95972bfa8b0f392d9487667eea370ca4cc0881b3fc7873e45a127aa53ac"
+    },
+    {
+      "stem": "personfx_pixel_shards",
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "visibleBounds": [
+        32,
+        25,
+        242,
+        244
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 23702,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "8e64d2ef16b222479b7b5608ccc67c29bb7c4df32e622db7270a1f50019a7814"
+    }
+  ]
+}

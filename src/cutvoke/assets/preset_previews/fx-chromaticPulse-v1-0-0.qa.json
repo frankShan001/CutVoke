@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.fx.chromaticPulse",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.chromatic",
+      "version": "1.0.0",
+      "params": {
+        "offset": 12
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 9.056,
+  "maxSampledMeanRgbDifference": 9.056,
+  "coverSha256": "dfe0c625f32385cd03c3aff9dc9e236e687f5b364c6ed3714f914b9a4f9175e2",
+  "previewSha256": "b23672d0458e927741bcabbde3522605fa3cee560badb91c9e2019cf91b201b4",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

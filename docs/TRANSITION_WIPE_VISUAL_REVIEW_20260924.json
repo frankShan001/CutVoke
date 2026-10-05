@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Compared five aligned frames at 0.55, 0.65, 0.75, 0.85 and 0.95 seconds for all eight 擦除 transitions; inspected contact covers and the rendered motion sequence. Distinct direction or geometry is visible for each candidate. Technical apply/edit/reload/undo/export reports were checked separately.",
+  "decisions": [
+    {"presetId": "cutvoke.preset.transition.wiperight", "decision": "approved", "motionPreviewSha256": "3aed08b023601bdbebcbca055b84a303011bbdf25477c562500dae036c364c0c", "observation": "A hard vertical boundary travels from left to right."},
+    {"presetId": "cutvoke.preset.transition.circleopen", "decision": "approved", "motionPreviewSha256": "d7f6e4d89629aaf66c2169d8a8544ec5dd358aa21ead599cbd9c7a9e342d1622", "observation": "The next shot opens from a growing central circle."},
+    {"presetId": "cutvoke.preset.transition.diagtl", "decision": "approved", "motionPreviewSha256": "410739f610134f368a1d0ef60317191097858de260ee696664da6b261f85f44d", "observation": "A diagonal edge sweeps across the frame."},
+    {"presetId": "cutvoke.preset.transition.radial", "decision": "approved", "motionPreviewSha256": "70ed0bed36f33b28114159bf00398606619b1567cfcb231f3c41198d7b777466", "observation": "A rotating wedge reveals the next shot around its center."},
+    {"presetId": "cutvoke.preset.transition.squeeze", "decision": "approved", "motionPreviewSha256": "ec1ebc92766a046d7c196888f630082868a1c369830831f4b89c35368e7b9f7b", "observation": "The old shot compresses into a horizontal band."},
+    {"presetId": "cutvoke.preset.transition.wipe", "decision": "approved", "motionPreviewSha256": "8f0c50baaa62781f8ddb22b0fc890e5ec140dd09c003c5eafa8c281c8c5f1f8c", "observation": "A hard vertical boundary travels in the opposite direction to wiperight."},
+    {"presetId": "cutvoke.preset.transition.wipedown", "decision": "approved", "motionPreviewSha256": "8bd637b85c90035628d2c3060da5fca74e11ca3fd6d2c5e0196c5496b39e9b1a", "observation": "A hard horizontal boundary moves downward."},
+    {"presetId": "cutvoke.preset.transition.wipeup", "decision": "approved", "motionPreviewSha256": "e6f44ca0c8288afecf8ac3ded7adf2167aaa5de477fbf9d61ce887eba18a5001", "observation": "A hard horizontal boundary moves upward."}
+  ]
+}

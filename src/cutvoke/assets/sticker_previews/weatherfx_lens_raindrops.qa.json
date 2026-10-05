@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_lens_raindrops",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "364d736db0e50cb3df74bdd8820d7da9e550f12c6b5f9fa2de581914b4c7170f",
+  "previewSha256": "01b56226b93c0e111546c0d15f6687a1bf4f4d844d195b8b9ef5200fc3e1aa9a",
+  "preview": "weatherfx_lens_raindrops.mp4",
+  "bytes": 8186,
+  "visiblePixels": 1381,
+  "changedPixels": 0,
+  "motionVisible": false
+}

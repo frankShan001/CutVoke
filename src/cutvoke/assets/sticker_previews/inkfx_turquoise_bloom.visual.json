@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_turquoise_bloom",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "A soft-edged turquoise pigment cloud with darker teal folds and small detached droplets; it reads as a bloom rather than a ring.",
+  "sourceSha256": "6483caabf84b833e1a7bf95f1bacc2dfd3e6429b5c839370eb7b3268d05f0ef2",
+  "previewSha256": "e53298758135837ca67b6e48d43d7f43d351031e5d1f05ff0c8dbf55a9444b6f",
+  "auditSha256": "a456c51ac665dbc0ed38d72fbfe0a8e063285229681c8550481a2de1439101e6"
+}

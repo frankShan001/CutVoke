@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_watercolor_wash",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "青蓝、珊瑚和金色颜料边界柔和但互相区分，保留透明空白。",
+  "sourceSha256": "aa6dd64299012ef3cc8b8f383e51b0930f396496ac99a0e14ca5b56da101d90f",
+  "previewSha256": "4ffd88e1226e7c3038326bcd8a5201e3526b43803aec1a2bc25555b5a6515e6b",
+  "auditSha256": "1e1e92d4bcaf0cbe7944b63507d4cacd81025a40a0432e5c50372f1d1e7656f7"
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual text cover and motion-sheet review",
+  "reviewedAt": "2026-09-24",
+  "method": "Compared eight actual 320x180 rendered covers and aligned five-frame motion sheets at 0.08, 0.30, 0.55, 0.85 and 1.15 seconds; checked titles remain legible through the common fade.",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.text.flower_gold",
+      "decision": "approved",
+      "motionPreviewSha256": "e655dd06806cb0e6af5521ab5487809ac1789a265ed1071fe0d6f29dd579d918",
+      "observation": "Warm gold serif lettering has a dark, broad edge and drop shadow; it stays readable on the dark stage and differs from the red flame and silver styles."
+    },
+    {
+      "presetId": "cutvoke.preset.text.flower_neon",
+      "decision": "approved",
+      "motionPreviewSha256": "e9e35140a19a27997dd8ea6580cf83e10c9db2a62e6d2b664b817f63a6f5e1cf",
+      "observation": "Cyan glyph interiors with saturated magenta edging form a distinct electric sign treatment; unlike the single-hue violet title, both hues remain visible after fade-in."
+    },
+    {
+      "presetId": "cutvoke.preset.text.flower_candy",
+      "decision": "approved",
+      "motionPreviewSha256": "e62e39c84c9eeea9a8c46c3e93a09cbd61e6c7b54c962a6dc48628f61a9cf4d6",
+      "observation": "After reducing its outline, the pink glyphs and narrow turquoise border remain separately readable; the seven-degree tilt and two-color treatment distinguish it from the straight mint title."
+    },
+    {
+      "presetId": "cutvoke.preset.text.flower_flame",
+      "decision": "approved",
+      "motionPreviewSha256": "98b22709b81f3723558e0057b0961cdb48d997f17d767c0788fe328104becef5",
+      "observation": "Orange lettering sits on a thick deep-red outline with a slight clockwise tilt; its warm red silhouette is distinct from the gold serif style."
+    },
+    {
+      "presetId": "cutvoke.preset.text.flower_mint",
+      "decision": "approved",
+      "motionPreviewSha256": "e3e5d45f647373460a8366adb85a2496a7e21a01817aa09d52d86174ba8ef522",
+      "observation": "Pale mint lettering and blue-green border make a cool, level title; the glyphs stay legible and the hue and pose differ from the tilted pink-blue candy version."
+    },
+    {
+      "presetId": "cutvoke.preset.text.flower_violet",
+      "decision": "approved",
+      "motionPreviewSha256": "f832a3467c997c87d42498ce548d35410c580e92c85d95fd62a195405e74eff0",
+      "observation": "Lavender lettering with a deep violet edge and clockwise tilt reads as a purple single-palette title, separate from neon's cyan-magenta pairing."
+    },
+    {
+      "presetId": "cutvoke.preset.text.flower_silver",
+      "decision": "approved",
+      "motionPreviewSha256": "d17bd7c6876296799814e1d4a790fbe92a184ae4e9b6219428ebc4def549380f",
+      "observation": "Bright silver-white serif letters with a slate outline and strong dark shadow provide a neutral metallic treatment distinct from all saturated-color styles."
+    },
+    {
+      "presetId": "cutvoke.preset.text.flower_pop",
+      "decision": "approved",
+      "motionPreviewSha256": "8ed0b4bb3acce9298667ed605684f19098f7e209d6c625dca12906dd1aa66577",
+      "observation": "The hot-pink slab around yellow letters and counterclockwise tilt creates a high-contrast pop title; it has a different shape and palette from the blue-pink candy lettering."
+    }
+  ]
+}

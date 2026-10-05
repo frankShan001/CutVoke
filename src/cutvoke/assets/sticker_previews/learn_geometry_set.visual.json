@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_geometry_set",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "圆规与直尺交叠关系清楚，铰点、刻度和尖端完整，无格边裁切。",
+  "sourceSha256": "77f5407ea363ae464a748b76dc273d0e5ae98ecf0f0d364c41be95601c90d4fd",
+  "previewSha256": "000df253ad1b9212b826b9d459753c70847645a19a8983df4251035f2ade087c",
+  "auditSha256": "88ff712b49967402927b1876f379c59b6e3c4384585320559db7db667f93c3ba"
+}

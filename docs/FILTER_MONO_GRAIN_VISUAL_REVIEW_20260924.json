@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Inspected the five-frame black-and-white comparison sheet at 0.55, 0.65, 0.75, 0.85 and 0.95 seconds, the full-size cover, and the edit/export audit; compared against the other seven black-and-white presets.",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.filter.monoMatte",
+      "decision": "approved",
+      "observation": "Dense monochrome grain covers both flat and bright regions throughout the shot. This moving textured treatment is visibly unlike the smooth classic, hard contrast, soft bloom, negative, line-art, vignette and block-tone black-and-white entries.",
+      "motionPreviewSha256": "9daf3cf7a58227c63c12d7ff506453a72fed589891da26db99999ce4b7a89abd"
+    }
+  ]
+}

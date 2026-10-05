@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.wiperight",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.657,
+  "exportSha256": "a81fc8712626423c4a9ffb35788b46a85e8f560507b88d56cb9cd81c6522a5c0",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "a81fc8712626423c4a9ffb35788b46a85e8f560507b88d56cb9cd81c6522a5c0",
+  "auditExport": "transition-wiperight-v1-0-0.audit.mp4"
+}

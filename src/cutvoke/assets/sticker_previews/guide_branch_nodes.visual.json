@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_branch_nodes",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Blue connector joins three hollow nodes with no broken branch or clipped endpoint.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "f9f62b062b787fb619b82ff6c85c9f4b29b235c69ea4847988ca7769b9199e14",
+  "previewSha256": "807dd0a79e27a972e49185726ec1ddb90fac3eb11ffcb299c85d407078eda3ac",
+  "auditSha256": "43f2332d1a2c96a1782bf5669a145e0c1cba3eb4d84fa9d3083ccdb5f98e66aa"
+}

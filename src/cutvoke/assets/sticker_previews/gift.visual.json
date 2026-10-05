@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.gift",
+  "version": "1.1.1",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex direct visual inspection",
+  "reviewedAt": "2026-10-02T20:24:22.486028+00:00",
+  "method": "Direct inspection of before/after alpha artwork, every library frame, and actual Tide project frames; dynamic 120-frame sequence inspected",
+  "observation": "从原图集重提取后，蝴蝶结两侧圆弧和白色描边完整。已目视前后对照、静态库预览全部30帧与潮汐工程10个时刻；盒体与蝴蝶结稳定，透明外部保留底片，无裁切。",
+  "sourceSha256": "93bc27d7fe36abf0e0a3dba8372135c241c683841fbab610baba5e3c78dc9db6",
+  "previewSha256": "e49ffda30e51fed51c59528e67d6f4fe270952b12d76255ce1a20b721a3cda11",
+  "auditSha256": "4f9f614208357832fc717f00953dc8518a71e7343aec06ee5460b80b11abef87"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_measure_double_arrow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Coral arrowheads point in both directions, making comparison or span clear.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "42bce0ab8a08be6e994a9b5ed5a19a7ca03c60ad4cbac4043f1491a45e253fcc",
+  "previewSha256": "a1f5855f2501dc4f76fd9280375530551490fd08990d12cdd07fe4e9922a70dc",
+  "auditSha256": "bccff88042f18cd235bfe93680afdf93abd029bdb55cfab8274d83bdcade589e"
+}

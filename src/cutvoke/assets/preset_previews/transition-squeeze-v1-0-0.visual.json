@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.squeeze",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.squeeze",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "擦除",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "横向压缩方向与名称相符；在0.5–1.033s逐步压为中央细条，f31完整到新画面，没有末帧残条/黑缝。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "4b1ecec8f39a500d2602736d0016bcdb3d912524ef172837de728512e06c23be",
+  "motionPreviewSha256": "b05fdb76d9d9ddfb2ae8d53938ef7c3d5c3ed8228d48c237c924d45c84a7095e",
+  "auditSha256": "e61e99c14e7d92f4ea2ff268a8321592d797d34d8780583e4ab7de1b3bcdf60f",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_transition_squeeze.png",
+  "libraryReviewSheetSha256": "e296f40df18f03a48d2a6fc7dfee19f1f10794f3c13dd9f1794cb046c0ec4f8c"
+}

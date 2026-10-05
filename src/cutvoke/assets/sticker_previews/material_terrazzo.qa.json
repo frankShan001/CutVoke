@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_terrazzo",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "10e10469a4b870b556b95bbda4ff3226b365521e2fd547d36d0bc79679f33a37",
+  "previewSha256": "489c9b1e6975c2b83185eb2650a621ef138ccfdef6324625fc812870eb45eea1",
+  "preview": "material_terrazzo.mp4",
+  "bytes": 4970,
+  "visiblePixels": 3619,
+  "changedPixels": 0,
+  "motionVisible": false
+}

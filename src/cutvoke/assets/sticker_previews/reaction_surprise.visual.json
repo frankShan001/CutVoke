@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_surprise",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Teal round face with wide eyes and open mouth; silhouette differs from joy and laugh.",
+  "sourceSha256": "960da5cb15bfa22f0d51c651ddd0e885c7c3be504cff328a7c8a23ee41bd3640",
+  "previewSha256": "cc8f14c71d2bf7a1d2ca4698554b517c7f455286ff9a14091b86735406cb083f",
+  "auditSha256": "4f6a69ec5f88f03aa30c4b143f6f57db7b15cfdd9f6d8b5bb71825f668918eef"
+}

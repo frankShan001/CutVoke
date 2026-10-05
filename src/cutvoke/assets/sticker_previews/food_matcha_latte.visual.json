@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_matcha_latte",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The handled cup and green matcha surface are distinct, with no detached crop fragments.",
+  "sourceSha256": "490a02fe8fc07a40560e0f3bef59047d6c63f79b3c6587cfb6abbc95833da74f",
+  "previewSha256": "389a3deea4768c91a93efcc518f3322050d7acfe162b7e3fce2b36e2fd837ef7",
+  "auditSha256": "24b43c3a8e5be2c18fa1a7bbf01ef44633874b6d109c48d1991b600011374a72"
+}

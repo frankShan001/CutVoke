@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_speedlines_white",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "A diagonal fan of pale speed lines that reads strongly on dark footage and intentionally stays subtle on pale footage; no backing plate is present.",
+  "sourceSha256": "a169eba011dbb389c55c568d1a58105cabc4bc502cee59341e0f8aff66155567",
+  "previewSha256": "bd8d016d57a9a833ab0387b28dd2dbe9431888a3802f2f52decb2a0aa6360958",
+  "auditSha256": "56c74df790d48c9f15958aa762673645a68b3f28d16b959fe8d7fece056ce519"
+}

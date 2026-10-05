@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_corner_sprig",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "奶油纸折角和鼠尾草枝叶轮廓完整，层次清楚，深浅底均可识别。",
+  "sourceSha256": "cef9cd830fe3c1bf4b7615655210fdd9188e4def94f9c64362238c4488fa1b05",
+  "previewSha256": "2e70c7db0d30e2ed119938ae883a8ce697824ca4e4ce6987bd7c456de46092d9",
+  "auditSha256": "43e2665aa4d3c0774ff39eaaeed5b0293ee8bfdfa04af3dd660763f9c75539f2"
+}

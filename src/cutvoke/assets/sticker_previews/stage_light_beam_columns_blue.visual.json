@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_beam_columns_blue",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "Four blue columns retain clear spacing and soft, even falloff.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "bda7394df599e6a2cdc5b28c44fabd5f8f89be6749e27d2262cc0098ddcea8e7",
+  "previewSha256": "60f9f650be1e66a94a459375358060dcf11c3c08c2032aeaea793fc6949c2bab",
+  "auditSha256": "92cc5d4e25ec0a93bad989566054d4606b47130f2b18e494b8b6634ddd8a6fdd"
+}

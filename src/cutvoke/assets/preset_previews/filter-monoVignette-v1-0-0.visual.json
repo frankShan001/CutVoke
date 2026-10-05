@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.monoVignette",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.grayscale",
+  "params": {
+    "strength": 1
+  },
+  "subcategory": "黑白",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:51:00+08:00",
+  "observation": "画面四角有明显暗角，中央圆形仍有连续灰阶；与硬朗黑白的均匀黑边不同。",
+  "method": "Manual comparison of 320x180 before-after covers and five aligned frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; monoMatte excluded as too close to existing bloom/gray",
+  "coverSha256": "3177372ece849e7300e4689c9b05d47d1a7c90eda5596d946f1d74ad83f21dfc",
+  "motionPreviewSha256": "88238162cfa9a11303be8940971a31b9a890085d311f83fb4722333e0df82096",
+  "auditSha256": "4df4340e8b3cae6df361d31bed44c19b148cb3ea84a829a4afe73256759fe889"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_laugh",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Pink closed-eye laughing face with blue tears; distinct laughing expression and side accents.",
+  "sourceSha256": "5126c02a630f3cef6e6e56a3e55e873c8692d14eea7fb464cbeb9fb30c5078e8",
+  "previewSha256": "6cf95d3ffa88c6c707cb43774de878002445af453a390ae204136f4a6aec54b8",
+  "auditSha256": "93132842503940af761a56f0ba71a09f85a3ecd39cf869cd38868c81df6b233f"
+}

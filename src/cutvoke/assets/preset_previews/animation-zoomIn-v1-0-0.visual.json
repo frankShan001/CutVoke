@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.zoomIn",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.zoomIn",
+  "params": {
+    "duration": 1.0,
+    "fromScale": 0.55,
+    "easing": "ease-out"
+  },
+  "subcategory": "入场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "缩小画幅连续放大到正常尺寸，图形比例一致，结束后没有突跳。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "101bb9e99b2550fa8c037fc4b0e9d33fe9ed4eb4ec42340d7d93ac51b4e6ab98",
+  "motionPreviewSha256": "ddbf7c6c7b4e805f7e15e8f6e001c2602e2063b902bfe5803b44a40b8c187ee4",
+  "auditSha256": "6baa30d1e2d8e092a9f23e78539b411bbf0977e752447ae741ccd2fb7f73c25e",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_zoomIn.png",
+  "libraryReviewSheetSha256": "bff425a6b8f754992151be16c54061c01830539d4c066dacaf9526853b2784b0"
+}

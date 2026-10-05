@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_shockwave_gold",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e590f95972bfa8b0f392d9487667eea370ca4cc0881b3fc7873e45a127aa53ac",
+  "previewSha256": "a86241d0501097540e368f97cf82c0c1a50f7d0410d96a7a879fa9fcfee5be89",
+  "preview": "personfx_shockwave_gold.mp4",
+  "bytes": 8328,
+  "visiblePixels": 3582,
+  "changedPixels": 0,
+  "motionVisible": false
+}

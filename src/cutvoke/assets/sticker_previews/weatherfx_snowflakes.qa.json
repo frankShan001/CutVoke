@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_snowflakes",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0572bbd3c47526276e20faa8d8f30f711a0f54cb462ea512652b76f212b68881",
+  "previewSha256": "ee8efc35e322c2b5f8e1fc97cd65158b42abd945597db73e7bace2d517313cb2",
+  "preview": "weatherfx_snowflakes.mp4",
+  "bytes": 8643,
+  "visiblePixels": 2336,
+  "changedPixels": 0,
+  "motionVisible": false
+}

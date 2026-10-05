@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.solarBeat",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.flicker",
+  "params": {
+    "hz": 2.1
+  },
+  "subcategory": "动感",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "The late frames reduce the scene to broad warm amber and yellow blocks, then brighten in a distinct beat; this differs from full-color brightness flicker and black-and-white contour strobe.",
+  "method": "Manual comparison of five rendered frames per preset and full MP4 decode",
+  "coverSha256": "2e43441c21f15e47a5421f4c32845b14f6d403af8daaaf67c97270d866f65e00",
+  "motionPreviewSha256": "24e96b9a26ae76526523165e53c3798a4c2716f33b3a5115bc09763d66962d62",
+  "auditSha256": "efd510f214f3f1b6998b10d35335f9506b8007df802195aff03100b7bd4b745a"
+}

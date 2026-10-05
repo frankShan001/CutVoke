@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_halftone_gradient",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a13f823ca9cf18db8dbabdc93e4a597f5b71d8089c2e0f32ab682ecc5c3b4f72",
+  "previewSha256": "c359fd0af5f3bb87d33b63de2d31fccbdb7b02557ebe8c9cd099988bdba68f01",
+  "preview": "printfx_halftone_gradient.mp4",
+  "bytes": 11962,
+  "visiblePixels": 6456,
+  "changedPixels": 0,
+  "motionVisible": false
+}

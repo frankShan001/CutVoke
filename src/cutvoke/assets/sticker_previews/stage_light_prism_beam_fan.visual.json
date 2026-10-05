@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_prism_beam_fan",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "The rainbow beam fan has clean color bands and a clear shared origin.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "2c56325c5aec8b6fc649e6d65f17a82afeb60b30b8e04176f4a186b3cdd75b93",
+  "previewSha256": "cbacf7edc4a2070209383ece110ae11246f8a7ae0620f2b083a63037d4248a89",
+  "auditSha256": "b1065e71dd59afef8eb744d145e93e4a98fb0e2757fca6bc541abcb414780905"
+}

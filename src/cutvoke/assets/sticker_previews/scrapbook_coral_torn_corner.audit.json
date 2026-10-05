@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_coral_torn_corner",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "a64b60b4662f897a009c6c4d48ec2cb17a9246aae93d3b8b8045253275b6fd3c",
+  "previewSha256": "b20aef51128e8d15326eaf4bcf1522f76ccf533c001e2ecd2101c2cd4fea8729",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1082,
+  "visiblePixels": 650,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 503,
+    "steady_entry": 650,
+    "steady_exit": 650,
+    "exit": 503
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 503,
+      "withoutFade": 650
+    },
+    "steady_entry": {
+      "withFade": 650,
+      "withoutFade": 650
+    },
+    "steady_exit": {
+      "withFade": 650,
+      "withoutFade": 650
+    },
+    "exit": {
+      "withFade": 503,
+      "withoutFade": 650
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.014,
+    0.014
+  ],
+  "auditExport": "scrapbook_coral_torn_corner.audit.mp4",
+  "auditExportSha256": "4cb59374e96e8f9b348c5289f7bc8b8919a2e7d11a0ed5782e8cdee59b8029f0"
+}

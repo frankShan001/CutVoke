@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_atlas_edge_leak",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "暖橙漏光集中在四边和角落，中心保留，渐变过渡柔和。",
+  "sourceSha256": "ebd2e4ea018c3604c3d0ab1ebd6791bee3c2109cd28ae4be57143432c4fdb1de",
+  "previewSha256": "443e8157fc2d84495219bb32b9c7d34a7513c084dea73e0c9763f14501e8d933",
+  "auditSha256": "8611c834d27155e264d35629925f8155afb85e7c9e53df2bd83cba1e83d12849"
+}

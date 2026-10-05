@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_emphasis_rays",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "464f27cddd7220564068542d35ed8ac0407055d13bfacce84b77a111bd1fb52d",
+  "previewSha256": "4e025311599356724fc52051802061b997102acf38db7b43e61feac5746689d6",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2869,
+  "visiblePixels": 1813,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1489,
+    "steady_entry": 1812,
+    "steady_exit": 1813,
+    "exit": 1489
+  },
+  "previewExportMeanRgbDifferences": [
+    0.161,
+    0.177
+  ],
+  "auditExport": "manga_emphasis_rays.audit.mp4",
+  "auditExportSha256": "7903c20d69558c040342c25ef57651863262820407b194cf8074122b5c4c5c3d"
+}

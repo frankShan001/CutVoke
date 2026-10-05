@@ -1,0 +1,25 @@
+{
+  "presetId": "cutvoke.preset.transition.fadefast",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.fadefast",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 96.59,
+  "maxSampledMeanRgbDifference": 96.59,
+  "coverSha256": "8f024dd0c10862cc63f2bbbd27a5f5387e80143be355b8f59e5b8ffc1160987a",
+  "previewSha256": "701bde0be3c4459f6fc37be5ff2b47f4f1275888aff5fcc0c855263e5b791985",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

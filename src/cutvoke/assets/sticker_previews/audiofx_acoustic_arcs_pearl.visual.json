@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_acoustic_arcs_pearl",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "Pearl arcs form a symmetric sound-wave hourglass with strong contrast on light and dark.",
+  "sourceSha256": "d0f55b250ddb6dafce333826c9945ebc7fbd9132d6d533ba28332e220a6a8641",
+  "previewSha256": "b5daf768251cbfa0c2db02bdf374075ca7dcb308eafe86afca42bc033e7934c0",
+  "auditSha256": "7d8a77dbb04ae3a1993df5f15d10ed2cd2f58d645a2c19e76ccb1c292c94ab14"
+}

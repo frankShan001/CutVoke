@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.smoothup",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.smoothup",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "运镜",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:46:00+08:00",
+  "observation": "旧画面向上平滑推移，交界区域有过渡混合；方向及边缘表现均区别于右向平滑推移。",
+  "method": "Manual comparison of 320x180 rendered covers and five transition frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; zoom excluded for poor middle-frame composition",
+  "coverSha256": "a562418eb60bc1b62d53419b4da2c762b7e29ee97fa9faac41bbbbf4ba1007f9",
+  "motionPreviewSha256": "e076b8483f6a870e26cc88a13f0a21d3c2125cf3d23af631ef6916a82a575929",
+  "auditSha256": "2047e520533c873eeebc108999fc1b77aa1cde30ade1146593a03b83ce17641d"
+}

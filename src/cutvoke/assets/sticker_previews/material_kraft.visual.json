@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_kraft",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器合成预览；只批准纹理特征清晰、边缘完整且缩略图可辨的素材。批准仅覆盖贴图本身的识别度，不代表复杂实拍成片验收。",
+  "observation": "粗麻纹理的纤维和不规则边缘清楚，浅底与深底都能识别为粗纹纸片。",
+  "sourceSha256": "a0e01b6a94d67bd3fe46cfe0efecdb1af87e49fbe0dc3f2e6d3920afd79d035b",
+  "previewSha256": "ffc8cb7df56b445641dd1ab11cbcce8d2420292015f1e6203ce61455795a0787",
+  "auditSha256": "d1c8e17a3d63209703f0e50174e960e2ac1f0f9e3f072b149c0f7f5a29291aba"
+}

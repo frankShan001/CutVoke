@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_glass_glints",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "玻璃折射闪点由多枚独立亮片组成，在深浅背景上均可见，未与相邻格连在一起。",
+  "sourceSha256": "b0e2751ef3e267b368df772cafef81550caaa9060cff4fdb1a9351503ae4f9bf",
+  "previewSha256": "c63041f0ff96fbc261a4cc7fee1b13e00f943dc7c062bbf95edcb2148d5dfc49",
+  "auditSha256": "7612eb0af3bdac0f3b8f17f800069babc5ac67a2d6c6a1115c3743c12b44246c"
+}

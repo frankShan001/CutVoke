@@ -1,0 +1,578 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "source": "east-asian-ink-motion-overlay-atlas-20260926.png",
+  "sourceSha256": "b8d6fa4d097410f7208aab23ec410f273f73c1fcecb9cd742ca4a6e24487a06a",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4",
+  "generationPrompt": "Use case: stylized-concept.\nAsset type: production-ready transparent overlay texture atlas for a desktop video editor.\nPrimary request: create one square 4 by 4 atlas containing sixteen visually distinct East Asian ink-and-gold motion overlay textures, one per equal-sized cell, in this exact row-major order: 1 expressive black ink splash with scattered droplets, 2 vermilion brush slash with fine pigment spray, 3 antique-gold ink burst with tiny foil flecks, 4 turquoise ink bloom with fluid edges, 5 dry graphite brush swipe with broken bristle tips, 6 deep-ink curling smoke tendrils, 7 pale pink petal fragments caught in a brush-motion arc, 8 thin gold-foil sweeping ribbon, 9 jade-and-cyan water ripple rings with pigment wisps, 10 white plum-blossom petals with restrained gold glints, 11 sparse warm-gold mica dust trail, 12 suspended black ink drops and tiny splashes, 13 abstract calligraphic curved brush arc with no letters or recognizable glyph, 14 vermilion and gold swirling pigment eddy, 15 soft charcoal wash mist with wispy edges, 16 bronze-and-teal liquid ring splash.\nScene/backdrop: truly transparent empty canvas; every cell contains only the overlay artwork and its very local soft glow.\nStyle/medium: polished hand-painted ink textures mixed with refined metallic pigment, suitable for compositing over live-action video; varied organic edges and graceful motion direction; each item must be clearly different from the others.\nComposition/framing: exact square regular 4 by 4 grid, equal-sized cells, each texture centered, contained fully inside its own cell with generous transparent margin, useful as a standalone square overlay after cell cropping. Preserve a genuinely transparent RGBA background.\nLighting/mood: restrained cinematic highlights that remain visible over both dark and light footage.\nColor palette: black ink, vermilion red, antique gold, jade, turquoise, pale plum pink, warm charcoal.\nMaterials/textures: flowing liquid ink, dry-brush fibers, suspended pigment, subtle metallic foil flecks.\nConstraints: no cell backgrounds, no paper panels, no grid lines, no borders, no checkerboard, no frames, no labels, no lettering, no Chinese characters, no numbers, no watermark, no full-scene illustrations. Keep the 4x4 layout exact and uniform.",
+  "extraction": "equal proportional cell crops; generated RGBA alpha preserved; centered on 320x320 transparent canvas",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "subcategory": "特效贴图",
+  "items": [
+    {
+      "stem": "inkfx_black_splash",
+      "name": "浓墨飞溅",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "墨点",
+        "飞溅"
+      ],
+      "row": 0,
+      "column": 0,
+      "cell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        317,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 27554,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "88dd5eddcec40eb900208deb4c2aae36b9065026f6da6b59dbf36065a93c8ca6"
+    },
+    {
+      "stem": "inkfx_vermilion_slash",
+      "name": "朱红飞白笔势",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "朱红",
+        "笔势"
+      ],
+      "row": 0,
+      "column": 1,
+      "cell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        4,
+        316,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 33159,
+      "visiblePixelsWithin8pxBoundary": 136,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "b66b7dc4436e80e7ddc30c5e32620eb6c7632db6d78e578cc6e7e49148973a41"
+    },
+    {
+      "stem": "inkfx_gold_burst",
+      "name": "金彩墨点爆发",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "金彩",
+        "爆发"
+      ],
+      "row": 0,
+      "column": 2,
+      "cell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        26,
+        316,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 36475,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "c82bf916a58c52df32c4bf55a701bf922bd6c6c1cfe2412d723733f4e572bcf5"
+    },
+    {
+      "stem": "inkfx_turquoise_bloom",
+      "name": "青碧水墨晕染",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "青碧",
+        "晕染"
+      ],
+      "row": 0,
+      "column": 3,
+      "cell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        12,
+        317,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 43307,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "6483caabf84b833e1a7bf95f1bacc2dfd3e6429b5c839370eb7b3268d05f0ef2"
+    },
+    {
+      "stem": "inkfx_dry_brush",
+      "name": "枯笔扫痕",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "枯笔",
+        "扫痕"
+      ],
+      "row": 1,
+      "column": 0,
+      "cell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        317,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 36224,
+      "visiblePixelsWithin8pxBoundary": 32,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "a72145b7b3cc58cc407221b22e9f690aa070664b96a93ae8d3dd38dff2d40c42"
+    },
+    {
+      "stem": "inkfx_ink_tendrils",
+      "name": "墨色回旋烟丝",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "墨烟",
+        "回旋"
+      ],
+      "row": 1,
+      "column": 1,
+      "cell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 44108,
+      "visiblePixelsWithin8pxBoundary": 500,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "94e959b07dc7c2830eda4dac5d51a2d76ff37a5701f13ad1ac7b3be8c9d88904"
+    },
+    {
+      "stem": "inkfx_petal_arc",
+      "name": "粉樱花瓣弧线",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "樱花",
+        "花瓣"
+      ],
+      "row": 1,
+      "column": 2,
+      "cell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 35384,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "e9f3e20425460a581e7605b8f507e538f26b9f74e9d1dc874159b534cb58e6ee"
+    },
+    {
+      "stem": "inkfx_gold_ribbon",
+      "name": "金箔流线",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "金箔",
+        "流线"
+      ],
+      "row": 1,
+      "column": 3,
+      "cell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        317,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 24578,
+      "visiblePixelsWithin8pxBoundary": 111,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "1718048eda3d8614d41690735e3fd48f5a60094c8e7688c64de5f200fb7205eb"
+    },
+    {
+      "stem": "inkfx_jade_ripple",
+      "name": "翡翠水纹环",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "翡翠",
+        "水纹"
+      ],
+      "row": 2,
+      "column": 0,
+      "cell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        317,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 51683,
+      "visiblePixelsWithin8pxBoundary": 6,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "7822c858ab047a113a2943de018b4d15417150cc74b2b19c45fd8fc73a369909"
+    },
+    {
+      "stem": "inkfx_plum_blossom",
+      "name": "白梅金粉花簇",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "白梅",
+        "金粉"
+      ],
+      "row": 2,
+      "column": 1,
+      "cell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 35017,
+      "visiblePixelsWithin8pxBoundary": 138,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "6995ceb1db84b9a05e7b922792f4d567cfa0ebaaecb79ee7d0c2a71827f9a528"
+    },
+    {
+      "stem": "inkfx_mica_trail",
+      "name": "暖金云母尘迹",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "云母",
+        "金尘"
+      ],
+      "row": 2,
+      "column": 2,
+      "cell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 20538,
+      "visiblePixelsWithin8pxBoundary": 36,
+      "alphaExtrema": [
+        0,
+        248
+      ],
+      "sha256": "70e3123b8dc1e015cabfe7918cf77fe0263262608a3451df9ba941148270c74c"
+    },
+    {
+      "stem": "inkfx_ink_drops",
+      "name": "悬浮浓墨滴",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "墨滴",
+        "飞溅"
+      ],
+      "row": 2,
+      "column": 3,
+      "cell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        311,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 15651,
+      "visiblePixelsWithin8pxBoundary": 183,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "921da815c7a7a8ae74f5019e053bd224d1b0849ee2cf586cafd675389e050cff"
+    },
+    {
+      "stem": "inkfx_calligraphic_arc",
+      "name": "抽象书写弧线",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "弧线",
+        "抽象"
+      ],
+      "row": 3,
+      "column": 0,
+      "cell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        317,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 34160,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "dcc2cb38482d5b74a3d2f22d3fa72ed765e6770da331d392de9048b1fe0bf3c1"
+    },
+    {
+      "stem": "inkfx_vermilion_eddy",
+      "name": "朱金流体涡旋",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "朱金",
+        "涡旋"
+      ],
+      "row": 3,
+      "column": 1,
+      "cell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 46966,
+      "visiblePixelsWithin8pxBoundary": 329,
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "sha256": "96d769cfb16182a3e0c9c13c38b67f71c2d46d0f380a79a640665074e410c971"
+    },
+    {
+      "stem": "inkfx_charcoal_mist",
+      "name": "炭墨轻雾",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "炭墨",
+        "薄雾"
+      ],
+      "row": 3,
+      "column": 2,
+      "cell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 50840,
+      "visiblePixelsWithin8pxBoundary": 410,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "704af31bf7158727d1cfe29af2f0f3261db5c77cea9629fed9c1b8d102cb0020"
+    },
+    {
+      "stem": "inkfx_bronze_teal_ring",
+      "name": "青铜碧色流体环",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水墨",
+        "青铜",
+        "流体环"
+      ],
+      "row": 3,
+      "column": 3,
+      "cell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        311,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 36780,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "sha256": "65321040c8fbfd44f0c6455bfa27db1af01ffbaa3ec35111d75812631d179f60"
+    }
+  ],
+  "contactSheet": "east-asian-ink-motion-overlay-contact-20260926.png"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_heat_haze",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器浅底合成预览；只批准结构和颜色在缩略图中清楚、可与同类区分的素材。批准仅覆盖贴图本身的可辨识度，不代表复杂实拍成片验收。",
+  "observation": "重复的彩色热浪条纹方向稳定、边缘清晰，与全息网格可区分。",
+  "sourceSha256": "43f39713a40f4cf83a1dbc03ae0db271038e5a7ad4c0871236d3fe253862d04d",
+  "previewSha256": "2f7668119d2f5164d9889aef17cc62ff03c21bed6c549263afc95579b5e1878b",
+  "auditSha256": "11d530fb15382d1594d529121cf36c2e7e5e239d09d8f6646ad65951eaf54906"
+}

@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.promo_frame_brackets",
+      "decision": "approved",
+      "sourceSha256": "a6a1210a08504f69e9f5d498371a59e6780760c42141c176eccf654ec9cf98eb",
+      "previewSha256": "bebf7d81e8dc4cabd6a1d38afc701ae826caaa3c80d5f64c1b2a11d112a40ccb",
+      "observation": "Four champagne corner brackets remain separated and frame a clear center."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_orbit_rings",
+      "decision": "approved",
+      "sourceSha256": "1693f6567337c2ec3650dd59c48e8d8a5c41c6c056358b19c00bfd3d2e3859fa",
+      "previewSha256": "fb3e335a348f93612145b6e7860788917b6f1d598fa656758457b01a59b88d9e",
+      "observation": "Two fine orbital loops and the pearl bead stay distinct without crossing the cell boundary."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_silk_loop",
+      "decision": "approved",
+      "sourceSha256": "ffeaad1c95f310f72739fcfd93afc31daa0bc51bf6a0ae9538c4de6497f93579",
+      "previewSha256": "d4b7bc319f26e6736dcbc9c448d3868f8f3a9432569dac03a9204a6c1ffa9407",
+      "observation": "The ivory silk loop keeps a smooth closed crossover and readable soft highlights."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_prism_refraction",
+      "decision": "approved",
+      "sourceSha256": "2950c1bfb504a45b62ed2f780dab56e63f697ba0dea0789ec4727e874adb6440",
+      "previewSha256": "f8f3796513d26b8290b31bb6c534bb56466e4061df54825b2a20d099a658fbb3",
+      "observation": "The faceted prism and rainbow refraction remain clear on both dark and light backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_foil_flourish",
+      "decision": "approved",
+      "sourceSha256": "f3a3ed8a24525a2f38e9380ca9b2d60518733925d50dbc04e1f8a2f335621afc",
+      "previewSha256": "0bce16aff0da6436181882f38f0041360dfac79469ce115be6010e0d77341a1a",
+      "observation": "The curved gold foil ribbon and its particle trail form one complete, clean silhouette."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_podium_outline",
+      "decision": "approved",
+      "sourceSha256": "ff3ee74b35ead5369676de8b173c6d9a9e16986f553c8762f41e0c08c2567a8f",
+      "previewSha256": "dbb0a8708f48f0deb7d1e234d4c5ad5ac74ae7dea27afe4ad5c175ad35408066",
+      "observation": "The two-tier translucent product stand retains separate bases and a visible center platform."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_callout_leaders",
+      "decision": "approved",
+      "sourceSha256": "d8ddebb374b72e7d8a89b14bfd61a6a839181870281f7cac64a676d3d0c1e392",
+      "previewSha256": "dd42b9c1d61c34cbb37b13b42f7b731a1d120d8497fc33887c5e9dcb9b9eb9f0",
+      "observation": "Both blank callout lines have intact endpoints and leave open space for later annotation."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_spotlight_fan",
+      "decision": "approved",
+      "sourceSha256": "ba6430064ee807c48424f795405f97711e089d6ab76d0199d26e0aeaf0b18b4a",
+      "previewSha256": "f3af652623af0f0f88b7eb1b62c88b23586aefb05547f7e32f36697d0341af36",
+      "observation": "The warm spotlight cone reaches a clean oval pool and remains visible over the preview gradient."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_opal_halo",
+      "decision": "approved",
+      "sourceSha256": "483b6aade5d9fe7b5a0d0e683ee8ff90bab0edc09f33cb4c0f59cffe71657654",
+      "previewSha256": "2b6267abc86433ffc1cc24d285649c8e1eb0b01d1f08e27757f42d9c7b70ef2a",
+      "observation": "The opalescent elliptical halo has a complete outline and restrained rainbow edge."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_leaf_shadow",
+      "decision": "approved",
+      "sourceSha256": "2cf1a074c436d18b9c068a4de4857755bed379c48a132289e4b7a169301c37fa",
+      "previewSha256": "6a83f44582abfcaa0631d01e648fdf0eff45fb475fb44eb913f553bf500e04d2",
+      "observation": "Two jade leaves remain separately outlined with translucent centers and no clipped tips."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_blank_seal",
+      "decision": "approved",
+      "sourceSha256": "ed611c0ad8679f4e0e63d673403392ce424dae7406a3786cc3c443b725ff3908",
+      "previewSha256": "89f867ae7125893e8f20004752fe63ad20e8e79c43de70b9f8b16cbdbbc27a68",
+      "observation": "The blank double-line seal forms a continuous circle with a clear empty center."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_sparkle_glints",
+      "decision": "approved",
+      "sourceSha256": "19504765c9412187fc17a1d17c89ffd96b796991c2d41c37515f0e7eb2d2b5e1",
+      "previewSha256": "113654ea0816557c49e773ee0a90339fa76a409fe82d063ab1e4b2519343a02a",
+      "observation": "Three pearl glints remain separated, with no stray fourth star or generated lettering."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_glass_wave",
+      "decision": "approved",
+      "sourceSha256": "133633e4b3c0dd11c03753c22f561976db02101d4e73c57982349dcdd6e84114",
+      "previewSha256": "0ba07b95a5e2272731a5a4de4ad22c7d0b38deb2fd0ed6c5f79e5d7ed2f2da0f",
+      "observation": "The teal glass wave is fully contained in its cell and keeps both curved ends intact."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_corner_foil",
+      "decision": "approved",
+      "sourceSha256": "af7625d9ad08c93dfa18570d0fd5f0c9404e0122a121b2444dda8ed86cb5ffc5",
+      "previewSha256": "ce523e96fe313e3a98c4ac96f68c395261df107c7d669d80e416cba326fed846",
+      "observation": "The gold corner accent has one crisp vertical-to-horizontal turn and a complete star flare."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_focus_ring",
+      "decision": "approved",
+      "sourceSha256": "4d4922978ed4962826547a1ee88fc85cad7fe99d75555a9d018da27deeef3ff3",
+      "previewSha256": "5db2cdb55c491f5599422b0d3fff48f2e7e753f80bc2480139369fee043a9656",
+      "observation": "The pearl focus ring stays circular and readable, with the small flare attached to its rim."
+    },
+    {
+      "stickerId": "cutvoke.sticker.promo_luxury_badge",
+      "decision": "approved",
+      "sourceSha256": "e7c1854e867c60bef8a120fa66976d5935d77f9f6fd0045e4588e602bd2905e4",
+      "previewSha256": "40b1444c276b11e68d66de08babd761a0ce7b22032b05c0797f1c7bc8392ba26",
+      "observation": "The four-lobed gold badge is symmetrical and its center remains blank for user-added content."
+    }
+  ],
+  "evidence": {
+    "sourceAtlas": "docs/assets/product-promo-overlay-atlas-20260927.png",
+    "extractionReport": "docs/assets/product-promo-overlay-atlas-20260927.extraction.json",
+    "darkContactSheet": "docs/assets/product-promo-overlay-atlas-20260927-contact-dark.png",
+    "lightContactSheet": "docs/assets/product-promo-overlay-atlas-20260927-contact-light.png",
+    "renderedContactSheet": "docs/assets/product-promo-overlay-rendered-review-20260927.png",
+    "renderedContactReport": "docs/assets/product-promo-overlay-rendered-review-20260927.json"
+  }
+}

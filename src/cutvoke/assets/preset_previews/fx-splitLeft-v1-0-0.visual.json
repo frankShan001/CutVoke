@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.splitLeft",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.mask",
+  "params": {
+    "shape": "rect",
+    "x": 0,
+    "y": 0,
+    "w": 0.5,
+    "h": 1,
+    "feather": 0,
+    "invert": false
+  },
+  "subcategory": "构图",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "画面仅保留左半幅，右半幅显示透明底；入段前左右完整，编辑水平位置后分割边界大幅移动。",
+  "method": "Viewed the full-size composition cover contact sheet and aligned 0.10s/0.95s frames from each generated MP4; compared audited edited-X export frames to default frames and confirmed visible movement or boundary shift.",
+  "coverSha256": "658f027473f335048b803f7149c5731ce216542ae055bf6d889730cfcceeef35",
+  "motionPreviewSha256": "7fce9cd12f51ce534c5c2f6511277966be2f3dc9cb25132ecd1d75edb23052c2",
+  "auditSha256": "e4aa47a9806b53ce26590140dc230adfc451c90cae14ae01e6eeae086480b068"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_chromatic_afterimage",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "cc7bca49fca6b4da5fb136c9c1e6d3da175200ff0ea2598b1086b01fef9b9a7c",
+  "previewSha256": "64c3d38153bea8f3d04426eaa31cd85ae1dbf97c6faefc51fbc598392794ea04",
+  "preview": "personfx_chromatic_afterimage.mp4",
+  "bytes": 7871,
+  "visiblePixels": 3504,
+  "changedPixels": 0,
+  "motionVisible": false
+}

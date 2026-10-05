@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_film_scratches",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "observation": "Thin silver hairlines appear across the dark half; their low opacity suits a restrained analog-film overlay.",
+  "sourceSha256": "389e34137eebafae4a0606c36f5d71b20ddba884a67d5d2c23251a1572f0316e",
+  "previewSha256": "9ee46cd5c2cefbf7c56ae754606f4bc89a7261619f250b3051b3fd0c5fa56f80",
+  "auditSha256": "b585e681a8bd3af2f20b33683694aaa624349208302a71d312b074ca42db1ec5"
+}

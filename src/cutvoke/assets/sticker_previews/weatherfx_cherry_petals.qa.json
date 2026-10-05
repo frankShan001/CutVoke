@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_cherry_petals",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ddf62a00bb80a2303bf0fa071ea39b470380b5d2d7a115294afeac8be4222333",
+  "previewSha256": "3e9e04fb33228c60c636f225a64d6e035ca2b3a7a6ecc0a6ce24b1c74d133716",
+  "preview": "weatherfx_cherry_petals.mp4",
+  "bytes": 8282,
+  "visiblePixels": 3733,
+  "changedPixels": 0,
+  "motionVisible": false
+}

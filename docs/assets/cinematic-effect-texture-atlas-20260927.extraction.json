@@ -1,0 +1,501 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "source": "docs/assets/cinematic-effect-texture-atlas-20260927.png",
+  "sourceSha256": "7f3d9563b198c6b2b1966640f6ed633ef1d1fdabea8ad0b2e38ff01d7a0058e2",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4 equal square cells",
+  "cellInsetFraction": 0.035,
+  "outputSize": [
+    1920,
+    1080
+  ],
+  "format": "JPEG quality 94, 4:4:4 chroma",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "contactSheet": "docs/assets/cinematic-effect-texture-contact-sheet-20260927.png",
+  "items": [
+    {
+      "stem": "bgfx_amber_film_burn",
+      "name": "琥珀胶片烧光",
+      "keywords": [
+        "胶片",
+        "暖光",
+        "烧光"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "cropBox": [
+        11,
+        11,
+        303,
+        303
+      ],
+      "output": "assets/backgrounds/bgfx_amber_film_burn.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "022da932a6da6d2c8555844e61b56dfd595b9ecccb2826d4e1ca14f8dfec9992",
+      "sizeBytes": 256605
+    },
+    {
+      "stem": "bgfx_cyan_scanline",
+      "name": "青色扫描线干扰",
+      "keywords": [
+        "数码",
+        "扫描线",
+        "故障"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "cropBox": [
+        325,
+        11,
+        616,
+        303
+      ],
+      "output": "assets/backgrounds/bgfx_cyan_scanline.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "38330d65cb6aff6f407dccb1da99109cbbc14f0b4d1278aa4a750eabf7dc452a",
+      "sizeBytes": 496505
+    },
+    {
+      "stem": "bgfx_magenta_chromatic",
+      "name": "洋红色差晕影",
+      "keywords": [
+        "色差",
+        "洋红",
+        "光晕"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "cropBox": [
+        638,
+        11,
+        929,
+        303
+      ],
+      "output": "assets/backgrounds/bgfx_magenta_chromatic.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "2ab94dcfceec0323f96139a03ffaf6bbb1d9c0d0e00376d9d5b3295f98af2c03",
+      "sizeBytes": 247198
+    },
+    {
+      "stem": "bgfx_violet_holographic",
+      "name": "紫色全息衍射",
+      "keywords": [
+        "全息",
+        "衍射",
+        "紫色"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "cropBox": [
+        951,
+        11,
+        1243,
+        303
+      ],
+      "output": "assets/backgrounds/bgfx_violet_holographic.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "f4b6c5aeb50344918b8f46d80db848a8285b971feacef493f32cbd0f1bb5f24b",
+      "sizeBytes": 355412
+    },
+    {
+      "stem": "bgfx_gold_dust",
+      "name": "金色漂浮尘光",
+      "keywords": [
+        "尘光",
+        "金色",
+        "氛围"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "cropBox": [
+        11,
+        325,
+        303,
+        616
+      ],
+      "output": "assets/backgrounds/bgfx_gold_dust.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "4f24fc213981c87dc68b87ca02ee0c5f8aa49a5026e473e0e7f5e847bed808c8",
+      "sizeBytes": 325323
+    },
+    {
+      "stem": "bgfx_blue_raindrops",
+      "name": "蓝调雨窗光斑",
+      "keywords": [
+        "雨滴",
+        "窗面",
+        "散景"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "cropBox": [
+        325,
+        325,
+        616,
+        616
+      ],
+      "output": "assets/backgrounds/bgfx_blue_raindrops.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "577ca8490e22d42a7db878bb6e381d75414b8e8c281def790ad1fa3a202691c4",
+      "sizeBytes": 469989
+    },
+    {
+      "stem": "bgfx_snow_crystals",
+      "name": "雪晶飘落",
+      "keywords": [
+        "雪花",
+        "冬日",
+        "氛围"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "cropBox": [
+        638,
+        325,
+        929,
+        616
+      ],
+      "output": "assets/backgrounds/bgfx_snow_crystals.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "09ee3a3a17e3e73cd28468f63cadee636c48196e7496ece09c3df6a83d46e859",
+      "sizeBytes": 273263
+    },
+    {
+      "stem": "bgfx_ember_sparks",
+      "name": "橙红余烬",
+      "keywords": [
+        "余烬",
+        "火星",
+        "橙红"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "cropBox": [
+        951,
+        325,
+        1243,
+        616
+      ],
+      "output": "assets/backgrounds/bgfx_ember_sparks.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "2aadbd7f0fe0a9b413bbe3d9692f001827b4f20748d0c87ec11ea735896e1a64",
+      "sizeBytes": 254213
+    },
+    {
+      "stem": "bgfx_cream_paper",
+      "name": "奶油纸纤维",
+      "keywords": [
+        "纸张",
+        "纤维",
+        "奶油色"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "cropBox": [
+        11,
+        638,
+        303,
+        929
+      ],
+      "output": "assets/backgrounds/bgfx_cream_paper.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "380064ccfea4a82935ff6fad1119215eb4bc6e91dc0381643f63846355234deb",
+      "sizeBytes": 348105
+    },
+    {
+      "stem": "bgfx_graphite_scratches",
+      "name": "石墨刮痕",
+      "keywords": [
+        "石墨",
+        "刮痕",
+        "深色"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "cropBox": [
+        325,
+        638,
+        616,
+        929
+      ],
+      "output": "assets/backgrounds/bgfx_graphite_scratches.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "d808d629ce15db6668b932c73f495f21ec866913e6507d59245c741476f9b98b",
+      "sizeBytes": 414553
+    },
+    {
+      "stem": "bgfx_vintage_halftone",
+      "name": "复古印刷网点",
+      "keywords": [
+        "复古",
+        "网点",
+        "印刷"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "cropBox": [
+        638,
+        638,
+        929,
+        929
+      ],
+      "output": "assets/backgrounds/bgfx_vintage_halftone.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "6d59bd8982d7f7b86f715cfaf6e53f1e93da74c0d974494afcf4001b981efd76",
+      "sizeBytes": 561913
+    },
+    {
+      "stem": "bgfx_linen_weave",
+      "name": "亚麻织纹",
+      "keywords": [
+        "织物",
+        "亚麻",
+        "纤维"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "cropBox": [
+        951,
+        638,
+        1243,
+        929
+      ],
+      "output": "assets/backgrounds/bgfx_linen_weave.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "2c32c30aab6a7f40a39fc86ce304ace3f3cef42805f1df6d65fe6e69c7d38e6b",
+      "sizeBytes": 440001
+    },
+    {
+      "stem": "bgfx_iridescent_caustics",
+      "name": "虹彩水纹折射",
+      "keywords": [
+        "水纹",
+        "虹彩",
+        "折射"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "cropBox": [
+        11,
+        951,
+        303,
+        1243
+      ],
+      "output": "assets/backgrounds/bgfx_iridescent_caustics.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "8bc7c0add266c62d3483854e0a6f9baa6670a35e224ee0a4cc86f9a050cca21d",
+      "sizeBytes": 379130
+    },
+    {
+      "stem": "bgfx_underwater_rays",
+      "name": "水下体积光束",
+      "keywords": [
+        "水下",
+        "光束",
+        "青绿"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "cropBox": [
+        325,
+        951,
+        616,
+        1243
+      ],
+      "output": "assets/backgrounds/bgfx_underwater_rays.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "2744d5eb6e06b5a4afecf64cd2b84adfaee80ea1256caa8f587587c953ebde07",
+      "sizeBytes": 244255
+    },
+    {
+      "stem": "bgfx_rose_prism_flare",
+      "name": "玫瑰金棱镜光",
+      "keywords": [
+        "棱镜",
+        "光束",
+        "玫瑰金"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "cropBox": [
+        638,
+        951,
+        929,
+        1243
+      ],
+      "output": "assets/backgrounds/bgfx_rose_prism_flare.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "0a822e2d97952d9a04202cfa6786f9efe16faa1b20b3cd043fc0274ff215e72a",
+      "sizeBytes": 255120
+    },
+    {
+      "stem": "bgfx_blue_electric_arcs",
+      "name": "蓝白电弧纹理",
+      "keywords": [
+        "电弧",
+        "蓝色",
+        "能量"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "cropBox": [
+        951,
+        951,
+        1243,
+        1243
+      ],
+      "output": "assets/backgrounds/bgfx_blue_electric_arcs.jpg",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "f04cf998138937d3fa935736f5f438a3b28a358c9d013243838cabd26dfb296e",
+      "sizeBytes": 376978
+    }
+  ]
+}

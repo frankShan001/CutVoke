@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_ribbon_flag",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Blue flag silhouette and inward notch are easy to distinguish, with a clean navy outline on both backgrounds.",
+  "sourceSha256": "06fae6c15b5eefed68533ff268fff1806c9c0e47e1bdf4c295e482428d606f20",
+  "previewSha256": "c04d33f055afc49afc25bce6420dace5a20fcc815637f415661509fcac971014",
+  "auditSha256": "cbfd78c845b51802b2e3f29a6335b4c5d468fcdbc4514a94ac895bd627aef054"
+}

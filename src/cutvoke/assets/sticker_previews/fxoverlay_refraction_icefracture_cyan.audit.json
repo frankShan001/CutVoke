@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_icefracture_cyan",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "640fcd1a90921eb66a1cef8fe4be2cef9c64107b40f44455052cabf9e763c337",
+  "previewSha256": "b3ecea2ee3f48b7722a113d0045ad7fe373419748a38560a05e0092c16377fbc",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 11816,
+  "visiblePixels": 10791,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 4632,
+    "steady_entry": 10794,
+    "steady_exit": 10790,
+    "exit": 4618
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 4632,
+      "withoutFade": 10789
+    },
+    "steady_entry": {
+      "withFade": 10794,
+      "withoutFade": 10794
+    },
+    "steady_exit": {
+      "withFade": 10790,
+      "withoutFade": 10794
+    },
+    "exit": {
+      "withFade": 4618,
+      "withoutFade": 10794
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.402,
+    0.463
+  ],
+  "auditExport": "fxoverlay_refraction_icefracture_cyan.audit.mp4",
+  "auditExportSha256": "ded6169a15e544d94abd51ecf6d3a01bdcda06c98177eca9d17cebb917a7c154"
+}

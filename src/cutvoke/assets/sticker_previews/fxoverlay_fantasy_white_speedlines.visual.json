@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_white_speedlines",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T01:05:55+00:00",
+  "observation": "The white speedline burst has a clean open center and even rays; it reads best on dark footage.",
+  "method": "Reviewed each extracted RGBA PNG on dark and light contact sheets, then checked the actual RenderService preview contact sheet. Examined distinct silhouettes, cell-edge clipping, alpha fringes, visibility on both tones, and usefulness as a compositing overlay.",
+  "sourceSha256": "d3fad09c61e4c3f5b02b8a2df478b8f484b30429c2daa7fc5d6940c82cd83d91",
+  "previewSha256": "00977bd8c757e0fcea7bcf62c91fea19e5834ff370ac0712f567df8ae72f77e8",
+  "auditSha256": "03ce87e1c850f20a98351209d4bd16d02c3276b41cc4c36fa360f3c9b16796b5"
+}

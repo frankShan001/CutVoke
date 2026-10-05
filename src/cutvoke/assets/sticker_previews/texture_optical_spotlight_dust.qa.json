@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_spotlight_dust",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a8147ed0a9b423585fa82e68b21549960455a468d0ce31029273a66de87c0805",
+  "previewSha256": "8570f0b9f31ddebb1ecd57679c8d6c3e7310d65ce37e3471bfe6d7d0d7e94b78",
+  "preview": "texture_optical_spotlight_dust.mp4",
+  "bytes": 7345,
+  "visiblePixels": 10638,
+  "changedPixels": 0,
+  "motionVisible": false
+}

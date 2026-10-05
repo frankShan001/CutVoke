@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.comboBannerIn",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "ac91b1f8b7740d28cee44a1d390e0f32e2bd7b5b202534c6ffcfede1b80e5218",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "ac91b1f8b7740d28cee44a1d390e0f32e2bd7b5b202534c6ffcfede1b80e5218",
+  "auditExport": "animation-comboBannerIn-v1-0-0.audit.mp4"
+}

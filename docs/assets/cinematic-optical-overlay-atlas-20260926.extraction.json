@@ -1,0 +1,495 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "layout": "4x4",
+  "sourceImageSize": [
+    1254,
+    1254
+  ],
+  "sourceSha256": "c6a1edd2f82723fd433b961a3dc52b1722f5778f95884a2579d05f85e365ad7c",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "cropCleanup": "zero alpha below 8; clear 4px cell rim; preserve semi-transparent pixels",
+  "contactSheet": "docs/assets/cinematic-optical-overlay-contact-20260926.png",
+  "items": [
+    {
+      "stem": "cinematic_optical_flare_amber",
+      "name": "琥珀宽银幕光斑",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "镜头",
+        "暖光",
+        "宽银幕"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 20810,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "c8555af15ed4b74cfad407e0ff1d76b3e5665757ab69c0d35fc70fab3224c0ae"
+    },
+    {
+      "stem": "cinematic_optical_flare_cyan",
+      "name": "青色宽银幕光斑",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "镜头",
+        "冷光",
+        "宽银幕"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "size": [
+        313,
+        314
+      ],
+      "visiblePixels": 17635,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "6ea7ffc35b060d04a51f72f6b5f6dc4a7a62c367418c8a550b5eee1e616c9785"
+    },
+    {
+      "stem": "cinematic_optical_flare_rose",
+      "name": "玫瑰色镜头光斑",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "镜头",
+        "粉色",
+        "柔光"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "size": [
+        313,
+        314
+      ],
+      "visiblePixels": 19523,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "299712a33f094ca02b448c842864fb9544ccb910f1ab00a53746290741ee15bd"
+    },
+    {
+      "stem": "cinematic_optical_flare_violet",
+      "name": "紫蓝镜头光带",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "镜头",
+        "紫色",
+        "光带"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 20758,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "5f08b64dec8262fc0791bc93ff0974242c5c7079f74bb350672e99122a234ae6"
+    },
+    {
+      "stem": "cinematic_optical_star_amber",
+      "name": "琥珀四芒星耀斑",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "镜头",
+        "星芒",
+        "金色"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "size": [
+        314,
+        313
+      ],
+      "visiblePixels": 12995,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "2cf26d5685576fd2445bbe35adc2109cefffcb179ba1aed0f5600b3ceb52972e"
+    },
+    {
+      "stem": "cinematic_optical_star_pearl",
+      "name": "珍珠八芒星耀斑",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "镜头",
+        "星芒",
+        "珍珠白"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 16442,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "919e1f6778a488f96b73e9a4bc2b38abe2e83b380f6374e55d88ba4965e83b82"
+    },
+    {
+      "stem": "cinematic_optical_prism_fan",
+      "name": "彩虹棱镜散射",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "镜头",
+        "棱镜",
+        "彩虹"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 19297,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "04b675ed9af4f7e5ef812be9eab7d637a0b5df8fe309ab08f53012aa0079081d"
+    },
+    {
+      "stem": "cinematic_optical_ghost_ring",
+      "name": "虹彩镜头鬼影环",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "镜头",
+        "鬼影",
+        "虹彩"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "size": [
+        314,
+        313
+      ],
+      "visiblePixels": 34004,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "a9574cd11333274740066e9b11a24ce56c59654c9ad73a426444f8f9dc7bfc4c"
+    },
+    {
+      "stem": "cinematic_optical_leak_amber",
+      "name": "琥珀左侧漏光",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "电影",
+        "漏光",
+        "琥珀"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "size": [
+        314,
+        313
+      ],
+      "visiblePixels": 41149,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "42248dea73a153e19b89bcb1802d4257ef53765639dbcd249a898621b6871b24"
+    },
+    {
+      "stem": "cinematic_optical_leak_cyan",
+      "name": "青蓝右侧漏光",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "电影",
+        "漏光",
+        "青蓝"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 38864,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "4dd61bfae7500cf6af960cfe2b73a5dfb19e855c11b77c3d20932829fb724904"
+    },
+    {
+      "stem": "cinematic_optical_leak_rose",
+      "name": "玫瑰下沿漏光",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "电影",
+        "漏光",
+        "玫瑰"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 34960,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "af0e602765cc368a9bb84886a96b7dbae850ff5c8f13516a352f8f65e1281571"
+    },
+    {
+      "stem": "cinematic_optical_leak_teal",
+      "name": "蓝青上角漏光",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "电影",
+        "漏光",
+        "蓝青"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "size": [
+        314,
+        313
+      ],
+      "visiblePixels": 41137,
+      "sourceBoundaryPixels": 31,
+      "removedBoundaryPixels": 31,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "46cafcf19c2ac9aa50f0406831b8a4493f5f31c8eeac8470d9404342ab8547a1"
+    },
+    {
+      "stem": "cinematic_optical_bokeh_gold",
+      "name": "香槟金散景光点",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "镜头",
+        "散景",
+        "香槟金"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 15014,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "611d46a30660dc230fe8e41640acf885a7610254d75a702cb6a28c12706b67c6"
+    },
+    {
+      "stem": "cinematic_optical_bokeh_ice",
+      "name": "冰蓝散景光点",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "镜头",
+        "散景",
+        "冰蓝"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "size": [
+        313,
+        314
+      ],
+      "visiblePixels": 25883,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "2f4030e159e6f43ef9ddfbc25e22dea2dee8ef35e9d24204691459566876b659"
+    },
+    {
+      "stem": "cinematic_optical_halation_peach",
+      "name": "蜜桃柔光晕",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "电影",
+        "光晕",
+        "蜜桃"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "size": [
+        313,
+        314
+      ],
+      "visiblePixels": 43275,
+      "sourceBoundaryPixels": 0,
+      "removedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "6a99b083fe70d06a3de7f908538c58cef9024cbd74ffc97c2fba9e4a93df2fdf"
+    },
+    {
+      "stem": "cinematic_optical_arc_pearl",
+      "name": "珍珠色弧形光轨",
+      "subcategory": "镜头光效",
+      "keywords": [
+        "镜头",
+        "弧光",
+        "光轨"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 19091,
+      "sourceBoundaryPixels": 50,
+      "removedBoundaryPixels": 50,
+      "alphaExtrema": [
+        0,
+        245
+      ],
+      "sha256": "d91f47335995156371037bc4d4a23bdbc0928ecac5c8c2a1db230a2f425d64f5"
+    }
+  ]
+}

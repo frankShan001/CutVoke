@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_holographic_mesh",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d302fa26bb75a36aac854738658bc45c43eaea4e451101404f1cf4053a3c1122",
+  "previewSha256": "9565023317d0fa26b3d75cd5ff7c12dfdf8171ccfc2b2762d813a2171b7ff550",
+  "preview": "texture_holographic_mesh.mp4",
+  "bytes": 4523,
+  "visiblePixels": 2985,
+  "changedPixels": 0,
+  "motionVisible": false
+}

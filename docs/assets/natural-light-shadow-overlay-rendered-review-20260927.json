@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/render_natural_light_shadow_overlay_review.py",
+  "frameSource": "per-sticker RenderService export audit",
+  "frameTimeSeconds": 0.75,
+  "items": [
+    {
+      "stickerId": "cutvoke.sticker.natural_light_window_beams",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_window_beams.audit.mp4",
+      "auditExportSha256": "b75b1b9377c02f20ee14e092bdab515d78f8d0435f43138a2a7e3352dbb4b6e5",
+      "frameSha256": "23292eecb5b2f108ae18328367e87ec8e66d399b59f4abf0d761f24a7f5f25a5",
+      "previewExportMeanRgbDifferences": [
+        0.676,
+        0.679
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_foliage_dapple",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_foliage_dapple.audit.mp4",
+      "auditExportSha256": "275cd7de25bae88ece94dddf8e4b3d82ff620e6a44cba47ad4a9f6f0aa7a0353",
+      "frameSha256": "4e80ef1039ebd877cef3fead2390080a41b46e71c416b69a40428681b7aee675",
+      "previewExportMeanRgbDifferences": [
+        0.118,
+        0.116
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_pool_caustics",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_pool_caustics.audit.mp4",
+      "auditExportSha256": "a3299d7454828574f5ed02018b1d360c9b1c4736e4c1d21f8c5b3063317b62f5",
+      "frameSha256": "109cfab82156270fca1a5899152274fbf994e08f1d601e1f47124a4d9b93af6e",
+      "previewExportMeanRgbDifferences": [
+        0.423,
+        0.45
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_candle_bloom",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_candle_bloom.audit.mp4",
+      "auditExportSha256": "f96a9a3b37d8dbcf59c656896fca1313573461101fd9ec153662edca5ba39b6e",
+      "frameSha256": "b19466c5e9b5c6f62551b3838f0ba65555b6f385d47929942f6d37c70caad886",
+      "previewExportMeanRgbDifferences": [
+        0.521,
+        0.516
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_sunrise_cloud_glow",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_sunrise_cloud_glow.audit.mp4",
+      "auditExportSha256": "1a77d800f172c04c34ba1d3f1414911ba884b346dca807db88bc9e584954abde",
+      "frameSha256": "02508245bc99b8b9f49e32aa3cc95511d9f91012a01dd4d535374890ce2617b2",
+      "previewExportMeanRgbDifferences": [
+        0.395,
+        0.389
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_window_blind_bands",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_window_blind_bands.audit.mp4",
+      "auditExportSha256": "cc987e7b203cb0e813c48486563e8577cf57b2e75398119d23bc6c1fbcaf8762",
+      "frameSha256": "4e796bc8dae6fd7c8e5e2171a28084d4161ee0b4f87b3f287712cfb2a8ed679a",
+      "previewExportMeanRgbDifferences": [
+        0.366,
+        0.353
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_moonlit_water",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_moonlit_water.audit.mp4",
+      "auditExportSha256": "5f08548c7b0fec3ea207033d47a0d4dcdfed365fceea8de361113001994d6c9e",
+      "frameSha256": "214ceb59a21f9ddf8d2ecdfbe1d30b937d91716518090226c9d9c9f3c73b573a",
+      "previewExportMeanRgbDifferences": [
+        0.511,
+        0.519
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_peach_haze",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_peach_haze.audit.mp4",
+      "auditExportSha256": "11a102aade6b97056c3e5e30a69b333ccd0abc6ebcfb35d8d6854741acc1a4db",
+      "frameSha256": "ba98984acdaa4cd46c7391d382d4ae61ded41509b2e2dbf7aefc0f1f2660ab04",
+      "previewExportMeanRgbDifferences": [
+        0.544,
+        0.544
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_forest_rays",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_forest_rays.audit.mp4",
+      "auditExportSha256": "cf62020b069e7ea3b0177ffab259d3b5b57a83bea461670ebad0ed48155ca053",
+      "frameSha256": "988d646dc8c0e5c483918bb638e76b160ca55f3ef1251168c1bd7440db619deb",
+      "previewExportMeanRgbDifferences": [
+        0.1,
+        0.1
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_snow_glints",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_snow_glints.audit.mp4",
+      "auditExportSha256": "82f234fbad341548d157ced34caa258c5cd8e24e3d825b36c85828f7b09a31bd",
+      "frameSha256": "b8f3743fda926df718ea58f2187da264f426a34ea2447032061a95e5a9c5ba64",
+      "previewExportMeanRgbDifferences": [
+        0.464,
+        0.5
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_prism_arc",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_prism_arc.audit.mp4",
+      "auditExportSha256": "473be991984b363b688323edad4ea7bd3307096a8a2a55cc33e659eef4aa5e9a",
+      "frameSha256": "6df02fe650e472fbbea2e7d23ce810b82d469086d8c558d49dddd6132bf09c6c",
+      "previewExportMeanRgbDifferences": [
+        0.655,
+        0.653
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_storm_flash",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_storm_flash.audit.mp4",
+      "auditExportSha256": "ff039d7d7704b5998c75c0fd53ee468609b90f0fa9cd0045be8d479c39e6d7d1",
+      "frameSha256": "70ccd295499c3f53306968ff0f7767f998cc73db44a39f2db9836d3245964c04",
+      "previewExportMeanRgbDifferences": [
+        0.397,
+        0.394
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_golden_dust_beam",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_golden_dust_beam.audit.mp4",
+      "auditExportSha256": "02bd958aa1117e1694ed40687ac7de3903af42bb8b53270d862c31e83070284a",
+      "frameSha256": "d6bc74602d39b523bf5f77e4c9aefe88d57a030418a80373980742b2007235f9",
+      "previewExportMeanRgbDifferences": [
+        1.011,
+        1.011
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_cloud_shadow_wisps",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_cloud_shadow_wisps.audit.mp4",
+      "auditExportSha256": "1b8aeb83e07e81026d598927f1ba07811623f2a574f4a2f77c4867be764d99e6",
+      "frameSha256": "c289300c288a86daca6dfb97292878d5a279deac30ad7e2e554927f27a37aaa2",
+      "previewExportMeanRgbDifferences": [
+        0.024,
+        0.024
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_aurora_ribbons",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_aurora_ribbons.audit.mp4",
+      "auditExportSha256": "c28b7872463671b6c01bc1b37f304cf9c2bdd3381f9282019781e85a11264ff3",
+      "frameSha256": "9c6bb45e7b99b83bd379fe44670e46a9cf3714ae8daacf4a6d146f21da55b66a",
+      "previewExportMeanRgbDifferences": [
+        0.422,
+        0.429
+      ]
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_firelight_reflection",
+      "frameTimeSeconds": 0.75,
+      "auditExport": "natural_light_firelight_reflection.audit.mp4",
+      "auditExportSha256": "b4a15378af136b27927bad0e23242de2eafbd5a79ba6bf89f15ccabe36fc5a73",
+      "frameSha256": "1c21d8caf097a8de3089104e439f6415c0a7c3e78590284adee1bd192c7c8da2",
+      "previewExportMeanRgbDifferences": [
+        0.415,
+        0.466
+      ]
+    }
+  ]
+}

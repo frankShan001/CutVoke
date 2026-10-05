@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_cyan_shards",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T01:05:55+00:00",
+  "observation": "The cyan crystal burst has clear shard edges and a balanced radial silhouette.",
+  "method": "Reviewed each extracted RGBA PNG on dark and light contact sheets, then checked the actual RenderService preview contact sheet. Examined distinct silhouettes, cell-edge clipping, alpha fringes, visibility on both tones, and usefulness as a compositing overlay.",
+  "sourceSha256": "13d768fb4ca3920f2faae372ad5b6242356749acc0cb798671ef68ac2342f3be",
+  "previewSha256": "668c2954e1792a4d5564de4023ac929a255ac276c37afbe928f09d90433a3376",
+  "auditSha256": "2aac7e1e70dcb2543916d8d15264b68e71b57db702bc822295a437acf364786c"
+}

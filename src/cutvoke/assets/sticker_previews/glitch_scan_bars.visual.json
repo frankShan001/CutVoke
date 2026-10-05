@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.glitch_scan_bars",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项检查4×4透明贴图裁切表和4×4真实画面合成表；确认Alpha通道、裁切边缘、深浅背景对比、缩略图可辨性与每项轮廓差异。",
+  "observation": "三组横向扫描光条间距明确，发光边缘平滑，在深浅背景上都可见。",
+  "sourceSha256": "3ea1b2bd4bb7bb25e0e130637f5637dbdef0a4c4de887f475eb1464702bd0e61",
+  "previewSha256": "d5a1be8cd7c3044c0ed1e99661290909dad5f06c91b9e4f8a1e23f0cbeca28af",
+  "auditSha256": "e2f26646da0aaccc0b18eb4dabe03e33caa5ceaf362be5f4e4fef92dc64ccae9"
+}

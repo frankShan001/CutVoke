@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_lime_spiral_motion",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3347e906cde7e8ecf6c9454342275256cd24b07d558c5e673fc20f6a7cf58730",
+  "previewSha256": "65d8e46fcc2a0ef3f5b9b5adaaa79ca4453de0c66ced994b748c7401f35fb86f",
+  "preview": "manga_v2_lime_spiral_motion.mp4",
+  "bytes": 14637,
+  "visiblePixels": 9399,
+  "changedPixels": 0,
+  "motionVisible": false
+}

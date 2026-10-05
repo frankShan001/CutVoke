@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_wool_felt",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "97a0ec7ae7385a7ac6489180e0f969f6a06848657d6264a66076cd7f681dab8b",
+  "previewSha256": "75ccba151da996a33ddafdaa7e0f4a683accfe68c94e6caed01316ef089b25e7",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4790,
+  "visiblePixels": 5233,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 4004,
+    "steady_entry": 5233,
+    "steady_exit": 5233,
+    "exit": 4063
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 4004,
+      "withoutFade": 5233
+    },
+    "steady_entry": {
+      "withFade": 5233,
+      "withoutFade": 5233
+    },
+    "steady_exit": {
+      "withFade": 5233,
+      "withoutFade": 5233
+    },
+    "exit": {
+      "withFade": 4063,
+      "withoutFade": 5233
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "material_wool_felt.audit.mp4",
+  "auditExportSha256": "45e3e8930cc208da7474871795f210303a717642dacb84603bc7c4d41914f44a"
+}

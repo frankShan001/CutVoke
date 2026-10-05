@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_dotted_route",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "c4aa80e097cef16c67299d53d73d5f41a3aa496b69187ad56c13ca3b74e21051",
+  "previewSha256": "1b44fb004621cc0cb69a43128e8282808ab999c1c0b4443448b2a40c04c3c8d8",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1742,
+  "visiblePixels": 1021,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 910,
+    "steady_entry": 1021,
+    "steady_exit": 1021,
+    "exit": 910
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 910,
+      "withoutFade": 1021
+    },
+    "steady_entry": {
+      "withFade": 1021,
+      "withoutFade": 1021
+    },
+    "steady_exit": {
+      "withFade": 1021,
+      "withoutFade": 1021
+    },
+    "exit": {
+      "withFade": 910,
+      "withoutFade": 1021
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.086,
+    0.086
+  ],
+  "auditExport": "guide_dotted_route.audit.mp4",
+  "auditExportSha256": "4b06c29e37423bf1721fbe525e9efd625edc022d04c9efd888a62f38244f32a5"
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.moon_float",
+  "version": "1.1.0",
+  "effectId": "cutvoke.anim.float",
+  "params": {
+    "amplitude": 0.1,
+    "period": 1.6
+  },
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-10-02T19:42:50+00:00",
+  "method": "Codex actually inspected all 30 chronological continuous frames (15fps, 2 seconds) from this regenerated library sample using view_image, checking motion, alpha edges, shape preservation and canvas containment. Preview QA and full apply/edit/saveReload/undo/export machine audits were rerun before binding.",
+  "observation": "蓝色月牙按默认1.6秒周期平滑上下漂浮，左右位置稳定；两端月牙尖角与蓝色渐变完整，全部30帧处于画布内部，无异常黑框或变形。",
+  "sourceSha256": "5ae439b2d75ddd28dda63e4a4d5769a5ae521f881452b80df604af264b087f43",
+  "previewSha256": "17a8d179487ee48eee770600d48fbdb61a60027319ef3a6a78668fa5e6b1827b",
+  "auditSha256": "4a0b24e85f15be012cfa96139d3f793b1cf34a190a2b1f9a620a0bad21907e45",
+  "rendererSha256": "019717a0438118bdb3a8a852d000a065e8eac7be52fecea1e33090128fcc318a",
+  "evidencePaths": [
+    "E:/myproject/opencut/output/acceptance/effects-visual-review-20261003/sticker-library/moon_float-continuous.png"
+  ]
+}

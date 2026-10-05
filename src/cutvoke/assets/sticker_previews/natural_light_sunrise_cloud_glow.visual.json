@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_sunrise_cloud_glow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Cloud bank and central sunrise are clearly separate from the other diffuse haze overlays.",
+  "sourceSha256": "10307478bb6c9af6cf2199ae1a1f816488328026bba00bc591a1903b8af9a08e",
+  "previewSha256": "600dcdf1001de41852e10aa415420d7c450736ef5f207433b73ba9072604d49b",
+  "auditSha256": "d812df8358dd62478d43f7b16405c7c0b62235ec5f20e93b7e3f4541af245ff8"
+}

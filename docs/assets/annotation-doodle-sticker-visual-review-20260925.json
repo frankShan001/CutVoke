@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_burst",
+      "decision": "approved",
+      "sourceSha256": "233d33de105cec7c5b391991c1fdbd7c6256139cb960e6a7b13fc5c28043db34",
+      "previewSha256": "f8d0660e25f0a17a8c223d378512dd1abcf5bf9742ca48b3c628f061b75698c9",
+      "observation": "Coral irregular burst has a clean navy edge and remains distinct on both light and dark backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_circle",
+      "decision": "approved",
+      "sourceSha256": "4fad25e17f2b359cf62db946b6b6f3a4007eb1336f76d09ec7c81b5321e0d0d3",
+      "previewSha256": "7f08509ae14b994cbdf238d93d4ee2ac551eeb5f102f9fc17149051a7738f683",
+      "observation": "Coral hand-drawn loop stays visible against both backgrounds; the open contour reads clearly as a circle marker."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_confetti",
+      "decision": "approved",
+      "sourceSha256": "c13f1e2adaa0accdfa044883ff461a8b91cbd9f8916bef3250103ce71085df51",
+      "previewSha256": "56a109e42ab0174dcd17f191969385d2a97db7650e23af3a6d78ab7ec0805b9d",
+      "observation": "Separate blue, coral, yellow and mint pieces retain clear gaps and color contrast on both backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_corner_brackets",
+      "decision": "approved",
+      "sourceSha256": "66448947a41d33269d357da17607ae9b5c0240d9adcd5fcd1bf8dacc6c3047f8",
+      "previewSha256": "69f54bf5a174b416df658660e1b2f30f0c5ca78cc13d3eee82a0f1ed15242451",
+      "observation": "Four mint corner marks have even weight and readable open centers on both backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_curl_arrow",
+      "decision": "approved",
+      "sourceSha256": "4c4a6ddcdb0fc4fc06814de2544460ec713af682e1f9d66208f954384db88c33",
+      "previewSha256": "b45df305ff8bb951aa69e69c3cc2f619e0e4aedf324d11033248e991b494fe04",
+      "observation": "Mint loop arrow has a clear path and distinct arrowhead; the navy edge keeps it legible on both backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_dashed_oval",
+      "decision": "approved",
+      "sourceSha256": "3f019a24028e7e23bb767006508a16e737b2df599f81e06942aba0747967f5d8",
+      "previewSha256": "4ff9a27c1fdab0759ca3676c54126f80833a30444eb7fbffcbce53ce5bf4b528",
+      "observation": "Yellow dash segments form a readable oval, with consistent spacing and navy outlines on both backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_dotted_orbit",
+      "decision": "approved",
+      "sourceSha256": "034b3f2bd1d336541c7ccaf471ee4eaeb57bec6a373a780ec7c43aeb25977be6",
+      "previewSha256": "49ab10894c1821da49f11a53fb1e686378a2796b6aaa276ae7c44310328024e2",
+      "observation": "Mint orbit dashes now have white and navy keylines for contrast; the yellow sparkle remains distinct on both backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_double_arrow",
+      "decision": "approved",
+      "sourceSha256": "e705fbbff664251376c5ad4c8c10ada59a771fa5ad5b639113185849b29df471",
+      "previewSha256": "546c4145407f2d9fd6a313ee616817cb822737ccd595972b8f194a907cd96312",
+      "observation": "Blue opposing arrowheads and connecting shaft are cleanly separated from both light and dark backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_location_pin",
+      "decision": "approved",
+      "sourceSha256": "f830a8cef869cd30ba8f99b6377112414e87b9c61ad7e2919531528d610aca0b",
+      "previewSha256": "4a44f3e04e451773f7c353a8381ef70ca8dd07d576dc1301393a156f3e5ab390",
+      "observation": "Coral pin silhouette and white-centered target remain distinct; the navy contour reads on both backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_motion_rays",
+      "decision": "approved",
+      "sourceSha256": "b6dd54e2f269cc0d61dd5d56dcfecb89951b0b457773f52fa2ef6e6231b465d1",
+      "previewSha256": "56a34e13b8f107ead970ed5ffc5c513334fb01185eb97d6c4294e0960fc22ea5",
+      "observation": "Three blue rays have rounded ends, consistent navy edging and clear separation on both backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_ribbon_flag",
+      "decision": "approved",
+      "sourceSha256": "06fae6c15b5eefed68533ff268fff1806c9c0e47e1bdf4c295e482428d606f20",
+      "previewSha256": "c04d33f055afc49afc25bce6420dace5a20fcc815637f415661509fcac971014",
+      "observation": "Blue flag silhouette and inward notch are easy to distinguish, with a clean navy outline on both backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_round_frame",
+      "decision": "approved",
+      "sourceSha256": "82be943d868f3bde90f7a9d209267354900a60ac6adb210d9771072d96f63cde",
+      "previewSha256": "29da5c0e3462d576d8fa6b2550930287bf0b661c7c22a7c75e3803059f359942",
+      "observation": "Four coral rounded corner segments retain clear gaps and readable framing on both backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_sparkle_cluster",
+      "decision": "approved",
+      "sourceSha256": "ae373921842c85eaa8f473377fe2ad325f24b98397493651625ee4b49265fc1e",
+      "previewSha256": "25ff7e8b12713ab8f4aeddb9505e97ab57acef9bfb2a1d49188d8e495bdf711c",
+      "observation": "Yellow, mint and blue sparkles differ in size and color, with crisp navy outlines on both backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_sunburst",
+      "decision": "approved",
+      "sourceSha256": "45b6e34caecbab6fb2704dc0680b10c6dd07cb8b3f7468d0ebe1dacbe0078cfb",
+      "previewSha256": "6ff7528426adffa1c5fa2692790378ab0a42ae52b92a9287fb38deef84180a3d",
+      "observation": "Yellow radial rays have consistent spacing and navy outlines, remaining easy to read on both backgrounds."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_underline",
+      "decision": "approved",
+      "sourceSha256": "23d12587292d6335a779b62fcb14a3026f5c140826fc10ede085eaa4e8cde782",
+      "previewSha256": "1d88c6b96802e977e15fc4c4477d2316e7d1aac87b7de222d57b2b31719091f1",
+      "observation": "Two yellow curved strokes remain visible on both backgrounds and have smooth, clean endpoints."
+    },
+    {
+      "stickerId": "cutvoke.sticker.marker_doodle_zigzag",
+      "decision": "approved",
+      "sourceSha256": "847586990d9605007050e1f7978c914422401c188294ce76648bb42397b7ea4d",
+      "previewSha256": "3a5c661f5b2096c3535f27e052a0bd7014d1028201a6a359417c23d06329b25d",
+      "observation": "Mint zigzag has a clean continuous contour and navy outline, remaining distinct on both backgrounds."
+    }
+  ]
+}

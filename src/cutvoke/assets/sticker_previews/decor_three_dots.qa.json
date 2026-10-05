@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_three_dots",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "69d2501e62ca74409c7469a322fba3b849b774723482b3e7dd3f2f17ae405efe",
+  "previewSha256": "c85ee196d7ea074a4d4ba3e2ed485ab7cd4aef31676cd5d1198a87c83c98695c",
+  "preview": "decor_three_dots.mp4",
+  "bytes": 3328,
+  "visiblePixels": 648,
+  "changedPixels": 0,
+  "motionVisible": false
+}

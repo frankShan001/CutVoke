@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_light_rain",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4339aaef3b1e9e508f3e9c65bbecac1102cd7467a3e353c2309c2d00c9026ccd",
+  "previewSha256": "26be401d06a5ecf3313912599840efe9762747282ab334317ba17b2639213a75",
+  "preview": "weatherfx_light_rain.mp4",
+  "bytes": 7440,
+  "visiblePixels": 135,
+  "changedPixels": 0,
+  "motionVisible": false
+}

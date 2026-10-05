@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.marker_doodle_motion_rays",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "b6dd54e2f269cc0d61dd5d56dcfecb89951b0b457773f52fa2ef6e6231b465d1",
+  "previewSha256": "56a34e13b8f107ead970ed5ffc5c513334fb01185eb97d6c4294e0960fc22ea5",
+  "preview": "marker_doodle_motion_rays.mp4",
+  "bytes": 4024,
+  "visiblePixels": 1108,
+  "changedPixels": 0,
+  "motionVisible": false
+}

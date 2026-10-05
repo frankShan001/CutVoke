@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.filmSunset",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 0.4
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "c695f3e1ac450b542e0dbbd70e3ffe82a1cb93206f537a679eb75b6deffdc1ee",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "c695f3e1ac450b542e0dbbd70e3ffe82a1cb93206f537a679eb75b6deffdc1ee",
+  "auditExport": "filter-filmSunset-v1-0-0.audit.mp4"
+}

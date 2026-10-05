@@ -1,0 +1,31 @@
+{
+  "presetId": "cutvoke.preset.filter.filmVignette",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.sepia",
+      "version": "1.0.0",
+      "params": {
+        "strength": 1.0
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.vignette",
+      "version": "1.0.0",
+      "params": {
+        "angle": "PI/4"
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 39.388,
+  "maxSampledMeanRgbDifference": 39.388,
+  "coverSha256": "0b26bb69c84bed66c91b8cf402af28ea466feaab2d277fd4b7310fbcf81a8733",
+  "previewSha256": "8d1cdcf0220963925567bcf36f8104da339d863360fa15c76463a0c2c96f43ae",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

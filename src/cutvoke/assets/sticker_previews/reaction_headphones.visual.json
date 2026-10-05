@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_headphones",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Purple over-ear headphones with visible arch and separated ear cups.",
+  "sourceSha256": "7131127809e2bcde87ed99b02bedbac65168e63fe07c6421b286ba743601ea90",
+  "previewSha256": "de1295a710a33cac4c1330ef990c563335be0fb783f6544d10a904f5a3049650",
+  "auditSha256": "0023a70efcac8acaf05e3a754af6d2cdaad78a395db702df68c783cd8c928dd1"
+}

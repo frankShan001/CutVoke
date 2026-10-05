@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_twilight_clouds",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "9ab5ed20b944dd5995eaaf2041169c90c764f97b319f32e7aa40b69e9143545f",
+  "previewSha256": "a1d109e2f8624927ab17c0c1a3f39903e8dd5a9f344cc465e660f467612d2ada",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 7527,
+  "visiblePixels": 6557,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 6241,
+    "steady_entry": 6557,
+    "steady_exit": 6557,
+    "exit": 6241
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 6241,
+      "withoutFade": 6557
+    },
+    "steady_entry": {
+      "withFade": 6557,
+      "withoutFade": 6557
+    },
+    "steady_exit": {
+      "withFade": 6557,
+      "withoutFade": 6557
+    },
+    "exit": {
+      "withFade": 6241,
+      "withoutFade": 6557
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.183,
+    0.194
+  ],
+  "auditExport": "texture_bg_twilight_clouds.audit.mp4",
+  "auditExportSha256": "369b89791eaba0483c3bcdbff0da86e152b020044993ef06f6c4825e3a8ee387"
+}

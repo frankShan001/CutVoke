@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_plum_blossom",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "6995ceb1db84b9a05e7b922792f4d567cfa0ebaaecb79ee7d0c2a71827f9a528",
+  "previewSha256": "e7c81dada6f23d8d27815d67f7920c02b7b90974fe80bac9bb7ee6cb7b939b3f",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 8583,
+  "visiblePixels": 5504,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 1516,
+    "steady_entry": 5504,
+    "steady_exit": 5506,
+    "exit": 1516
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1516,
+      "withoutFade": 5506
+    },
+    "steady_entry": {
+      "withFade": 5504,
+      "withoutFade": 5506
+    },
+    "steady_exit": {
+      "withFade": 5506,
+      "withoutFade": 5503
+    },
+    "exit": {
+      "withFade": 1516,
+      "withoutFade": 5506
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.061,
+    0.081
+  ],
+  "auditExport": "inkfx_plum_blossom.audit.mp4",
+  "auditExportSha256": "13888f2df3bda6d3a1ea91c6e052c8b088a7abcbc77485370cdae221b9344e46"
+}

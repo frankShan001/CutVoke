@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_olives",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "橄榄果和狭长叶形区别明确，枝梗连续，浅底可读，深底适合做低调点缀。",
+  "sourceSha256": "c721a91037c7fe3b1123b7bf667c10879a6a89785caffdfa85e3c9920cbb7247",
+  "previewSha256": "593e5095802f8c67113b43cabaef49c2164f9acab00ba07a6cee40c8256dd2d8",
+  "auditSha256": "f507ba39cd64ffe97e1cf38c1ebbd525bcc0f638952afa3d5c6ec6b49abc63b2"
+}

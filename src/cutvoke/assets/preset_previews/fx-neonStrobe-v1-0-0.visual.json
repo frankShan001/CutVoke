@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.neonStrobe",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.flicker",
+  "params": {
+    "hz": 4.4
+  },
+  "subcategory": "动感",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "The late frames switch to a nearly black image with thin white contours around the sun, foreground, and panel; the contour intensity flashes over time. This is visibly distinct from full-color brightness flicker and multicolor glitch effects.",
+  "method": "Manual comparison of five rendered frames per preset, nearest-neighbor report, and full MP4 decode",
+  "coverSha256": "abb3d822449e0c50d6b52e94dfec7bba834b2a78e90ab5741786c5513129facb",
+  "motionPreviewSha256": "2b4f40389f551bf0c58c38be1031e7cc905daa0b2f52d76cf600f90fc0aa5547",
+  "auditSha256": "abd013539f37e9ed327bc67b6a075aae5fb404c0f7d698d05f9c1711f2fba7ef"
+}

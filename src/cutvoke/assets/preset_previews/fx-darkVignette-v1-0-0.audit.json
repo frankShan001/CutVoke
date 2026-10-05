@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.darkVignette",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "angle",
+    "value": "PI/5"
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 1.833,
+  "exportSha256": "fc1b510625b98c0abfd3cea06383640f81f7c97a90b1b7644f9e09a02264c5f4",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "fc1b510625b98c0abfd3cea06383640f81f7c97a90b1b7644f9e09a02264c5f4",
+  "auditExport": "fx-darkVignette-v1-0-0.audit.mp4"
+}

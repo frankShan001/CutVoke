@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.rosePortrait",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.tint",
+  "params": {
+    "hue": -24,
+    "saturation": 0.82,
+    "intensity": 0.12,
+    "lightness": true
+  },
+  "subcategory": "人物色彩",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A softer rose-magenta grade changes the subject color while retaining the scene contrast.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "e2f951bcb494ecdd354dffc7719d97b3638f8bb2c92d370ef986a32e024aa9eb",
+  "motionPreviewSha256": "aed186c95bbcb5b7cef6ceec8a60e6446b9f3d09be7a6a5c301c52c47f7da856",
+  "auditSha256": "8bb42ac11de2d3d76a4e6990b3d0ee92eff2fe717d08bc5958a6dc4436aea6a6"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_lightning",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex 视觉审阅",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切联系表和 320x180 浅深渐变实景合成联系表，并结合逐张机器应用/编辑/保存重开/撤销重做/入出场动画/MP4 预览与导出审计；只批准轮廓完整、边界干净、可见且彼此可辨的条目。",
+  "observation": "蓝色分叉电弧线条清楚，枝杈不碰格边，浅背景上仍易辨认。",
+  "sourceSha256": "b459cdc37bb127a79e7974e481bfcaca4f199b5f47ed3ed7fa1d29ca0610fff2",
+  "previewSha256": "6b2197c65e0a0302f83555c5c38ce5f5a3c028a21c68f581bf19188e55985700",
+  "auditSha256": "24521d508ad6b86bf5254ac03499704ca0d4e9cf8d4a4fd8e7db95e9d3e26d01"
+}

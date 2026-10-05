@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_halation_peach",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "6a99b083fe70d06a3de7f908538c58cef9024cbd74ffc97c2fba9e4a93df2fdf",
+  "previewSha256": "d244f3cc8dc0b157f0a200caf56dc0db53b685e5f4eb246df28ab50395c38ce5",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1910,
+  "visiblePixels": 1698,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 66,
+    "steady_entry": 1714,
+    "steady_exit": 1714,
+    "exit": 62
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 66,
+      "withoutFade": 1714
+    },
+    "steady_entry": {
+      "withFade": 1714,
+      "withoutFade": 1698
+    },
+    "steady_exit": {
+      "withFade": 1714,
+      "withoutFade": 1714
+    },
+    "exit": {
+      "withFade": 62,
+      "withoutFade": 1698
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.036,
+    0.03
+  ],
+  "auditExport": "cinematic_optical_halation_peach.audit.mp4",
+  "auditExportSha256": "f003925cef6a2baf43506d9f6aa4dcc540426bf66b67420d0a58001c6a7b3f3a"
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_coral_teal_flow",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "7c8d9c4a130737404bf320615b040fe576292e00b5cc81f34bedcd28d79323e0",
+  "previewSha256": "cc9f7878b82f135d972b206c53effa273b291b218bebb3ff998b12556c7b4cd0",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 7686,
+  "visiblePixels": 6558,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 5902,
+    "steady_entry": 6558,
+    "steady_exit": 6558,
+    "exit": 5904
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 5902,
+      "withoutFade": 6558
+    },
+    "steady_entry": {
+      "withFade": 6558,
+      "withoutFade": 6558
+    },
+    "steady_exit": {
+      "withFade": 6558,
+      "withoutFade": 6558
+    },
+    "exit": {
+      "withFade": 5904,
+      "withoutFade": 6558
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.179,
+    0.18
+  ],
+  "auditExport": "texture_bg_coral_teal_flow.audit.mp4",
+  "auditExportSha256": "5d2e22457485dbd77f819686a0de583ee8be8f8a9edf000bdcc87d1c977850c3"
+}

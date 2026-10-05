@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.neonEdge",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "sigma",
+    "value": 6.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.302,
+  "exportSha256": "096a264b3129f0437b8dd956184958376179b512e2df5a04e24aff1f050f0564",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "096a264b3129f0437b8dd956184958376179b512e2df5a04e24aff1f050f0564",
+  "auditExport": "personFx-neonEdge-v1-1-0.audit.mp4"
+}

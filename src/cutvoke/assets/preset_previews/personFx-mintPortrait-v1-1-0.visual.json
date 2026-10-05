@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.mintPortrait",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.tint",
+  "params": {
+    "hue": 105,
+    "saturation": 0.86,
+    "intensity": 0.1,
+    "lightness": false
+  },
+  "subcategory": "人物色彩",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A fresh green-cyan grade is visible across the subject and is lighter than the cool and cinema variants.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "6a1c3d01c4db23b84835fb0025a988745445bff3611ff118855bd07b3d3048db",
+  "motionPreviewSha256": "bab3f27aef384446445923abcaafd3cd130af73eab58c7c63f2cd7c37f67dfae",
+  "auditSha256": "7a5ad6a0edbae98b1bb272c5c95c0c621b70c7c77bb7c60771e81f2d96a68c0f"
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.pincushion",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.lens",
+  "params": {
+    "k1": 0.6,
+    "k2": 0.2
+  },
+  "subcategory": "光影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "完整画幅向中心收紧，四角露出黑底，与桶形向外扩张的轮廓不同；编辑畸变系数后可见收缩程度改变。",
+  "method": "Viewed the full-size fx-光影 cover contact sheet and aligned untreated/default/edited frames from every generated MP4; compared each visual to its category siblings and confirmed numeric editing changes the actual rendered frame.",
+  "coverSha256": "30032c86891e498a87546b0293c0980a40e846a795bd8cea76d1067a782071eb",
+  "motionPreviewSha256": "c756fe80248dbaa0f277d457af0ae7c13d056472124eebed13c9b98c981c6685",
+  "auditSha256": "d9a097cf7877d45d852872807674dd66153e3698b1339bcc7731305501e506db"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_kraft_torn_patch",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "牛皮纸撕边贴片完整，中央奶油色空白区域清楚。",
+  "sourceSha256": "32f6aa2bcc3df3bad330d94de845bce3556b3ba9f65345a9c3bdd6a68e3c982d",
+  "previewSha256": "5962b7d6b801fc6c8320fdb02b5817e6bfb06731b230e4b08acfeacbd5e388d0",
+  "auditSha256": "28ccfacdfab6d87dd3ef2982eacd2bfba7e68437f26eb99877331d92a2fd8e2e"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_arc_electric",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0f13a556e966166c6716f88444196ec9f9b3019b6e06533af01fac7a4e0afa2b",
+  "previewSha256": "8bdb818d2645b9bf27ece7a684ab218d0aca83cc83644c115ef9cc2adf30c4eb",
+  "preview": "texture_arc_electric.mp4",
+  "bytes": 4157,
+  "visiblePixels": 1456,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_starburst_ultraviolet",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0d0fe2f3809fff158e3d511f036fd6613072e96cf728e4d2e93ae7e2ccb53422",
+  "previewSha256": "046c1912d2fb4f8500293397612aa99b712c30c9f7a6553d9885a43d9174a7f5",
+  "preview": "stage_light_starburst_ultraviolet.mp4",
+  "bytes": 9625,
+  "visiblePixels": 10595,
+  "changedPixels": 0,
+  "motionVisible": false
+}

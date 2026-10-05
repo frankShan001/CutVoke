@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_pool_caustics",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c9bb039256f811af2f5618e04e604e7867ac77fc2fdc163fae4c7ddc5d8cc079",
+  "previewSha256": "7ddeef695efdddcdf7744bf8a0a518c378e14b7a330602a116385d58a02a4126",
+  "preview": "natural_light_pool_caustics.mp4",
+  "bytes": 11994,
+  "visiblePixels": 15514,
+  "changedPixels": 0,
+  "motionVisible": false
+}

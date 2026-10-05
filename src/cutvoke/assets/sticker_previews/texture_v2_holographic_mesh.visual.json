@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_holographic_mesh",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "细网格叠加彩虹折射，网线结构完整，和无网格的热浪纹理可区分。",
+  "sourceSha256": "04680f2501ccf26bad5af89bed08f77f443dc08f6246f7849c99c11d2947a1a4",
+  "previewSha256": "110690fe16fb64603a1e4508366d4fc5558cfbfda22e9a2192ece1e66e110710",
+  "auditSha256": "e9a88421b6b11b8e330029874cd556df8206bd5a40d79e87375eae12a8aa824c"
+}

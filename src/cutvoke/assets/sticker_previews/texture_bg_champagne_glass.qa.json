@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_champagne_glass",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7a5ed1df1e941f53e9fd982d4bdd157b3dba764cc628a6db9febd4139ff1499a",
+  "previewSha256": "8f176887a43486b0f9fb4e0c8f6ffa7fb66bc0eedfa1cd0a5b106c5be1bd3f27",
+  "preview": "texture_bg_champagne_glass.mp4",
+  "bytes": 17110,
+  "visiblePixels": 51667,
+  "changedPixels": 0,
+  "motionVisible": false
+}

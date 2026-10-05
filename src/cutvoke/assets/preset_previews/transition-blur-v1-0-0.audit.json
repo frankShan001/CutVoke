@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.blur",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.819,
+  "exportSha256": "5c727481715c000585ed43fa3f1b8517937fdaddf2a814db0cf21eb13cd792f7",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "5c727481715c000585ed43fa3f1b8517937fdaddf2a814db0cf21eb13cd792f7",
+  "auditExport": "transition-blur-v1-0-0.audit.mp4"
+}

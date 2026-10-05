@@ -1,0 +1,27 @@
+{
+  "presetId": "cutvoke.preset.animation.slideDown",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.slideDown",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "distance": 0.45,
+        "easing": "ease-out"
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 56.64,
+  "maxSampledMeanRgbDifference": 56.64,
+  "coverSha256": "d0ed72da45095065eeeb87fcf9c41ba72ba226c2170946400fcedaeb15116d95",
+  "previewSha256": "750979b39bd87439579292420fb6d1633cbc40a1a99073ab0af2e47e3abaa435",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

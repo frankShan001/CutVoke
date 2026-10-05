@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_moonlit_water",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5c82ca2e388f0e2ba9ea647f1e1c93fd6720262edd7575e04dbd801fbb309da6",
+  "previewSha256": "2457a92e4bcf6a392d66676cb2b6c6e357048077c8f80533a3f622aba3fce51a",
+  "preview": "natural_light_moonlit_water.mp4",
+  "bytes": 11913,
+  "visiblePixels": 16771,
+  "changedPixels": 0,
+  "motionVisible": false
+}

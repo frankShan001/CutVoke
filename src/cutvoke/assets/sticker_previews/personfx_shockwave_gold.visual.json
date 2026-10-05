@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_shockwave_gold",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "Thin golden concentric waves have a clear center and remain separate from the amber aura ring.",
+  "sourceSha256": "e590f95972bfa8b0f392d9487667eea370ca4cc0881b3fc7873e45a127aa53ac",
+  "previewSha256": "a86241d0501097540e368f97cf82c0c1a50f7d0410d96a7a879fa9fcfee5be89",
+  "auditSha256": "48959cac38679398e0582d6cb33d26714f1f22536a0cd1defbe1a22ad21bd3d6"
+}

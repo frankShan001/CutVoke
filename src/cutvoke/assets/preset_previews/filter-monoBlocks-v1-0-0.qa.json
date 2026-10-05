@@ -1,0 +1,31 @@
+{
+  "presetId": "cutvoke.preset.filter.monoBlocks",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.posterize",
+      "version": "1.0.0",
+      "params": {
+        "levels": 3
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.grayscale",
+      "version": "1.0.0",
+      "params": {
+        "strength": 1
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 56.825,
+  "maxSampledMeanRgbDifference": 56.825,
+  "coverSha256": "1faead68ed60966562b5dc26820033820bc964582db6b52ac8809187ee908f86",
+  "previewSha256": "50554c87c9f128ba58eeef60bd421ef97243d4ce71873354e7cb5174ef455f4f",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

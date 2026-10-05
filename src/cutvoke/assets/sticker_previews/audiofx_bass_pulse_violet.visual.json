@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_bass_pulse_violet",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "Four concentric violet rings form a clean centered pulse with no crop or neighboring artwork.",
+  "sourceSha256": "e198cd803d46d7e61bcc8f6f62934d0692c2b259885d7d12e7ecf78efd12f74e",
+  "previewSha256": "289a062c89a315841ac31e54a2963cc178f4b32232212a7ff26ea4226f8b7a4e",
+  "auditSha256": "e57f49a6afc47cc04a22ac2fb7ed95eb7acfd386e6cacf5f004af782f03991c2"
+}

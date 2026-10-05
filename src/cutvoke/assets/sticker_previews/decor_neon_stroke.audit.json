@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_neon_stroke",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "6d36d0203d07f5b8f504fc7735f7f58a22d295b4c4f90beda57fd341d0314f1c",
+  "previewSha256": "944aedcdcc99a57323ead950ca76fc564f454dba3d06b862deeb52a04dcfc970",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3115,
+  "visiblePixels": 1870,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1625,
+    "steady_entry": 1870,
+    "steady_exit": 1870,
+    "exit": 1622
+  },
+  "previewExportMeanRgbDifferences": [
+    0.34,
+    0.338
+  ],
+  "auditExport": "decor_neon_stroke.audit.mp4",
+  "auditExportSha256": "bb87bd8fc89c087dde31f3040a14449e72b52063af35014765fbe5e1db6e5f8c"
+}

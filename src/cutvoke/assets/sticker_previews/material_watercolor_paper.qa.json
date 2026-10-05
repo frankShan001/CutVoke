@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_watercolor_paper",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "bbf2829953d693c9a4053cab010bf16ea7d085e7ad79cf56c6584b4e6bea5a7b",
+  "previewSha256": "e25727908d027bc84fef886690e01e0a4dd5dd1aceef1406ee0ac6e8353f3ab8",
+  "preview": "material_watercolor_paper.mp4",
+  "bytes": 4340,
+  "visiblePixels": 3682,
+  "changedPixels": 0,
+  "motionVisible": false
+}

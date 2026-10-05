@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_atlas_embers",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "橙色余烬颗粒与短光迹分散，透明底干净，视觉强度克制。",
+  "sourceSha256": "0a843caf0dd3bdff3bf65e8f0f13bda1d2930e33d331c945975a81bf3db0c6b3",
+  "previewSha256": "29c8c21f37aeddc35bee4ba7fc7c22071ddcd1f70b82bbbd209413a536d2fa49",
+  "auditSha256": "4067b760deae773e992610941be0d2b5caf5497f9fe4b38308acda74c573fa7a"
+}

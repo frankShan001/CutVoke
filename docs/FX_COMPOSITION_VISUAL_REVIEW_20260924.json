@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed the full-size composition cover contact sheet and aligned 0.10s/0.95s frames from each generated MP4; compared audited edited-X export frames to default frames and confirmed visible movement or boundary shift.",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.fx.frameBlue",
+      "decision": "approved",
+      "observation": "蓝色细线矩形取景框在画面边缘形成完整边框，入段前无边框；编辑水平位置后边框明显移动，与中心绿色圆环区分。",
+      "motionPreviewSha256": "0ba89dc9a2b7d632279642dec6455b67cf171d443b39d06d46bb137c6862448d"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.arrowOrange",
+      "decision": "approved",
+      "observation": "橙色粗方向箭头在画面中部清晰指向右侧，入段前无箭头；编辑水平位置后箭头明显移动，与蓝色矩形边框区分。",
+      "motionPreviewSha256": "29cc49314d9d2d126bb4ec1f627c42d3613c3d38a3bd40e154ef3af3fb689e0e"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.ringGreen",
+      "decision": "approved",
+      "observation": "绿色椭圆聚焦圈围住画面中心物体，入段前无圈；编辑水平位置后圆圈明显移动，与矩形框的轮廓和颜色区分。",
+      "motionPreviewSha256": "ad91382a6bc9eb7e9f27010f83baa26555ebbbb2133255595ac3fa1d8b1f11ec"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.splitLeft",
+      "decision": "approved",
+      "observation": "画面仅保留左半幅，右半幅显示透明底；入段前左右完整，编辑水平位置后分割边界大幅移动。",
+      "motionPreviewSha256": "7fce9cd12f51ce534c5c2f6511277966be2f3dc9cb25132ecd1d75edb23052c2"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.centerCutout",
+      "decision": "approved",
+      "observation": "画面中心出现透明圆形镂空，外侧仍保留原画；编辑水平位置后洞口明显移动，与左半幅分割区分。",
+      "motionPreviewSha256": "9d8244e48f8abebc88baf1690b44e0c4b608b2eda76c699e8d4a6adf6d6f3469"
+    }
+  ]
+}

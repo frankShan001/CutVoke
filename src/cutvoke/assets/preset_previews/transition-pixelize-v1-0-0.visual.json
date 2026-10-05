@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.pixelize",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.pixelize",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "故障",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Block sized pixel fragments cover both source images near the center of the join, then resolve to the incoming image. This is visibly different from the smooth blur and clean camera or wipe transitions.",
+  "method": "Inspected five aligned frames through each full transition and compared with the existing dissolve, wipe and camera-motion sheets; checked the command/edit/reload/preview/export audits.",
+  "coverSha256": "5bd83db9b82be0a9f93833f966e864c3140574ae032567ec50722c4f5a925088",
+  "motionPreviewSha256": "84a8e0e78835c4e0478d1bafccb244708a8db027b60d7a2654144c61a155a214",
+  "auditSha256": "5879fdf1e5853a08bd2764f1d6be52151f77289493f48e92b467846274d04a95"
+}

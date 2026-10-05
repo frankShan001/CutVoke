@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_flower_wreath",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "f398b85acb6a58392f2ea05a5e5b73a6673940d3e795582c601503d56c8d420c",
+  "previewSha256": "2ca453570755db8e4899ddb30af5f6aa6447803f8b9630cf11b5f73d56244ac2",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4128,
+  "visiblePixels": 2746,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1727,
+    "steady_entry": 2745,
+    "steady_exit": 2746,
+    "exit": 1728
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1727,
+      "withoutFade": 2746
+    },
+    "steady_entry": {
+      "withFade": 2745,
+      "withoutFade": 2746
+    },
+    "steady_exit": {
+      "withFade": 2746,
+      "withoutFade": 2745
+    },
+    "exit": {
+      "withFade": 1728,
+      "withoutFade": 2746
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "botanical_flower_wreath.audit.mp4",
+  "auditExportSha256": "1f235a986a1472f67e2f0f99279bc803469b04884d5f57994015ee4e3866c831"
+}

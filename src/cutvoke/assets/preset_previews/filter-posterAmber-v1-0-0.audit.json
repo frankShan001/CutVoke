@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.posterAmber",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "levels",
+    "value": 3.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "9b339027606e7489e8e0b9582827258cc50bd769f169465cdf45e1dbca5b824e",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "9b339027606e7489e8e0b9582827258cc50bd769f169465cdf45e1dbca5b824e",
+  "auditExport": "filter-posterAmber-v1-0-0.audit.mp4"
+}

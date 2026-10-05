@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_trophy",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "金色奖杯的杯口、双耳和底座结构完整，缩小后仍易识别，未出现背景残色。",
+  "sourceSha256": "00ccec732a735643c7c52012f946f48a819feaf24e2d4de8277bb96c20f86100",
+  "previewSha256": "c0c5313636608df8ecf043497f668353f08b2d03e44850cbb6537ac877a08f61",
+  "auditSha256": "19d84fd92c4335d38ce75f1ab7f11c25c75798a299635e32c1b103e907abc5e7"
+}

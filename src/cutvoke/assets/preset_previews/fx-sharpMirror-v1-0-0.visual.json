@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.sharpMirror",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.sharpen",
+  "params": {
+    "amount": 2.6
+  },
+  "subcategory": "基础",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "太阳和主体从右侧反转到左侧，方向变化一眼可辨，同时边缘更锐；与线稿、网格和镜头畸变的画面不同。",
+  "method": "Compared before/after frames at 0.20s and 0.95s from real previews, compared them with existing basic-effect covers, and decoded each MP4 fully; geometric sample only.",
+  "coverSha256": "fe455da1df3928e745b8e054867b9f3f84daf4539c5db1750e4b40a6a3f0b748",
+  "motionPreviewSha256": "338e77965067453f1ba31ea0268dc7e476510bec4a1d4b4cf8fe3dfa2543f520",
+  "auditSha256": "9f10ec3ecebc57babe959f14b6efaf2774be175e7bee8efa122203aba795102b"
+}

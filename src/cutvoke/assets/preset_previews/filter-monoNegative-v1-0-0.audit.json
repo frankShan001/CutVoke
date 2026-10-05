@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.monoNegative",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 0.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "e17b57995e1bbe4331e4b3474aff8ee5e6bf902609bdf7d99b512ace2b6c0e07",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "e17b57995e1bbe4331e4b3474aff8ee5e6bf902609bdf7d99b512ace2b6c0e07",
+  "auditExport": "filter-monoNegative-v1-0-0.audit.mp4"
+}

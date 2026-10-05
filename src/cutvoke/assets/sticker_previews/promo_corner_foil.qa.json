@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_corner_foil",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "af7625d9ad08c93dfa18570d0fd5f0c9404e0122a121b2444dda8ed86cb5ffc5",
+  "previewSha256": "ce523e96fe313e3a98c4ac96f68c395261df107c7d669d80e416cba326fed846",
+  "preview": "promo_corner_foil.mp4",
+  "bytes": 6061,
+  "visiblePixels": 1083,
+  "changedPixels": 0,
+  "motionVisible": false
+}

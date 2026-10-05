@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_double_arrow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Blue opposing arrowheads and connecting shaft are cleanly separated from both light and dark backgrounds.",
+  "sourceSha256": "e705fbbff664251376c5ad4c8c10ada59a771fa5ad5b639113185849b29df471",
+  "previewSha256": "546c4145407f2d9fd6a313ee616817cb822737ccd595972b8f194a907cd96312",
+  "auditSha256": "1938db0ca28ebbbb18f3d9b14d8f7073e7cb4cfd598b87d40bf83fb8de1588fb"
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_rainbow_sparks",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "9ef2ae62b51455887444289f6dea5daa6e7e4c5875e8aa1984f8c92948909bfc",
+  "previewSha256": "c40a75e6ba629f6721ad97d7b90f96afac38663a00f9fc16d24fcae9da9daef6",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2669,
+  "visiblePixels": 1711,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1345,
+    "steady_entry": 1711,
+    "steady_exit": 1711,
+    "exit": 1344
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1345,
+      "withoutFade": 1711
+    },
+    "steady_entry": {
+      "withFade": 1711,
+      "withoutFade": 1711
+    },
+    "steady_exit": {
+      "withFade": 1711,
+      "withoutFade": 1711
+    },
+    "exit": {
+      "withFade": 1344,
+      "withoutFade": 1711
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.324,
+    0.324
+  ],
+  "auditExport": "fxoverlay_pixel_rainbow_sparks.audit.mp4",
+  "auditExportSha256": "286be67f5d5f17ecfdce240c83d820b7b477568c5939f5150ac3bf2c21b08f59"
+}

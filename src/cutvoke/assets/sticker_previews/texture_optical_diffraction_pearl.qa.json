@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_diffraction_pearl",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c9299dcb544f801588319f77b06a47df483f11743aa90879a7a32777d3e2f629",
+  "previewSha256": "fb8bb34ca9845dd0f398aa8254c4ef2d104569e712e88d4a1883c1c1956e2df7",
+  "preview": "texture_optical_diffraction_pearl.mp4",
+  "bytes": 7048,
+  "visiblePixels": 4768,
+  "changedPixels": 0,
+  "motionVisible": false
+}

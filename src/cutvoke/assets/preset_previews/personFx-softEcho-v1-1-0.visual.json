@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.softEcho",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.echo",
+  "params": {
+    "frames": 3,
+    "decay": 0.42
+  },
+  "subcategory": "人物残影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A subtle single trailing silhouette appears during movement without obscuring the main figure.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "91dac805e802ae2b5435daa4a3fc67d550473a7233498c76b1aa8f39f7979eb1",
+  "motionPreviewSha256": "cc3d0fecda260189bf653fea679d48e1baa95161bcc16062eb20b58f171575a7",
+  "auditSha256": "b3518fec85bd90920a60c409e3c1d780b4139f980fcbd16adc12fd6e284d0395"
+}

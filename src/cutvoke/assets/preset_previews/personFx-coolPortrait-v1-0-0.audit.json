@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.coolPortrait",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "hue",
+    "value": -17.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.928,
+  "exportSha256": "e3de25b694aa1a536a11e88330461a6a5e93522d1032c516be974ecf1ad424d7",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "e3de25b694aa1a536a11e88330461a6a5e93522d1032c516be974ecf1ad424d7",
+  "auditExport": "personFx-coolPortrait-v1-0-0.audit.mp4"
+}

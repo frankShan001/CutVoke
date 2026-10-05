@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.arrowOrange",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "x",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "f35a5bbd9f5251b5caa453391912f5c1755894dd66f5b3806083c71e656bef71",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "f35a5bbd9f5251b5caa453391912f5c1755894dd66f5b3806083c71e656bef71",
+  "auditExport": "fx-arrowOrange-v1-0-0.audit.mp4"
+}

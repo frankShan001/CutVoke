@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_ink_splatter",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "8f4709a81fc54067afbcf85ef5719d8de9d325bdfc63e76278331758823fc1f3",
+  "previewSha256": "bb85cde0ffefddd80fac367482ffc6deeb98058cd8bcb5ab24f678f9deb7163a",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4904,
+  "visiblePixels": 3621,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2290,
+    "steady_entry": 3620,
+    "steady_exit": 3621,
+    "exit": 2290
+  },
+  "previewExportMeanRgbDifferences": [
+    0.427,
+    0.437
+  ],
+  "auditExport": "manga_ink_splatter.audit.mp4",
+  "auditExportSha256": "c079154450c377c08c5994aa7bd44ac387920c725779eef63d1c0c675f4f5739"
+}

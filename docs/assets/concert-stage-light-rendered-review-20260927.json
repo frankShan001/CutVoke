@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "generator": "RenderService output sampled with ffmpeg",
+  "sampleTimeSeconds": 0.8,
+  "background": "editor preview's generated dark-to-light gradient",
+  "contactSheet": "docs/assets/concert-stage-light-rendered-review-20260927.png",
+  "contactSheetSha256": "e3d4c63221d612afaaf05e76f2b2466dce3d818630f81d849f07332387e8629f",
+  "items": [
+    {
+      "index": 1,
+      "stickerId": "cutvoke.sticker.stage_light_laser_fan_cyan",
+      "name": "青紫激光扇",
+      "sourceSha256": "5be68efe9ac61efca85d421dbfa216bc42f259e82f9743d0ad601c55c6b89b2e",
+      "previewSha256": "93ba9f5e914f890993ea3d74859214379f300b6eb20aeecfc3cfee80c48c702d"
+    },
+    {
+      "index": 2,
+      "stickerId": "cutvoke.sticker.stage_light_spotlight_pair_amber",
+      "name": "琥珀双聚光灯",
+      "sourceSha256": "de1727185cf9fc896cc01074e00e9fbe34b05ecd0ce5e80e4ff5af27076ebd74",
+      "previewSha256": "dd14e318c21b065f482339f091e00c7ef9433a141312b56ad7521ff98e3fc9c3"
+    },
+    {
+      "index": 3,
+      "stickerId": "cutvoke.sticker.stage_light_moving_head_magenta",
+      "name": "洋红环形摇头灯",
+      "sourceSha256": "262cf35f6aaf2d20a318e7b499e8565e1f0b8d0ae8208a5f1756b364908a008d",
+      "previewSha256": "8cdb004b9f05c829da2ee8dc46458996316facab7522d7a22984f14684b0f7ab"
+    },
+    {
+      "index": 4,
+      "stickerId": "cutvoke.sticker.stage_light_beam_columns_blue",
+      "name": "蓝色体积光柱",
+      "sourceSha256": "bda7394df599e6a2cdc5b28c44fabd5f8f89be6749e27d2262cc0098ddcea8e7",
+      "previewSha256": "60f9f650be1e66a94a459375358060dcf11c3c08c2032aeaea793fc6949c2bab"
+    },
+    {
+      "index": 5,
+      "stickerId": "cutvoke.sticker.stage_light_prism_flare_rainbow",
+      "name": "彩虹棱镜光晕",
+      "sourceSha256": "64ce0770ab7742e071df4ae9a02a17f5d7a7f9179337f38ae766ec51d3729bf2",
+      "previewSha256": "636c8218c354bae7366d9466847665fe1f6a530635ec1f7c1569685c22c00d6c"
+    },
+    {
+      "index": 6,
+      "stickerId": "cutvoke.sticker.stage_light_crossing_lasers",
+      "name": "青粉交叉激光",
+      "sourceSha256": "a9e328ad507b5f3ef361afbc3964615c16f6079fffe24cdc339b3decfa47edf4",
+      "previewSha256": "c5ac6c78fdad9966ae56c072d92a70f1cf168c720cb66c787340825d2aa0afdd"
+    },
+    {
+      "index": 7,
+      "stickerId": "cutvoke.sticker.stage_light_anamorphic_flare_pearl",
+      "name": "珍珠白变形宽银幕光",
+      "sourceSha256": "f2cd348c94f1872d144532c562d3b9fd2b0f6bd0bffa1312afbc050f6a7358f6",
+      "previewSha256": "b51723514c8c2a98f90411ba30a09c7c4dc7a11915546bcc960f36bcd39655dd"
+    },
+    {
+      "index": 8,
+      "stickerId": "cutvoke.sticker.stage_light_starburst_ultraviolet",
+      "name": "紫外星芒光束",
+      "sourceSha256": "0d0fe2f3809fff158e3d511f036fd6613072e96cf728e4d2e93ae7e2ccb53422",
+      "previewSha256": "046c1912d2fb4f8500293397612aa99b712c30c9f7a6553d9885a43d9174a7f5"
+    },
+    {
+      "index": 9,
+      "stickerId": "cutvoke.sticker.stage_light_haze_ribbons_amber_rose",
+      "name": "琥珀玫瑰雾光丝带",
+      "sourceSha256": "d7f322661e4ee2d6f8d117a9d42fb59e429984662d404f4cd7081e3a0388ef58",
+      "previewSha256": "6431f9e9578a083751278618628bd0680db7a5e6c7a6fabaa18e7e1f97a4bf67"
+    },
+    {
+      "index": 10,
+      "stickerId": "cutvoke.sticker.stage_light_tunnel_cyan",
+      "name": "青色光环隧道",
+      "sourceSha256": "33bd82c56d6fd0413a12d5889984058444005dc35a78989b8d189f6068623023",
+      "previewSha256": "373833f9b4e1226158f7b65271727389d4dba689a9a9f757c1c18e03a488572a"
+    },
+    {
+      "index": 11,
+      "stickerId": "cutvoke.sticker.stage_light_disco_facets_emerald_violet",
+      "name": "翡翠紫色镜面光斑",
+      "sourceSha256": "6b88e5ffd3475925d288e43b6c3bb1c9596cd0999aadbddb4d62a4f2a42913da",
+      "previewSha256": "b747571ce8e92f50db5e535b7ff71aab9977852493cf140b5c4962297d673457"
+    },
+    {
+      "index": 12,
+      "stickerId": "cutvoke.sticker.stage_light_sweep_beams_red_blue",
+      "name": "红蓝横扫光束",
+      "sourceSha256": "4030792374561228c3b34f76f529ccaa1c92be4233d51569abad4a05e8a6d1e5",
+      "previewSha256": "7955d321d1a812a04bc43f35aefdba69577599375cc3981f92104f382ec0eac4"
+    },
+    {
+      "index": 13,
+      "stickerId": "cutvoke.sticker.stage_light_spotlight_bloom_gold",
+      "name": "金色聚光灯晕",
+      "sourceSha256": "aa600002d7d2e79dd3b7b037b4d4d7f302c4d661316f26b274dd268cceb4c213",
+      "previewSha256": "cd16db84fcac4fa2f4f3390159dac9d04e6453c9480ca9dd3e440ab8ebc03a97"
+    },
+    {
+      "index": 14,
+      "stickerId": "cutvoke.sticker.stage_light_curtain_magenta_cyan",
+      "name": "洋红青色叠层光幕",
+      "sourceSha256": "73f5b689b0fab449eb0bb58f55710134e569a5a91dd4d556d335cc71c00f8162",
+      "previewSha256": "b4b164bd609fbbfe93a3e9010ba3350c814e2b8949bef68154cd62747d1711ed"
+    },
+    {
+      "index": 15,
+      "stickerId": "cutvoke.sticker.stage_light_beam_spotlight_coolwhite",
+      "name": "冷白舞台追光",
+      "sourceSha256": "c7f09da143f25c8fb7b2c0a62eb5eb83114723d7b92ad80f0af4f3bbe67c13e6",
+      "previewSha256": "6f80547f23aa43deeecc8813659bf6366102a93a781953c157c6ed7196b89954"
+    },
+    {
+      "index": 16,
+      "stickerId": "cutvoke.sticker.stage_light_prism_beam_fan",
+      "name": "彩色棱镜扇形光束",
+      "sourceSha256": "2c56325c5aec8b6fc649e6d65f17a82afeb60b30b8e04176f4a186b3cdd75b93",
+      "previewSha256": "cbacf7edc4a2070209383ece110ae11246f8a7ae0620f2b083a63037d4248a89"
+    }
+  ]
+}

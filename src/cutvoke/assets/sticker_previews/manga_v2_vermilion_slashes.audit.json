@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_vermilion_slashes",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "ee6ebcef0f2a58e6c6ad87bcb8a5062001ab60bbd3b1c1ab9bddbd15bfcab616",
+  "previewSha256": "5be83be433d309c0caa6bb514e37ad0ff9885bbbb6e81c00827006f1fa52babe",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3823,
+  "visiblePixels": 2556,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1984,
+    "steady_entry": 2556,
+    "steady_exit": 2556,
+    "exit": 1993
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1984,
+      "withoutFade": 2555
+    },
+    "steady_entry": {
+      "withFade": 2556,
+      "withoutFade": 2556
+    },
+    "steady_exit": {
+      "withFade": 2556,
+      "withoutFade": 2554
+    },
+    "exit": {
+      "withFade": 1993,
+      "withoutFade": 2553
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.239,
+    0.26
+  ],
+  "auditExport": "manga_v2_vermilion_slashes.audit.mp4",
+  "auditExportSha256": "6c39d7884b852685cec92e9be70b18de14c583ccbc4d261acd1556fb81f6a33e"
+}

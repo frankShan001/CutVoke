@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_underline",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Two yellow curved strokes remain visible on both backgrounds and have smooth, clean endpoints.",
+  "sourceSha256": "23d12587292d6335a779b62fcb14a3026f5c140826fc10ede085eaa4e8cde782",
+  "previewSha256": "1d88c6b96802e977e15fc4c4477d2316e7d1aac87b7de222d57b2b31719091f1",
+  "auditSha256": "38889d0667e35294b55c4b29ff88f90f87852623e13a0ec9e9f76eeda2a5b6e2"
+}

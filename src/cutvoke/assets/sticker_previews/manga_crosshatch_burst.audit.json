@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_crosshatch_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "93770b9bc3738cec9c2cc1578c55090c73aa80c840ad055c130c075d8a6f711d",
+  "previewSha256": "f50798ec6db2325e23c36f39ecad7cddb1352b73501e99ec6b869fd21f42fc0f",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4512,
+  "visiblePixels": 3043,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1594,
+    "steady_entry": 3043,
+    "steady_exit": 3043,
+    "exit": 1580
+  },
+  "previewExportMeanRgbDifferences": [
+    0.323,
+    0.285
+  ],
+  "auditExport": "manga_crosshatch_burst.audit.mp4",
+  "auditExportSha256": "ddfff2fd7994ec07471cc77d0e95df82fe468fa583b98dd3716f683492f75a50"
+}

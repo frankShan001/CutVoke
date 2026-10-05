@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_ground_fog",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "54e1b3f393330641dde83f5674692565a9a1d40e7a821ae9670d62ae2b158d2c",
+  "previewSha256": "3584d22c154601eedabf4d799cee95d4cdd768a8b963af4303677aa186797d69",
+  "preview": "weatherfx_ground_fog.mp4",
+  "bytes": 8665,
+  "visiblePixels": 11997,
+  "changedPixels": 0,
+  "motionVisible": false
+}

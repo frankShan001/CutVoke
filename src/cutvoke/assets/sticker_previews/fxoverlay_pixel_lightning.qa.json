@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_lightning",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "b459cdc37bb127a79e7974e481bfcaca4f199b5f47ed3ed7fa1d29ca0610fff2",
+  "previewSha256": "6b2197c65e0a0302f83555c5c38ce5f5a3c028a21c68f581bf19188e55985700",
+  "preview": "fxoverlay_pixel_lightning.mp4",
+  "bytes": 11720,
+  "visiblePixels": 6083,
+  "changedPixels": 12,
+  "motionVisible": false
+}

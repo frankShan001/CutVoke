@@ -1,0 +1,602 @@
+{
+  "schemaVersion": 1,
+  "source": "cinematic-texture-atlas-20260925.png",
+  "sourceSha256": "473cc2a8f586a2724a72dd4186d322207663e7c3a75a3ab4af0fd59d4436571d",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4; first 14 row-major cells extracted",
+  "extraction": "centered 94% square crop per cell; transparent trim under alpha 8; fit to 280px and center on transparent 320px canvas",
+  "contactSheet": "cinematic-texture-contact-sheet-20260925.png",
+  "items": [
+    {
+      "index": 1,
+      "stem": "texture_atlas_dust_bokeh",
+      "name": "金尘散景",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "金色",
+        "散景",
+        "光斑"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "cropBox": [
+        9,
+        9,
+        304,
+        304
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 26485,
+      "alphaBounds": [
+        52,
+        45,
+        286,
+        271
+      ],
+      "alphaExtrema": [
+        0,
+        243
+      ],
+      "sha256": "431002098597770124c5f014ae38879c59f6094a634c4f0b376070f41bae8f10"
+    },
+    {
+      "index": 2,
+      "stem": "texture_atlas_edge_leak",
+      "name": "暖橙漏光",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "暖光",
+        "漏光",
+        "边缘"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "cropBox": [
+        323,
+        10,
+        617,
+        304
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 21469,
+      "alphaBounds": [
+        23,
+        23,
+        297,
+        292
+      ],
+      "alphaExtrema": [
+        0,
+        246
+      ],
+      "sha256": "ebd2e4ea018c3604c3d0ab1ebd6791bee3c2109cd28ae4be57143432c4fdb1de"
+    },
+    {
+      "index": 3,
+      "stem": "texture_atlas_embers",
+      "name": "微光余烬",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "火花",
+        "余烬",
+        "光点"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "cropBox": [
+        636,
+        10,
+        930,
+        304
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 7168,
+      "alphaBounds": [
+        56,
+        29,
+        285,
+        286
+      ],
+      "alphaExtrema": [
+        0,
+        236
+      ],
+      "sha256": "0a843caf0dd3bdff3bf65e8f0f13bda1d2930e33d331c945975a81bf3db0c6b3"
+    },
+    {
+      "index": 4,
+      "stem": "texture_atlas_foil_flecks",
+      "name": "金银箔碎片",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "金箔",
+        "银箔",
+        "碎片"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "cropBox": [
+        949,
+        9,
+        1244,
+        304
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 12669,
+      "alphaBounds": [
+        36,
+        37,
+        279,
+        284
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "77bc03eba565ae85480c71da5be55af517dd9bcab29a1303425ad9eb6a207b4d"
+    },
+    {
+      "index": 5,
+      "stem": "texture_atlas_frost_edge",
+      "name": "冰霜框边",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "冰霜",
+        "边框",
+        "冬日"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "cropBox": [
+        10,
+        323,
+        304,
+        617
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 43755,
+      "alphaBounds": [
+        26,
+        22,
+        297,
+        290
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "e2927e25ec804aeb61319e2a19cff41e7b27bbda77f745e4fe7f95979a08fc0a"
+    },
+    {
+      "index": 6,
+      "stem": "texture_atlas_gate_weave",
+      "name": "青色放映门痕",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "青色",
+        "胶片",
+        "划痕"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "cropBox": [
+        323,
+        323,
+        617,
+        617
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 4040,
+      "alphaBounds": [
+        52,
+        27,
+        286,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        235
+      ],
+      "sha256": "da826f3adc2e4e7312db5109ffbb8ec49c579c4730fe3d90850139718511091d"
+    },
+    {
+      "index": 7,
+      "stem": "texture_atlas_leaf_shadows",
+      "name": "叶影漏光",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "叶影",
+        "植物",
+        "光影"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "cropBox": [
+        636,
+        323,
+        930,
+        617
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 34680,
+      "alphaBounds": [
+        24,
+        23,
+        297,
+        287
+      ],
+      "alphaExtrema": [
+        0,
+        156
+      ],
+      "sha256": "eb23ca2bbddb3d450dcc2dd30e7e3ed700e6e1a94e1a49a237c3964a66d61d77"
+    },
+    {
+      "index": 8,
+      "stem": "texture_atlas_low_fog",
+      "name": "层叠低雾",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "薄雾",
+        "蓝色",
+        "氛围"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "cropBox": [
+        950,
+        323,
+        1244,
+        617
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 42497,
+      "alphaBounds": [
+        23,
+        112,
+        295,
+        290
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "56850bfb6424b11bed43f84c7f95e5cfc4263661a6486b91dfc9894635b7bcdc"
+    },
+    {
+      "index": 9,
+      "stem": "texture_atlas_prism_arc",
+      "name": "虹彩棱镜弧",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "棱镜",
+        "虹彩",
+        "弧光"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "cropBox": [
+        10,
+        636,
+        304,
+        930
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 35922,
+      "alphaBounds": [
+        26,
+        23,
+        285,
+        278
+      ],
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "43cb84f432095e9ad9fd3cb17ccf8e62ba3fa4000e5e0dc20cd4cc00ea783426"
+    },
+    {
+      "index": 10,
+      "stem": "texture_atlas_rain_glass",
+      "name": "雨窗水滴",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "雨滴",
+        "玻璃",
+        "水珠"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "cropBox": [
+        323,
+        636,
+        617,
+        930
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 40144,
+      "alphaBounds": [
+        32,
+        23,
+        293,
+        286
+      ],
+      "alphaExtrema": [
+        0,
+        240
+      ],
+      "sha256": "79972e389293b59595e46a968f50ab402861d04dd7c9cd20eb7499d0fe0f9069"
+    },
+    {
+      "index": 11,
+      "stem": "texture_atlas_smoke",
+      "name": "轻烟流线",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "烟雾",
+        "轻烟",
+        "流动"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "cropBox": [
+        636,
+        636,
+        930,
+        930
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 62868,
+      "alphaBounds": [
+        24,
+        23,
+        297,
+        286
+      ],
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "4aa34ddb1d9957c648080290a4d6784415b680aaeb37a60c61f7224b31c84e45"
+    },
+    {
+      "index": 12,
+      "stem": "texture_atlas_snow_crystals",
+      "name": "散落雪晶",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "雪花",
+        "晶体",
+        "冬日"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "cropBox": [
+        950,
+        636,
+        1244,
+        930
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 17365,
+      "alphaBounds": [
+        43,
+        42,
+        277,
+        274
+      ],
+      "alphaExtrema": [
+        0,
+        248
+      ],
+      "sha256": "c94750660a8afb0fb9c00983aa1a6d5c98f0093d3ba71848d6166088996cf6eb"
+    },
+    {
+      "index": 13,
+      "stem": "texture_atlas_torn_paper",
+      "name": "纤维撕纸边",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "纸张",
+        "撕边",
+        "纤维"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "cropBox": [
+        9,
+        949,
+        304,
+        1244
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 23397,
+      "alphaBounds": [
+        28,
+        22,
+        297,
+        292
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "eaf4433cef97db36a5c82ee68d5ed482e3655c79b5b31c31b14807561ca7ca73"
+    },
+    {
+      "index": 14,
+      "stem": "texture_atlas_watercolor",
+      "name": "蓝珊瑚水彩",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "电影叠加",
+        "水彩",
+        "蓝色",
+        "珊瑚"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "cropBox": [
+        323,
+        950,
+        617,
+        1244
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "sourceVisiblePixels": 50706,
+      "alphaBounds": [
+        28,
+        22,
+        298,
+        283
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "c07886549c316c9790877c3ea4ddf7993ac9dca21b48094d8512c51ac48b335b"
+    }
+  ]
+}

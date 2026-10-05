@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.fade",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.fade",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "叠化",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "两段画面通过明显的暗场完成切换；中间帧与透明叠化、白场闪光和灰度叠化有清晰视觉差异。",
+  "method": "Viewed aligned five-frame motion sheets for all eight 叠化 candidates and compared their intermediate frames with adjacent presets. Approved only four transitions with clearly different visible motion or color behavior.",
+  "coverSha256": "68058cfe215b27a34dc7cbd7b64978ff028b4ef18f101f8510d1a2336eca08a0",
+  "motionPreviewSha256": "209b53fc57bb1706c46af83500b0447606f8e3af27ea0cb3ff5822681c0f3c8c",
+  "auditSha256": "60c5191c384761649730933677b219d3f69fb12db1e223385f13c70c3e36d49b"
+}

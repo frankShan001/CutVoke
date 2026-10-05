@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_toxic_bubbles",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4150fcca0861d1daf5d64411ee3e8d81d0b9df911c7f1a457c7d560f8e55276a",
+  "previewSha256": "5ce36f371b2d9b09f5cefef5f9515f368c8442ed3c152486b8a8d3950ef6632d",
+  "preview": "fxoverlay_pixel_toxic_bubbles.mp4",
+  "bytes": 12457,
+  "visiblePixels": 8921,
+  "changedPixels": 0,
+  "motionVisible": false
+}

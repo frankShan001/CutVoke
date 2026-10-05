@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.transition.distance",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.distance",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 98.147,
+  "maxSampledMeanRgbDifference": 98.147,
+  "coverSha256": "e0471865f67811d0016f22967876b08877a09932352161503ee6cfbc3d1c8a75",
+  "previewSha256": "915a46e756ab62aa41170fbaffa58251ecb928b9f1aa76550b118327fdc44194",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

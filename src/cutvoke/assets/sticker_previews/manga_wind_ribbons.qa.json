@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_wind_ribbons",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "415e255d87ebc156e3aa404dd73dcc1d4ca1597e9babbe3388b7298ca4afddb0",
+  "previewSha256": "56c57b6d7cf927f59677a2a3302f12f9ba7f6d621ecebb99a774ff3bbbb7fe0d",
+  "preview": "manga_wind_ribbons.mp4",
+  "bytes": 5881,
+  "visiblePixels": 2137,
+  "changedPixels": 0,
+  "motionVisible": false
+}

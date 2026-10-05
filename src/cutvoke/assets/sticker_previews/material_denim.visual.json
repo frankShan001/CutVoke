@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_denim",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器合成预览；只批准纹理特征清晰、边缘完整且缩略图可辨的素材。批准仅覆盖贴图本身的识别度，不代表复杂实拍成片验收。",
+  "observation": "深蓝斜纹、织线和明暗起伏明显，缩放后仍能识别为牛仔布。",
+  "sourceSha256": "fa8e8e646e57f3e682bc25fc3cec43e26024e00bc7fcf4f43c11493d091931c0",
+  "previewSha256": "4871f676bf0d4abd7731876447cae04bf6d4a347e3de9b7d801f63f4bd640a26",
+  "auditSha256": "2efab98daf56796fd4c26b3ec3f425d2e4fc4b6bafda72be05c583177c222a9f"
+}

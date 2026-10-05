@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_telescope",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "fc13d642085a7d718c6e34205736a9211c15533136c832c8636001527fc88642",
+  "previewSha256": "f11c7982dfc2d21865b5cdf83e524d8d95296489cfbf81607c28f6711bc24e75",
+  "preview": "learn_telescope.mp4",
+  "bytes": 4033,
+  "visiblePixels": 1166,
+  "changedPixels": 0,
+  "motionVisible": false
+}

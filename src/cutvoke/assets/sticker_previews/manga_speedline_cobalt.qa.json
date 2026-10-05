@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_speedline_cobalt",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2bef8aba707d3af8d8b8fc0eee23b843a2f20603afe1e61b4bad8dca51259252",
+  "previewSha256": "6f7775a5a2fbbfac1a81519d938049fd9c97ed187ca165f98a0cf7dfe1516be0",
+  "preview": "manga_speedline_cobalt.mp4",
+  "bytes": 5437,
+  "visiblePixels": 1927,
+  "changedPixels": 6,
+  "motionVisible": false
+}

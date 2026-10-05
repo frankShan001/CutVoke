@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.roseEdge",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "sigma",
+    "value": 12.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.192,
+  "exportSha256": "c00960660e18606296dbbe6f67b4ae2b534e2e7329811d56fc45581b21728301",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "c00960660e18606296dbbe6f67b4ae2b534e2e7329811d56fc45581b21728301",
+  "auditExport": "personFx-roseEdge-v1-3-0.audit.mp4"
+}

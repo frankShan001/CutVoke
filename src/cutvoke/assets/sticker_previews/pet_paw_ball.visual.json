@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_paw_ball",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "球体及爪印对比清晰；底部有一个小于80像素的孤立浅色点，正常显示时不干扰主体。",
+  "sourceSha256": "f4c98c0e0907094d11e7084dcf82d723718650a3a7a972b998dc0ef6e04a5adb",
+  "previewSha256": "5ac40836dba38f525ab651e08ccbecd94e8f375ac66939341c90787439f22ace",
+  "auditSha256": "8b02c7c349adb7b7964d9a117d1110cbe28f917ce0fc7444c815e76c470a7dcb"
+}

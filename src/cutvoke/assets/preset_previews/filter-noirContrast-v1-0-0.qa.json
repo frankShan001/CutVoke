@@ -1,0 +1,31 @@
+{
+  "presetId": "cutvoke.preset.filter.noirContrast",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.grayscale",
+      "version": "1.0.0",
+      "params": {
+        "strength": 1.0
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.curves",
+      "version": "1.0.0",
+      "params": {
+        "preset": "strong_contrast"
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 39.332,
+  "maxSampledMeanRgbDifference": 39.332,
+  "coverSha256": "fa08e7131414e51260a9db1ab82742047efd7ab49b54e6ef22b44cb532367592",
+  "previewSha256": "2422b2404113ba68c20f8422a9be8716f5f99618fc138d576e1d0341df7059e8",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

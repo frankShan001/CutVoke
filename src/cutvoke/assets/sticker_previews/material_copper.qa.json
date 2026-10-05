@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_copper",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "75348930ade9e2aca0ab88277478efadff851119adf2e70fdbf1303c89bc478e",
+  "previewSha256": "5b8e643f0c5d56ae9bff11fa2264db56bf2e5244350b77e99bffaf280272ecb1",
+  "preview": "material_copper.mp4",
+  "bytes": 5155,
+  "visiblePixels": 3386,
+  "changedPixels": 0,
+  "motionVisible": false
+}

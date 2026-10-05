@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.transition.slide",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.slide",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 95.612,
+  "maxSampledMeanRgbDifference": 95.612,
+  "coverSha256": "42db738447a14fa8d221924ac16f463196425e0f37937c970511c168d40d7401",
+  "previewSha256": "e14f7f2f237f7da574a0c8e7b56823ebc6ca22c330e605708cdf7fca46fe9787",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

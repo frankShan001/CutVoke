@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_lilac_pearl",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "a6e00d5a416cf54de4cf7835ec497a2606124941399849a6aab8127d8c427ef2",
+  "previewSha256": "e25e2d52101ec00245982d8052d399305a001867e2033b05a5a694fa8aa1921d",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6357,
+  "visiblePixels": 5810,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 0,
+    "steady_entry": 5810,
+    "steady_exit": 5810,
+    "exit": 0
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 0,
+      "withoutFade": 5810
+    },
+    "steady_entry": {
+      "withFade": 5810,
+      "withoutFade": 5810
+    },
+    "steady_exit": {
+      "withFade": 5810,
+      "withoutFade": 5810
+    },
+    "exit": {
+      "withFade": 0,
+      "withoutFade": 5810
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.073,
+    0.075
+  ],
+  "auditExport": "texture_bg_lilac_pearl.audit.mp4",
+  "auditExportSha256": "04c88d0a008bb32f5f4b8be47d32e6f66caa71cd0ce90921c0c55f22a61ff29b"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_prism_flare",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3f61869723b7836d996cebaa1de04caac450ccb9f16dea42d1fd2b51d890b733",
+  "previewSha256": "e0fec5140df31c041238f30e902565aa1ff1e92c451ce5b6727ee4f5b464f140",
+  "preview": "texture_optical_prism_flare.mp4",
+  "bytes": 6948,
+  "visiblePixels": 4287,
+  "changedPixels": 0,
+  "motionVisible": false
+}

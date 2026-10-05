@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.flower_neon",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 5257,
+  "exportSha256": "a05b23597a232edb863e1d17d1abb1160da8e306856cc1ff02c55cdef7f37d31",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "a05b23597a232edb863e1d17d1abb1160da8e306856cc1ff02c55cdef7f37d31",
+  "auditExport": "text-flower_neon-v1-0-0.audit.mp4"
+}

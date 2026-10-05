@@ -1,0 +1,52 @@
+{
+  "name": "cutvoke-desktop",
+  "version": "0.3.1",
+  "private": true,
+  "description": "CutVoke local video editor",
+  "author": "frankShan001",
+  "license": "MIT",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis --x64",
+    "unpacked": "electron-builder --win --x64 --dir"
+  },
+  "devDependencies": {
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.cutvoke.editor",
+    "productName": "CutVoke",
+    "asar": true,
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "../dist/desktop"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "loading.html",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../build/desktop-engine/cutvoke-engine",
+        "to": "engine"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "signAndEditExecutable": false,
+      "artifactName": "CutVoke-Setup-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}

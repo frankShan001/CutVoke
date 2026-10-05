@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_aura_amber",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "Warm amber arc remains crisp on both dark and light backgrounds, with intentional open space at the top.",
+  "sourceSha256": "bab3bfcaa16e25515f072eeb4a98c9a5643f80cb3445fc121d91a0fcc8a34d01",
+  "previewSha256": "e02ba3f0b0608f807ef15fdb18506914783e7e9e18fd8a7b5b37c0bd2ffd86ea",
+  "auditSha256": "046ea4845946af7e11d2d172173acb8ff5bf00a548630574f9fb40a27523fd6a"
+}

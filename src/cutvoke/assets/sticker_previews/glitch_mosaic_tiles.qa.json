@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_mosaic_tiles",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6c6c2c51dddad5e717a2ea9ebf3cb52359f7e9f54728a55049c491e5ad04a52b",
+  "previewSha256": "0a371bd36caba83153a56bb048f0113358bbb5ccf00fe62576965489d50f01f7",
+  "preview": "glitch_mosaic_tiles.mp4",
+  "bytes": 10034,
+  "visiblePixels": 8651,
+  "changedPixels": 0,
+  "motionVisible": false
+}

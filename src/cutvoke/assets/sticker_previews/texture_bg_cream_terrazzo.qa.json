@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_cream_terrazzo",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "9c1cc6c9fb35f93fdc07717ef34b63cb27da1bc5465d6743806648fa8c6fac8f",
+  "previewSha256": "cd41462a11a5b03066f1fba1c557a8385da6de964c9642655868b115455492d7",
+  "preview": "texture_bg_cream_terrazzo.mp4",
+  "bytes": 21352,
+  "visiblePixels": 52113,
+  "changedPixels": 0,
+  "motionVisible": false
+}

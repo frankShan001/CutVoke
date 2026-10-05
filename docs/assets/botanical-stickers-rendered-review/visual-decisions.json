@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.botanical_daisies",
+      "decision": "approved",
+      "sourceSha256": "c55330120e01f9d33e8bb809514ee00fda0d35bbf26b2389a6c3262b790d87f1",
+      "previewSha256": "0654458187d96f053a737139d848019f2ad857dd3b65cd9018bc360228c4af79",
+      "observation": "两朵白色雏菊、花苞和细叶分层清楚，缩小后仍可辨，透明边缘无残底。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_olives",
+      "decision": "approved",
+      "sourceSha256": "c721a91037c7fe3b1123b7bf667c10879a6a89785caffdfa85e3c9920cbb7247",
+      "previewSha256": "593e5095802f8c67113b43cabaef49c2164f9acab00ba07a6cee40c8256dd2d8",
+      "observation": "橄榄果和狭长叶形区别明确，枝梗连续，浅底可读，深底适合做低调点缀。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_eucalyptus",
+      "decision": "approved",
+      "sourceSha256": "e2491627e0898d97210ec2ae5ccd6cd63ad79147b37045b5aa15205ac7b1d538",
+      "previewSha256": "de4498f6ae5f0256c9d37fc5074ab4e9c48f9b3a3f5e7c92ccef7e28f4ff27d7",
+      "observation": "银灰圆叶与细枝结构清楚，深底对比更好，适合中深色画面上的柔和装饰。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_cherry_blossom",
+      "decision": "approved",
+      "sourceSha256": "598c0ab00688a83e63cd34c444a9e8a7317d97b6d2d0c017498d2e258b1b5628",
+      "previewSha256": "d49e34b0dc66adf5baa651a81f5df224f345ac12155419773189e9e5ab7006ed",
+      "observation": "粉色花簇、花蕾和木枝层次分明，边缘干净，可用于春日画面角饰。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_fern",
+      "decision": "approved",
+      "sourceSha256": "141ca98ca1bad0b0e79a95c0f2110fb562486101c09a90c4929441db853a435d",
+      "previewSha256": "08664029e1375d32e27528fd87be2ff1a1ab012f216fce50c81c82728ab98eaa",
+      "observation": "单片蕨叶轮廓完整，羽状小叶没有跨格或裁切损伤，浅底下识别度高。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_ginkgo",
+      "decision": "approved",
+      "sourceSha256": "8e76d39642cd714d96b7b4fc8f6f841733a0fc9227f9edf924c8d469d513cf40",
+      "previewSha256": "61b41436feac56ac15a3639d81280d571a5bcdee37d88558f92a7b107f1242d1",
+      "observation": "金黄色扇形叶脉辨识明显，枝梗完整，暖色画面与秋季主题适配。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_wildflowers",
+      "decision": "approved",
+      "sourceSha256": "9628e0d54fbfee847ef538de8d0e84f314a28ca7549ad495dd641358dcac2fbe",
+      "previewSha256": "f922a248403ee179121203ade4b6d91073aa062f63c52a4464ece93be78da1c4",
+      "observation": "白、黄、蓝紫小花形成有层次的花束，主体集中，缩小预览仍容易辨认。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_lavender",
+      "decision": "approved",
+      "sourceSha256": "1b6b29e50adbbf80991662fb3005ebc553a0229f3e775916b0a38eafa1cd10f6",
+      "previewSha256": "5d106312e70a20bf327dd3b0c0d3519530a2b5e7722b916dc816d154ebc52969",
+      "observation": "紫色穗状花与长茎清楚，轮廓细节保留，适合作为竖向边缘装饰。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_sunflower",
+      "decision": "approved",
+      "sourceSha256": "c185266d6da21500a6dc2bd1a20b12ce70448759e682178bfcf280c1beef8cf9",
+      "previewSha256": "61a72645631230321b69999eefbf492119fe3e70e2491aeb57f24a2f05a31941",
+      "observation": "向日葵花盘、金色花瓣和叶片层次明确，缩至画布预览后主体仍醒目。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_orange_blossom",
+      "decision": "approved",
+      "sourceSha256": "94974435bc65f5884c57ef102917d119afee8b8fc5ae7ba711ec0e5253d48480",
+      "previewSha256": "0d9733ba37b397312da30ad80874900b39a26043d11ab5d99ac5d62abffc6eb8",
+      "observation": "橙色果实与白色花朵同时可辨，绿叶边缘干净，适合果园和生活方式画面。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_monstera",
+      "decision": "approved",
+      "sourceSha256": "7c465533aa457798ee722f5ab5bb2fc9388716af01aed61a8a1d6628d52eed01",
+      "previewSha256": "d7f378f7b584f597a14c9190ba6df0beb9e0320503466e211059c5a1ae8ac823",
+      "observation": "龟背竹裂叶孔洞保留为真实透明区域，深浅底轮廓都明确，适合热带主题。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_poppy",
+      "decision": "approved",
+      "sourceSha256": "ff782349fcbadf784350579d2eb53828e77b7fe72e179c4af29067b38620dc1b",
+      "previewSha256": "6585014a96fd59b704ca2b114e4b11cba059875674e48b7a19a838e5bfb9c491",
+      "observation": "红色花瓣和深色花心形成强对比，单茎构图完整，浅深底均清楚。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_flower_wreath",
+      "decision": "approved",
+      "sourceSha256": "f398b85acb6a58392f2ea05a5e5b73a6673940d3e795582c601503d56c8d420c",
+      "previewSha256": "2ca453570755db8e4899ddb30af5f6aa6447803f8b9630cf11b5f73d56244ac2",
+      "observation": "白色小花沿弧线枝叶分布，开口和端点完整，可作标题侧边半环装饰。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_ivy_vine",
+      "decision": "approved",
+      "sourceSha256": "d8c68d830e91227687709739f088c494c24105875eaa324c070270163632e53b",
+      "previewSha256": "99995294fe088d3c07b10cb4b7d39f1fe107152f9367f5e518f772dc9d107d07",
+      "observation": "常春藤卷曲枝条与叶片层级清楚，开放构图适合作为画面角落装饰。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_magnolia",
+      "decision": "approved",
+      "sourceSha256": "f05e00c7f05669920919f6c468aa180177ef9fa6d07957324f6cad3d067d6e8f",
+      "previewSha256": "3f60ec447a897619b445d30bdc0660351f0508690907265e3dd3ded22b0b598c",
+      "observation": "大朵浅色玉兰、花蕊和绿叶区分明确，深底表现突出，适合春季和花卉主题。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.botanical_delphinium",
+      "decision": "approved",
+      "sourceSha256": "a291efe8b8247af03f7878ddc02f189a291ae3cb3a6d14f633859a3d890727a3",
+      "previewSha256": "62a4719fbef88192310a08cae283e499a42b3b542f1053bb625bc53dc733281b",
+      "observation": "蓝色花穗与深浅蓝花瓣层次清楚，竖向造型完整，缩小预览仍有良好识别度。"
+    }
+  ]
+}

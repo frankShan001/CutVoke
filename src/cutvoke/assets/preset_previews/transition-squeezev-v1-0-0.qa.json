@@ -1,0 +1,25 @@
+{
+  "presetId": "cutvoke.preset.transition.squeezev",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.squeezev",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 94.847,
+  "maxSampledMeanRgbDifference": 94.847,
+  "coverSha256": "86cf84cb04fd0ce113dc11a540337d482a94661577699f1f07be806993dfd32f",
+  "previewSha256": "d29aa10a1be2df8c1dd9bfe62ce0e4ae16a95e8c70de9854b786a255053a8c5a",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_target_reticle",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5ab195d54592b6ceaab7ca6249a12caba28252c5be5f62cfc4727e5156752190",
+  "previewSha256": "ab9b321410ac12dcf6bda12e0b7146b030ddec3a39395cd3f8fff654f68b1e5a",
+  "preview": "guide_target_reticle.mp4",
+  "bytes": 5100,
+  "visiblePixels": 2153,
+  "changedPixels": 0,
+  "motionVisible": false
+}

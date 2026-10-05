@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_snow_crystals",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "c94750660a8afb0fb9c00983aa1a6d5c98f0093d3ba71848d6166088996cf6eb",
+  "previewSha256": "4a0e2edb90bdb534f33da7768459e7e9dd53b7277f2da8b2a662bf683db6ae58",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1189,
+  "visiblePixels": 813,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 23,
+    "steady_entry": 813,
+    "steady_exit": 814,
+    "exit": 23
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 23,
+      "withoutFade": 814
+    },
+    "steady_entry": {
+      "withFade": 813,
+      "withoutFade": 812
+    },
+    "steady_exit": {
+      "withFade": 814,
+      "withoutFade": 813
+    },
+    "exit": {
+      "withFade": 23,
+      "withoutFade": 813
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_atlas_snow_crystals.audit.mp4",
+  "auditExportSha256": "d1e4ba42fd28f30cdf1b404383069b115158a3dad251cec87b26853e5a1aae71"
+}

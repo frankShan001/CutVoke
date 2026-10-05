@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.colorPoster",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.posterize",
+  "params": {
+    "levels": 2
+  },
+  "subcategory": "风格",
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Large orange, green and turquoise color blocks create a graphic poster look.",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "coverSha256": "67eb397615c8ab5b7c6b1a5bb2a0945a1fcb3923ca60cd45fa4e31636f26e7ff",
+  "motionPreviewSha256": "925ca4f02a69bde0c82d288a7c587374a59fd19c887123cf5c70accbf7a5a4da",
+  "auditSha256": "c4e240695a13302be26df1d275d59906890027520e632d191ad8c345f7b41f8a"
+}

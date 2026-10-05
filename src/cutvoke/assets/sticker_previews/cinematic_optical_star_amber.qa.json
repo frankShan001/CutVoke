@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_star_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2cf26d5685576fd2445bbe35adc2109cefffcb179ba1aed0f5600b3ceb52972e",
+  "previewSha256": "55b656a5e26e5696d7e07f4cf503b22ef5bc918f3a8ff3f4e5bdaa7bf3b0ee78",
+  "preview": "cinematic_optical_star_amber.mp4",
+  "bytes": 6283,
+  "visiblePixels": 1825,
+  "changedPixels": 0,
+  "motionVisible": false
+}

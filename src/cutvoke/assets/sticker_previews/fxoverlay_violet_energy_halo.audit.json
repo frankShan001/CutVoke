@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_violet_energy_halo",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "453d6613cf1e3e630074c9b86487ac875f92a6db0f1a2f4d93c05ac8727fc36d",
+  "previewSha256": "fbfe584b8d3f5b668bdfb3ce8532ee45d4de4e03f1a24752b40606a41c6bc848",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3792,
+  "visiblePixels": 2985,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1666,
+    "steady_entry": 2984,
+    "steady_exit": 2976,
+    "exit": 1670
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1666,
+      "withoutFade": 2975
+    },
+    "steady_entry": {
+      "withFade": 2984,
+      "withoutFade": 2984
+    },
+    "steady_exit": {
+      "withFade": 2976,
+      "withoutFade": 2986
+    },
+    "exit": {
+      "withFade": 1670,
+      "withoutFade": 2986
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.209,
+    0.197
+  ],
+  "auditExport": "fxoverlay_violet_energy_halo.audit.mp4",
+  "auditExportSha256": "adbdb8da1ce9a05e2d3daf6fdd4e9ed3fe224f734d6b2887c8d4b2ea74d98eaa"
+}

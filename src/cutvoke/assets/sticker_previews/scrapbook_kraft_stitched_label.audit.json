@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_kraft_stitched_label",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "f533ca47a156fa5ae9ad4eb2e6c013896b1e7eaf16db07b679fc27e9ef6ddfa6",
+  "previewSha256": "af54012adc36cc78e9294add50bcc1c29096f5016c8b5d3523b20f59ca6ee446",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1863,
+  "visiblePixels": 1099,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 1047,
+    "steady_entry": 1099,
+    "steady_exit": 1099,
+    "exit": 1047
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1047,
+      "withoutFade": 1099
+    },
+    "steady_entry": {
+      "withFade": 1099,
+      "withoutFade": 1099
+    },
+    "steady_exit": {
+      "withFade": 1099,
+      "withoutFade": 1099
+    },
+    "exit": {
+      "withFade": 1047,
+      "withoutFade": 1099
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.06,
+    0.06
+  ],
+  "auditExport": "scrapbook_kraft_stitched_label.audit.mp4",
+  "auditExportSha256": "8c72a21d1ad380a46268a414d2a885d434bde931b54f5eb998437f55d91a1504"
+}

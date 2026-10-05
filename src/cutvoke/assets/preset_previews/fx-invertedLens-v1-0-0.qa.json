@@ -1,0 +1,31 @@
+{
+  "presetId": "cutvoke.preset.fx.invertedLens",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.lens",
+      "version": "1.0.0",
+      "params": {
+        "k1": -0.62,
+        "k2": -0.12
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.vflip",
+      "version": "1.0.0",
+      "params": {}
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 30.647,
+  "maxSampledMeanRgbDifference": 30.647,
+  "coverSha256": "d0163cb12c8ddb9f1f61771fe1ff66e7e77cf1e95db94096401b6d9efd0ea176",
+  "previewSha256": "289e987d30bb2d237ad4b13631b1724235cd718e9195883e89493d880586a42e",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-24T06:43:42Z",
+  "method": "手工对照每项封面、五时间点动态表与真实导出帧表；分别核对模糊方向、焦点位置、画面明度和镜头顺序。动态表见 output/preset_review/transition-20260924-blur-fixed/transition-模糊-motion.png，真实导出帧见 output/preset_review/transition-20260924-blur-custom-export.png。另以透明导出样片确认 alpha 保留在 254–255。",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.transition.vblur",
+      "decision": "approved",
+      "motionPreviewSha256": "b7ee845eb0d434b0919ba8caf4d1cdfd64c1711504b0ec0d98291484ec217e1c",
+      "observation": "运动边缘沿纵向拖开，保持前后镜头都可辨；与横向基准模糊方向相反。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.diagblurdown",
+      "decision": "approved",
+      "motionPreviewSha256": "c3c40cba6b5df0b26851a50afc1443fcfa40a585d469bf457a4848298ce7a3a3",
+      "observation": "轮廓沿右下方向拉出柔和拖影，片段顺序正确且没有中段暗帧。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.diagblurup",
+      "decision": "approved",
+      "motionPreviewSha256": "dfda85fdd4b4963764d9374aee44d6407eefd4bacc96e113b397e2fc4b2f4747",
+      "observation": "轮廓沿右上方向拉出柔和拖影，与右下版呈镜像方向，亮度连续。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.crossblur",
+      "decision": "approved",
+      "motionPreviewSha256": "ae88a6b103b46a724d0f2efbda59878163c75f562febed7241811ea0a666b95f",
+      "observation": "横向与纵向拖影同时展开，十字边缘比单轴模糊更宽，主体仍可辨。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.radialblur",
+      "decision": "approved",
+      "motionPreviewSha256": "ce1fe75ee8954e4e7b5a42e4c58fa01ed381cbba769959d8264b76a6f7f57ce4",
+      "observation": "细节从中心向外形成放射拖影，边缘推进感与线性方向模糊不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.edgeblur",
+      "decision": "approved",
+      "motionPreviewSha256": "0ba7bd99b09957bd8a6906fe72f0b94cb30b03a3a09847c45396e4767248ada9",
+      "observation": "模糊权重集中在画面外围，中央线条保持清晰，形成边缘柔焦。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.centerblur",
+      "decision": "approved",
+      "motionPreviewSha256": "03ca6f3b36a0aec40364b3b17daf98db32181810f8d5786be33c882a0392e9eb",
+      "observation": "模糊权重集中在画面中央，外围轮廓保留，和边缘柔焦的重心相反。"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_terrazzo",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器合成预览；只批准纹理特征清晰、边缘完整且缩略图可辨的素材。批准仅覆盖贴图本身的识别度，不代表复杂实拍成片验收。",
+  "observation": "浅底内的彩色石粒大小和颜色各异，图案边界清晰，缩略图也可辨识。",
+  "sourceSha256": "10e10469a4b870b556b95bbda4ff3226b365521e2fd547d36d0bc79679f33a37",
+  "previewSha256": "489c9b1e6975c2b83185eb2650a621ef138ccfdef6324625fc812870eb45eea1",
+  "auditSha256": "a46e8aab12fa72e08535cdb5d42c365fcdcff69e541edd8125f72fb4e00a1f93"
+}

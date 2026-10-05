@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_haze_ribbons_amber_rose",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "The amber and rose ribbons remain separate, soft, and visible at preview size.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "d7f322661e4ee2d6f8d117a9d42fb59e429984662d404f4cd7081e3a0388ef58",
+  "previewSha256": "6431f9e9578a083751278618628bd0680db7a5e6c7a6fabaa18e7e1f97a4bf67",
+  "auditSha256": "d5f9a851eac9c8406ea1f57f1023d5a2aecb0f1526b597898193e1ce3f54ed93"
+}

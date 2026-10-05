@@ -1,0 +1,30 @@
+{
+  "presetId": "cutvoke.preset.animation.comboFadeSlide",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.combo",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "primary": "fadeIn",
+        "secondary": "slideDown",
+        "distance": 0.5,
+        "easing": "ease-out",
+        "fromScale": 0.8
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 97.114,
+  "maxSampledMeanRgbDifference": 97.114,
+  "coverSha256": "9bb90720748a19a2108386751f4c54aab876416acb361492ea1e2df5d59fd693",
+  "previewSha256": "4d8daa726d3e2a25891deab7f98111262521345cb7199236c77a1077c00bbc6d",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

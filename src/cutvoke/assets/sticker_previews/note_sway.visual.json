@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.note_sway",
+  "version": "1.1.0",
+  "effectId": "cutvoke.anim.sway",
+  "params": {
+    "amplitude": 0.1,
+    "period": 1.0
+  },
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-10-02T19:42:50+00:00",
+  "method": "Codex actually inspected all 30 chronological continuous frames (15fps, 2 seconds) from this regenerated library sample using view_image, checking motion, alpha edges, shape preservation and canvas containment. Preview QA and full apply/edit/saveReload/undo/export machine audits were rerun before binding.",
+  "observation": "紫色双音符按默认1秒周期左右摆动，连续两轮轨迹清楚；符杆、横梁与两个音符头形状稳定，透明区域正常，未发生跳位或画布裁剪。",
+  "sourceSha256": "a4d18a5cffad1b2b88f91226bba31d2fdced8a29706b26bf8f5ac220ca255a55",
+  "previewSha256": "70a212e3970891e9b921bb0faca98a8bcfd1726f38e1989ccbf704d19ce74f8e",
+  "auditSha256": "14178656ad1b9808bf4d5a64b816c17c989f26fbfd947dd6a8f8f495f8b6f41b",
+  "rendererSha256": "019717a0438118bdb3a8a852d000a065e8eac7be52fecea1e33090128fcc318a",
+  "evidencePaths": [
+    "E:/myproject/opencut/output/acceptance/effects-visual-review-20261003/sticker-library/note_sway-continuous.png"
+  ]
+}

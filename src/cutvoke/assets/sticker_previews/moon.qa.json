@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.moon",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5ae439b2d75ddd28dda63e4a4d5769a5ae521f881452b80df604af264b087f43",
+  "previewSha256": "b906bf0c7bbde7f490d6fefc2f8928686fb125080117653cd06592ae985212d1",
+  "preview": "moon.mp4",
+  "bytes": 4235,
+  "visiblePixels": 2078,
+  "changedPixels": 0,
+  "motionVisible": false
+}

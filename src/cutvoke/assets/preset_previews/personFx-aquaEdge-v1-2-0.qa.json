@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.personFx.aquaEdge",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.person.halo",
+      "version": "1.1.0",
+      "params": {
+        "sigma": 16,
+        "hueShift": 145,
+        "saturation": 1.7,
+        "opacity": 0.95
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 18.124,
+  "maxSampledMeanRgbDifference": 18.124,
+  "coverSha256": "18b4a9493fec517d1c460126ecbd617f256c102a42c30a82169c45748a1d3f71",
+  "previewSha256": "c806b760e1d18905b89a2c0c3072acc5c8beb5acb5a84b302778938b1ce88a7d",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

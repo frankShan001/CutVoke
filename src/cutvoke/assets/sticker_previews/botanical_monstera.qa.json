@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_monstera",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7c465533aa457798ee722f5ab5bb2fc9388716af01aed61a8a1d6628d52eed01",
+  "previewSha256": "d7f378f7b584f597a14c9190ba6df0beb9e0320503466e211059c5a1ae8ac823",
+  "preview": "botanical_monstera.mp4",
+  "bytes": 5066,
+  "visiblePixels": 2867,
+  "changedPixels": 0,
+  "motionVisible": false
+}

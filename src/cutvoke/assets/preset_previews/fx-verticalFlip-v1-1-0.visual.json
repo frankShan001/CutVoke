@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.verticalFlip",
+  "version": "1.1.0",
+  "effectId": "cutvoke.fx.vflip",
+  "params": {
+    "axis": "vertical"
+  },
+  "subcategory": "构图",
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "observation": "场景上下倒置，太阳与画框的纵向关系交换；与左右镜像能直接区分，翻转轴向可编辑。",
+  "method": "Manual comparison of full dynamic previews and aligned motion sheets",
+  "coverSha256": "8fe101e8359f4e27b9d1110a3d551633fb69b62ad861c1c46b528c99b4a32a0b",
+  "motionPreviewSha256": "388d0de85d0a07470356a4c1ef1323381faa3bb9d43e5426754120a8ccb13747",
+  "auditSha256": "f35171254aa29dcd1b772c4c0c765ee5fc7006491181a3be34ea220c89e9e52f"
+}

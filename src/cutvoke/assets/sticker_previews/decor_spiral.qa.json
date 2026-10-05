@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_spiral",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5337378b26bcc846bdfbed48ce68564aa97f7be005b64934e261e92ccb33ba45",
+  "previewSha256": "9072c018d1385e72fd0f401e8c35924f6f550a43a77ef6dbf37bbd7e0fcf2c10",
+  "preview": "decor_spiral.mp4",
+  "bytes": 4753,
+  "visiblePixels": 1595,
+  "changedPixels": 0,
+  "motionVisible": false
+}

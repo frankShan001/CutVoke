@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_light_leak_duotone",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "A narrow magenta-to-cyan vertical light leak with soft luminous edges; clearly differs from the point flare and keeps its transparent surround.",
+  "sourceSha256": "a0339078f38edcf4a1dc7e568f660e54be6d07d4d2f90ff39b902e980316d973",
+  "previewSha256": "e8cf2bd92099776aa8e1ee0c686d7fefd99faa6175bb2474b2148c2a17435980",
+  "auditSha256": "bc46ee4c75d367ede72399abf2b597f08e03bce7d66e0726b30bd574c973c7c4"
+}

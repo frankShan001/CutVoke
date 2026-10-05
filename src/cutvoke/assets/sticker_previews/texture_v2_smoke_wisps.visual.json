@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_smoke_wisps",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "灰白烟流有透明软边和明显卷曲层次，轮廓在浅深背景仍然可见。",
+  "sourceSha256": "132fde06344a241e350cc880162e58e7d2b999d346e7d6ccdf9d580db4a97598",
+  "previewSha256": "acf07f9be2b80e58f1e56fd6e5ea1ac964f5bbe6e64fbaf44bfe15d41fb5c445",
+  "auditSha256": "e40117a3fb1bbfb70286c780395c07022b7c687e81318f814fb1273f17670065"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_bokeh_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3dbd0028b20b60fbabe9c094e70b8122546e98e5d01f2b375bc02ca0cefd2602",
+  "previewSha256": "8860903df09670a46cff41ddf123e0f0206e06fae70ca04a1fb636b6f8b18ff3",
+  "preview": "texture_optical_bokeh_amber.mp4",
+  "bytes": 8712,
+  "visiblePixels": 11825,
+  "changedPixels": 0,
+  "motionVisible": false
+}

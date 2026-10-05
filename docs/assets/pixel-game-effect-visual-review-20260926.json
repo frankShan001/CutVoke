@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex 视觉审阅",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切联系表和 320x180 浅深渐变实景合成联系表，并结合逐张机器应用/编辑/保存重开/撤销重做/入出场动画/MP4 预览与导出审计；只批准轮廓完整、边界干净、可见且彼此可辨的条目。",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_impact_gold",
+      "decision": "approved",
+      "sourceSha256": "bd0ef7dd70ebc7a1b232e5c37ce45348fb10115f072a7359680611aafd2668ad",
+      "previewSha256": "79a773ec064bd8ec13bc4ae0d66f7eb5a3083f8ad8a6191c4dd875c3773888d3",
+      "observation": "金色放射冲击星与小方粒边界清晰，中心亮点完整，浅深渐变上都有足够对比。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_frost_burst",
+      "decision": "approved",
+      "sourceSha256": "5a771cc427ad615a436cebcf8ea65a0013ddb71f0da1e2dc2729ddad7a78d831",
+      "previewSha256": "257c810af0c23b260f17b1a2520b16c46f8d25a3d7778179fda6231bf6e50333",
+      "observation": "冰蓝霜晶呈独立六向爆发，冷色轮廓与金色冲击星明显不同，边缘无裁切。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_fireball",
+      "decision": "approved",
+      "sourceSha256": "b83fb80b2255f61b5668b5f5425206785e0330c117528d80efca0ce791c0e5a0",
+      "previewSha256": "a5e3e87d9e9292b9e303cd637bd3f0792c21e3a0a07f4ce9472ffede42570b97",
+      "observation": "橙色火球纵向上升，火焰和方形余烬轮廓完整，透明安全边距充足。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_lightning",
+      "decision": "approved",
+      "sourceSha256": "b459cdc37bb127a79e7974e481bfcaca4f199b5f47ed3ed7fa1d29ca0610fff2",
+      "previewSha256": "6b2197c65e0a0302f83555c5c38ce5f5a3c028a21c68f581bf19188e55985700",
+      "observation": "蓝色分叉电弧线条清楚，枝杈不碰格边，浅背景上仍易辨认。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_portal",
+      "decision": "approved",
+      "sourceSha256": "ff8a365a00aadf5ec0e76d5b08b469c073f465066358a79a6a3c022b11871e8c",
+      "previewSha256": "7dd41ab46f39d0c991b10d0bf7dc337a52c810e0e16ba08446a1a883ec3a2477",
+      "observation": "紫色传送门有完整环形外缘与暗色中心，像素边缘干净。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_heal_swirl",
+      "decision": "approved",
+      "sourceSha256": "ec4246e2f6a47fbd89e5f6168f3cc3fcdac4797e360a882663dda844c5adef32",
+      "previewSha256": "6cca7012b43b45669b1df482f308015ebfb4f43a8321ce1f6b626630175071af",
+      "observation": "绿色螺旋能量与加号粒子彼此分离，主题和轮廓一眼可辨。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_shockwave",
+      "decision": "approved",
+      "sourceSha256": "0235160854c2eceaf04fa9950cb2c3a7656bcb083995ba298a1b6ea3d4c3a098",
+      "previewSha256": "9907eeb666c5691269f13eedb820868b0c3c974cf6837c4d6615fc202b059ab1",
+      "observation": "洋红冲击波由同心环和断续方粒组成，与其他爆发图案有明显区别。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_dash",
+      "decision": "approved",
+      "sourceSha256": "2341b8a443a9bc6b70a6587f59a43a6b5bde3fd25fde87516a98ae5db854660a",
+      "previewSha256": "abba1bf2c2f96a027728c940982f1f0a8bd874b5502c4e4d11fcfc37782f556a",
+      "observation": "青色疾速拖尾横向延伸，方向明确，四周保留透明空间。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_power_orb",
+      "decision": "approved",
+      "sourceSha256": "cd0d78b690445067bc2cfce632ea08c4820039b3dd74aa5486e933a930c67b75",
+      "previewSha256": "21ea11d876d430832c90868b7e5091f8ae0d6a9313661109415c55127bd3b589",
+      "observation": "紫色多面能量球有完整高光和方粒点缀，未与相邻单元串色。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_smoke",
+      "decision": "approved",
+      "sourceSha256": "f2248146d0846d50fbb807f4886dbf90a6f95cef4218b027a7e1c9a8bc504150",
+      "previewSha256": "53a120ecc1eb15a410a5fba9e6397b2de6ed4e7393f463e064a2d47a7d4f0bc1",
+      "observation": "紫黑烟团呈不规则云状并有洋红亮部，浅深渐变上都能看清轮廓。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_arcade_coins",
+      "decision": "approved",
+      "sourceSha256": "cf73977964d01cc1762eef20d81aa78d590e92db0a7ee0bbb07a571681ab6fa6",
+      "previewSha256": "98de8caf9bd88f3a2805d6a64e75562c2cb1fbdc4c2c1e9031f68625c255ae9c",
+      "observation": "三枚金色街机金币斜向堆叠，币面无文字，金币和火花各自清楚。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_toxic_bubbles",
+      "decision": "approved",
+      "sourceSha256": "4150fcca0861d1daf5d64411ee3e8d81d0b9df911c7f1a457c7d560f8e55276a",
+      "previewSha256": "5ce36f371b2d9b09f5cefef5f9515f368c8442ed3c152486b8a8d3950ef6632d",
+      "observation": "青柠色毒雾泡泡大小有别并分布松散，卷曲雾边没有触及裁切边界。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_shield",
+      "decision": "approved",
+      "sourceSha256": "9fcc226c929032d9ed07d0fa715960148ec3a3afa3098b1ebcc37c75f631310e",
+      "previewSha256": "616be209fe2ab9b78951d4f5d599b5c0b0b8da356acfda54dff044b919cc9c17",
+      "observation": "冰蓝护盾有明确盾形中心、光圈和碎光，和普通光环素材不同。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_debris",
+      "decision": "approved",
+      "sourceSha256": "b7adf10c31d880226f802a19a758aed189392ed2d418c2cb0f12a57a2db3aafb",
+      "previewSha256": "7f0fd802d8fc239b1ed6c8d76a5816208941251dd52878372e546336fc427494",
+      "observation": "橙褐碎石向外飞散，碎块轮廓清晰，中心冲击亮部可见。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_rainbow_sparks",
+      "decision": "approved",
+      "sourceSha256": "9ef2ae62b51455887444289f6dea5daa6e7e4c5875e8aa1984f8c92948909bfc",
+      "previewSha256": "c40a75e6ba629f6721ad97d7b90f96afac38663a00f9fc16d24fcae9da9daef6",
+      "observation": "彩虹星光由多色独立像素星组成，色彩丰富但各颗粒仍可分辨。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.fxoverlay_pixel_critical_hit",
+      "decision": "approved",
+      "sourceSha256": "332d99a6ba7224977097e8f57e9af57a85c4c51d0d1936a3ee5686b3839f57af",
+      "previewSha256": "96018da9b267625e85b146e920bbd7e2c1c2efda95afc616107a4b0c96b6f894",
+      "observation": "红白冲击星呈不对称锐角放射并带块状残影，与金色冲击星配色和外形不同。"
+    }
+  ]
+}

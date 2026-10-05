@@ -1,0 +1,588 @@
+{
+  "generator": "OpenAI ImageGen",
+  "source": "product-promo-overlay-atlas-20260927.png",
+  "sourceSha256": "c84c1b462af2320b99a3c093f71797610260193f6f2963a626a714dd301e6dac",
+  "layout": "4x4 equal square cells",
+  "subcategory": "产品广告",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "alphaThreshold": 8,
+  "safetyGutterPixels": 8,
+  "items": [
+    {
+      "stem": "promo_frame_brackets",
+      "name": "香槟金圆角构图角",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "取景",
+        "构图",
+        "香槟金"
+      ],
+      "row": 0,
+      "column": 0,
+      "nominalGridCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBounds": [
+        72,
+        84,
+        250,
+        261
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 8329,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "a6a1210a08504f69e9f5d498371a59e6780760c42141c176eccf654ec9cf98eb"
+    },
+    {
+      "stem": "promo_orbit_rings",
+      "name": "珍珠轨道环",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "轨道",
+        "珍珠",
+        "装饰"
+      ],
+      "row": 0,
+      "column": 1,
+      "nominalGridCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "visibleBounds": [
+        48,
+        99,
+        267,
+        263
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 10590,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "1693f6567337c2ec3650dd59c48e8d8a5c41c6c056358b19c00bfd3d2e3859fa"
+    },
+    {
+      "stem": "promo_silk_loop",
+      "name": "奶油金丝绸环",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "丝绸",
+        "飘带",
+        "柔光"
+      ],
+      "row": 0,
+      "column": 2,
+      "nominalGridCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "visibleBounds": [
+        54,
+        92,
+        289,
+        270
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 19132,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "ffeaad1c95f310f72739fcfd93afc31daa0bc51bf6a0ae9538c4de6497f93579"
+    },
+    {
+      "stem": "promo_prism_refraction",
+      "name": "虹彩棱镜折射",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "棱镜",
+        "虹彩",
+        "折射"
+      ],
+      "row": 0,
+      "column": 3,
+      "nominalGridCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "visibleBounds": [
+        62,
+        81,
+        266,
+        269
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 17637,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "2950c1bfb504a45b62ed2f780dab56e63f697ba0dea0789ec4727e874adb6440"
+    },
+    {
+      "stem": "promo_foil_flourish",
+      "name": "金箔弧形飘带",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "金箔",
+        "飘带",
+        "弧光"
+      ],
+      "row": 1,
+      "column": 0,
+      "nominalGridCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "visibleBounds": [
+        64,
+        51,
+        264,
+        285
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 18373,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "f3a3ed8a24525a2f38e9380ca9b2d60518733925d50dbc04e1f8a2f335621afc"
+    },
+    {
+      "stem": "promo_podium_outline",
+      "name": "阶梯产品展示台",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "展示台",
+        "阶梯",
+        "金属"
+      ],
+      "row": 1,
+      "column": 1,
+      "nominalGridCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "visibleBounds": [
+        49,
+        145,
+        269,
+        240
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 17102,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "ff3ee74b35ead5369676de8b173c6d9a9e16986f553c8762f41e0c08c2567a8f"
+    },
+    {
+      "stem": "promo_callout_leaders",
+      "name": "留白标注引线",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "标注",
+        "引线",
+        "说明"
+      ],
+      "row": 1,
+      "column": 2,
+      "nominalGridCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "visibleBounds": [
+        72,
+        83,
+        272,
+        239
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 5752,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "d8ddebb374b72e7d8a89b14bfd61a6a839181870281f7cac64a676d3d0c1e392"
+    },
+    {
+      "stem": "promo_spotlight_fan",
+      "name": "奶油金放射柔光",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "聚光",
+        "放射",
+        "柔光"
+      ],
+      "row": 1,
+      "column": 3,
+      "nominalGridCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "visibleBounds": [
+        42,
+        58,
+        281,
+        266
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 29763,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "ba6430064ee807c48424f795405f97711e089d6ab76d0199d26e0aeaf0b18b4a"
+    },
+    {
+      "stem": "promo_opal_halo",
+      "name": "欧泊玻璃光环",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "欧泊",
+        "玻璃",
+        "光环"
+      ],
+      "row": 2,
+      "column": 0,
+      "nominalGridCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "visibleBounds": [
+        49,
+        80,
+        280,
+        250
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 19257,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "483b6aade5d9fe7b5a0d0e683ee8ff90bab0edc09f33cb4c0f59cffe71657654"
+    },
+    {
+      "stem": "promo_leaf_shadow",
+      "name": "青瓷叶片柔影",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "叶影",
+        "自然",
+        "青瓷"
+      ],
+      "row": 2,
+      "column": 1,
+      "nominalGridCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "visibleBounds": [
+        51,
+        64,
+        264,
+        258
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 16841,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "2cf1a074c436d18b9c068a4de4857755bed379c48a132289e4b7a169301c37fa"
+    },
+    {
+      "stem": "promo_blank_seal",
+      "name": "空白双线圆章",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "圆章",
+        "边框",
+        "留白"
+      ],
+      "row": 2,
+      "column": 2,
+      "nominalGridCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "visibleBounds": [
+        54,
+        49,
+        267,
+        263
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 15177,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "ed611c0ad8679f4e0e63d673403392ce424dae7406a3786cc3c443b725ff3908"
+    },
+    {
+      "stem": "promo_sparkle_glints",
+      "name": "三枚珍珠星芒",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "星芒",
+        "闪光",
+        "珍珠"
+      ],
+      "row": 2,
+      "column": 3,
+      "nominalGridCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "visibleBounds": [
+        63,
+        57,
+        269,
+        243
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 9042,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "19504765c9412187fc17a1d17c89ffd96b796991c2d41c37515f0e7eb2d2b5e1"
+    },
+    {
+      "stem": "promo_glass_wave",
+      "name": "青瓷流动玻璃带",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "玻璃",
+        "飘带",
+        "流动"
+      ],
+      "row": 3,
+      "column": 0,
+      "nominalGridCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "visibleBounds": [
+        49,
+        77,
+        301,
+        215
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 19959,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "133633e4b3c0dd11c03753c22f561976db02101d4e73c57982349dcdd6e84114"
+    },
+    {
+      "stem": "promo_corner_foil",
+      "name": "金箔角花",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "角花",
+        "金箔",
+        "装饰"
+      ],
+      "row": 3,
+      "column": 1,
+      "nominalGridCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "visibleBounds": [
+        59,
+        41,
+        272,
+        231
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 4757,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "af7625d9ad08c93dfa18570d0fd5f0c9404e0122a121b2444dda8ed86cb5ffc5"
+    },
+    {
+      "stem": "promo_focus_ring",
+      "name": "珍珠对焦光圈",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "对焦",
+        "光圈",
+        "珍珠"
+      ],
+      "row": 3,
+      "column": 2,
+      "nominalGridCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "visibleBounds": [
+        54,
+        31,
+        266,
+        248
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 17151,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4d4922978ed4962826547a1ee88fc85cad7fe99d75555a9d018da27deeef3ff3"
+    },
+    {
+      "stem": "promo_luxury_badge",
+      "name": "空白鎏金徽章",
+      "subcategory": "产品广告",
+      "keywords": [
+        "产品广告",
+        "徽章",
+        "鎏金",
+        "留白"
+      ],
+      "row": 3,
+      "column": 3,
+      "nominalGridCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "visibleBounds": [
+        58,
+        43,
+        265,
+        242
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "visiblePixels": 20986,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "e7c1854e867c60bef8a120fa66976d5935d77f9f6fd0045e4588e602bd2905e4"
+    }
+  ]
+}

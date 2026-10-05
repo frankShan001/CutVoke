@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_blue_coral_ink_burst",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "蓝珊瑚水墨由中心向外喷溅，轮廓密度适中，与琥珀尘爆颜色和边缘语言不同。",
+  "sourceSha256": "f2605d1e1a4a1b64c8386deffc34caddfcfe65552e1e97ea02f5f5fac44e9ced",
+  "previewSha256": "fec468717b1f776fb8453197a71fe59481c62605f890ee8bf42571a3213d62e3",
+  "auditSha256": "de54b65f53e21849d0b2a51c240907594e2d63f2997e5b768b7c0930e813b97b"
+}

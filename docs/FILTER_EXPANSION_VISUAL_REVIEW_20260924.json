@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:51:00+08:00",
+  "method": "Manual comparison of 320x180 before-after covers and five aligned frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; monoMatte excluded as too close to existing bloom/gray",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.filter.blueprintCyan",
+      "decision": "approved",
+      "motionPreviewSha256": "e84fc42e035aca694a8e2e8357f5244989c8752e09cf7b63702abef9000def44",
+      "observation": "深青底色上仅保留浅青几何轮廓，和既有电光线描的深蓝背景、亮白细线明显不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.filter.posterAmber",
+      "decision": "approved",
+      "motionPreviewSha256": "e6d1611cdceeb20e728addc905b5f0355490083931ade474652961cf25de7337",
+      "observation": "画面被归并为琥珀、棕和橙黄大色块；与既有撞色海报的荧绿和高饱和青色不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.filter.negativeViolet",
+      "decision": "approved",
+      "motionPreviewSha256": "5155b81b4487e7f4ab251e8c8bd23acfdfc811136981e7d47ee45c4cca679c68",
+      "observation": "反相结构呈亮紫和深紫两层色阶，与既有反相冲印的淡绿蓝配色明显不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.filter.monoNegative",
+      "decision": "approved",
+      "motionPreviewSha256": "4c26746ee10da8f9768f2a0f3defdf27acc7a21c84bb145073a3de761cc20fbb",
+      "observation": "明暗完全翻转，白色底域和深灰圆形形成负片观感；与经典黑白的黑底亮圆相反。"
+    },
+    {
+      "presetId": "cutvoke.preset.filter.monoInk",
+      "decision": "approved",
+      "motionPreviewSha256": "1548289aff0392bf6bcf47496d652add3e4e84617fa8340e09ab9d6d7e53b693",
+      "observation": "仅有细白轮廓线及大片黑底，主体内部纹理呈线稿；不同于黑白块面的大灰块。"
+    },
+    {
+      "presetId": "cutvoke.preset.filter.monoVignette",
+      "decision": "approved",
+      "motionPreviewSha256": "88238162cfa9a11303be8940971a31b9a890085d311f83fb4722333e0df82096",
+      "observation": "画面四角有明显暗角，中央圆形仍有连续灰阶；与硬朗黑白的均匀黑边不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.filter.monoBlocks",
+      "decision": "approved",
+      "motionPreviewSha256": "50554c87c9f128ba58eeef60bd421ef97243d4ce71873354e7cb5174ef455f4f",
+      "observation": "原场景压成黑、灰、白三档大块，边界硬且无连续中间调；与黑白负片方向和层次不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.filter.filmFineGrain",
+      "decision": "approved",
+      "motionPreviewSha256": "3dbf79a1eb61183c9a65a8e413a90e7c971c2ad75cd5843c53abc544cf511f5f",
+      "observation": "在复古暖色底上有可见且持续的细密颗粒纹理；既有复古褪色画面较平滑，纹理差异可辨。"
+    },
+    {
+      "presetId": "cutvoke.preset.filter.filmFaded",
+      "decision": "approved",
+      "motionPreviewSha256": "b6b7c2c3d371aacb056d7db1f2225a3936dfe91846f0da408655f0d47f90a0c8",
+      "observation": "旧片色彩被压成低饱和粉紫和浅黄，暗部抬起；与既有褪色对比的强对比轮廓不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.filter.filmBlue",
+      "decision": "approved",
+      "motionPreviewSha256": "5dc9b2a6fe834f2f9d0d0fd9760205bdf5fee1708f9a81d7a59ac3e04123d89f",
+      "observation": "旧片整体为冷蓝和浅青两个主色区，完全区别于胶片组其它暖黄、粉紫样张。"
+    },
+    {
+      "presetId": "cutvoke.preset.filter.filmSunset",
+      "decision": "approved",
+      "motionPreviewSha256": "948b4ab67f0ab39420db31c43d971b1adb77a835ccb8905d33103d317251a935",
+      "observation": "旧片转为明显的红橙及鲑橙色块，和偏粉紫的褪色柔片及浅黄暖棕的暖棕胶片不同。"
+    }
+  ]
+}

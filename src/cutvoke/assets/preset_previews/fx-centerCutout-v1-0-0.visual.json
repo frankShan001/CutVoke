@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.centerCutout",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.mask",
+  "params": {
+    "shape": "circle",
+    "x": 0.5,
+    "y": 0.5,
+    "w": 0.48,
+    "h": 0.48,
+    "aspectMode": "circle",
+    "feather": 0.02,
+    "invert": true
+  },
+  "subcategory": "构图",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "修复后默认 aspectMode=circle；中央镂空为真圆且外围画面完整保留，反向遮罩正确，边缘及圆心在 12 时点稳定。 实际库预览的 0–0.6s 为原图对照，0.7–1.0s 可清晰看到相应效果。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "d0a071b413045e3fc667235b11f71419f88c35331185ed8b75933f1c073fe9b6",
+  "motionPreviewSha256": "95eadc0c126dff519dc51cfb8e0b2a2b779c4e95d0ac33efdcac7e14adef6dbf",
+  "auditSha256": "48a9ba5a5de3388f7bfd0ee5ac93cb5784fadf8f7addbad2e41090f68c9390ce",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_fx_centerCutout.png",
+  "libraryReviewSheetSha256": "d410908e74891e5323101c95543fb482eb32e3bdbdda3577d053a78a1e00d681"
+}

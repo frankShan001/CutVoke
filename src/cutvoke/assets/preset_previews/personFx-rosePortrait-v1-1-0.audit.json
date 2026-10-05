@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.rosePortrait",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "hue",
+    "value": -102.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.048,
+  "exportSha256": "46f64f3446dd49bf4fa4f449892b43a1219526d8dd1206d5c991cd559e705863",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "46f64f3446dd49bf4fa4f449892b43a1219526d8dd1206d5c991cd559e705863",
+  "auditExport": "personFx-rosePortrait-v1-1-0.audit.mp4"
+}

@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.flower_mint",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 5342,
+  "exportSha256": "5209161a20181a6c1500a13eb549f00a265b5edfe3a78261a9947399ef5d57bc",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "5209161a20181a6c1500a13eb549f00a265b5edfe3a78261a9947399ef5d57bc",
+  "auditExport": "text-flower_mint-v1-0-0.audit.mp4"
+}

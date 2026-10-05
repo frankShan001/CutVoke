@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_daisies",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "c55330120e01f9d33e8bb809514ee00fda0d35bbf26b2389a6c3262b790d87f1",
+  "previewSha256": "0654458187d96f053a737139d848019f2ad857dd3b65cd9018bc360228c4af79",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3492,
+  "visiblePixels": 2472,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1199,
+    "steady_entry": 2475,
+    "steady_exit": 2475,
+    "exit": 1205
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1199,
+      "withoutFade": 2475
+    },
+    "steady_entry": {
+      "withFade": 2475,
+      "withoutFade": 2475
+    },
+    "steady_exit": {
+      "withFade": 2475,
+      "withoutFade": 2475
+    },
+    "exit": {
+      "withFade": 1205,
+      "withoutFade": 2475
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.095,
+    0.104
+  ],
+  "auditExport": "botanical_daisies.audit.mp4",
+  "auditExportSha256": "593cb0e6b730298f3efbd91fc399978359205627b203d68bb1392221b536d8a1"
+}

@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.animation.fadeIn",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.fadeIn",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "easing": "linear"
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 99.201,
+  "maxSampledMeanRgbDifference": 99.201,
+  "coverSha256": "2979cae956d86748344bac6a601229c8c1fd663d4f6a7652704caddc265b1c05",
+  "previewSha256": "a1f6a720a34906bb6accefd7973d59d4b34a31e696dc3b190523fcf374398885",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

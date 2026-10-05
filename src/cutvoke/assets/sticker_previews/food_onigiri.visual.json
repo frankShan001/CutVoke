@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_onigiri",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The triangular rice shape, dark seaweed and facial details remain recognizable at preview size.",
+  "sourceSha256": "88df29c980d00d9728c8d90204e28f17346adea0bbb1f6bf60fa6ab74e475a78",
+  "previewSha256": "d43c98a07ce84d63caeaebcc601c59b3aba4b1663e2cb08c836e131fd2a38380",
+  "auditSha256": "7f26b0c7585181a728040d34bac94eeccec8f67f4cd4a3e0bd634b9e5f364bcf"
+}

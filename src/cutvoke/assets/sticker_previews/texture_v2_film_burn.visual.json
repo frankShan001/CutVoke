@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_film_burn",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "橙金灼边集中在单侧，边缘发光清楚，适合暖色漏光转场氛围。",
+  "sourceSha256": "da69bb858e8eacacda20fc1252eb42006c0353927ff231e054ecc220b98fd4a4",
+  "previewSha256": "7bb7b3c44cc1f238fe8d310996083cd6d84e298f5ebfc5ded864878d875c2c65",
+  "auditSha256": "cf521e94347b962a85ceaeb91c5011bc11e94ccad4e0b5fe1f128605d47134aa"
+}

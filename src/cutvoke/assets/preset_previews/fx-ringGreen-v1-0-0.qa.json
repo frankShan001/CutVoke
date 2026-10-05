@@ -1,0 +1,33 @@
+{
+  "presetId": "cutvoke.preset.fx.ringGreen",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.shape",
+      "version": "1.0.0",
+      "params": {
+        "shape": "ellipse",
+        "mode": "outline",
+        "x": 0.5,
+        "y": 0.5,
+        "w": 0.65,
+        "h": 0.8,
+        "strokeWidth": 15,
+        "color": "#34C759",
+        "opacity": 1
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 12.791,
+  "maxSampledMeanRgbDifference": 12.791,
+  "coverSha256": "5f843dfeb3f1b6c47a113fe931172b176bdb9712cefb3b84b4201c393378ca3d",
+  "previewSha256": "ad91382a6bc9eb7e9f27010f83baa26555ebbbb2133255595ac3fa1d8b1f11ec",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

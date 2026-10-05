@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_debris",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex 视觉审阅",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切联系表和 320x180 浅深渐变实景合成联系表，并结合逐张机器应用/编辑/保存重开/撤销重做/入出场动画/MP4 预览与导出审计；只批准轮廓完整、边界干净、可见且彼此可辨的条目。",
+  "observation": "橙褐碎石向外飞散，碎块轮廓清晰，中心冲击亮部可见。",
+  "sourceSha256": "b7adf10c31d880226f802a19a758aed189392ed2d418c2cb0f12a57a2db3aafb",
+  "previewSha256": "7f0fd802d8fc239b1ed6c8d76a5816208941251dd52878372e546336fc427494",
+  "auditSha256": "964746ebceacf5eb28f25499019c56bd6ad3c1119443dd89ce3673eb747daaf8"
+}

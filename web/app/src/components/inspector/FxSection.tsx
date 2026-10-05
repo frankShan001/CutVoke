@@ -1,5 +1,5 @@
 /** 片段特效小节：按素材适用类型筛选；调参一次原子更新。 */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { showError, useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
@@ -14,7 +14,28 @@ import {
 import { paramControls } from "../../lib/effectControls";
 import { ParamControls } from "./ParamControls";
 import { inferKind } from "../../lib/assetStore";
+import { uploadLut } from "../../lib/lutApi";
+import { ColorWheels } from "./ColorWheels";
 import type { Clip } from "../../types/api";
+
+function preserveMaskBoundsOnShapeChange(
+  previous: Record<string, unknown>, next: Record<string, unknown>,
+): Record<string, unknown> {
+  const from = previous.shape === "circle";
+  const to = next.shape === "circle";
+  if (from === to) return next;
+  const w = Number(previous.w ?? 0.7);
+  const h = Number(previous.h ?? 0.7);
+  const x = Number(previous.x ?? 0.15);
+  const y = Number(previous.y ?? 0.15);
+  const clamp = (value: number, min: number, max: number) =>
+    Math.round(Math.min(Math.max(min, max), Math.max(min, value)) * 10000) / 10000;
+  return to
+    ? { ...next, x: clamp(x + w / 2, w / 2, 1 - w / 2),
+        y: clamp(y + h / 2, h / 2, 1 - h / 2) }
+    : { ...next, x: clamp(x - w / 2, 0, 1 - w),
+        y: clamp(y - h / 2, 0, 1 - h) };
+}
 
 export function FxSection({ clip, trackKind }: { clip: Clip; trackKind: string }) {
   const { state, dispatch } = useEditor();
@@ -133,15 +154,33 @@ function FxParams({
   onCommit: (next: Record<string, unknown>) => Promise<boolean>;
 }) {
   const [local, setLocal] = useState<Record<string, unknown>>(params);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState("");
+  const lutInput = useRef<HTMLInputElement>(null);
   const paramKey = JSON.stringify(params);
   useEffect(() => {
     setLocal(params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spec.effectId, paramKey]);
 
-  const controls = useMemo(() => paramControls(spec, local), [spec, local]);
+  const isLut = spec.effectId === "cutvoke.fx.lut";
+  const isColorBalance = spec.effectId === "cutvoke.fx.colorbalance";
+  const controls = useMemo(() => paramControls(spec, local).filter((control) => {
+    if (spec.effectId === "cutvoke.fx.lut" &&
+        (control.name === "file" || control.name === "name")) return false;
+    if (spec.effectId === "cutvoke.fx.mask" && local.shape !== "text" &&
+        (control.name === "content" || control.name === "fontSize")) return false;
+    return true;
+  }), [spec, local]);
 
-  return (
+  const commitLocal = (next: Record<string, unknown>) => {
+    if (JSON.stringify(next) === JSON.stringify(params)) return;
+    void onCommit(next).then((ok) => {
+      if (!ok) setLocal(params);
+    });
+  };
+
+  const numericControls = (
     <ParamControls
       controls={controls}
       onChange={(name, value) => {
@@ -151,16 +190,74 @@ function FxParams({
         setLocal(next);
       }}
       onCommit={(change) => {
-        const next = { ...local };
+        let next = { ...local };
         if (change) {
           if (change.value === undefined) delete next[change.name];
           else next[change.name] = change.value;
+          if (spec.effectId === "cutvoke.fx.mask" && change.name === "shape") {
+            next = preserveMaskBoundsOnShapeChange(params, next);
+          }
+          if (isLut && change.name === "preset") {
+            next.file = "";
+            next.name = "";
+          }
         }
-        if (JSON.stringify(next) === JSON.stringify(params)) return;
-        void onCommit(next).then((ok) => {
-          if (!ok) setLocal(params);
-        });
+        commitLocal(next);
       }}
     />
+  );
+
+  return (
+    <>
+      {isColorBalance ? (
+        <>
+          <ColorWheels params={local} onPreview={setLocal} onCommit={commitLocal} />
+          <details className="inspector__adv color-wheels__numeric">
+            <summary>RGB 数值微调</summary>
+            {numericControls}
+          </details>
+        </>
+      ) : numericControls}
+      {isLut ? (
+        <div className="lut-import">
+          <input ref={lutInput} type="file" accept=".cube" hidden
+            aria-label="导入 3D LUT 文件"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (!file) return;
+              setImporting(true);
+              setImportError("");
+              void uploadLut(file).then(async (result) => {
+                if (result.kind === "error") {
+                  setImportError(result.message);
+                  return;
+                }
+                const next = { ...local, file: result.data.path, name: result.data.name };
+                if (await onCommit(next)) setLocal(next);
+                else setImportError("LUT 已导入，但未能应用到片段；请重试");
+              }).finally(() => setImporting(false));
+            }} />
+          <div className="lut-import__actions">
+            <button type="button" className="cv-chip" disabled={importing}
+              onClick={() => lutInput.current?.click()}>
+              {importing ? "正在导入…" : "导入 3D .cube LUT"}
+            </button>
+            {local.file ? (
+              <button type="button" className="cv-chip" disabled={importing}
+                onClick={() => {
+                  const next = { ...local, file: "", name: "" };
+                  void onCommit(next).then((ok) => {
+                    if (ok) setLocal(next);
+                  });
+                }}>恢复内置 LUT</button>
+            ) : null}
+          </div>
+          {local.file ? <p className="cv-hint">当前 LUT：{String(local.name || local.file).split(/[\\/]/).pop()}</p> : null}
+          {importError ? <p role="alert" className="cv-hint">{importError}</p> : null}
+          <p className="cv-hint">导入文件按 Rec.709/sRGB 画面解释；预览与导出共用同一 LUT 渲染链。</p>
+        </div>
+      ) : null}
+    </>
   );
 }

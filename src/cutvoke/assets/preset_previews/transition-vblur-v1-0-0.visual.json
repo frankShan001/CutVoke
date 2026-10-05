@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.vblur",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.vblur",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "模糊",
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-24T06:43:42Z",
+  "observation": "运动边缘沿纵向拖开，保持前后镜头都可辨；与横向基准模糊方向相反。",
+  "method": "手工对照每项封面、五时间点动态表与真实导出帧表；分别核对模糊方向、焦点位置、画面明度和镜头顺序。动态表见 output/preset_review/transition-20260924-blur-fixed/transition-模糊-motion.png，真实导出帧见 output/preset_review/transition-20260924-blur-custom-export.png。另以透明导出样片确认 alpha 保留在 254–255。",
+  "coverSha256": "3f1554fd46127e5630b4395a7e7a2255a4440b3b71b3d26ae5422e593428dcc6",
+  "motionPreviewSha256": "b7ee845eb0d434b0919ba8caf4d1cdfd64c1711504b0ec0d98291484ec217e1c",
+  "auditSha256": "34f0751ca63216bdb9af35eeda270d24c7dd0093852d04701cd6dd2ee94c23b2"
+}

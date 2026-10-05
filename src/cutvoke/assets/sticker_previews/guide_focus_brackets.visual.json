@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_focus_brackets",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Four mint corner brackets frame a subject without covering the center.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "50ead7b830022b40facd0c7f673814dc1cc26df8289324bd921d25181c206bab",
+  "previewSha256": "168c50c9e31846586505bd05ac4e29891c006bdb81d4c64c2435a84585e5f1e4",
+  "auditSha256": "a996cc7d5d5d5655d25b5b7f076b17e313fa895301f7befe87c670b40e255b08"
+}

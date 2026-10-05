@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_burger_fries",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2e97c456ac9c52e6f5c0f0f6aa9ecaa9d08ca3ac031775528371da1c55f3e2be",
+  "previewSha256": "4eddbcfd5236836f1a9997a05d778738a3b7be76cdcd393a304acc65054fe9af",
+  "preview": "food_burger_fries.mp4",
+  "bytes": 5998,
+  "visiblePixels": 3653,
+  "changedPixels": 0,
+  "motionVisible": false
+}

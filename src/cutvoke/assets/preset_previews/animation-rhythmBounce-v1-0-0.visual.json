@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.rhythmBounce",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.bounce",
+  "params": {
+    "amplitude": 0.12,
+    "period": 1.4
+  },
+  "subcategory": "循环",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "画面按节奏上弹、回落；落地压缩姿态按既有阈值切换，空中垂直轨迹连续，画布没有黑边。 已实际复看重建库预览的12个时间点，图形运动清楚，画幅和边缘正常。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "496405ddadf15e60a2afefb62efe5832d8edd9d4581c7290e8b5b202704f6f44",
+  "motionPreviewSha256": "a092819f52844ecb5f05ba6a4dde201348e99805895645a9752fbd504b40b9d1",
+  "auditSha256": "162cc16d26df5cb2646664e6417aad0d30dee99cb65dd17db1f75691e0c885a6",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_rhythmBounce.png",
+  "libraryReviewSheetSha256": "7961f43682cf463e05087971c3d8afee3c8fff31f7a9b1489685cf803c4a5739"
+}

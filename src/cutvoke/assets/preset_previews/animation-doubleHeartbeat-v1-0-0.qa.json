@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.animation.doubleHeartbeat",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.heartbeat",
+      "version": "1.0.0",
+      "params": {
+        "amplitude": 0.22,
+        "period": 1.4
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 10.085,
+  "maxSampledMeanRgbDifference": 14.816,
+  "coverSha256": "416aaee62905ea323d132f513d86824f0a3d41841fde8e66b7631e3f9e93212c",
+  "previewSha256": "cd08f33cf670234708f919c43a1172bb80e7334da152c9c3672e35d50c0ef7c4",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

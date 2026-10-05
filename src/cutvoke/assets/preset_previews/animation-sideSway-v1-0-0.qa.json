@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.animation.sideSway",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.sway",
+      "version": "1.0.0",
+      "params": {
+        "amplitude": 0.1,
+        "period": 1.5
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 28.139,
+  "maxSampledMeanRgbDifference": 30.81,
+  "coverSha256": "6aec68146e64a61ad62551e945284839c50902ac540ca61f9818f67e3fed3c40",
+  "previewSha256": "bcf575144897160472be907140d0ad22288eda1029a6bfadc355671a6a1cbc72",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

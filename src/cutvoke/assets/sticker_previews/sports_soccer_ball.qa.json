@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_soccer_ball",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "962a6a1afceecd8e3bbf7902aa3f214a36cc38dac80e0863d3002b0dd1762e9f",
+  "previewSha256": "4447449ab8d3b514b340898d92b5fa11d1d2c62d2f06a07a37d04fa1d4d55d10",
+  "preview": "sports_soccer_ball.mp4",
+  "bytes": 3354,
+  "visiblePixels": 754,
+  "changedPixels": 0,
+  "motionVisible": false
+}

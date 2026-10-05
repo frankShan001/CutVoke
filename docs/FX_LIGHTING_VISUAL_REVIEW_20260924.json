@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed the full-size fx-光影 cover contact sheet and aligned untreated/default/edited frames from every generated MP4; compared each visual to its category siblings and confirmed numeric editing changes the actual rendered frame.",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.fx.barrelWide",
+      "decision": "approved",
+      "observation": "画面外缘被桶形透镜明显拉伸，左侧窗口线条弯曲，太阳仍在右侧；编辑畸变系数后弯曲程度明显改变。",
+      "motionPreviewSha256": "5b45662f479b413301e64d8cd7fa97974ba857397aff1ae5257df165f25d5d87"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.pincushion",
+      "decision": "approved",
+      "observation": "完整画幅向中心收紧，四角露出黑底，与桶形向外扩张的轮廓不同；编辑畸变系数后可见收缩程度改变。",
+      "motionPreviewSha256": "c756fe80248dbaa0f277d457af0ae7c13d056472124eebed13c9b98c981c6685"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.warmAura",
+      "decision": "approved",
+      "observation": "原紫红背景变为暖棕橙调，太阳和窗口边缘有漫射光；编辑发光强度后边缘亮度改变，与未染色霓虹柔光区分。",
+      "motionPreviewSha256": "4817ac66f74d7ca8ee4e4c9f4be21f0260deb30f14cbe5a8bab183642f096e5c"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.iceAura",
+      "decision": "approved",
+      "observation": "画面压成冷蓝和青色调，亮部保留蓝色光晕；编辑发光强度后边缘亮度改变，色相与暖光漫射清楚区分。",
+      "motionPreviewSha256": "ead074e3ad521edfe54af3665ea54a521fe9b3ba7636ebfc3c3664cf3ab109ab"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.tunnelShadow",
+      "decision": "approved",
+      "observation": "画面收在中心并叠加深暗角，主体周围出现黑色隧道边缘；编辑镜头畸变后中心画面大小明显变化，与普通枕形压缩区分。",
+      "motionPreviewSha256": "2247e3c3be946556b663216c64a2580125818bb9dd8c950583f18cf96496f67b"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.whiteMist",
+      "decision": "approved",
+      "observation": "窗口线条明显柔化且太阳泛白溢光，形成无色白雾感；调节模糊量可改变轮廓清晰度，与暖光和冷光染色预设区分。",
+      "motionPreviewSha256": "7e4cf804cdb3a013c03cc14feb4244482eb8d5684b3628678f52a4cb5ce68cf1"
+    }
+  ]
+}

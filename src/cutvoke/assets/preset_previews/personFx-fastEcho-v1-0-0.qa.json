@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.personFx.fastEcho",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.person.echo",
+      "version": "1.0.0",
+      "params": {
+        "frames": 3,
+        "decay": 0.9
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 15.242,
+  "maxSampledMeanRgbDifference": 15.242,
+  "coverSha256": "02ceaadae83f412f4615e9cd6024b9232943c8959c3fd48f18ac8e61c6a5cd73",
+  "previewSha256": "9d374367220769a7d3bca03b335b4f057309c30d3d33f2bf876e9326f255d92f",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

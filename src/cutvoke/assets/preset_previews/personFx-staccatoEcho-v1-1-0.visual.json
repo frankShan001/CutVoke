@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.staccatoEcho",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.echo",
+  "params": {
+    "frames": 4,
+    "decay": 0.78
+  },
+  "subcategory": "人物残影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "The subject produces discrete repeated silhouettes with a choppy rhythm, visibly separate from the smoother trails.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "9e03c2477c99149f2d656279160dcf733dab91fab63c2b6c45dfe5737aa26781",
+  "motionPreviewSha256": "640a5c4d0ee1dd6b30c1349ba10d17630749c93f654742be3ed978c3785cbaaa",
+  "auditSha256": "c48ac66fa675f772052f4df7db449267bc7060304e80be026fd252a3b0e3d049"
+}

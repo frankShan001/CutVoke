@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.star_burst",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "14cd0b2ffbbe5cbd61a13645a748ffb854439219e0c205a6053d3520c672731d",
+  "previewSha256": "0d61d183c6bd0828fa16f3f645aae4d455d2c67de006fa988ec1801972e921bd",
+  "preview": "star_burst.mp4",
+  "bytes": 4787,
+  "visiblePixels": 1942,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_toxic_bubbles",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "4150fcca0861d1daf5d64411ee3e8d81d0b9df911c7f1a457c7d560f8e55276a",
+  "previewSha256": "5ce36f371b2d9b09f5cefef5f9515f368c8442ed3c152486b8a8d3950ef6632d",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4795,
+  "visiblePixels": 3419,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3098,
+    "steady_entry": 3419,
+    "steady_exit": 3419,
+    "exit": 3098
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3098,
+      "withoutFade": 3418
+    },
+    "steady_entry": {
+      "withFade": 3419,
+      "withoutFade": 3419
+    },
+    "steady_exit": {
+      "withFade": 3419,
+      "withoutFade": 3419
+    },
+    "exit": {
+      "withFade": 3098,
+      "withoutFade": 3419
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.395,
+    0.447
+  ],
+  "auditExport": "fxoverlay_pixel_toxic_bubbles.audit.mp4",
+  "auditExportSha256": "1d77c445022e3bd0b1f95ed6f0da6a6be39c774bb6720686f6091a47999b95b6"
+}

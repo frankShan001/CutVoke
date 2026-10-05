@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_check",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e737b76e84dc863c6432f51e736ab9af54dda47286f42153fbe10b47b7e7e83f",
+  "previewSha256": "c6c0aad249d87eb26a112f25ac75f695489f89989c80ef0d084bd10d17a67d9c",
+  "preview": "reaction_check.mp4",
+  "bytes": 4258,
+  "visiblePixels": 2390,
+  "changedPixels": 0,
+  "motionVisible": false
+}

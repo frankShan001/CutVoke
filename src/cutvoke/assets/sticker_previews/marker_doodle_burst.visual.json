@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_burst",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Coral irregular burst has a clean navy edge and remains distinct on both light and dark backgrounds.",
+  "sourceSha256": "233d33de105cec7c5b391991c1fdbd7c6256139cb960e6a7b13fc5c28043db34",
+  "previewSha256": "f8d0660e25f0a17a8c223d378512dd1abcf5bf9742ca48b3c628f061b75698c9",
+  "auditSha256": "00b9e1ecb7fe2bf0c92f839e4429e402bdf32713d159589e3d93a9bd2356f312"
+}

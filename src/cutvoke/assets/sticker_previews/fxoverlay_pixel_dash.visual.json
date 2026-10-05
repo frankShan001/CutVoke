@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_dash",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex 视觉审阅",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切联系表和 320x180 浅深渐变实景合成联系表，并结合逐张机器应用/编辑/保存重开/撤销重做/入出场动画/MP4 预览与导出审计；只批准轮廓完整、边界干净、可见且彼此可辨的条目。",
+  "observation": "青色疾速拖尾横向延伸，方向明确，四周保留透明空间。",
+  "sourceSha256": "2341b8a443a9bc6b70a6587f59a43a6b5bde3fd25fde87516a98ae5db854660a",
+  "previewSha256": "abba1bf2c2f96a027728c940982f1f0a8bd874b5502c4e4d11fcfc37782f556a",
+  "auditSha256": "b8161bb210794866328b41646beafbdb03da868c6636b2d1e9c00cb8c716e67e"
+}

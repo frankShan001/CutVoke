@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_bronze_teal_ring",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "65321040c8fbfd44f0c6455bfa27db1af01ffbaa3ec35111d75812631d179f60",
+  "previewSha256": "79a389f233e2c22de391aaa7b510d72e94504f39bfb28dd93c56a5b504f668e6",
+  "preview": "inkfx_bronze_teal_ring.mp4",
+  "bytes": 17417,
+  "visiblePixels": 12375,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_rice_paper",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "observation": "Warm fibers and small natural flecks distinguish the handmade paper surface from smooth vellum.",
+  "sourceSha256": "30376f9ed5ae8f4cf50318c75de6ac5915f0b1ab0c590fa5eb1d35a2f2572b7e",
+  "previewSha256": "a3210628b872fe6dfe92632ce606a77beae0767ebde7b5ab34e88fd8cbaf497e",
+  "auditSha256": "efe5931963e71fd31c0e8c1fd4162a1795d1142c0c7648aede61d17992731907"
+}

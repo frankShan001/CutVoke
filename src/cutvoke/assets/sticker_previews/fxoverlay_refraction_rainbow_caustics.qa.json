@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_rainbow_caustics",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4a6f26f15b1a50f6e2772ceaeee9b36868b4d2eb0595889735b00922458c1e25",
+  "previewSha256": "b4f351faf5575875a3c6ba223f3b616dd8839060dc65bdbec19a7dfb170e45fa",
+  "preview": "fxoverlay_refraction_rainbow_caustics.mp4",
+  "bytes": 14390,
+  "visiblePixels": 11091,
+  "changedPixels": 0,
+  "motionVisible": false
+}

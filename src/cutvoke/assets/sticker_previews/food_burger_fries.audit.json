@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_burger_fries",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "2e97c456ac9c52e6f5c0f0f6aa9ecaa9d08ca3ac031775528371da1c55f3e2be",
+  "previewSha256": "4eddbcfd5236836f1a9997a05d778738a3b7be76cdcd393a304acc65054fe9af",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6263,
+  "visiblePixels": 5143,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 4546,
+    "steady_entry": 5143,
+    "steady_exit": 5143,
+    "exit": 4546
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 4546,
+      "withoutFade": 5143
+    },
+    "steady_entry": {
+      "withFade": 5143,
+      "withoutFade": 5143
+    },
+    "steady_exit": {
+      "withFade": 5143,
+      "withoutFade": 5143
+    },
+    "exit": {
+      "withFade": 4546,
+      "withoutFade": 5143
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.326,
+    0.243
+  ],
+  "auditExport": "food_burger_fries.audit.mp4",
+  "auditExportSha256": "1e6ed5b9e1e9e45a80910f4b44513afc04005568fd8f1b27bf11607d0bdc590d"
+}

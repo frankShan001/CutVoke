@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_hud_scan_cyan",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "Separated cyan scanning arcs with small ticks form a technical HUD ring; the interrupted circular structure differs from the four-corner focus frame.",
+  "sourceSha256": "0804e81d946d5eaba82832f4674057f3fb0f5799156284842c9fa5ed162a6479",
+  "previewSha256": "10aa4e01811bf73e658e139b02de129a7ad9762b36a8c8f7b83c13485af7de09",
+  "auditSha256": "bc8068707fbd4a9a6feaef5115d70f64ab51194c09e307fa18166fdb15c4c5d7"
+}

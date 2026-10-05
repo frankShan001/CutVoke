@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_holo_foil",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2ef3b72dcad9135302279d12f9c53530c4460a85b8ddee9eae8d8435a1ac5bfb",
+  "previewSha256": "fabc598f756d56cf392460f8bd385cde1922be5962b13cc559304a4eecde1085",
+  "preview": "fxoverlay_refraction_holo_foil.mp4",
+  "bytes": 17549,
+  "visiblePixels": 17677,
+  "changedPixels": 0,
+  "motionVisible": false
+}

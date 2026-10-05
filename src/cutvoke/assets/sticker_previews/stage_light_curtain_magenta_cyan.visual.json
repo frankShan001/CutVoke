@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_curtain_magenta_cyan",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "The magenta and cyan curtains remain distinct with a soft layered overlap.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "73f5b689b0fab449eb0bb58f55710134e569a5a91dd4d556d335cc71c00f8162",
+  "previewSha256": "b4b164bd609fbbfe93a3e9010ba3350c814e2b8949bef68154cd62747d1711ed",
+  "auditSha256": "76c462686a4cc48487e7283d61fb40a51c80ea26690e4057c6cd8d52ab8175eb"
+}

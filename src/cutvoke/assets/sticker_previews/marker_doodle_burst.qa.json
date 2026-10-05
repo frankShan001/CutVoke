@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.marker_doodle_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "233d33de105cec7c5b391991c1fdbd7c6256139cb960e6a7b13fc5c28043db34",
+  "previewSha256": "f8d0660e25f0a17a8c223d378512dd1abcf5bf9742ca48b3c628f061b75698c9",
+  "preview": "marker_doodle_burst.mp4",
+  "bytes": 4776,
+  "visiblePixels": 1663,
+  "changedPixels": 0,
+  "motionVisible": false
+}

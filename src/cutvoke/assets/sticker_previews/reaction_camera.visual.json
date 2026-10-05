@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_camera",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Teal compact camera with centered lens and small top controls.",
+  "sourceSha256": "c1db8df05290cd5a18c9ac539139cfb8b0227fba63d44748441ddef289efb44a",
+  "previewSha256": "a2e14df217a8211f6367c8db73e4ac446e6242b8311a5249675b1a44ce345e1c",
+  "auditSha256": "a65c415b976c9336526b173a1d028d4e2735ba344e2a909e69659eceda93381b"
+}

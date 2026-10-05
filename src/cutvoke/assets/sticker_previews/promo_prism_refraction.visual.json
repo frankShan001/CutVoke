@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.promo_prism_refraction",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "observation": "The faceted prism and rainbow refraction remain clear on both dark and light backgrounds.",
+  "sourceSha256": "2950c1bfb504a45b62ed2f780dab56e63f697ba0dea0789ec4727e874adb6440",
+  "previewSha256": "f8f3796513d26b8290b31bb6c534bb56466e4061df54825b2a20d099a658fbb3",
+  "auditSha256": "7d2df2eba3f12924852004edf7f08063605bbed210a9df86dcd0044a36bcfa6b"
+}

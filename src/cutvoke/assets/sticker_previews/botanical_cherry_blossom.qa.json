@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_cherry_blossom",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "598c0ab00688a83e63cd34c444a9e8a7317d97b6d2d0c017498d2e258b1b5628",
+  "previewSha256": "d49e34b0dc66adf5baa651a81f5df224f345ac12155419773189e9e5ab7006ed",
+  "preview": "botanical_cherry_blossom.mp4",
+  "bytes": 4648,
+  "visiblePixels": 1785,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.slideRight",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "7c8ff98c9bbe19be76e529e82797502b294af54fec69a75eda7eb687182c0a30",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "7c8ff98c9bbe19be76e529e82797502b294af54fec69a75eda7eb687182c0a30",
+  "auditExport": "animation-slideRight-v1-0-0.audit.mp4"
+}

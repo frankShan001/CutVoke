@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_sunrays",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "暖金体积光从一侧放射，光束边缘柔和且透明。",
+  "sourceSha256": "ec9da99a8d603fb9e38d070e8d075270732a329f9941151cb219fe51fa3349ed",
+  "previewSha256": "3ef6bb6ef55a84eea93845449eefb633c404c04ba1d975a07a16f99474635abf",
+  "auditSha256": "69e1a526225de0952b2cfd92092561219b574276ca60a1c8bbcc0ad6b4c07aac"
+}

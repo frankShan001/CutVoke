@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_gold_spark_curve",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "金色弧线由两处星芒牵引，周围小光点有层级，浅背景仍可读。",
+  "sourceSha256": "e0d0c91f0a699586c5843e3a0c70750a58fc6020c51ae728a9ae57ed4132dde2",
+  "previewSha256": "d94362771c8ee6e7b9acda36dcca9e7c5a90608854ab344d0644fd55a51063e3",
+  "auditSha256": "205a70a4b21bafab86da4714b7efb559c02c47aaf5304eea946c8910ca6eede8"
+}

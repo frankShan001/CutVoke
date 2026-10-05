@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_film_burn",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器浅底合成预览；只批准结构和颜色在缩略图中清楚、可与同类区分的素材。批准仅覆盖贴图本身的可辨识度，不代表复杂实拍成片验收。",
+  "observation": "画面边缘的橙红燃烧带和火星清楚，范围受控且不遮住中央内容。",
+  "sourceSha256": "b0dc6df1b5542192c539a58e00748417414425ab1e2dd338707092e8326aeaa4",
+  "previewSha256": "e1d35af62605c79bfc0958e150db101c77eeceb9dd543c091928b4361ba08d7d",
+  "auditSha256": "6de739f7f42f7b2a2135b4d3a2616e7817867d78f17d0f04c252b435f723486d"
+}

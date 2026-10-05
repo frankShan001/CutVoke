@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_orbit_rings",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1693f6567337c2ec3650dd59c48e8d8a5c41c6c056358b19c00bfd3d2e3859fa",
+  "previewSha256": "fb3e335a348f93612145b6e7860788917b6f1d598fa656758457b01a59b88d9e",
+  "preview": "promo_orbit_rings.mp4",
+  "bytes": 7674,
+  "visiblePixels": 2086,
+  "changedPixels": 0,
+  "motionVisible": false
+}

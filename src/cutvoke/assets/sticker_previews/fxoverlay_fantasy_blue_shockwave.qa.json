@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_blue_shockwave",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "817e492e9376298c93a02c70fe8f3306259364222e99f79dd091ddf53863458d",
+  "previewSha256": "0ee8bece222716db7768e59195b518405201ccb6c66f04d9a763f9945124bd01",
+  "preview": "fxoverlay_fantasy_blue_shockwave.mp4",
+  "bytes": 15774,
+  "visiblePixels": 12840,
+  "changedPixels": 0,
+  "motionVisible": false
+}

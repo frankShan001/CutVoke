@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_rain_glass",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "79972e389293b59595e46a968f50ab402861d04dd7c9cd20eb7499d0fe0f9069",
+  "previewSha256": "5cfaa859365acac81507d8574b3a5374f2c87dc0c9b374f7ff1379d5ebccce4f",
+  "preview": "texture_atlas_rain_glass.mp4",
+  "bytes": 9481,
+  "visiblePixels": 1840,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_tanghulu",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The three red fruit pieces and diagonal skewer remain separated and recognizable at preview size.",
+  "sourceSha256": "affc51782817fb4dd95af2fbdf38dfa667e9e02af756d258e6dfeeeb4b7d878a",
+  "previewSha256": "2f9c197f1fc8b0949ab0b39fef9c23efceca37c301a2c2d7de7330e8df43bf05",
+  "auditSha256": "e6367988b4153d4a22dfa60979cb529d6c82af86e42afbe6a6b5da520ff3c154"
+}

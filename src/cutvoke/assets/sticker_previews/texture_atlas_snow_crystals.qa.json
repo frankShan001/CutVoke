@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_snow_crystals",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c94750660a8afb0fb9c00983aa1a6d5c98f0093d3ba71848d6166088996cf6eb",
+  "previewSha256": "4a0e2edb90bdb534f33da7768459e7e9dd53b7277f2da8b2a662bf683db6ae58",
+  "preview": "texture_atlas_snow_crystals.mp4",
+  "bytes": 8776,
+  "visiblePixels": 2385,
+  "changedPixels": 0,
+  "motionVisible": false
+}

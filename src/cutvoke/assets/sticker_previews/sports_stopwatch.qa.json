@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_stopwatch",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2dded051960ad0c4d8471ea88872cdfadbff0545b066c5641856ba9e54233bf2",
+  "previewSha256": "238c9635f20f1f59b71b945509148f3ea4f83447497a9ce00070464029a446e6",
+  "preview": "sports_stopwatch.mp4",
+  "bytes": 3642,
+  "visiblePixels": 722,
+  "changedPixels": 0,
+  "motionVisible": false
+}

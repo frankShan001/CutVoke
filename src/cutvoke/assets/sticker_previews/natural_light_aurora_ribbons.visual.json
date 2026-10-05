@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_aurora_ribbons",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Teal and violet aurora folds retain separate color bands and a soft transparent contour.",
+  "sourceSha256": "95abe4b0ff1841efbb711710475c20f56a9c6bee43bedf3091a0dd6f3f92d330",
+  "previewSha256": "bef576203585fc06d9c6fc2e3f086255cb9717aed9936ef0d09457b3bd7e4575",
+  "auditSha256": "2659410a760aead0875142601c497e2b733b642c4e003862f49254d53518c126"
+}

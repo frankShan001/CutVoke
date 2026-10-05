@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_sparklers",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "57dad9539785c892dbc54c20773c4a3c08cb0f9b9bc25786b1c263040770540d",
+  "previewSha256": "39676be0568f6053800e9e69817cdd105c958a3226d7c8d47c599faeb8ce0535",
+  "preview": "party_sparklers.mp4",
+  "bytes": 4496,
+  "visiblePixels": 1446,
+  "changedPixels": 0,
+  "motionVisible": false
+}

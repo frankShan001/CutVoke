@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_cool",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "5390b21a90a971ce40bc7a1af3429a6f93528e004a3e45ed944b9d492831e68e",
+  "previewSha256": "cb4a3349c3d0b1172a7f278e29bf62186f33e9133904603568c6ce4a26b0b0bd",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4289,
+  "visiblePixels": 3333,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3224,
+    "steady_entry": 3333,
+    "steady_exit": 3333,
+    "exit": 3224
+  },
+  "previewExportMeanRgbDifferences": [
+    0.295,
+    0.237
+  ],
+  "auditExport": "reaction_cool.audit.mp4",
+  "auditExportSha256": "5abee0407daefed6c0fd94f5271628a3721ad6e0bfbfae1e2c028b395b76d2b0"
+}

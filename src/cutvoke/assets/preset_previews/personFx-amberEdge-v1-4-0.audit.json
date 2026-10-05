@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.amberEdge",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "sigma",
+    "value": 11.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.379,
+  "exportSha256": "52cf43cbc5236660a5404b3fbf626b58fd4ce69d42a264894b7d1296cb58d9e7",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "52cf43cbc5236660a5404b3fbf626b58fd4ce69d42a264894b7d1296cb58d9e7",
+  "auditExport": "personFx-amberEdge-v1-4-0.audit.mp4"
+}

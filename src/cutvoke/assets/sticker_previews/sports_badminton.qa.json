@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_badminton",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1e1610b3dc9e6136761dddb274b5f0da4ea41d4de15b754c135d3fb39eaf2af2",
+  "previewSha256": "97ea4c6cd1e982e9f1a9f9ab953214441a818b9485b2a10899207acbb14e2c92",
+  "preview": "sports_badminton.mp4",
+  "bytes": 3520,
+  "visiblePixels": 573,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_golf",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "高尔夫球杆、球与红色球座均在画面内，灰色杆头和白球分离明确，合成预览没有底色块。",
+  "sourceSha256": "86d0d18f7d6a90d9dbe5f8bad7c4a481f6c2621ce79bbf5cd9150d61b0b740c2",
+  "previewSha256": "c816006f378b0254ab5c3b37ce86eacaceab8d0db292b4f15613c2ceba37b909",
+  "auditSha256": "b11111bb58c570f12933f9ee03eac30e9738a8d88336b444bcde76460d49d46d"
+}

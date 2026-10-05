@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.comboDriftLeft",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "3405adaef8a8b69246cc929ffe421578eb972adb2bda45a6f425c84f70956a68",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "3405adaef8a8b69246cc929ffe421578eb972adb2bda45a6f425c84f70956a68",
+  "auditExport": "animation-comboDriftLeft-v1-0-0.audit.mp4"
+}

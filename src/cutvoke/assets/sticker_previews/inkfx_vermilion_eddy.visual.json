@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_vermilion_eddy",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "A tight red-and-gold fluid spiral has a circular rotating silhouette, clearly unlike the straight vermilion slash.",
+  "sourceSha256": "96d769cfb16182a3e0c9c13c38b67f71c2d46d0f380a79a640665074e410c971",
+  "previewSha256": "f334fb90b9d8958d677917ed09900e6f4cb524383548fc06de6124235eeccdd6",
+  "auditSha256": "7348cf46b2d726c309af3217483e5f06463c76d3b063a18e82e8d2dac9fa62a1"
+}

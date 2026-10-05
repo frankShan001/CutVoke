@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_heart_hand",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Two hands frame a red heart; the central heart and pink rays remain legible.",
+  "sourceSha256": "9819143a07d761a09111430b012efa064d012bc6fea85248f9e679bb6221fb43",
+  "previewSha256": "3ea3cc6c09fa2bd2d314028d4f617ad55306f9a9c46b59387aee820bc6cba5a8",
+  "auditSha256": "9d91c22d7534ab1a8f8c862bce241ebcd4fa17ef14ce3fbea9dadabf73a04a45"
+}

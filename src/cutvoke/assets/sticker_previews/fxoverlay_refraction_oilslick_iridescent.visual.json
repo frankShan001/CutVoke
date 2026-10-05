@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_oilslick_iridescent",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "observation": "虹彩油膜以薄膜形态呈现，多色过渡可辨；深色背景上边缘更鲜明。",
+  "sourceSha256": "c5c3e97c5d6f5d3cc5b4865123b7b6ac55b070c4b6ff78171f1490854e789a6f",
+  "previewSha256": "04755f571b86db78998451dd949ee2dffc5180a4878b0fb67ed97828c4f43159",
+  "auditSha256": "df24ae524a3ea58779d07ceb3d3cfbb7c89848910e46dc5ebab37ea145f2fdac"
+}

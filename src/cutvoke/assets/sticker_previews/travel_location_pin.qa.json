@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_location_pin",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "98d53890758a33e65af0a6e5e76dbc7378ea652a0c2ab913c083a7ef573d43e8",
+  "previewSha256": "79c83862c18688c552ce670f3b641b40a926fb33176bfd5372088656dbda538b",
+  "preview": "travel_location_pin.mp4",
+  "bytes": 3683,
+  "visiblePixels": 1043,
+  "changedPixels": 0,
+  "motionVisible": false
+}

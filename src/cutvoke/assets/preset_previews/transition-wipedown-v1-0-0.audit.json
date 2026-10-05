@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.wipedown",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.805,
+  "exportSha256": "34d1390aa6e7874b2ec8ea10008ac630ed2f4730620ea50c0d7fc78ae0d2acd3",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "34d1390aa6e7874b2ec8ea10008ac630ed2f4730620ea50c0d7fc78ae0d2acd3",
+  "auditExport": "transition-wipedown-v1-0-0.audit.mp4"
+}

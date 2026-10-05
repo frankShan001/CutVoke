@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.star",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "金色五角星结构对称，内部高光克制，没有背景杂点。",
+  "sourceSha256": "c41bb3a910b55458ce17cb5a8f0125fcd804b2f851bdbe4dbd7e469341d7ec51",
+  "previewSha256": "951b6289c59210cc4d840ab7bba710b009120c12b440c7894d674d61f1a30493",
+  "auditSha256": "9d661936adf157ce4005a8ce16bf718869dadde3f693ddbaa9c205878f478006"
+}

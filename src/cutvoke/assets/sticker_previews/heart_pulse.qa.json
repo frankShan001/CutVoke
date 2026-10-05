@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.heart_pulse",
+  "version": "1.1.0",
+  "kind": "dynamic",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d220149af5f63cc543188a4802e3eb8164dfeafaa233353d507fcb5e94e50988",
+  "previewSha256": "d83d5c49f7c198e5aba694db8bcb92b7b85b8c830af46cd628b7d54e9980bd77",
+  "preview": "heart_pulse.mp4",
+  "bytes": 13860,
+  "visiblePixels": 4110,
+  "changedPixels": 3163,
+  "motionVisible": true
+}

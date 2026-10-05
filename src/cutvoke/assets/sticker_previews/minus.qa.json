@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.minus",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "317fa4afb88e01693ff27faadc5c53cf61199e5ccb9d0df8112cf14c8218a47f",
+  "previewSha256": "dde171d7dad558a8b3b7a0b803cab44c3120dc7893cdb44f6ef12969cd4fc21d",
+  "preview": "minus.mp4",
+  "bytes": 2978,
+  "visiblePixels": 1150,
+  "changedPixels": 0,
+  "motionVisible": false
+}

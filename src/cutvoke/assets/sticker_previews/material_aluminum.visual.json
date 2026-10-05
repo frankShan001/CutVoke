@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_aluminum",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "observation": "Fine linear brushed-metal grain stays visible across both halves and its softly irregular edges retain alpha.",
+  "sourceSha256": "87c9d97e68b85fd9ac53f75367caeffb60dc8ce8ab086a70854d1058b03ff4c9",
+  "previewSha256": "331e03b4535667c65c62f00a607cdae74414e57e95afd9a8b3c7aac24019da54",
+  "auditSha256": "e23db9e0e7eedae68e5318a1615f8df277561e98ad5a2040874ce626becd3310"
+}

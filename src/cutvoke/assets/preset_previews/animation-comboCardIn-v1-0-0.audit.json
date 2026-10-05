@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.comboCardIn",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "88509845e619f82c5c451c02b93817fe83abb2478e518a22b5b36f071ced6821",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "88509845e619f82c5c451c02b93817fe83abb2478e518a22b5b36f071ced6821",
+  "auditExport": "animation-comboCardIn-v1-0-0.audit.mp4"
+}

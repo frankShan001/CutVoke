@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_vhs_interference",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a4992207d75e45d76b5013a20db29c94b634a3d0ba92f32acb0c1b4e9cf6fab1",
+  "previewSha256": "b246516cd8ee39a9f6114b66c4363db584d68870d79473a0c7d050d09a9c809b",
+  "preview": "texture_vhs_interference.mp4",
+  "bytes": 3989,
+  "visiblePixels": 2178,
+  "changedPixels": 0,
+  "motionVisible": false
+}

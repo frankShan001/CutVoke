@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_prism_beam_fan",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "2c56325c5aec8b6fc649e6d65f17a82afeb60b30b8e04176f4a186b3cdd75b93",
+  "previewSha256": "cbacf7edc4a2070209383ece110ae11246f8a7ae0620f2b083a63037d4248a89",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 7405,
+  "visiblePixels": 8574,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 6572,
+    "steady_entry": 8577,
+    "steady_exit": 8576,
+    "exit": 6575
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 6572,
+      "withoutFade": 8579
+    },
+    "steady_entry": {
+      "withFade": 8577,
+      "withoutFade": 8579
+    },
+    "steady_exit": {
+      "withFade": 8576,
+      "withoutFade": 8579
+    },
+    "exit": {
+      "withFade": 6575,
+      "withoutFade": 8579
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.864,
+    0.849
+  ],
+  "auditExport": "stage_light_prism_beam_fan.audit.mp4",
+  "auditExportSha256": "ea59a66909e05ad153d3c20e9e2300bfee93fbbe1ac74de2412f543fce495a39"
+}

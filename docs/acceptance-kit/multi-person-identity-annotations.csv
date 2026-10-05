@@ -1,0 +1,1 @@
+reviewer_code,frame_index,timestamp_seconds,person_id,visual_cue,bbox_x_min_norm,bbox_y_min_norm,bbox_x_max_norm,bbox_y_max_norm,occlusion_state,event,identity_confidence_1_to_5,notes

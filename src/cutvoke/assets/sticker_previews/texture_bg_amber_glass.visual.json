@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_amber_glass",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "Warm amber glass has clean flowing highlights, no text, and no magenta divider residue at the crop edges.",
+  "sourceSha256": "2d376ddaa1d764b67c33e8c8005096722d4dd8e2249e6cdf3f31dfc793352430",
+  "previewSha256": "86cbd691bcb086b1aea13636a735a421e2f98a90c8ea7872a4edf1d363d6d1eb",
+  "auditSha256": "d3eb76a4d17ddd24f463e04a98d53ff3f852b68a71adcf46afad31f7f163ffc5"
+}

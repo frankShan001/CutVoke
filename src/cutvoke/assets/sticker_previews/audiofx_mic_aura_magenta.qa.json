@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_mic_aura_magenta",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5579ad8188dedd2521f461acc6582ef0ab9ce2fe6e0afb009fa20e5b6da656fe",
+  "previewSha256": "537c5b640e589fcd28e318310ba17d4ba0715aa9eaa7a504e1fa117c928e27ed",
+  "preview": "audiofx_mic_aura_magenta.mp4",
+  "bytes": 8656,
+  "visiblePixels": 5283,
+  "changedPixels": 0,
+  "motionVisible": false
+}

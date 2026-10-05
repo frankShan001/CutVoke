@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_bokeh_gold",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "611d46a30660dc230fe8e41640acf885a7610254d75a702cb6a28c12706b67c6",
+  "previewSha256": "c5dd9ce8e456692ca438df66f983b21232bd3d05b4910bce2044882aefd71c6a",
+  "preview": "cinematic_optical_bokeh_gold.mp4",
+  "bytes": 6945,
+  "visiblePixels": 2764,
+  "changedPixels": 0,
+  "motionVisible": false
+}

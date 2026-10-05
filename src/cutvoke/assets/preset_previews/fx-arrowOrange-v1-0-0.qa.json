@@ -1,0 +1,33 @@
+{
+  "presetId": "cutvoke.preset.fx.arrowOrange",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.shape",
+      "version": "1.0.0",
+      "params": {
+        "shape": "arrow",
+        "mode": "fill",
+        "x": 0.5,
+        "y": 0.7,
+        "w": 0.75,
+        "h": 0.35,
+        "strokeWidth": 24,
+        "color": "#FF9F0A",
+        "opacity": 1
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 11.88,
+  "maxSampledMeanRgbDifference": 11.88,
+  "coverSha256": "456b3a766aa7053d4214a6993ac492973cc068599f471142f24092ce5fc12942",
+  "previewSha256": "29cc49314d9d2d126bb4ec1f627c42d3613c3d38a3bd40e154ef3af3fb689e0e",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_amber_arc",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "98f44aef7d05299722c759793fcd6bff96d149d5b2fc8d298ab30af6ead1e6e7",
+  "previewSha256": "b394b97e9d6e900657931b11e32b179eef1dda065b1088f2f51f3898f4abbeaf",
+  "preview": "fxoverlay_fantasy_amber_arc.mp4",
+  "bytes": 13689,
+  "visiblePixels": 8947,
+  "changedPixels": 0,
+  "motionVisible": false
+}

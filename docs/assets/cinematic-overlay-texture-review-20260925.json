@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:25:53+08:00",
+  "method": "Compared cropped transparent artwork and 320x180 composited motion previews on a dark-to-light split background; excluded two atlas cells that were unreadable at preview size.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_frost_edge",
+      "decision": "approved",
+      "sourceSha256": "d1a1274e43e3550bf38fffcd62d7e624951e0b54e93c30d7c7b7f45ce2ff4607",
+      "previewSha256": "8d7aa3e8e0a744eb3cd5dd1b910f9348db753bc6761af80892fb94e20ae92798",
+      "observation": "Ice crystals stay along the top corners and side edges, leaving the center clear for the footage."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_low_fog",
+      "decision": "approved",
+      "sourceSha256": "d149cfadad91c5d2e68f9837d0d2bcb903fc6178b968559be36442bb6bd1f3da",
+      "previewSha256": "423860131151bb321ee047fc9ef82f2f0d35b60e2d6458aa11b05ff01b0f90cb",
+      "observation": "The cool mist forms a low horizontal band and remains translucent across both dark and light sides."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_torn_paper",
+      "decision": "approved",
+      "sourceSha256": "ddc5a7c1a7dc310238198ce923359a7200301b7a1a6811c9ce7819e0edb2398f",
+      "previewSha256": "4eba4ce7e6515c83da5692b675b337fcdc8f8ecc6ac699b281d73fd6d635902d",
+      "observation": "The ivory torn edge has visible paper fibers and a clean transparent area above and below it."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_rain_glass",
+      "decision": "approved",
+      "sourceSha256": "cf5d20d0bc8f4562990dc804004dbe307e1317503790c465a344c630ee641f9e",
+      "previewSha256": "26f110a517397be4b7095118564e2eb4217ed84248179b2691a8cdc9b91cbf8c",
+      "observation": "Separate droplets and short trails remain visible without forming an opaque glass panel."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_smoke",
+      "decision": "approved",
+      "sourceSha256": "5f69bd2c001954a03fa6956affefe11bacb742028c89d979b49dacdde25b7412",
+      "previewSha256": "112630d9c49cea99dc549b4dd7fa717065b9fe52cfa427211ceecce5916ed34f",
+      "observation": "The pale smoke follows a broad curved path and keeps enough transparency for footage to show through."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_snow_crystals",
+      "decision": "approved",
+      "sourceSha256": "48999078950dd5a888751c16f02690e0d4df4f4489323020ab26f6984b9b2a17",
+      "previewSha256": "e6439b73467ac80c8300cc5065663b2c862183a1e8673f168b47930c7aa5de35",
+      "observation": "Sparse flakes retain crisp star shapes and remain legible over the dark half of the preview."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_edge_leak",
+      "decision": "approved",
+      "sourceSha256": "c09e04b2dd8801a87bd71c09a87f2ff5ee0d701b675b208693be0da5519e0ad6",
+      "previewSha256": "e34cc4e0a6ba14faa7f6f33672239d247e85532bf85434859b94121bf4d0fee4",
+      "observation": "Warm orange light is confined to the right edge with a soft fade into the transparent center."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_dust_bokeh",
+      "decision": "approved",
+      "sourceSha256": "25b2203a10c997823b123549133e89952025a03d40a42c8a3942fb7c16b99908",
+      "previewSha256": "a41ea9e7e21c2c2337c416a702f166259eadec4ca6ce7ba0dc25fa1a8294d655",
+      "observation": "Warm bokeh spots vary in size and brightness, with the largest circles visible over the dark half."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_prism_arc",
+      "decision": "approved",
+      "sourceSha256": "ee3c18142beb0698d85c71cc3c3e1d3b04dac1369d174992f178885e37a3a73c",
+      "previewSha256": "03b8a22762618688fb6cf937d5e9282617cadfc2ead40391e8ac563a1a42af08",
+      "observation": "The violet-cyan arc has a clear highlight and a tapered path that remains distinct from the background."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_watercolor",
+      "decision": "approved",
+      "sourceSha256": "6dfb2c73c1052eb3f922872f59e76cb65cfb6c6e33c7642d31cfe6de70100b4f",
+      "previewSha256": "f793c2c9b27eaf8433f26b9500e1857d7523c78b7e3d3ee9759a02a74df04f26",
+      "observation": "Blue and coral washes blend softly while keeping separate color regions and transparent edges."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_embers",
+      "decision": "approved",
+      "sourceSha256": "3ffda22d29a43513e269c3d6f56e3835d2504b1a0cff2c2af0661687cb9abbcf",
+      "previewSha256": "7647da57218029ac9e3a6fec696123c175814084480e3dd90a743c446f4d61d9",
+      "observation": "Small orange embers are individually separated and bright enough to read as floating sparks."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_foil_flecks",
+      "decision": "approved",
+      "sourceSha256": "6b5d5b59af6e65d62328354a4f26a66d42ce2f6ce427c68ba3c219627e80eef8",
+      "previewSha256": "ce2e5bf44f484a15078045bc7f3e54a5a48eedd9ba847d51e1bfa4e6dd81e92f",
+      "observation": "Gold and silver foil fragments have distinct irregular shapes and remain separated in the overlay."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_leaf_shadows",
+      "decision": "approved",
+      "sourceSha256": "6165f9e940d6429ef53bf6d2c0d2a4cba735699de711e0227962a2463c8c4c85",
+      "previewSha256": "648be8538668671fc48b99588c115670363942aeb222a8ea3498949cdcd35bd4",
+      "observation": "Leaf silhouettes cluster along the left edge with translucent highlights and open center space."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_atlas_gate_weave",
+      "decision": "approved",
+      "sourceSha256": "578c57b030c9bb02b5d8f31f17dd62a2ba562b953a7f88ed8cd7454f11c6635c",
+      "previewSha256": "f6ae3cb04a257a4b1fd1e5063c6a0a1041acc62220a47b612efcdb45d30f2161",
+      "observation": "A fine pale hairline and teal light strip create a readable analog film-edge accent."
+    }
+  ]
+}

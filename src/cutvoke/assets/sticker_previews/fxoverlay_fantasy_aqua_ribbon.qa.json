@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_aqua_ribbon",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d98481ca9ff85548dfc52aeec27e7de6d2e08d8d0eca2511dfa216732bb68628",
+  "previewSha256": "52b0f9e2ac47b7e673b45346c64b0161c986854763425f510b5db2c5cd70caa5",
+  "preview": "fxoverlay_fantasy_aqua_ribbon.mp4",
+  "bytes": 13110,
+  "visiblePixels": 7989,
+  "changedPixels": 0,
+  "motionVisible": false
+}

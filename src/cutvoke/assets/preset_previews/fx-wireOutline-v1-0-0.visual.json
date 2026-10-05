@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.wireOutline",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.sharpen",
+  "params": {
+    "amount": 2.5
+  },
+  "subcategory": "基础",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "白色细线仅保留主体边缘，原来的大色块退为黑底；与模糊、色块化和网格覆盖明显不同。",
+  "method": "Compared untreated and treated frames at 0.20s and 0.95s from each real rendered preview, checked sibling covers and full MP4 decode; observations are specific to these geometric samples.",
+  "coverSha256": "72d7a4065e00719e1d37ca7c3a132b962c63cf53d0f53e92cf731951ea6208b5",
+  "motionPreviewSha256": "4f875245ce9257ae57b1271eb5c213f300a34962248385ae0c0aad3796c94a77",
+  "auditSha256": "46f97d8244a71f13496f0f91e4fc3ab563017a005cf6b055a42b13e683fb8cb9"
+}

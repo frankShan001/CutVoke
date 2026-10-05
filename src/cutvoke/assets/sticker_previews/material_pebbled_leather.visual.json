@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_pebbled_leather",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器合成预览；只批准纹理特征清晰、边缘完整且缩略图可辨的素材。批准仅覆盖贴图本身的识别度，不代表复杂实拍成片验收。",
+  "observation": "深棕皮革压纹具有连续颗粒和侧向明暗，表现稳定且不串格。",
+  "sourceSha256": "9c33cb5ea39c934809c86f959a86267ff17e2815617488de83cffdd63b7a38aa",
+  "previewSha256": "1d80dc01a2b67807ed6b98b99684e9595026f5a27b0fc1a9a507a4f76244861b",
+  "auditSha256": "e217e5731db043efd53a3632463033132e9dc040b4ec8405160e88ad1c1f7a74"
+}

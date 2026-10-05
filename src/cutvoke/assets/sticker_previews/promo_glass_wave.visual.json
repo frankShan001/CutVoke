@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.promo_glass_wave",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "observation": "The teal glass wave is fully contained in its cell and keeps both curved ends intact.",
+  "sourceSha256": "133633e4b3c0dd11c03753c22f561976db02101d4e73c57982349dcdd6e84114",
+  "previewSha256": "0ba07b95a5e2272731a5a4de4ad22c7d0b38deb2fd0ed6c5f79e5d7ed2f2da0f",
+  "auditSha256": "6c034084323d33ffe5d1440c5f1bf43c77fb7d15a4b0d3b339bbc46d51cd4a61"
+}

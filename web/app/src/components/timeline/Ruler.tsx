@@ -1,8 +1,9 @@
 /** 时间线标尺：秒刻度 + 主/次刻度分级。 */
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useEditor } from "../../store/editor";
 import { fmtTime, ticksForRange, toPx, type Tick } from "./util";
+import { rationalToSecs } from "../../lib/rational";
 
 export function Ruler({
   lengthSecs,
@@ -17,6 +18,9 @@ export function Ruler({
 }) {
   const { state, dispatch } = useEditor();
   const pointerId = useRef<number | null>(null);
+  useEffect(() => () => {
+    if (pointerId.current != null) dispatch({ type: "SCRUBBING_SET", active: false });
+  }, [dispatch]);
   const ticks = ticksForRange(lengthSecs, pxPerSec);
 
   const seekTo = (time: number) => {
@@ -31,6 +35,7 @@ export function Ruler({
     if (e.button !== 0) return;
     e.preventDefault();
     pointerId.current = e.pointerId;
+    dispatch({ type: "SCRUBBING_SET", active: true });
     // preventDefault 阻止浏览器自动聚焦；显式聚焦后，方向键才可逐帧调整。
     e.currentTarget.focus();
     try {
@@ -44,7 +49,10 @@ export function Ruler({
     if (pointerId.current === e.pointerId) seekAt(e.clientX, e.currentTarget);
   };
   const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (pointerId.current === e.pointerId) pointerId.current = null;
+    if (pointerId.current !== e.pointerId) return;
+    if (e.type === "pointerup") seekAt(e.clientX, e.currentTarget);
+    pointerId.current = null;
+    dispatch({ type: "SCRUBBING_SET", active: false });
   };
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const fps = state.project?.sequence.fps;
@@ -86,10 +94,20 @@ export function Ruler({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      onLostPointerCapture={onPointerUp}
       onKeyDown={onKeyDown}
     >
       {ticks.map((t) => (
         <TickView key={`${t.secs}-${t.major}`} tick={t} pxPerSec={pxPerSec} />
+      ))}
+      {(state.project?.sequence.markers || []).map((marker) => (
+        <span
+          key={marker.id}
+          className="timeline-ruler__marker"
+          style={{ left: toPx(rationalToSecs(marker.time), pxPerSec) }}
+          title={`${marker.name || "标记"} · ${fmtTime(rationalToSecs(marker.time))}`}
+          aria-hidden="true"
+        />
       ))}
     </div>
   );

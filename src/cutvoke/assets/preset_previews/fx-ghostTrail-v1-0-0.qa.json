@@ -1,0 +1,34 @@
+{
+  "presetId": "cutvoke.preset.fx.ghostTrail",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.shake",
+      "version": "1.0.0",
+      "params": {
+        "pixels": 16.0,
+        "hz": 2.2
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.trail",
+      "version": "1.0.0",
+      "params": {
+        "frames": 10,
+        "decay": 0.78
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 20.07,
+  "maxSampledMeanRgbDifference": 20.07,
+  "coverSha256": "57eee00fe2d5cd951c39a798d32e9efc04592db7324bf5e55895ce78fdb50b44",
+  "previewSha256": "96f99ce56b74c3a1e7c487e62e6915b00e5f2095ba1fecec54bbec223e784765",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

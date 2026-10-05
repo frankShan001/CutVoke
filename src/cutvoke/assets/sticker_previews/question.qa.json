@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.question",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d3d914db828ba6e2b1b673fcbe3430f07f2ee78f248648263a0e6f3551c4c09b",
+  "previewSha256": "ab2a40859def487d0c10244d2a0f090a3affb79173d16e12043bcf6dd5a63196",
+  "preview": "question.mp4",
+  "bytes": 4097,
+  "visiblePixels": 1808,
+  "changedPixels": 0,
+  "motionVisible": false
+}

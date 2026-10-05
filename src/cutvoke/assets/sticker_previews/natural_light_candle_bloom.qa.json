@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_candle_bloom",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ff910b8d59af08c45414ce66cefbe8ed74f33285dc762082521a893d28082101",
+  "previewSha256": "f4bc5ecc1eaa94bc4c2e64fe3f5468c8776440f29442f6c353e70fe46c9d326b",
+  "preview": "natural_light_candle_bloom.mp4",
+  "bytes": 7547,
+  "visiblePixels": 11948,
+  "changedPixels": 0,
+  "motionVisible": false
+}

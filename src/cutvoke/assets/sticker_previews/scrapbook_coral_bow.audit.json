@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_coral_bow",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "a106cdffde477cb575208cbf093b88d46a5064b19ee7406ec7d33bfc5d5194e9",
+  "previewSha256": "d376dbe29df2ad9515b7e33dfd9b3f8a0d92f6b06c8ff4d1b4cb0064750c3a63",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1525,
+  "visiblePixels": 926,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 714,
+    "steady_entry": 926,
+    "steady_exit": 925,
+    "exit": 709
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 714,
+      "withoutFade": 927
+    },
+    "steady_entry": {
+      "withFade": 926,
+      "withoutFade": 925
+    },
+    "steady_exit": {
+      "withFade": 925,
+      "withoutFade": 927
+    },
+    "exit": {
+      "withFade": 709,
+      "withoutFade": 926
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.071,
+    0.071
+  ],
+  "auditExport": "scrapbook_coral_bow.audit.mp4",
+  "auditExportSha256": "92465bd8f40492ca5ea8e173bda1727db61c086aba75e630075b204a94507323"
+}

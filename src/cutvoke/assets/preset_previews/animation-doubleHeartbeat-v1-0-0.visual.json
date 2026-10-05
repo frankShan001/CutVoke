@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.doubleHeartbeat",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.heartbeat",
+  "params": {
+    "amplitude": 0.22,
+    "period": 1.4
+  },
+  "subcategory": "循环",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "每周期两次缩放脉冲可辨，脉冲之间正常回落，图形比例一致，没有意外黑帧。 已实际复看重建库预览的12个时间点，图形运动清楚，画幅和边缘正常。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "416aaee62905ea323d132f513d86824f0a3d41841fde8e66b7631e3f9e93212c",
+  "motionPreviewSha256": "cd08f33cf670234708f919c43a1172bb80e7334da152c9c3672e35d50c0ef7c4",
+  "auditSha256": "f058381a93609343c49618cff27b3209db18e088fb578fe83d22017d4aea4b1b",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_doubleHeartbeat.png",
+  "libraryReviewSheetSha256": "c9b009dfaa14a00fac2730d154d53112902c8111789700af6c1d48e023f3618a"
+}

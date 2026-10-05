@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_haze_ribbons_amber_rose",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "d7f322661e4ee2d6f8d117a9d42fb59e429984662d404f4cd7081e3a0388ef58",
+  "previewSha256": "6431f9e9578a083751278618628bd0680db7a5e6c7a6fabaa18e7e1f97a4bf67",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6219,
+  "visiblePixels": 9258,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 6369,
+    "steady_entry": 9262,
+    "steady_exit": 9249,
+    "exit": 6380
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 6369,
+      "withoutFade": 9262
+    },
+    "steady_entry": {
+      "withFade": 9262,
+      "withoutFade": 9262
+    },
+    "steady_exit": {
+      "withFade": 9249,
+      "withoutFade": 9249
+    },
+    "exit": {
+      "withFade": 6380,
+      "withoutFade": 9258
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.465,
+    0.456
+  ],
+  "auditExport": "stage_light_haze_ribbons_amber_rose.audit.mp4",
+  "auditExportSha256": "79470cf7bbd6af3c6c3730d066898c8830e9f0c91f4e8f8b4efc191fcdc628ca"
+}

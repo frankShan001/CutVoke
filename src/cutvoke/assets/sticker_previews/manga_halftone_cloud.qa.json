@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_halftone_cloud",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ec03cd3ce0f7c8cb7347ff7990081ff69d715a92a1b369be49e47abd9c1cefd4",
+  "previewSha256": "e92ea07299c8df20927067b3f618afba3b8cb16bc72a327cbe12e07dfd4ada87",
+  "preview": "manga_halftone_cloud.mp4",
+  "bytes": 5250,
+  "visiblePixels": 2381,
+  "changedPixels": 0,
+  "motionVisible": false
+}

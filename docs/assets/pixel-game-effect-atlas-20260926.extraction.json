@@ -1,0 +1,571 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "source": "pixel-game-effect-atlas-20260926.png",
+  "sourceSha256": "c35223525351d73957ed3fa194b31f7c30b0b8e2b941f0c112ad3d99079e8473",
+  "layout": "4x4",
+  "subcategory": "特效贴图",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "items": [
+    {
+      "stem": "fxoverlay_pixel_impact_gold",
+      "name": "金色像素冲击",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "冲击"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBounds": [
+        43,
+        44,
+        294,
+        284
+      ],
+      "visiblePixels": 27499,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "bd0ef7dd70ebc7a1b232e5c37ce45348fb10115f072a7359680611aafd2668ad"
+    },
+    {
+      "stem": "fxoverlay_pixel_frost_burst",
+      "name": "冰晶像素爆发",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "冰晶"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "visibleBounds": [
+        47,
+        44,
+        283,
+        285
+      ],
+      "visiblePixels": 28303,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "5a771cc427ad615a436cebcf8ea65a0013ddb71f0da1e2dc2729ddad7a78d831"
+    },
+    {
+      "stem": "fxoverlay_pixel_fireball",
+      "name": "橙色像素火球",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "火焰"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "visibleBounds": [
+        62,
+        17,
+        246,
+        306
+      ],
+      "visiblePixels": 24171,
+      "trimmedBoundaryPixels": 64,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "b83fb80b2255f61b5668b5f5425206785e0330c117528d80efca0ce791c0e5a0"
+    },
+    {
+      "stem": "fxoverlay_pixel_lightning",
+      "name": "蓝色像素电弧",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "闪电"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "visibleBounds": [
+        37,
+        30,
+        272,
+        306
+      ],
+      "visiblePixels": 21145,
+      "trimmedBoundaryPixels": 16,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "b459cdc37bb127a79e7974e481bfcaca4f199b5f47ed3ed7fa1d29ca0610fff2"
+    },
+    {
+      "stem": "fxoverlay_pixel_portal",
+      "name": "紫色像素传送门",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "传送门"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "visibleBounds": [
+        41,
+        34,
+        294,
+        277
+      ],
+      "visiblePixels": 39890,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "ff8a365a00aadf5ec0e76d5b08b469c073f465066358a79a6a3c022b11871e8c"
+    },
+    {
+      "stem": "fxoverlay_pixel_heal_swirl",
+      "name": "绿色像素治疗能量",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "治疗"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "visibleBounds": [
+        41,
+        22,
+        281,
+        283
+      ],
+      "visiblePixels": 33705,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "ec4246e2f6a47fbd89e5f6168f3cc3fcdac4797e360a882663dda844c5adef32"
+    },
+    {
+      "stem": "fxoverlay_pixel_shockwave",
+      "name": "洋红像素冲击波",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "冲击波"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "visibleBounds": [
+        21,
+        38,
+        292,
+        281
+      ],
+      "visiblePixels": 28943,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "0235160854c2eceaf04fa9950cb2c3a7656bcb083995ba298a1b6ea3d4c3a098"
+    },
+    {
+      "stem": "fxoverlay_pixel_dash",
+      "name": "青色像素疾速拖尾",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "速度"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "visibleBounds": [
+        16,
+        69,
+        288,
+        255
+      ],
+      "visiblePixels": 27525,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "2341b8a443a9bc6b70a6587f59a43a6b5bde3fd25fde87516a98ae5db854660a"
+    },
+    {
+      "stem": "fxoverlay_pixel_power_orb",
+      "name": "紫色像素能量球",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "能量球"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "visibleBounds": [
+        53,
+        33,
+        276,
+        257
+      ],
+      "visiblePixels": 26191,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "cd0d78b690445067bc2cfce632ea08c4820039b3dd74aa5486e933a930c67b75"
+    },
+    {
+      "stem": "fxoverlay_pixel_smoke",
+      "name": "紫黑像素烟团",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "烟雾"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "visibleBounds": [
+        40,
+        22,
+        288,
+        274
+      ],
+      "visiblePixels": 36154,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "f2248146d0846d50fbb807f4886dbf90a6f95cef4218b027a7e1c9a8bc504150"
+    },
+    {
+      "stem": "fxoverlay_pixel_arcade_coins",
+      "name": "街机金币叠影",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "金币"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "visibleBounds": [
+        63,
+        11,
+        270,
+        266
+      ],
+      "visiblePixels": 24413,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "cf73977964d01cc1762eef20d81aa78d590e92db0a7ee0bbb07a571681ab6fa6"
+    },
+    {
+      "stem": "fxoverlay_pixel_toxic_bubbles",
+      "name": "青柠像素毒雾泡泡",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "毒雾"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "visibleBounds": [
+        40,
+        8,
+        272,
+        276
+      ],
+      "visiblePixels": 31703,
+      "trimmedBoundaryPixels": 69,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "4150fcca0861d1daf5d64411ee3e8d81d0b9df911c7f1a457c7d560f8e55276a"
+    },
+    {
+      "stem": "fxoverlay_pixel_shield",
+      "name": "冰蓝像素护盾",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "护盾"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "visibleBounds": [
+        40,
+        18,
+        303,
+        266
+      ],
+      "visiblePixels": 44712,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "9fcc226c929032d9ed07d0fa715960148ec3a3afa3098b1ebcc37c75f631310e"
+    },
+    {
+      "stem": "fxoverlay_pixel_debris",
+      "name": "橙色像素碎石爆发",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "碎石"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "visibleBounds": [
+        32,
+        17,
+        288,
+        266
+      ],
+      "visiblePixels": 32215,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "b7adf10c31d880226f802a19a758aed189392ed2d418c2cb0f12a57a2db3aafb"
+    },
+    {
+      "stem": "fxoverlay_pixel_rainbow_sparks",
+      "name": "彩虹像素星光",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "星光"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "visibleBounds": [
+        41,
+        15,
+        263,
+        255
+      ],
+      "visiblePixels": 15123,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "9ef2ae62b51455887444289f6dea5daa6e7e4c5875e8aa1984f8c92948909bfc"
+    },
+    {
+      "stem": "fxoverlay_pixel_critical_hit",
+      "name": "红白像素重击闪光",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "游戏",
+        "像素",
+        "重击"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "visibleBounds": [
+        17,
+        8,
+        290,
+        267
+      ],
+      "visiblePixels": 33749,
+      "trimmedBoundaryPixels": 78,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "332d99a6ba7224977097e8f57e9af57a85c4c51d0d1936a3ee5686b3839f57af"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_prism_refraction",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2950c1bfb504a45b62ed2f780dab56e63f697ba0dea0789ec4727e874adb6440",
+  "previewSha256": "f8f3796513d26b8290b31bb6c534bb56466e4061df54825b2a20d099a658fbb3",
+  "preview": "promo_prism_refraction.mp4",
+  "bytes": 7282,
+  "visiblePixels": 3622,
+  "changedPixels": 0,
+  "motionVisible": false
+}

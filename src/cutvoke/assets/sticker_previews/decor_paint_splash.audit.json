@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_paint_splash",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "4bc6a16badcad5797796252e2d4be12257cb1bf1abd2a2263538d63807773841",
+  "previewSha256": "7ee6d38da009ded91ecffe7925cddcb929e365318a971f90f8b040bc7e852015",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3849,
+  "visiblePixels": 2770,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2333,
+    "steady_entry": 2768,
+    "steady_exit": 2770,
+    "exit": 2334
+  },
+  "previewExportMeanRgbDifferences": [
+    0.113,
+    0.113
+  ],
+  "auditExport": "decor_paint_splash.audit.mp4",
+  "auditExportSha256": "2ef64ee582840e0438710a0de755d5afd107ffbbc0a1cc27c36828e6526e198d"
+}

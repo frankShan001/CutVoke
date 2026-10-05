@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Manual comparison of five rendered frames per preset, nearest-neighbor report, and full MP4 decode",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.fx.ghostTrail",
+      "decision": "approved",
+      "motionPreviewSha256": "96f99ce56b74c3a1e7c487e62e6915b00e5f2095ba1fecec54bbec223e784765",
+      "observation": "The late frames retain several offset translucent outlines of the foreground while the sun edge smears across positions. Unlike handheld shake, the previous positions remain visibly layered, creating a recognizable ghost trail."
+    },
+    {
+      "presetId": "cutvoke.preset.fx.neonStrobe",
+      "decision": "approved",
+      "motionPreviewSha256": "2b4f40389f551bf0c58c38be1031e7cc905daa0b2f52d76cf600f90fc0aa5547",
+      "observation": "The late frames switch to a nearly black image with thin white contours around the sun, foreground, and panel; the contour intensity flashes over time. This is visibly distinct from full-color brightness flicker and multicolor glitch effects."
+    }
+  ]
+}

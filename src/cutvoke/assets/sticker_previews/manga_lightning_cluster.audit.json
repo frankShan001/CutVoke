@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_lightning_cluster",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "5e00caae982a6744a2c669e1caffd5b540b32cff5f7f43d7efff9b9ed34ba036",
+  "previewSha256": "0be9f25f781722cc88163353863cc31b95417968843fad7a233b6ab2122f3268",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3418,
+  "visiblePixels": 2325,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2031,
+    "steady_entry": 2325,
+    "steady_exit": 2325,
+    "exit": 2031
+  },
+  "previewExportMeanRgbDifferences": [
+    0.195,
+    0.188
+  ],
+  "auditExport": "manga_lightning_cluster.audit.mp4",
+  "auditExportSha256": "d8f94677a9edb4fd4df2c8bb6457a9f01350e1810dfc944cd0094aa9c87c60c7"
+}

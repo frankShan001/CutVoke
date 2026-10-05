@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_energy_spiral_teal",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "282af72eb57415ee720cc0ee649760a2493892e6511d230392c98400c275781a",
+  "previewSha256": "4f3f491c9bb3912a677b6ff5e9dbc04bc5fd301606048926de5f14e6fa12ecbe",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3702,
+  "visiblePixels": 2591,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2340,
+    "steady_entry": 2590,
+    "steady_exit": 2590,
+    "exit": 2337
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2340,
+      "withoutFade": 2592
+    },
+    "steady_entry": {
+      "withFade": 2590,
+      "withoutFade": 2592
+    },
+    "steady_exit": {
+      "withFade": 2590,
+      "withoutFade": 2589
+    },
+    "exit": {
+      "withFade": 2337,
+      "withoutFade": 2592
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.177,
+    0.161
+  ],
+  "auditExport": "audiofx_energy_spiral_teal.audit.mp4",
+  "auditExportSha256": "f8961269def88d936fb1ca63304d6b94592125c3c1af904dff8d68e3f9571546"
+}

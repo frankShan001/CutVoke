@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_blue_vellum_ribbon",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "0585afb83c4315636878f618e325c85efe633d547fc41f1f7f41713126379b8d",
+  "previewSha256": "950a51375ff923a6ebf44cf29eb4375b4f71bdda0655c4c8ccededfa8171ccd5",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 977,
+  "visiblePixels": 578,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 49,
+    "steady_entry": 578,
+    "steady_exit": 578,
+    "exit": 44
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 49,
+      "withoutFade": 578
+    },
+    "steady_entry": {
+      "withFade": 578,
+      "withoutFade": 578
+    },
+    "steady_exit": {
+      "withFade": 578,
+      "withoutFade": 578
+    },
+    "exit": {
+      "withFade": 44,
+      "withoutFade": 578
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.013,
+    0.013
+  ],
+  "auditExport": "scrapbook_blue_vellum_ribbon.audit.mp4",
+  "auditExportSha256": "48ac1b4681669dca46e1d8338c93476e99c88bd182fe7c9220b33c319a97c189"
+}

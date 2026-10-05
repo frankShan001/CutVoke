@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_coral_bow",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a106cdffde477cb575208cbf093b88d46a5064b19ee7406ec7d33bfc5d5194e9",
+  "previewSha256": "d376dbe29df2ad9515b7e33dfd9b3f8a0d92f6b06c8ff4d1b4cb0064750c3a63",
+  "preview": "scrapbook_coral_bow.mp4",
+  "bytes": 3333,
+  "visiblePixels": 667,
+  "changedPixels": 0,
+  "motionVisible": false
+}

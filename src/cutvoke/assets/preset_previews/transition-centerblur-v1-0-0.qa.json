@@ -1,0 +1,25 @@
+{
+  "presetId": "cutvoke.preset.transition.centerblur",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.centerblur",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 91.98,
+  "maxSampledMeanRgbDifference": 91.98,
+  "coverSha256": "192ad9297a4ae6474aba9a53c71a5e9757d39c78f531bb717f62e1cc7620d0f4",
+  "previewSha256": "03ca6f3b36a0aec40364b3b17daf98db32181810f8d5786be33c882a0392e9eb",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

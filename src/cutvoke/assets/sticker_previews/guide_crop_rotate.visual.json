@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_crop_rotate",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Cyan crop corners and rotate handle read as one complete editing guide mark.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "bfa9fe6c0e1d055dd069bb32487a42e091b5b6511b7148618d2b8fd820661f8d",
+  "previewSha256": "35ca763a5694e4969b4e4fbe902667d300f135b0d60fd7877934e88fdc8cc8ff",
+  "auditSha256": "c2705b1ed449ad26493bb7aa73ae7de434f4bb493bb7f53cd5ca2ecb119f62c2"
+}

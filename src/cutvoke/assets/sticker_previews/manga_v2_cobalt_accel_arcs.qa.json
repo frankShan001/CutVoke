@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_cobalt_accel_arcs",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "cce58df16467fa666ec585d79399a3577ca6c42b2367567211186a6545689dd2",
+  "previewSha256": "8741a9c0dee76f3d3b811c6f62d13188be6c827e55c1c2cb41563cd4135813a6",
+  "preview": "manga_v2_cobalt_accel_arcs.mp4",
+  "bytes": 12877,
+  "visiblePixels": 7042,
+  "changedPixels": 8,
+  "motionVisible": false
+}

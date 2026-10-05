@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Manual comparison of four frames per preset and full MP4 decode",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.fx.rhythmSwing",
+      "decision": "approved",
+      "motionPreviewSha256": "b361ed7ae9fc0ccfc9a2138525ab6967446aa66c1328141ab7db35765dc17480",
+      "observation": "Four sampled frames show clockwise and counterclockwise center rotation, with the scene covering every corner; this reads as a rhythmic camera swing distinct from horizontal handheld motion and color-split effects."
+    },
+    {
+      "presetId": "cutvoke.preset.fx.handheldShake",
+      "decision": "approved",
+      "motionPreviewSha256": "81b146f0a491b5cde1ded279640046041b8fbef1a55daefa95c806ed2f633dbd",
+      "observation": "Four sampled frames move the horizon and foreground laterally with smaller vertical displacement, while retaining full-frame coverage; the straight horizon and jittered crop distinguish it from rotational rhythm swing."
+    }
+  ]
+}

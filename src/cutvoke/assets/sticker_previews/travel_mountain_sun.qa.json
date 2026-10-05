@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_mountain_sun",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "b70d1d1477123ba3bc2aef323b9c443dcce07776dac34be25e0bc8010001d2f1",
+  "previewSha256": "27d4c46ca3a742b5554eed18a4a82b683e4b759e5cb58372f69551fa8e5bbcba",
+  "preview": "travel_mountain_sun.mp4",
+  "bytes": 4071,
+  "visiblePixels": 1610,
+  "changedPixels": 0,
+  "motionVisible": false
+}

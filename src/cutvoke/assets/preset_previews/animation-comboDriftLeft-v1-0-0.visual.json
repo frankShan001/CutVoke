@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.comboDriftLeft",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.comboDriftLeft",
+  "params": {
+    "duration": 1.0,
+    "easing": "ease-out",
+    "distance": 0.3,
+    "primary": "zoomIn",
+    "secondary": "slideRight",
+    "fromScale": 0.8
+  },
+  "subcategory": "组合",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "从右侧缩小画幅连续左移并推近，结束时恢复正常比例和位置。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "569b0b96882e3f2a92602df86d0ea11e2d50199163216672d3386393150159b8",
+  "motionPreviewSha256": "a589e5ddeaba761acc774e3cffd5cb0c8707f0327274d1d143db0c479732d1d6",
+  "auditSha256": "eeb726cc195c284013c2773a6412c8292cef3252b5adf23df493632992987385",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_comboDriftLeft.png",
+  "libraryReviewSheetSha256": "3621bd656c111ce9c29c32f841dceff61745b8385c2e054d1f080699616adf8f"
+}

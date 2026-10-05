@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.comboRotateZoom",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "fbbd42e39a6e69d2159bcfa600b1f6ce66bdf349d731e31aeacd8a749093a21e",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "fbbd42e39a6e69d2159bcfa600b1f6ce66bdf349d731e31aeacd8a749093a21e",
+  "auditExport": "animation-comboRotateZoom-v1-0-0.audit.mp4"
+}

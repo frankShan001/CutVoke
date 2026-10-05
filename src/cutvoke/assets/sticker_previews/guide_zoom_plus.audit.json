@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_zoom_plus",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "c77b52fd92f9d4e3067defdccded0e2069b39e6453c15a4de6585d274d1db48c",
+  "previewSha256": "cfe2a13d78059362af59b71dc87b66d9189e37ca54fa83ad0955f7f65176bae9",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3325,
+  "visiblePixels": 2290,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 1991,
+    "steady_entry": 2290,
+    "steady_exit": 2290,
+    "exit": 1995
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1991,
+      "withoutFade": 2290
+    },
+    "steady_entry": {
+      "withFade": 2290,
+      "withoutFade": 2290
+    },
+    "steady_exit": {
+      "withFade": 2290,
+      "withoutFade": 2290
+    },
+    "exit": {
+      "withFade": 1995,
+      "withoutFade": 2290
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.236,
+    0.236
+  ],
+  "auditExport": "guide_zoom_plus.audit.mp4",
+  "auditExportSha256": "041638c3e73e78390f772bd63b9fb79bbfb8f97f824feb6bae31748b58a509cb"
+}

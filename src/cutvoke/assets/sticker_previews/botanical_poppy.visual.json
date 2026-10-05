@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_poppy",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "红色花瓣和深色花心形成强对比，单茎构图完整，浅深底均清楚。",
+  "sourceSha256": "ff782349fcbadf784350579d2eb53828e77b7fe72e179c4af29067b38620dc1b",
+  "previewSha256": "6585014a96fd59b704ca2b114e4b11cba059875674e48b7a19a838e5bfb9c491",
+  "auditSha256": "25f9b79d96916239b51332a06e0fa5c864ecfe91c05f79f94838f780cc6852db"
+}

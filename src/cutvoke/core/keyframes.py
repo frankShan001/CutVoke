@@ -62,7 +62,7 @@ def evaluate(keyframes: List[Keyframe], time: Rational) -> float:
     - time 在末关键帧之后：取末关键帧值（端点保持）
     - 否则：相邻关键帧间线性插值
 
-    缓动（ease-in/ease-out）字段已保存，但求值生效留 M2 完整版，当前统一线性。
+    每段使用起始关键帧声明的插值方式；ease-in/ease-out 在段内生效。
     """
     if not keyframes:
         raise ValueError("evaluate requires at least one keyframe")
@@ -80,5 +80,35 @@ def evaluate(keyframes: List[Keyframe], time: Rational) -> float:
             if tb == ta:
                 return b.value
             frac = float((t - ta) / (tb - ta))
+            if a.interpolation == "ease-in":
+                frac *= frac
+            elif a.interpolation == "ease-out":
+                frac = 1.0 - (1.0 - frac) * (1.0 - frac)
             return a.value + frac * (b.value - a.value)
     return kfs[-1].value
+
+
+def expression(keyframes: List[Keyframe], time: str, default: float) -> str:
+    """Compile the same endpoint holds and easing to an FFmpeg expression.
+
+    Keep presentation time and values fractional: rounding positions or holding
+    two output frames at a sampled midpoint makes slow camera moves judder.
+    """
+    if not keyframes:
+        return f"{default:.12g}"
+    kfs = sorted(keyframes, key=lambda keyframe: keyframe.time.to_fraction())
+    result = f"{kfs[-1].value:.12g}"
+    for a, b in reversed(list(zip(kfs, kfs[1:]))):
+        start = float(a.time.to_fraction())
+        end = float(b.time.to_fraction())
+        if end <= start:
+            continue
+        progress = f"(({time})-{start:.12g})/{end - start:.12g}"
+        if a.interpolation == "ease-in":
+            progress = f"pow({progress},2)"
+        elif a.interpolation == "ease-out":
+            progress = f"(1-pow(1-({progress}),2))"
+        value = f"({a.value:.12g}+({b.value - a.value:.12g})*({progress}))"
+        result = f"if(lt({time},{end:.12g}),{value},{result})"
+    first = float(kfs[0].time.to_fraction())
+    return f"if(lte({time},{first:.12g}),{kfs[0].value:.12g},{result})"

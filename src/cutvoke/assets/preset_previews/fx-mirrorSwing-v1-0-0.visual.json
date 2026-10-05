@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.mirrorSwing",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.swing",
+  "params": {
+    "degrees": 6.5,
+    "hz": 0.85
+  },
+  "subcategory": "动感",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "The whole composition is horizontally reversed: the sun occupies the left side, and the frame rocks in the opposite visual direction from rhythm swing. The mirrored geography remains visible in both late motion frames, not merely a changed speed.",
+  "method": "Manual comparison of five rendered frames per preset and full MP4 decode",
+  "coverSha256": "8e6393ca4a115a8de13bcc88902d4086e003223b63f44b16ae473af6783f3966",
+  "motionPreviewSha256": "470e766d0ead8f59708de59ef33c506facddc23c406a5523079f331c9146d03e",
+  "auditSha256": "f6b52a72cb21e139688c37046453a0fc6e8cf7c280576b23b8fce4889085eaff"
+}

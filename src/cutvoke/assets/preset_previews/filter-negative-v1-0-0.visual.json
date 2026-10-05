@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.negative",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.invert",
+  "params": {
+    "strength": 1.0
+  },
+  "subcategory": "风格",
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "observation": "All major colors invert to complementary hues while shapes remain intact.",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "coverSha256": "74c5303cd783d748f63820b89910b087b5ccaa15496f3d49039adf84c13cec05",
+  "motionPreviewSha256": "dbca1924193337bbfbf9b834cd52941a3eff0c72f32ef8887432bee04914a5aa",
+  "auditSha256": "f00a12a9f305b93e4968558223b3bf13fca2a321d097880478e7d2a45e13968b"
+}

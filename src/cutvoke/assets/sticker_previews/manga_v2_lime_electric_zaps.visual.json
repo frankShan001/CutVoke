@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_lime_electric_zaps",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "青柠折线电光分成多支，白芯和深描边对比充分，适合作为短促冲击强调。",
+  "sourceSha256": "0b01cd54184f5d1fba940d102c7ffaa655f92f23b21fdcdcb623b46283d55c18",
+  "previewSha256": "2ac55a080a468b149e5b21436777084ab33cc29778b8ad2526d18cedf6733a03",
+  "auditSha256": "12099b99b78eb5ea70d180c2e0af5729681b8f890c63bd32015468247db4c0e2"
+}

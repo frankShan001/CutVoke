@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_plum_silk",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ec76d6390cacbb24a5808c0235a3fec2045cdbfd55e7745cac4d078fea1bc599",
+  "previewSha256": "69075d1ecc3f1613a271e32070dd3440dba5ecb19d0af11d8e246cf41364e1de",
+  "preview": "texture_bg_plum_silk.mp4",
+  "bytes": 17484,
+  "visiblePixels": 57600,
+  "changedPixels": 0,
+  "motionVisible": false
+}

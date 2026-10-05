@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.violetPortrait",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "hue",
+    "value": -130.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.749,
+  "exportSha256": "1c40b69636d61a9df7a1cad802dd27584d2ef98fc470c69bb53aef54cf48f81a",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "1c40b69636d61a9df7a1cad802dd27584d2ef98fc470c69bb53aef54cf48f81a",
+  "auditExport": "personFx-violetPortrait-v1-0-0.audit.mp4"
+}

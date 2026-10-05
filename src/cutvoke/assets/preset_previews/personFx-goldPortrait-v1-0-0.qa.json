@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.personFx.goldPortrait",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.person.tint",
+      "version": "1.0.0",
+      "params": {
+        "hue": 34,
+        "saturation": 0.48,
+        "intensity": 0.12,
+        "lightness": false
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 16.365,
+  "maxSampledMeanRgbDifference": 16.365,
+  "coverSha256": "cceb5e46ea5f0e8abdec6b8bf4e495a733af665f35fe4bed07e193db4ed574e0",
+  "previewSha256": "36e63713eb0097dd05448c0ba24ce7cf974b2b49526b428d8eab11bba2875560",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

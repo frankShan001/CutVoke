@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.longEcho",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "frames",
+    "value": 9
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.261,
+  "exportSha256": "bbaeb9b8002cda3bb9b2305f5fdb45edf65e7d0d6ff6828f632a0f84592254df",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "bbaeb9b8002cda3bb9b2305f5fdb45edf65e7d0d6ff6828f632a0f84592254df",
+  "auditExport": "personFx-longEcho-v1-1-0.audit.mp4"
+}

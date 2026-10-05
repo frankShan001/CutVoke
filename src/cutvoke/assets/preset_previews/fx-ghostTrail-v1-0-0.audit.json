@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.ghostTrail",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "pixels",
+    "value": 9.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.956,
+  "exportSha256": "858ce0c6cd0851e1b56ab6fa2a586060a4b58d3e6858b484f4e0c84407c51483",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "858ce0c6cd0851e1b56ab6fa2a586060a4b58d3e6858b484f4e0c84407c51483",
+  "auditExport": "fx-ghostTrail-v1-0-0.audit.mp4"
+}

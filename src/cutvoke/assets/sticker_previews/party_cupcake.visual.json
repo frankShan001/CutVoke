@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_cupcake",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "纸杯蛋糕的樱桃、奶油与纸杯分层清晰，边缘完整。",
+  "sourceSha256": "e72de5be7174ea88388860613a433419f66e216abf57f43dbbde9be5ac58452c",
+  "previewSha256": "fe8b7f06ad1347df808564c74d27f3af5173c7c50a42193d5884b188cb25c8d8",
+  "auditSha256": "cb26332534c0555d40070dae4eda02decb1324d1c1a243597e792f67c1d8790c"
+}

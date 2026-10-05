@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_magenta_sparkles",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "c27c7001e837f030ee48d71b113d67e56611fe1d3702acc268fbc7bf0dbc356f",
+  "previewSha256": "8eb822899136a9a51dddbc95f027be10c18a891fa332e05a4544e791caa1d9e0",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3553,
+  "visiblePixels": 3699,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 744,
+    "steady_entry": 3665,
+    "steady_exit": 3652,
+    "exit": 738
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 744,
+      "withoutFade": 3667
+    },
+    "steady_entry": {
+      "withFade": 3665,
+      "withoutFade": 3693
+    },
+    "steady_exit": {
+      "withFade": 3652,
+      "withoutFade": 3658
+    },
+    "exit": {
+      "withFade": 738,
+      "withoutFade": 3667
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.197,
+    0.203
+  ],
+  "auditExport": "fxoverlay_magenta_sparkles.audit.mp4",
+  "auditExportSha256": "0f0f1668ef9b05e56fa63abb1d8be2eda06b680e098c4f6dc5bcae68c2fd8494"
+}

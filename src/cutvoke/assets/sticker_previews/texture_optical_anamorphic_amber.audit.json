@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_anamorphic_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "4b502576defb533e9023374007e0cec8f560b0a36ae85aa91c5ab87851863bf8",
+  "previewSha256": "65f193f50a1cab3f030086bae4a1ea0f0b8d790116bdb4b23daf7b78c046c927",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2150,
+  "visiblePixels": 1748,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 791,
+    "steady_entry": 1747,
+    "steady_exit": 1747,
+    "exit": 804
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 791,
+      "withoutFade": 1748
+    },
+    "steady_entry": {
+      "withFade": 1747,
+      "withoutFade": 1751
+    },
+    "steady_exit": {
+      "withFade": 1747,
+      "withoutFade": 1751
+    },
+    "exit": {
+      "withFade": 804,
+      "withoutFade": 1751
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.051,
+    0.049
+  ],
+  "auditExport": "texture_optical_anamorphic_amber.audit.mp4",
+  "auditExportSha256": "efd1865757451ecb160c62e0c00ddedb05769e982459d787b360ca2417cf494c"
+}

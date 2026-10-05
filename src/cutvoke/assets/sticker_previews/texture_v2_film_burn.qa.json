@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_film_burn",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "da69bb858e8eacacda20fc1252eb42006c0353927ff231e054ecc220b98fd4a4",
+  "previewSha256": "7bb7b3c44cc1f238fe8d310996083cd6d84e298f5ebfc5ded864878d875c2c65",
+  "preview": "texture_v2_film_burn.mp4",
+  "bytes": 4138,
+  "visiblePixels": 2345,
+  "changedPixels": 0,
+  "motionVisible": false
+}

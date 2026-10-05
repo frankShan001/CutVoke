@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.decor_neon_stroke",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed transparent 4x3 artwork contact sheet and actual composited frames for every sticker, compared silhouettes, palette, use and edge quality against the existing sticker library.",
+  "observation": "弯曲的蓝粉黄发光笔触有明确方向和多层色带，可作镜头强调线；轮廓与已有实心箭头不同。",
+  "sourceSha256": "6d36d0203d07f5b8f504fc7735f7f58a22d295b4c4f90beda57fd341d0314f1c",
+  "previewSha256": "944aedcdcc99a57323ead950ca76fc564f454dba3d06b862deeb52a04dcfc970",
+  "auditSha256": "527b3d72216390982253c8c068fafe8710a055a7b97c9f9424a4f37de2b80094"
+}

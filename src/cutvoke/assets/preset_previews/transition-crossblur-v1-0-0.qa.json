@@ -1,0 +1,25 @@
+{
+  "presetId": "cutvoke.preset.transition.crossblur",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.crossblur",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 91.316,
+  "maxSampledMeanRgbDifference": 91.316,
+  "coverSha256": "3fec7ccf132f473546e3bb5330ff9a13a6352ceb01fc8e423d7448e9bb212f8e",
+  "previewSha256": "ae88a6b103b46a724d0f2efbda59878163c75f562febed7241811ea0a666b95f",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

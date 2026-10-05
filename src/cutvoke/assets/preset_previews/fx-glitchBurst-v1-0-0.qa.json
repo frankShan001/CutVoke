@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.fx.glitchBurst",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.glitch",
+      "version": "1.0.0",
+      "params": {
+        "amount": 0.65
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 9.586,
+  "maxSampledMeanRgbDifference": 9.586,
+  "coverSha256": "ce95d85c291bc42594b390d2693c5b970409914939eadb7f842ed1da1d7fa58f",
+  "previewSha256": "c76067835477beff3982f8feaf006cdc60676742d665e226798a2b5dc090d86a",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

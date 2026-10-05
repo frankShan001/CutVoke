@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_amber_impact_cloud",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f147741846f828461457ba7fcbcd4c60157f9cd56455dfbb8b6c083c059898fb",
+  "previewSha256": "0937149b854e715b4483fb4a4793ee4a34e1fc6ea59ec2ca8b6ff5d91e2af511",
+  "preview": "manga_v2_amber_impact_cloud.mp4",
+  "bytes": 16803,
+  "visiblePixels": 13054,
+  "changedPixels": 0,
+  "motionVisible": false
+}

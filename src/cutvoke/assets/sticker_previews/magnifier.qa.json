@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.magnifier",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7e4a82c49077431357405053afdc1ec84cda9555837ba563789e34e061e4e4f6",
+  "previewSha256": "92429777444d1c3bfc6b5c34b349dd608a39873149f9ee24145ba78cb18b919c",
+  "preview": "magnifier.mp4",
+  "bytes": 4084,
+  "visiblePixels": 1876,
+  "changedPixels": 0,
+  "motionVisible": false
+}

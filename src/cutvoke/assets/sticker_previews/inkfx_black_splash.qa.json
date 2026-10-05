@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_black_splash",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "88dd5eddcec40eb900208deb4c2aae36b9065026f6da6b59dbf36065a93c8ca6",
+  "previewSha256": "a1eb6442c4815a486d12165f9a7cc4cbcde95cd35cdf7632321c55a030370b49",
+  "preview": "inkfx_black_splash.mp4",
+  "bytes": 11347,
+  "visiblePixels": 8823,
+  "changedPixels": 0,
+  "motionVisible": false
+}

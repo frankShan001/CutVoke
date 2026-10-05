@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_halftone_blue",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "4ea7355cc6714e36eb4b71f06c70e936125a4f24adb8cfc9c184836114e8523a",
+  "previewSha256": "b60f33ace74bbc52f83a93b81a3766c3c6cbf0fb5e7295101fff9c1e3d3f51b4",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1807,
+  "visiblePixels": 1130,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 646,
+    "steady_entry": 1130,
+    "steady_exit": 1130,
+    "exit": 646
+  },
+  "previewExportMeanRgbDifferences": [
+    0.078,
+    0.078
+  ],
+  "auditExport": "texture_halftone_blue.audit.mp4",
+  "auditExportSha256": "08a371ce7ff204f2de95a955f0ded681a7a6f7ac398a2b7bd044e52bd01a10eb"
+}

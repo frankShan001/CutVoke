@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.energy_prism_flare_magenta",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "824fbeca7dd5796520ea5992ff1aa078fd7a0181dea8e91a9fa161e4cf35f30a",
+  "previewSha256": "5df324799cdf9bb286b532f866f84fb9c6e2f6d1751b826c023f1f6e06e2af45",
+  "preview": "energy_prism_flare_magenta.mp4",
+  "bytes": 6005,
+  "visiblePixels": 789,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_slash_trails",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "115fcfa806e7a6f53e93050985cb3a735cb1446ad4b6873b5ee739c731a53d30",
+  "previewSha256": "983e4b079861d78006f008678335d76579b88ed4ddd842e1975ad1a33a24c18f",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4376,
+  "visiblePixels": 2891,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2146,
+    "steady_entry": 2891,
+    "steady_exit": 2891,
+    "exit": 2147
+  },
+  "previewExportMeanRgbDifferences": [
+    0.189,
+    0.161
+  ],
+  "auditExport": "manga_slash_trails.audit.mp4",
+  "auditExportSha256": "d68783ef59a9c5962fe3dab82d7f0b4ddb7b8e645f55e89b9dae5806c1d632e1"
+}

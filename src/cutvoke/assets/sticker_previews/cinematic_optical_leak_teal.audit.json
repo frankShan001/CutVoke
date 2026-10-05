@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_leak_teal",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "46cafcf19c2ac9aa50f0406831b8a4493f5f31c8eeac8470d9404342ab8547a1",
+  "previewSha256": "22d1ba1b1b2bf717f0c3fe761403b6b002e77e16d3228d632267744a6ef241eb",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4222,
+  "visiblePixels": 3474,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 2065,
+    "steady_entry": 3481,
+    "steady_exit": 3481,
+    "exit": 2068
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2065,
+      "withoutFade": 3474
+    },
+    "steady_entry": {
+      "withFade": 3481,
+      "withoutFade": 3481
+    },
+    "steady_exit": {
+      "withFade": 3481,
+      "withoutFade": 3481
+    },
+    "exit": {
+      "withFade": 2068,
+      "withoutFade": 3474
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.179,
+    0.179
+  ],
+  "auditExport": "cinematic_optical_leak_teal.audit.mp4",
+  "auditExportSha256": "6287ae9b4fe481239a677f227f4aaa396ae47e92196992c47673d6164b0792e7"
+}

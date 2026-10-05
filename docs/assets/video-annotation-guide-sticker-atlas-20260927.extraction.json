@@ -1,0 +1,625 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "source": "docs/assets/video-annotation-guide-sticker-atlas-20260927.png",
+  "sourceSha256": "fe4d7804e0e16fad2ddb7caabcc1ba02f297ab5e2732ad3db290f948e5867255",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4 equal square RGBA cells in reading order",
+  "extraction": "equal-cell crop with an 8px safety gutter, resized to transparent 512x512 PNG",
+  "subcategory": "指引",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "contactSheet": "docs/assets/video-annotation-guide-sticker-atlas-20260927-contact.png",
+  "items": [
+    {
+      "index": 1,
+      "stem": "guide_pointer_arrow",
+      "name": "青色弧线指引箭头",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "指向",
+        "箭头",
+        "青色"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 13820,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        67,
+        119,
+        467,
+        444
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "aabbb8b259cef49b9b726e3f3d3cd0d573b671c463d389e1e53cf7f689ba0ad2"
+    },
+    {
+      "index": 2,
+      "stem": "guide_measure_double_arrow",
+      "name": "珊瑚双向测量箭头",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "测量",
+        "比较",
+        "双向"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 14879,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        21,
+        193,
+        486,
+        360
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "42bce0ab8a08be6e994a9b5ed5a19a7ca03c60ad4cbac4043f1491a45e253fcc"
+    },
+    {
+      "index": 3,
+      "stem": "guide_emphasis_circle",
+      "name": "黄色手绘重点圈",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "圈选",
+        "重点",
+        "手绘"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 20107,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        31,
+        96,
+        490,
+        455
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "45b2db34dc753cd5265bcba96de164df2f7d3f9b1a4788bf11c51bbefa9e2479"
+    },
+    {
+      "index": 4,
+      "stem": "guide_selection_box",
+      "name": "紫色虚线选区框",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "选区",
+        "虚线框",
+        "紫色"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 16737,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        56,
+        113,
+        460,
+        432
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "c652e1c198d686babd1672c7c21d452b00c65fe329bb868f957b078c6bb3f0a6"
+    },
+    {
+      "index": 5,
+      "stem": "guide_focus_brackets",
+      "name": "薄荷绿焦点取景框",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "焦点",
+        "取景框",
+        "薄荷绿"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 13482,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        77,
+        82,
+        436,
+        436
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "50ead7b830022b40facd0c7f673814dc1cc26df8289324bd921d25181c206bab"
+    },
+    {
+      "index": 6,
+      "stem": "guide_highlight_stroke",
+      "name": "珊瑚色荧光强调线",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "强调",
+        "划线",
+        "珊瑚色"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 11343,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        21,
+        199,
+        488,
+        337
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "d36a974793b94883bc7174adad2a984e19f7bfc7517318e381f837d0a1d42df3"
+    },
+    {
+      "index": 7,
+      "stem": "guide_dotted_route",
+      "name": "青色节点引导路径",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "路径",
+        "节点",
+        "青色"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 9476,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        34,
+        108,
+        476,
+        412
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "c4aa80e097cef16c67299d53d73d5f41a3aa496b69187ad56c13ca3b74e21051"
+    },
+    {
+      "index": 8,
+      "stem": "guide_zoom_plus",
+      "name": "蓝色放大镜加号",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "放大",
+        "查看",
+        "蓝色"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 27960,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        78,
+        86,
+        438,
+        437
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "c77b52fd92f9d4e3067defdccded0e2069b39e6453c15a4de6585d274d1db48c"
+    },
+    {
+      "index": 9,
+      "stem": "guide_spotlight",
+      "name": "琥珀色聚焦光束",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "聚焦",
+        "光束",
+        "琥珀色"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 25078,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        102,
+        46,
+        448,
+        419
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4137cd293b3d01e0e4a84f9307601bb61e10e8a1ed49c836379700e1966d9b5b"
+    },
+    {
+      "index": 10,
+      "stem": "guide_target_reticle",
+      "name": "珊瑚色目标准星",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "目标",
+        "准星",
+        "珊瑚色"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 30168,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        61,
+        48,
+        452,
+        429
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "5ab195d54592b6ceaab7ca6249a12caba28252c5be5f62cfc4727e5156752190"
+    },
+    {
+      "index": 11,
+      "stem": "guide_check_badge",
+      "name": "绿色完成勾选徽章",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "完成",
+        "勾选",
+        "绿色"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 26597,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        76,
+        61,
+        438,
+        416
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "72a116a4d751f9e978f41d38eaa5f72796d96c18e9aa91b5be536a4f96f3bd36"
+    },
+    {
+      "index": 12,
+      "stem": "guide_comment_bubble",
+      "name": "紫色三点提示气泡",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "提示",
+        "对话气泡",
+        "紫色"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 36358,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        58,
+        81,
+        460,
+        409
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "3eecd39f66e64a1323af6df47e16f30f9559272fa13ae7955b4a39f7b7122d83"
+    },
+    {
+      "index": 13,
+      "stem": "guide_branch_nodes",
+      "name": "蓝色分支连接节点",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "连接",
+        "分支",
+        "蓝色"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 16425,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        66,
+        63,
+        461,
+        392
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "f9f62b062b787fb619b82ff6c85c9f4b29b235c69ea4847988ca7769b9199e14"
+    },
+    {
+      "index": 14,
+      "stem": "guide_burst_highlight",
+      "name": "黄色放射重点强调",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "重点",
+        "放射",
+        "黄色"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 25192,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        29,
+        25,
+        481,
+        415
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "6dca84316c57e295ae83828979ab1fce0c94e3b143474d7975425b837b7cd743"
+    },
+    {
+      "index": 15,
+      "stem": "guide_crop_rotate",
+      "name": "青色裁切旋转框",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "裁切",
+        "旋转",
+        "青色"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 15257,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        83,
+        64,
+        467,
+        414
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "bfa9fe6c0e1d055dd069bb32487a42e091b5b6511b7148618d2b8fd820661f8d"
+    },
+    {
+      "index": 16,
+      "stem": "guide_split_compare",
+      "name": "双色左右对比标记",
+      "subcategory": "指引",
+      "keywords": [
+        "标注",
+        "对比",
+        "分屏",
+        "双色"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "edgeGutterPixels": 8,
+      "visiblePixelsInSourceCell": 15741,
+      "visiblePixelsWithinSourceEdgeGutter": 0,
+      "outputSize": [
+        512,
+        512
+      ],
+      "visibleBounds": [
+        98,
+        20,
+        416,
+        418
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "99ae5238bed705442254e3ad9f29752ce916ee7a6c6732ea3eb4904e07d3d36d"
+    }
+  ]
+}

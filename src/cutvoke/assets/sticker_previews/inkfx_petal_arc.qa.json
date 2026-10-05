@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_petal_arc",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e9f3e20425460a581e7605b8f507e538f26b9f74e9d1dc874159b534cb58e6ee",
+  "previewSha256": "df7f76a2648f4678475ab8de6c2777f4f43b23dd2bc0014761859ce87fe6f8f6",
+  "preview": "inkfx_petal_arc.mp4",
+  "bytes": 12830,
+  "visiblePixels": 10747,
+  "changedPixels": 0,
+  "motionVisible": false
+}

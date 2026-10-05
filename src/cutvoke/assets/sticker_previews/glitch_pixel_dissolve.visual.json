@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.glitch_pixel_dissolve",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项检查4×4透明贴图裁切表和4×4真实画面合成表；确认Alpha通道、裁切边缘、深浅背景对比、缩略图可辨性与每项轮廓差异。",
+  "observation": "方形像素块由左下向右上散开，块状轨迹明确，与RGB色块图样可区分。",
+  "sourceSha256": "4b040fde1e1168c43530d02fc00aed043ccd4ea6e8ac65a91af2c7fe39ec65ac",
+  "previewSha256": "4dea9a0b0e2b98e57f7e758ccf3eaf7d2334489f1f3e0b24cdafefd9814a8e16",
+  "auditSha256": "d5af9c3d0be49976aa796528a45e5f325d2a571bc6c7924b31c0f6497e9a30bd"
+}

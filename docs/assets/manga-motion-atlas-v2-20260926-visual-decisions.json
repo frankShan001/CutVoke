@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_bw_speed_burst",
+      "decision": "approved",
+      "sourceSha256": "d695d9b64a806517c18d0eae37c7c0c3dd293cbbe4e5169fce8024d0c83f24cf",
+      "previewSha256": "e67c04bb0c0c89eeda9a9d8acef2c0374d614514377315e73b74dad093d22659",
+      "observation": "黑白放射线向外渐隐，暗区线条清楚，中心留白适合主体叠加；透明格边没有背景块。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_coral_impact_crack",
+      "decision": "approved",
+      "sourceSha256": "0a77d67b06c6330f095406e1acaa0ce3774e1b9bc8ab5395f060e9fc9f6a7c52",
+      "previewSha256": "6ca07233bf6231bdd8fb305ab78cfc579770eececd6c7cff1b83a5fbfb597984",
+      "observation": "珊瑚红裂纹呈不规则星爆，碎片分散但未碰格边，与直线速度贴图区别明显。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_lime_spiral_motion",
+      "decision": "approved",
+      "sourceSha256": "3347e906cde7e8ecf6c9454342275256cd24b07d558c5e673fc20f6a7cf58730",
+      "previewSha256": "65d8e46fcc2a0ef3f5b9b5adaaa79ca4453de0c66ced994b748c7401f35fb86f",
+      "observation": "青柠绿螺旋粗细交替，中心收拢、外围断笔，渐变预览中边缘保持清晰。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_ink_smoke_wipe",
+      "decision": "approved",
+      "sourceSha256": "40914a86f9bc3c314d020291c4902f9484f21a933c928537db62ea889e3af01e",
+      "previewSha256": "47a5534418f1241a2709b51b9daf850aeffe7c74c97997e13bc4fe7b941c540f",
+      "observation": "象牙墨烟由团块和细线构成，浅底仍可辨外沿，暗底有足够亮度，未见实色底框。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_cobalt_accel_arcs",
+      "decision": "approved",
+      "sourceSha256": "cce58df16467fa666ec585d79399a3577ca6c42b2367567211186a6545689dd2",
+      "previewSha256": "8741a9c0dee76f3d3b811c6f62d13188be6c827e55c1c2cb41563cd4135813a6",
+      "observation": "钴蓝弧线朝右上加速，曲线间有空隙，深色背景下白蓝高光可读。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_violet_star_shards",
+      "decision": "approved",
+      "sourceSha256": "f7eeed1f9e511a4f64cf67bac3fe84de1bb3da3950d62e32ca70889650a39e85",
+      "previewSha256": "c84cdf5accdfdd9aebf8963161081e2b2581b9499b76316f70c2db37f8da68a2",
+      "observation": "紫色星屑环绕旋涡，星形和弧线组合与绿色旋涡有明显轮廓差异。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_teal_pulse_rings",
+      "decision": "approved",
+      "sourceSha256": "93f9409e68d3fc9f7648d8127c9b93e1803fd5e4660a99b19cf265839a52cf48",
+      "previewSha256": "dbb81c89a4ae149ed992c7eb741a06b0cac257b1b4028b9c27c8a91509ef895a",
+      "observation": "青绿色双环保持中心透明，外缘尖脉冲均匀，适合作为人物或物件强调圈。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_magenta_afterimages",
+      "decision": "approved",
+      "sourceSha256": "ec6bab2638bb70e951bed01fec2f36396ce106cbad7525efc48f7fd7dc6fc3a8",
+      "previewSha256": "7728dfe568e80eb18182d3e1652eeff3b47e8b65cdf27637e59232bf12b9c75b",
+      "observation": "洋红横向残影有清晰主形与水平拖尾，方向性明显且边缘不过格。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_amber_impact_cloud",
+      "decision": "approved",
+      "sourceSha256": "f147741846f828461457ba7fcbcd4c60157f9cd56455dfbb8b6c083c059898fb",
+      "previewSha256": "0937149b854e715b4483fb4a4793ee4a34e1fc6ea59ec2ca8b6ff5d91e2af511",
+      "observation": "琥珀尘爆由多层烟团和碎屑组成，深浅背景均有足够色彩层次。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_cyan_wind_tunnel",
+      "decision": "approved",
+      "sourceSha256": "d899d1da401194f8305bcabf19a9fb9832a3282cf2c956bf6be5615c584aa73e",
+      "previewSha256": "556d3d6346ff6a9280e0bcd75263e143da3ac300b350f46d8acf28870cda6b6f",
+      "observation": "冰青风洞形成纵向旋流，亮色细节在深底突出，形状区别于环形脉冲。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_pearl_fracture_fan",
+      "decision": "approved",
+      "sourceSha256": "e15b9200ab6870c7b14eb1f2cf80161d883403830997eac4a490dc7e2a35cbac",
+      "previewSha256": "0230a137df163efae746eb1dc509b1a3600028a1c4209a4a8b9c8e7ed5a1c761",
+      "observation": "珍珠碎片以单一偏心点放射，虹彩碎面清楚，与黑白速度线的色彩和几何感不同。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_lime_electric_zaps",
+      "decision": "approved",
+      "sourceSha256": "0b01cd54184f5d1fba940d102c7ffaa655f92f23b21fdcdcb623b46283d55c18",
+      "previewSha256": "2ac55a080a468b149e5b21436777084ab33cc29778b8ad2526d18cedf6733a03",
+      "observation": "青柠折线电光分成多支，白芯和深描边对比充分，适合作为短促冲击强调。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_violet_halftone_wave",
+      "decision": "approved",
+      "sourceSha256": "e89d7f72a952abf6fe46bbefb92d9443c02a973be5337a4a259d5b7c79297be3",
+      "previewSha256": "b70bcd6b1f630bf8b07d287fd0c210589b914c3b848cc80aad036861467e9d32",
+      "observation": "紫色半调由密至疏过渡成浪形，网点边缘透明，没有可见方形底板。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_vermilion_slashes",
+      "decision": "approved",
+      "sourceSha256": "ee6ebcef0f2a58e6c6ad87bcb8a5062001ab60bbd3b1c1ab9bddbd15bfcab616",
+      "previewSha256": "5be83be433d309c0caa6bb514e37ad0ff9885bbbb6e81c00827006f1fa52babe",
+      "observation": "朱红斩击为数条倾斜锐角长线，方向一致，和其它爆裂/环绕形素材区分明确。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_gold_spark_curve",
+      "decision": "approved",
+      "sourceSha256": "e0d0c91f0a699586c5843e3a0c70750a58fc6020c51ae728a9ae57ed4132dde2",
+      "previewSha256": "d94362771c8ee6e7b9acda36dcca9e7c5a90608854ab344d0644fd55a51063e3",
+      "observation": "金色弧线由两处星芒牵引，周围小光点有层级，浅背景仍可读。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.manga_v2_blue_coral_ink_burst",
+      "decision": "approved",
+      "sourceSha256": "f2605d1e1a4a1b64c8386deffc34caddfcfe65552e1e97ea02f5f5fac44e9ced",
+      "previewSha256": "fec468717b1f776fb8453197a71fe59481c62605f890ee8bf42571a3213d62e3",
+      "observation": "蓝珊瑚水墨由中心向外喷溅，轮廓密度适中，与琥珀尘爆颜色和边缘语言不同。"
+    }
+  ]
+}

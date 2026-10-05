@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.decor_spiral",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed transparent 4x3 artwork contact sheet and actual composited frames for every sticker, compared silhouettes, palette, use and edge quality against the existing sticker library.",
+  "observation": "红色手绘螺旋配少量黄色和青色短笔，形成圈点式动势；合成预览中没有文字或背景框。",
+  "sourceSha256": "5337378b26bcc846bdfbed48ce68564aa97f7be005b64934e261e92ccb33ba45",
+  "previewSha256": "9072c018d1385e72fd0f401e8c35924f6f550a43a77ef6dbf37bbd7e0fcf2c10",
+  "auditSha256": "8f06cb8cb24dd7acbef346755f61878185f27fd8484cdfd4bef7fd16a9e61327"
+}

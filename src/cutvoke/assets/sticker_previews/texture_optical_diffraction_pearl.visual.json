@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_diffraction_pearl",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "珍珠白八芒星与紫色星芒形状一致但亮度和色温不同，透明羽化自然。",
+  "sourceSha256": "c9299dcb544f801588319f77b06a47df483f11743aa90879a7a32777d3e2f629",
+  "previewSha256": "fb8bb34ca9845dd0f398aa8254c4ef2d104569e712e88d4a1883c1c1956e2df7",
+  "auditSha256": "c1b164e0463cbf39c6acdd46b8344d95de3badd650db788b1cdca142b5805828"
+}

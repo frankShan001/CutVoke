@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.negativeFilm",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.glow",
+  "params": {
+    "intensity": 2.2
+  },
+  "subcategory": "基础",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "整体颜色转为冷绿、深蓝及浅黄的反相高光，原有构图保留；色彩变化与线稿及色块化不同。",
+  "method": "Compared untreated and treated frames at 0.20s and 0.95s from each real rendered preview, checked sibling covers and full MP4 decode; observations are specific to these geometric samples.",
+  "coverSha256": "ee7858829ddc40f3f36257a3dee1313aed79c44a6ad2fa40092c2a45ad7bf43b",
+  "motionPreviewSha256": "8554e7680b8127f24136a0e2b516aef1cdb091ef6d3f6a9c74ff97bcb76d148c",
+  "auditSha256": "0a8aff2b7f5365534148ca1f3f4d00d73907ca7de4bfdf5af8db7a929b557d61"
+}

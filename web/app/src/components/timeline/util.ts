@@ -147,10 +147,10 @@ export const zoomLabel = (pxPerSec: number) => `${pxPerSec}px/s`;
 /** 播放头/总时长格式：m:ss.d。 */
 export function fmtTime(secs: number): string {
   if (isNaN(secs) || secs < 0) return "0:00.0";
-  const m = Math.floor(secs / 60);
-  const s = Math.floor(secs % 60);
-  const ms = Math.floor((secs - Math.floor(secs)) * 10);
-  return `${m}:${String(s).padStart(2, "0")}.${ms}`;
+  const tenths = Math.round(secs * 10);
+  const m = Math.floor(tenths / 600);
+  const s = Math.floor((tenths % 600) / 10);
+  return `${m}:${String(s).padStart(2, "0")}.${tenths % 10}`;
 }
 
 /** 播放头毫秒显示：保留帧级微调的可见反馈，片段总时长仍使用紧凑格式。 */

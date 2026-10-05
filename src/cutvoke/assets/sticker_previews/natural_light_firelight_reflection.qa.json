@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_firelight_reflection",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0b8ad5fa52df3d5c1dfda2936906418fd89a176737de2689ba26e2048cf087be",
+  "previewSha256": "b4be6f5fb59b1a13427ac7e84ab210509190e2def1612c75f6de795015e5009e",
+  "preview": "natural_light_firelight_reflection.mp4",
+  "bytes": 10991,
+  "visiblePixels": 13900,
+  "changedPixels": 0,
+  "motionVisible": false
+}

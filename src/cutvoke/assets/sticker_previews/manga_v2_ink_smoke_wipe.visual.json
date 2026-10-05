@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_ink_smoke_wipe",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "象牙墨烟由团块和细线构成，浅底仍可辨外沿，暗底有足够亮度，未见实色底框。",
+  "sourceSha256": "40914a86f9bc3c314d020291c4902f9484f21a933c928537db62ea889e3af01e",
+  "previewSha256": "47a5534418f1241a2709b51b9daf850aeffe7c74c97997e13bc4fe7b941c540f",
+  "auditSha256": "35a1fc069b3bba86c761127829ae8d33137b5701c88ff94ee7fdb6849dff3ff7"
+}

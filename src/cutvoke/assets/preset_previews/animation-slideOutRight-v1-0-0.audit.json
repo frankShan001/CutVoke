@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.slideOutRight",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.733333,
+  "previewExportMeanRgbDifference": 1.283,
+  "exportSha256": "15e4d9772788d6627a6c4ca3693d271b1d96bd875ddc5656ea51bb79ce78537f",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "15e4d9772788d6627a6c4ca3693d271b1d96bd875ddc5656ea51bb79ce78537f",
+  "auditExport": "animation-slideOutRight-v1-0-0.audit.mp4"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_heal_swirl",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex 视觉审阅",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切联系表和 320x180 浅深渐变实景合成联系表，并结合逐张机器应用/编辑/保存重开/撤销重做/入出场动画/MP4 预览与导出审计；只批准轮廓完整、边界干净、可见且彼此可辨的条目。",
+  "observation": "绿色螺旋能量与加号粒子彼此分离，主题和轮廓一眼可辨。",
+  "sourceSha256": "ec4246e2f6a47fbd89e5f6168f3cc3fcdac4797e360a882663dda844c5adef32",
+  "previewSha256": "6cca7012b43b45669b1df482f308015ebfb4f43a8321ce1f6b626630175071af",
+  "auditSha256": "418ba39cc4c7dad893bdd4e4dff136414fdc54ec8a69554b2f52cfb0e91981e9"
+}

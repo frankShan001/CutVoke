@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_heart_bowl",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ce239dd6028f24942cac746c134a48a27d411f45b44cfbacb4b8fb8844c66d59",
+  "previewSha256": "527a5f148fee75b7fbda3ff0ab7fb0238f86ae1a6254f4676b67124e715a0807",
+  "preview": "pet_heart_bowl.mp4",
+  "bytes": 3829,
+  "visiblePixels": 1842,
+  "changedPixels": 0,
+  "motionVisible": false
+}

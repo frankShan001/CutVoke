@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.printfx_registration_marks",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-26T22:26:35+08:00",
+  "method": "Inspected the original 4x4 RGBA atlas, transparent crop contact sheet, and all 16 actual composited sticker previews on light and dark neutral backgrounds at normal display size. Checked cell identity, crop boundaries, alpha edges, silhouette/readability at sticker scale, and uniqueness; subtle dust and scratch assets were judged at their intended low opacity.",
+  "observation": "青红黄套印十字与中心圆环容易识别，标记彼此分开且无裁切。",
+  "sourceSha256": "a3d775440d59c2f6b8c2ba24a2c5b386acc55e454260241d4d73503937ed7d34",
+  "previewSha256": "bc8ccabbad6dc313e63a44de4af713caf110abbc6d9b1e9e8338334699d6ac58",
+  "auditSha256": "1d8ddf59560cb19d65cbe1c4489e31a0d1682c4ef517db9129fe8f7dce0226f6"
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_soft_serve",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "36905ba34e6db97f8107e750636cfa1abd63de53eb0c040e45f66a6c45b6c932",
+  "previewSha256": "5d45c1ad149946b464699a1dd1f85006741b4bdc5d80034e51c0a60b392f0926",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4621,
+  "visiblePixels": 3014,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1568,
+    "steady_entry": 3014,
+    "steady_exit": 3014,
+    "exit": 1574
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1568,
+      "withoutFade": 3014
+    },
+    "steady_entry": {
+      "withFade": 3014,
+      "withoutFade": 3014
+    },
+    "steady_exit": {
+      "withFade": 3014,
+      "withoutFade": 3014
+    },
+    "exit": {
+      "withFade": 1574,
+      "withoutFade": 3014
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.017,
+    0.017
+  ],
+  "auditExport": "food_soft_serve.audit.mp4",
+  "auditExportSha256": "3147ef35790e19cb39829e1c4e58d28a112a775b1c6fc917e941c771c5cdd27a"
+}

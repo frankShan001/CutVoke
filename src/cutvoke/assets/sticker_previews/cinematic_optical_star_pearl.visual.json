@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_star_pearl",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "珍珠白多芒星带有淡紫色衍射边，形状与四芒琥珀星明显不同。",
+  "sourceSha256": "919e1f6778a488f96b73e9a4bc2b38abe2e83b380f6374e55d88ba4965e83b82",
+  "previewSha256": "2afad8116f67e0cad1d9788f909ea1c920b36fb339059ef47b7688c6891f1fd9",
+  "auditSha256": "7b80fcaa733fe13cd2c1bfb43b7b07a86153483f76d230c3516b98109f18cf9a"
+}

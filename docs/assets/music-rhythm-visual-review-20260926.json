@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.audiofx_waveform_cyan_coral",
+      "decision": "approved",
+      "sourceSha256": "8861bce21af1dcb174902beb3e9e46c1367a86a74a3e9c834b9c3be714c682e3",
+      "previewSha256": "15c620e83967f0776456d3745a3c7b9f80b2612493a776d11b8ce8b162ca1174",
+      "observation": "Thin cyan and coral waveform remains legible over both dark and pale halves of the composited preview."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_bass_pulse_violet",
+      "decision": "approved",
+      "sourceSha256": "e198cd803d46d7e61bcc8f6f62934d0692c2b259885d7d12e7ecf78efd12f74e",
+      "previewSha256": "289a062c89a315841ac31e54a2963cc178f4b32232212a7ff26ea4226f8b7a4e",
+      "observation": "Four concentric violet rings form a clean centered pulse with no crop or neighboring artwork."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_equalizer_arc_gold",
+      "decision": "approved",
+      "sourceSha256": "c3c05fb12ce648235b834775461ee5605b38e2254fd40bf26d699fb6656922db",
+      "previewSha256": "5f5387c40066f82236d31c33a6d6740a1298ef958b8e2f80375e3ddfc9554b80",
+      "observation": "Warm gold bars follow a curved baseline and remain clearly separated at thumbnail size."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_music_notes_neon",
+      "decision": "approved",
+      "sourceSha256": "386c55d1d612715faa77fa8d96c322aa6edcf26ed8e3d475aa9296a81417c7e3",
+      "previewSha256": "63488978972adb25c0d2ea7097b1ad04873bb224cf96c5ba08928fe36d61a86d",
+      "observation": "Cyan and magenta note forms follow a curved path and read as a distinct music accent."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_spectrum_halo_rainbow",
+      "decision": "approved",
+      "sourceSha256": "e272f30cb4db647d38b1696a1c1a4a8cff8ff6562ac5fcef4dc2cf2c6735b0c7",
+      "previewSha256": "f1cb37b3866e2938dbf11ed828da0dd0c707914070cfb737bd10f5f473babbec",
+      "observation": "The rainbow ring has an open center and evenly spaced spectrum rays, distinct from the compact bar badge."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_soundwave_dots_aqua",
+      "decision": "approved",
+      "sourceSha256": "61bf7f24563a2a834c57205196ce3dfab9fa37a48895e6d280543693cebc7336",
+      "previewSha256": "bed2af66687edb37046c487ba94deec0c829db8d3dd12a062ea14636dcece69b",
+      "observation": "Aqua dots make a clear rising wave trail with a lightweight silhouette suited to an overlay."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_rhythm_pulse_coral",
+      "decision": "approved",
+      "sourceSha256": "bb562ceb54ae897a0bd86df4118f32dd106b2a33320d14e8c476e5c8f8d3bf52",
+      "previewSha256": "4d0603f606afeff5cbb8f55c9fcb0dd3cb41c74a2aabe3b060b1ddbbbb7ce350",
+      "observation": "The coral rhythm trace has one dominant peak and clear horizontal endpoints on the preview."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_acoustic_arcs_pearl",
+      "decision": "approved",
+      "sourceSha256": "d0f55b250ddb6dafce333826c9945ebc7fbd9132d6d533ba28332e220a6a8641",
+      "previewSha256": "b5daf768251cbfa0c2db02bdf374075ca7dcb308eafe86afca42bc033e7934c0",
+      "observation": "Pearl arcs form a symmetric sound-wave hourglass with strong contrast on light and dark."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_beat_burst_mint",
+      "decision": "approved",
+      "sourceSha256": "f6e0cf9b6bcb1200d64b01195b53f4547d2f56096da7a91e6176a5e9705486e3",
+      "previewSha256": "860778d191e84773821a8ffb338b57e98c7d2370b4418de20bd1dbfb05ce193e",
+      "observation": "Mint radial strokes converge to a bright center and read as a compact beat burst."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_frequency_badge_violet",
+      "decision": "approved",
+      "sourceSha256": "c67434e0302dd149cd65cab82c5723b043fb5fa051a012291424eb93527f3d05",
+      "previewSha256": "365f7794c4e3ea18b201cf8b5b884a8724273de5cca04b93d42b7dd805c281c0",
+      "observation": "Blue-violet equalizer bars sit inside a round badge, visually distinct from the open rainbow ring."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_vinyl_orbit_amber",
+      "decision": "approved",
+      "sourceSha256": "d87b42e82bc910900a1e0d024d583e08718441cfd813a3213445724fd9509d5f",
+      "previewSha256": "4810804e36ef92a90ab45bb21b7703508a69c6e5712c675b64e33d156f90e5e4",
+      "observation": "Amber elliptical orbit lines create a warm rotational music accent with a clean central opening."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_mic_aura_magenta",
+      "decision": "approved",
+      "sourceSha256": "5579ad8188dedd2521f461acc6582ef0ab9ce2fe6e0afb009fa20e5b6da656fe",
+      "previewSha256": "537c5b640e589fcd28e318310ba17d4ba0715aa9eaa7a504e1fa117c928e27ed",
+      "observation": "Magenta luminous strokes form a recognizable microphone silhouette without a solid stand or text."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_beat_stars_cyan",
+      "decision": "approved",
+      "sourceSha256": "e2f379b1aa0ebd33fae3ce6880c2e57f05b32258bd3a1b42d7997c5457013c85",
+      "previewSha256": "918c3263be254d88374114988148e4ae6765c14f9b4c7f9aa3a4a3555acea78e",
+      "observation": "A cyan curve links differently sized stars into a clear directional beat trail."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_lyric_spotlight_peach",
+      "decision": "approved",
+      "sourceSha256": "aada8eeb32d44ab5fc8d50277ad4d4383d44a6e93085992ef82f8bce83a2a4d9",
+      "previewSha256": "a55dc05ee6596cf624d4cd228cb69829814c613f3f2cf7b02b9b4e1c60c0cd27",
+      "observation": "Peach-lilac oval glow and its small waveform edge make a distinct soft lyric spotlight."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_energy_spiral_teal",
+      "decision": "approved",
+      "sourceSha256": "282af72eb57415ee720cc0ee649760a2493892e6511d230392c98400c275781a",
+      "previewSha256": "4f3f491c9bb3912a677b6ff5e9dbc04bc5fd301606048926de5f14e6fa12ecbe",
+      "observation": "Teal and gold ribbon strokes form a readable vertical sound-energy spiral."
+    },
+    {
+      "stickerId": "cutvoke.sticker.audiofx_stereo_waveform_rainbow",
+      "decision": "approved",
+      "sourceSha256": "f4711d404306b4747f89d618c9cdbf40ed80a6b55c79a0eb729e279542295021",
+      "previewSha256": "be534aa5ffa72d9a90925cac3b9872c1a218892fcb6b1dad0b69d901f9b75a30",
+      "observation": "Compact rainbow peaks create a balanced stereo waveform with clear multicolor separation."
+    }
+  ]
+}

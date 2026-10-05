@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_moonlit_water",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Cool blue horizontal ripples and white glints read as moonlit water, distinct from the turquoise pool caustic.",
+  "sourceSha256": "5c82ca2e388f0e2ba9ea647f1e1c93fd6720262edd7575e04dbd801fbb309da6",
+  "previewSha256": "2457a92e4bcf6a392d66676cb2b6c6e357048077c8f80533a3f622aba3fce51a",
+  "auditSha256": "eed8deaee87aa18934d2bd7cfaac8e05259aa8a1541f9f437e753ed9d80ae907"
+}

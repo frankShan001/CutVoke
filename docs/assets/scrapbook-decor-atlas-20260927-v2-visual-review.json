@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual visual inspection of transparent source crops over dark and light tiles and actual edited/export MP4 frame samples.",
+  "atlasSha256": "be90d9c690c2d601b1d47ae77f8498a7f227d62f32fef897ffc6fef2e3dae71c",
+  "renderedReviewSha256": "89541cac557b4b51fd07b1c441d18a9e9cdca0e6db444207024da38fee8cdc94",
+  "approvedCount": 16,
+  "items": [
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_corner_sprig",
+      "name": "鼠尾草折角纸片",
+      "decision": "approved",
+      "observation": "奶油纸折角和鼠尾草枝叶轮廓完整，层次清楚，深浅底均可识别。",
+      "sourceSha256": "cef9cd830fe3c1bf4b7615655210fdd9188e4def94f9c64362238c4488fa1b05",
+      "previewSha256": "2e70c7db0d30e2ed119938ae883a8ce697824ca4e4ce6987bd7c456de46092d9",
+      "auditSha256": "43e2665aa4d3c0774ff39eaaeed5b0293ee8bfdfa04af3dd660763f9c75539f2",
+      "auditExportSha256": "009e3344b2becb042375fba9bb5c7f7aae88c71faab7119adc1cfb9060ce4265"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_crossed_washi",
+      "name": "交叉和纸胶带",
+      "decision": "approved",
+      "observation": "珊瑚圆点胶带与鼠尾草格纹胶带交叉清楚，边缘完整且与其他素材不同。",
+      "sourceSha256": "3bb3db4cf5af168e3fc9ae96daeb4b0e235dca0e558fddb3d8a8add9a6afea27",
+      "previewSha256": "c4def9755b6ddb2319af9a146e9d4220409cdf90835af76532be601592b95855",
+      "auditSha256": "bee537c853e901a81851c848709f3c3cce48c2e5bde29b9de5c5587bc7550ad7",
+      "auditExportSha256": "d88742a55161218ed7043597731783301fcc072822f8b7658d805f72d72d7c6b"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_coral_torn_corner",
+      "name": "珊瑚色撕纸框角",
+      "decision": "approved",
+      "observation": "珊瑚色 L 形撕纸轮廓完整，适合放在画面角落作边缘装饰。",
+      "sourceSha256": "a64b60b4662f897a009c6c4d48ec2cb17a9246aae93d3b8b8045253275b6fd3c",
+      "previewSha256": "b20aef51128e8d15326eaf4bcf1522f76ccf533c001e2ecd2101c2cd4fea8729",
+      "auditSha256": "2bb9d8ffe3a30294ee39800301bfd154d0893160c03bb986a42d0d0fe5cfe658",
+      "auditExportSha256": "4cb59374e96e8f9b348c5289f7bc8b8919a2e7d11a0ed5782e8cdee59b8029f0"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_blue_vellum_ribbon",
+      "name": "天蓝描图纸飘带",
+      "decision": "approved",
+      "observation": "天蓝透明纸飘带折面完整；浅色画面上对比偏弱，深色画面更清楚。",
+      "sourceSha256": "0585afb83c4315636878f618e325c85efe633d547fc41f1f7f41713126379b8d",
+      "previewSha256": "950a51375ff923a6ebf44cf29eb4375b4f71bdda0655c4c8ccededfa8171ccd5",
+      "auditSha256": "5537873a70d1f10b957715d1e11337d67ef1b71ba84383406caa01e052728f06",
+      "auditExportSha256": "48ac1b4681669dca46e1d8338c93476e99c88bd182fe7c9220b33c319a97c189"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_kraft_stitched_label",
+      "name": "牛皮纸缝线空白标签",
+      "decision": "approved",
+      "observation": "牛皮纸标签外形和缝线边完整，中央留白可承载用户另加的标题。",
+      "sourceSha256": "f533ca47a156fa5ae9ad4eb2e6c013896b1e7eaf16db07b679fc27e9ef6ddfa6",
+      "previewSha256": "af54012adc36cc78e9294add50bcc1c29096f5016c8b5d3523b20f59ca6ee446",
+      "auditSha256": "3f55ef378d32ddd330f4bf5079aa2ea5fa2dd5683913423a3c9c1749c71af817",
+      "auditExportSha256": "8c72a21d1ad380a46268a414d2a885d434bde931b54f5eb998437f55d91a1504"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_lavender_curl",
+      "name": "薰衣草色卷曲纸带",
+      "decision": "approved",
+      "observation": "薰衣草色纸带形成连续 S 弯，边缘完整；浅色画面上对比偏弱。",
+      "sourceSha256": "4a6c8c0456a117fccca87633dbb2aa6b39e11054f66f8f0696cc7b5cb0a05fa1",
+      "previewSha256": "57d86c2fc102df5aca24a232f8ecb684d88851543351d38a6a05b73ea9b3fd0a",
+      "auditSha256": "7a1ee861c9e22c87b9adf561121f4eaea5f52bbdef7b27cf353f4f6df3876933",
+      "auditExportSha256": "3ef58c8552526cd7b212c0133abbad0f3b5db74f29c52ce4b07b3fa549c59f1a"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_layered_flower",
+      "name": "珊瑚奶油叠层纸花",
+      "decision": "approved",
+      "observation": "珊瑚与奶油色花瓣分层明显，金色花心清楚，轮廓完整。",
+      "sourceSha256": "6ff26c2402f3c8e4e3feddce13b9f76155002d3fb3f98e55a4a9d30f5d7182a3",
+      "previewSha256": "b87d54b7f6edda68d286e45968af4ea0590db64494a509fa08366024e84719bc",
+      "auditSha256": "4593e23d06dadde21fbf7cf22ecf927fb1fda5050a664675780be5ba3cb8d1f7",
+      "auditExportSha256": "affc0a2c042c0db622ea6f3b57272e114a1ce4acf2a687a3ce385827b9a86579"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_yellow_stars",
+      "name": "奶油黄剪纸星星组",
+      "decision": "approved",
+      "observation": "三颗剪纸星星彼此分离且轮廓完整；黄色在明亮背景上较淡。",
+      "sourceSha256": "79ff1235e510b0d43717d14fbde3c9fce412c98d286b58164a12a160a263534a",
+      "previewSha256": "4129ca34a9c52ccfb68a38126f0bd5c13780df8035c72c37fe04021087f45af4",
+      "auditSha256": "8c95b2e1e92d7725e13519d73ff633bac3051bb9e33a5dca448967e5d342668c",
+      "auditExportSha256": "b9124c1ff783b6b9bc73dfa9c8eeedaf667f5228c928e4bf86cff703f5eb1d46"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_sage_leaf",
+      "name": "鼠尾草叶片贴纸",
+      "decision": "approved",
+      "observation": "鼠尾草叶片和奶油色外沿完整，适合搭配纸艺或自然主题。",
+      "sourceSha256": "41bd1ca0212a7f292b144d1a79440e271d606e7a25ea682b85d29f56e879c13b",
+      "previewSha256": "0b9b9aa660b6ff27c61e1bbe45675e3cd352667935542c4afdc4d1626f6b429c",
+      "auditSha256": "9ed9c1dbc8c86261de53c64824d9592a6422a75ce50ac26333253827da64b0e5",
+      "auditExportSha256": "2900a00b727b8b89fe6cc4ba7a6f20e377a679fdf15c5b47d76deb656f985ec6"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_scalloped_edge",
+      "name": "奶油色扇形纸边",
+      "decision": "approved",
+      "observation": "奶油色扇形边缘连续，适合作为短边框；浅底对比有限。",
+      "sourceSha256": "4105fcc49973a1162525bdda81a58f080a49a73f9718ca3eab91bf7debdc4afa",
+      "previewSha256": "6dffbe851d01c2bdf97f7a635f5ff04c5d460ff216f22e29600279ae6175e009",
+      "auditSha256": "cb31440643ad91c179780da4c2371141a1f1c310de092c12d53102e82727f405",
+      "auditExportSha256": "c55a924d79a94349ea0085b5fcd59ccf44e84b158054f37c9a3bc84c4c83db0a"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_charcoal_loops",
+      "name": "炭黑手绘双圈",
+      "decision": "approved",
+      "observation": "两条炭黑手绘圈线完整，在浅色背景清晰，在深色背景可见度低。",
+      "sourceSha256": "504f819176f48911ae66879bef3ca790b0bab8a01b4735525c3d032bdd76af31",
+      "previewSha256": "fc8eca7f20119434324364e24132690703af22de5697f413c986c14524271a29",
+      "auditSha256": "92c5b79cf35494f8eeffe9537f5d0696a2b50255aa69461dd0cd0e74684ac503",
+      "auditExportSha256": "178bef95d4cb22b9257ffbfaf48f38dfcfe0c99f47c7c430abcb59d8fbf3be19"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_blue_paperclip",
+      "name": "天蓝回形针与珊瑚珠",
+      "decision": "approved",
+      "observation": "天蓝回形针结构完整，珊瑚珠形成明确视觉焦点。",
+      "sourceSha256": "81b9450a6279c30e8d2b3fef4436c4de06e5877c6336c34c7cf025215cfd496e",
+      "previewSha256": "ace2398de9ccf7e3d1a11ab206f8243ebf79c5ee094ec019967461cb6def9fbf",
+      "auditSha256": "68aeb2118f73ba1e4d7bc22b68a435e4cfc1db63da0465526c6b8a0dd0d7f9a2",
+      "auditExportSha256": "fcb9f9fbd0a4474f56e9dcffafc479c1af2b0671a88bab3cfb1866f72191f63d"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_kraft_torn_patch",
+      "name": "牛皮纸撕边空白贴片",
+      "decision": "approved",
+      "observation": "牛皮纸撕边贴片完整，中央奶油色空白区域清楚。",
+      "sourceSha256": "32f6aa2bcc3df3bad330d94de845bce3556b3ba9f65345a9c3bdd6a68e3c982d",
+      "previewSha256": "5962b7d6b801fc6c8320fdb02b5817e6bfb06731b230e4b08acfeacbd5e388d0",
+      "auditSha256": "28ccfacdfab6d87dd3ef2982eacd2bfba7e68437f26eb99877331d92a2fd8e2e",
+      "auditExportSha256": "957e48bde7da8668abef5b9112d18f622645c18870815cb545c37d7dda582cf1"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_matte_confetti",
+      "name": "哑光箔纸屑组合",
+      "decision": "approved",
+      "observation": "金色圆片、珊瑚心形和天蓝星形区分清楚，三个独立轮廓均完整。",
+      "sourceSha256": "92526b9824038e13b2c593d71f44462df1a7ef4f725ea4421672ada8536ac135",
+      "previewSha256": "977bcfd81e4bd66f49321e4a88b646673262ca9f1c58d2955be9e97c43bbc5a8",
+      "auditSha256": "74570222d956252b64071858be91fe89f5fc5ca5375a7c24bde3da6b0c6739e1",
+      "auditExportSha256": "954555b9467cee7b5e8d4977418f8f824e24bfdd0f809a266382dbadb592f034"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_double_bookmark",
+      "name": "薰衣草奶油双层书签",
+      "decision": "approved",
+      "observation": "薰衣草与奶油双层书签轮廓完整，底部 V 形切口清楚。",
+      "sourceSha256": "df180b0746714dd043ecf6c47beb7f0b0611e388956710d8e85c34cd52616a08",
+      "previewSha256": "c8a517857bcf7ef3967b157698fb9fbdfe2aeaf5f81ca96b6a2288251ec63d5c",
+      "auditSha256": "a550eb953fd9da2d2ed602e4aceb620feaa2c4e8b354835c09f31a216bca2b21",
+      "auditExportSha256": "50b5c9065c5f5c79dfeadbdbce932c7979638602bda2ac346b89542fb317d136"
+    },
+    {
+      "stickerId": "cutvoke.sticker.scrapbook_coral_bow",
+      "name": "珊瑚色纸艺蝴蝶结",
+      "decision": "approved",
+      "observation": "珊瑚色蝴蝶结结心、双环和飘带轮廓完整。",
+      "sourceSha256": "a106cdffde477cb575208cbf093b88d46a5064b19ee7406ec7d33bfc5d5194e9",
+      "previewSha256": "d376dbe29df2ad9515b7e33dfd9b3f8a0d92f6b06c8ff4d1b4cb0064750c3a63",
+      "auditSha256": "39e54e88161d6613e433143e87c60b037836c10c3ee6784e7eef18686b80a599",
+      "auditExportSha256": "92465bd8f40492ca5ea8e173bda1727db61c086aba75e630075b204a94507323"
+    }
+  ]
+}

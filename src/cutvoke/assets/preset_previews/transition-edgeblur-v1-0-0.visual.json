@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.edgeblur",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.edgeblur",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "模糊",
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-24T06:43:42Z",
+  "observation": "模糊权重集中在画面外围，中央线条保持清晰，形成边缘柔焦。",
+  "method": "手工对照每项封面、五时间点动态表与真实导出帧表；分别核对模糊方向、焦点位置、画面明度和镜头顺序。动态表见 output/preset_review/transition-20260924-blur-fixed/transition-模糊-motion.png，真实导出帧见 output/preset_review/transition-20260924-blur-custom-export.png。另以透明导出样片确认 alpha 保留在 254–255。",
+  "coverSha256": "117daa240fe18c0b53638385030ee8e55acf1a4a9c09126a269079020689daae",
+  "motionPreviewSha256": "0ba7bd99b09957bd8a6906fe72f0b94cb30b03a3a09847c45396e4767248ada9",
+  "auditSha256": "21a42883e431e936e9ba8f02a7f78fa26c7552b748d80eb64ac6336c86efa538"
+}

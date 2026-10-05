@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_rosette_badge",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "圆形绶带中心留白，外圈与双垂带未被裁切。",
+  "sourceSha256": "6bd1f4d2c7acdf4799a31539f0f9efce38a96b01d14bbc8a3f01b746d5d2760d",
+  "previewSha256": "d3511540685d5a7c7a090ab3868db8af1159b5f992cca610336bd39eaaa4eaee",
+  "auditSha256": "88d64a0520457f6b0104ef1dff1b797d770ad885a192eaf41fe5eb3fbe64b60d"
+}

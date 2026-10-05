@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_violet_flame",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T01:05:55+00:00",
+  "observation": "The violet spectral flame retains its upright plume and a bright inner energy contour.",
+  "method": "Reviewed each extracted RGBA PNG on dark and light contact sheets, then checked the actual RenderService preview contact sheet. Examined distinct silhouettes, cell-edge clipping, alpha fringes, visibility on both tones, and usefulness as a compositing overlay.",
+  "sourceSha256": "7dcf1da6f306e2d908c5a46de57b60b0a460e33fac0ec600a32c48feb699bc78",
+  "previewSha256": "cd6201e76db6a2ae1e723180c33808759f6d51500df5f9419a6e74c822793552",
+  "auditSha256": "234e46c0771e69e6e7b8a9b6ffb73bce7ce30fee8ca4f3941bb530e9450b496a"
+}

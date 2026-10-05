@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_shiba",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "fc8ebf8f896f6afea333ae4e49a76b91b14b862cbea63cbec13889c46de674af",
+  "previewSha256": "759e684b376aa47ccb4882486467aa1f6a0374e59b15acdf443feb67a415ad9b",
+  "preview": "pet_shiba.mp4",
+  "bytes": 4157,
+  "visiblePixels": 1846,
+  "changedPixels": 0,
+  "motionVisible": false
+}

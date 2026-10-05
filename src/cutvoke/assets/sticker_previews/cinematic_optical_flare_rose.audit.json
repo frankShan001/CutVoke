@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_flare_rose",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "299712a33f094ca02b448c842864fb9544ccb910f1ab00a53746290741ee15bd",
+  "previewSha256": "d5d86d054f7c9f5a91e4e0d3de3df6c79e134b28414aacdca8dcc0d893241031",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1650,
+  "visiblePixels": 1508,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 584,
+    "steady_entry": 1508,
+    "steady_exit": 1508,
+    "exit": 582
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 584,
+      "withoutFade": 1508
+    },
+    "steady_entry": {
+      "withFade": 1508,
+      "withoutFade": 1508
+    },
+    "steady_exit": {
+      "withFade": 1508,
+      "withoutFade": 1508
+    },
+    "exit": {
+      "withFade": 582,
+      "withoutFade": 1508
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.007,
+    0.0
+  ],
+  "auditExport": "cinematic_optical_flare_rose.audit.mp4",
+  "auditExportSha256": "21959d139d6c97bec249dfc9f8b5d23edaf968844a3aed332150e88ba2d4e2ce"
+}

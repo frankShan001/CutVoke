@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_rosette_badge",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6bd1f4d2c7acdf4799a31539f0f9efce38a96b01d14bbc8a3f01b746d5d2760d",
+  "previewSha256": "d3511540685d5a7c7a090ab3868db8af1159b5f992cca610336bd39eaaa4eaee",
+  "preview": "party_rosette_badge.mp4",
+  "bytes": 4667,
+  "visiblePixels": 1892,
+  "changedPixels": 0,
+  "motionVisible": false
+}

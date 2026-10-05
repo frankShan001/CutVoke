@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_magenta_spiral",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T01:05:55+00:00",
+  "observation": "The magenta particle spiral reads from its bright center through the full outer curve.",
+  "method": "Reviewed each extracted RGBA PNG on dark and light contact sheets, then checked the actual RenderService preview contact sheet. Examined distinct silhouettes, cell-edge clipping, alpha fringes, visibility on both tones, and usefulness as a compositing overlay.",
+  "sourceSha256": "60372ff66814099ddb4ca207ddb91c556e108fa84a98a3834feaadd59162c231",
+  "previewSha256": "5d7a949d836c72e8e150b4a48c37ca60dd915d491b72492f1892347b74f375b6",
+  "auditSha256": "e6f200aa7ba8f42965fd2f1f5a590d5265108fd744c5470508ccafb7660fd0ee"
+}

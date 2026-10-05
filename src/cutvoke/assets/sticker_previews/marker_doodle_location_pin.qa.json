@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.marker_doodle_location_pin",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f830a8cef869cd30ba8f99b6377112414e87b9c61ad7e2919531528d610aca0b",
+  "previewSha256": "4a44f3e04e451773f7c353a8381ef70ca8dd07d576dc1301393a156f3e5ab390",
+  "preview": "marker_doodle_location_pin.mp4",
+  "bytes": 4043,
+  "visiblePixels": 1649,
+  "changedPixels": 0,
+  "motionVisible": false
+}

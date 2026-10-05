@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_golden_dust_beam",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "b74ccabcea5219d753d1dc69ae4b8be6762752f8de972df9b8cea56403ab18f5",
+  "previewSha256": "a0a4f3df3d5414d69a5deb548c57ce23de81e4eef1c88bbfe972daa0a003a57e",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 14599,
+  "visiblePixels": 20619,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 9176,
+    "steady_entry": 20614,
+    "steady_exit": 20623,
+    "exit": 9228
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 9176,
+      "withoutFade": 20613
+    },
+    "steady_entry": {
+      "withFade": 20614,
+      "withoutFade": 20617
+    },
+    "steady_exit": {
+      "withFade": 20623,
+      "withoutFade": 20614
+    },
+    "exit": {
+      "withFade": 9228,
+      "withoutFade": 20623
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    1.011,
+    1.011
+  ],
+  "auditExport": "natural_light_golden_dust_beam.audit.mp4",
+  "auditExportSha256": "02bd958aa1117e1694ed40687ac7de3903af42bb8b53270d862c31e83070284a"
+}

@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.zoom",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.786,
+  "exportSha256": "5300df1decc8da8e53263f046ae37166178b81e08bbca6c40bacc945fce3f58d",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "5300df1decc8da8e53263f046ae37166178b81e08bbca6c40bacc945fce3f58d",
+  "auditExport": "transition-zoom-v1-0-0.audit.mp4"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_compass",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "9b6e059c8c20fd360646be86d6a829c62dd177859e326ca5c29601379319c200",
+  "previewSha256": "cbbced13afa10448865bb7b5d5c796f90fe20b363cb3cf2bdfe8dd0e407109dc",
+  "preview": "travel_compass.mp4",
+  "bytes": 3978,
+  "visiblePixels": 1306,
+  "changedPixels": 0,
+  "motionVisible": false
+}

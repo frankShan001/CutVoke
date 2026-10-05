@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.mintPortrait",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "hue",
+    "value": -37.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.929,
+  "exportSha256": "67f9fcf60f7dce05716ca9afafa2a37b87f505d512a219ee0aed5a32ca862ce4",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "67f9fcf60f7dce05716ca9afafa2a37b87f505d512a219ee0aed5a32ca862ce4",
+  "auditExport": "personFx-mintPortrait-v1-0-0.audit.mp4"
+}

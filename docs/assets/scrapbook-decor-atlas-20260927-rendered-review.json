@@ -1,0 +1,103 @@
+{
+  "source": "sticker audit MP4, 1.0-second frame",
+  "image": "scrapbook-decor-atlas-20260927-rendered-review.png",
+  "imageSha256": "91ea46bafa8e9d8b00a618285a53093adb065838ca76fe33e3275493ed7fb415",
+  "items": [
+    {
+      "stem": "scrapbook_corner_sprig",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_corner_sprig.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "b50dc3ba1d6dbd7185ef957665787a1ea09f27e73b652088c4fae2f80c0ddd76"
+    },
+    {
+      "stem": "scrapbook_crossed_washi",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_crossed_washi.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "2b32a6fd188b09f460164afbcba5a22352f3a8a835e7011de7fe8edd7b1fea82"
+    },
+    {
+      "stem": "scrapbook_coral_torn_corner",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_coral_torn_corner.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "d1c47a4d023cb8e41b23a11a452bdc07dc12dcd743eb907b0f0e0b560c9cd7c5"
+    },
+    {
+      "stem": "scrapbook_blue_vellum_ribbon",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_blue_vellum_ribbon.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "08d64450a08d149cb12e32a9dc96e0fdc2828e6d71eec8c7bb54c0c82fb9d173"
+    },
+    {
+      "stem": "scrapbook_kraft_stitched_label",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_kraft_stitched_label.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "43bd014a99fe6f72b1687205c7688dca8f2387642ff91d256489a882343ab163"
+    },
+    {
+      "stem": "scrapbook_lavender_curl",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_lavender_curl.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "ace936cd88a21783e48e5622cac6788ba76591c68ad888f9ebe416057fcae350"
+    },
+    {
+      "stem": "scrapbook_layered_flower",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_layered_flower.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "64c5c0753fd54c4357848bee5bc5d516575beb3e5f7ba1c216410b4911cff26e"
+    },
+    {
+      "stem": "scrapbook_yellow_stars",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_yellow_stars.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "28ba162c08311c29549bd47cc2536d2cfc9af6ea23c8340b2c3bbe5624a38a23"
+    },
+    {
+      "stem": "scrapbook_sage_leaf",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_sage_leaf.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "d8fb9d63d2d5cef27b220837030819208618fb7168984e00395ea999e67d8695"
+    },
+    {
+      "stem": "scrapbook_scalloped_edge",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_scalloped_edge.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "712e76282e987d7294f2287ba8ee656499c458962eeb4a3b05b33b341dae032e"
+    },
+    {
+      "stem": "scrapbook_charcoal_loops",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_charcoal_loops.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "cad933503d62755cde4885bb25768e90035a3916b5b3f7044fc3ebba02f6f71b"
+    },
+    {
+      "stem": "scrapbook_blue_paperclip",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_blue_paperclip.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "6b70feb32e72de27eb0a2ae028c3170fae2c199bc7914975c7e25ba79b26d715"
+    },
+    {
+      "stem": "scrapbook_kraft_torn_patch",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_kraft_torn_patch.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "ad55760ce7bc6855ed3b3f70152d61e12cdf4055f1fe0540a686ce5238b9963b"
+    },
+    {
+      "stem": "scrapbook_matte_confetti",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_matte_confetti.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "54c9e5929cb5f1e50752ac9c53089272b3be378750c9a7c99b826246c3cf1473"
+    },
+    {
+      "stem": "scrapbook_double_bookmark",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_double_bookmark.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "491a67b82e3ff8924a4fa31999e68397b64f68591a334013005b7cfbf541cb08"
+    },
+    {
+      "stem": "scrapbook_coral_bow",
+      "video": "src/cutvoke/assets/sticker_previews/scrapbook_coral_bow.audit.mp4",
+      "frameTimeSeconds": 1,
+      "frameSha256": "c65f880c972038a933ceb2fac6bf1456d77f5f991ec48909fdbe3c42189b799c"
+    }
+  ]
+}

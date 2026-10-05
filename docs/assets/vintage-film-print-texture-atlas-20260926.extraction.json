@@ -1,0 +1,512 @@
+{
+  "generator": "OpenAI ImageGen",
+  "source": "vintage-film-print-texture-atlas-20260926.png",
+  "sourceSha256": "4906c287a82d8064963c98a6034d87760633176daab3780e2a0c94f1ddbb6c77",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4",
+  "alpha": "preserved from the generated RGBA atlas",
+  "extraction": "equal proportional 4x4 crops; transparent pixels preserved; centered square RGBA PNG",
+  "license": "Project-internal original AI-generated assets; not separately licensed for redistribution",
+  "items": [
+    {
+      "stem": "printfx_film_perforation_strip",
+      "name": "35 毫米胶片齿孔",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "复古",
+        "胶片",
+        "齿孔"
+      ],
+      "row": 0,
+      "column": 0,
+      "cell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBounds": [
+        97,
+        24,
+        174,
+        313
+      ],
+      "visiblePixels": 19304,
+      "visiblePixelsWithin8pxBoundary": 466,
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "7eb67fcf5082f7db185be811b603c1ae846a78b5658db1dd9f3259930d023b30"
+    },
+    {
+      "stem": "printfx_film_dust_specks",
+      "name": "胶片浮尘颗粒",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "复古",
+        "胶片",
+        "浮尘"
+      ],
+      "row": 0,
+      "column": 1,
+      "cell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "visibleBounds": [
+        24,
+        61,
+        272,
+        290
+      ],
+      "visiblePixels": 1858,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "796a4c7c632ce48e72b93f5c91bebe63e7b76fe1b1280c90c5102e280bb02d60"
+    },
+    {
+      "stem": "printfx_film_scratch_cluster",
+      "name": "胶片纵向划痕",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "复古",
+        "胶片",
+        "划痕"
+      ],
+      "row": 0,
+      "column": 2,
+      "cell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "visibleBounds": [
+        57,
+        36,
+        256,
+        312
+      ],
+      "visiblePixels": 4597,
+      "visiblePixelsWithin8pxBoundary": 30,
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "aa2fc08192359b51c44877fad0e66b8f68daa3c3ab8b1ebca1884958624acdda"
+    },
+    {
+      "stem": "printfx_ink_roller_grain",
+      "name": "油墨滚筒颗粒",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "印刷",
+        "油墨",
+        "颗粒"
+      ],
+      "row": 0,
+      "column": 3,
+      "cell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "visibleBounds": [
+        32,
+        56,
+        282,
+        306
+      ],
+      "visiblePixels": 49613,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "f5a7f32fd11e0da9547e9fe9c664fe7c4362f7eb50ac3b94dd72a778e0b96d83"
+    },
+    {
+      "stem": "printfx_halftone_gradient",
+      "name": "渐隐半调网点",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "印刷",
+        "网点",
+        "半调"
+      ],
+      "row": 1,
+      "column": 0,
+      "cell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "visibleBounds": [
+        33,
+        26,
+        287,
+        281
+      ],
+      "visiblePixels": 26259,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "a13f823ca9cf18db8dbabdc93e4a597f5b71d8089c2e0f32ab682ecc5c3b4f72"
+    },
+    {
+      "stem": "printfx_comic_halftone_burst",
+      "name": "漫画半调爆发",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "漫画",
+        "网点",
+        "爆发"
+      ],
+      "row": 1,
+      "column": 1,
+      "cell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "visibleBounds": [
+        15,
+        23,
+        291,
+        291
+      ],
+      "visiblePixels": 35686,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "859f09331cf672143e0479fb86bbb8d838ea4488d182db1452a71d23d4704c0c"
+    },
+    {
+      "stem": "printfx_photocopy_tear_edge",
+      "name": "复印纸撕边",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "拼贴",
+        "纸张",
+        "撕边"
+      ],
+      "row": 1,
+      "column": 2,
+      "cell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "visibleBounds": [
+        20,
+        111,
+        295,
+        257
+      ],
+      "visiblePixels": 30651,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "7f98681d3a9aa9b573cd93b8d8f1af9c14a3d909e16ec3bfd65ef6c78d7bd7ba"
+    },
+    {
+      "stem": "printfx_masking_tape_pair",
+      "name": "复古纸胶带",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "拼贴",
+        "纸胶带",
+        "手账"
+      ],
+      "row": 1,
+      "column": 3,
+      "cell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "visibleBounds": [
+        30,
+        53,
+        284,
+        271
+      ],
+      "visiblePixels": 37430,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "d8e3a2e2fc79b7d54be4fbc51cab181a778ea4bd00d493c87d834288945f4ce4"
+    },
+    {
+      "stem": "printfx_curled_paper_corner",
+      "name": "卷起的纸角",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "拼贴",
+        "纸张",
+        "卷角"
+      ],
+      "row": 2,
+      "column": 0,
+      "cell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "visibleBounds": [
+        32,
+        28,
+        286,
+        313
+      ],
+      "visiblePixels": 28905,
+      "visiblePixelsWithin8pxBoundary": 128,
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "3723f110ce4c09c8e8d55ea704141db240097c2ac34efef6c1157286c4d6b4c7"
+    },
+    {
+      "stem": "printfx_creased_paper_sheet",
+      "name": "折痕纸张",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "纸张",
+        "折痕",
+        "复古"
+      ],
+      "row": 2,
+      "column": 1,
+      "cell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "visibleBounds": [
+        21,
+        27,
+        283,
+        313
+      ],
+      "visiblePixels": 57928,
+      "visiblePixelsWithin8pxBoundary": 5,
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "fa4d34f35d33eb4fc25875b0ea37ea5124cecc28322a9d800d8339b20e5c6056"
+    },
+    {
+      "stem": "printfx_toner_smudge",
+      "name": "复印机碳粉污迹",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "印刷",
+        "复印",
+        "污迹"
+      ],
+      "row": 2,
+      "column": 2,
+      "cell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "visibleBounds": [
+        23,
+        59,
+        294,
+        313
+      ],
+      "visiblePixels": 33450,
+      "visiblePixelsWithin8pxBoundary": 44,
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "e5647ab784098b00ea03e06adb91ae14ddede312464213531fc9c5f18978689f"
+    },
+    {
+      "stem": "printfx_vintage_label_frame",
+      "name": "复古空白标签框",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "拼贴",
+        "标签",
+        "相框"
+      ],
+      "row": 2,
+      "column": 3,
+      "cell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "visibleBounds": [
+        24,
+        49,
+        289,
+        313
+      ],
+      "visiblePixels": 46617,
+      "visiblePixelsWithin8pxBoundary": 1140,
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "f51219d1d85cbdd24f40420b3e4b107348087e029e59be86de1627c88c08476a"
+    },
+    {
+      "stem": "printfx_screenprint_splatter",
+      "name": "丝网印刷飞溅",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "印刷",
+        "油墨",
+        "飞溅"
+      ],
+      "row": 3,
+      "column": 0,
+      "cell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "visibleBounds": [
+        32,
+        0,
+        295,
+        261
+      ],
+      "visiblePixels": 23315,
+      "visiblePixelsWithin8pxBoundary": 139,
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "73946589e1f0a8382bb548762c9078f33758a3c392c2a2a93043dae5c63009fe"
+    },
+    {
+      "stem": "printfx_analog_scanline_sweep",
+      "name": "模拟扫描纹理",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "模拟",
+        "扫描线",
+        "复古"
+      ],
+      "row": 3,
+      "column": 1,
+      "cell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "visibleBounds": [
+        23,
+        0,
+        289,
+        258
+      ],
+      "visiblePixels": 33591,
+      "visiblePixelsWithin8pxBoundary": 240,
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "161d01f15942f316fce955e7cd90ce0c5eede7563dcca202b031adc2c2d1ea70"
+    },
+    {
+      "stem": "printfx_registration_marks",
+      "name": "四色套印标记",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "印刷",
+        "套印",
+        "十字线"
+      ],
+      "row": 3,
+      "column": 2,
+      "cell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "visibleBounds": [
+        29,
+        0,
+        287,
+        255
+      ],
+      "visiblePixels": 5175,
+      "visiblePixelsWithin8pxBoundary": 86,
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "a3d775440d59c2f6b8c2ba24a2c5b386acc55e454260241d4d73503937ed7d34"
+    },
+    {
+      "stem": "printfx_film_frame_corners",
+      "name": "胶片取景角标",
+      "subcategory": "电影叠加",
+      "keywords": [
+        "胶片",
+        "取景框",
+        "角标"
+      ],
+      "row": 3,
+      "column": 3,
+      "cell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "visibleBounds": [
+        28,
+        0,
+        286,
+        248
+      ],
+      "visiblePixels": 9026,
+      "visiblePixelsWithin8pxBoundary": 1053,
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "c521aa8eca68f7e8a98470d40f31e2c7817ba4149d1e9c8542eedae08bf228cf"
+    }
+  ],
+  "contactSheet": "vintage-film-print-texture-contact-20260926.png"
+}

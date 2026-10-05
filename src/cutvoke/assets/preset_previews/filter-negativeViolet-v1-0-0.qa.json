@@ -1,0 +1,34 @@
+{
+  "presetId": "cutvoke.preset.filter.negativeViolet",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.invert",
+      "version": "1.0.0",
+      "params": {
+        "strength": 0.88
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.colorize",
+      "version": "1.0.0",
+      "params": {
+        "hue": 290,
+        "saturation": 0.8,
+        "mix": 0.55,
+        "lightness": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 110.18,
+  "maxSampledMeanRgbDifference": 110.18,
+  "coverSha256": "05747c7001f33c7e13c2b3f69de421e754a7e6e49963dad5a028f23538bf1b2a",
+  "previewSha256": "5155b81b4487e7f4ab251e8c8bd23acfdfc811136981e7d47ee45c4cca679c68",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.travel_map_route",
+      "decision": "approved",
+      "sourceSha256": "291c30e642ed0df5ee3807f57d7307411530ce5b13a4a6eff6ee2acf11002d0e",
+      "previewSha256": "4e920da8e17c7779ec23ea28881dc10f4e7525b191b1e9f36f460afee3f16bc9",
+      "observation": "地图折页完整，虚线路径与定位点清晰，边缘无串格碎片。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_location_pin",
+      "decision": "approved",
+      "sourceSha256": "98d53890758a33e65af0a6e5e76dbc7378ea652a0c2ab913c083a7ef573d43e8",
+      "previewSha256": "79c83862c18688c552ce670f3b641b40a926fb33176bfd5372088656dbda538b",
+      "observation": "珊瑚定位标轮廓完整，内部风景可辨，浅深底对比稳定。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_instant_camera",
+      "decision": "approved",
+      "sourceSha256": "1b0e86877bebec66fbe40e047191bb30b87a19857749bef46aba1e2ee333ce38",
+      "previewSha256": "ce3647de03b0c2981177e054081c7384471408a28414b23048d1bddbc5734d59",
+      "observation": "相机与照片层次分明，镜头和按键细节清楚，透明边缘干净。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_suitcase",
+      "decision": "approved",
+      "sourceSha256": "21998d2b64393c3de888945bda2f8425727cf6dca7c4e52e95d56b30307495c5",
+      "previewSha256": "46d8aea9860384e10e9d19b35f71a2f751f0e60ef6e12c85040eb390c92b07a0",
+      "observation": "行李箱把手、箱体、标签与滚轮完整，配色和深色轮廓清晰。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_mountain_sun",
+      "decision": "approved",
+      "sourceSha256": "b70d1d1477123ba3bc2aef323b9c443dcce07776dac34be25e0bc8010001d2f1",
+      "previewSha256": "27d4c46ca3a742b5554eed18a4a82b683e4b759e5cb58372f69551fa8e5bbcba",
+      "observation": "山峰、树林、湖面和日出形成完整风景徽章，轮廓无截断。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_compass",
+      "decision": "approved",
+      "sourceSha256": "9b6e059c8c20fd360646be86d6a829c62dd177859e326ca5c29601379319c200",
+      "previewSha256": "cbbced13afa10448865bb7b5d5c796f90fe20b363cb3cf2bdfe8dd0e407109dc",
+      "observation": "罗盘外圈和指针完整，中心对齐，细刻度在缩略图中仍可辨。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_train",
+      "decision": "approved",
+      "sourceSha256": "c1337178b858c07b084437fbe3254058e08fd1567ee1ce968c66e54e9e87b230",
+      "previewSha256": "907cf8a4472dc931d74dcefccc2e36797c7d85e9370e9090b9e3945eef64c9af",
+      "observation": "列车车头、车窗和轨道连成完整图形，形态可与其他交通贴纸区分。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_boarding_pass",
+      "decision": "approved",
+      "sourceSha256": "f3f0e197c1631104426ea7f0af917a9adacefa5073fe8cffd0177e31f8ec89cd",
+      "previewSha256": "f7fa22389469766b6fb48e6fb32124154a44fff8910c6f98dc1ac639f92cfc69",
+      "observation": "登机票轮廓和飞机符号清晰，空白票面没有生成文字或串格残片。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_airplane_route",
+      "decision": "approved",
+      "sourceSha256": "33ca1b115f14f0f44a3fc5bf67204145ea2ca6e2ac565adc88d533bc0bb287b2",
+      "previewSha256": "56563eda58995e343dc1aecd128161eecd246d52f4ffa5be1ab4bb8c8fdd33e0",
+      "observation": "纸飞机与虚线航迹主题明确，虚线边缘干净且保持透明背景。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_postcard",
+      "decision": "approved",
+      "sourceSha256": "d64261add7adb13fe49a27098639c0a51eb46b669d94b9f14ebec4c6340858bc",
+      "previewSha256": "97f1efaf38874fad2c5dc44ba00e435e914ab4921db18e302558041393ae4a99",
+      "observation": "明信片图窗、邮票区和海岛插画完整，线条留白足够。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_hiking_boot",
+      "decision": "approved",
+      "sourceSha256": "4ef61d589f7df6915f9aeb2c13f6da7ec79ca4471332fe2cf90d3d3dae18037c",
+      "previewSha256": "84badd388dabe76aa2600f88126c4498168a833e44177a55e879f81d6e562d1c",
+      "observation": "登山靴细节完整，旁侧脚印分离清晰，适合作为徒步标记。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_beach_umbrella",
+      "decision": "approved",
+      "sourceSha256": "be11d647389aaa1e7fc39ac98ff47f0a8749f253ef6d54168cb2828336c2bae9",
+      "previewSha256": "c72b4308e1231f50bbb6cc734365850b562e4871afba16fe6a426b06c4825fd8",
+      "observation": "遮阳伞、沙滩和海浪完整，暖色与青蓝色层次清楚。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_camcorder",
+      "decision": "approved",
+      "sourceSha256": "5d9bf0f9f883ff2e10f82c9699101a4cfe0b85025856551482d1f97b0410ab6c",
+      "previewSha256": "770a6cb89897ef00b6d75733111f0c02edb78c271f4b0d2b972adb5c4ba7ef5a",
+      "observation": "摄像机镜头、机身和屏幕结构清晰，没有背景色块。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_globe_route",
+      "decision": "approved",
+      "sourceSha256": "6ca964d84f95f91549e2c521ff68bcac7600cc76fff32c9cab4f10558ca7adfd",
+      "previewSha256": "97e9b9f2978d2cc9b10b1229d41fac9347aa48598df761fbc8d5b061459a7ea8",
+      "observation": "地球仪、支架和航线完整，明暗轮廓清楚且无边缘污染。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_film_frame",
+      "decision": "approved",
+      "sourceSha256": "5454d3f4fc1131f65ec5860dd29503f1e00e6abf97bbed7bae084f7fcce2858c",
+      "previewSha256": "271f1cde80c3f027c32168e5b7e1edd3c1521640fb8cb4378f454f8389bbec60",
+      "observation": "胶片孔与空白画框均匀完整，造型简洁易辨。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.travel_seashell_leaf",
+      "decision": "approved",
+      "sourceSha256": "3ecc9ec82b7d3f8fbefb68e59260ea6f3d1b63b25cae4561c9bdc0b2cdc5ab94",
+      "previewSha256": "b7042642aaf1594d905004fc6fdf871f5b1c3a572263393af74be03367d6b50b",
+      "observation": "贝壳、棕榈叶和海星彼此分开，轮廓干净、主题一致。"
+    }
+  ]
+}

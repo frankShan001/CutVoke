@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_atlas_frost_edge",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "冰晶沿画面边缘分布且中心开放，细节清晰，没有越格残片。",
+  "sourceSha256": "e2927e25ec804aeb61319e2a19cff41e7b27bbda77f745e4fe7f95979a08fc0a",
+  "previewSha256": "a7d3cc0ca598447f4b58b495c06d6b797342ed40a7543c0f3b87bbb1f431764e",
+  "auditSha256": "008e0b7b4309ec0acc028fa54496b5dfe88586d7f501de9bc4c9b42d37a7b5db"
+}

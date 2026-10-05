@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.sepiaTone",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.sepia",
+  "params": {
+    "strength": 1.0
+  },
+  "subcategory": "胶片",
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Warm brown treatment replaces cool source hues with a classic sepia cast.",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "coverSha256": "933b095e5091119e5f5c3f649805a0e9b0b0f436f131d543262ca43bc6bbbabd",
+  "motionPreviewSha256": "6a1d4b0f2afbae2055ace0322c21d6f5dcd099d997ad3d9c13afa4da9d507fc2",
+  "auditSha256": "b467e35b21496b595808840c5861c5ca1b59e7e1b74086e384c097e362b4bf44"
+}

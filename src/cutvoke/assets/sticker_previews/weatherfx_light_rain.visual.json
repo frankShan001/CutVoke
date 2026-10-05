@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_light_rain",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "细雨斜线细密且低对比，置于深色半幅时仍可辨认，适合轻雨画面。",
+  "sourceSha256": "4339aaef3b1e9e508f3e9c65bbecac1102cd7467a3e353c2309c2d00c9026ccd",
+  "previewSha256": "26be401d06a5ecf3313912599840efe9762747282ab334317ba17b2639213a75",
+  "auditSha256": "42fb84491082ed6772296c1775bd531a7cbb43aa4eb9ab76fff9b7a790ccfcf7"
+}

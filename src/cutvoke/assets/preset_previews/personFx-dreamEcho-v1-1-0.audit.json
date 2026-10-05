@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.dreamEcho",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "frames",
+    "value": 11
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.434,
+  "exportSha256": "847c86211da5af538d736486802d0e83e4a554d9bf30672adb3af139fe4c8728",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "847c86211da5af538d736486802d0e83e4a554d9bf30672adb3af139fe4c8728",
+  "auditExport": "personFx-dreamEcho-v1-1-0.audit.mp4"
+}

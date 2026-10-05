@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_holographic_foil",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "41428648e740389d25719a28386cb325babad917f63f0579a969211844d232bf",
+  "previewSha256": "b1da77d9f29c172662c5420b58b47b870ed3cfa5f73c5c4cc8f00a23cb5118c8",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6163,
+  "visiblePixels": 4926,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 4410,
+    "steady_entry": 4926,
+    "steady_exit": 4926,
+    "exit": 4410
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 4410,
+      "withoutFade": 4926
+    },
+    "steady_entry": {
+      "withFade": 4926,
+      "withoutFade": 4926
+    },
+    "steady_exit": {
+      "withFade": 4926,
+      "withoutFade": 4926
+    },
+    "exit": {
+      "withFade": 4410,
+      "withoutFade": 4926
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.105,
+    0.102
+  ],
+  "auditExport": "material_holographic_foil.audit.mp4",
+  "auditExportSha256": "7912b7fa1a70d2d4424632a4f1a1858d6c7a857cdff62d762a014134f22a28f3"
+}

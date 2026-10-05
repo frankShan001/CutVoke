@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_blue_crystal_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "b102a74ddadd02e16d87d0c4137f85c85372b02ed547757aa28bf41e8e6a12df",
+  "previewSha256": "e39c7613418711e5e959146985de2ce37e6a340a77227c973079a18bce57cda5",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2793,
+  "visiblePixels": 1959,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 853,
+    "steady_entry": 1957,
+    "steady_exit": 1959,
+    "exit": 844
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 853,
+      "withoutFade": 1956
+    },
+    "steady_entry": {
+      "withFade": 1957,
+      "withoutFade": 1959
+    },
+    "steady_exit": {
+      "withFade": 1959,
+      "withoutFade": 1959
+    },
+    "exit": {
+      "withFade": 844,
+      "withoutFade": 1940
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.164,
+    0.139
+  ],
+  "auditExport": "fxoverlay_blue_crystal_burst.audit.mp4",
+  "auditExportSha256": "23f15454f78c5b6ad68acd558b852508eca313cbc82b4593199bdb686a7cf668"
+}

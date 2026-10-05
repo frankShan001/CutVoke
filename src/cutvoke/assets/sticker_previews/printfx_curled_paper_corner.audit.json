@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_curled_paper_corner",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "3723f110ce4c09c8e8d55ea704141db240097c2ac34efef6c1157286c4d6b4c7",
+  "previewSha256": "a1cb08352618adf79497e7f80769b691a0a6b51aa167406696cf0b9d1c3724d3",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 9713,
+  "visiblePixels": 8447,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 5097,
+    "steady_entry": 8447,
+    "steady_exit": 8447,
+    "exit": 5093
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 5097,
+      "withoutFade": 8447
+    },
+    "steady_entry": {
+      "withFade": 8447,
+      "withoutFade": 8447
+    },
+    "steady_exit": {
+      "withFade": 8447,
+      "withoutFade": 8447
+    },
+    "exit": {
+      "withFade": 5093,
+      "withoutFade": 8447
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.134,
+    0.137
+  ],
+  "auditExport": "printfx_curled_paper_corner.audit.mp4",
+  "auditExportSha256": "58907e57b4cb9e9977a5e88ec353fa87e980368d87e29216167730ca616e55e6"
+}

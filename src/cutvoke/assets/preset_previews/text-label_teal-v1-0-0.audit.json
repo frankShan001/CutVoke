@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.label_teal",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 857,
+  "exportSha256": "ea29b9cf1023d4549dc5594c4e2c39b0b72249a42cd25613bf05d67a446e2724",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "ea29b9cf1023d4549dc5594c4e2c39b0b72249a42cd25613bf05d67a446e2724",
+  "auditExport": "text-label_teal-v1-0-0.audit.mp4"
+}

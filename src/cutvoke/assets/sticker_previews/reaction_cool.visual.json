@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_cool",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Orange smiling face with oversized blue sunglasses; unmistakable cool reaction.",
+  "sourceSha256": "5390b21a90a971ce40bc7a1af3429a6f93528e004a3e45ed944b9d492831e68e",
+  "previewSha256": "cb4a3349c3d0b1172a7f278e29bf62186f33e9133904603568c6ce4a26b0b0bd",
+  "auditSha256": "cd8cdcc0de271a4de0b3baad9ff4664d4c447734001059179bc694829b6c4c89"
+}

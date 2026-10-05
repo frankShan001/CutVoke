@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.vdslice",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.256,
+  "exportSha256": "4fe9a9b2d6575196042ae5f97d5a0e8318800bb0b026d33adc7be429cb7a684e",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "4fe9a9b2d6575196042ae5f97d5a0e8318800bb0b026d33adc7be429cb7a684e",
+  "auditExport": "transition-vdslice-v1-0-0.audit.mp4"
+}

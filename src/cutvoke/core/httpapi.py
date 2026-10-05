@@ -12,6 +12,15 @@
   GET  /api/v1/projects/{id}/summary       工程摘要
   GET  /api/v1/projects/{id}/lookup        按需读取字幕或片段
   POST /api/v1/projects/{id}/commands      提交编辑命令
+  GET  /api/v1/asr/status                   本地语音识别组件状态
+  POST /api/v1/projects/{id}/asr-jobs      提交片段识别任务
+  GET  /api/v1/asr-jobs/{id}               识别进度与候选字幕
+  POST /api/v1/asr-jobs/{id}/cancel        取消识别任务
+  GET  /api/v1/person-cutout/status        本地人物抠像组件状态
+  POST /api/v1/projects/{id}/person-cutout-jobs  提交人物抠像任务
+  GET  /api/v1/person-cutout-jobs/{id}     人物抠像进度
+  POST /api/v1/person-cutout-jobs/{id}/cancel  取消人物抠像任务
+  POST /api/v1/projects/{id}/person-cutout-jobs/{job}/apply  可撤销地应用抠像结果
   POST /api/v1/projects/{id}/export        触发导出（同步阻塞，等结果）
   POST /api/v1/projects/{id}/exports       提交异步导出任务（V02，返回 202+jobId）
   GET  /api/v1/projects/{id}/exports       该工程的导出任务列表
@@ -31,6 +40,7 @@ import hashlib
 import json
 import os
 import threading
+import zipfile
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Optional
@@ -40,7 +50,10 @@ import uuid
 from .service import EditService, EditError
 from .protocol import Command, Actor, ErrorCode, ExitCode
 from .rational import Rational
-from .render import RenderService
+from .effects import find_transition
+from .render import RenderService, _TRANSITION_HANDLE_STATIC_FX
+from .preview_prepare import PreviewPreparation
+from .preview_cache import PreviewDiskCache, PreviewRenderScheduler
 from .projectpack import (
     pack_project, unpack_project, inspect_package, ProjectPackError,
     SUPPORTED_PACKAGE_FORMAT,
@@ -49,12 +62,27 @@ from .security import (ORIGIN_MESSAGES, GovernanceError, Limits, ResourceLimiter
                        SessionToken, PathEscapeError, check_origin,
                        check_request_token, safe_path, resolve_binding)
 from .diagnostics import JsonlLogger
+from .asr_jobs import AsrJobManager
+from .speech_recognition import (SpeechRecognitionError,
+                                 availability as asr_availability,
+                                 source_signature)
+from .person_cutout import (PersonCutoutError, PersonCutoutJobManager,
+                            availability as person_cutout_availability,
+                            find_video_clip)
+from .luts import CubeInvalid, MAX_CUBE_BYTES, validate_cube
 
 
 # Bump when preview rendering changes so neither disk cache nor browser ETag can
 # treat media produced by an older renderer as current for the same project data.
-PREVIEW_RENDER_CACHE_VERSION = 5
+PREVIEW_RENDER_CACHE_VERSION = 16
 PREVIEW_WINDOW_SECONDS = 8
+ASSET_MEDIA_TYPES = {
+    ".mp3": "audio/mpeg", ".wav": "audio/wav", ".flac": "audio/flac",
+    ".aac": "audio/aac", ".m4a": "audio/mp4", ".ogg": "audio/ogg",
+    ".opus": "audio/ogg", ".mp4": "video/mp4", ".m4v": "video/mp4",
+    ".webm": "video/webm", ".mov": "video/quicktime",
+    ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif",
+}
 
 
 class HttpApi:
@@ -64,9 +92,15 @@ class HttpApi:
                  *, logger: Optional[JsonlLogger] = None,
                  limits: Optional[Limits] = None,
                  session: Optional[SessionToken] = None,
-                 media_dir: Optional[str] = None) -> None:
+        media_dir: Optional[str] = None) -> None:
         self.service = service
+        self.media_dir = media_dir or os.path.join(
+            os.path.expanduser("~"), ".cutvoke", "media")
+        if service.store is not None:
+            self._ensure_active_stickers()
         self.render = render or RenderService()
+        if service.store is not None:
+            self._ensure_builtin_backgrounds()
         # 结构化诊断日志（T31）：默认关闭（避免库导入即写用户目录），
         # 由 CLI / 服务启动时显式注入 JsonlLogger() 写入 ~/.cutvoke/logs/。
         self.logger = logger
@@ -74,19 +108,55 @@ class HttpApi:
         self.limiter = ResourceLimiter(limits)
         # 会话令牌（T31）：None 表示仅回环匿名访问（默认）；存在则要求令牌
         self.session = session
-        # 素材导入落盘目录（WP-03/A07）：默认 ~/.cutvoke/media/
-        self.media_dir = media_dir or os.path.join(
-            os.path.expanduser("~"), ".cutvoke", "media")
+        # The CLI injects a boot-time snapshot; library users have identity too.
+        from ..runtime import runtime_identity
+        store_path = str(getattr(service.store, "path", "")) if service.store else None
+        self.runtime_info = runtime_identity(store_path)
         # 预览视频缓存按“去掉可编辑字幕后的画面工程”寻址：字幕修改只更新
         # 前端叠层，不重新编码基础视频；画面/音频/效果变化才生成新缓存。
         self._preview_lock = threading.RLock()
-        self._preview_cache: dict[str, dict[str, Any]] = {}
-        self._preview_cache_limit = 8
+        self.preview_cache = PreviewDiskCache(self.media_dir)
+        self._preview_scheduler = PreviewRenderScheduler()
+        self._preview_jobs_lock = threading.Lock()
+        self._preview_active_jobs: dict[str, tuple[str, threading.Event]] = {}
+        self._preview_preparation = PreviewPreparation(
+            os.path.join(self.media_dir, ".preview-cache"), self.render,
+            self._preview_window_file, self._preview_lock,
+            renderer_version=PREVIEW_RENDER_CACHE_VERSION,
+            window_seconds=PREVIEW_WINDOW_SECONDS, disk_cache=self.preview_cache)
+        self._asr_jobs = AsrJobManager()
+        self._person_cutout_jobs = PersonCutoutJobManager()
         # V02 异步导出队列：**挂在 EditService 上**（架构矫正）。本 HttpApi 不再
         # 自持队列实例——否则会与 service 命令各持一份，导致两个后台线程重复
         # 消费任务。HttpApi 只做薄封装，转调 service._get_export_queue()，
         # 并传入 `lambda: self.render` 让队列复用本接口的 RenderService（便于
         # 测试注入假渲染器）。队列的懒创建/后台线程由 EditService.close() 收尾。
+
+    def _ensure_active_stickers(self) -> None:
+        """Register active pack stickers while retaining versioned project media."""
+        if self.service.store is None:
+            return
+        from .builtin_assets import ensure_builtin_stickers
+        from .resource_pack import active_resource_pack_root
+        store_path = str(getattr(self.service.store, "path", ""))
+        immutable_root = (None if store_path == ":memory:" or "mode=memory" in store_path
+                          else Path(self.media_dir) / ".builtin-resources")
+        ensure_builtin_stickers(
+            self.service.store, immutable_root=immutable_root,
+            package_root=active_resource_pack_root(self.media_dir))
+
+    def _ensure_builtin_backgrounds(self) -> None:
+        """Expose bundled composition backgrounds in the shared media library."""
+        if self.service.store is None:
+            return
+        from .builtin_assets import ensure_builtin_backgrounds
+        from .resource_pack import active_resource_pack_root
+        store_path = str(getattr(self.service.store, "path", ""))
+        immutable_root = (None if store_path == ":memory:" or "mode=memory" in store_path
+                          else Path(self.media_dir) / ".builtin-resources")
+        ensure_builtin_backgrounds(
+            self.service.store, render=self.render, immutable_root=immutable_root,
+            package_root=active_resource_pack_root(self.media_dir))
 
     def _export_queue(self) -> "ExportQueue":
         """取本进程唯一的异步导出队列（实际由 EditService 持有）。
@@ -98,6 +168,13 @@ class HttpApi:
 
     def close(self) -> None:
         """停掉异步导出队列的后台线程（复用实例 / 测试收尾时必须调用）。"""
+        self._preview_preparation.close()
+        with self._preview_jobs_lock:
+            for _identity, event in self._preview_active_jobs.values():
+                event.set()
+        self._asr_jobs.close()
+        self._person_cutout_jobs.close()
+        self.preview_cache.close()
         self.service.close()
 
     def _preview_media_file(self, project) -> tuple[str, str, Optional[float]]:
@@ -117,60 +194,217 @@ class HttpApi:
             "rendererVersion": PREVIEW_RENDER_CACHE_VERSION,
             "project": snapshot,
         }
+        from .preview_prepare import preview_identity
+        digest_source["sourceIdentity"] = preview_identity(project, PREVIEW_RENDER_CACHE_VERSION)
         digest = hashlib.sha256(
             json.dumps(digest_source, sort_keys=True, ensure_ascii=False).encode("utf-8")
         ).hexdigest()[:32]
-        with self._preview_lock:
-            cached = self._preview_cache.get(digest)
-            if cached and os.path.isfile(cached["path"]):
-                self._preview_cache.pop(digest, None)
-                self._preview_cache[digest] = cached
-                return cached["path"], digest, cached.get("duration")
-
-            cache_dir = os.path.join(self.media_dir, ".preview-cache")
-            os.makedirs(cache_dir, exist_ok=True)
-            out_path = os.path.join(cache_dir, f"preview_{digest}.mp4")
-            if os.path.isfile(out_path) and os.path.getsize(out_path) > 0:
-                entry = {"path": out_path, "duration": None}
-                self._preview_cache[digest] = entry
-                return out_path, digest, None
-            tmp_path = out_path + ".building.mp4"
-            for stale in (tmp_path,):
-                with contextlib.suppress(OSError):
-                    os.remove(stale)
+        name = f"preview_{digest}.mp4"
+        metadata = self.preview_cache.metadata(name)
+        cached = self.preview_cache.get(name, metadata)
+        if cached:
+            return cached, digest, metadata.get("duration")
+        with self._preview_scheduler.slot(threading.Event()):
+            metadata = self.preview_cache.metadata(name)
+            cached = self.preview_cache.get(name, metadata)
+            if cached:
+                return cached, digest, metadata.get("duration")
+            out_path = str(self.preview_cache.path(name))
+            tmp_path = out_path + "." + uuid.uuid4().hex + ".building.mp4"
             try:
                 result = self.render.render(
                     preview_project, tmp_path, quality="low", overwrite=True)
                 if not os.path.isfile(tmp_path):
                     raise RuntimeError("preview renderer returned without an output file")
-                os.replace(tmp_path, out_path)
+                out_path = self.preview_cache.publish(name, tmp_path, {"duration": result.get("duration")})
             except BaseException:
                 with contextlib.suppress(OSError):
                     os.remove(tmp_path)
                 raise
-            entry = {"path": out_path, "duration": result.get("duration")}
-            self._preview_cache[digest] = entry
-            while len(self._preview_cache) > self._preview_cache_limit:
-                old_key, old = next(iter(self._preview_cache.items()))
-                if old_key == digest:
-                    break
-                self._preview_cache.pop(old_key, None)
-                with contextlib.suppress(OSError):
-                    os.remove(old["path"])
             return out_path, digest, result.get("duration")
 
-    def _preview_window_file(self, project, index: int) -> tuple[str, str, float]:
+    def _slice_preview_window_project(self, project, start: Rational, stop: Rational):
+        """Build a bounded render-only project for timeline-safe clip features.
+
+        Timeline edits remain untouched. Keyframed, animated, attached, or
+        time-dependent clip features fall back to full-project compilation.
+        """
+        seq = project.sequence
+        start_s = float(start.to_fraction())
+        stop_s = float(stop.to_fraction())
+        render_start_s, render_stop_s = start_s, stop_s
+        multicam = seq.multicam if isinstance(seq.multicam, dict) else {}
+        multicam_active = multicam.get("activeTrackId")
+
+        video_tracks = [track for track in seq.tracks
+                        if track.kind == "video" and track.visible and
+                        (multicam_active is None or track.id == multicam_active) and
+                        any(not clip.hidden for clip in track.clips)]
+        video_tracks.sort(key=lambda track: track.role == "sticker")
+        video_rank = {track.id: rank for rank, track in enumerate(video_tracks)}
+
+        def transition_seconds(value: Any) -> float:
+            if isinstance(value, Rational):
+                return float(value.to_fraction())
+            if isinstance(value, dict):
+                try:
+                    denominator = float(value.get("den", 1))
+                    return float(value.get("num", 0)) / denominator
+                except (TypeError, ValueError, ZeroDivisionError):
+                    return 0.0
+            try:
+                return float(value or 0)
+            except (TypeError, ValueError):
+                return 0.0
+
+        all_transitions: list[tuple[float, float]] = []
+        target_transitions: list[tuple[float, float]] = []
+        for track in video_tracks:
+            clips = sorted((clip for clip in track.clips if not clip.hidden),
+                           key=lambda clip: clip.timeline_start)
+            for index in range(1, len(clips)):
+                incoming, outgoing = clips[index], clips[index - 1]
+                seam = float(incoming.timeline_start.to_fraction())
+                if abs(float((incoming.timeline_start - outgoing.timeline_end).to_fraction())) > 1e-6:
+                    continue
+                transition = find_transition(incoming, getattr(self.render, "effects", None))
+                if transition is None:
+                    continue
+                params = transition.get("params") or {}
+                requested = transition_seconds(params.get("duration", 0))
+                duration = min(requested,
+                               float(outgoing.duration.to_fraction()) / 2,
+                               float(incoming.duration.to_fraction()) / 2)
+                if duration <= 0:
+                    continue
+                transition_window = (seam, duration)
+                all_transitions.append(transition_window)
+                if seam >= stop_s or seam + duration <= start_s:
+                    continue
+                target_transitions.append(transition_window)
+                # Keep enough of both clips for _build_video_track to calculate
+                # the same clamped transition duration after the preview trim.
+                render_start_s = min(render_start_s, max(0.0, seam - 2 * duration))
+                render_stop_s = max(render_stop_s, seam + 2 * duration)
+
+        # If the required pre-roll itself crosses another transition, retain the
+        # established full-project route rather than approximate its visual state.
+        for seam, duration in all_transitions:
+            if (seam < start_s and seam + duration > render_start_s and
+                    (seam, duration) not in target_transitions):
+                return None
+
+        render_start = Rational.of(round(render_start_s * 1_000_000), 1_000_000)
+        render_stop = Rational.of(round(render_stop_s * 1_000_000), 1_000_000)
+        if render_stop <= render_start:
+            return None
+
+        sliced = copy.deepcopy(project)
+        for sequence in sliced.sequences:
+            sequence.captions = []
+        sliced.sequence.captions = []
+        selected_ids: set[str] = set()
+        render_modes: list[dict[str, Any]] = []
+        needs_canvas = getattr(self.render, "_clip_needs_canvas", None)
+
+        for track in sliced.sequence.tracks:
+            if track.kind == "video":
+                active = (track.visible and
+                          (multicam_active is None or track.id == multicam_active))
+            elif track.kind == "audio":
+                active = track.visible and not track.muted
+            elif track.kind == "text":
+                active = track.visible
+            else:
+                active = False
+            if not active:
+                track.clips = []
+                continue
+            overlapping = [clip for clip in track.clips if not clip.hidden and
+                           clip.timeline_start < render_stop and
+                           clip.timeline_end > render_start]
+            if track.kind == "text" and overlapping:
+                return None
+            track.clips = overlapping
+            selected_ids.update(clip.id for clip in overlapping)
+            if track.kind == "video" and overlapping:
+                original = next((item for item in video_tracks if item.id == track.id), None)
+                if original is None:
+                    return None
+                rank = video_rank[track.id]
+                render_modes.append({
+                    "trackId": track.id,
+                    "overlay": rank > 0 or track.role == "sticker",
+                    "canvas": bool(needs_canvas and any(
+                        not clip.hidden and needs_canvas(clip) for clip in original.clips)),
+                })
+
+        all_clips = [clip for track in sliced.sequence.tracks for clip in track.clips]
+        selected_set = {clip.id for clip in all_clips}
+        for track in seq.tracks:
+            for clip in track.clips:
+                if clip.id in selected_ids and clip.attached_to_clip_id:
+                    return None
+                if clip.attached_to_clip_id in selected_set and clip.id not in selected_set:
+                    return None
+
+        fx_key_params = getattr(self.render, "_fx_key_params", None)
+
+        def stable_effect_stack(effects: list[dict]) -> bool:
+            for effect in effects:
+                if not isinstance(effect, dict):
+                    return False
+                effect_id = str(effect.get("effectId", ""))
+                if (effect_id.startswith("cutvoke.transition.") or
+                        effect_id in {"cutvoke.color", "cutvoke.transform"}):
+                    continue
+                if not effect_id.startswith("cutvoke.fx.") or fx_key_params is None:
+                    return False
+                key, _params = fx_key_params(effect)
+                if key not in _TRANSITION_HANDLE_STATIC_FX:
+                    return False
+            return True
+
+        for clip in all_clips:
+            effects = clip.effects or []
+            if (clip.nested is not None or clip.keyframes or
+                    clip.fade_in != Rational.of(0) or clip.fade_out != Rational.of(0) or
+                    clip.frame_interpolation not in (None, "none") or
+                    clip.speed <= Rational.of(0) or
+                    not stable_effect_stack(effects)):
+                return None
+            old_start, old_end = clip.timeline_start, clip.timeline_end
+            new_start = max(old_start, render_start)
+            new_end = min(old_end, render_stop)
+            if new_end <= new_start:
+                return None
+            if clip.speed_curve is not None:
+                EditService._crop_curve_clip(clip, new_start, new_end)
+            else:
+                EditService._rebase_effect_ranges(
+                    clip, old_start, old_end, new_start, new_end)
+                clip.source_start = clip.source_start + (new_start - old_start) * clip.speed
+                clip.timeline_start, clip.timeline_end = new_start, new_end
+            clip.timeline_start = new_start - render_start
+            clip.timeline_end = new_end - render_start
+
+        sliced.sequence.tracks = [track for track in sliced.sequence.tracks if track.clips]
+        return sliced, float((start - render_start).to_fraction()), render_modes
+
+    def _preview_window_file(self, project, index: int,
+                             cancel_event: Optional[threading.Event] = None,
+                             *, priority: int = 0) -> tuple[str, str, float]:
         """Render/cache one playback window instead of an entire changed project."""
         if index < 0:
             raise EditError(ErrorCode.INVALID_ARGUMENT, "preview window index must be >= 0")
         seq = project.sequence
         visible = [clip for track in seq.tracks if track.kind == "video" and track.visible
                    for clip in track.clips if not clip.hidden]
-        if not visible:
-            raise EditError(ErrorCode.INVALID_ARGUMENT, "project has no visible video")
         audible = [clip for track in seq.tracks
                    if track.kind == "audio" and track.visible and not track.muted
                    for clip in track.clips if not clip.hidden]
+        if not visible and not audible:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "project has no visible video or audible audio")
         timeline_end = max(clip.timeline_end for clip in visible + audible)
         start = Rational.of(index * PREVIEW_WINDOW_SECONDS)
         if start >= timeline_end:
@@ -191,13 +425,19 @@ class HttpApi:
         active_audio_tracks = [track for track in seq.tracks
                                if track.kind == "audio" and track.visible and
                                not track.muted and any(not clip.hidden for clip in track.clips)]
+        active_text_tracks = [track for track in seq.tracks
+                              if track.kind == "text" and track.visible and
+                              any(not clip.hidden and clip.timeline_start < stop and
+                                  clip.timeline_end > start for clip in track.clips)]
         local = False
-        if len(active_video_tracks) == 1 and not active_audio_tracks and not seq.multicam:
+        if (len(active_video_tracks) == 1 and not active_audio_tracks and
+                not active_text_tracks and not seq.multicam):
             covering = [clip for clip in active_video_tracks[0].clips
                         if not clip.hidden and clip.timeline_start <= start and clip.timeline_end >= stop]
             if len(covering) == 1:
                 clip = covering[0]
                 if (not clip.effects and not clip.keyframes and not clip.nested and
+                        clip.speed_curve is None and
                         clip.freeze_at is None and clip.fade_in == Rational.of(0) and
                         clip.fade_out == Rational.of(0) and clip.speed > Rational.of(0)):
                     sliced = copy.deepcopy(clip)
@@ -210,22 +450,129 @@ class HttpApi:
                     local = True
 
         digest_project = preview_project
-        future_canvas_mode = None
-        if (not local and len(active_video_tracks) == 1 and not seq.multicam and
-                hasattr(self.render, "_clip_needs_canvas")):
-            # Only prior clips can contribute to an already-output window.
-            # A future clip can still switch the track's global compile mode.
-            future_canvas_mode = any(
-                not clip.hidden and self.render._clip_needs_canvas(clip)
-                for clip in active_video_tracks[0].clips)
+        window_render_modes: list[dict[str, Any]] = []
+        if not local:
+            # Hash only material that can contribute pixels or samples to this
+            # window. Rendering still uses the full project above; this copy is
+            # solely the cache identity, so an edit in another interval reuses
+            # already encoded windows.
             digest_project = copy.deepcopy(preview_project)
-            for track in digest_project.sequence.tracks:
-                track.clips = [clip for clip in track.clips
-                               if clip.timeline_start < stop]
-        snapshot = digest_project.to_dict()
-        for key in ("revision", "name", "favorites", "recentEffects", "presets"):
-            snapshot.pop(key, None)
-        paths = {clip.asset_ref.source_path for track in digest_project.sequence.tracks
+            digest_tracks = digest_project.sequence.tracks
+            multicam_active = (seq.multicam.get("activeTrackId")
+                               if isinstance(seq.multicam, dict) else None)
+            renderable_video_tracks = [
+                track for track in seq.tracks
+                if track.kind == "video" and track.visible and
+                (multicam_active is None or track.id == multicam_active) and
+                any(not clip.hidden for clip in track.clips)
+            ]
+            renderable_video_tracks.sort(key=lambda track: track.role == "sticker")
+            video_rank = {track.id: rank
+                          for rank, track in enumerate(renderable_video_tracks)}
+
+            def transition_seconds(value: Any) -> float:
+                if isinstance(value, Rational):
+                    return float(value.to_fraction())
+                if isinstance(value, dict):
+                    try:
+                        denominator = float(value.get("den", 1))
+                        return float(value.get("num", 0)) / denominator
+                    except (TypeError, ValueError, ZeroDivisionError):
+                        return 0.0
+                try:
+                    return float(value or 0)
+                except (TypeError, ValueError):
+                    return 0.0
+
+            for track in digest_tracks:
+                if track.kind == "video":
+                    if (not track.visible or
+                            (multicam_active is not None and
+                             multicam_active != track.id)):
+                        track.clips = []
+                        continue
+                    clips = sorted((clip for clip in track.clips if not clip.hidden),
+                                   key=lambda clip: clip.timeline_start)
+                    retained = {
+                        clip.id for clip in clips
+                        if clip.timeline_start < stop and clip.timeline_end > start
+                    }
+                    for index, clip in enumerate(clips):
+                        if clip.id not in retained or index == 0:
+                            continue
+                        transition = find_transition(clip, getattr(self.render, "effects", None))
+                        if transition is None:
+                            continue
+                        previous = clips[index - 1]
+                        if abs(float((clip.timeline_start - previous.timeline_end).to_fraction())) > 1e-6:
+                            continue
+                        params = transition.get("params") or {}
+                        transition_duration = transition_seconds(
+                            params.get("duration", 0))
+                        transition_duration = min(
+                            transition_duration,
+                            float(previous.duration.to_fraction()) / 2,
+                            float(clip.duration.to_fraction()) / 2,
+                        )
+                        transition_start = float(clip.timeline_start.to_fraction())
+                        if (transition_duration > 0 and
+                                transition_start < float(stop.to_fraction()) and
+                                transition_start + transition_duration >
+                                float(start.to_fraction())):
+                            retained.add(previous.id)
+                    track.clips = [clip for clip in clips if clip.id in retained]
+                    if track.clips:
+                        rank = video_rank.get(track.id, 0)
+                        needs_canvas = getattr(self.render, "_clip_needs_canvas", None)
+                        window_render_modes.append({
+                            "trackId": track.id,
+                            "overlay": rank > 0 or track.role == "sticker",
+                            # Track compilation chooses one path for all of its
+                            # clips. A distant clip may switch that path even
+                            # though its pixels are outside this window.
+                            "canvas": bool(needs_canvas and any(
+                                not clip.hidden and needs_canvas(clip)
+                                for clip in next(
+                                    full.clips for full in seq.tracks
+                                    if full.id == track.id))),
+                        })
+                elif track.kind == "audio":
+                    if not track.visible or track.muted:
+                        track.clips = []
+                    else:
+                        track.clips = [clip for clip in track.clips
+                                       if not clip.hidden and clip.timeline_start < stop
+                                       and clip.timeline_end > start]
+                elif track.kind == "text":
+                    if not track.visible:
+                        track.clips = []
+                    else:
+                        track.clips = [clip for clip in track.clips
+                                       if not clip.hidden and clip.timeline_start < stop
+                                       and clip.timeline_end > start]
+                else:
+                    track.clips = []
+            digest_project.sequence.tracks = [track for track in digest_tracks if track.clips]
+
+        render_project = preview_project
+        render_window_start = float(start.to_fraction())
+        render_modes_for_preview = None
+        if not local:
+            sliced = self._slice_preview_window_project(project, start, stop)
+            if sliced is not None:
+                render_project, render_window_start, render_modes_for_preview = sliced
+                # The exact render-only snapshot is also the cache identity, so
+                # a changed pre-roll clip or preserved track mode cannot reuse
+                # a stale window.
+                digest_project = copy.deepcopy(render_project)
+                window_render_modes = render_modes_for_preview
+
+        digest_sequence = digest_project.sequence
+        snapshot = {
+            "sequence": digest_sequence.to_dict(),
+            "windowRenderModes": window_render_modes,
+        }
+        paths = {clip.asset_ref.source_path for track in digest_sequence.tracks
                  for clip in track.clips if clip.asset_ref.source_path}
         source_stats = []
         for path in sorted(paths):
@@ -238,41 +585,114 @@ class HttpApi:
             "rendererVersion": PREVIEW_RENDER_CACHE_VERSION,
             "window": index, "local": local, "duration": duration,
             "project": snapshot, "sourceStats": source_stats,
-            "futureCanvasMode": future_canvas_mode,
         }, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:32]
-        with self._preview_lock:
-            cached = self._preview_cache.get(digest)
-            if cached and os.path.isfile(cached["path"]):
-                return cached["path"], digest, duration
-            cache_dir = os.path.join(self.media_dir, ".preview-cache")
-            os.makedirs(cache_dir, exist_ok=True)
-            out_path = os.path.join(cache_dir, f"window_{digest}.mp4")
-            if os.path.isfile(out_path) and os.path.getsize(out_path) > 0:
-                self._preview_cache[digest] = {"path": out_path, "duration": duration}
-                return out_path, digest, duration
-            temp_path = out_path + ".building.mp4"
-            with contextlib.suppress(OSError):
-                os.remove(temp_path)
+
+        def cached_window_is_valid(path: str) -> bool:
+            probe_media = getattr(self.render, "probe_media", None)
+            if not callable(probe_media):
+                return True
+            try:
+                info = probe_media(path)
+                video_duration = float(info.get("video_duration") or
+                                       info.get("duration") or 0.0)
+                return (
+                    bool(info.get("has_video")) and
+                    int(info.get("width", 0)) == seq.width and
+                    int(info.get("height", 0)) == seq.height and
+                    abs(video_duration - duration) <= 0.1
+                )
+            except Exception:  # noqa: BLE001 — an unreadable cache is regenerated
+                return False
+
+        # A newer visual edit may arrive while the old immutable window is still
+        # encoding under the cache lock. Signal that worker before waiting for
+        # the lock; windows with identical visual dependencies remain queued.
+        preview_cancel = cancel_event if cancel_event is not None else threading.Event()
+        project_key = str(project.project_id)
+        # Captions are drawn by the editor and already removed above. Metadata
+        # such as project name/favorites/revision is not a visual dependency.
+        # The active-job identity belongs to the whole visual timeline, before
+        # slicing a plain clip. Different windows are seeks, not newer edits.
+        from .preview_prepare import preview_identity
+        visual_identity = preview_identity(project, PREVIEW_RENDER_CACHE_VERSION)
+        with self._preview_jobs_lock:
+            active = self._preview_active_jobs.get(project_key)
+            if active and active[0] != visual_identity:
+                active[1].set()
+        name = f"window_{digest}.mp4"
+        metadata = {"width": seq.width, "height": seq.height, "duration": duration}
+        cached = self.preview_cache.get(name, metadata, cached_window_is_valid)
+        if cached:
+            return cached, digest, duration
+        # The short disk-index lock never covers encoding. Recheck on admission
+        # so duplicate requests share a render and cached reads bypass the queue.
+        with self._preview_scheduler.slot(preview_cancel, priority):
+            cached = self.preview_cache.get(name, metadata, cached_window_is_valid)
+            if cached:
+                return cached, digest, duration
+            out_path = str(self.preview_cache.path(name))
+            temp_path = out_path + "." + uuid.uuid4().hex + ".building.mp4"
+            with self._preview_jobs_lock:
+                self._preview_active_jobs[project_key] = (visual_identity, preview_cancel)
             try:
                 if local:
-                    self.render.render(preview_project, temp_path, quality="low", overwrite=True)
+                    options = {"cancel_event": preview_cancel} if isinstance(self.render, RenderService) else {}
+                    self.render.render(preview_project, temp_path, quality="low", overwrite=True, **options)
                 else:
-                    self.render.render_preview_window(preview_project, temp_path,
-                                                      float(start.to_fraction()), duration)
-                os.replace(temp_path, out_path)
+                    options = {"cancel_event": preview_cancel} if isinstance(self.render, RenderService) else {}
+                    self.render.render_preview_window(
+                        render_project, temp_path, render_window_start, duration,
+                        render_modes=render_modes_for_preview, **options)
+                if preview_cancel.is_set():
+                    from .render import RenderCancelled
+                    raise RenderCancelled("preview superseded by a newer edit")
+                out_path = self.preview_cache.publish(name, temp_path, metadata)
             except BaseException:
                 with contextlib.suppress(OSError):
                     os.remove(temp_path)
                 raise
-            self._preview_cache[digest] = {"path": out_path, "duration": duration}
-            while len(self._preview_cache) > self._preview_cache_limit:
-                old_key, old = next(iter(self._preview_cache.items()))
-                if old_key == digest:
-                    break
-                self._preview_cache.pop(old_key, None)
-                with contextlib.suppress(OSError):
-                    os.remove(old["path"])
+            finally:
+                with self._preview_jobs_lock:
+                    active = self._preview_active_jobs.get(project_key)
+                    if active is not None and active[1] is preview_cancel:
+                        self._preview_active_jobs.pop(project_key, None)
             return out_path, digest, duration
+
+    def _preview_frame_file(self, project, at: float, size) -> Optional[str]:
+        """Frame-aligned disk cache, with dependencies bounded to its interval."""
+        import math
+        from .preview_prepare import preview_identity
+        if not math.isfinite(at) or at < 0:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "预览时间必须是非负有限数")
+        if size is not None and not all(0 < value <= 3840 for value in size):
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "预览尺寸需要在 1 到 3840 之间")
+        fps = float(project.sequence.fps.to_fraction())
+        frame = math.floor(at * fps + 1e-7)
+        at = frame / fps
+        start = Rational.of(int((frame / fps // PREVIEW_WINDOW_SECONDS) * PREVIEW_WINDOW_SECONDS))
+        stop = start + Rational.of(PREVIEW_WINDOW_SECONDS)
+        sliced = self._slice_preview_window_project(project, start, stop)
+        dependencies = sliced[0] if sliced else project
+        identity = preview_identity(dependencies, PREVIEW_RENDER_CACHE_VERSION)
+        digest = hashlib.sha256(json.dumps([identity, frame, size]).encode()).hexdigest()[:32]
+        name = f"frame_{digest}.png"
+        metadata = {"frame": frame, "size": size}
+        cached = self.preview_cache.get(name, metadata, lambda path: Path(path).stat().st_size > 0)
+        if cached:
+            return cached
+        with self._preview_scheduler.slot(threading.Event()):
+            cached = self.preview_cache.get(name, metadata, lambda path: Path(path).stat().st_size > 0)
+            if cached:
+                return cached
+            temporary = str(self.preview_cache.path(name)) + "." + uuid.uuid4().hex + ".png"
+            try:
+                result = self.render.extract_frame(project, at, temporary, size=size, include_captions=False)
+                if result is None:
+                    return None
+                return self.preview_cache.publish(name, temporary, metadata)
+            finally:
+                with contextlib.suppress(OSError):
+                    os.remove(temporary)
 
     def save_asset(self, asset_id: str, filename: str, raw: bytes) -> str:
         """把上传的素材字节落到媒体目录，返回落盘绝对路径。
@@ -290,6 +710,76 @@ class HttpApi:
             f.write(raw)
         os.replace(tmp, dest)
         return dest
+
+    def _asset_media_path(self, asset: dict) -> Optional[Path]:
+        """Resolve an asset ledger entry without exposing arbitrary local files."""
+        source = asset.get("path")
+        if not isinstance(source, str) or not source:
+            return None
+        path = Path(source).resolve()
+        media_root = Path(self.media_dir).resolve()
+        builtin_root = Path(__file__).resolve().parent.parent / "assets"
+        immutable_root = media_root / ".builtin-resources"
+        imported = (path.parent == media_root and
+                    path.stem == asset.get("assetId"))
+        bundled = bool(asset.get("builtin") and
+                       (path.is_relative_to(builtin_root) or path.is_relative_to(immutable_root)))
+        if not imported and not bundled:
+            return None
+        return path if path.is_file() else None
+
+    def relink_asset(self, asset_id: str, filename: str, raw: bytes) -> tuple[int, dict]:
+        """Restore one missing uploaded file at its original project reference path."""
+        store = self.service.store
+        asset = store.get_asset(asset_id) if store is not None else None
+        if not asset:
+            return 404, {"error": {"code": "NOT_FOUND", "message": "素材不存在"}}
+        source = Path(str(asset.get("path", ""))).resolve()
+        media_root = Path(self.media_dir).resolve()
+        if (asset.get("builtin") or source.parent != media_root or
+                source.stem != asset_id):
+            return 409, {"error": {"code": "ASSET_NOT_RELINKABLE",
+                                   "message": "此素材不是可重新链接的用户导入文件"}}
+        if source.exists():
+            return 409, {"error": {"code": "ASSET_PRESENT",
+                                   "message": "原素材仍可访问，无需重新链接"}}
+        if Path(filename).suffix.lower() != source.suffix.lower():
+            return 400, {"error": {"code": "TYPE_MISMATCH",
+                                   "message": "请选择与原素材相同扩展名的文件"}}
+        if not raw:
+            return 400, {"error": {"code": "INVALID_ARGUMENT", "message": "文件为空"}}
+        media_root.mkdir(parents=True, exist_ok=True)
+        staged = media_root / f"{asset_id}-{uuid.uuid4().hex[:8]}{source.suffix.lower()}"
+        try:
+            staged.write_bytes(raw)
+            info = self.render.probe_media(str(staged))
+            kind = self._infer_kind(filename, bool(info.get("has_video")),
+                                    bool(info.get("has_audio")))
+            if (kind != asset.get("kind") or
+                    (kind == "audio" and not info.get("has_audio")) or
+                    (kind in ("video", "image") and not info.get("has_video"))):
+                return 400, {"error": {"code": "TYPE_MISMATCH",
+                                       "message": "新文件的媒体类型与原素材不一致"}}
+            duration = info.get("duration") if info.get("duration", 0) > 0 else None
+            previous = asset.get("duration")
+            if (previous is not None and
+                    (duration is None or duration + 0.01 < float(previous))):
+                return 400, {"error": {"code": "DURATION_TOO_SHORT",
+                                       "message": "新文件比原素材短，可能使已有片段越过素材末尾"}}
+            os.replace(staged, source)
+            restored = store.add_asset(
+                asset_id=asset_id, name=filename, path=str(source), size=len(raw),
+                kind=kind, duration=duration,
+                has_video=bool(info.get("has_video")),
+                has_audio=bool(info.get("has_audio")),
+                width=info.get("width"), height=info.get("height"),
+            )
+            return 200, {**restored, "available": True}
+        except Exception as error:  # noqa: BLE001 — caller needs a structured failure
+            return 422, {"error": {"code": "RELINK_FAILED", "message": str(error)}}
+        finally:
+            with contextlib.suppress(OSError):
+                staged.unlink()
 
     @staticmethod
     def _infer_kind(name: str, has_video: bool, has_audio: bool) -> str:
@@ -362,6 +852,54 @@ class HttpApi:
             "height": height,
         }
 
+    def import_lut(self, filename: str, raw: bytes) -> dict:
+        """Validate and keep a user 3D LUT under a content-addressed local path."""
+        if Path(filename).suffix.lower() != ".cube":
+            raise CubeInvalid("只支持 .cube 3D LUT 文件")
+        edge = validate_cube(raw)
+        digest = hashlib.sha256(raw).hexdigest()
+        folder = Path(self.media_dir).resolve() / "luts"
+        folder.mkdir(parents=True, exist_ok=True)
+        target = folder / f"{digest}.cube"
+        if not target.is_file():
+            temporary = folder / f"{digest}.{uuid.uuid4().hex}.part"
+            try:
+                temporary.write_bytes(raw)
+                os.replace(temporary, target)
+            finally:
+                temporary.unlink(missing_ok=True)
+        return {"lutId": f"lut_{digest[:16]}", "name": Path(filename).name,
+                "path": str(target), "sha256": digest, "size": len(raw),
+                "edgeSize": edge, "inputColorSpace": "Rec.709/sRGB"}
+
+    def _without_clip_color(self, project, clip_id: str):
+        """Return a render-only snapshot before one clip's filters and color grade."""
+        preview = copy.deepcopy(project)
+        for track in preview.sequence.tracks:
+            for clip in track.clips:
+                if clip.id != clip_id:
+                    continue
+                if track.kind != "video":
+                    raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                    "color comparison requires a video or image clip")
+                retained = []
+                for effect in clip.effects:
+                    if effect.get("enabled", True) is False:
+                        retained.append(effect)
+                        continue
+                    spec = self.service._effects.find(effect.get("effectId", ""))
+                    if (spec is not None and
+                            spec.to_dict()["browseCategory"] in ("filter", "color")):
+                        continue
+                    retained.append(effect)
+                if len(retained) == len(clip.effects):
+                    raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                    "selected clip has no filter or color effect to compare")
+                clip.effects = retained
+                return preview
+        raise EditError(ErrorCode.INVALID_ARGUMENT,
+                        f"comparison clip not found: {clip_id}")
+
     def _log(self, level: str, event: str, **kw: Any) -> None:
         if self.logger is None:
             return
@@ -409,7 +947,104 @@ class HttpApi:
         parts = [unquote(p) for p in path.split("/") if p]
         # parts 形如 ['api','v1','projects',...]
 
+        if method == "POST" and len(parts) == 4 and parts[:3] == ["api", "v1", "agent"]:
+            from .agent_tools import AgentTools, AGENT_TOOLS
+            from .mcp_server import MCPServer
+            spec = next((tool for tool in AGENT_TOOLS if tool["name"] == parts[3]), None)
+            if spec is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "unknown Agent tool"}}
+            try:
+                MCPServer._validate_arguments(body, spec["inputSchema"])
+                result = AgentTools(self).call(parts[3], body)
+            except (ValueError, KeyError, TypeError) as error:
+                return 400, {"error": {"code": "INVALID_ARGUMENT", "message": str(error)}}
+            images = result.pop("_images", [])
+            if images:
+                result["images"] = images
+            return 200, result
+
+        if method == "GET" and parts == ["api", "v1", "agent", "tools"]:
+            from .agent_tools import AGENT_TOOLS
+            return 200, {"tools": AGENT_TOOLS, "modelServices": False}
+
+        if method == "POST" and parts == ["api", "v1", "runtime", "shutdown"]:
+            import hmac
+            expected = os.environ.get("CUTVOKE_DESKTOP_KEY", "")
+            supplied = body.get("key")
+            stop = getattr(self, "shutdown_callback", None)
+            if not expected or not isinstance(supplied, str) or not hmac.compare_digest(expected, supplied) or stop is None:
+                return 403, {"error": {"code": "FORBIDDEN", "message": "此服务不属于当前客户端"}}
+            threading.Thread(target=stop, name="desktop-shutdown", daemon=True).start()
+            return 200, {"ok": True}
+
+        if parts == ["api", "v1", "preview-cache"]:
+            if method == "GET":
+                return 200, self.preview_cache.status()
+            if method == "POST":
+                if self._preview_scheduler.active or self._preview_scheduler.queue or self._preview_preparation.busy():
+                    return 409, {"error": {"code": "CACHE_BUSY", "message": "预览正在准备，请完成后再调整缓存设置"}}
+                try:
+                    return 200, self.preview_cache.configure(directory=body.get("directory"), max_bytes=body.get("maxBytes"))
+                except (ValueError, OSError) as error:
+                    return 400, {"error": {"code": "CACHE_CONFIG_INVALID", "message": str(error)}}
+        if method == "POST" and parts == ["api", "v1", "preview-cache", "clear"]:
+            return 200, {**self.preview_cache.trim(clear=True), **self.preview_cache.status()}
+
+        if parts[:3] == ["api", "v1", "preview-jobs"] and len(parts) in (4, 5):
+            job_id = parts[3]
+            try:
+                if method == "GET" and len(parts) == 4:
+                    return 200, self._preview_preparation.get(job_id)
+                if method == "POST" and len(parts) == 5 and parts[4] == "cancel":
+                    return 200, self._preview_preparation.cancel(job_id)
+                if method == "POST" and len(parts) == 5 and parts[4] == "keepalive":
+                    self._preview_preparation.media(job_id)
+                    return 200, {"ok": True}
+                if method == "GET" and len(parts) == 5 and parts[4] == "media":
+                    media, etag, duration = self._preview_preparation.media(job_id)
+                    result = {"__video_path__": media, "__video_etag__": etag, "duration": duration}
+                    if inline_media:
+                        with open(media, "rb") as video:
+                            result["__video__"] = video.read()
+                    return 200, result
+            except KeyError:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "preview job not found"}}
+            except Exception as error:
+                return 422, {"error": {"code": "PREVIEW_FAILED", "message": str(error)}}
+
+        if (method == "POST" and parts[:3] == ["api", "v1", "projects"] and
+                len(parts) == 5 and parts[4] == "preview-jobs"):
+            project = self.service.get_project(parts[3])
+            if body.get("revision") and str(body["revision"]) != project.revision:
+                raise EditError(ErrorCode.REVISION_CONFLICT,
+                                "工程已更新，请重新加载", retryable=True)
+            try:
+                return 202, self._preview_preparation.submit(project)
+            except Exception as error:
+                return 422, {"error": {"code": "PREVIEW_FAILED", "message": str(error)}}
+
         # ---- 能力与效果发现（AC18：UI/CLI/HTTP/MCP 都能列出效果）----
+        if method == "GET" and parts == ["api", "v1", "runtime"]:
+            return 200, {"ok": True, **self.runtime_info,
+                         "previewPreparation": {"supported": True, "windowSeconds": PREVIEW_WINDOW_SECONDS}}
+
+        # Fixed font names expose only the fonts used by caption export. This
+        # shares the packaged files with Web instead of duplicating 43MB in Vite.
+        if method == "GET" and len(parts) == 4 and parts[:3] == ["api", "v1", "fonts"]:
+            from .caption_render import resolve_title_font, CaptionFontError
+            families = {"NotoSansSC-VF.ttf": "Noto Sans SC",
+                        "NotoSerifSC-VF.ttf": "Noto Serif SC"}
+            family = families.get(parts[3])
+            if family is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "unknown caption font"}}
+            try:
+                font_path = resolve_title_font(family)
+                stat = os.stat(font_path)
+            except (CaptionFontError, OSError) as error:
+                return 422, {"error": {"code": "FONT_UNAVAILABLE", "message": str(error)}}
+            return 200, {"__media_path__": font_path, "__media_type__": "font/ttf",
+                         "__media_etag__": f"font-{parts[3]}-{stat.st_size}-{stat.st_mtime_ns}"}
+
         if method == "GET" and parts == ["api", "v1", "capabilities"]:
             lang = body.get("lang", "zh-CN")
             return 200, {
@@ -417,6 +1052,7 @@ class HttpApi:
                 "qualityPresets": ["high", "medium", "low"],
                 "rationalTime": "num/den decimal strings",
                 "commands": self.service.command_catalog(lang),
+                "runtime": self.runtime_info,
             }
 
         # ---- 命令目录（D09：开发者接入，自动派生自 EditService._handlers）----
@@ -424,6 +1060,39 @@ class HttpApi:
             lang = body.get("lang", "zh-CN")
             catalog = self.service.command_catalog(lang)
             return 200, {"commands": catalog, "count": len(catalog)}
+
+        if method == "GET" and parts == ["api", "v1", "asr", "status"]:
+            return 200, asr_availability()
+
+        if method == "GET" and parts == ["api", "v1", "person-cutout", "status"]:
+            return 200, person_cutout_availability()
+
+        if method == "GET" and len(parts) == 4 and parts[:3] == ["api", "v1", "asr-jobs"]:
+            job = self._asr_jobs.get(parts[3])
+            if job is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "识别任务不存在"}}
+            return 200, job
+
+        if (method == "POST" and len(parts) == 5 and
+                parts[:3] == ["api", "v1", "asr-jobs"] and parts[4] == "cancel"):
+            job = self._asr_jobs.cancel(parts[3])
+            if job is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "识别任务不存在"}}
+            return 200, job
+
+        if (method == "GET" and len(parts) == 4 and
+                parts[:3] == ["api", "v1", "person-cutout-jobs"]):
+            job = self._person_cutout_jobs.get(parts[3])
+            if job is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "人物抠像任务不存在"}}
+            return 200, job
+
+        if (method == "POST" and len(parts) == 5 and
+                parts[:3] == ["api", "v1", "person-cutout-jobs"] and parts[4] == "cancel"):
+            job = self._person_cutout_jobs.cancel(parts[3])
+            if job is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "人物抠像任务不存在"}}
+            return 200, job
 
         # ---- 机器可读 schema（P4 SDK）：命令目录 + 效果的 JSON Schema 形态 ----
         if method == "GET" and parts == ["api", "v1", "schema"]:
@@ -442,18 +1111,235 @@ class HttpApi:
                                            "message": str(e)}}
                 return 200, {"effect": spec.to_dict(lang)}
             cat = body.get("category")
-            if cat:
-                items = [s.to_dict(lang) for s in registry.by_category(cat)]
-                return 200, {"category": cat, "effects": items, "count": len(items)}
-            # J01 资源检索（计划 5.1）：支持关键词与适用对象筛选
+            subcategory = body.get("subcategory")
+            # J01 资源检索（计划 5.1）：支持关键词、两级分类与适用对象筛选
             q = body.get("q")
             applies_to = body.get("appliesTo")
-            if q or applies_to:
+            if q or applies_to or cat or subcategory:
                 items = [s.to_dict(lang) for s in registry.search(
-                    q=q, applies_to=applies_to)]
+                    q=q, category=cat, subcategory=subcategory,
+                    applies_to=applies_to)]
                 return 200, {"q": q or "", "appliesTo": applies_to or "",
+                             "category": cat or "", "subcategory": subcategory or "",
                              "effects": items, "count": len(items)}
             return 200, self.service.effect_capabilities(lang)
+
+        if method == "GET" and parts == ["api", "v1", "resource-packs"]:
+            from .resource_pack import resource_pack_manager_status
+            return 200, resource_pack_manager_status(self.media_dir)
+
+        if method == "GET" and parts == ["api", "v1", "resource-packs", "registries"]:
+            from .resource_pack_registry import list_registries
+            try:
+                return 200, list_registries(self.media_dir)
+            except (OSError, ValueError) as error:
+                return 500, {"error": {"code": "RESOURCE_REGISTRY_STATE_INVALID",
+                                       "message": str(error)}}
+
+        if method == "POST" and parts == ["api", "v1", "resource-packs", "registries", "add"]:
+            url = body.get("url")
+            if not isinstance(url, str):
+                return 400, {"error": {"code": "INVALID_ARGUMENT",
+                                       "message": "url is required"}}
+            from .resource_pack_registry import add_registry
+            try:
+                return 201, add_registry(self.media_dir, url)
+            except (OSError, ValueError) as error:
+                return 422, {"error": {"code": "RESOURCE_REGISTRY_INVALID",
+                                       "message": str(error)}}
+
+        if method == "POST" and parts == ["api", "v1", "resource-packs", "registries", "refresh"]:
+            url = body.get("url")
+            if url is not None and not isinstance(url, str):
+                return 400, {"error": {"code": "INVALID_ARGUMENT",
+                                       "message": "url must be a string when provided"}}
+            from .resource_pack_registry import refresh_registries
+            try:
+                return 200, refresh_registries(self.media_dir, url)
+            except (OSError, ValueError) as error:
+                return 422, {"error": {"code": "RESOURCE_REGISTRY_INVALID",
+                                       "message": str(error)}}
+
+        if method == "POST" and parts == ["api", "v1", "resource-packs", "registries", "remove"]:
+            url = body.get("url")
+            if not isinstance(url, str):
+                return 400, {"error": {"code": "INVALID_ARGUMENT",
+                                       "message": "url is required"}}
+            from .resource_pack_registry import remove_registry
+            try:
+                return 200, remove_registry(self.media_dir, url)
+            except KeyError as error:
+                return 404, {"error": {"code": "NOT_FOUND", "message": str(error)}}
+            except (OSError, ValueError) as error:
+                return 422, {"error": {"code": "RESOURCE_REGISTRY_INVALID",
+                                       "message": str(error)}}
+
+        if method == "POST" and parts == ["api", "v1", "resource-packs", "registries", "download"]:
+            url, pack_id, version = body.get("url"), body.get("packId"), body.get("version")
+            if not all(isinstance(value, str) and value for value in (url, pack_id, version)):
+                return 400, {"error": {"code": "INVALID_ARGUMENT",
+                                       "message": "url, packId, and version are required"}}
+            from .resource_pack_registry import download_registry_package
+            try:
+                return 201, download_registry_package(self.media_dir, url, pack_id, version)
+            except KeyError as error:
+                return 404, {"error": {"code": "NOT_FOUND", "message": str(error)}}
+            except (OSError, ValueError) as error:
+                return 422, {"error": {"code": "RESOURCE_PACKAGE_DOWNLOAD_FAILED",
+                                       "message": str(error)}}
+
+        if method == "POST" and parts == ["api", "v1", "resource-packs", "trust"]:
+            publisher_id = body.get("publisherId")
+            public_key_pem = body.get("publicKeyPem")
+            fingerprint = body.get("fingerprint")
+            if (not isinstance(publisher_id, str) or not isinstance(public_key_pem, str)
+                    or len(public_key_pem.encode("utf-8")) > 16 * 1024
+                    or not isinstance(fingerprint, str)):
+                return 400, {"error": {"code": "INVALID_ARGUMENT",
+                                       "message": "publisherId, publicKeyPem, and fingerprint are required"}}
+            try:
+                from cryptography.hazmat.primitives import serialization
+                from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+                from .resource_pack_signing import add_trusted_publisher
+                public_key = serialization.load_pem_public_key(public_key_pem.encode("utf-8"))
+                if not isinstance(public_key, Ed25519PublicKey):
+                    raise ValueError("publisher key must be an Ed25519 public key")
+                add_trusted_publisher(
+                    self.media_dir, publisher_id, public_key,
+                    expected_fingerprint=fingerprint,
+                )
+            except (TypeError, ValueError) as error:
+                return 422, {"error": {"code": "PUBLISHER_KEY_INVALID", "message": str(error)}}
+            from .resource_pack import resource_pack_manager_status
+            return 200, resource_pack_manager_status(self.media_dir)
+
+        if method == "POST" and parts == ["api", "v1", "resource-packs", "activate"]:
+            pack_id, version = body.get("packId"), body.get("version")
+            if not isinstance(pack_id, str) or not isinstance(version, str):
+                return 400, {"error": {"code": "INVALID_ARGUMENT",
+                                       "message": "packId and version are required"}}
+            from .resource_pack import activate_resource_pack, resource_pack_manager_status
+            try:
+                activate_resource_pack(self.media_dir, pack_id, version)
+                self._ensure_active_stickers()
+            except (OSError, ValueError) as error:
+                return 422, {"error": {"code": "RESOURCE_PACK_INVALID", "message": str(error)}}
+            return 200, resource_pack_manager_status(self.media_dir)
+
+        if method == "POST" and parts == ["api", "v1", "resource-packs", "rollback"]:
+            from .resource_pack import resource_pack_manager_status, rollback_resource_pack
+            try:
+                rollback_resource_pack(self.media_dir)
+                self._ensure_active_stickers()
+            except (OSError, ValueError) as error:
+                return 409, {"error": {"code": "RESOURCE_PACK_ROLLBACK_FAILED",
+                                       "message": str(error)}}
+            return 200, resource_pack_manager_status(self.media_dir)
+
+        # 内置预设与效果算子分开计数；未通过完整验收的候选只供盘点，
+        # 不能被客户端当作已交付的预设数量。
+        if method == "GET" and parts == ["api", "v1", "presets"]:
+            from .preset_catalog import PresetCatalog
+            from .resource_pack import active_resource_pack_root
+            package_root = active_resource_pack_root(self.media_dir)
+            catalog = PresetCatalog.builtin(self.service._effects, package_root=package_root)
+            family = str(body.get("family", ""))
+            subcategory = str(body.get("subcategory", ""))
+            qualified_only = str(body.get("qualifiedOnly", "")).lower() in ("1", "true", "yes")
+            items = [preset.to_dict() for preset in catalog.all()
+                     if (not family or preset.family == family)
+                     and (not subcategory or preset.subcategory == subcategory)
+                     and (not qualified_only or preset.qualified)]
+            from .resource_pack import resource_pack_summary
+            return 200, {"presets": items, "count": len(items),
+                         "candidateCount": sum(p.status == "candidate" for p in catalog.all()),
+                         "qualifiedCount": sum(p.qualified for p in catalog.all()),
+                         "resourcePack": resource_pack_summary(package_root)}
+
+        if method == "GET" and parts == ["api", "v1", "stickers"]:
+            from .builtin_stickers import load_builtin_stickers
+            from .resource_pack import (active_resource_pack_root, file_matches_sha256,
+                                        load_resource_pack_manifest)
+
+            package_root = active_resource_pack_root(self.media_dir)
+            manifest = load_resource_pack_manifest(package_root)
+            resource_entries = {item["resourceId"]: item for item in manifest["resources"]
+                                if isinstance(item, dict) and isinstance(item.get("resourceId"), str)}
+            file_entries = {item["path"]: item for item in manifest["files"]
+                            if isinstance(item, dict) and isinstance(item.get("path"), str)}
+            store = self.service.store
+            items = []
+            for sticker in load_builtin_stickers(package_root=package_root):
+                asset = store.get_asset(sticker["assetId"]) if store is not None else None
+                preview = Path(sticker["previewPath"]) if sticker["previewPath"] else None
+                resource = resource_entries.get(sticker["stickerId"])
+                image_path = next((item for item in (resource or {}).get("mediaFiles", [])
+                                   if item.startswith("assets/stickers/") and item.lower().endswith(".png")), None)
+                file_record = file_entries.get(image_path)
+                asset_path = self._asset_media_path(asset) if asset is not None else None
+                resource_available = bool(
+                    asset_path is not None and isinstance(file_record, dict) and
+                    file_matches_sha256(asset_path, file_record.get("sha256", ""),
+                                        file_record.get("sizeBytes")))
+                resource_ref = ({
+                    "resourceId": sticker["stickerId"],
+                    "packId": manifest["packId"],
+                    "packVersion": manifest["version"],
+                    "resourceVersion": sticker["version"],
+                    "sha256": file_record["sha256"],
+                } if isinstance(file_record, dict) and isinstance(file_record.get("sha256"), str) else None)
+                preview_available = preview is not None and preview.is_file()
+                availability_message = ""
+                if not resource_available or not preview_available:
+                    availability_message = "资源缺失或校验失败；请恢复/下载对应资源包，或选择其他贴纸。"
+                items.append({key: value for key, value in sticker.items()
+                              if key not in ("path", "previewPath")} | {
+                    "resourceRef": resource_ref,
+                    "available": resource_available and preview_available,
+                    "previewAvailable": preview_available,
+                    "availabilityMessage": availability_message,
+                    "downloadState": "bundled" if resource_available and preview_available else "missing",
+                })
+            return 200, {"stickers": items, "count": len(items),
+                         "qualifiedCount": sum(item["qualified"] for item in items)}
+
+        if (method == "GET" and len(parts) == 5 and
+                parts[:3] == ["api", "v1", "stickers"] and parts[4] == "preview"):
+            from .builtin_stickers import load_builtin_stickers
+            from .resource_pack import active_resource_pack_root
+            package_root = active_resource_pack_root(self.media_dir)
+            sticker = next((item for item in load_builtin_stickers(include_quality=False,
+                                                                    package_root=package_root)
+                            if item["stickerId"] == parts[3]), None)
+            if sticker is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "sticker not found"}}
+            source = Path(sticker["previewPath"]).resolve()
+            if not source.is_relative_to(package_root.resolve()) or not source.is_file():
+                return 404, {"error": {"code": "NOT_FOUND", "message": "sticker preview not found"}}
+            return 200, {"__video_path__": str(source),
+                         "__video_etag__": f"{sticker['stickerId']}-{sticker['version']}-{source.stat().st_size}"}
+
+        if (method == "GET" and len(parts) == 5 and parts[:3] == ["api", "v1", "presets"]
+                and parts[4] in ("cover", "preview")):
+            from .preset_catalog import PresetCatalog
+            from .resource_pack import active_resource_pack_root
+            package_root = active_resource_pack_root(self.media_dir)
+            preset = next((item for item in PresetCatalog.builtin(
+                               self.service._effects, package_root=package_root).all()
+                           if item.id == parts[3]), None)
+            if preset is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "preset not found"}}
+            reference = preset.cover if parts[4] == "cover" else preset.motion_preview
+            media = (preset.asset_root / reference).resolve()
+            # The manifest is bundled, but still prevent an accidental path
+            # outside the package from becoming a local-file HTTP endpoint.
+            if (not reference or not media.is_relative_to(package_root.resolve())
+                    or not media.is_file()):
+                return 404, {"error": {"code": "NOT_FOUND", "message": "preset media not found"}}
+            if parts[4] == "cover":
+                return 200, {"__png__": media.read_bytes()}
+            return 200, {"__video_path__": str(media),
+                         "__video_etag__": f"{preset.id}-{preset.version}-{media.stat().st_size}"}
 
         # ---- J12 工程模板库：一键套用完整时间线（横/竖/方画幅模板）----
         if method == "GET" and parts == ["api", "v1", "templates"]:
@@ -551,7 +1437,79 @@ class HttpApi:
             if store is None:
                 return 404, {"error": {"code": "NOT_FOUND",
                                        "message": "asset ledger requires persistent store"}}
-            return 200, {"assets": store.list_assets()}
+            return 200, {"assets": [
+                {**asset, "available": self._asset_media_path(asset) is not None}
+                for asset in store.list_assets()
+            ]}
+
+        # 音频用途分类：用户显式区分背景音乐、音效和未分类；不从文件名猜测。
+        if method == "PATCH" and len(parts) == 4 and parts[:3] == ["api", "v1", "assets"]:
+            store = self.service.store
+            if store is None:
+                return 404, {"error": {"code": "NOT_FOUND",
+                                       "message": "asset ledger requires persistent store"}}
+            asset = store.get_asset(parts[3])
+            if asset is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "asset not found"}}
+            if asset.get("kind") != "audio":
+                return 422, {"error": {"code": "INVALID_ARGUMENT",
+                                       "message": "audioRole can only be set on audio assets"}}
+            if asset.get("builtin"):
+                return 409, {"error": {"code": "BUILTIN_ASSET_IMMUTABLE",
+                                       "message": "built-in audio classification is maintained by the resource manifest"}}
+            audio_role = body.get("audioRole")
+            if audio_role not in ("music", "sound_effect", "unclassified"):
+                return 400, {"error": {"code": "INVALID_ARGUMENT",
+                                       "message": "audioRole must be music, sound_effect, or unclassified"}}
+            updated = store.set_asset_audio_role(parts[3], audio_role)
+            if updated is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "audio asset not found"}}
+            return 200, {**updated, "available": self._asset_media_path(updated) is not None}
+
+        if (method == "GET" and len(parts) == 5 and
+                parts[:3] == ["api", "v1", "assets"] and
+                parts[4] in ("media", "waveform")):
+            store = self.service.store
+            asset = store.get_asset(parts[3]) if store is not None else None
+            if not asset:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "asset not found"}}
+            source = self._asset_media_path(asset)
+            if source is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "asset media not found"}}
+            if parts[4] == "media":
+                media_type = ASSET_MEDIA_TYPES.get(source.suffix.lower())
+                if asset.get("kind") not in ("audio", "video", "image") or not media_type:
+                    return 415, {"error": {"code": "UNSUPPORTED_MEDIA",
+                                           "message": "asset format cannot be previewed in browser"}}
+                stat = source.stat()
+                return 200, {"__media_path__": str(source), "__media_type__": media_type,
+                             "__media_etag__": f"{asset['assetId']}-{stat.st_size}-{stat.st_mtime_ns}"}
+            if asset.get("kind") != "audio":
+                return 415, {"error": {"code": "UNSUPPORTED_MEDIA",
+                                       "message": "waveform requires an audio asset"}}
+            try:
+                width = max(160, min(960, int(body.get("w", 320))))
+            except (TypeError, ValueError):
+                width = 320
+            from .render import RenderError
+            stat = source.stat()
+            digest = hashlib.sha256(
+                f"{asset['assetId']}:{stat.st_size}:{stat.st_mtime_ns}:{width}".encode()
+            ).hexdigest()[:24]
+            cache_dir = Path(self.media_dir) / ".waveform-cache"
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            output = cache_dir / f"{digest}.png"
+            if not output.is_file():
+                building = cache_dir / f"{digest}-{uuid.uuid4().hex[:8]}.png"
+                try:
+                    self.render.waveform_media(str(source), str(building), width=width)
+                    os.replace(building, output)
+                except RenderError as error:
+                    return 422, {"error": {"code": "WAVEFORM_FAILED", "message": str(error)}}
+                finally:
+                    with contextlib.suppress(OSError):
+                        building.unlink()
+            return 200, {"__png__": output.read_bytes()}
 
         # 素材缩略图（D02 缩略图）：GET /api/v1/assets/{id}/thumbnail?w=320
         # 从素材源文件抽首帧 PNG；图片可直接抽、视频按 0 时刻抽帧。
@@ -614,6 +1572,155 @@ class HttpApi:
 
         if len(parts) >= 4 and parts[:3] == ["api", "v1", "projects"]:
             pid = parts[3]
+
+            if (method == "GET" and len(parts) == 5 and
+                    parts[4] == "person-cutout-preview"):
+                clip_id = body.get("clipId")
+                if not isinstance(clip_id, str) or not clip_id:
+                    return 400, {"error": {"code": "INVALID_ARGUMENT",
+                                           "message": "请选择要预览的视频片段"}}
+                try:
+                    import shutil
+                    import subprocess
+                    from math import isfinite
+                    clip = find_video_clip(self.service.get_project(pid), clip_id)
+                    ffmpeg = shutil.which("ffmpeg")
+                    if not ffmpeg:
+                        raise PersonCutoutError("找不到 ffmpeg；请先安装 FFmpeg 并加入 PATH")
+                    source_start = clip.source_start.to_fraction()
+                    preview_at = body.get("atSeconds", float(source_start))
+                    if (isinstance(preview_at, bool) or
+                            not isinstance(preview_at, (str, int, float))):
+                        raise PersonCutoutError("预览时间必须是片段源素材范围内的秒数")
+                    preview_at = float(preview_at)
+                    source_end = source_start + clip.consumed_source_duration.to_fraction()
+                    if (not isfinite(preview_at) or
+                            not float(source_start) <= preview_at < float(source_end)):
+                        raise PersonCutoutError("预览时间超出所选片段的源素材范围")
+                    completed = subprocess.run(
+                        [ffmpeg, "-hide_banner", "-loglevel", "error", "-ss",
+                         f"{preview_at:.6f}",
+                         "-i", clip.asset_ref.source_path, "-frames:v", "1",
+                         "-vf", "scale=640:360:force_original_aspect_ratio=decrease:flags=lanczos",
+                         "-f", "image2pipe", "-vcodec", "png", "pipe:1"],
+                        capture_output=True, timeout=30,
+                    )
+                    if completed.returncode or not completed.stdout.startswith(b"\x89PNG\r\n\x1a\n"):
+                        detail = completed.stderr.decode("utf-8", errors="replace")[-600:]
+                        raise PersonCutoutError(detail or "无法提取片段源入点预览帧")
+                    if len(completed.stdout) > 8 * 1024 * 1024:
+                        raise PersonCutoutError("预览帧超过 8 MiB 限制")
+                    return 200, {"__png__": completed.stdout}
+                except (PersonCutoutError, OSError, subprocess.SubprocessError,
+                        EditError) as exc:
+                    return 422, {"error": {"code": "PERSON_CUTOUT_PREVIEW_FAILED",
+                                           "message": str(exc)}}
+
+            if method == "POST" and len(parts) == 5 and parts[4] == "asr-jobs":
+                clip_id = body.get("clipId")
+                if not isinstance(clip_id, str) or not clip_id:
+                    return 400, {"error": {"code": "INVALID_ARGUMENT",
+                                           "message": "请选择有声视频或音频片段"}}
+                try:
+                    job = self._asr_jobs.submit(
+                        self.service.get_project(pid), clip_id,
+                        model=body.get("model", "base"),
+                        language=body.get("language", "auto"))
+                except SpeechRecognitionError as exc:
+                    return 400, {"error": {"code": "ASR_UNAVAILABLE", "message": str(exc)}}
+                return 202, job
+
+            if method == "POST" and len(parts) == 5 and parts[4] == "person-cutout-jobs":
+                clip_id = body.get("clipId")
+                if not isinstance(clip_id, str) or not clip_id:
+                    return 400, {"error": {"code": "INVALID_ARGUMENT",
+                                           "message": "请选择要抠像的视频片段"}}
+                try:
+                    selection_mode = body.get("selectionMode", "all")
+                    raw_point = body.get("selectionPoint")
+                    point = ((raw_point.get("x"), raw_point.get("y"))
+                             if isinstance(raw_point, dict) else None)
+                    raw_points = body.get("selectionPoints")
+                    selection_points = None
+                    if isinstance(raw_points, list):
+                        selection_points = [
+                            (item.get("x"), item.get("y"), item.get("label"))
+                            if isinstance(item, dict) else item
+                            for item in raw_points
+                        ]
+                    raw_prompts = body.get("selectionPrompts")
+                    selection_prompts = None
+                    if isinstance(raw_prompts, list):
+                        selection_prompts = []
+                        for prompt in raw_prompts:
+                            if not isinstance(prompt, dict):
+                                selection_prompts.append(prompt)
+                                continue
+                            prompt_points = prompt.get("points")
+                            if isinstance(prompt_points, list):
+                                prompt_points = [
+                                    (item.get("x"), item.get("y"), item.get("label"))
+                                    if isinstance(item, dict) else item
+                                    for item in prompt_points
+                                ]
+                            selection_prompts.append({
+                                "atSeconds": prompt.get("atSeconds"),
+                                "points": prompt_points,
+                            })
+                    elif "selectionPrompts" in body:
+                        selection_prompts = raw_prompts
+                    job = self._person_cutout_jobs.submit(
+                        self.service.get_project(pid), clip_id, self.media_dir,
+                        edge_softness=body.get("edgeSoftness", 1.2),
+                        selection_mode=selection_mode,
+                        selection_point=point,
+                        selection_points=selection_points,
+                        selection_at_seconds=body.get("selectionAtSeconds", 0.0),
+                        selection_prompts=selection_prompts,
+                        tracking_mode=body.get("trackingMode", "semantic"))
+                except PersonCutoutError as exc:
+                    return 400, {"error": {"code": "PERSON_CUTOUT_UNAVAILABLE",
+                                           "message": str(exc)}}
+                return 202, job
+
+            if (method == "POST" and len(parts) == 7 and
+                    parts[4] == "person-cutout-jobs" and parts[6] == "apply"):
+                job_id = parts[5]
+                job = self._person_cutout_jobs.claim_apply(job_id, pid)
+                if job is None:
+                    return 409, {"error": {"code": "PERSON_CUTOUT_NOT_READY",
+                                           "message": "抠像任务不存在、尚未完成或属于其他工程"}}
+                try:
+                    project = self.service.get_project(pid)
+                    clip = find_video_clip(project, job["clipId"])
+                    if source_signature(clip) != job["sourceSignature"]:
+                        raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                        "原片段在抠像期间发生变化；请重新生成抠像结果")
+                    track = next((track for track in project.sequence.tracks
+                                  if any(item.id == clip.id for item in track.clips)), None)
+                    if track is None or track.locked:
+                        raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                        "片段所在轨道已锁定或不存在，无法应用抠像")
+                    result = job.get("result") or {}
+                    output = Path(str(result.get("outputPath", ""))).resolve()
+                    cutout_root = (Path(self.media_dir).resolve() / ".person-cutouts").resolve()
+                    if (not output.is_relative_to(cutout_root) or not output.is_file()
+                            or output.stat().st_size <= 0):
+                        raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                        "透明视频文件缺失，请重新生成抠像结果")
+                    command = self._make_command(pid, {
+                        "type": "asset.swap",
+                        "payload": {"clipIds": [clip.id], "sourcePath": str(output)},
+                        "expectedRevision": project.revision,
+                        "commandId": f"person_cutout_apply_{job_id}",
+                        "actor": {"kind": "human", "id": "person-cutout"},
+                    })
+                    applied = self.service.execute(command)
+                except Exception as exc:
+                    self._person_cutout_jobs.finish_apply(job_id, error=str(exc))
+                    raise
+                finished = self._person_cutout_jobs.finish_apply(job_id)
+                return 200, {"job": finished, "command": applied.to_dict()}
 
             # 重命名工程（仅 name）：缺失返回 404；非法 name 返回 400。
             if method == "PATCH" and len(parts) == 4:
@@ -749,6 +1856,13 @@ class HttpApi:
                     return 400, {"error": {"code": "INVALID_ARGUMENT", "message": "outPath required"}}
                 quality = body.get("quality", "high")
                 out_abs = _os.path.abspath(out)
+                try:
+                    output_range = (self.service._validated_export_range(
+                        proj, body["range"])
+                        if body.get("range") is not None else None)
+                except EditError as e:
+                    return 400, {"error": {"code": e.code,
+                                           "message": e.message}}
 
                 # 导出任务幂等（指导第 9 章：导出任务同样要有幂等保证）。
                 # 账本只在持久化服务下可用；内存态退化为直接渲染。
@@ -757,9 +1871,11 @@ class HttpApi:
                 store = self.service.store
                 if store is not None:
                     import hashlib as _hl
-                    req_hash = _hl.sha256(
-                        f"{pid}|{proj.revision}|{out_abs}|{quality}".encode("utf-8")
-                    ).hexdigest()
+                    request_key = f"{pid}|{proj.revision}|{out_abs}|{quality}"
+                    if output_range is not None:
+                        request_key += (f"|range:{output_range[0]:.9f}:"
+                                        f"{output_range[1]:.9f}")
+                    req_hash = _hl.sha256(request_key.encode("utf-8")).hexdigest()
                     try:
                         claim = store.claim_export_job(
                             job_id=job_id, project_id=pid, revision=proj.revision,
@@ -794,7 +1910,12 @@ class HttpApi:
                 # 并发导出上限（T31）：超限直接拒绝，不无界排队
                 try:
                     with self.limiter.export_slot():
-                        r = self.render.render(proj, out, quality=quality, overwrite=True)
+                        render_options = dict(quality=quality, overwrite=True)
+                        if output_range is not None:
+                            start, end = output_range
+                            render_options.update(output_start=start,
+                                                  output_duration=end - start)
+                        r = self.render.render(proj, out, **render_options)
                 except GovernanceError as e:
                     code = getattr(e, "code", "LIMIT_EXCEEDED")
                     return _fail(code, str(e), 429)
@@ -858,7 +1979,7 @@ class HttpApi:
             if method == "GET" and len(parts) == 5 and parts[4] == "exports":
                 store = self.service.store
                 if store is None:
-                    return 200, {"jobs": []}
+                    return 200, {"jobs": self._export_queue().list(pid)}
                 return 200, {"jobs": store.list_export_jobs(pid)}
 
             # 异步导出队列入队（V02）：POST /api/v1/projects/{id}/exports
@@ -879,7 +2000,16 @@ class HttpApi:
                 except EditError:
                     return 404, {"error": {"code": "NOT_FOUND",
                                            "message": f"unknown project: {pid}"}}
-                job = self._export_queue().submit(proj, body)
+                queue_payload = dict(body)
+                if body.get("range") is not None:
+                    try:
+                        start, end = self.service._validated_export_range(
+                            proj, body["range"])
+                    except EditError as e:
+                        return 400, {"error": {"code": e.code,
+                                               "message": e.message}}
+                    queue_payload["range"] = {"start": start, "end": end}
+                job = self._export_queue().submit(proj, queue_payload)
                 return 202, {"jobId": job["jobId"], "status": job["status"],
                              "projectId": job["projectId"],
                              "outPath": job["outPath"],
@@ -899,6 +2029,7 @@ class HttpApi:
                 scope = fav if fav_only else (rec if rec_only else None)
                 specs = self.service._effects.search(
                     q=body.get("q"), category=body.get("category"),
+                    subcategory=body.get("subcategory"),
                     applies_to=body.get("appliesTo"), ids=scope)
                 items = []
                 for s in specs:
@@ -908,6 +2039,93 @@ class HttpApi:
                     items.append(d)
                 return 200, {"effects": items, "count": len(items),
                              "favorites": fav, "recent": rec}
+
+            # 对选中片段试用真实渲染路径。只修改工程深拷贝，绝不提交 revision。
+            # UI 按需请求单卡预览，避免打开资源库时并发渲染整页效果。
+            if method == "GET" and len(parts) == 5 and parts[4] == "resource-preview":
+                from .render import RenderError
+                effect_id = str(body.get("effectId", ""))
+                clip_id = str(body.get("clipId", ""))
+                if not effect_id or not clip_id:
+                    return 400, {"error": {"code": "INVALID_ARGUMENT",
+                                           "message": "effectId and clipId are required"}}
+                spec = self.service._effects.find(effect_id)
+                if spec is None:
+                    return 404, {"error": {"code": "EFFECT_UNAVAILABLE",
+                                           "message": f"unknown effect: {effect_id}"}}
+                params: dict = {}
+                if "duration" in body:
+                    import math
+                    try:
+                        duration = float(body["duration"])
+                    except (TypeError, ValueError):
+                        duration = float("nan")
+                    if spec.category != "transition" or not math.isfinite(duration) or not 0.1 <= duration <= 5:
+                        return 400, {"error": {"code": "INVALID_ARGUMENT",
+                                               "message": "transition preview duration must be 0.1..5 seconds"}}
+                    params["duration"] = duration
+                source = self.service.get_project(pid)
+                preview = copy.deepcopy(source)
+                target_track = next((track for track in preview.sequence.tracks
+                                     if any(c.id == clip_id for c in track.clips)), None)
+                clip = next((c for c in target_track.clips if c.id == clip_id), None) if target_track else None
+                if clip is None:
+                    return 404, {"error": {"code": "NOT_FOUND",
+                                           "message": f"unknown clip: {clip_id}"}}
+                if spec.category == "transition":
+                    adjacent = sorted(target_track.clips,
+                                      key=lambda c: c.timeline_start.to_fraction())
+                    index = next(i for i, c in enumerate(adjacent) if c.id == clip_id)
+                    if index == 0 or abs(float(clip.timeline_start.to_fraction() -
+                                               adjacent[index - 1].timeline_end.to_fraction())) > 0.001:
+                        return 422, {"error": {"code": "INVALID_TRANSITION_TARGET",
+                                               "message": "转场需要前一段与当前片段首尾相接"}}
+                try:
+                    if spec.category == "transition":
+                        self.service._h_effect_set_transition(
+                            preview, {"clipId": clip_id, "effectId": effect_id,
+                                      "params": params})
+                    elif spec.category == "animation":
+                        self.service._h_effect_set_animation(
+                            preview, {"clipId": clip_id, "effectId": effect_id,
+                                      "params": params})
+                    else:
+                        self.service._h_effect_add(preview, {"clipId": clip_id,
+                                                             "effectId": effect_id,
+                                                             "params": params})
+                except EditError as e:
+                    return 422, {"error": {"code": e.code, "message": e.message}}
+                start = float(clip.timeline_start.to_fraction())
+                end = float(clip.timeline_end.to_fraction())
+                phase = spec.subcategory or spec.to_dict()["subcategory"]
+                if spec.category == "transition":
+                    t = start + min(float(params.get("duration", spec.default_params().get("duration", 0.5))) / 2,
+                                    (end - start) / 2)
+                elif spec.category == "animation" and phase == "出场":
+                    t = end - min(0.25, (end - start) / 2)
+                elif spec.category == "animation" and phase in {"入场", "组合"}:
+                    t = start + min(0.25, (end - start) / 2)
+                else:
+                    t = start + (end - start) / 2
+                import tempfile
+                fd, tmp_png = tempfile.mkstemp(suffix=".png")
+                os.close(fd)
+                try:
+                    out = self.render.extract_frame(preview, t, tmp_png,
+                                                    size=(320, 180),
+                                                    include_captions=False)
+                    if out is None:
+                        return 204, {}
+                    with open(tmp_png, "rb") as f:
+                        return 200, {"__png__": f.read()}
+                except RenderError as e:
+                    return 422, {"error": {"code": "PREVIEW_FAILED",
+                                           "message": str(e)}}
+                finally:
+                    try:
+                        os.remove(tmp_png)
+                    except OSError:
+                        pass
 
             # J01 个人预设列表
             if method == "GET" and len(parts) == 5 and parts[4] == "presets":
@@ -938,17 +2156,24 @@ class HttpApi:
                 _os.close(fd)
                 try:
                     proj = self.service.get_project(pid)
+                    compare_clip_id = body.get("compareClipId")
+                    if compare_clip_id is not None:
+                        if not isinstance(compare_clip_id, str) or not compare_clip_id:
+                            raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                            "compareClipId must be a non-empty clip ID")
+                        proj = self._without_clip_color(proj, compare_clip_id)
                     # 字幕由 Web 的可编辑 Canvas 叠层负责显示；服务端只抽取
                     # 无字幕基础画面，避免字幕修改触发重复烧录。
-                    out = self.render.extract_frame(
-                        proj, t, tmp_png, size=size, include_captions=False)
+                    out = self._preview_frame_file(proj, t, size)
                     if out is None:
                         return 204, {}
-                    with open(tmp_png, "rb") as f:
+                    with self.preview_cache.pin(out), open(out, "rb") as f:
                         data = f.read()
                     return 200, {"__png__": data}
                 except RenderError as e:
                     return 422, {"error": {"code": "PREVIEW_FAILED", "message": str(e)}}
+                except EditError:
+                    raise
                 except Exception as e:  # noqa: BLE001
                     return 500, {"error": {"code": "PREVIEW_ERROR", "message": str(e)}}
                 finally:
@@ -1209,8 +2434,9 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             self.end_headers()
             self._write_body(data)
 
-        def _respond_video_file(self, path: str, etag: str = "") -> None:
-            """按浏览器 Range 请求流式返回预览 MP4，不把整片读入内存。"""
+        def _respond_video_file(self, path: str, etag: str = "",
+                                media_type: str = "video/mp4") -> None:
+            """按浏览器 Range 请求流式返回媒体，不把整片读入内存。"""
             try:
                 total = os.path.getsize(path)
                 if total <= 0:
@@ -1258,7 +2484,7 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                 self.end_headers()
                 return
             self.send_response(status)
-            self.send_header("Content-Type", "video/mp4")
+            self.send_header("Content-Type", media_type)
             self.send_header("Content-Length", str(length))
             self.send_header("Accept-Ranges", "bytes")
             self.send_header("Cache-Control", "no-cache")
@@ -1398,13 +2624,18 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                 body["t"] = qs["t"][0]
             if "size" in qs:
                 body["size"] = qs["size"][0]
-            for key in ("category", "effectId", "lang", "path", "w",
+            for key in ("category", "subcategory", "family", "qualifiedOnly", "effectId", "clipId", "duration", "lang", "path", "w",
                         "q", "appliesTo", "favoritesOnly", "recentOnly", "rev",
-                        "entityType", "entityId", "textContains", "atSeconds",
+                        "entityType", "entityId", "textContains", "atSeconds", "compareClipId",
                         "fromSeconds", "toSeconds", "fields", "limit", "index"):
                 if key in qs:
                     body[key] = qs[key][0]
-            if self._reject_if_unauthorized(qs):
+            # Like built Web files, these two public font assets need no session
+            # token. CSS cannot set a custom token header; origin checks above
+            # still apply, and the API's fixed-name whitelist forbids file paths.
+            public_font = parsed.path in {"/api/v1/fonts/NotoSansSC-VF.ttf",
+                                          "/api/v1/fonts/NotoSerifSC-VF.ttf"}
+            if not public_font and self._reject_if_unauthorized(qs):
                 return
             status, data = api.handle("GET", parsed.path, body,
                                       inline_media=False)
@@ -1414,8 +2645,14 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                 return
             # 工程预览媒体：可播放 mp4（含音频）
             if isinstance(data, dict) and "__video_path__" in data:
-                self._respond_video_file(data["__video_path__"],
-                                         data.get("__video_etag__", ""))
+                with api.preview_cache.pin(data["__video_path__"]):
+                    self._respond_video_file(data["__video_path__"],
+                                             data.get("__video_etag__", ""))
+                return
+            if isinstance(data, dict) and "__media_path__" in data:
+                self._respond_video_file(data["__media_path__"],
+                                         data.get("__media_etag__", ""),
+                                         data.get("__media_type__", "application/octet-stream"))
                 return
             # SRT 导出：纯文本（UTF-8）
             if isinstance(data, dict) and "__text__" in data:
@@ -1434,9 +2671,32 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             parsed = urlparse(self.path)
             if self._reject_if_unauthorized(parse_qs(parsed.query)):
                 return
-            # 文件导入（WP-03/A07）：POST /api/v1/assets?name=<filename> 读原始字节
-            # 存到服务媒体目录，返回稳定 assetId + 落盘路径（前端不再填绝对路径）。
-            if parsed.path == "/api/v1/assets":
+            # Import and relink both carry raw media bytes and share body limits.
+            path_parts = [unquote(p) for p in parsed.path.split("/") if p]
+            if parsed.path == "/api/v1/resource-packs/install":
+                length = int(self.headers.get("Content-Length", 0))
+                limit = api.limiter.limits.max_body_bytes
+                if length <= 0:
+                    self._respond(400, {"error": {"code": "INVALID_ARGUMENT",
+                                                  "message": "empty resource package"}})
+                    return
+                if length > limit:
+                    self._respond(413, {"error": {"code": "BODY_TOO_LARGE",
+                                                  "message": f"文件 {length} 字节超过上限 {limit} 字节"}})
+                    return
+                raw = self.rfile.read(length)
+                try:
+                    from .resource_pack import install_resource_pack_archive
+                    result = install_resource_pack_archive(raw, api.media_dir)
+                except (OSError, ValueError, zipfile.BadZipFile) as error:
+                    self._respond(422, {"error": {"code": "RESOURCE_PACKAGE_INVALID",
+                                                  "message": str(error)}})
+                    return
+                self._respond(201, result)
+                return
+            relink = (len(path_parts) == 5 and path_parts[:3] == ["api", "v1", "assets"]
+                      and path_parts[4] == "relink")
+            if parsed.path in ("/api/v1/assets", "/api/v1/luts") or relink:
                 qs = parse_qs(parsed.query)
                 fname = (qs.get("name") or [""])[0].strip()
                 if not fname:
@@ -1444,7 +2704,8 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                                                   "message": "import requires ?name=<filename>"}})
                     return
                 length = int(self.headers.get("Content-Length", 0))
-                limit = api.limiter.limits.max_body_bytes
+                limit = (min(api.limiter.limits.max_body_bytes, MAX_CUBE_BYTES)
+                         if parsed.path == "/api/v1/luts" else api.limiter.limits.max_body_bytes)
                 if length <= 0:
                     self._respond(400, {"error": {"code": "INVALID_ARGUMENT",
                                                   "message": "empty body"}})
@@ -1454,6 +2715,20 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                                                   "message": f"文件 {length} 字节超过上限 {limit} 字节"}})
                     return
                 raw = self.rfile.read(length)
+                if parsed.path == "/api/v1/luts":
+                    try:
+                        self._respond(201, api.import_lut(fname, raw))
+                    except CubeInvalid as error:
+                        self._respond(400, {"error": {"code": "INVALID_LUT",
+                                                      "message": str(error)}})
+                    except OSError as error:
+                        self._respond(500, {"error": {"code": "LUT_SAVE_FAILED",
+                                                      "message": str(error)}})
+                    return
+                if relink:
+                    status, result = api.relink_asset(path_parts[3], fname, raw)
+                    self._respond(status, result)
+                    return
                 try:
                     asset = api.import_asset(fname, raw)
                 except Exception as e:  # noqa: BLE001
@@ -1501,6 +2776,7 @@ def serve(api: HttpApi, host: str = "127.0.0.1", port: int = 8787,
     bound = resolve_binding(host, allow_non_loopback=allow_non_loopback)
     handler = build_handler(api, web_dir)
     server = ThreadingHTTPServer((bound, port), handler)
+    api.shutdown_callback = server.shutdown
     api._log("INFO", "http.serve_start",
              detail={"host": bound, "port": port, "tokenRequired": api.session is not None})
     print(f"CutVoke server listening on http://{bound}:{port}")
@@ -1512,3 +2788,6 @@ def serve(api: HttpApi, host: str = "127.0.0.1", port: int = 8787,
         server.serve_forever()
     except KeyboardInterrupt:
         server.shutdown()
+    finally:
+        server.server_close()
+        api.shutdown_callback = None

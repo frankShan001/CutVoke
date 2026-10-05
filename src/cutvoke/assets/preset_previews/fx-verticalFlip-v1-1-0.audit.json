@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.verticalFlip",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "axis",
+    "value": "horizontal"
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "ce557a912bc02542e0db83af537b56460fa5c427755a815b0fb9814d159f4aaa",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "ce557a912bc02542e0db83af537b56460fa5c427755a815b0fb9814d159f4aaa",
+  "auditExport": "fx-verticalFlip-v1-1-0.audit.mp4"
+}

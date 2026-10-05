@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_sage_leaf_shadows",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1fecd8b5a31ac86be141f841bfafe48ece5dcd9a95a7b99b5075f64861a398b8",
+  "previewSha256": "4b8fbf429feb467333c67322cc8c3c87d2304bb606a3a1a73a7c4f990563f834",
+  "preview": "texture_bg_sage_leaf_shadows.mp4",
+  "bytes": 12158,
+  "visiblePixels": 51391,
+  "changedPixels": 0,
+  "motionVisible": false
+}

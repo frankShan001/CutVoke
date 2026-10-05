@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_mountain_sun",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "山峰、树林、湖面和日出形成完整风景徽章，轮廓无截断。",
+  "sourceSha256": "b70d1d1477123ba3bc2aef323b9c443dcce07776dac34be25e0bc8010001d2f1",
+  "previewSha256": "27d4c46ca3a742b5554eed18a4a82b683e4b759e5cb58372f69551fa8e5bbcba",
+  "auditSha256": "cc92f6ef0fb7b7adb58022e704d2f2d26a007b86577fbf2093653bd8d0074651"
+}

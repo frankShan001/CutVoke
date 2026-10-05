@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_disco_facets_emerald_violet",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6b88e5ffd3475925d288e43b6c3bb1c9596cd0999aadbddb4d62a4f2a42913da",
+  "previewSha256": "b747571ce8e92f50db5e535b7ff71aab9977852493cf140b5c4962297d673457",
+  "preview": "stage_light_disco_facets_emerald_violet.mp4",
+  "bytes": 10648,
+  "visiblePixels": 11005,
+  "changedPixels": 0,
+  "motionVisible": false
+}

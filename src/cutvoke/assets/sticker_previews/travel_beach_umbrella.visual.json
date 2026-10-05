@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_beach_umbrella",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "遮阳伞、沙滩和海浪完整，暖色与青蓝色层次清楚。",
+  "sourceSha256": "be11d647389aaa1e7fc39ac98ff47f0a8749f253ef6d54168cb2828336c2bae9",
+  "previewSha256": "c72b4308e1231f50bbb6cc734365850b562e4871afba16fe6a426b06c4825fd8",
+  "auditSha256": "e645d7fc8746279f504fe77294593ffdd9e75e77307148bed70054e8679b51b6"
+}

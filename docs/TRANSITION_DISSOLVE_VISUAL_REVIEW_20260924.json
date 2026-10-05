@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-24T06:25:32Z",
+  "method": "手工对照逐项封面、五时间点并排样片与 0.05–0.95 秒十帧密集序列；动态证据见 output/preset_review/transition-20260924-review/transition-dissolve-density.png。仅批准可辨且用途明确的算法差异。",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.transition.fadefast",
+      "decision": "approved",
+      "motionPreviewSha256": "701bde0be3c4459f6fc37be5ff2b47f4f1275888aff5fcc0c855263e5b791985",
+      "observation": "前半段基本保留原镜头，约0.55秒开始加速混合，到0.65秒已明显接近新镜头；过渡重心靠前，提供快节奏选择。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.fadeslow",
+      "decision": "approved",
+      "motionPreviewSha256": "92d7a71a30f24433361c0e8184240bcf851faefff825b5ce6daf15a348cd2e0a",
+      "observation": "前半段保留原镜头，到0.55秒才开始显露新镜头，随后渐进混合到0.95秒；节奏重心比快速版靠后。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.crossfade",
+      "decision": "approved",
+      "motionPreviewSha256": "41ae9600af50b777bc2e0492dc40c8d11c9f757bd1bae0a580ed8d88451dfd91",
+      "observation": "两幅画面保持连续可辨的均匀叠合，过程中不落入黑场；它与黑场、灰阶和白场过渡的中间态明显不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.transition.dissolve",
+      "decision": "approved",
+      "motionPreviewSha256": "3f112fdb65280aae7a3928eccb18e399c62fbd8ad313624f71f12e6b62dbdff6",
+      "observation": "约0.55秒开始出现分散的彩色像素点，并逐步铺满画面；这是颗粒式图案溶解，不是均匀透明叠化，适合作为强风格选项。"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_gold_comet",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T01:05:55+00:00",
+  "observation": "The gold comet trail has a clean S curve and a distinct bright head with sparse particles.",
+  "method": "Reviewed each extracted RGBA PNG on dark and light contact sheets, then checked the actual RenderService preview contact sheet. Examined distinct silhouettes, cell-edge clipping, alpha fringes, visibility on both tones, and usefulness as a compositing overlay.",
+  "sourceSha256": "a7c3bbdea6efad198e43b88db6acbbdf75dca6aa21e2bb51ab1bae5c1e94dacc",
+  "previewSha256": "2e209925faf10cbf4b81c57a50ea194db929866584924caa2064773cbe75b5d6",
+  "auditSha256": "611bc3a0c6d0c58c86063b07b13bd7be16e129e7093d6845a3eedab8ef5c7f31"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_flask",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "707480d0c27b7ffc707de238200dcde02b667356f9fa0d6bbceb1cdfbeb5a61c",
+  "previewSha256": "59ed43c8c3f2a9e54f594dd1d70700d63d227f7ee6d4dea69a2c19db02b58953",
+  "preview": "learn_flask.mp4",
+  "bytes": 3801,
+  "visiblePixels": 1533,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_prism_flare_rainbow",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "The white flare core and rainbow arc are both visible without a background panel.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "64ce0770ab7742e071df4ae9a02a17f5d7a7f9179337f38ae766ec51d3729bf2",
+  "previewSha256": "636c8218c354bae7366d9466847665fe1f6a530635ec1f7c1569685c22c00d6c",
+  "auditSha256": "ef06a39ce8e68d3343e3b9781f44b1cb9e47d98711b0420f431463623e15c253"
+}

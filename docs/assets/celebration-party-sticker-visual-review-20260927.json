@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.party_balloon_bouquet",
+      "decision": "approved",
+      "sourceSha256": "3364dfb56b8f7b9d91365aaa2c7b000cf41f89583619600bd6c6e450e7c72379",
+      "previewSha256": "d06c7fa7376e6da36cb12207d678b6a3cd8d75d75854f079cf8077a45812c371",
+      "observation": "气球组与垂下的细绳完整，白色描边连续，透明背景无可见杂点。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_confetti_popper",
+      "decision": "approved",
+      "sourceSha256": "fca73fac504c44e051d6f4d2a5930a7bc73256a596e5d3d9e13a47543d353222",
+      "previewSha256": "10919340fe8a3466966161696e0d1058f15a4af07cd77cd618f4998ab2f732dc",
+      "observation": "礼花筒主体与散开彩纸保持分离，斜向轮廓和开口完整。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_candle_cake",
+      "decision": "approved",
+      "sourceSha256": "75b66c7df5b026865f75536af8be4bbd07a0872ee9aa855a55daa6bf2ca7b86f",
+      "previewSha256": "889cf0cf38b866c443a2425a19ffb9bf0815e5e3eb19b9bae609a945ac8edb97",
+      "observation": "三支点燃蜡烛和蛋糕主体均完整，彩色装饰清晰。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_gift_box",
+      "decision": "approved",
+      "sourceSha256": "ca776060840b0a23d3267e38cfa80a937f1ed62ec5b608f72c75a2c1dc96f8a0",
+      "previewSha256": "27b1a54f80e163d664cc1291509a54bbd517d7c71b5bbd4187c0b0777d2b564b",
+      "observation": "礼物盒、盒盖与金色蝴蝶结完整，缩放预览未被画幅裁切。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_cone_hat",
+      "decision": "approved",
+      "sourceSha256": "304b4c58653175959c608a112d6db38752360a52d2dd100efd9be08a93f168e6",
+      "previewSha256": "0e66b384ed6f6a182d4224086467000131ced5ea80ba66d6303bf1182eb7ee71",
+      "observation": "派对帽尖顶、毛球和底部装饰完整，条纹边缘清楚。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_curled_streamer",
+      "decision": "approved",
+      "sourceSha256": "65dbac48f50bcc66e8b83d0ee3a5cf8b83a4af3af2f5b5411fadc6fa886616e2",
+      "previewSha256": "8607ab505f752940ec6f372b7651f604c9c8c01efb00d82007b86ed3bfca6eb3",
+      "observation": "卷曲彩带保留完整的弯折形状，边缘没有残留背景。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_starburst",
+      "decision": "approved",
+      "sourceSha256": "6190a9c37f510b60d88d25bb9f52f4c4ec08e31bf4361d52e19b4e00c076e587",
+      "previewSha256": "57e882bca3560dc1997ee12dce383a037ae33ec19dd4429c636145d4596ccec7",
+      "observation": "中心星芒与周围四颗闪光点完整分离，透明间隔清楚。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_juice_cheers",
+      "decision": "approved",
+      "sourceSha256": "79be302297827228093e777d4ad9ee3b7ef55b5bf77e19bb215e8b111742750f",
+      "previewSha256": "b134ef1f50a03937bd48c9681ca781b69be97a7a3f7b0c896c7be8b3add2df38",
+      "observation": "两只果汁杯的杯沿和杯脚完整，碰杯关系一眼可辨。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_rosette_badge",
+      "decision": "approved",
+      "sourceSha256": "6bd1f4d2c7acdf4799a31539f0f9efce38a96b01d14bbc8a3f01b746d5d2760d",
+      "previewSha256": "d3511540685d5a7c7a090ab3868db8af1159b5f992cca610336bd39eaaa4eaee",
+      "observation": "圆形绶带中心留白，外圈与双垂带未被裁切。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_paper_crown",
+      "decision": "approved",
+      "sourceSha256": "17ab39be47d9a96ea37f95d8d99d979823c9b547f6bd7ee10d20e379d97d061a",
+      "previewSha256": "0b6b448cf6a4379cfc379c6972a0ca2a3457f255a34015c5ed5af2892f934f1e",
+      "observation": "皇冠顶部彩球和底部轮廓完整，装饰宝石清楚。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_cupcake",
+      "decision": "approved",
+      "sourceSha256": "e72de5be7174ea88388860613a433419f66e216abf57f43dbbde9be5ac58452c",
+      "previewSha256": "fe8b7f06ad1347df808564c74d27f3af5173c7c50a42193d5884b188cb25c8d8",
+      "observation": "纸杯蛋糕的樱桃、奶油与纸杯分层清晰，边缘完整。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_horn",
+      "decision": "approved",
+      "sourceSha256": "4e5bd6ecfb68fad84cc468d030b8dff0a9a3b997f1d8e7de6ffe064593be7c05",
+      "previewSha256": "3a533d2e7cd18578900f02f9fed6a5bfb422888b342f30f7b79bf9ef720f6ed9",
+      "observation": "派对吹龙从吹口到卷曲纸舌轮廓完整，色块干净。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_fireworks",
+      "decision": "approved",
+      "sourceSha256": "df45368ca177de8134389041011b17fbb78cfbc333212506eb2eba5082b1f22f",
+      "previewSha256": "c5b24680185c49e04e287045422ec6d4a6a969648e604774e4a5d10cbe45c7ce",
+      "observation": "烟花射线与外围星点完整，缩小显示仍可辨认。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_bunting_garland",
+      "decision": "approved",
+      "sourceSha256": "147aa8b081b4efc955a64b5ba0d9e6c6414ea6dea0d057be66b3e2308fbbb2f7",
+      "previewSha256": "4002a1828d11e331337f00447ae5282f5d43d52cf922b1251c87829a2a5c97d2",
+      "observation": "四面三角旗和顶部悬挂线完整，旗片彼此分开。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_confetti_cluster",
+      "decision": "approved",
+      "sourceSha256": "2cb6b6aaf14b586987bf92bede4e73a1df2f981920265030be467c84bcba239f",
+      "previewSha256": "5b763184c5601ed182118dfdac463fab029a168a818aafd23e472f12db114cc1",
+      "observation": "彩纸碎片作为一组独立装饰保留，单片之间没有粘连。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.party_sparklers",
+      "decision": "approved",
+      "sourceSha256": "57dad9539785c892dbc54c20773c4a3c08cb0f9b9bc25786b1c263040770540d",
+      "previewSha256": "39676be0568f6053800e9e69817cdd105c958a3226d7c8d47c599faeb8ce0535",
+      "observation": "两支仙女棒交叉摆放，火花与细杆均完整清晰。"
+    }
+  ]
+}

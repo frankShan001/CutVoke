@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_rainbow_confetti",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "dc668cc2472149670bd0767294e514b2895489a064dd789faf3d8b9554fafa00",
+  "previewSha256": "209471ea48bca00a442d3cf6a917d150c879f308d42c11c1dcb345140008920d",
+  "preview": "fxoverlay_rainbow_confetti.mp4",
+  "bytes": 11449,
+  "visiblePixels": 3361,
+  "changedPixels": 8,
+  "motionVisible": false
+}

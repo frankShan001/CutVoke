@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed aligned full-frame and enlarged five-time-point motion sheets for all eight samples, then inspected 1.35s cropped covers at card size; checked alternating pixel counts for blink and pulse variants; machine command and export audits were completed separately.",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.text.motion_type_reveal",
+      "decision": "approved",
+      "observation": "The sample reveals one Chinese character near 0.10s, a longer prefix at 0.45s, and the complete title by 0.85s; no scaling or flicker is substituted for letter reveal.",
+      "motionPreviewSha256": "8f8afc52255520ca5e9f3a67fbd4938db6d3feee59bf81f6f279719f450e62d9"
+    },
+    {
+      "presetId": "cutvoke.preset.text.motion_scale_burst",
+      "decision": "approved",
+      "observation": "The orange title begins small and faint at 0.10s, reaches its full size near 0.45s, and stays steady; unlike the typewriter, all characters scale together.",
+      "motionPreviewSha256": "78b117f13e95764470bede4870a27931536441c1620ffbc2ca4adf15126a4381"
+    },
+    {
+      "presetId": "cutvoke.preset.text.motion_scale_retreat",
+      "decision": "approved",
+      "observation": "The cyan title grows in together, remains legible at full size, then visibly shrinks and fades near 1.80s; the two-sided scale motion differs from the one-way burst.",
+      "motionPreviewSha256": "7843f15c0e97f4214be3d66718a6a3cf36c9b6080f7eeb67812efe632fe55c66"
+    },
+    {
+      "presetId": "cutvoke.preset.text.motion_pulse",
+      "decision": "approved",
+      "observation": "The pink full title repeatedly expands and contracts after fading in. Its size and foreground area vary across the middle samples without losing the whole word.",
+      "motionPreviewSha256": "c239e85444ef159a4fdd1cdac10eecdc10d0c0ee7c7a5f611c2a047e3740443c"
+    },
+    {
+      "presetId": "cutvoke.preset.text.motion_blink",
+      "decision": "approved",
+      "observation": "The green title alternates between nearly invisible and readable states at a regular short interval; sampled foreground counts alternate between about 17 and 156 pixels.",
+      "motionPreviewSha256": "2789738c861abec01ea5e4f2f5ed9aa6a8861076d16b9d06af7f816b3d4e7796"
+    },
+    {
+      "presetId": "cutvoke.preset.text.motion_type_pulse",
+      "decision": "approved",
+      "observation": "The serif gold title starts with a single Chinese character, adds the rest in order, then expands rhythmically and shrinks on exit; both reveal and size motion are visible.",
+      "motionPreviewSha256": "c8e2a06ed7438e131bc1ddd21cae70010bb213e04bda10cbb0b192a26fcb50ad"
+    },
+    {
+      "presetId": "cutvoke.preset.text.motion_scale_blink",
+      "decision": "approved",
+      "observation": "The purple full title grows in as one object, then alternates bright and dim while remaining in place, and shrinks at the end; no letter-by-letter reveal occurs.",
+      "motionPreviewSha256": "5a7e4b4b4ef745564973a5c51280cc3a1c1f64c4c52ba6c786474fe27bacc97d"
+    },
+    {
+      "presetId": "cutvoke.preset.text.motion_type_blink",
+      "decision": "approved",
+      "observation": "The cyan and magenta title reveals characters progressively, then switches between bright and dim states; its reveal plus opacity rhythm differs from the gold pulse variant.",
+      "motionPreviewSha256": "12c48b27ebe4d6235b91cc3bf376aed472a656125d2ed19071e5f0d43519b843"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "presetId": "cutvoke.preset.filter.electricWire",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.edge",
+      "version": "1.0.0",
+      "params": {
+        "mode": "wire",
+        "low": 0.0784314,
+        "high": 0.196078
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.colorize",
+      "version": "1.0.0",
+      "params": {
+        "hue": 210,
+        "saturation": 0.95,
+        "mix": 0.85,
+        "lightness": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 80.854,
+  "maxSampledMeanRgbDifference": 80.854,
+  "coverSha256": "150ad415e3f147285e011f393a9ad8e8a59b23513d34c178394368553101f0fd",
+  "previewSha256": "195b8de849a9eec01827d45ca416b948015b030e1e2e35ac240a0fc451b3bbe3",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

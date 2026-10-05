@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.glitch_wave_interrupt",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项检查4×4透明贴图裁切表和4×4真实画面合成表；确认Alpha通道、裁切边缘、深浅背景对比、缩略图可辨性与每项轮廓差异。",
+  "observation": "青粉波形由细密线条组成并在中部断开，左右峰值轮廓清楚。",
+  "sourceSha256": "756599f8f79333671a5282c9ddc39438c9b937b63f13cb0a10104d52af376ece",
+  "previewSha256": "c94cf82ddb780b9f6bba2262e8cde69f048bf8f85d8a4c92e6b72795c82530ce",
+  "auditSha256": "c15df569eac4d54758844157357dfba6e90dae854e855d7b8ee74b99ad02cac2"
+}

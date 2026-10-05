@@ -27,7 +27,7 @@ from typing import Optional
 from .model import Project
 
 # 当前模块支持的包格式版本。包格式比此值新 → 明确拒绝（见 check_compatibility）。
-SUPPORTED_PACKAGE_FORMAT = 1
+SUPPORTED_PACKAGE_FORMAT = 2
 
 # 生成工具版本（与 pyproject.toml 的 version 保持一致；不引入 import 以避免
 # 在未安装环境下解析失败）。
@@ -91,18 +91,41 @@ def _sha256_stream(src: Path) -> tuple[str, int]:
     return h.hexdigest(), total
 
 
+def _project_sequences(project: Project) -> list:
+    """Use the active sequence and every other sequence exactly once."""
+    return [project.sequence] + [sequence for sequence in project.sequences
+                                 if sequence.id != project.sequence.id]
+
+
 def _collect_asset_refs(project: Project) -> list:
-    """收集工程里所有片段引用的素材（AssetReference，去重按 asset_id）。"""
+    """Collect each source path once, including legacy clips without an asset ID."""
     seen: dict[str, object] = {}
     out = []
-    for track in project.sequence.tracks:
-        for clip in track.clips:
-            ref = clip.asset_ref
-            if ref.asset_id in seen:
-                continue
-            seen[ref.asset_id] = True
-            out.append(ref)
+    for sequence in _project_sequences(project):
+        for track in sequence.tracks:
+            for clip in track.clips:
+                ref = clip.asset_ref
+                # Text clips have no external media. Older video clips can also
+                # have an empty asset_id, so the path is the portable identity.
+                if not ref.source_path or ref.source_path in seen:
+                    continue
+                seen[ref.source_path] = True
+                out.append(ref)
     return out
+
+
+def _collect_lut_paths(project: Project) -> list[str]:
+    """Collect custom LUT dependencies stored on effect instances."""
+    paths: dict[str, None] = {}
+    for sequence in _project_sequences(project):
+        for track in sequence.tracks:
+            for clip in track.clips:
+                for effect in clip.effects:
+                    if effect.get("effectId") == "cutvoke.fx.lut":
+                        path = (effect.get("params") or {}).get("file")
+                        if isinstance(path, str) and path:
+                            paths[path] = None
+    return list(paths)
 
 
 def _resolve_media_source(ref, media_root: Optional[str]) -> Path:
@@ -177,9 +200,10 @@ def pack_project(project: Project, dest_pkg_path: str, *,
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     refs = _collect_asset_refs(project)
+    lut_paths = _collect_lut_paths(project)
 
     # 第一阶段：定位 + 流式算 sha256 / 大小（只读源，不动源）。
-    # 按 asset_id 去重；按 sha256 去重素材副本（同内容只存一份）。
+    # 按源路径去重；按 sha256 去重素材副本（同内容只存一份）。
     asset_entries: list[dict] = []
     # 每个 pkg_path 对应的源文件（用于第二阶段落盘去重，同内容只写一次）。
     pkg_to_src: dict[str, Path] = {}
@@ -201,13 +225,27 @@ def pack_project(project: Project, dest_pkg_path: str, *,
         if pkg_path not in pkg_to_src:
             pkg_to_src[pkg_path] = src
 
+    lut_entries: list[dict] = []
+    for source_path in lut_paths:
+        src = Path(source_path)
+        if not src.is_file() and media_root is not None:
+            src = Path(media_root) / source_path
+        if not src.is_file() or src.suffix.lower() != ".cube":
+            raise ProjectPackError(f"自定义 LUT 缺失或不是 .cube：{source_path}")
+        sha_hex, size = _sha256_stream(src)
+        pkg_path = f"media/{sha_hex}.cube"
+        lut_entries.append({"originalPath": source_path, "packagePath": pkg_path,
+                            "size": size, "sha256": sha_hex})
+        pkg_to_src.setdefault(pkg_path, src)
+
     manifest = {
-        "packageFormat": SUPPORTED_PACKAGE_FORMAT,
+        "packageFormat": 2 if lut_entries else 1,
         "projectId": project.project_id,
         "schemaVersion": project.schema_version,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "generator": {"tool": TOOL_NAME, "coreVersion": TOOL_VERSION},
         "assets": asset_entries,
+        "luts": lut_entries,
     }
 
     # 第二阶段：写入 zip。manifest / project 用 writestr；素材流式写入。
@@ -273,6 +311,9 @@ def check_compatibility(manifest: dict, *, core_version: Optional[str] = None,
                 f"素材在包中标记为缺失：asset_id={asset.get('assetId')} "
                 f"path={asset.get('originalPath')}"
             )
+    for lut in manifest.get("luts", []):
+        if lut.get("present") is False:
+            report.warnings.append(f"LUT 在包中标记为缺失：{lut.get('originalPath')}")
 
     # 未知效果（需工程对象 + 已知集合）。
     unknown = _scan_unknown_effects(project, known_effect_ids) if project else []
@@ -374,7 +415,9 @@ def unpack_project(pkg_path: str, dest_dir: str, *,
         warnings: list[str] = list(report.warnings)
 
         # 素材落地 + 流式校验 sha256。
-        asset_by_pkg: dict[str, dict] = {a["packagePath"]: a for a in manifest.get("assets", [])}
+        entries_by_pkg: dict[str, list[dict]] = {}
+        for entry in [*manifest.get("assets", []), *manifest.get("luts", [])]:
+            entries_by_pkg.setdefault(entry["packagePath"], []).append(entry)
         media_dir = dest / "media"
         media_dir.mkdir(parents=True, exist_ok=True)
 
@@ -382,10 +425,11 @@ def unpack_project(pkg_path: str, dest_dir: str, *,
         for name in zf.namelist():
             if not name.startswith("media/"):
                 continue
-            entry = asset_by_pkg.get(name)
-            if entry is None:
+            entries = entries_by_pkg.get(name)
+            if not entries:
                 warnings.append(f"包内存在 manifest 未记录的素材成员：{name}")
                 continue
+            entry = entries[0]
             target = media_dir / Path(name).name
             h = hashlib.sha256()
             with zf.open(name) as fsrc, open(target, "wb") as fdst:
@@ -401,25 +445,42 @@ def unpack_project(pkg_path: str, dest_dir: str, *,
                     f"素材校验和不符：{name} 期望 {entry.get('sha256')} 实际 {actual}"
                 )
             # 路径映射：原工程声明路径 -> 新绝对路径。
-            mapping[entry["originalPath"]] = str(target.resolve())
+            for item in entries:
+                mapping[item["originalPath"]] = str(target.resolve())
 
-        # 重写工程里每个片段的素材路径（按 asset_id 定位新路径）。
-        by_asset_id = {a["assetId"]: a for a in manifest.get("assets", [])}
-        for track in project.sequence.tracks:
-            for clip in track.clips:
-                ref = clip.asset_ref
-                entry = by_asset_id.get(ref.asset_id)
-                if entry is None:
-                    warnings.append(
-                        f"片段引用了 manifest 未记录的素材：asset_id={ref.asset_id}"
-                    )
-                    continue
-                new_path = mapping.get(entry["originalPath"])
-                if new_path is None:
-                    warnings.append(
-                        f"素材解包后缺失，路径未重写：asset_id={ref.asset_id}"
-                    )
-                    continue
-                ref.source_path = new_path
+        # Prefer the exact source path. Legacy clips may share an empty asset ID;
+        # looking those up by ID can silently replace several videos with one.
+        by_asset_id = {a["assetId"]: a for a in manifest.get("assets", [])
+                       if a.get("assetId")}
+        for sequence in _project_sequences(project):
+            for track in sequence.tracks:
+                for clip in track.clips:
+                    ref = clip.asset_ref
+                    if not ref.source_path:
+                        continue
+                    new_path = mapping.get(ref.source_path)
+                    if new_path is None and ref.asset_id:
+                        entry = by_asset_id.get(ref.asset_id)
+                        if entry is not None:
+                            new_path = mapping.get(entry["originalPath"])
+                    if new_path is None:
+                        warnings.append(
+                            f"片段素材未在包中找到：asset_id={ref.asset_id} "
+                            f"path={ref.source_path}"
+                        )
+                    else:
+                        ref.source_path = new_path
+                    for effect in clip.effects:
+                        if effect.get("effectId") != "cutvoke.fx.lut":
+                            continue
+                        params = effect.get("params") or {}
+                        old_lut = params.get("file")
+                        if not old_lut:
+                            continue
+                        new_lut = mapping.get(old_lut)
+                        if new_lut is None:
+                            warnings.append(f"自定义 LUT 解包后缺失：{old_lut}")
+                        else:
+                            params["file"] = new_lut
 
     return project, mapping, warnings

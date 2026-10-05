@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_teal_pulse_rings",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "93f9409e68d3fc9f7648d8127c9b93e1803fd5e4660a99b19cf265839a52cf48",
+  "previewSha256": "dbb81c89a4ae149ed992c7eb741a06b0cac257b1b4028b9c27c8a91509ef895a",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4758,
+  "visiblePixels": 3258,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2348,
+    "steady_entry": 3259,
+    "steady_exit": 3251,
+    "exit": 2369
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2348,
+      "withoutFade": 3259
+    },
+    "steady_entry": {
+      "withFade": 3259,
+      "withoutFade": 3257
+    },
+    "steady_exit": {
+      "withFade": 3251,
+      "withoutFade": 3258
+    },
+    "exit": {
+      "withFade": 2369,
+      "withoutFade": 3254
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.296,
+    0.299
+  ],
+  "auditExport": "manga_v2_teal_pulse_rings.audit.mp4",
+  "auditExportSha256": "aa397aa08c98ec4c6b6e7415120a940a07230d8a525f552100ca8c6c26ce84dd"
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_vhs_interference",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "d63eb611bc23a0f8a3ac7bf296704dc7ee3127dced40d871e8b4c049494a9767",
+  "previewSha256": "9fd6327ea569ac0f6b55a30cdb3638edffede8aba7c481497f700f91a95d160f",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5557,
+  "visiblePixels": 4095,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2252,
+    "steady_entry": 4095,
+    "steady_exit": 4095,
+    "exit": 2252
+  },
+  "previewExportMeanRgbDifferences": [
+    0.021,
+    0.059
+  ],
+  "auditExport": "texture_v2_vhs_interference.audit.mp4",
+  "auditExportSha256": "28f4f2373616c7abef2312921fa8c8185514ed701386315d987d40524dad8d70"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_paper_tear",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "白色纤维撕边带灰色投影，深底轮廓清楚；浅底主要靠投影辨认。",
+  "sourceSha256": "42968908bbbab172beada495d75eb3f8e901f37870c8bcfb67fb122bf53af795",
+  "previewSha256": "07743bb210507adcf449b763ee6029b70082f594fc33bb6a3637ce37b27a7205",
+  "auditSha256": "6da82f1e6d02c924b38338c05c32e5a376e3aa2197f00c070b789b6c4ae5a248"
+}

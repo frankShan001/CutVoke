@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.comboFadeSlide",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.combo",
+  "params": {
+    "duration": 1.0,
+    "primary": "fadeIn",
+    "secondary": "slideDown",
+    "distance": 0.5,
+    "easing": "ease-out",
+    "fromScale": 0.8
+  },
+  "subcategory": "组合",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "淡入与下滑同步逐帧变化，动画结束时平滑回到正常亮度和位置。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "9bb90720748a19a2108386751f4c54aab876416acb361492ea1e2df5d59fd693",
+  "motionPreviewSha256": "4d8daa726d3e2a25891deab7f98111262521345cb7199236c77a1077c00bbc6d",
+  "auditSha256": "9323f0da99e30d831e071df941d7b4cd994cc84ac8ab068e108d342acca5484c",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_comboFadeSlide.png",
+  "libraryReviewSheetSha256": "26d54040aaa0c2bf1c58f44c3cd13eba79e0accedcddf69720f096d6d700de55"
+}

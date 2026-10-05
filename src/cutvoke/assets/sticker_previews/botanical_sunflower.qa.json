@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_sunflower",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c185266d6da21500a6dc2bd1a20b12ce70448759e682178bfcf280c1beef8cf9",
+  "previewSha256": "61a72645631230321b69999eefbf492119fe3e70e2491aeb57f24a2f05a31941",
+  "preview": "botanical_sunflower.mp4",
+  "bytes": 5591,
+  "visiblePixels": 3173,
+  "changedPixels": 0,
+  "motionVisible": false
+}

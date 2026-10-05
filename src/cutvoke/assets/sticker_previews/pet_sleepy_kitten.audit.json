@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_sleepy_kitten",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "f6a61b4f16b35ccd8fbcee08891808af7181ce4f1b4d155eb22a6461cdfc1e05",
+  "previewSha256": "d2f863d35343a5fbf7495589a412946867b9b8841432b36ab155438b04fa2556",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3713,
+  "visiblePixels": 2896,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2291,
+    "steady_entry": 2896,
+    "steady_exit": 2896,
+    "exit": 2284
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2291,
+      "withoutFade": 2896
+    },
+    "steady_entry": {
+      "withFade": 2896,
+      "withoutFade": 2896
+    },
+    "steady_exit": {
+      "withFade": 2896,
+      "withoutFade": 2896
+    },
+    "exit": {
+      "withFade": 2284,
+      "withoutFade": 2896
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "pet_sleepy_kitten.audit.mp4",
+  "auditExportSha256": "3173da04eb8bc3495b5c4c4dd0fe04640f6058ef5be00d3e056373890710265b"
+}

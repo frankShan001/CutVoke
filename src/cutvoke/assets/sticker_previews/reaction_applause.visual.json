@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_applause",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Two clapping hands with small yellow impact marks; clearly distinct from the single-hand gesture.",
+  "sourceSha256": "78a7252642ea7a17a1ffed7c1d0d082c949c2bf6a1f1576eb564f813824a3004",
+  "previewSha256": "2e9f8480508ff12d4a09f162810855e006a2baa9228817875831a190baaccd48",
+  "auditSha256": "647d2bf86f75a60b13b59faa9ebb36c809f0b9f4676b916b7201349023e3b995"
+}

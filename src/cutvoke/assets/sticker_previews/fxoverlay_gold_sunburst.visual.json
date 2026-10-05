@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_gold_sunburst",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "Fine golden radial rays form a centered starburst with a much sharper geometry than the bokeh.",
+  "method": "Inspected the rendered transparent artwork on split dark and light neutral panels; machine workflow audit hashes are pinned.",
+  "sourceSha256": "2cc8d3c39e1a26f2c88826feeff591e08bf4987d0d56bf7ff6b78ffc97d39fc5",
+  "previewSha256": "366a5986a8d6395610a9e9f1e59924a07c3a6fe6c8c100bdc7df9df5a05aa352",
+  "auditSha256": "4726f20a9b870fb800196112fba935a047cff24c5f7811329a449ad552d31419"
+}

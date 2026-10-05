@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_happy_dog",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "狗狗表情与粉色爱心装饰易识别，透明边缘没有明显越界。",
+  "sourceSha256": "aec8e1351c7529b4441b8e59dfb24310eb1f91a1b86f105bee8bbd7524830127",
+  "previewSha256": "6225caa8f3effd0a40d5c5237467c9bb365b260e271b0ba02bd4ad3758a1467c",
+  "auditSha256": "f23b23a86e91677c5922f2090b9bbf33eecc9efe9a3337b18341da1809934b41"
+}

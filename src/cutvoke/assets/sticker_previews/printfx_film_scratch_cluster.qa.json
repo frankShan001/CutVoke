@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_film_scratch_cluster",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "aa2fc08192359b51c44877fad0e66b8f68daa3c3ab8b1ebca1884958624acdda",
+  "previewSha256": "f3e0297ac13a1d32f08788aed222094e3745e2b18edd69702c94e7714ca70a67",
+  "preview": "printfx_film_scratch_cluster.mp4",
+  "bytes": 6478,
+  "visiblePixels": 988,
+  "changedPixels": 0,
+  "motionVisible": false
+}

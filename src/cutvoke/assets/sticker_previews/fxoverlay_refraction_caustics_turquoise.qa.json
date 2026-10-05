@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_caustics_turquoise",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "39976c2ec259b50ba64c5009769734b784a38c2ed6102b07400c338036954dd7",
+  "previewSha256": "dfffedfdfa2b6a774d1ff8443c267241b0e7559aca8c26f02b36ceff51805fc9",
+  "preview": "fxoverlay_refraction_caustics_turquoise.mp4",
+  "bytes": 15402,
+  "visiblePixels": 15180,
+  "changedPixels": 0,
+  "motionVisible": false
+}

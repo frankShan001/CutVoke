@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_snow_flurries",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "193b0417b5f98c26a1ae3cad509a281e962ce48804c179f46a2081e74a649338",
+  "previewSha256": "a9e3fd4fd982f0dcd5dab4225b7375408d1c0ea05d997bc660a0010da622d2cd",
+  "preview": "texture_v2_snow_flurries.mp4",
+  "bytes": 4254,
+  "visiblePixels": 1234,
+  "changedPixels": 0,
+  "motionVisible": false
+}

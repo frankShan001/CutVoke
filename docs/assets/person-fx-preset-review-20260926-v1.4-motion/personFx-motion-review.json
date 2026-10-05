@@ -1,0 +1,164 @@
+{
+  "family": "personFx",
+  "groups": {
+    "人物轮廓": {
+      "count": 8,
+      "sampleTimes": [
+        0.55,
+        0.65,
+        0.75,
+        0.85,
+        0.95
+      ],
+      "sheet": "docs\\assets\\person-fx-preset-review-20260926-v1.4-motion\\personFx-人物轮廓-motion.png",
+      "nearestPairs": [
+        {
+          "a": "cutvoke.preset.personFx.amberEdge",
+          "b": "cutvoke.preset.personFx.roseEdge",
+          "meanRgbDistance": 1.578
+        },
+        {
+          "a": "cutvoke.preset.personFx.aquaEdge",
+          "b": "cutvoke.preset.personFx.neonEdge",
+          "meanRgbDistance": 1.595
+        },
+        {
+          "a": "cutvoke.preset.personFx.aquaEdge",
+          "b": "cutvoke.preset.personFx.limeEdge",
+          "meanRgbDistance": 1.833
+        },
+        {
+          "a": "cutvoke.preset.personFx.pearlEdge",
+          "b": "cutvoke.preset.personFx.neonEdge",
+          "meanRgbDistance": 2.028
+        },
+        {
+          "a": "cutvoke.preset.personFx.iceEdge",
+          "b": "cutvoke.preset.personFx.pearlEdge",
+          "meanRgbDistance": 2.075
+        },
+        {
+          "a": "cutvoke.preset.personFx.iceEdge",
+          "b": "cutvoke.preset.personFx.neonEdge",
+          "meanRgbDistance": 2.504
+        },
+        {
+          "a": "cutvoke.preset.personFx.violetEdge",
+          "b": "cutvoke.preset.personFx.roseEdge",
+          "meanRgbDistance": 2.588
+        },
+        {
+          "a": "cutvoke.preset.personFx.limeEdge",
+          "b": "cutvoke.preset.personFx.neonEdge",
+          "meanRgbDistance": 2.667
+        }
+      ]
+    },
+    "人物残影": {
+      "count": 8,
+      "sampleTimes": [
+        0.55,
+        0.65,
+        0.75,
+        0.85,
+        0.95
+      ],
+      "sheet": "docs\\assets\\person-fx-preset-review-20260926-v1.4-motion\\personFx-人物残影-motion.png",
+      "nearestPairs": [
+        {
+          "a": "cutvoke.preset.personFx.mistEcho",
+          "b": "cutvoke.preset.personFx.dreamEcho",
+          "meanRgbDistance": 0.979
+        },
+        {
+          "a": "cutvoke.preset.personFx.blueEcho",
+          "b": "cutvoke.preset.personFx.pulseEcho",
+          "meanRgbDistance": 1.283
+        },
+        {
+          "a": "cutvoke.preset.personFx.staccatoEcho",
+          "b": "cutvoke.preset.personFx.fastEcho",
+          "meanRgbDistance": 1.514
+        },
+        {
+          "a": "cutvoke.preset.personFx.softEcho",
+          "b": "cutvoke.preset.personFx.fastEcho",
+          "meanRgbDistance": 1.685
+        },
+        {
+          "a": "cutvoke.preset.personFx.softEcho",
+          "b": "cutvoke.preset.personFx.staccatoEcho",
+          "meanRgbDistance": 1.733
+        },
+        {
+          "a": "cutvoke.preset.personFx.blueEcho",
+          "b": "cutvoke.preset.personFx.staccatoEcho",
+          "meanRgbDistance": 2.45
+        },
+        {
+          "a": "cutvoke.preset.personFx.longEcho",
+          "b": "cutvoke.preset.personFx.mistEcho",
+          "meanRgbDistance": 2.563
+        },
+        {
+          "a": "cutvoke.preset.personFx.longEcho",
+          "b": "cutvoke.preset.personFx.pulseEcho",
+          "meanRgbDistance": 2.756
+        }
+      ]
+    },
+    "人物色彩": {
+      "count": 8,
+      "sampleTimes": [
+        0.55,
+        0.65,
+        0.75,
+        0.85,
+        0.95
+      ],
+      "sheet": "docs\\assets\\person-fx-preset-review-20260926-v1.4-motion\\personFx-人物色彩-motion.png",
+      "nearestPairs": [
+        {
+          "a": "cutvoke.preset.personFx.warmPortrait",
+          "b": "cutvoke.preset.personFx.goldPortrait",
+          "meanRgbDistance": 0.851
+        },
+        {
+          "a": "cutvoke.preset.personFx.coolPortrait",
+          "b": "cutvoke.preset.personFx.cinemaPortrait",
+          "meanRgbDistance": 1.025
+        },
+        {
+          "a": "cutvoke.preset.personFx.coolPortrait",
+          "b": "cutvoke.preset.personFx.mintPortrait",
+          "meanRgbDistance": 1.536
+        },
+        {
+          "a": "cutvoke.preset.personFx.warmPortrait",
+          "b": "cutvoke.preset.personFx.rosePortrait",
+          "meanRgbDistance": 1.591
+        },
+        {
+          "a": "cutvoke.preset.personFx.violetPortrait",
+          "b": "cutvoke.preset.personFx.rosePortrait",
+          "meanRgbDistance": 1.773
+        },
+        {
+          "a": "cutvoke.preset.personFx.rosePortrait",
+          "b": "cutvoke.preset.personFx.goldPortrait",
+          "meanRgbDistance": 2.054
+        },
+        {
+          "a": "cutvoke.preset.personFx.coolPortrait",
+          "b": "cutvoke.preset.personFx.monoPortrait",
+          "meanRgbDistance": 2.06
+        },
+        {
+          "a": "cutvoke.preset.personFx.violetPortrait",
+          "b": "cutvoke.preset.personFx.monoPortrait",
+          "meanRgbDistance": 2.166
+        }
+      ]
+    }
+  }
+}

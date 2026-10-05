@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_circle",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Coral hand-drawn loop stays visible against both backgrounds; the open contour reads clearly as a circle marker.",
+  "sourceSha256": "4fad25e17f2b359cf62db946b6b6f3a4007eb1336f76d09ec7c81b5321e0d0d3",
+  "previewSha256": "7f08509ae14b994cbdf238d93d4ee2ac551eeb5f102f9fc17149051a7738f683",
+  "auditSha256": "22cb7d1bc49e1e25c3b940e6062bd3c345f03e89cb1a851afa1e52a80d009e93"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_frequency_badge_violet",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "Blue-violet equalizer bars sit inside a round badge, visually distinct from the open rainbow ring.",
+  "sourceSha256": "c67434e0302dd149cd65cab82c5723b043fb5fa051a012291424eb93527f3d05",
+  "previewSha256": "365f7794c4e3ea18b201cf8b5b884a8724273de5cca04b93d42b7dd805c281c0",
+  "auditSha256": "2ac377536f26907a8035acdecb7600006a6c4f7c462bb482eecbf82a6c229fb6"
+}

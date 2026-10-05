@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.noirContrast",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 0.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "b8f3471216026c6d07e2ceae7e278fb02a56df01921290b3d47edfbc5b9be7b6",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "b8f3471216026c6d07e2ceae7e278fb02a56df01921290b3d47edfbc5b9be7b6",
+  "auditExport": "filter-noirContrast-v1-0-0.audit.mp4"
+}

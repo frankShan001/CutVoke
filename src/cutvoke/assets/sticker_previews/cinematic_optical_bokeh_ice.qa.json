@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_bokeh_ice",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2f4030e159e6f43ef9ddfbc25e22dea2dee8ef35e9d24204691459566876b659",
+  "previewSha256": "11e097263e8d9edd1c5e5d53fe981cee812fbb768ef1748e0f77b988eaab0cf3",
+  "preview": "cinematic_optical_bokeh_ice.mp4",
+  "bytes": 6924,
+  "visiblePixels": 3195,
+  "changedPixels": 0,
+  "motionVisible": false
+}

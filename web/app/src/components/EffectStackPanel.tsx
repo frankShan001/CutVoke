@@ -8,11 +8,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bookmark, Loader2, Save, Copy } from "lucide-react";
-import { Panel, Button, TextInput } from "./ui";
+import { Panel, Button, Select, TextInput } from "./ui";
 import { useEditor, showError } from "../store/editor";
 import { getLatestState } from "../store/actions";
 import {
   bypassEffect,
+  copyVisualEffects,
   deletePreset,
   applyPreset,
   reorderEffect,
@@ -22,6 +23,7 @@ import {
 import { getEffectCatalog, listPresets, type EffectSpec, type Preset } from "../lib/effects";
 import { EffectRow } from "./effectStack/EffectRow";
 import { PresetList } from "./effectStack/PresetList";
+import { PersonCutoutSection } from "./effectStack/PersonCutoutSection";
 import type { EffectInstance } from "../types/api";
 
 interface Props {
@@ -29,18 +31,23 @@ interface Props {
 }
 
 export function EffectStackPanel({ active }: Props) {
-  const { state, dispatch } = useEditor();
+  const { state, dispatch } = useEditor({ subscribeToClock: false });
   const pid = state.currentId;
   const selectedClipId = state.selection?.clipId ?? null;
   const selectedTrackLocked = !!state.project?.sequence.tracks.find((track) =>
     track.clips.some((clip) => clip.id === selectedClipId),
   )?.locked;
   const readOnly = selectedTrackLocked || !!state.editLock;
+  const copyReadOnly = !!state.editLock;
 
   const [catalog, setCatalog] = useState<EffectSpec[]>([]);
   const [presets, setPresets] = useState<Preset[]>([]);
   const [presetName, setPresetName] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [copyTargets, setCopyTargets] = useState<string[]>([]);
+  const [copyMode, setCopyMode] = useState<"replace" | "merge">("replace");
+
+  useEffect(() => setCopyTargets([]), [pid, selectedClipId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -84,6 +91,23 @@ export function EffectStackPanel({ active }: Props) {
     return [];
   }, [selectedClipId, state.project]);
 
+  const visualEffectIds = useMemo(() => new Set(
+    catalog.filter((spec) => ["fx", "filter", "color"].includes(spec.browseCategory))
+      .map((spec) => spec.effectId),
+  ), [catalog]);
+  const visualEffectCount = clipEffects.filter((effect) => visualEffectIds.has(effect.effectId)).length;
+  const targetClips = useMemo(() => (
+    (state.project?.sequence.tracks ?? [])
+      .filter((track) => track.kind === "video" && track.role !== "sticker")
+      .flatMap((track) => track.clips.filter((clip) => clip.role !== "sticker").map((clip, index) => ({
+        id: clip.id,
+        locked: !!track.locked,
+        label: `${track.id} · 第 ${index + 1} 段 · ${clip.assetRef.sourcePath.split(/[\\/]/).pop() || clip.id}`,
+      })))
+      .filter((item) => item.id !== selectedClipId)
+  ), [state.project, selectedClipId]);
+  const availableTargetIds = targetClips.filter((item) => !item.locked).map((item) => item.id);
+
   const anyBusy = !!busyId;
   const run = async (fn: () => Promise<{ ok: boolean }>, busy: string | null) => {
     setBusyId(busy);
@@ -125,7 +149,7 @@ export function EffectStackPanel({ active }: Props) {
       {!selectedClipId ? (
         <p className="cv-empty">先在时间线选中一个片段，这里会列出它的完整效果栈。</p>
       ) : clipEffects.length === 0 ? (
-        <p className="cv-empty">该片段还没有效果。到「资源库」选择一个应用到选中片段。</p>
+        <p className="cv-empty">该片段还没有效果。到左侧「特效」或「滤镜」选择并应用到当前片段。</p>
       ) : (
         <div className="effect-stack">
           {clipEffects.map((e, i) => (
@@ -178,6 +202,65 @@ export function EffectStackPanel({ active }: Props) {
           ))}
         </div>
       )}
+
+      <PersonCutoutSection
+        active={active}
+        projectId={pid}
+        clipId={selectedClipId}
+        readOnly={readOnly}
+      />
+
+      <details className="effect-copy">
+        <summary>复制画面效果、滤镜与调色</summary>
+        <p className="cv-hint">
+          从当前片段复制 {visualEffectCount} 项画面效果及微调参数到目标片段。一次操作可以整体撤销。
+        </p>
+        {targetClips.length ? (
+          <>
+            <div className="effect-copy__toolbar">
+              <Button variant="secondary" size="sm" disabled={copyReadOnly || anyBusy || !availableTargetIds.length}
+                onClick={() => setCopyTargets(availableTargetIds)}>全选可编辑片段</Button>
+              <Button variant="secondary" size="sm" disabled={anyBusy || !copyTargets.length}
+                onClick={() => setCopyTargets([])}>清空</Button>
+            </div>
+            <div className="effect-copy__targets" role="group" aria-label="复制画面效果的目标片段">
+              {targetClips.map((target) => (
+                <label key={target.id} className="effect-copy__target" title={target.label}>
+                  <input type="checkbox" checked={copyTargets.includes(target.id)}
+                    disabled={copyReadOnly || anyBusy || target.locked}
+                    onChange={(event) => setCopyTargets((current) => event.target.checked
+                      ? [...current, target.id] : current.filter((id) => id !== target.id))} />
+                  <span>{target.label}{target.locked ? "（轨道已锁定）" : ""}</span>
+                </label>
+              ))}
+            </div>
+            <div className="effect-copy__toolbar">
+              <Select aria-label="复制方式" value={copyMode}
+                onChange={(event) => setCopyMode(event.target.value as "replace" | "merge")}
+                disabled={copyReadOnly || anyBusy}>
+                <option value="replace">替换目标画面效果</option>
+                <option value="merge">保留其它画面效果</option>
+              </Select>
+              <Button variant="secondary" size="sm"
+                disabled={!selectedClipId || copyReadOnly || anyBusy || !visualEffectCount ||
+                  !copyTargets.some((id) => availableTargetIds.includes(id))}
+                onClick={() => {
+                  if (!selectedClipId) return;
+                  const ids = copyTargets.filter((id) => availableTargetIds.includes(id));
+                  const st = getLatestState() || state;
+                  void run(() => copyVisualEffects(dispatch, st, {
+                    sourceClipId: selectedClipId, targetClipIds: ids, mode: copyMode,
+                  }), "copyVisual").then((result) => {
+                    if (result.ok) setCopyTargets([]);
+                  });
+                }}>
+                {busyId === "copyVisual" ? <Loader2 size={12} className="cv-spin" /> : <Copy size={12} />}
+                复制到 {copyTargets.filter((id) => availableTargetIds.includes(id)).length} 段
+              </Button>
+            </div>
+          </>
+        ) : <p className="cv-hint">工程中还没有其它视频或图片片段。</p>}
+      </details>
 
       <div className="inspector__sep" />
 

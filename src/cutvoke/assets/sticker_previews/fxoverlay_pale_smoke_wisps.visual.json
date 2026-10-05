@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_pale_smoke_wisps",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "Pale lavender smoke clusters have a soft cloud texture and remain legible on dark panels; contrast is intentionally low on light panels.",
+  "method": "Inspected the rendered transparent artwork on split dark and light neutral panels; machine workflow audit hashes are pinned.",
+  "sourceSha256": "2a2ecbcdab4870e78c85d54516f7b80c54300e64a3b4d1570007fcacd0dcc01d",
+  "previewSha256": "405a445e11555cb86064f0b3afba689740457c611c553d22974a9428e8c894e8",
+  "auditSha256": "4f3cbe88991dc686f605255e1a42b3c102c749b4151e31b7c0678ab0aa3443e2"
+}

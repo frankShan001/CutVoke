@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.material_aluminum",
+      "decision": "approved",
+      "sourceSha256": "87c9d97e68b85fd9ac53f75367caeffb60dc8ce8ab086a70854d1058b03ff4c9",
+      "previewSha256": "331e03b4535667c65c62f00a607cdae74414e57e95afd9a8b3c7aac24019da54",
+      "observation": "Fine linear brushed-metal grain stays visible across both halves and its softly irregular edges retain alpha."
+    },
+    {
+      "stickerId": "cutvoke.sticker.material_frosted_glass",
+      "decision": "approved",
+      "sourceSha256": "4d9267d5bcd7bf3e42e0f0885ea000f5102c72bc6cde8641ee4b89036e1002b9",
+      "previewSha256": "43a481a68a01150ac201e79dbcddac242581fb98f64d6f982867a7e25272f417",
+      "observation": "The diffuse cloudy center and softly frosted border read as glass without becoming an opaque card."
+    },
+    {
+      "stickerId": "cutvoke.sticker.material_rice_paper",
+      "decision": "approved",
+      "sourceSha256": "30376f9ed5ae8f4cf50318c75de6ac5915f0b1ab0c590fa5eb1d35a2f2572b7e",
+      "previewSha256": "a3210628b872fe6dfe92632ce606a77beae0767ebde7b5ab34e88fd8cbaf497e",
+      "observation": "Warm fibers and small natural flecks distinguish the handmade paper surface from smooth vellum."
+    },
+    {
+      "stickerId": "cutvoke.sticker.material_vellum",
+      "decision": "approved",
+      "sourceSha256": "e201491773b23317f90b8be6462bcdf576fd143200a6f5ab549c9010f3dae752",
+      "previewSha256": "652da7754c6d8f6bca8a12127e371e989a75458a3d92e39d6afacbbeab2f5842",
+      "observation": "Broad translucent folds and pale layered bands make the tracing-paper surface recognizable."
+    },
+    {
+      "stickerId": "cutvoke.sticker.material_wool_felt",
+      "decision": "approved",
+      "sourceSha256": "97a0ec7ae7385a7ac6489180e0f969f6a06848657d6264a66076cd7f681dab8b",
+      "previewSha256": "75ccba151da996a33ddafdaa7e0f4a683accfe68c94e6caed01316ef089b25e7",
+      "observation": "Dense short fibers create a soft felt surface and stay distinct from the paper materials."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_film_scratches",
+      "decision": "approved",
+      "sourceSha256": "389e34137eebafae4a0606c36f5d71b20ddba884a67d5d2c23251a1572f0316e",
+      "previewSha256": "9ee46cd5c2cefbf7c56ae754606f4bc89a7261619f250b3051b3fd0c5fa56f80",
+      "observation": "Thin silver hairlines appear across the dark half; their low opacity suits a restrained analog-film overlay."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_frost_edge",
+      "decision": "approved",
+      "sourceSha256": "1c7383b3caa294c08cc602f59e598a8adf01367be4dcd71661ebc7cd57ed074b",
+      "previewSha256": "4f9a7910cf96c2eb02fd5aa6048c07b080b8488a0c64d14acb7d6edb1bb21865",
+      "observation": "Blue-white crystals cluster along the upper-left edge and leave clear space toward the center."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_low_fog",
+      "decision": "approved",
+      "sourceSha256": "18e601dff0eed6d7ba69d2e2b51ee4a08017a816c94ff03a1ea8127f93b86af8",
+      "previewSha256": "bfeb829b096c154da5fa8fbe106749a819e17f4479b730fb0ea734d4d60f3a04",
+      "observation": "Translucent white fog sits low in the frame and rises unevenly without hiding the gradient."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_paper_tear",
+      "decision": "approved",
+      "sourceSha256": "49a48dcb64369af26c43334a74e4e34c9b2e51c9234d284179db401196e42456",
+      "previewSha256": "0e0c97a337acf218401ef2a6bb26f854f7daf0508184d59383ebcf0978c8186c",
+      "observation": "A diagonal ragged paper edge has a bright fibrous boundary and fades to transparent outside the torn sheet."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_rain_drops",
+      "decision": "approved",
+      "sourceSha256": "da6dfd08b995b5ff46e3be9da050d8c31f1a13dc82d820c94b2f5459c7f58e8a",
+      "previewSha256": "1367a94c554d01f2eb264de2a3a50630fc1c931ef95b467942d0ef706f2c7520",
+      "observation": "Separate rounded droplets and narrow trails remain visible over the dark half without forming a solid panel."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_smoke_wisps",
+      "decision": "approved",
+      "sourceSha256": "4885467c94b2ab59ac7238e32b5ca9f8a492b23effa3661da8d8d8be695a895c",
+      "previewSha256": "beba4fbd60f8bcfcab625ddbca6103998c8261731e5a754f3c3d81d9c75dce20",
+      "observation": "A pale smoke ribbon rises in a distinct curl and keeps the underlying scene visible."
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_snow_flurries",
+      "decision": "approved",
+      "sourceSha256": "3b8eebd29de78ccaa16cfe1515a4bbc1e11cd2cea2612b3cad8ad45f88619b9b",
+      "previewSha256": "f6324a6618dccb9553732ed47c7fa533f985de48c285c0cb0a63b5e4d351aadd",
+      "observation": "Scattered snowflakes vary in size and remain crisp against the darker side of the preview."
+    },
+    {
+      "stickerId": "cutvoke.sticker.flame_sway",
+      "decision": "approved",
+      "sourceSha256": "59903a75b478f23cbb5fee3e17ea54e58e48a2f3fbea838f9b2decb0f0248d7b",
+      "previewSha256": "4db1eacaaef6b6414570dd92582f998ef367950e1f0a408164ecdd3620c178b7",
+      "observation": "Across the timed frames the flame keeps its shape while moving left and right through a clear repeating arc."
+    },
+    {
+      "stickerId": "cutvoke.sticker.note_sway",
+      "decision": "approved",
+      "sourceSha256": "f8613e1805e9eff663af310355e24bb44c8a74bdba5626743bbe2e22506fb6a3",
+      "previewSha256": "c5262eeda3247c31cea6fc2518006bae44653da497fbfc44d6c957ce47c987ce",
+      "observation": "The purple note shifts horizontally over successive frames, making the sway visible while preserving its silhouette."
+    },
+    {
+      "stickerId": "cutvoke.sticker.star_pulse",
+      "decision": "approved",
+      "sourceSha256": "ed6794cefaae98313a6f1a5f7ac05e76ed9fc7aa7ac92a069037b1be2f23d12b",
+      "previewSha256": "24569ffed1224fb27c26f9fa4a4022b7a2059a98dd3d95f895a0d1a1cea1817d",
+      "observation": "The outlined star grows and contracts over the loop; measured bounds change from about 67px to 85px."
+    }
+  ]
+}

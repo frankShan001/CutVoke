@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.techGrid",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "cell",
+    "value": 49
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.032,
+  "exportSha256": "9a6fb24106dfecf3aadd6a8ed9dcd60e13d3da37bf1b72b58adf0577cc838d0c",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "9a6fb24106dfecf3aadd6a8ed9dcd60e13d3da37bf1b72b58adf0577cc838d0c",
+  "auditExport": "fx-techGrid-v1-0-0.audit.mp4"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_blue_lens_flare",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A compact blue-white star flare has long horizontal rays and a bright center, distinct from the crystal burst.",
+  "method": "Inspected the rendered transparent artwork on split dark and light neutral panels; machine workflow audit hashes are pinned.",
+  "sourceSha256": "86a072110abf807f2b129680b7a81f524d574f7ea7ac5eae6486ae6907469d34",
+  "previewSha256": "4303ab512098f9f6ae216ef361343b745e4868cd74d553d2c3d7b1e5261c232a",
+  "auditSha256": "5889ce53e60875e96113c2d864ebb21d6a2af334bb20105ff049d8aa1c9be837"
+}

@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_rain_drops",
+      "decision": "approved",
+      "sourceSha256": "705777f155d72206c525c39a5b09c913053dc5291805e7ee5148d20b155ef04d",
+      "previewSha256": "e265545fea86482bb6a5ecb19b49a47d4304828ae1fd9431b46e7948ba2a4c88",
+      "observation": "水珠大小有层次并带少量纵向雨痕；浅底与深底都能读成玻璃雨滴。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_snow_flurries",
+      "decision": "approved",
+      "sourceSha256": "193b0417b5f98c26a1ae3cad509a281e962ce48804c179f46a2081e74a649338",
+      "previewSha256": "a9e3fd4fd982f0dcd5dab4225b7375408d1c0ea05d997bc660a0010da622d2cd",
+      "observation": "蓝白雪晶大小分层，点状雪花与六角雪晶清楚区分，浅深底均可辨认。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_frost_edge",
+      "decision": "approved",
+      "sourceSha256": "731b75cc87684f85760b373888d1d0ac0398854a0f114a254d8d78fb0156efac",
+      "previewSha256": "e5292bb45760be6fe229f06a0936ae36fd274fa67294c395e7cd56d44ed4205d",
+      "observation": "冰枝从两侧角落生长且保留画面中心，能作为边缘寒霜覆盖层。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_smoke_wisps",
+      "decision": "approved",
+      "sourceSha256": "132fde06344a241e350cc880162e58e7d2b999d346e7d6ccdf9d580db4a97598",
+      "previewSha256": "acf07f9be2b80e58f1e56fd6e5ea1ac964f5bbe6e64fbaf44bfe15d41fb5c445",
+      "observation": "灰白烟流有透明软边和明显卷曲层次，轮廓在浅深背景仍然可见。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_low_fog",
+      "decision": "approved",
+      "sourceSha256": "8dddd924162557df875f529ae49bbc1e737ad4cb85f5e7b645a4b19940afedfc",
+      "previewSha256": "c00fb84f2472ef98d53e77092eebe9747fdb4c56bb03e5f98b07510d87e0136f",
+      "observation": "低位银雾集中在画面下沿，上方保留清晰区域，浅底柔和、深底可读。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_dust_motes",
+      "decision": "approved",
+      "sourceSha256": "6be2cefe8fbdc7bcee4fd3050036e63318a4163ffc9504f257b9f00f66c29a39",
+      "previewSha256": "8909597ee05fdee6f9bc11d844b5f0bcad70598dca6906ad97802a95838912bc",
+      "observation": "金色尘点疏密和尺寸有变化，较亮的大颗粒形成清楚焦点，不像噪点铺满。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_film_scratches",
+      "decision": "approved",
+      "sourceSha256": "82cdecc1589b81db68c531030fe5bb717948f7df2b01a56162885d2128ed31d2",
+      "previewSha256": "fc71c8c09816706478cb8a1365749185f1992be9aea045b89bc48e78c71a1c9b",
+      "observation": "细直胶片划痕与零星尘点可辨，浅底对比更好；适合明亮或复古画面。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_film_burn",
+      "decision": "approved",
+      "sourceSha256": "da69bb858e8eacacda20fc1252eb42006c0353927ff231e054ecc220b98fd4a4",
+      "previewSha256": "7bb7b3c44cc1f238fe8d310996083cd6d84e298f5ebfc5ded864878d875c2c65",
+      "observation": "橙金灼边集中在单侧，边缘发光清楚，适合暖色漏光转场氛围。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_vhs_interference",
+      "decision": "approved",
+      "sourceSha256": "d63eb611bc23a0f8a3ac7bf296704dc7ee3127dced40d871e8b4c049494a9767",
+      "previewSha256": "9fd6327ea569ac0f6b55a30cdb3638edffede8aba7c481497f700f91a95d160f",
+      "observation": "青紫水平干扰条有多组间隔，呈现录像扫描故障，区别于块状故障素材。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_glitch_shards",
+      "decision": "approved",
+      "sourceSha256": "7498bb247155c4cd733d0d728c1ac342e8533b4170e7da4b719419b2020d0d6a",
+      "previewSha256": "996219a1fc93d898190087e0b72ebd56473af3621a07d845f569310dd2d16f77",
+      "observation": "青紫绿的短条块错位明显，形状硬朗，与连续水平扫描线有明确区别。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_holographic_mesh",
+      "decision": "approved",
+      "sourceSha256": "04680f2501ccf26bad5af89bed08f77f443dc08f6246f7849c99c11d2947a1a4",
+      "previewSha256": "110690fe16fb64603a1e4508366d4fc5558cfbfda22e9a2192ece1e66e110710",
+      "observation": "细网格叠加彩虹折射，网线结构完整，和无网格的热浪纹理可区分。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_heat_haze",
+      "decision": "approved",
+      "sourceSha256": "8f27b2d2b88f4b71168c0f076b5eab8aedd68afd7a3afb71e8757c01bc61a06a",
+      "previewSha256": "eb2103547a192576543c666990f3d1d66d1c9ff21295b8c9560263145216e2c4",
+      "observation": "竖向起伏的折射色带没有网格，呈现热扰动感，与全息网有区别。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_ink_bloom",
+      "decision": "approved",
+      "sourceSha256": "22b907685bb88af3d4df2d127aafb5d899a9bf3876c77bc77bc6808b0756dbff",
+      "previewSha256": "5b0e658826c610cb5517cb9dc44d8e639f6b4187d6520098438550fe009eaac8",
+      "observation": "黑墨团块有羽化渗边和浓淡层次，浅色背景表现清楚，深色背景对比较弱。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_watercolor_wash",
+      "decision": "approved",
+      "sourceSha256": "aa6dd64299012ef3cc8b8f383e51b0930f396496ac99a0e14ca5b56da101d90f",
+      "previewSha256": "4ffd88e1226e7c3038326bcd8a5201e3526b43803aec1a2bc25555b5a6515e6b",
+      "observation": "青蓝、珊瑚和金色颜料边界柔和但互相区分，保留透明空白。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_paper_tear",
+      "decision": "approved",
+      "sourceSha256": "42968908bbbab172beada495d75eb3f8e901f37870c8bcfb67fb122bf53af795",
+      "previewSha256": "07743bb210507adcf449b763ee6029b70082f594fc33bb6a3637ce37b27a7205",
+      "observation": "白色纤维撕边带灰色投影，深底轮廓清楚；浅底主要靠投影辨认。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_v2_prismatic_caustics",
+      "decision": "approved",
+      "sourceSha256": "d01a3635b13af8b909c855f5ad72ae2f3c67130db5483c92acdc69e4cd35e9a2",
+      "previewSha256": "930cdce4a1175b584baa397f9d84aea4f0466fccac2f73ffd514d410973df4f1",
+      "observation": "青金紫粉光带与星点高光清晰，形态轻盈，适合点状折射氛围。"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_heat_haze",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "竖向起伏的折射色带没有网格，呈现热扰动感，与全息网有区别。",
+  "sourceSha256": "8f27b2d2b88f4b71168c0f076b5eab8aedd68afd7a3afb71e8757c01bc61a06a",
+  "previewSha256": "eb2103547a192576543c666990f3d1d66d1c9ff21295b8c9560263145216e2c4",
+  "auditSha256": "9af072c437cbbe5ba795979996d374c65737ae0eb1febb3d41e867bccb90b441"
+}

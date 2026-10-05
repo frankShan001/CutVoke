@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bokeh_pastel",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f4d1e2582f394d49fa6371fd60650ff5c10859ae12036ccd5bb9af4fa7e11f0f",
+  "previewSha256": "ad8ea34be8d53e478d88ae18dc00422ff0596fe1881f0790a810956843c2474a",
+  "preview": "texture_bokeh_pastel.mp4",
+  "bytes": 3674,
+  "visiblePixels": 1054,
+  "changedPixels": 0,
+  "motionVisible": false
+}

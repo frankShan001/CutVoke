@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_gold_spark_curve",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e0d0c91f0a699586c5843e3a0c70750a58fc6020c51ae728a9ae57ed4132dde2",
+  "previewSha256": "d94362771c8ee6e7b9acda36dcca9e7c5a90608854ab344d0644fd55a51063e3",
+  "preview": "manga_v2_gold_spark_curve.mp4",
+  "bytes": 10932,
+  "visiblePixels": 5828,
+  "changedPixels": 0,
+  "motionVisible": false
+}

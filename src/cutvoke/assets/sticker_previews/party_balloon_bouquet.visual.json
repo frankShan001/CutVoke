@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_balloon_bouquet",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "气球组与垂下的细绳完整，白色描边连续，透明背景无可见杂点。",
+  "sourceSha256": "3364dfb56b8f7b9d91365aaa2c7b000cf41f89583619600bd6c6e450e7c72379",
+  "previewSha256": "d06c7fa7376e6da36cb12207d678b6a3cd8d75d75854f079cf8077a45812c371",
+  "auditSha256": "c6b28fcf070e37f4e70140fd4d5ca97c4c4830f9c39642a373b613373b99ea51"
+}

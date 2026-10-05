@@ -1,0 +1,39 @@
+{
+  "presetId": "cutvoke.preset.text.label_orange",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.text",
+      "version": "1.0.0",
+      "params": {
+        "content": "创作标题",
+        "animIn": 300,
+        "animOut": 200,
+        "scale": 1.0,
+        "fontSize": 124,
+        "color": "#241e1a",
+        "strokeColor": "#241e1a",
+        "strokeWidth": 0,
+        "background": "#ffb347",
+        "bold": true,
+        "x": 0.38,
+        "y": 0.75,
+        "fontFamily": "Noto Sans SC",
+        "lineSpacing": 1.0,
+        "align": "center",
+        "rotation": 0.0,
+        "shadow": 1
+      }
+    }
+  ],
+  "durationSeconds": 1.5,
+  "firstLastMeanRgbDifference": 3.072,
+  "coverSha256": "b61a6a1c25908d69aa2caacf706a9ff1ae162bc5c10857415f5d29481cdb4993",
+  "previewSha256": "4f20092fad904dc3bab7d8f15d63e18694c0c293a83f104f692cd772b45c0eef",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

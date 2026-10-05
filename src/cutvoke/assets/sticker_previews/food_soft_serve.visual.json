@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_soft_serve",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The cream swirl and waffle cone read as one clean sticker after trimming the neighboring-cell fragment.",
+  "sourceSha256": "fab395a94d7d6760c580d832cb06e7045fbb73f7a2f47e5e25a68953dc5a33a1",
+  "previewSha256": "aa38105e242bcf84b3563f93111440ad56108b45eaec4cddcc0575cfd7a1c0fa",
+  "auditSha256": "94b853e243e45972badc47e32ab977e30963f70496d33cf44fd501ae5ecf133b"
+}

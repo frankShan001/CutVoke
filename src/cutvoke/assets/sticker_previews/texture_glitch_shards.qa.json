@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_glitch_shards",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "85400f6650f835d6fb5e3aa216bccff5503834752a79e084a56cc3c4340e7145",
+  "previewSha256": "911d62592bb5c39282738cbec19d9c7e835f8f442725ff1f7a2a975bac49d398",
+  "preview": "texture_glitch_shards.mp4",
+  "bytes": 4349,
+  "visiblePixels": 1308,
+  "changedPixels": 0,
+  "motionVisible": false
+}

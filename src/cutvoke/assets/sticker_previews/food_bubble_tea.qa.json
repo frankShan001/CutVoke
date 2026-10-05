@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_bubble_tea",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "74322726b30b04e6a9cbf0e0c6f5fcacbb02245d03181c51fbe1adbd069bf663",
+  "previewSha256": "eec6f2c71dcebfc3d1385f75be267ab0ed0b43e4360ea2ea4d68c7ff99f5abf8",
+  "preview": "food_bubble_tea.mp4",
+  "bytes": 5067,
+  "visiblePixels": 2777,
+  "changedPixels": 0,
+  "motionVisible": false
+}

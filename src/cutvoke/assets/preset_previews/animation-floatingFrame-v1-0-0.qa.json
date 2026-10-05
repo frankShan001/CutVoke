@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.animation.floatingFrame",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.float",
+      "version": "1.0.0",
+      "params": {
+        "amplitude": 0.08,
+        "period": 1.6
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 18.381,
+  "maxSampledMeanRgbDifference": 19.493,
+  "coverSha256": "82d882e6cd45631f7b09651897d78ff7f2ebb51c798d93e0bbc785b3dd26153a",
+  "previewSha256": "2f7702f09e8c293e36708753c239419c68a28d6c4234ce0ee147e235ed6de529",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

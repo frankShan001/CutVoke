@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_blue_crystal_burst",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "Angular icy-blue crystal shards radiate outward; the facets and blue highlights remain distinct on both dark and light panels.",
+  "method": "Inspected the rendered transparent artwork on split dark and light neutral panels; machine workflow audit hashes are pinned.",
+  "sourceSha256": "b102a74ddadd02e16d87d0c4137f85c85372b02ed547757aa28bf41e8e6a12df",
+  "previewSha256": "e39c7613418711e5e959146985de2ce37e6a340a77227c973079a18bce57cda5",
+  "auditSha256": "a82b6cc5edd82359aa0fa0996341d2665f1588a9814709edde92c1422cedb041"
+}

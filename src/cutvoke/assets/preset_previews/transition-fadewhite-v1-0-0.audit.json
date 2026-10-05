@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.fadewhite",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.111,
+  "exportSha256": "8fabc36ac322bfbdb70dd9f2fe35793115c2c43ccdf1fd20450770f43614e0d8",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "8fabc36ac322bfbdb70dd9f2fe35793115c2c43ccdf1fd20450770f43614e0d8",
+  "auditExport": "transition-fadewhite-v1-0-0.audit.mp4"
+}

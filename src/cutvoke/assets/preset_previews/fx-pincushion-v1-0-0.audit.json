@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.pincushion",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "k1",
+    "value": -0.2
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "12ff5f911b455150c8dbc31285fe81b21737e97fd6e8e7e0dc0daff84e02ed60",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "12ff5f911b455150c8dbc31285fe81b21737e97fd6e8e7e0dc0daff84e02ed60",
+  "auditExport": "fx-pincushion-v1-0-0.audit.mp4"
+}

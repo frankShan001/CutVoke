@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_laser_fan_cyan",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "5be68efe9ac61efca85d421dbfa216bc42f259e82f9743d0ad601c55c6b89b2e",
+  "previewSha256": "93ba9f5e914f890993ea3d74859214379f300b6eb20aeecfc3cfee80c48c702d",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5450,
+  "visiblePixels": 5429,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 4567,
+    "steady_entry": 5429,
+    "steady_exit": 5428,
+    "exit": 4564
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 4567,
+      "withoutFade": 5427
+    },
+    "steady_entry": {
+      "withFade": 5429,
+      "withoutFade": 5429
+    },
+    "steady_exit": {
+      "withFade": 5428,
+      "withoutFade": 5425
+    },
+    "exit": {
+      "withFade": 4564,
+      "withoutFade": 5429
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.393,
+    0.395
+  ],
+  "auditExport": "stage_light_laser_fan_cyan.audit.mp4",
+  "auditExportSha256": "595e24adbefddcfeef39ec3f9bb9169a9de91ffd228e807ba46114c9b4038727"
+}

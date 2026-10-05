@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_dotted_route",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c4aa80e097cef16c67299d53d73d5f41a3aa496b69187ad56c13ca3b74e21051",
+  "previewSha256": "1b44fb004621cc0cb69a43128e8282808ab999c1c0b4443448b2a40c04c3c8d8",
+  "preview": "guide_dotted_route.mp4",
+  "bytes": 3838,
+  "visiblePixels": 746,
+  "changedPixels": 0,
+  "motionVisible": false
+}

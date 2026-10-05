@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_sunburst",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Yellow radial rays have consistent spacing and navy outlines, remaining easy to read on both backgrounds.",
+  "sourceSha256": "45b6e34caecbab6fb2704dc0680b10c6dd07cb8b3f7468d0ebe1dacbe0078cfb",
+  "previewSha256": "6ff7528426adffa1c5fa2692790378ab0a42ae52b92a9287fb38deef84180a3d",
+  "auditSha256": "7739424c94bc9c5f68df2622f136b50b361574fee3e3f25e03e3526ad23e85f2"
+}

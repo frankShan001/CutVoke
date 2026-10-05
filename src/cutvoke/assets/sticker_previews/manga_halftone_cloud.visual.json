@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_halftone_cloud",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项比对透明原图、浅色/深色合成底图与实际渲染器样片，检查造型辨识、格线串入、边缘裁切、透明通道和背景对比；本次不代表复杂实拍素材的商业观感验收。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿，单独复审，原批次记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿并复审，原 13 项记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另纳入 2026-09-24 的 2×2 高对比图集审核记录。",
+  "observation": "黑色网点围绕白色爆裂中心，深底仍保留明确的白色焦点。",
+  "sourceSha256": "ec03cd3ce0f7c8cb7347ff7990081ff69d715a92a1b369be49e47abd9c1cefd4",
+  "previewSha256": "e92ea07299c8df20927067b3f618afba3b8cb16bc72a327cbe12e07dfd4ada87",
+  "auditSha256": "b6122e966dafc0bdf57781ba133523fd69bfb795c8f27459dcd54465497a8b31"
+}

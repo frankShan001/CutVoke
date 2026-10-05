@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.blueEcho",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.echo",
+  "params": {
+    "frames": 5,
+    "decay": 0.58
+  },
+  "subcategory": "人物残影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "The motion leaves a clearly visible cool-blue offset echo behind the subject.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "71874eb2061538e876dae7bda8a9921868cf64b0893eed91f2c025ff9fdc65c3",
+  "motionPreviewSha256": "fc52fc581007c5c5a29584bb05db2b4251d1293b3600fd5c6e6e8bdb301cafa2",
+  "auditSha256": "60a7a076f22ec6ce0103be120f0e194ae56c8e5abe38f6601f8f80fc049be68e"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_low_fog",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "8dddd924162557df875f529ae49bbc1e737ad4cb85f5e7b645a4b19940afedfc",
+  "previewSha256": "c00fb84f2472ef98d53e77092eebe9747fdb4c56bb03e5f98b07510d87e0136f",
+  "preview": "texture_v2_low_fog.mp4",
+  "bytes": 3700,
+  "visiblePixels": 3189,
+  "changedPixels": 0,
+  "motionVisible": false
+}

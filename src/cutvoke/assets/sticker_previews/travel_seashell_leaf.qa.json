@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_seashell_leaf",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3ecc9ec82b7d3f8fbefb68e59260ea6f3d1b63b25cae4561c9bdc0b2cdc5ab94",
+  "previewSha256": "b7042642aaf1594d905004fc6fdf871f5b1c3a572263393af74be03367d6b50b",
+  "preview": "travel_seashell_leaf.mp4",
+  "bytes": 4166,
+  "visiblePixels": 1398,
+  "changedPixels": 0,
+  "motionVisible": false
+}

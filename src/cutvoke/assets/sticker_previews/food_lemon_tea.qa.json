@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_lemon_tea",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "da75ff5261f4bc3b2bd6d09da7a4dd4f8ee27d7a26c8e88ce5f89371ba6b41ec",
+  "previewSha256": "38d65e82f695551fe8820c9af2e462e2bc155cf673eb74c816ad954aba382e34",
+  "preview": "food_lemon_tea.mp4",
+  "bytes": 5318,
+  "visiblePixels": 2982,
+  "changedPixels": 0,
+  "motionVisible": false
+}

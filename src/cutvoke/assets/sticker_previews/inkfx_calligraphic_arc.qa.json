@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_calligraphic_arc",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "dcc2cb38482d5b74a3d2f22d3fa72ed765e6770da331d392de9048b1fe0bf3c1",
+  "previewSha256": "fa72a489b31c4a24aa80bb8cde175a63d29124cf4ccae8aa70b13d7c2f60d724",
+  "preview": "inkfx_calligraphic_arc.mp4",
+  "bytes": 11629,
+  "visiblePixels": 11400,
+  "changedPixels": 0,
+  "motionVisible": false
+}

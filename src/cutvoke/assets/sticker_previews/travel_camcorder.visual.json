@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_camcorder",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "摄像机镜头、机身和屏幕结构清晰，没有背景色块。",
+  "sourceSha256": "5d9bf0f9f883ff2e10f82c9699101a4cfe0b85025856551482d1f97b0410ab6c",
+  "previewSha256": "770a6cb89897ef00b6d75733111f0c02edb78c271f4b0d2b972adb5c4ba7ef5a",
+  "auditSha256": "4c02ad3c6f4ce0e6eb8b364368fb4a3a96cfac7f073d4474d6b7b3956fa1fdbc"
+}

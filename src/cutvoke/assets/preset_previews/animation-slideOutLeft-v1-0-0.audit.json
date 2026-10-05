@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.slideOutLeft",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.733333,
+  "previewExportMeanRgbDifference": 0.826,
+  "exportSha256": "9999b94c69c5587ff7df26fe232d30b387133eaae7810b7fc0ef7f056f5e6743",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "9999b94c69c5587ff7df26fe232d30b387133eaae7810b7fc0ef7f056f5e6743",
+  "auditExport": "animation-slideOutLeft-v1-0-0.audit.mp4"
+}

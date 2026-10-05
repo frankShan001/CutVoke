@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_cyan_wind_tunnel",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "冰青风洞形成纵向旋流，亮色细节在深底突出，形状区别于环形脉冲。",
+  "sourceSha256": "d899d1da401194f8305bcabf19a9fb9832a3282cf2c956bf6be5615c584aa73e",
+  "previewSha256": "556d3d6346ff6a9280e0bcd75263e143da3ac300b350f46d8acf28870cda6b6f",
+  "auditSha256": "f1ab43d1ef79de557110224f06c789bb255ce34d176e63605d20c3fecbbcdfd4"
+}

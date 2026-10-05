@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_arcade_coins",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex 视觉审阅",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切联系表和 320x180 浅深渐变实景合成联系表，并结合逐张机器应用/编辑/保存重开/撤销重做/入出场动画/MP4 预览与导出审计；只批准轮廓完整、边界干净、可见且彼此可辨的条目。",
+  "observation": "三枚金色街机金币斜向堆叠，币面无文字，金币和火花各自清楚。",
+  "sourceSha256": "cf73977964d01cc1762eef20d81aa78d590e92db0a7ee0bbb07a571681ab6fa6",
+  "previewSha256": "98de8caf9bd88f3a2805d6a64e75562c2cb1fbdc4c2c1e9031f68625c255ae9c",
+  "auditSha256": "d182b152f74bb95650ed9080d2433f673dcdef4fa933f52ef67f1b144315295c"
+}

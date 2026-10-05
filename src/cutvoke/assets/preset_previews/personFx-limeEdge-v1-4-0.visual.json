@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.limeEdge",
+  "version": "1.4.0",
+  "effectId": "cutvoke.person.halo",
+  "params": {
+    "sigma": 12,
+    "hueShift": 110,
+    "saturation": 1.8,
+    "opacity": 0.98
+  },
+  "subcategory": "人物轮廓",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "The bright green halo remains visible around the whole moving subject and is distinct from teal and cyan.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "4851feff81ce123fd88c1c2552976cde1d9b635c2bdcf858310b727124ebcef1",
+  "motionPreviewSha256": "dc46438f65304f380ac43c0a0e91cd59143b6d8575bf64f191e32cd5793f71e2",
+  "auditSha256": "5ed29829b643c6813cb8ec7309c0e65b6e8f6be11376ebb520e3ad5def8041b8"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_cobalt_accel_arcs",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "钴蓝弧线朝右上加速，曲线间有空隙，深色背景下白蓝高光可读。",
+  "sourceSha256": "cce58df16467fa666ec585d79399a3577ca6c42b2367567211186a6545689dd2",
+  "previewSha256": "8741a9c0dee76f3d3b811c6f62d13188be6c827e55c1c2cb41563cd4135813a6",
+  "auditSha256": "c5a46a9756b3b22fcc2154a4e703e229a9d23f280575ea5045ddc5157452d6d0"
+}

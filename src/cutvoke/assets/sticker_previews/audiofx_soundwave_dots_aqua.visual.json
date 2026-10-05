@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_soundwave_dots_aqua",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "Aqua dots make a clear rising wave trail with a lightweight silhouette suited to an overlay.",
+  "sourceSha256": "61bf7f24563a2a834c57205196ce3dfab9fa37a48895e6d280543693cebc7336",
+  "previewSha256": "bed2af66687edb37046c487ba94deec0c829db8d3dd12a062ea14636dcece69b",
+  "auditSha256": "cac12157bde3ef7b43f20def6d8833980aa934808b3cb4af81f4a5f3d8e19f75"
+}

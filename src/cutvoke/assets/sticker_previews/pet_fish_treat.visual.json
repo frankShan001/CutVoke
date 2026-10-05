@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_fish_treat",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "鱼形零食轮廓完整，鳞片装饰未触边，颜色与其它用品区分清楚。",
+  "sourceSha256": "bc4e506c7907edbbf5ed07cfd69c2fb5b18cec36f850aa012af5f524a16b322a",
+  "previewSha256": "c530ef4e489ae7ad28414373878555e6c3dbac716c53b4ee9d278b68442a6e90",
+  "auditSha256": "48a6f1d5b235512cdd12cc0ea30af9efab8f598a63cf5e88b4fa2fdabb013cf1"
+}

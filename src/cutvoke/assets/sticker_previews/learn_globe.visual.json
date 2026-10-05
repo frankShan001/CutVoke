@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_globe",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "球面、陆块和弧形支架结构完整，蓝绿对比在深色背景上仍可辨。",
+  "sourceSha256": "aafff573b5db46258417cb2112637c149c1c8a047090eb47198ae716be3b7ee7",
+  "previewSha256": "6f94cfa38f066261029e507c9e070fe4934ff77da7b10c4041dffa0f2a241a49",
+  "auditSha256": "db0b0cf4f168cced686178948f192dbc9b42399a377ef71a6a696e054bc3e679"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_spectrum_halo_rainbow",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e272f30cb4db647d38b1696a1c1a4a8cff8ff6562ac5fcef4dc2cf2c6735b0c7",
+  "previewSha256": "f1cb37b3866e2938dbf11ed828da0dd0c707914070cfb737bd10f5f473babbec",
+  "preview": "audiofx_spectrum_halo_rainbow.mp4",
+  "bytes": 9420,
+  "visiblePixels": 5879,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_sunrays",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ec9da99a8d603fb9e38d070e8d075270732a329f9941151cb219fe51fa3349ed",
+  "previewSha256": "3ef6bb6ef55a84eea93845449eefb633c404c04ba1d975a07a16f99474635abf",
+  "preview": "weatherfx_sunrays.mp4",
+  "bytes": 7487,
+  "visiblePixels": 12546,
+  "changedPixels": 0,
+  "motionVisible": false
+}

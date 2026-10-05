@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_atom",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e86ac331288cd8a08e150a40278164eaddb030a4d98b072b50a5d330acf7eef8",
+  "previewSha256": "6f270b053464edfea059662d30aa4615f0473e70653f8a3199ced6e848679427",
+  "preview": "learn_atom.mp4",
+  "bytes": 4680,
+  "visiblePixels": 1412,
+  "changedPixels": 0,
+  "motionVisible": false
+}

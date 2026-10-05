@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_hiking_boot",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "登山靴细节完整，旁侧脚印分离清晰，适合作为徒步标记。",
+  "sourceSha256": "4ef61d589f7df6915f9aeb2c13f6da7ec79ca4471332fe2cf90d3d3dae18037c",
+  "previewSha256": "84badd388dabe76aa2600f88126c4498168a833e44177a55e879f81d6e562d1c",
+  "auditSha256": "fdbf9b602d94b54a3b5ef36d52e3138c78a584afaa9251f64d47e0388be62e4e"
+}

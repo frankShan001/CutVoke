@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_halftone_blue",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "Blue-to-violet halftone dots fade outward in a compact oval patch; individual dots stay crisp and the pattern is not confused with grain.",
+  "sourceSha256": "4ea7355cc6714e36eb4b71f06c70e936125a4f24adb8cfc9c184836114e8523a",
+  "previewSha256": "b60f33ace74bbc52f83a93b81a3766c3c6cbf0fb5e7295101fff9c1e3d3f51b4",
+  "auditSha256": "525888631fa594598928ed0f0b0ebb8dd7fea7d4d5bf3f05e60d4e97bb126d11"
+}

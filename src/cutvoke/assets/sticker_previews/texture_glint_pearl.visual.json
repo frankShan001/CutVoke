@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_glint_pearl",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "A small pearl-white cluster of four-point lens glints has restrained pale-blue halos; it reads on dark footage and avoids a visible opaque tile.",
+  "sourceSha256": "1ca5d66f5a266577ef2211a787cbd399fe5d43aa17bbc8960a888cc126314228",
+  "previewSha256": "ecc3de77a58976e82602ad8007266f6a4bde6ea28618adce9dd3252bdf830cf7",
+  "auditSha256": "a5e6e3ea345bf69be27758a7b03f814eda73606116fbf32be785191d5c31eed4"
+}

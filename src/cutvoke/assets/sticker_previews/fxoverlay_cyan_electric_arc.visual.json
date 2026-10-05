@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_cyan_electric_arc",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A branching cyan lightning path has a jagged silhouette and bright nodes, visibly different from the circular aura.",
+  "method": "Inspected the rendered transparent artwork on split dark and light neutral panels; machine workflow audit hashes are pinned.",
+  "sourceSha256": "e89e1b0ccac4a9eded05fc33c27fb8f3f65ea57bcca54b50a38c8b237eae8eef",
+  "previewSha256": "e9a8be4ed5447b8afb5f4ff33d163ffaaf84f307e35b06c822545ef9b58f45c1",
+  "auditSha256": "7f3a93f467b9d9f1b94959308bc7a71d90292680cc40f94f8dfeba06a6efe4e1"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_ghost_teal",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a7a93453f533795068a91151ee071a493000fce2b693419195ffc67fedcb1c40",
+  "previewSha256": "cf2a5a6947d96195902f5fb6ab6267b9214eab75a438b43d7641fd53b487b028",
+  "preview": "texture_optical_ghost_teal.mp4",
+  "bytes": 7705,
+  "visiblePixels": 5050,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_ink_bloom",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "22b907685bb88af3d4df2d127aafb5d899a9bf3876c77bc77bc6808b0756dbff",
+  "previewSha256": "5b0e658826c610cb5517cb9dc44d8e639f6b4187d6520098438550fe009eaac8",
+  "preview": "texture_v2_ink_bloom.mp4",
+  "bytes": 4349,
+  "visiblePixels": 3339,
+  "changedPixels": 0,
+  "motionVisible": false
+}

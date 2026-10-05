@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_globe",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "aafff573b5db46258417cb2112637c149c1c8a047090eb47198ae716be3b7ee7",
+  "previewSha256": "6f94cfa38f066261029e507c9e070fe4934ff77da7b10c4041dffa0f2a241a49",
+  "preview": "learn_globe.mp4",
+  "bytes": 4286,
+  "visiblePixels": 1807,
+  "changedPixels": 0,
+  "motionVisible": false
+}

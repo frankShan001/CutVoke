@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_wind_ribbons",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "415e255d87ebc156e3aa404dd73dcc1d4ca1597e9babbe3388b7298ca4afddb0",
+  "previewSha256": "56c57b6d7cf927f59677a2a3302f12f9ba7f6d621ecebb99a774ff3bbbb7fe0d",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4324,
+  "visiblePixels": 2848,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2133,
+    "steady_entry": 2854,
+    "steady_exit": 2854,
+    "exit": 2129
+  },
+  "previewExportMeanRgbDifferences": [
+    0.284,
+    0.282
+  ],
+  "auditExport": "manga_wind_ribbons.audit.mp4",
+  "auditExportSha256": "278619db54e72e8bb6c68f6eebfd0d1ced02771cce4f62dde1bdb767b9151973"
+}

@@ -3,6 +3,9 @@
     资产即使未进入时间线也会出现在素材库。 */
 
 import { sourceBasename } from "./media";
+import { useSyncExternalStore } from "react";
+import type { AudioRole } from "./mediaApi";
+import type { AssetReference } from "../types/api";
 
 export interface SessionAsset {
   assetId: string;
@@ -11,6 +14,8 @@ export interface SessionAsset {
   size: number;
   kind: "video" | "audio" | "image" | "unknown";
   duration: number | null;
+  available?: boolean;
+  audioRole?: AudioRole;
 }
 
 /** 根据扩展名/探测结果推断类型。 */
@@ -28,9 +33,23 @@ export function inferKind(name: string, hasVideo: boolean, hasAudio: boolean): S
 
 let assets: SessionAsset[] = [];
 const listeners = new Set<() => void>();
+const namesById = new Map<string, string>();
+const namesByPath = new Map<string, string>();
 
 export function getSessionAssets(): SessionAsset[] {
   return assets;
+}
+
+/** Refresh consumers when the server asset ledger finishes loading. */
+export function useSessionAssets(): SessionAsset[] {
+  return useSyncExternalStore(subscribeAssets, getSessionAssets, getSessionAssets);
+}
+
+/** Prefer the original imported filename in editing controls. */
+export function assetDisplayName(reference: Pick<AssetReference, "assetId" | "sourcePath"> | string): string {
+  const path = typeof reference === "string" ? reference : reference.sourcePath;
+  const id = typeof reference === "string" ? undefined : reference.assetId;
+  return (id && namesById.get(id)) || namesByPath.get(path) || sourceBasename(path);
 }
 
 export function addSessionAsset(a: SessionAsset): void {
@@ -44,16 +63,28 @@ export function addSessionAsset(a: SessionAsset): void {
  * 本次会话内的最新探测信息。
  */
 export function hydrateAssets(serverAssets: SessionAsset[]): void {
-  const existing = new Set(assets.map((a) => a.path));
+  const byId = new Map(serverAssets.map((asset) => [asset.assetId, asset]));
+  let changed = false;
+  const updated = assets.map((asset) => {
+    const server = byId.get(asset.assetId);
+    if (!server) return asset;
+    if (asset.available === server.available && asset.name === server.name &&
+        asset.duration === server.duration && asset.audioRole === server.audioRole) return asset;
+    changed = true;
+    return { ...asset, name: server.name, size: server.size,
+             duration: server.duration, available: server.available,
+             audioRole: server.audioRole };
+  });
+  const existing = new Set(updated.map((a) => a.assetId));
   const incoming = serverAssets
-    .filter((a) => !existing.has(a.path))
+    .filter((a) => !existing.has(a.assetId))
     .map((a) => ({
       ...a,
       // 修正旧资产账本中“带封面的音频被记成视频”的历史分类。
       kind: inferKind(a.path || a.name, a.kind === "video", a.kind === "audio"),
     }));
-  if (incoming.length === 0) return;
-  assets = [...incoming, ...assets];
+  if (incoming.length === 0 && !changed) return;
+  assets = [...incoming, ...updated];
   emit();
 }
 
@@ -62,12 +93,29 @@ export function clearSessionAssets(): void {
   emit();
 }
 
+export function updateSessionAssetAudioRole(assetId: string, audioRole: AudioRole): void {
+  let changed = false;
+  assets = assets.map((asset) => {
+    if (asset.assetId !== assetId || asset.audioRole === audioRole) return asset;
+    changed = true;
+    return { ...asset, audioRole };
+  });
+  if (changed) emit();
+}
+
 export function subscribeAssets(fn: () => void): () => void {
   listeners.add(fn);
   return () => listeners.delete(fn);
 }
 
 function emit(): void {
+  namesById.clear();
+  namesByPath.clear();
+  for (const asset of assets) {
+    if (!asset.name.trim()) continue;
+    namesById.set(asset.assetId, asset.name);
+    namesByPath.set(asset.path, asset.name);
+  }
   for (const fn of listeners) fn();
 }
 

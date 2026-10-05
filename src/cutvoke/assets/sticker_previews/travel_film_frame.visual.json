@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_film_frame",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "胶片孔与空白画框均匀完整，造型简洁易辨。",
+  "sourceSha256": "5454d3f4fc1131f65ec5860dd29503f1e00e6abf97bbed7bae084f7fcce2858c",
+  "previewSha256": "271f1cde80c3f027c32168e5b7e1edd3c1521640fb8cb4378f454f8389bbec60",
+  "auditSha256": "d086383fcf8ef1d5c9576efe51e248000a3256a20d9cf91df746c7134e16ac41"
+}

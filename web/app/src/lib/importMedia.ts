@@ -52,7 +52,7 @@ export async function uploadOneFile(file: File): Promise<UploadOneResult> {
     kind,
     duration: dur,
   };
-  addSessionAsset({ ...media });
+  addSessionAsset({ ...media, available: true });
   return { ok: true, media };
 }
 
@@ -64,17 +64,25 @@ export async function uploadFiles(
   files: File[],
   onEach: (media: UploadedMedia, index: number) => unknown,
   onError?: (name: string, message: string) => void,
+  onProgress?: (progress: { completed: number; total: number; name: string; succeeded: number; failed: number }) => void,
 ): Promise<number> {
   let ok = 0;
   let index = 0;
+  let failed = 0;
+  let completed = 0;
   for (const f of files) {
     const res = await uploadOneFile(f);
     if (!res.ok) {
       onError?.(res.name, res.message);
+      failed++;
+      completed++;
+      onProgress?.({ completed, total: files.length, name: f.name, succeeded: ok, failed });
       continue;
     }
     await onEach(res.media, index++);
     ok++;
+    completed++;
+    onProgress?.({ completed, total: files.length, name: f.name, succeeded: ok, failed });
   }
   return ok;
 }

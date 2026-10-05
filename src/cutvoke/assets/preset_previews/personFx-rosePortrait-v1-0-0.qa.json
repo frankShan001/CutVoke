@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.personFx.rosePortrait",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.person.tint",
+      "version": "1.0.0",
+      "params": {
+        "hue": -24,
+        "saturation": 0.2,
+        "intensity": 0.04,
+        "lightness": true
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 16.193,
+  "maxSampledMeanRgbDifference": 16.193,
+  "coverSha256": "6efe7ec71c3314e808d9d33177cf3ea355937f2e3b9f5215c5c2e0b1874f735d",
+  "previewSha256": "219d60e9b09fb824130e68ac9abee8cdde29a2204319dd42f5656095675f4197",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

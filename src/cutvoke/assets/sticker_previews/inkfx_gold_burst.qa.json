@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_gold_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c82bf916a58c52df32c4bf55a701bf922bd6c6c1cfe2412d723733f4e572bcf5",
+  "previewSha256": "328eba7fba76b15bbdd1c87edd77f4781b1fc783a64a41653e7b4128bd2f1e85",
+  "preview": "inkfx_gold_burst.mp4",
+  "bytes": 16837,
+  "visiblePixels": 11150,
+  "changedPixels": 0,
+  "motionVisible": false
+}

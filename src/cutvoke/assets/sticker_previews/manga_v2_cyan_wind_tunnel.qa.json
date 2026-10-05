@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_cyan_wind_tunnel",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d899d1da401194f8305bcabf19a9fb9832a3282cf2c956bf6be5615c584aa73e",
+  "previewSha256": "556d3d6346ff6a9280e0bcd75263e143da3ac300b350f46d8acf28870cda6b6f",
+  "preview": "manga_v2_cyan_wind_tunnel.mp4",
+  "bytes": 15889,
+  "visiblePixels": 11210,
+  "changedPixels": 0,
+  "motionVisible": false
+}

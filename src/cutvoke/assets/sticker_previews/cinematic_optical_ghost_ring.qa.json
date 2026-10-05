@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_ghost_ring",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a9574cd11333274740066e9b11a24ce56c59654c9ad73a426444f8f9dc7bfc4c",
+  "previewSha256": "49e5c7f23ae08b9c96ee8134ed810cede3600fd142a93f4fabd111992b47e3f6",
+  "preview": "cinematic_optical_ghost_ring.mp4",
+  "bytes": 6981,
+  "visiblePixels": 3558,
+  "changedPixels": 0,
+  "motionVisible": false
+}

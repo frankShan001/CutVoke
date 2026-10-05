@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_spotlight_fan",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ba6430064ee807c48424f795405f97711e089d6ab76d0199d26e0aeaf0b18b4a",
+  "previewSha256": "f3af652623af0f0f88b7eb1b62c88b23586aefb05547f7e32f36697d0341af36",
+  "preview": "promo_spotlight_fan.mp4",
+  "bytes": 7071,
+  "visiblePixels": 6872,
+  "changedPixels": 0,
+  "motionVisible": false
+}

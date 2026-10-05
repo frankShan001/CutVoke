@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_smoke",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4aa34ddb1d9957c648080290a4d6784415b680aaeb37a60c61f7224b31c84e45",
+  "previewSha256": "39e818dae136a02da91d968e8662820293f4959a0c0bfc3c6892dca9268ecb30",
+  "preview": "texture_atlas_smoke.mp4",
+  "bytes": 7550,
+  "visiblePixels": 7344,
+  "changedPixels": 0,
+  "motionVisible": false
+}

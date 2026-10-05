@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.marker_doodle_dotted_orbit",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "034b3f2bd1d336541c7ccaf471ee4eaeb57bec6a373a780ec7c43aeb25977be6",
+  "previewSha256": "49ab10894c1821da49f11a53fb1e686378a2796b6aaa276ae7c44310328024e2",
+  "preview": "marker_doodle_dotted_orbit.mp4",
+  "bytes": 4178,
+  "visiblePixels": 820,
+  "changedPixels": 0,
+  "motionVisible": false
+}

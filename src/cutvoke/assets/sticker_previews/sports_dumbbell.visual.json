@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_dumbbell",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "哑铃两端配重与中间金属杆连续完整，红色端盖对应一致，缩小预览仍易辨认。",
+  "sourceSha256": "bcda0273402b85b232490c57d4c932f442eb6305c74a8f3236a7687c58a5b3ad",
+  "previewSha256": "f33ad5abaaa2292a5e5481e929e7403b9e42e750ba7f187340a297612a2fa9fc",
+  "auditSha256": "34e3e37ca9c6c9ddf4b7d20f370048036a2ef4076de8fe5eac73fdbe59404e20"
+}

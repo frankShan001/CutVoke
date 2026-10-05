@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_snow_glints",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "White crystal glints are spread across cool blue snow; broad shape and sparkle points remain readable.",
+  "sourceSha256": "b9096a403635ed372e6af53e7c6fe1e1614fbabd58950141b7730a93efa9721d",
+  "previewSha256": "e6c1143144fb1c860f57d9110bf43d492efe9a5186917b2541bb939f60be019b",
+  "auditSha256": "356ea040bf159fe1f48aca1e3cf9efedf8958f9baf7e43b7c29ef5d544c2f6c3"
+}

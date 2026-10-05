@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_confetti_popper",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "礼花筒主体与散开彩纸保持分离，斜向轮廓和开口完整。",
+  "sourceSha256": "fca73fac504c44e051d6f4d2a5930a7bc73256a596e5d3d9e13a47543d353222",
+  "previewSha256": "10919340fe8a3466966161696e0d1058f15a4af07cd77cd618f4998ab2f732dc",
+  "auditSha256": "fcc7ade3ca0eb5828520a14020af744a980f03c63b30e57635677c4fc1661b80"
+}

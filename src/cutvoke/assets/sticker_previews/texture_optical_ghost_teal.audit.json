@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_ghost_teal",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "a7a93453f533795068a91151ee071a493000fce2b693419195ffc67fedcb1c40",
+  "previewSha256": "cf2a5a6947d96195902f5fb6ab6267b9214eab75a438b43d7641fd53b487b028",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2940,
+  "visiblePixels": 2123,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1418,
+    "steady_entry": 2123,
+    "steady_exit": 2121,
+    "exit": 1411
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1418,
+      "withoutFade": 2123
+    },
+    "steady_entry": {
+      "withFade": 2123,
+      "withoutFade": 2123
+    },
+    "steady_exit": {
+      "withFade": 2121,
+      "withoutFade": 2121
+    },
+    "exit": {
+      "withFade": 1411,
+      "withoutFade": 2121
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.031,
+    0.031
+  ],
+  "auditExport": "texture_optical_ghost_teal.audit.mp4",
+  "auditExportSha256": "d4bc06f0561014fbf42e529239fa2dc680fabac9a83bb227688820f9fb874531"
+}

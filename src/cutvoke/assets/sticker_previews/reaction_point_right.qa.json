@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_point_right",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d1be992fbe70fe651d39fa319cf073a512b20a68fe9e5e54869b8c6a0f294b02",
+  "previewSha256": "1506d62f5cb04260089574dae1bdc0f13935a5a6bdb326f46609c219f9acf653",
+  "preview": "reaction_point_right.mp4",
+  "bytes": 3711,
+  "visiblePixels": 1731,
+  "changedPixels": 0,
+  "motionVisible": false
+}

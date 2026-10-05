@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_pencil",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "木质铅笔的橡皮端、笔身与尖端完整，单体清爽，没有卷屑或格间残片。",
+  "sourceSha256": "c903282d9e431d0a8cec4b2bb479f36ca8010d96e779338cc267757b5462e25d",
+  "previewSha256": "692e043aa0a62c6164c80931ba7fb20b5c72174c90cddb6a231ce64d3dd34a55",
+  "auditSha256": "83c40494d8d78afd2495a9aea510dbde4e0b8064e0b3a00f576f7134a78b4086"
+}

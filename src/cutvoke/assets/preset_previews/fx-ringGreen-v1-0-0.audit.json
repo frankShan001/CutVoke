@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.ringGreen",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "x",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.011,
+  "exportSha256": "68ecdb97a481a5016b412eba6ed9166cfa62f9ad9669a308de08c44199ee154b",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "68ecdb97a481a5016b412eba6ed9166cfa62f9ad9669a308de08c44199ee154b",
+  "auditExport": "fx-ringGreen-v1-0-0.audit.mp4"
+}

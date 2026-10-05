@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_bw_speed_burst",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "黑白放射线向外渐隐，暗区线条清楚，中心留白适合主体叠加；透明格边没有背景块。",
+  "sourceSha256": "d695d9b64a806517c18d0eae37c7c0c3dd293cbbe4e5169fce8024d0c83f24cf",
+  "previewSha256": "e67c04bb0c0c89eeda9a9d8acef2c0374d614514377315e73b74dad093d22659",
+  "auditSha256": "6fa5075626cecfec54d8fce6ec860e71d9a1dd88b37f915631ab1ffe505cef5b"
+}

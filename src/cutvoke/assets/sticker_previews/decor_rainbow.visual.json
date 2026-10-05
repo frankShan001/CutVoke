@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.decor_rainbow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed transparent 4x3 artwork contact sheet and actual composited frames for every sticker, compared silhouettes, palette, use and edge quality against the existing sticker library.",
+  "observation": "粉黄青三层彩虹与两朵白云形成独立柔和装饰，弧线和云朵在缩小合成帧中仍可识别。",
+  "sourceSha256": "5b121bfa6c89e0c69ae89b659974c36f03b2d6e117557d70f7480a7748794c36",
+  "previewSha256": "407e5863999ac08f891bfcbb14963d30b999e07b49ef755a0df3d72dccf7e80d",
+  "auditSha256": "ca0b1f4c262698164b55159cd2f94f8abc5104d6dd206f11c965782225e85dbf"
+}

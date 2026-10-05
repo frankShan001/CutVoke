@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_idea",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Yellow light bulb with visible filament and rays; distinct from the round face icons.",
+  "sourceSha256": "ee92299e713edf1ba2a077a329cdca413c65812bc1b9aa0f04a429497f5bd098",
+  "previewSha256": "d95fe50a09286ef7bee0b6f90d16b2fba632fb235f54b8799eb6be3c2b9a8521",
+  "auditSha256": "247eda43a14eb18aae9e7876b1e3887df1228ddb9b85694b9cab3bdb4ca67fe1"
+}

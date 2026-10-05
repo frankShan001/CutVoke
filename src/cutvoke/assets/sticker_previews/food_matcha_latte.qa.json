@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_matcha_latte",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "490a02fe8fc07a40560e0f3bef59047d6c63f79b3c6587cfb6abbc95833da74f",
+  "previewSha256": "389a3deea4768c91a93efcc518f3322050d7acfe162b7e3fce2b36e2fd837ef7",
+  "preview": "food_matcha_latte.mp4",
+  "bytes": 5402,
+  "visiblePixels": 3485,
+  "changedPixels": 0,
+  "motionVisible": false
+}

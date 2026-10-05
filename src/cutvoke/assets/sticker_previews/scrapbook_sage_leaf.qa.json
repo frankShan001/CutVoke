@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_sage_leaf",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "41bd1ca0212a7f292b144d1a79440e271d606e7a25ea682b85d29f56e879c13b",
+  "previewSha256": "0b9b9aa660b6ff27c61e1bbe45675e3cd352667935542c4afdc4d1626f6b429c",
+  "preview": "scrapbook_sage_leaf.mp4",
+  "bytes": 3044,
+  "visiblePixels": 415,
+  "changedPixels": 0,
+  "motionVisible": false
+}

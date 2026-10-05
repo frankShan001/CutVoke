@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.fx.pincushion",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.lens",
+      "version": "1.0.0",
+      "params": {
+        "k1": 0.6,
+        "k2": 0.2
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 49.839,
+  "maxSampledMeanRgbDifference": 49.839,
+  "coverSha256": "30032c86891e498a87546b0293c0980a40e846a795bd8cea76d1067a782071eb",
+  "previewSha256": "c756fe80248dbaa0f277d457af0ae7c13d056472124eebed13c9b98c981c6685",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

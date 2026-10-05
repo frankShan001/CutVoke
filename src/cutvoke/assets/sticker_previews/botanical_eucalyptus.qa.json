@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_eucalyptus",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e2491627e0898d97210ec2ae5ccd6cd63ad79147b37045b5aa15205ac7b1d538",
+  "previewSha256": "de4498f6ae5f0256c9d37fc5074ab4e9c48f9b3a3f5e7c92ccef7e28f4ff27d7",
+  "preview": "botanical_eucalyptus.mp4",
+  "bytes": 4156,
+  "visiblePixels": 1963,
+  "changedPixels": 0,
+  "motionVisible": false
+}

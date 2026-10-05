@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_trophy",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "00ccec732a735643c7c52012f946f48a819feaf24e2d4de8277bb96c20f86100",
+  "previewSha256": "c0c5313636608df8ecf043497f668353f08b2d03e44850cbb6537ac877a08f61",
+  "preview": "sports_trophy.mp4",
+  "bytes": 3730,
+  "visiblePixels": 987,
+  "changedPixels": 0,
+  "motionVisible": false
+}

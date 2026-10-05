@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.filmFaded",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.vintage",
+  "params": {
+    "strength": 0.9
+  },
+  "subcategory": "胶片",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:51:00+08:00",
+  "observation": "旧片色彩被压成低饱和粉紫和浅黄，暗部抬起；与既有褪色对比的强对比轮廓不同。",
+  "method": "Manual comparison of 320x180 before-after covers and five aligned frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; monoMatte excluded as too close to existing bloom/gray",
+  "coverSha256": "1d3f559210615d97ac78308956bc27d77a4e6f83a72e664632b1b9085eefb4ab",
+  "motionPreviewSha256": "b6b7c2c3d371aacb056d7db1f2225a3936dfe91846f0da408655f0d47f90a0c8",
+  "auditSha256": "bd4e84337f979955f4965d0540e262d128cc710b869142c187155e6dc4a4f59b"
+}

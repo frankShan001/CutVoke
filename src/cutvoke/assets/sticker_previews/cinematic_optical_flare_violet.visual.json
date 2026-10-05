@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_flare_violet",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "紫蓝光带含多个小型镜头鬼影，轮廓比其余三款更分段。",
+  "sourceSha256": "5f08b64dec8262fc0791bc93ff0974242c5c7079f74bb350672e99122a234ae6",
+  "previewSha256": "5b2fe8a0b9efecb77a9eac0085787319f3da231419f5cf4b4aa0ccf2ac807261",
+  "auditSha256": "d28a950021c927d3948655ae0d33acd81ed9fb6be0175793493157079fec4e77"
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_spotlight_bloom_gold",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "aa600002d7d2e79dd3b7b037b4d4d7f302c4d661316f26b274dd268cceb4c213",
+  "previewSha256": "cd16db84fcac4fa2f4f3390159dac9d04e6453c9480ca9dd3e440ab8ebc03a97",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5483,
+  "visiblePixels": 6351,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 3823,
+    "steady_entry": 6364,
+    "steady_exit": 6352,
+    "exit": 3823
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3823,
+      "withoutFade": 6364
+    },
+    "steady_entry": {
+      "withFade": 6364,
+      "withoutFade": 6364
+    },
+    "steady_exit": {
+      "withFade": 6352,
+      "withoutFade": 6364
+    },
+    "exit": {
+      "withFade": 3823,
+      "withoutFade": 6368
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.279,
+    0.274
+  ],
+  "auditExport": "stage_light_spotlight_bloom_gold.audit.mp4",
+  "auditExportSha256": "840f5b2b60fa3dfe721d39f5b77a2a872382d0fd79edc94585cb3a0925d931bb"
+}

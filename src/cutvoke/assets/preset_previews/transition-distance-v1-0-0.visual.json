@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.distance",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.distance",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "叠化",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "过渡早段出现具有空间距离感的双影混合，前后画面同时可见且随时间改变；区别于单纯均匀透明度叠加。",
+  "method": "Viewed aligned five-frame motion sheets for all eight 叠化 candidates and compared their intermediate frames with adjacent presets. Approved only four transitions with clearly different visible motion or color behavior.",
+  "coverSha256": "e0471865f67811d0016f22967876b08877a09932352161503ee6cfbc3d1c8a75",
+  "motionPreviewSha256": "915a46e756ab62aa41170fbaffa58251ecb928b9f1aa76550b118327fdc44194",
+  "auditSha256": "0369c52ea643f1fc077f2d79f435d3e04f0dc28f6644b35cf3e340db73e6e0ae"
+}

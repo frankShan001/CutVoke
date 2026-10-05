@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_rhythm_pulse_coral",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "The coral rhythm trace has one dominant peak and clear horizontal endpoints on the preview.",
+  "sourceSha256": "bb562ceb54ae897a0bd86df4118f32dd106b2a33320d14e8c476e5c8f8d3bf52",
+  "previewSha256": "4d0603f606afeff5cbb8f55c9fcb0dd3cb41c74a2aabe3b060b1ddbbbb7ce350",
+  "auditSha256": "b36a0602c9cba18dee2000317640f9fb0857c23084fa5d6b0eebdbf1ab9a88dc"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_spotlight_dust",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "柔光聚光锥内有细小尘点，亮度从中心向下柔和衰减，主体边界完整。",
+  "sourceSha256": "a8147ed0a9b423585fa82e68b21549960455a468d0ce31029273a66de87c0805",
+  "previewSha256": "8570f0b9f31ddebb1ecd57679c8d6c3e7310d65ce37e3471bfe6d7d0d7e94b78",
+  "auditSha256": "12702b8d1bf93f3c00b5a73a27f0355ffc4647dbdb907806bc07fbf4909294fd"
+}

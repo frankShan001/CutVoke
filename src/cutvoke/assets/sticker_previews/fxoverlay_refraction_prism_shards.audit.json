@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_prism_shards",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "240132c9c1f1da6af7edc011e729b7bc712543933aa9088fa8d7ad395827da13",
+  "previewSha256": "6389d3a184c1285d041aeb8640ec3a8bc06024c58001f5dc50bba20ccb12388c",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 16131,
+  "visiblePixels": 13925,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 5989,
+    "steady_entry": 13925,
+    "steady_exit": 13923,
+    "exit": 5985
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 5989,
+      "withoutFade": 13924
+    },
+    "steady_entry": {
+      "withFade": 13925,
+      "withoutFade": 13925
+    },
+    "steady_exit": {
+      "withFade": 13923,
+      "withoutFade": 13924
+    },
+    "exit": {
+      "withFade": 5985,
+      "withoutFade": 13925
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.391,
+    0.448
+  ],
+  "auditExport": "fxoverlay_refraction_prism_shards.audit.mp4",
+  "auditExportSha256": "8f494379476c8ff220c526bfa0fb5d3610aa070b4aac6000d5c1ea5766430da4"
+}

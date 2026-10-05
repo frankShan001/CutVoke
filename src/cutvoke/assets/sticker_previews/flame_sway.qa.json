@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.flame_sway",
+  "version": "1.1.0",
+  "kind": "dynamic",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "9e0f2a17def4b5013caa8f3405472a134c1138f785b4717875b437566c675709",
+  "previewSha256": "ab343f5409a3f66cccd9c2450976ba9fe9553ea6d84c4f5f25516bd89cef4f29",
+  "preview": "flame_sway.mp4",
+  "bytes": 6719,
+  "visiblePixels": 4049,
+  "changedPixels": 7762,
+  "motionVisible": true
+}

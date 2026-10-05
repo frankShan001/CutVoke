@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_rose_satin",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "0ddc4288a1f179d296b39ed607c28491bac74aaa930e7537bfc7198206642237",
+  "previewSha256": "a49b5536e76b2f52ac1c8f26e7f4434731f4e8806ea27952b5105a77f45411a7",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 7292,
+  "visiblePixels": 6557,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 5897,
+    "steady_entry": 6557,
+    "steady_exit": 6557,
+    "exit": 5900
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 5897,
+      "withoutFade": 6557
+    },
+    "steady_entry": {
+      "withFade": 6557,
+      "withoutFade": 6557
+    },
+    "steady_exit": {
+      "withFade": 6557,
+      "withoutFade": 6557
+    },
+    "exit": {
+      "withFade": 5900,
+      "withoutFade": 6557
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.121,
+    0.121
+  ],
+  "auditExport": "texture_bg_rose_satin.audit.mp4",
+  "auditExportSha256": "3ff65286392b2f9a653653919826422717c38cdb968f63630ceb7f283f6509c2"
+}

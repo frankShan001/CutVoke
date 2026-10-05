@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_camcorder",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5d9bf0f9f883ff2e10f82c9699101a4cfe0b85025856551482d1f97b0410ab6c",
+  "previewSha256": "770a6cb89897ef00b6d75733111f0c02edb78c271f4b0d2b972adb5c4ba7ef5a",
+  "preview": "travel_camcorder.mp4",
+  "bytes": 3763,
+  "visiblePixels": 1441,
+  "changedPixels": 0,
+  "motionVisible": false
+}

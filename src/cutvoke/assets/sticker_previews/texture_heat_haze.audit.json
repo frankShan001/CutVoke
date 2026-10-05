@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_heat_haze",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "43f39713a40f4cf83a1dbc03ae0db271038e5a7ad4c0871236d3fe253862d04d",
+  "previewSha256": "2f7668119d2f5164d9889aef17cc62ff03c21bed6c549263afc95579b5e1878b",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2374,
+  "visiblePixels": 2396,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 289,
+    "steady_entry": 2396,
+    "steady_exit": 2405,
+    "exit": 289
+  },
+  "previewExportMeanRgbDifferences": [
+    0.137,
+    0.139
+  ],
+  "auditExport": "texture_heat_haze.audit.mp4",
+  "auditExportSha256": "28888bc6ad1ec538282e5cc6d2680d53ba96a87bf50d61d74061a5bd1cd531b8"
+}

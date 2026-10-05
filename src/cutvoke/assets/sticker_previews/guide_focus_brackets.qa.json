@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_focus_brackets",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "50ead7b830022b40facd0c7f673814dc1cc26df8289324bd921d25181c206bab",
+  "previewSha256": "168c50c9e31846586505bd05ac4e29891c006bdb81d4c64c2435a84585e5f1e4",
+  "preview": "guide_focus_brackets.mp4",
+  "bytes": 3721,
+  "visiblePixels": 1042,
+  "changedPixels": 0,
+  "motionVisible": false
+}

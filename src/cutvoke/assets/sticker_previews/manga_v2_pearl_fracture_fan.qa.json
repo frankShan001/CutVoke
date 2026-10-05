@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_pearl_fracture_fan",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e15b9200ab6870c7b14eb1f2cf80161d883403830997eac4a490dc7e2a35cbac",
+  "previewSha256": "0230a137df163efae746eb1dc509b1a3600028a1c4209a4a8b9c8e7ed5a1c761",
+  "preview": "manga_v2_pearl_fracture_fan.mp4",
+  "bytes": 12024,
+  "visiblePixels": 6491,
+  "changedPixels": 0,
+  "motionVisible": false
+}

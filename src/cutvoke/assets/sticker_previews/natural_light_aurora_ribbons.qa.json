@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_aurora_ribbons",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "95abe4b0ff1841efbb711710475c20f56a9c6bee43bedf3091a0dd6f3f92d330",
+  "previewSha256": "bef576203585fc06d9c6fc2e3f086255cb9717aed9936ef0d09457b3bd7e4575",
+  "preview": "natural_light_aurora_ribbons.mp4",
+  "bytes": 8731,
+  "visiblePixels": 11611,
+  "changedPixels": 0,
+  "motionVisible": false
+}

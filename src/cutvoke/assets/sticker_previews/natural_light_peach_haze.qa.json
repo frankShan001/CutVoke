@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_peach_haze",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0b35ccfdb31e97994e32691733084846589615611c53dbda627aba628987972e",
+  "previewSha256": "b942d09bceb8873a43ce5effdeeb942891436891d6654a020bd0752dd1b2ff68",
+  "preview": "natural_light_peach_haze.mp4",
+  "bytes": 7788,
+  "visiblePixels": 13116,
+  "changedPixels": 0,
+  "motionVisible": false
+}

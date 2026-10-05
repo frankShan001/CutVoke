@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_neon_stroke",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6d36d0203d07f5b8f504fc7735f7f58a22d295b4c4f90beda57fd341d0314f1c",
+  "previewSha256": "944aedcdcc99a57323ead950ca76fc564f454dba3d06b862deeb52a04dcfc970",
+  "preview": "decor_neon_stroke.mp4",
+  "bytes": 4137,
+  "visiblePixels": 1349,
+  "changedPixels": 0,
+  "motionVisible": false
+}

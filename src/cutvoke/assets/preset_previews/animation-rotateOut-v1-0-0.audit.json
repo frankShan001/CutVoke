@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.rotateOut",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.733333,
+  "previewExportMeanRgbDifference": 1.185,
+  "exportSha256": "cabff648d2c42c8343f42ff44fd003527b5c33881962a9644a0bb29de6769749",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "cabff648d2c42c8343f42ff44fd003527b5c33881962a9644a0bb29de6769749",
+  "auditExport": "animation-rotateOut-v1-0-0.audit.mp4"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_ink_tendrils",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "94e959b07dc7c2830eda4dac5d51a2d76ff37a5701f13ad1ac7b3be8c9d88904",
+  "previewSha256": "2865d9fbff4f7680169abb609b553f2da54991f596b8f5e4fd91bf0d3f3bee39",
+  "preview": "inkfx_ink_tendrils.mp4",
+  "bytes": 9664,
+  "visiblePixels": 12638,
+  "changedPixels": 0,
+  "motionVisible": false
+}

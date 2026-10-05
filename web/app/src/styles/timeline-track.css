@@ -50,6 +50,10 @@
   color: var(--audio);
   background: var(--audio-soft);
 }
+.timeline-track__kind--text {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
 .timeline-track__kind--effect {
   color: var(--accent-text);
   background: var(--accent-soft);
@@ -66,6 +70,48 @@
 }
 .timeline-track__lane--focused {
   border-color: var(--accent);
+}
+.timeline-track__label--captions {
+  background: color-mix(in srgb, var(--bg-2) 84%, #9f7aea 16%);
+}
+.timeline-track__lane--captions {
+  background: color-mix(in srgb, var(--bg-2) 95%, #9f7aea 5%);
+}
+.timeline-track__caption-count {
+  margin-left: auto;
+  color: var(--text-faint);
+  font-size: 10px;
+}
+.caption-timeline-clip {
+  position: absolute;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  padding: 0 5px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, #a78bfa 68%, white 32%);
+  border-radius: 4px;
+  background: color-mix(in srgb, #6d4bb3 82%, transparent);
+  color: #fff;
+  font: inherit;
+  font-size: 10px;
+  line-height: 1;
+  text-align: left;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  z-index: 2;
+}
+.caption-timeline-clip:hover,
+.caption-timeline-clip--selected {
+  border-color: #fff;
+  background: #7654bf;
+  box-shadow: 0 0 0 1px #a78bfa;
+}
+.caption-timeline-clip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  z-index: 3;
 }
 
 .timeline-track__insert-target {
@@ -88,6 +134,45 @@
   border-radius: 3px;
   font-size: 10px;
   white-space: nowrap;
+}
+
+/* 主视频轨的空白确实渲染为黑场；点击只合拢这一处空隙。 */
+.timeline-track__gap {
+  position: absolute;
+  z-index: 1;
+  top: 6px;
+  bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 3px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 4px;
+  background: #080a0f;
+  color: var(--text-dim);
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: pointer;
+}
+.timeline-track__gap span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.timeline-track__gap-close {
+  flex: none;
+  color: var(--accent-text);
+}
+.timeline-track__gap:hover,
+.timeline-track__gap:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.timeline-track__gap:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 /* 紧凑效果轨：只承担可见、可选、可删除的效果对象，不与素材轨争夺高度。 */
@@ -114,17 +199,18 @@
 .effect-segment-group {
   position: absolute;
   inset-block: 3px;
-  display: flex;
-  gap: 2px;
+  display: block;
   min-width: 0;
+  overflow: hidden;
 }
 .effect-segment {
+  position: absolute;
+  box-sizing: border-box;
   min-width: 22px;
-  flex: 1 1 0;
   display: flex;
   align-items: center;
   gap: 3px;
-  padding: 0 4px 0 6px;
+  padding: 0 5px;
   border: 1px solid var(--accent-border-rgba);
   border-radius: 4px;
   background: var(--accent-soft);
@@ -132,6 +218,34 @@
   font-size: 10px;
   cursor: pointer;
   overflow: hidden;
+  touch-action: none;
+}
+.effect-segment--range-editable {
+  cursor: grab;
+}
+.effect-segment--range-editable:active {
+  cursor: grabbing;
+}
+.effect-segment__resize {
+  position: absolute;
+  z-index: 2;
+  inset-block: 0;
+  width: 6px;
+  display: none;
+  background: color-mix(in srgb, var(--accent) 72%, transparent);
+  cursor: ew-resize;
+}
+.effect-segment__resize--start {
+  inset-inline-start: 0;
+  border-radius: 3px 0 0 3px;
+}
+.effect-segment__resize--end {
+  inset-inline-end: 0;
+  border-radius: 0 3px 3px 0;
+}
+.effect-segment--range-editable:hover .effect-segment__resize,
+.effect-segment--range-editable.effect-segment--selected .effect-segment__resize {
+  display: block;
 }
 .effect-segment:hover,
 .effect-segment--selected {
@@ -195,6 +309,33 @@
 }
 
 /* 转场属于两个片段的接缝，因此覆盖在剪切点上，而不是伪装成普通片段。 */
+.transition-seam {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  width: 12px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-3, var(--bg));
+  color: var(--text-dim);
+  cursor: pointer;
+  opacity: 0.8;
+}
+.transition-seam:hover,
+.transition-seam:focus-visible,
+.transition-seam--drop {
+  border-color: var(--accent);
+  color: var(--accent-text);
+  opacity: 1;
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
 .transition-marker {
   position: absolute;
   top: 50%;
@@ -219,6 +360,22 @@
 .transition-marker--selected {
   box-shadow: 0 0 0 2px var(--accent), 0 2px 8px rgba(0, 0, 0, 0.34);
 }
+.transition-marker--inactive {
+  border-color: var(--border-strong);
+  border-style: dashed;
+  color: var(--text-faint);
+  opacity: 0.7;
+}
+.transition-marker--inactive:hover,
+.transition-marker--inactive.transition-marker--selected {
+  box-shadow: 0 0 0 2px var(--border-strong);
+  opacity: 1;
+}
+.transition-marker--drop {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent);
+  opacity: 1;
+}
 .transition-marker:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -228,6 +385,29 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.transition-marker__resize {
+  align-self: stretch;
+  width: 10px;
+  flex: none;
+  border: 0;
+  border-left: 1px solid currentColor;
+  border-radius: 0 999px 999px 0;
+  background: transparent;
+  color: inherit;
+  cursor: ew-resize;
+  touch-action: none;
+  opacity: 0.65;
+}
+.transition-marker__resize:hover,
+.transition-marker__resize:focus-visible {
+  opacity: 1;
+  background: var(--accent-soft-6);
+  outline: none;
+}
+.transition-marker__resize:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
 }
 
 /* 片段条块 */
@@ -253,6 +433,10 @@
 .clip-block--audio {
   background: var(--audio-soft);
   border-color: var(--audio-border-rgba);
+}
+.clip-block--text {
+  background: var(--accent-soft);
+  border-color: var(--accent);
 }
 .clip-block:hover {
   box-shadow: var(--elev-raised);
@@ -322,7 +506,29 @@
   border-bottom-right-radius: var(--radius-sm);
 }
 .clip-block__drag:hover {
-  background: var(--white-soft-rgba);
+  background: color-mix(in srgb, var(--accent) 72%, transparent);
+}
+.clip-block--selected .clip-block__drag {
+  width: 16px;
+  background: color-mix(in srgb, var(--white-soft-rgba) 55%, transparent);
+}
+.timeline-track__trim-readout {
+  position: absolute;
+  top: 2px;
+  z-index: 12;
+  max-width: 340px;
+  padding: 4px 7px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 72%, white 28%);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--bg-0) 92%, transparent);
+  color: var(--text-1);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 28%);
 }
 
 /* 空轨道提示 */

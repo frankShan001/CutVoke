@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_spotlight_violet",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "8ed0c15ca7b8afed5c42b8a978c792575d187aa57cacaafde5ccb4d4edb8b8ad",
+  "previewSha256": "b63ab1f5d0a013e8c4138c86f01d722d5898c05cfe00ddf2d0c4db465dcdf68b",
+  "preview": "personfx_spotlight_violet.mp4",
+  "bytes": 7246,
+  "visiblePixels": 8959,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_light_leak_duotone",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "a0339078f38edcf4a1dc7e568f660e54be6d07d4d2f90ff39b902e980316d973",
+  "previewSha256": "e8cf2bd92099776aa8e1ee0c686d7fefd99faa6175bb2474b2148c2a17435980",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2954,
+  "visiblePixels": 1831,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1087,
+    "steady_entry": 1832,
+    "steady_exit": 1832,
+    "exit": 1083
+  },
+  "previewExportMeanRgbDifferences": [
+    0.125,
+    0.125
+  ],
+  "auditExport": "texture_light_leak_duotone.audit.mp4",
+  "auditExportSha256": "561a7e218d43706dc0d76a89db7b061cc09e4d25aea73fbae6fd4103235cb0e2"
+}

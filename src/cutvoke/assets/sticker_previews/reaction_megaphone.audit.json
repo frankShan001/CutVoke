@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_megaphone",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "9a1d8d6d6da4f21a352f32a899cf50bbc48cd69d4f7469db1369e02b72249b67",
+  "previewSha256": "d881ebfc3434891b4880041af0a7deec6b07071d46cbf19efa4fc4cfcbe29e5c",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3858,
+  "visiblePixels": 2763,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2528,
+    "steady_entry": 2767,
+    "steady_exit": 2767,
+    "exit": 2533
+  },
+  "previewExportMeanRgbDifferences": [
+    0.311,
+    0.31
+  ],
+  "auditExport": "reaction_megaphone.audit.mp4",
+  "auditExportSha256": "c96d3d27f75b68446bffc4c6191b3b0ad334573de441e2ce4c8c7f49b86ec0ca"
+}

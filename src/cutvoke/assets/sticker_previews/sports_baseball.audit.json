@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_baseball",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "95b2e2840b3016fe8e8166d44bf0bde6df7ca68e00c8e5bd71d0174a2c369d7b",
+  "previewSha256": "85cb3e20725c7a0ee4edf5f718965c32f09e335db092ebd96f783d46e829a59a",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1888,
+  "visiblePixels": 1220,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 885,
+    "steady_entry": 1220,
+    "steady_exit": 1220,
+    "exit": 885
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 885,
+      "withoutFade": 1220
+    },
+    "steady_entry": {
+      "withFade": 1220,
+      "withoutFade": 1220
+    },
+    "steady_exit": {
+      "withFade": 1220,
+      "withoutFade": 1220
+    },
+    "exit": {
+      "withFade": 885,
+      "withoutFade": 1220
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.108,
+    0.111
+  ],
+  "auditExport": "sports_baseball.audit.mp4",
+  "auditExportSha256": "64ba1d0fd4c54244dcdb6d5b41f2ce8abf4e94013c7d0edca218c4e534609f3a"
+}

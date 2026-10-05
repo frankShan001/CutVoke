@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_glass_streaks",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "1fe8565e5f5aeb0c838b3d6531e80a7bfaca4431c839c59e1f8a0dccbe045160",
+  "previewSha256": "7820ca0218bd448092624dcf3190f44057b559c1f6e11f91243bbf55198cf234",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4597,
+  "visiblePixels": 3136,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2489,
+    "steady_entry": 3135,
+    "steady_exit": 3136,
+    "exit": 2485
+  },
+  "previewExportMeanRgbDifferences": [
+    0.122,
+    0.2
+  ],
+  "auditExport": "manga_glass_streaks.audit.mp4",
+  "auditExportSha256": "88e677334b8b50443b31f41fe550ea53bcedcd59b2125fc5739ccf4db0e51e34"
+}

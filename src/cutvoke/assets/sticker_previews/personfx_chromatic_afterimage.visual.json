@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_chromatic_afterimage",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "Short cyan and magenta streaks remain separated and read as directional afterimages on both backgrounds.",
+  "sourceSha256": "cc7bca49fca6b4da5fb136c9c1e6d3da175200ff0ea2598b1086b01fef9b9a7c",
+  "previewSha256": "64c3d38153bea8f3d04426eaa31cd85ae1dbf97c6faefc51fbc598392794ea04",
+  "auditSha256": "1f0cbc0df6e7f92f7f3a3f0ed94539c6527a7e98506496b123a8f382a65a03ba"
+}

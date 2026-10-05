@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_spotlight_pair_amber",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "de1727185cf9fc896cc01074e00e9fbe34b05ecd0ce5e80e4ff5af27076ebd74",
+  "previewSha256": "dd14e318c21b065f482339f091e00c7ef9433a141312b56ad7521ff98e3fc9c3",
+  "preview": "stage_light_spotlight_pair_amber.mp4",
+  "bytes": 8124,
+  "visiblePixels": 9537,
+  "changedPixels": 0,
+  "motionVisible": false
+}

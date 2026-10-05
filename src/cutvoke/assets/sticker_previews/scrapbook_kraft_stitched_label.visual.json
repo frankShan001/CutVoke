@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_kraft_stitched_label",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "牛皮纸标签外形和缝线边完整，中央留白可承载用户另加的标题。",
+  "sourceSha256": "f533ca47a156fa5ae9ad4eb2e6c013896b1e7eaf16db07b679fc27e9ef6ddfa6",
+  "previewSha256": "af54012adc36cc78e9294add50bcc1c29096f5016c8b5d3523b20f59ca6ee446",
+  "auditSha256": "3f55ef378d32ddd330f4bf5079aa2ea5fa2dd5683913423a3c9c1749c71af817"
+}

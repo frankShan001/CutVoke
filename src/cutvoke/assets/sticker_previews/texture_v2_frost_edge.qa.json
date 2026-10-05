@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_frost_edge",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "731b75cc87684f85760b373888d1d0ac0398854a0f114a254d8d78fb0156efac",
+  "previewSha256": "e5292bb45760be6fe229f06a0936ae36fd274fa67294c395e7cd56d44ed4205d",
+  "preview": "texture_v2_frost_edge.mp4",
+  "bytes": 4987,
+  "visiblePixels": 2805,
+  "changedPixels": 0,
+  "motionVisible": false
+}

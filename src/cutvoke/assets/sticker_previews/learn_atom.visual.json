@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_atom",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "中心核、轨道和电子位置清楚，细线在深浅背景上都保持可读。",
+  "sourceSha256": "e86ac331288cd8a08e150a40278164eaddb030a4d98b072b50a5d330acf7eef8",
+  "previewSha256": "6f270b053464edfea059662d30aa4615f0473e70653f8a3199ced6e848679427",
+  "auditSha256": "88470aa925747a8b135efb7ebc306bfdcb3636282a89e60b1148266eaa000ffc"
+}

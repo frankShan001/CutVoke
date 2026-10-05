@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_tuxedo_wave",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "afe6fca11f3cc63ce5fe1e8f615d0a1dd21451fdb0186d88bf7e35413475ea79",
+  "previewSha256": "e81a00345f174e905e61bfd074facafacef0bfd72d71bdba551a272c4e138412",
+  "preview": "pet_tuxedo_wave.mp4",
+  "bytes": 4038,
+  "visiblePixels": 1964,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_compass",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "罗盘外圈和指针完整，中心对齐，细刻度在缩略图中仍可辨。",
+  "sourceSha256": "9b6e059c8c20fd360646be86d6a829c62dd177859e326ca5c29601379319c200",
+  "previewSha256": "cbbced13afa10448865bb7b5d5c796f90fe20b363cb3cf2bdfe8dd0e407109dc",
+  "auditSha256": "6c8bc0a925e13e428b5dd7e8ee41aa5e8d5961d9bf4ed15e201f431a1b01fd2d"
+}

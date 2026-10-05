@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_tabby_cat",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "82b0f6ab1afba70f1a4a4cfbb72d241a9d48c9e778d2f33a90aec85f75315e16",
+  "previewSha256": "b6eadbd23b3ea1660fa14758fcf4d01c3bde07c28eaa9f16f9ae309581a641c4",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4383,
+  "visiblePixels": 3030,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2634,
+    "steady_entry": 3030,
+    "steady_exit": 3030,
+    "exit": 2638
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2634,
+      "withoutFade": 3030
+    },
+    "steady_entry": {
+      "withFade": 3030,
+      "withoutFade": 3030
+    },
+    "steady_exit": {
+      "withFade": 3030,
+      "withoutFade": 3030
+    },
+    "exit": {
+      "withFade": 2638,
+      "withoutFade": 3030
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.117,
+    0.134
+  ],
+  "auditExport": "pet_tabby_cat.audit.mp4",
+  "auditExportSha256": "bbf3f1881bfdd79f61dfad180f85beac5404e4cb3bfe24fb0810fb55864b1f56"
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.hrslice",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.hrslice",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "故障",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Vertical incoming bars progress from the left toward the right, reversing the horizontal slice direction while keeping a visibly segmented transition midpoint.",
+  "method": "Manual comparison of five actual rendered frames per transition, neighboring presets, and complete MP4 decode",
+  "coverSha256": "052f9be712e2ee41799643228f3b0d3e683663363eef356612556065a4f250af",
+  "motionPreviewSha256": "9acfb1713ddea58504c4c860fa9709e1743459fa824ded9a343510dd9ef69f71",
+  "auditSha256": "675e5f1ca6b1f6df34e4ebe95f74bd46271d4f1627f5f216eef32a3eb8f6d811"
+}

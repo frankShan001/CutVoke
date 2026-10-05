@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_mic_aura_magenta",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "Magenta luminous strokes form a recognizable microphone silhouette without a solid stand or text.",
+  "sourceSha256": "5579ad8188dedd2521f461acc6582ef0ab9ce2fe6e0afb009fa20e5b6da656fe",
+  "previewSha256": "537c5b640e589fcd28e318310ba17d4ba0715aa9eaa7a504e1fa117c928e27ed",
+  "auditSha256": "960f8bcdd687f4070ac676e8d59ca59678dd9cc904743f40a60fa6d6a9190c88"
+}

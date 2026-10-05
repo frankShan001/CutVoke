@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_film_burn",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "da69bb858e8eacacda20fc1252eb42006c0353927ff231e054ecc220b98fd4a4",
+  "previewSha256": "7bb7b3c44cc1f238fe8d310996083cd6d84e298f5ebfc5ded864878d875c2c65",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4784,
+  "visiblePixels": 3294,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2210,
+    "steady_entry": 3294,
+    "steady_exit": 3294,
+    "exit": 2210
+  },
+  "previewExportMeanRgbDifferences": [
+    0.024,
+    0.028
+  ],
+  "auditExport": "texture_v2_film_burn.audit.mp4",
+  "auditExportSha256": "165fc2f318a902ceee60b5874d8fb92938066af944d5b4da672ead721322a57b"
+}

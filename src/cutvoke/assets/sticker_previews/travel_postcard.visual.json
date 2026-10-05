@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_postcard",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "明信片图窗、邮票区和海岛插画完整，线条留白足够。",
+  "sourceSha256": "d64261add7adb13fe49a27098639c0a51eb46b669d94b9f14ebec4c6340858bc",
+  "previewSha256": "97f1efaf38874fad2c5dc44ba00e435e914ab4921db18e302558041393ae4a99",
+  "auditSha256": "37afc7762fc96ef4d96061117e33887e111ac919b3fa2c2b969a32356e8ad599"
+}

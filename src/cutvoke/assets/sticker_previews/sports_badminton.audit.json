@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_badminton",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "1e1610b3dc9e6136761dddb274b5f0da4ea41d4de15b754c135d3fb39eaf2af2",
+  "previewSha256": "97ea4c6cd1e982e9f1a9f9ab953214441a818b9485b2a10899207acbb14e2c92",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1138,
+  "visiblePixels": 714,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 350,
+    "steady_entry": 714,
+    "steady_exit": 714,
+    "exit": 349
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 350,
+      "withoutFade": 714
+    },
+    "steady_entry": {
+      "withFade": 714,
+      "withoutFade": 714
+    },
+    "steady_exit": {
+      "withFade": 714,
+      "withoutFade": 714
+    },
+    "exit": {
+      "withFade": 349,
+      "withoutFade": 714
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.031,
+    0.031
+  ],
+  "auditExport": "sports_badminton.audit.mp4",
+  "auditExportSha256": "833fce59c91331b44172d1f7220fd007227b47c8616517716ca62ebcd23882a9"
+}

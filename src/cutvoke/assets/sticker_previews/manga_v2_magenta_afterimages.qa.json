@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_magenta_afterimages",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ec6bab2638bb70e951bed01fec2f36396ce106cbad7525efc48f7fd7dc6fc3a8",
+  "previewSha256": "7728dfe568e80eb18182d3e1652eeff3b47e8b65cdf27637e59232bf12b9c75b",
+  "preview": "manga_v2_magenta_afterimages.mp4",
+  "bytes": 11589,
+  "visiblePixels": 10293,
+  "changedPixels": 0,
+  "motionVisible": false
+}

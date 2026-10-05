@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.energy_rainbow_arc",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T08:40:43+00:00",
+  "observation": "The rainbow arc preserves its band separation and remains visible over both backgrounds.",
+  "method": "Reviewed all extracted RGBA overlays on dark and light checkerboard contacts and inspected the rendered player preview contact sheet. Checked silhouette clarity, alpha cleanup, edge safety, contrast, and use as a timeline compositing overlay.",
+  "sourceSha256": "0ebbb81f7ad18b29e8f6183a56f21c8500d604b329cff66773419ac0f20e9615",
+  "previewSha256": "7f509c7016a80c73a9dcc44dba7b12b0105b2803976bd20c88793713fa93d94f",
+  "auditSha256": "f8385b884cd21cb65bc19c1e36e7c1a6561c920b966fae6cd36b0dbe457e431e"
+}

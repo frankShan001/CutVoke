@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.ellipseOrbit",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "amplitude",
+    "value": 0.0475
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "27c02182fd48d24c71cd72928568c2e9ffbcf193cffe5db38dc885bf665331c2",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "27c02182fd48d24c71cd72928568c2e9ffbcf193cffe5db38dc885bf665331c2",
+  "auditExport": "animation-ellipseOrbit-v1-0-0.audit.mp4"
+}

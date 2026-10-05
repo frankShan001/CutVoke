@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.heart_pulse",
+  "version": "1.1.0",
+  "effectId": "cutvoke.anim.breathe",
+  "params": {
+    "amplitude": 0.18,
+    "period": 1.2
+  },
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-10-02T19:42:50+00:00",
+  "method": "Codex actually inspected all 30 chronological continuous frames (15fps, 2 seconds) from this regenerated library sample using view_image, checking motion, alpha edges, shape preservation and canvas containment. Preview QA and full apply/edit/saveReload/undo/export machine audits were rerun before binding.",
+  "observation": "红色爱心按默认1.2秒周期连续呼吸放大/缩小，中心稳定，心尖和高光轮廓完整；全部30帧无黑色矩形背景、越界或突跳。",
+  "sourceSha256": "d220149af5f63cc543188a4802e3eb8164dfeafaa233353d507fcb5e94e50988",
+  "previewSha256": "d83d5c49f7c198e5aba694db8bcb92b7b85b8c830af46cd628b7d54e9980bd77",
+  "auditSha256": "e4a9dbb4bdfe05182427e55ea036e4c18c39cfee34ad40dfb119e97824433da1",
+  "rendererSha256": "019717a0438118bdb3a8a852d000a065e8eac7be52fecea1e33090128fcc318a",
+  "evidencePaths": [
+    "E:/myproject/opencut/output/acceptance/effects-visual-review-20261003/sticker-library/heart_pulse-continuous.png"
+  ]
+}

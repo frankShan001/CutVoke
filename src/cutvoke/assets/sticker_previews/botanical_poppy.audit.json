@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_poppy",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "ff782349fcbadf784350579d2eb53828e77b7fe72e179c4af29067b38620dc1b",
+  "previewSha256": "6585014a96fd59b704ca2b114e4b11cba059875674e48b7a19a838e5bfb9c491",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4650,
+  "visiblePixels": 3419,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3266,
+    "steady_entry": 3419,
+    "steady_exit": 3419,
+    "exit": 3266
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3266,
+      "withoutFade": 3419
+    },
+    "steady_entry": {
+      "withFade": 3419,
+      "withoutFade": 3419
+    },
+    "steady_exit": {
+      "withFade": 3419,
+      "withoutFade": 3419
+    },
+    "exit": {
+      "withFade": 3266,
+      "withoutFade": 3419
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.232,
+    0.232
+  ],
+  "auditExport": "botanical_poppy.audit.mp4",
+  "auditExportSha256": "13b8dc841b9a936f0bacf043a7563f9b7f83daeb109a911f6d11504c7c4a7526"
+}

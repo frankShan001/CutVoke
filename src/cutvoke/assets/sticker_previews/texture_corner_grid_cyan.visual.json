@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_corner_grid_cyan",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "Four blue-cyan technical corner marks with small segmented details form a frame cue; denser than the simple lime focus brackets.",
+  "sourceSha256": "3c7785d307ce234f3f002a27036d7be0f9a6abf0056bf928874e4259910e80a4",
+  "previewSha256": "091926d2f3a74dcf5a1f45797b3a4b1f2dc72a60f70f4b3a0a6c9e44f473cd47",
+  "auditSha256": "b2dc1ce7328247fa87ec88e7383a7ec763d301cb3c315ac8bc9385ce7650c0cf"
+}

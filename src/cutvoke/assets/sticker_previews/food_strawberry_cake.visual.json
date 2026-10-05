@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_strawberry_cake",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The layered cake slice and whole strawberry on the cream top stay readable at preview size.",
+  "sourceSha256": "25d943293c7d4f7b64ff5e4c05d722aeba43b209c7827459f363e01a62628cb5",
+  "previewSha256": "216405e01df83c4f95cea0115d7b5fc9a9368c283bda96a69f73eebbca555183",
+  "auditSha256": "d59ea5a4f38c59c15efcf930576426a7b1fcc4b580597371e7d3fb22eaad2cc9"
+}

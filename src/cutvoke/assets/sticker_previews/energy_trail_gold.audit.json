@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.energy_trail_gold",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "bdc4ef9c14f2c4dec643d65e16ddb43af09db12cd783244ee3ec7404929b5d99",
+  "previewSha256": "3457f266198a4bcef11a36df40e61e7a45f1d8f68977ce1b03a0866bfd3706c7",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1953,
+  "visiblePixels": 1482,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 559,
+    "steady_entry": 1482,
+    "steady_exit": 1482,
+    "exit": 557
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 559,
+      "withoutFade": 1476
+    },
+    "steady_entry": {
+      "withFade": 1482,
+      "withoutFade": 1482
+    },
+    "steady_exit": {
+      "withFade": 1482,
+      "withoutFade": 1482
+    },
+    "exit": {
+      "withFade": 557,
+      "withoutFade": 1482
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.056,
+    0.049
+  ],
+  "auditExport": "energy_trail_gold.audit.mp4",
+  "auditExportSha256": "59d2989053401e7501675a5608bd2ca74d8269c549bced3a465674632ad91630"
+}

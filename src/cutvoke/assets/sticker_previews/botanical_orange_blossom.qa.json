@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_orange_blossom",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "94974435bc65f5884c57ef102917d119afee8b8fc5ae7ba711ec0e5253d48480",
+  "previewSha256": "0d9733ba37b397312da30ad80874900b39a26043d11ab5d99ac5d62abffc6eb8",
+  "preview": "botanical_orange_blossom.mp4",
+  "bytes": 5343,
+  "visiblePixels": 2992,
+  "changedPixels": 0,
+  "motionVisible": false
+}

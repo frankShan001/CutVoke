@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_dumbbell",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "bcda0273402b85b232490c57d4c932f442eb6305c74a8f3236a7687c58a5b3ad",
+  "previewSha256": "f33ad5abaaa2292a5e5481e929e7403b9e42e750ba7f187340a297612a2fa9fc",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1466,
+  "visiblePixels": 981,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 810,
+    "steady_entry": 981,
+    "steady_exit": 981,
+    "exit": 810
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 810,
+      "withoutFade": 981
+    },
+    "steady_entry": {
+      "withFade": 981,
+      "withoutFade": 981
+    },
+    "steady_exit": {
+      "withFade": 981,
+      "withoutFade": 981
+    },
+    "exit": {
+      "withFade": 810,
+      "withoutFade": 981
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.002,
+    0.002
+  ],
+  "auditExport": "sports_dumbbell.audit.mp4",
+  "auditExportSha256": "cb643256c60614e8b5d08b51c309fca798988687c45fca6e8dc4819028225c1f"
+}

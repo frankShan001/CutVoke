@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Compared untreated and treated frames at 0.20s and 0.95s from each real rendered preview, checked sibling covers and full MP4 decode; observations are specific to these geometric samples.",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.fx.wireOutline",
+      "decision": "approved",
+      "motionPreviewSha256": "4f875245ce9257ae57b1271eb5c213f300a34962248385ae0c0aad3796c94a77",
+      "observation": "白色细线仅保留主体边缘，原来的大色块退为黑底；与模糊、色块化和网格覆盖明显不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.boldPoster",
+      "decision": "approved",
+      "motionPreviewSha256": "5042a3f30526a1aa0b7b078e0fb1ccf6aab8b194428ea27c9a28e8b9f053b7d8",
+      "observation": "图像被压成少数灰色与亮色块，叠加淡白网格；主体轮廓仍可认，区别于单纯网格与线稿。"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.negativeFilm",
+      "decision": "approved",
+      "motionPreviewSha256": "8554e7680b8127f24136a0e2b516aef1cdb091ef6d3f6a9c74ff97bcb76d148c",
+      "observation": "整体颜色转为冷绿、深蓝及浅黄的反相高光，原有构图保留；色彩变化与线稿及色块化不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.yellowGrid",
+      "decision": "approved",
+      "motionPreviewSha256": "fd98d3ab3d15945de238efad8d1e2f79532a9035e0dff9c19a6da85a207b2226",
+      "observation": "黄色粗网格覆盖完整彩色原图，原图颜色和细节保留；属于明确的构图叠加而非全画面去色或反相。"
+    }
+  ]
+}

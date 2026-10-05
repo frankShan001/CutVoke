@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_beam_columns_blue",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "bda7394df599e6a2cdc5b28c44fabd5f8f89be6749e27d2262cc0098ddcea8e7",
+  "previewSha256": "60f9f650be1e66a94a459375358060dcf11c3c08c2032aeaea793fc6949c2bab",
+  "preview": "stage_light_beam_columns_blue.mp4",
+  "bytes": 8032,
+  "visiblePixels": 12107,
+  "changedPixels": 0,
+  "motionVisible": false
+}

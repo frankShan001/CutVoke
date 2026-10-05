@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.glitch_chromatic_edges",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项检查4×4透明贴图裁切表和4×4真实画面合成表；确认Alpha通道、裁切边缘、深浅背景对比、缩略图可辨性与每项轮廓差异。",
+  "observation": "椭圆轮廓的青粉色通道彼此错开，环形完整，缩略图仍保持识别度。",
+  "sourceSha256": "936a884bc2b7369b90af3557789a7dff522759b28eb81724d4f2095f0d1c3ecc",
+  "previewSha256": "8f61852780fe9e5a8816bef8acbc7bddfb3f4bad88d05f1f8c2a8200c12ccac9",
+  "auditSha256": "92abc463f96fe6b12e386d07f7826e8baa434b2b5e01cdd23ba9d61f6fe9256e"
+}

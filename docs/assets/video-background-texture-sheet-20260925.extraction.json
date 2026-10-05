@@ -1,0 +1,689 @@
+{
+  "schemaVersion": 1,
+  "source": "video-background-texture-sheet-20260925.png",
+  "sourceSha256": "77e80024186b3dd9dcf52cd42926c64290b6fd2c2ff9b9d5acc718c0d1d4d2aa",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "sourceGenerator": "OpenAI built-in image generation",
+  "generatedAt": "2026-09-25",
+  "prompt": "One square 4x4 atlas of 16 restrained video background textures with exact magenta gutters: underwater blue caustics, champagne brushed glass, rose satin, sage leaf shadows, emerald velvet, lilac pearl, terracotta plaster, charcoal gold geometry, icy frosted glass, coral teal flow, peach watercolor, plum silk, seafoam refraction, cream terrazzo, twilight clouds, amber glass. No text, logos, objects, or noisy artifacts. Generated with OpenAI built-in image generation for the CutVoke project on 2026-09-25.",
+  "layout": "4x4",
+  "extraction": "centered square crop at 82% of each proportional cell; 32px transparent padding",
+  "contactSheet": "video-background-texture-contact-sheet-20260925.png",
+  "items": [
+    {
+      "index": 1,
+      "stem": "texture_bg_underwater_caustics",
+      "name": "深海焦散",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "深海",
+        "水光",
+        "蓝色"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "cropBox": [
+        28,
+        28,
+        285,
+        285
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "4ad54b9c50a93a155254d3cd5d6519a4a0b18da7c7fa07339fd54a595fef20bb",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 2,
+      "stem": "texture_bg_champagne_glass",
+      "name": "香槟拉丝玻璃",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "玻璃",
+        "香槟金",
+        "细腻"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "cropBox": [
+        342,
+        28,
+        599,
+        285
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "7a5ed1df1e941f53e9fd982d4bdd157b3dba764cc628a6db9febd4139ff1499a",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 3,
+      "stem": "texture_bg_rose_satin",
+      "name": "柔玫缎面",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "缎面",
+        "玫瑰粉",
+        "柔光"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "cropBox": [
+        655,
+        28,
+        912,
+        285
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "0ddc4288a1f179d296b39ed607c28491bac74aaa930e7537bfc7198206642237",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 4,
+      "stem": "texture_bg_sage_leaf_shadows",
+      "name": "鼠尾草叶影",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "叶影",
+        "鼠尾草绿",
+        "自然"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "cropBox": [
+        968,
+        28,
+        1225,
+        285
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "1fecd8b5a31ac86be141f841bfafe48ece5dcd9a95a7b99b5075f64861a398b8",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 5,
+      "stem": "texture_bg_emerald_velvet",
+      "name": "深翡翠绒面",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "天鹅绒",
+        "翡翠绿",
+        "质感"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "cropBox": [
+        28,
+        342,
+        285,
+        599
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "cced6d7fcac49ba878626b72a9edbb74b2a167daedbe36d814c09226fe1868c6",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 6,
+      "stem": "texture_bg_lilac_pearl",
+      "name": "淡紫珠光",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "珠光",
+        "淡紫",
+        "虹彩"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "cropBox": [
+        342,
+        342,
+        599,
+        599
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "a6e00d5a416cf54de4cf7835ec497a2606124941399849a6aab8127d8c427ef2",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 7,
+      "stem": "texture_bg_terracotta_plaster",
+      "name": "赤陶灰泥",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "赤陶",
+        "灰泥",
+        "暖色"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "cropBox": [
+        655,
+        342,
+        912,
+        599
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "5feb742b79f369e59e7f2d18d963ec0143fa48bc99d1aed2e608030266d8136d",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 8,
+      "stem": "texture_bg_charcoal_gold",
+      "name": "炭黑金线",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "炭黑",
+        "金线",
+        "几何"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "cropBox": [
+        968,
+        342,
+        1225,
+        599
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "0e9ecfeb3564271f88c5629c7a5c1c92daffdc0c75a990ea617c97fdd303640d",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 9,
+      "stem": "texture_bg_ice_frosted_glass",
+      "name": "冰蓝磨砂玻璃",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "冰蓝",
+        "磨砂玻璃",
+        "冷调"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "cropBox": [
+        28,
+        655,
+        285,
+        912
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "977fb3b76ea58f69ca064b45d85c6354fd4e4438d6881ad0df039e4f43cb2661",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 10,
+      "stem": "texture_bg_coral_teal_flow",
+      "name": "珊瑚青流体",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "珊瑚色",
+        "青色",
+        "流体"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "cropBox": [
+        342,
+        655,
+        599,
+        912
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "7c8d9c4a130737404bf320615b040fe576292e00b5cc81f34bedcd28d79323e0",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 11,
+      "stem": "texture_bg_peach_watercolor",
+      "name": "桃粉水彩",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "桃粉",
+        "水彩",
+        "柔和"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "cropBox": [
+        655,
+        655,
+        912,
+        912
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "38cccbbfcbd7ba3fef92f805e9005f2835303c972922a8e8939afcbbc073a45b",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 12,
+      "stem": "texture_bg_plum_silk",
+      "name": "深梅丝绸",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "丝绸",
+        "梅紫",
+        "暗调"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "cropBox": [
+        968,
+        655,
+        1225,
+        912
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "ec76d6390cacbb24a5808c0235a3fec2045cdbfd55e7745cac4d078fea1bc599",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 13,
+      "stem": "texture_bg_seafoam_refraction",
+      "name": "海沫折射",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "海沫绿",
+        "折射",
+        "水光"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "cropBox": [
+        28,
+        968,
+        285,
+        1225
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        247
+      ],
+      "sha256": "df68a15bdfd0a9c5f0a942eb5b0a14b20acbc42e099cbd5224af5aa2deb75c2d",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 14,
+      "stem": "texture_bg_cream_terrazzo",
+      "name": "奶油水磨石",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "奶油色",
+        "水磨石",
+        "浅色"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "cropBox": [
+        342,
+        968,
+        599,
+        1225
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "9c1cc6c9fb35f93fdc07717ef34b63cb27da1bc5465d6743806648fa8c6fac8f",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 15,
+      "stem": "texture_bg_twilight_clouds",
+      "name": "暮色云层",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "暮色",
+        "云层",
+        "蓝紫"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "cropBox": [
+        655,
+        968,
+        912,
+        1225
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "9ab5ed20b944dd5995eaaf2041169c90c764f97b319f32e7aa40b69e9143545f",
+      "defaultScale": 2.22
+    },
+    {
+      "index": 16,
+      "stem": "texture_bg_amber_glass",
+      "name": "蜜糖琥珀玻璃",
+      "subcategory": "背景纹理",
+      "keywords": [
+        "背景纹理",
+        "琥珀",
+        "玻璃",
+        "金色"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "cropBox": [
+        968,
+        968,
+        1225,
+        1225
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        288,
+        288
+      ],
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "2d376ddaa1d764b67c33e8c8005096722d4dd8e2249e6cdf3f31dfc793352430",
+      "defaultScale": 2.22
+    }
+  ]
+}

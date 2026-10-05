@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_anamorphic_cyan",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "838d2a7559bbfd54dc6163d7aeb77c8188c40938a75ed4837e0af64d59be1e2b",
+  "previewSha256": "cc5c0db09ab83f456574872eec0cd8dc2ab5750fcd528c8737301d3405e8480d",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1780,
+  "visiblePixels": 1400,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 553,
+    "steady_entry": 1411,
+    "steady_exit": 1400,
+    "exit": 548
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 553,
+      "withoutFade": 1408
+    },
+    "steady_entry": {
+      "withFade": 1411,
+      "withoutFade": 1411
+    },
+    "steady_exit": {
+      "withFade": 1400,
+      "withoutFade": 1400
+    },
+    "exit": {
+      "withFade": 548,
+      "withoutFade": 1400
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.093,
+    0.09
+  ],
+  "auditExport": "texture_optical_anamorphic_cyan.audit.mp4",
+  "auditExportSha256": "7885c8dda1d7d6e6f4831b15c1766f85250e3de51e350f84e08aebdca0a6e7f8"
+}

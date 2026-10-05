@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.exclaim_yellow",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0905e0f7ec4dd1d8f6522e6c9563d9988c35e9d1b6315cc566340a58d7cfbb3e",
+  "previewSha256": "74247d6a8d435bdfa28ffe50405404d9de7ba5ef6d456eb373dcee5d1289f9f7",
+  "preview": "exclaim_yellow.mp4",
+  "bytes": 5051,
+  "visiblePixels": 2977,
+  "changedPixels": 0,
+  "motionVisible": false
+}

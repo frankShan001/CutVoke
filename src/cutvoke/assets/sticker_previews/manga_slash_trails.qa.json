@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_slash_trails",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "115fcfa806e7a6f53e93050985cb3a735cb1446ad4b6873b5ee739c731a53d30",
+  "previewSha256": "983e4b079861d78006f008678335d76579b88ed4ddd842e1975ad1a33a24c18f",
+  "preview": "manga_slash_trails.mp4",
+  "bytes": 5648,
+  "visiblePixels": 2047,
+  "changedPixels": 0,
+  "motionVisible": false
+}

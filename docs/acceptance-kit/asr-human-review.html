@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>自然人声 ASR 人工校对</title>
+  <style>
+    :root { color-scheme: light; font: 16px/1.6 system-ui, "Microsoft YaHei", sans-serif; }
+    body { max-width: 920px; margin: 32px auto; padding: 0 20px; color: #20242a; }
+    h1 { font-size: 1.7rem; }
+    .note { border-left: 4px solid #cc7a00; background: #fff5e5; padding: 12px 16px; }
+    audio { width: 100%; margin: 16px 0; }
+    textarea { box-sizing: border-box; width: 100%; min-height: 420px; padding: 14px; font: 1rem/1.7 system-ui, sans-serif; }
+    label { display: block; margin: 16px 0 5px; font-weight: 650; }
+    input, select { box-sizing: border-box; padding: 9px 10px; }
+    input[type="text"], input[type="date"] { width: 100%; }
+    .confirm { display: flex; align-items: flex-start; gap: 10px; font-weight: 400; }
+    .confirm input { margin-top: 6px; }
+    button { margin: 16px 8px 0 0; padding: 10px 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>自然人声 ASR 人工校对</h1>
+  <p>素材：4 分 55.644 秒完整英语访谈，含主持人与受访者对话，受访者为印度英语口音。来源、署名和 SHA-256 见下方记录；请完整听完音频，再逐字校订字幕草稿，不要为了通顺改写原话。听不清的词请标为 <code>[听不清]</code>，不要猜测。</p>
+  <p class="note"><strong>重要：</strong>下方文本来自 Wikimedia Commons 社区时间字幕，105 条、未经人工逐字校对，不是标准答案。只有逐段听完整条音频、按实际发音修改并由复核者确认后，才可作为自然人声人工参考稿。建议对人名、数字和听不清处再由第二位校对者复核。</p>
+  <audio id="sourceAudio" controls preload="metadata" src="../../output/acceptance/jy-r13-asr-wikimedia-caption-reference-20260926/source.webm"></audio>
+  <label for="playRate">听校播放速度</label>
+  <select id="playRate" aria-label="听校播放速度">
+    <option value="0.75">0.75×</option><option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option><option value="1.5">1.5×</option>
+  </select>
+
+  <label for="transcript">听校后的完整逐字稿</label>
+  <textarea id="transcript" spellcheck="true">Hello I am Rupika Sharma, Hindi Community Strategy Liaison from  Movement Strategy team Today we have Abhinav Srivastava from Partnerships working group Today we are streaming from Wikimania Stockholms Rupika: How are you doing Abhinav? Abhinav: I am doing well. Abhinav, would you tell us about the working groups? The work that has been doing on with the partnerships working group, what are they thinking and what has been the workflow of the working group so far? The partnerships working group is one of the nine working groups of the movement strategy project that relates to how we can collaborate with external partners how to work with education programs how to work with musuems how to work with archives what is happening right and what needs improvement These are the first and foremost issues Secondly, the challenges with those organizations whom we have yet not partnered but should do it. Temperature is rising in the world Icerbergs are melting and climate is changing So what is our responsibility We are not developing any factory that emits carbon emissions but we are a very big dot com, so the big responsibilities should also be our responsibilities such kind of debates are present in this in which there is brainstorming what should be there, how it should be made possible Most of the times, what happens is for instance, someone did a very good partnership in Russia In India, we don't have knowledge about that In India if someone did a partnership, then people from Brazil would have no knowledge about it integrating these all There are Wikimedians in Russia and there are Wikimedians in Brazil and there are Wikimedians in India This is important. India has 24 languages And we still don't know about the work of different communities India alone has these issues And we have to think of the whole country, the world is one village We join with this notion Can you share some draft recommendations created by your working group with the community For draft recommendations, there is no particular framework. When we organize a conference, that is considered as a partnership with hotel. This is not a client management - we gave  funds and we will get a service. We often bargain for social discounts. We explain them about the non-profit work and how we can mention them in the reports. This scenario becomes a partnership. Partnership is not when we go to school and did a workshop It is about developing a framework. Partnerships is done at many places. Partnerships is an ethical aspect. We are considered a very big dot com We set an example - See the Wikipedia community did this. We should also follow their example. Or we are not able to do anything keeping this in copyright and is keeping the license open is better. This is being put forth in a message. Advocacy is also one form of partnership. Partnerships is a big phenomena. This is one of the issues. It is why we need to understand why every person cannot do a partnership. Is the reason relates to non sufficient recognition in offline work? Or what is the reason behind it. This is something we need to understand. Similarly, there are modern technologies. We need to understand them For example, for Wikimedia Commons, we use third party tools We are using our partner's third party tools There are many such tools on Commons. One of them is Pattypan. Hindi Wikipedia has a lot of third party tools Suppose if the person who wrote the code for the tool falls ill and he/she is not a Wikipedia editor, then what will we explain to our partner. So there are a lot of things we need to understand like the what are the concerns till date and what can be their solutions What can the community expect from the partnerships working group in the coming future. What is the timeline? In September, all nine working group recommendations will be integrated into one set of document Before that however much the discussions and brainstorming can be made possible this content can be checked out from the Meta-wiki This is the time, take it to village pump or anywhere else and follow up with the discussions about what should be done and what shouldn't be done And what can you share about that the harmonization sprint coming up in the near future In that, 2-3 representatives from each working group I am not going there but I will definitely share my work with them with the local context from India And All working groups have create an integrated set of recommendations Some of the recommendations clash. For example, the capacity building is related to partnerships and capacity building itself is also one of the working groups. Similarly, there is community health. So we will integrate them all. Thank you so much for joining us today and for your contribution to the partnerships working group To all our viewers, thank you for watching us Namaskar!</textarea>
+  <label class="confirm"><input id="confirmed" type="checkbox">
+    我已完整听完整条素材，并按音频逐字校正了文稿；未确认的词标为 [听不清]。</label>
+  <label for="reviewer">校对者匿名代号（不要填写姓名）</label>
+  <input id="reviewer" type="text" autocomplete="off" placeholder="例如 R1">
+  <label for="reviewDate">校对日期</label>
+  <input id="reviewDate" type="date">
+  <button id="downloadText">下载纯逐字稿 TXT</button>
+  <button id="downloadRecord">下载校对记录 JSON</button>
+  <button id="restore">恢复未经校对的社区字幕草稿</button>
+
+  <script>
+    const transcript = document.querySelector("#transcript");
+    const reviewer = document.querySelector("#reviewer");
+    const reviewDate = document.querySelector("#reviewDate");
+    const confirmed = document.querySelector("#confirmed");
+    const sourceAudio = document.querySelector("#sourceAudio");
+    const key = "cutvoke-asr-human-review-v2";
+    const sourceRecord = {
+      title: "Interview by Rupika Sharma with Abhinava Srivastava (Partnerships Working Group member)",
+      path: "output/acceptance/jy-r13-asr-wikimedia-caption-reference-20260926/source.webm",
+      sha256: "53abf0d42a529dfdd79d8b09e6d1ed38e849b006b46972eba3516d186076a5c9",
+      durationSeconds: 295.644,
+      attribution: "Rupika Sharma",
+      license: "CC BY 3.0",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Interview_by_Rupika_Sharma_with_Abhinava_Srivastava_(Partnerships_Working_Group_member).webm",
+      draftTranscript: "Wikimedia Commons community English timed text; 105 cues; not independently listen-verified",
+    };
+    const playRate = document.querySelector("#playRate");
+    playRate.addEventListener("change", () => { sourceAudio.playbackRate = Number(playRate.value); });
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || "null");
+      if (saved) {
+        transcript.value = saved.transcript || transcript.value;
+        reviewer.value = saved.reviewer || "";
+        reviewDate.value = saved.reviewDate || "";
+        confirmed.checked = saved.confirmed === true;
+      }
+    } catch {}
+    for (const field of [transcript, reviewer, reviewDate, confirmed]) {
+      field.addEventListener("input", () => {
+        localStorage.setItem(key, JSON.stringify({
+          transcript: transcript.value,
+          reviewer: reviewer.value,
+          reviewDate: reviewDate.value,
+          confirmed: confirmed.checked,
+        }));
+      });
+    }
+    function readyToDownload() {
+      if (!confirmed.checked) {
+        alert("请先完整听完素材并按声音校订；未听校的字幕不能作为人工参考稿。");
+        return false;
+      }
+      if (!reviewer.value.trim() || !reviewDate.value) {
+        alert("请填写匿名校对代号和校对日期。");
+        return false;
+      }
+      if (!transcript.value.trim()) {
+        alert("逐字稿不能为空。");
+        return false;
+      }
+      return true;
+    }
+    function download(name, content, type) {
+      const url = URL.createObjectURL(new Blob([content], { type }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = name;
+      anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    document.querySelector("#downloadText").addEventListener("click", () => {
+      if (!readyToDownload()) return;
+      download("human-checked-reference.en.txt", transcript.value.trim() + "\n", "text/plain;charset=utf-8");
+    });
+    document.querySelector("#downloadRecord").addEventListener("click", () => {
+      if (!readyToDownload()) return;
+      const record = {
+        schemaVersion: 1,
+        reviewType: "full_source_human_listen_verified_transcript",
+        reviewerCode: reviewer.value.trim(),
+        reviewDate: reviewDate.value,
+        source: sourceRecord,
+        sourceIntervalSeconds: { start: 0, end: 295.644 },
+        draftWasProvided: true,
+        reviewerConfirmedFullListenAndCorrection: confirmed.checked,
+        transcriptFile: "human-checked-reference.en.txt",
+      };
+      download("human-checked-reference.review.json", JSON.stringify(record, null, 2) + "\n", "application/json;charset=utf-8");
+    });
+    document.querySelector("#restore").addEventListener("click", () => {
+      localStorage.removeItem(key);
+      location.reload();
+    });
+  </script>
+</body>
+</html>

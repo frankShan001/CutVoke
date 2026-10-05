@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_film_frame",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5454d3f4fc1131f65ec5860dd29503f1e00e6abf97bbed7bae084f7fcce2858c",
+  "previewSha256": "271f1cde80c3f027c32168e5b7e1edd3c1521640fb8cb4378f454f8389bbec60",
+  "preview": "travel_film_frame.mp4",
+  "bytes": 3447,
+  "visiblePixels": 1901,
+  "changedPixels": 0,
+  "motionVisible": false
+}

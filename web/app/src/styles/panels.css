@@ -134,6 +134,15 @@
   background: var(--border);
   margin: 6px 0;
 }
+.title-editor { display: grid; gap: 8px; font-size: 11px; }
+.title-editor > strong { font-size: 12px; }
+.title-editor label { display: grid; gap: 4px; color: var(--text-dim); min-width: 0; }
+.title-editor .cv-input { width: 100%; min-width: 0; }
+.title-editor textarea { resize: vertical; min-height: 70px; }
+.title-editor__two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.title-editor .title-editor__check { display: flex; align-items: center; gap: 6px; }
+.title-editor__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.title-editor .cv-hint { margin: 0; }
 
 /* ---- 检查器「音频」小节（音量滑块 / 淡入淡出） ---- */
 .inspector__audio {
@@ -182,6 +191,90 @@
 .inspector__adv[open] {
   padding-bottom: var(--space-1);
 }
+
+.lut-import {
+  display: grid;
+  gap: 5px;
+  padding: 8px;
+  margin-top: 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-2);
+}
+.lut-import__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.lut-import .cv-hint {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.lut-import [role="alert"] {
+  color: var(--err);
+}
+.color-wheels {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-2);
+}
+.color-wheels__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.color-wheel-group {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.color-wheel-group__name {
+  font-size: 11px;
+  color: var(--text);
+}
+.color-wheel {
+  position: relative;
+  width: min(100%, 78px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: radial-gradient(circle at center, rgba(140, 140, 140, .96),
+    rgba(140, 140, 140, .45) 38%, transparent 78%),
+    conic-gradient(from 90deg, #e84d55 0deg, #bd67b8 60deg,
+      #5d77d5 120deg, #4ba9b3 180deg, #54bf68 240deg,
+      #cf9c40 300deg, #e84d55 360deg);
+  cursor: crosshair;
+  touch-action: none;
+}
+.color-wheel:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.color-wheel__point {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #202329;
+  box-shadow: 0 0 0 1px #101217, 0 2px 5px #0008;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.color-wheel-group__reset {
+  border: 0;
+  padding: 2px 6px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 10px;
+  cursor: pointer;
+}
+.color-wheel-group__reset:hover { color: var(--text); }
+.color-wheels .cv-hint { margin: 7px 0 0; }
+.color-wheels__numeric { margin-top: 7px; }
 
 /* ---- 轨道列表（含删除按钮） ---- */
 .cv-tracks {
@@ -288,6 +381,18 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
 }
+.cv-caption-word-highlight {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 6px 8px;
+}
+.cv-caption-word-highlight input[type="color"] {
+  width: 48px;
+  height: 28px;
+  padding: 2px;
+}
+.cv-caption-word-highlight .cv-hint { grid-column: 1 / -1; }
 .font-style-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -346,6 +451,16 @@
   font-weight: 600;
   margin-left: auto;
 }
+.audio-analyze__beats {
+  display: grid;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.audio-analyze__beat-actions {
+  display: flex;
+  gap: 8px;
+}
 .cv-caption-row__body {
   flex: 1;
   min-width: 0;
@@ -361,3 +476,114 @@
   font-size: 10.5px;
   color: var(--text-faint);
 }
+.cv-asr {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-2);
+}
+.cv-asr__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+}
+.cv-asr p { margin: 0; }
+.cv-asr__settings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+.cv-asr__settings label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.cv-asr__settings select { width: 100%; min-width: 0; }
+.cv-asr__job, .cv-asr__review {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 11px;
+}
+.cv-asr__job progress { width: 100%; }
+.cv-asr__drafts {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: 350px;
+  overflow-y: auto;
+}
+.cv-asr__draft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.cv-asr__draft-times {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cv-asr__draft-times input { min-width: 0; width: 45%; }
+.cv-asr__draft textarea { width: 100%; resize: vertical; }
+.cv-asr__word-highlight {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 54px;
+  align-items: center;
+  gap: 5px 8px;
+  padding: 6px 0;
+}
+.cv-asr__word-highlight label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-dim);
+}
+.cv-asr__word-highlight input[type="color"] {
+  width: 54px;
+  height: 30px;
+  padding: 2px;
+}
+.cv-asr__word-highlight .cv-hint { grid-column: 1 / -1; }
+.cv-asr__error { color: var(--danger, #ef6d6d); font-size: 11px; }
+.cv-speed-curve {
+  display: grid;
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.cv-speed-curve__plot {
+  display: block;
+  width: 100%;
+  min-height: 130px;
+  background: var(--cv-surface-2, #1f2430);
+  border: 1px solid var(--cv-border, #3c4452);
+  border-radius: 8px;
+  touch-action: none;
+}
+
+.cv-speed-curve__points {
+  display: grid;
+  gap: 5px;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.cv-speed-curve__point {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cv-speed-curve__point > .cv-field__label { min-width: 43px; }
+.cv-speed-curve__point input { width: 55px; min-width: 0; }

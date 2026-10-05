@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_swoosh_pink",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "One saturated pink curved swoosh with a tapered tail; the clean ribbon form is easy to distinguish from the straight light leak.",
+  "sourceSha256": "b2bc3660462adebe19cfd8b91388f6f4ed05bc29bf53eb20f18a061ce97f5fcf",
+  "previewSha256": "2d42dfa5e1983a7fefd477b196385ec90cab0a5c4d5f5db1bc2240c46fb1bb3b",
+  "auditSha256": "fc0b5a7c9b906158c6214ddc58c35af12ba9229337dff667a3e024e9bd030d6e"
+}

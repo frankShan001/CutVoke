@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_light_rain",
+      "decision": "approved",
+      "sourceSha256": "4339aaef3b1e9e508f3e9c65bbecac1102cd7467a3e353c2309c2d00c9026ccd",
+      "previewSha256": "26be401d06a5ecf3313912599840efe9762747282ab334317ba17b2639213a75",
+      "observation": "细雨斜线细密且低对比，置于深色半幅时仍可辨认，适合轻雨画面。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_heavy_rain",
+      "decision": "approved",
+      "sourceSha256": "0fdd979f961ac84310684be862d5993d02bec86b3d09013a16f972fc7a8d351b",
+      "previewSha256": "bdaca0524dd7caa1e6aa57c091b042dde8e638c401d5bc0817ecbaaccc7dc20c",
+      "observation": "密集白色斜向雨丝形成明显雨幕，与细雨素材的密度差异清楚。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_lens_raindrops",
+      "decision": "approved",
+      "sourceSha256": "364d736db0e50cb3df74bdd8820d7da9e550f12c6b5f9fa2de581914b4c7170f",
+      "previewSha256": "01b56226b93c0e111546c0d15f6687a1bf4f4d844d195b8b9ef5200fc3e1aa9a",
+      "observation": "多枚透明水滴保留高光和暗边，可读作镜头表面水珠。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_soft_snow",
+      "decision": "approved",
+      "sourceSha256": "0f0d092decea1790798648f452d29ab75bb9f17038234182feeb9c9d97830392",
+      "previewSha256": "22cb36f1ad5836cb397fefd0fff1b51e85dc19a53f5efc2c3b13ba3c8da80085",
+      "observation": "柔焦雪点大小有层次，呈现散落飘雪，与锐利雪花素材区分明显。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_snowflakes",
+      "decision": "approved",
+      "sourceSha256": "0572bbd3c47526276e20faa8d8f30f711a0f54cb462ea512652b76f212b68881",
+      "previewSha256": "ee8efc35e322c2b5f8e1fc97cd65158b42abd945597db73e7bace2d517313cb2",
+      "observation": "晶形雪花轮廓清晰、分布疏朗，适合强调冬日雪花。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_ground_fog",
+      "decision": "approved",
+      "sourceSha256": "54e1b3f393330641dde83f5674692565a9a1d40e7a821ae9670d62ae2b158d2c",
+      "previewSha256": "3584d22c154601eedabf4d799cee95d4cdd768a8b963af4303677aa186797d69",
+      "observation": "低位灰白雾带横向铺开，上部保留透明空间，适合作为地面薄雾叠层。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_sunrays",
+      "decision": "approved",
+      "sourceSha256": "ec9da99a8d603fb9e38d070e8d075270732a329f9941151cb219fe51fa3349ed",
+      "previewSha256": "3ef6bb6ef55a84eea93845449eefb633c404c04ba1d975a07a16f99474635abf",
+      "observation": "暖金体积光从一侧放射，光束边缘柔和且透明。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_window_lightleak",
+      "decision": "approved",
+      "sourceSha256": "cef3086020b1ae9e7077d1f28ae78c2b7f3f359f86bdb46d4c702c4bb2e25b77",
+      "previewSha256": "cf1631488307db9ae501fd987f8bcd574d80608b139cb2ba0ffbda2b2ee44d93",
+      "observation": "琥珀窗格光斑和横向漏光集中在一侧，与放射光束形态不同。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_dust_motes",
+      "decision": "approved",
+      "sourceSha256": "5868c18a0fadc992aacad25174bf3a751833e71b4beab7e87ed42a9a07315021",
+      "previewSha256": "da1da438ac29f736c4d5dde338e3690a06159598fc1fed257bfc718730192857",
+      "observation": "稀疏细小金色光点与柔焦尘斑形成前后层次。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_cherry_petals",
+      "decision": "approved",
+      "sourceSha256": "ddf62a00bb80a2303bf0fa071ea39b470380b5d2d7a115294afeac8be4222333",
+      "previewSha256": "3e9e04fb33228c60c636f225a64d6e035ca2b3a7a6ecc0a6ce24b1c74d133716",
+      "observation": "粉色花瓣形态明确，大小与朝向有变化，透明边缘无格线残留。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_autumn_leaves",
+      "decision": "approved",
+      "sourceSha256": "354a5ab880261f6beea0ccd18b5619a675f344084eb20ea5a904db929d5aaf03",
+      "previewSha256": "4256a5dfcf0e30d627f8d6a5381faee04f8c9a79e8027494ad2b296e9db2df81",
+      "observation": "橙金叶片保留叶脉和轮廓，与樱花花瓣色形均有区别。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_fireflies",
+      "decision": "approved",
+      "sourceSha256": "59992634f5587a7761c2b3284b92e85e8e118b11ebf1d5c759be81021744ce43",
+      "previewSha256": "80093f6bc0ff5dadf50378fcd025864c5bfb0e69df35621636c4f21e081d5aee",
+      "observation": "独立黄绿色发光点带柔和光晕，粒子间距清晰。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_soap_bubbles",
+      "decision": "approved",
+      "sourceSha256": "0b657a391c134b9e043d08cf5021c0aa10cc39d7b014a51b1eda4c0f623fa785",
+      "previewSha256": "b31f6c3ad8d512e0d0294a8b7fe0af59f45bb0b326aed1d022614cffc7fa52c9",
+      "observation": "透明虹彩泡泡具有高光边缘，背景透过主体，不含实色底板。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_embers",
+      "decision": "approved",
+      "sourceSha256": "3bc6b823db6e3fd2ec587d2a865dedb779ee3c0e0d5caf056658cbea054d4a36",
+      "previewSha256": "6a265ff5c9663cf67b77f0a89f2d3faa6de0061af289094d00f08339895b9782",
+      "observation": "橙色短焰粒子有明暗核心，方向和大小变化可见。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.weatherfx_wind_seeds",
+      "decision": "approved",
+      "sourceSha256": "327f0eeb99fefc9a55331f7ef81482d4e5b7e4b9405d55c97d1ee5dea6228adb",
+      "previewSha256": "9f27ff681b0d43f00fa4c429517d265f7113a6235a6bce4cde5dfe09f19985d3",
+      "observation": "浅色冠毛和细茎组合明确，疏散分布，适合风吹草籽氛围。"
+    }
+  ]
+}

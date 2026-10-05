@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_flashline_pearl",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d6ff0fb532d46aa260c00e51fe57f4932b59b74cf445955566c186962117557d",
+  "previewSha256": "aec08c6c99448789b799faa7ff5d5fe07e42beb6b54300984daee54b547102a3",
+  "preview": "texture_optical_flashline_pearl.mp4",
+  "bytes": 6891,
+  "visiblePixels": 3388,
+  "changedPixels": 0,
+  "motionVisible": false
+}

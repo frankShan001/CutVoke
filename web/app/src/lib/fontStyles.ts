@@ -8,6 +8,7 @@ export type CaptionAlign = "left" | "center" | "right";
 /** 字幕样式字段（与后端 caption.add/update 的 style 字段对齐）。 */
 export interface CaptionStyle {
   fontSize: number;
+  fontFamily?: "Noto Sans SC" | "Noto Serif SC";
   color: string;
   strokeColor: string;
   strokeWidth: number;
@@ -28,6 +29,7 @@ export interface FontStylePreset {
  *  与后端 Caption 默认样式保持一致：白字、黑描边、居中、无背景。 */
 export const CLEAR_CAPTION_STYLE: CaptionStyle = {
   fontSize: 0,
+  fontFamily: "Noto Sans SC",
   color: "#ffffff",
   strokeColor: "#000000",
   strokeWidth: 0,

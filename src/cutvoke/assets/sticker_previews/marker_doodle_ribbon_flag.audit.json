@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.marker_doodle_ribbon_flag",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "06fae6c15b5eefed68533ff268fff1806c9c0e47e1bdf4c295e482428d606f20",
+  "previewSha256": "c04d33f055afc49afc25bce6420dace5a20fcc815637f415661509fcac971014",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3244,
+  "visiblePixels": 2639,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2572,
+    "steady_entry": 2639,
+    "steady_exit": 2639,
+    "exit": 2572
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2572,
+      "withoutFade": 2639
+    },
+    "steady_entry": {
+      "withFade": 2639,
+      "withoutFade": 2639
+    },
+    "steady_exit": {
+      "withFade": 2639,
+      "withoutFade": 2639
+    },
+    "exit": {
+      "withFade": 2572,
+      "withoutFade": 2639
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.194,
+    0.194
+  ],
+  "auditExport": "marker_doodle_ribbon_flag.audit.mp4",
+  "auditExportSha256": "3a10d183a7035fb964f70e16eadae099ffe469fc88324b5e543ff84db111303f"
+}

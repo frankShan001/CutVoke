@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_sage_leaf",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "鼠尾草叶片和奶油色外沿完整，适合搭配纸艺或自然主题。",
+  "sourceSha256": "41bd1ca0212a7f292b144d1a79440e271d606e7a25ea682b85d29f56e879c13b",
+  "previewSha256": "0b9b9aa660b6ff27c61e1bbe45675e3cd352667935542c4afdc4d1626f6b429c",
+  "auditSha256": "9ed9c1dbc8c86261de53c64824d9592a6422a75ce50ac26333253827da64b0e5"
+}

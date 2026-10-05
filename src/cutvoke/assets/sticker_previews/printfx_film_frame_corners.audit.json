@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_film_frame_corners",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "c521aa8eca68f7e8a98470d40f31e2c7817ba4149d1e9c8542eedae08bf228cf",
+  "previewSha256": "a87bfbbc49521e0f2b426c7aeeae592b41dcf59f4926eb0cc2f89b5e466922fa",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5289,
+  "visiblePixels": 2728,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 2310,
+    "steady_entry": 2728,
+    "steady_exit": 2728,
+    "exit": 2313
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2310,
+      "withoutFade": 2728
+    },
+    "steady_entry": {
+      "withFade": 2728,
+      "withoutFade": 2729
+    },
+    "steady_exit": {
+      "withFade": 2728,
+      "withoutFade": 2728
+    },
+    "exit": {
+      "withFade": 2313,
+      "withoutFade": 2728
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.085,
+    0.08
+  ],
+  "auditExport": "printfx_film_frame_corners.audit.mp4",
+  "auditExportSha256": "b595ce5e220408796998f4ddb2eb3abc2e087eeb3211978defb15cccf617ad03"
+}

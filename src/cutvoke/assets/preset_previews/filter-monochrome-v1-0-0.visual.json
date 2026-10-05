@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.monochrome",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.grayscale",
+  "params": {
+    "strength": 1.0
+  },
+  "subcategory": "黑白",
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Even neutral grayscale retains midtone separation without exaggerated contrast.",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "coverSha256": "28e451b310e5a1326b781d5f2038d8ef56db7113122377af4c32d5bfdb57f7ac",
+  "motionPreviewSha256": "8d5ee1b10bf45cbb4a18ceec1dd2e1367699aad43e984d752bb4cb318f40d0ec",
+  "auditSha256": "c20beddba0c5b34f4b78ea94f0ad8feea968f77f6500de18f90bf2870a583998"
+}

@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.natural_light_window_beams",
+      "decision": "approved",
+      "sourceSha256": "674351e800acffada34e667c5c7bb98c60064b20a38d33fd4f02662aba5e1dc7",
+      "previewSha256": "7f5951a33d760b03a1632302215c8f49c9f62e1026447bb4a3a25ef758750a88",
+      "observation": "Broad amber shafts have a clean alpha fade and remain distinct over both dark and pale backplates."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_foliage_dapple",
+      "decision": "approved",
+      "sourceSha256": "090eb84c4a02fdc65bd660f91f90a2f568b2e03d11a0293285faa6c91900d346",
+      "previewSha256": "7474ff11cb23f19a82685929db81b4934aaf29bbed369515cbf74f3b51f9f0da",
+      "observation": "Leaf-shadow pattern has a coherent canopy silhouette with soft transparent margins; green marks remain identifiable."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_pool_caustics",
+      "decision": "approved",
+      "sourceSha256": "c9bb039256f811af2f5618e04e604e7867ac77fc2fdc163fae4c7ddc5d8cc079",
+      "previewSha256": "7ddeef695efdddcdf7744bf8a0a518c378e14b7a330602a116385d58a02a4126",
+      "observation": "Cyan caustic network reads as pool water rather than a solid panel and keeps good line contrast."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_candle_bloom",
+      "decision": "approved",
+      "sourceSha256": "ff910b8d59af08c45414ce66cefbe8ed74f33285dc762082521a893d28082101",
+      "previewSha256": "f4bc5ecc1eaa94bc4c2e64fe3f5468c8776440f29442f6c353e70fe46c9d326b",
+      "observation": "Four warm candle glows form a distinct clustered bloom with feathered edges."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_sunrise_cloud_glow",
+      "decision": "approved",
+      "sourceSha256": "10307478bb6c9af6cf2199ae1a1f816488328026bba00bc591a1903b8af9a08e",
+      "previewSha256": "600dcdf1001de41852e10aa415420d7c450736ef5f207433b73ba9072604d49b",
+      "observation": "Cloud bank and central sunrise are clearly separate from the other diffuse haze overlays."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_window_blind_bands",
+      "decision": "approved",
+      "sourceSha256": "837c87f5837ad932598b7f9e8ab8d43585c6aa8850b11a042375003773767004",
+      "previewSha256": "ac4c76c1f4538929c5ec1eb03e411ced588ed1e7ed1e1cee8257fc4327dc22c9",
+      "observation": "Parallel window-blind bands remain individually legible and show useful gaps for the base footage."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_moonlit_water",
+      "decision": "approved",
+      "sourceSha256": "5c82ca2e388f0e2ba9ea647f1e1c93fd6720262edd7575e04dbd801fbb309da6",
+      "previewSha256": "2457a92e4bcf6a392d66676cb2b6c6e357048077c8f80533a3f622aba3fce51a",
+      "observation": "Cool blue horizontal ripples and white glints read as moonlit water, distinct from the turquoise pool caustic."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_peach_haze",
+      "decision": "approved",
+      "sourceSha256": "0b35ccfdb31e97994e32691733084846589615611c53dbda627aba628987972e",
+      "previewSha256": "b942d09bceb8873a43ce5effdeeb942891436891d6654a020bd0752dd1b2ff68",
+      "observation": "Peach haze is deliberately subtle and soft; it is more visible on midtone footage than a bright background."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_forest_rays",
+      "decision": "approved",
+      "sourceSha256": "08b41c4a190ce25a8e478e696531150a47d4373b7a21faa9e89b556b18be3dce",
+      "previewSha256": "e8dc8821c45f7e72c7037c418696b11dbf09040d026025bdf1c4e788aae89bc9",
+      "observation": "Green-teal volumetric rays have a strong diagonal direction; the tinted field is most suitable for dark or midtone footage."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_snow_glints",
+      "decision": "approved",
+      "sourceSha256": "b9096a403635ed372e6af53e7c6fe1e1614fbabd58950141b7730a93efa9721d",
+      "previewSha256": "e6c1143144fb1c860f57d9110bf43d492efe9a5186917b2541bb939f60be019b",
+      "observation": "White crystal glints are spread across cool blue snow; broad shape and sparkle points remain readable."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_prism_arc",
+      "decision": "approved",
+      "sourceSha256": "904292eb3a1c7f5b69b3931e15b7f306d2a8a8262c8bf9e5a73bb39a7a08eb87",
+      "previewSha256": "a898c34475d375c32edba7c9a1d4f5512f9b03032a50264488e30efd58fae35d",
+      "observation": "Rainbow arc is a distinct single curved highlight with gently fading alpha edges."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_storm_flash",
+      "decision": "approved",
+      "sourceSha256": "22e45ca14d1ff6d248b18658dda9672fb1b5869d8ac7c68df5af98370b48f992",
+      "previewSha256": "1504e0522cdc9dfedaf4b903573c95acf3d6f9af76263e6f9f286b85e5e9f12e",
+      "observation": "Violet-blue flash web has a clear central burst and branching lines; it reads differently from the blue water."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_golden_dust_beam",
+      "decision": "approved",
+      "sourceSha256": "b74ccabcea5219d753d1dc69ae4b8be6762752f8de972df9b8cea56403ab18f5",
+      "previewSha256": "a0a4f3df3d5414d69a5deb548c57ce23de81e4eef1c88bbfe972daa0a003a57e",
+      "observation": "Amber dust motes stay within a diagonal beam, with visible but not excessive round flecks."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_cloud_shadow_wisps",
+      "decision": "approved",
+      "sourceSha256": "00b63e9e418545b95941f368641e0d6f20f0585aae47843f5536cc43f143b460",
+      "previewSha256": "d90c673cdfab3c2a29313d091b91c27370c78339909f8f825ece0bc56106d0a5",
+      "observation": "Soft cool cloud-shadow streaks differ from the colorful sunrise and peach haze; subtle over pale scenes."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_aurora_ribbons",
+      "decision": "approved",
+      "sourceSha256": "95abe4b0ff1841efbb711710475c20f56a9c6bee43bedf3091a0dd6f3f92d330",
+      "previewSha256": "bef576203585fc06d9c6fc2e3f086255cb9717aed9936ef0d09457b3bd7e4575",
+      "observation": "Teal and violet aurora folds retain separate color bands and a soft transparent contour."
+    },
+    {
+      "stickerId": "cutvoke.sticker.natural_light_firelight_reflection",
+      "decision": "approved",
+      "sourceSha256": "0b8ad5fa52df3d5c1dfda2936906418fd89a176737de2689ba26e2048cf087be",
+      "previewSha256": "b4be6f5fb59b1a13427ac7e84ab210509190e2def1612c75f6de795015e5009e",
+      "observation": "Amber flowing caustic pattern forms a distinct warm reflective texture; best used as a stylized firelight overlay."
+    }
+  ]
+}

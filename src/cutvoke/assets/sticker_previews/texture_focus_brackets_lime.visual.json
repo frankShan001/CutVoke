@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_focus_brackets_lime",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "Four lime corner brackets remain separate with no box fill; the minimal focus mark is legible over both sample backgrounds.",
+  "sourceSha256": "1435b7b45785150e85834ed9e5663c1ec58ecb80af0c5c0c79b6725bbc83640b",
+  "previewSha256": "6218f2828be4f7aec9324e1659664eb9bcc675dc81d7a3b2c4ad7f35745602ec",
+  "auditSha256": "447f88006e688979a1dcebcf54350736aaa0d1340d56f4d4be7bfe42b5f59c25"
+}

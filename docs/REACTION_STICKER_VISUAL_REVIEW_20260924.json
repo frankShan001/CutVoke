@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.reaction_joy",
+      "decision": "approved",
+      "sourceSha256": "f6d189896766a658ca25c42cb0ca7d44952e593ecc70e261aa068cf3164a46fe",
+      "previewSha256": "3858ad55a7202930e8988eb95e4ea400fc91d67f0b373040c4a1d95de0e8f178",
+      "observation": "Bright yellow smiling face with rays; facial expression reads clearly at sticker scale."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_surprise",
+      "decision": "approved",
+      "sourceSha256": "960da5cb15bfa22f0d51c651ddd0e885c7c3be504cff328a7c8a23ee41bd3640",
+      "previewSha256": "cc8f14c71d2bf7a1d2ca4698554b517c7f455286ff9a14091b86735406cb083f",
+      "observation": "Teal round face with wide eyes and open mouth; silhouette differs from joy and laugh."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_laugh",
+      "decision": "approved",
+      "sourceSha256": "5126c02a630f3cef6e6e56a3e55e873c8692d14eea7fb464cbeb9fb30c5078e8",
+      "previewSha256": "6cf95d3ffa88c6c707cb43774de878002445af453a390ae204136f4a6aec54b8",
+      "observation": "Pink closed-eye laughing face with blue tears; distinct laughing expression and side accents."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_cool",
+      "decision": "approved",
+      "sourceSha256": "5390b21a90a971ce40bc7a1af3429a6f93528e004a3e45ed944b9d492831e68e",
+      "previewSha256": "cb4a3349c3d0b1172a7f278e29bf62186f33e9133904603568c6ce4a26b0b0bd",
+      "observation": "Orange smiling face with oversized blue sunglasses; unmistakable cool reaction."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_thumbsup",
+      "decision": "approved",
+      "sourceSha256": "e27e94e28e59bbcc963c8ea2b9e6ef17d9b30c77d1feba5258ce4b1ace95ca34",
+      "previewSha256": "796eefc75c9e480d1f21b036db458bfa7b18e900fd6fff65cea3e4eaa9afeacd",
+      "observation": "Blue-cuffed hand forms a clear upright thumb with separated fingers."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_applause",
+      "decision": "approved",
+      "sourceSha256": "78a7252642ea7a17a1ffed7c1d0d082c949c2bf6a1f1576eb564f813824a3004",
+      "previewSha256": "2e9f8480508ff12d4a09f162810855e006a2baa9228817875831a190baaccd48",
+      "observation": "Two clapping hands with small yellow impact marks; clearly distinct from the single-hand gesture."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_point_right",
+      "decision": "approved",
+      "sourceSha256": "d1be992fbe70fe651d39fa319cf073a512b20a68fe9e5e54869b8c6a0f294b02",
+      "previewSha256": "1506d62f5cb04260089574dae1bdc0f13935a5a6bdb326f46609c219f9acf653",
+      "observation": "Blue-cuffed hand extends one index finger horizontally to the right."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_heart_hand",
+      "decision": "approved",
+      "sourceSha256": "9819143a07d761a09111430b012efa064d012bc6fea85248f9e679bb6221fb43",
+      "previewSha256": "3ea3cc6c09fa2bd2d314028d4f617ad55306f9a9c46b59387aee820bc6cba5a8",
+      "observation": "Two hands frame a red heart; the central heart and pink rays remain legible."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_heart",
+      "decision": "approved",
+      "sourceSha256": "1104d533fe1c9bd043f234c599342d938baa9a5abd52bfbfd06a8d2b077829bb",
+      "previewSha256": "ac51e656f0a1763789ea2e0d12dcd1d937bee5fa913c1099ca5d1645120077c4",
+      "observation": "Glossy red standalone heart silhouette with clean transparent margins."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_crown",
+      "decision": "approved",
+      "sourceSha256": "abef4daed6fad17dd8bc1422b293c23ac865ca36d064142061f0009eb5c2f477",
+      "previewSha256": "972d20a3fa0ba94b8209fcc6bceecb4e874959c5a8a5e7dbcc58ec5195916f43",
+      "observation": "Gold crown with colored jewels; upright silhouette remains distinct at small scale."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_megaphone",
+      "decision": "approved",
+      "sourceSha256": "9a1d8d6d6da4f21a352f32a899cf50bbc48cd69d4f7469db1369e02b72249b67",
+      "previewSha256": "d881ebfc3434891b4880041af0a7deec6b07071d46cbf19efa4fc4cfcbe29e5c",
+      "observation": "Blue handheld megaphone with yellow sound rays; object reads clearly."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_camera",
+      "decision": "approved",
+      "sourceSha256": "c1db8df05290cd5a18c9ac539139cfb8b0227fba63d44748441ddef289efb44a",
+      "previewSha256": "a2e14df217a8211f6367c8db73e4ac446e6242b8311a5249675b1a44ce345e1c",
+      "observation": "Teal compact camera with centered lens and small top controls."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_coffee",
+      "decision": "approved",
+      "sourceSha256": "036087da79d0e52e3771256858917535022af9f652b08fb9592267a4f952f2cc",
+      "previewSha256": "bed3d87f47bac6c0c38e9510276227fe4669d3cb3270aaf9a91623267c5c6dc4",
+      "observation": "Pink steaming cup and saucer; handle and steam separate cleanly from the body."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_headphones",
+      "decision": "approved",
+      "sourceSha256": "7131127809e2bcde87ed99b02bedbac65168e63fe07c6421b286ba743601ea90",
+      "previewSha256": "de1295a710a33cac4c1330ef990c563335be0fb783f6544d10a904f5a3049650",
+      "observation": "Purple over-ear headphones with visible arch and separated ear cups."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_check",
+      "decision": "approved",
+      "sourceSha256": "e737b76e84dc863c6432f51e736ab9af54dda47286f42153fbe10b47b7e7e83f",
+      "previewSha256": "c6c0aad249d87eb26a112f25ac75f695489f89989c80ef0d084bd10d17a67d9c",
+      "observation": "Green scalloped badge with a large white check mark and strong contrast."
+    },
+    {
+      "stickerId": "cutvoke.sticker.reaction_idea",
+      "decision": "approved",
+      "sourceSha256": "ee92299e713edf1ba2a077a329cdca413c65812bc1b9aa0f04a429497f5bd098",
+      "previewSha256": "d95fe50a09286ef7bee0b6f90d16b2fba632fb235f54b8799eb6be3c2b9a8521",
+      "observation": "Yellow light bulb with visible filament and rays; distinct from the round face icons."
+    }
+  ]
+}

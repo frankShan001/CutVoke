@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_paper_tear",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "observation": "A diagonal ragged paper edge has a bright fibrous boundary and fades to transparent outside the torn sheet.",
+  "sourceSha256": "49a48dcb64369af26c43334a74e4e34c9b2e51c9234d284179db401196e42456",
+  "previewSha256": "0e0c97a337acf218401ef2a6bb26f854f7daf0508184d59383ebcf0978c8186c",
+  "auditSha256": "cefabe975465f5e423b4006d0c428a2ba73da3662467979b36aaeeef7deaf7d1"
+}

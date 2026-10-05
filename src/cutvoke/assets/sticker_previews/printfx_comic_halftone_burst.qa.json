@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_comic_halftone_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "859f09331cf672143e0479fb86bbb8d838ea4488d182db1452a71d23d4704c0c",
+  "previewSha256": "758b4bc5ca7f87511c53da26293a137c0252ded98930db543099e14d75a3bf5b",
+  "preview": "printfx_comic_halftone_burst.mp4",
+  "bytes": 14002,
+  "visiblePixels": 8426,
+  "changedPixels": 0,
+  "motionVisible": false
+}

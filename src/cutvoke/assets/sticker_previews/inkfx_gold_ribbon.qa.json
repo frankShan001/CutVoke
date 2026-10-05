@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_gold_ribbon",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1718048eda3d8614d41690735e3fd48f5a60094c8e7688c64de5f200fb7205eb",
+  "previewSha256": "46045c5b0fa68aa8f2f09c6b555ccd08600f57636c82ff4804c08b501f6e15be",
+  "preview": "inkfx_gold_ribbon.mp4",
+  "bytes": 12907,
+  "visiblePixels": 6813,
+  "changedPixels": 0,
+  "motionVisible": false
+}

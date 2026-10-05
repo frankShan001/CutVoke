@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器浅底合成预览；只批准结构和颜色在缩略图中清楚、可与同类区分的素材。批准仅覆盖贴图本身的可辨识度，不代表复杂实拍成片验收。",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.texture_dust_motes",
+      "decision": "approved",
+      "sourceSha256": "b7bc7a1b7b21c93dcf46fb7763faeca62fcb5f802b475a7796d03b8be2c23d07",
+      "previewSha256": "77d1cb879101f39bbc2bc62ce1b64988b2505ac0966b1ddcf8f0cfeabccd8208",
+      "observation": "金色颗粒有大小和明暗层次，浅灰预览中仍清晰可辨，能表达暖色漂浮尘点。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_film_burn",
+      "decision": "approved",
+      "sourceSha256": "b0dc6df1b5542192c539a58e00748417414425ab1e2dd338707092e8326aeaa4",
+      "previewSha256": "e1d35af62605c79bfc0958e150db101c77eeceb9dd543c091928b4361ba08d7d",
+      "observation": "画面边缘的橙红燃烧带和火星清楚，范围受控且不遮住中央内容。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_vhs_interference",
+      "decision": "approved",
+      "sourceSha256": "a4992207d75e45d76b5013a20db29c94b634a3d0ba92f32acb0c1b4e9cf6fab1",
+      "previewSha256": "b246516cd8ee39a9f6114b66c4363db584d68870d79473a0c7d050d09a9c809b",
+      "observation": "多条青紫横向扫描干扰明显，缩略图能辨认为 VHS 横向信号纹理。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_glitch_shards",
+      "decision": "approved",
+      "sourceSha256": "85400f6650f835d6fb5e3aa216bccff5503834752a79e084a56cc3c4340e7145",
+      "previewSha256": "911d62592bb5c39282738cbec19d9c7e835f8f442725ff1f7a2a975bac49d398",
+      "observation": "青品红色块与错位碎片对比清晰，形态与 VHS 横线区别明显。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_holographic_mesh",
+      "decision": "approved",
+      "sourceSha256": "d302fa26bb75a36aac854738658bc45c43eaea4e451101404f1cf4053a3c1122",
+      "previewSha256": "9565023317d0fa26b3d75cd5ff7c12dfdf8171ccfc2b2762d813a2171b7ff550",
+      "observation": "彩虹网格有连续波形与色带，浅底上仍保留清楚的全息网格结构。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_heat_haze",
+      "decision": "approved",
+      "sourceSha256": "43f39713a40f4cf83a1dbc03ae0db271038e5a7ad4c0871236d3fe253862d04d",
+      "previewSha256": "2f7668119d2f5164d9889aef17cc62ff03c21bed6c549263afc95579b5e1878b",
+      "observation": "重复的彩色热浪条纹方向稳定、边缘清晰，与全息网格可区分。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_ink_bloom",
+      "decision": "approved",
+      "sourceSha256": "8dd0326e12802aedcf98bdde7df0015e8708077b93a26d51be0a64ed125b0929",
+      "previewSha256": "08b4bff67216f143e51c5395642719eb5a128e68cf64f41b398be7567cada372",
+      "observation": "深色墨迹团块轮廓和内部晕染清楚，透明边缘自然，浅底可读。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_watercolor_wash",
+      "decision": "approved",
+      "sourceSha256": "5af4b4891594a4a78d9ac8c8e62d26a169ef9e68e2c346f5ca90f7ca461dc404",
+      "previewSha256": "31edaacc147d380351ddfdc5e8bc7bbf713f81b0269cd84ccb84c77eeaf07be2",
+      "observation": "蓝粉橙色水彩形块轮廓完整，颜色分层清晰且未出现裁切串格。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.texture_prismatic_caustics",
+      "decision": "approved",
+      "sourceSha256": "249fc410bf7f21ce02946edc99df74eb2a631b8ba4bcbc93b93d886ae498677f",
+      "previewSha256": "88bd66f4c1c4560769a5a6d88608869afbc1d43f05345ee5638f914da5b8697f",
+      "observation": "彩色折射光线与星点高光清楚，分布稀疏，作为光学叠层有辨识度。"
+    }
+  ]
+}

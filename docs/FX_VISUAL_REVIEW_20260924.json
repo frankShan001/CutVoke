@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual FX motion-sheet review",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared actual rendered five-frame motion sheets and cover sheets across FX subcategories; checked edited audit renders against original preset previews at the same time.",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.fx.softBlur",
+      "decision": "approved",
+      "motionPreviewSha256": "1a0c80aee5174291f8fa51904d8e5afc3fd2a97a76edba669047912bc5fc3013",
+      "observation": "The original lines and sun edge become uniformly soft; this is distinct from the grid and light treatments. Changing sigma alters the rendered frame."
+    },
+    {
+      "presetId": "cutvoke.preset.fx.flickerPulse",
+      "decision": "approved",
+      "motionPreviewSha256": "b4df12cca65fedcec0b6198381461bc7e11cdd7898784c7628f1df366b1b2ebe",
+      "observation": "Brightness visibly flashes across the sampled moments while geometry stays intact; unlike static RGB split or noisy glitch. Changing hz alters the rendered sequence."
+    },
+    {
+      "presetId": "cutvoke.preset.fx.neonGlow",
+      "decision": "approved",
+      "motionPreviewSha256": "72384a9f2d998e94d9a7a70ca4ba5fde5e2fd79f8ef844e57eab7980f69fb7cf",
+      "observation": "Highlights bloom around the sun and outlined card while the scene remains colored; unlike the dark vignette. Intensity visibly changes the render."
+    },
+    {
+      "presetId": "cutvoke.preset.fx.techGrid",
+      "decision": "approved",
+      "motionPreviewSha256": "320f02d88c1e2451e4c68286b2925f335b8a07cebf38f618a543c38243af093b",
+      "observation": "A regular white grid covers the whole frame with transparent cells, distinct from the centered yellow block. Cell-size edit visibly changes the render."
+    },
+    {
+      "presetId": "cutvoke.preset.fx.yellowPanel",
+      "decision": "approved",
+      "motionPreviewSha256": "b01cf97fd868fa3f7e13e6ef52c9328a2f51d37e1e22606ed1a069625a0c4204",
+      "observation": "A semitransparent yellow rectangular area occupies the center-right while the rest stays clear; distinct from the full-frame grid. X-position edit visibly changes the render."
+    }
+  ]
+}

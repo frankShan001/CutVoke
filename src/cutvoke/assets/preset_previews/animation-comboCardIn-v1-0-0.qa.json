@@ -1,0 +1,30 @@
+{
+  "presetId": "cutvoke.preset.animation.comboCardIn",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.comboCardIn",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "easing": "ease-out",
+        "distance": 0.3,
+        "primary": "flipIn",
+        "secondary": "slideIn",
+        "fromScale": 0.8
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 108.967,
+  "maxSampledMeanRgbDifference": 108.967,
+  "coverSha256": "2cc30bf22b5d777f4485c0c8002f837f99d28537dce96d173ed477a23eb07d55",
+  "previewSha256": "1b8449c7245b8bdc83180f3ebe7889b9ccad9ebd4260bca2d4cb2c5e9ecd5378",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

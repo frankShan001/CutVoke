@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_lens_glow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T01:05:55+00:00",
+  "observation": "The horizontal lens flare keeps a bright core and broad soft rays without an opaque panel.",
+  "method": "Reviewed each extracted RGBA PNG on dark and light contact sheets, then checked the actual RenderService preview contact sheet. Examined distinct silhouettes, cell-edge clipping, alpha fringes, visibility on both tones, and usefulness as a compositing overlay.",
+  "sourceSha256": "8233c1fe16ffdea001ad4dbee66c4af3b15eb39a5cc0c072fe6bcc1e4d986947",
+  "previewSha256": "ed202aba9ba914b64f3ed2583dd9202532b7d35ada80dc5b7fed963213698285",
+  "auditSha256": "ecc9dacce98c6c15553ab75edd45aeb7950af8dc60fecf39617c1af83f0e52bc"
+}

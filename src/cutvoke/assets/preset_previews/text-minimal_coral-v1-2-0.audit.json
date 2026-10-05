@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.minimal_coral",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 1508,
+  "exportSha256": "860ae7494964120352c2a0e64977e88ddd04d05a0cb73474f5b037fc0397bba7",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "860ae7494964120352c2a0e64977e88ddd04d05a0cb73474f5b037fc0397bba7",
+  "auditExport": "text-minimal_coral-v1-2-0.audit.mp4"
+}

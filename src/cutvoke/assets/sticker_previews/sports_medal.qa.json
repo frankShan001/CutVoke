@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_medal",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "21ff37f9665c8e9a6e8706e24cb72d6a32d70f07b9cfb0afbc1ee02a9f3bb33e",
+  "previewSha256": "91d126333ca0979c8ffb2889d0cb716d7486c86acd23c5c8c1433b2e0217b266",
+  "preview": "sports_medal.mp4",
+  "bytes": 3664,
+  "visiblePixels": 866,
+  "changedPixels": 0,
+  "motionVisible": false
+}

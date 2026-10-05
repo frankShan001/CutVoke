@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_anamorphic_flare_pearl",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "f2cd348c94f1872d144532c562d3b9fd2b0f6bd0bffa1312afbc050f6a7358f6",
+  "previewSha256": "b51723514c8c2a98f90411ba30a09c7c4dc7a11915546bcc960f36bcd39655dd",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4114,
+  "visiblePixels": 3189,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 626,
+    "steady_entry": 3193,
+    "steady_exit": 3192,
+    "exit": 648
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 626,
+      "withoutFade": 3193
+    },
+    "steady_entry": {
+      "withFade": 3193,
+      "withoutFade": 3193
+    },
+    "steady_exit": {
+      "withFade": 3192,
+      "withoutFade": 3192
+    },
+    "exit": {
+      "withFade": 648,
+      "withoutFade": 3192
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.193,
+    0.191
+  ],
+  "auditExport": "stage_light_anamorphic_flare_pearl.audit.mp4",
+  "auditExportSha256": "44469c320627243239a018a426c6d6c3d809585db68303a19a12d0afe9fd92f7"
+}

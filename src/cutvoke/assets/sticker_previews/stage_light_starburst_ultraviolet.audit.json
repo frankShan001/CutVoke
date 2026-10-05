@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_starburst_ultraviolet",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "0d0fe2f3809fff158e3d511f036fd6613072e96cf728e4d2e93ae7e2ccb53422",
+  "previewSha256": "046c1912d2fb4f8500293397612aa99b712c30c9f7a6553d9885a43d9174a7f5",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5997,
+  "visiblePixels": 8229,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 4927,
+    "steady_entry": 8233,
+    "steady_exit": 8233,
+    "exit": 4927
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 4927,
+      "withoutFade": 8233
+    },
+    "steady_entry": {
+      "withFade": 8233,
+      "withoutFade": 8233
+    },
+    "steady_exit": {
+      "withFade": 8233,
+      "withoutFade": 8228
+    },
+    "exit": {
+      "withFade": 4927,
+      "withoutFade": 8233
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.398,
+    0.406
+  ],
+  "auditExport": "stage_light_starburst_ultraviolet.audit.mp4",
+  "auditExportSha256": "219909c57ba9becca8ff01f6558d14b6fd84220926be9048e685d0b48cede34b"
+}

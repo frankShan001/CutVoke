@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.filmFaded",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 0.45
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "fc0fa9a63d6040a37dc0bd4e1cf17725dd1e2d367e8c5ee51c77146c8ed451d2",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "fc0fa9a63d6040a37dc0bd4e1cf17725dd1e2d367e8c5ee51c77146c8ed451d2",
+  "auditExport": "filter-filmFaded-v1-0-0.audit.mp4"
+}

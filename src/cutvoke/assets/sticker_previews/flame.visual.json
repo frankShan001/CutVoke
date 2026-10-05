@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.flame",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "火焰外焰与黄色内焰层次分开，火尖和底边完整。",
+  "sourceSha256": "9e0f2a17def4b5013caa8f3405472a134c1138f785b4717875b437566c675709",
+  "previewSha256": "e973c15cff8dfab5cb6dadac1db346b79c21877edcb3463aab9d9f6d77fb0643",
+  "auditSha256": "0118a7e285e12cb124382e45ff4caed2f3ae9a77f04d510a75ee4b8c6d7337f0"
+}

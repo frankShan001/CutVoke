@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_window_lightleak",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "cef3086020b1ae9e7077d1f28ae78c2b7f3f359f86bdb46d4c702c4bb2e25b77",
+  "previewSha256": "cf1631488307db9ae501fd987f8bcd574d80608b139cb2ba0ffbda2b2ee44d93",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 10445,
+  "visiblePixels": 12741,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 130,
+    "steady_entry": 12749,
+    "steady_exit": 12726,
+    "exit": 130
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 130,
+      "withoutFade": 12738
+    },
+    "steady_entry": {
+      "withFade": 12749,
+      "withoutFade": 12735
+    },
+    "steady_exit": {
+      "withFade": 12726,
+      "withoutFade": 12749
+    },
+    "exit": {
+      "withFade": 130,
+      "withoutFade": 12755
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.373,
+    0.365
+  ],
+  "auditExport": "weatherfx_window_lightleak.audit.mp4",
+  "auditExportSha256": "418a660e8ff71d9918c6c4bed6959e671e316aa16d23096969d2890c7d4a7bfa"
+}

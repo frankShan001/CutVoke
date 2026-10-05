@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_spotlight_violet",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "Violet spotlight has a clear downward beam and elliptical base, with smooth transparency outside its glow.",
+  "sourceSha256": "8ed0c15ca7b8afed5c42b8a978c792575d187aa57cacaafde5ccb4d4edb8b8ad",
+  "previewSha256": "b63ab1f5d0a013e8c4138c86f01d722d5898c05cfe00ddf2d0c4db465dcdf68b",
+  "auditSha256": "6ce6bc7fb73489a9b7f2aed933f3ed68268a533f46ba737e3f68e885d891c4a7"
+}

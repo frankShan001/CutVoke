@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.motion_type_reveal",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 714,
+  "exportSha256": "f294fa598b83d12065b28ab6be5124f11d82edf6b5b44a0188a71c81bc5f01d0",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "f294fa598b83d12065b28ab6be5124f11d82edf6b5b44a0188a71c81bc5f01d0",
+  "auditExport": "text-motion_type_reveal-v1-0-0.audit.mp4"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_bokeh_aqua",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "12a8a24747d29e4c16aac8b0272419e81daa27f9cb8930986342882e9de95f15",
+  "previewSha256": "0540191a99e031208701dc1a708659596853b2a98cd26403fc637888175ad0ed",
+  "preview": "texture_optical_bokeh_aqua.mp4",
+  "bytes": 8050,
+  "visiblePixels": 8724,
+  "changedPixels": 0,
+  "motionVisible": false
+}

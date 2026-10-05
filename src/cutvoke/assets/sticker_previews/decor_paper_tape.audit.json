@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_paper_tape",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "72e49bf547c4de93ecec87cf3e7c5d62602884aca93a30a3f14c8f739fc89757",
+  "previewSha256": "dad76173a946679bcc8612e20b01946e6db64ce104fa67a1646a0d0637652eea",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3687,
+  "visiblePixels": 2739,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2531,
+    "steady_entry": 2739,
+    "steady_exit": 2739,
+    "exit": 2532
+  },
+  "previewExportMeanRgbDifferences": [
+    0.126,
+    0.126
+  ],
+  "auditExport": "decor_paper_tape.audit.mp4",
+  "auditExportSha256": "8bc345f4d668e25dfc1f51ee819d2c2a8ce31b3425b804b88356d123bc48967d"
+}

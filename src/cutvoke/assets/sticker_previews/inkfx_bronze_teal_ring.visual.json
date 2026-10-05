@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_bronze_teal_ring",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "A rough bronze-and-teal liquid ring combines metallic splashes and an irregular edge, distinct in color and texture from the smooth jade ripple.",
+  "sourceSha256": "65321040c8fbfd44f0c6455bfa27db1af01ffbaa3ec35111d75812631d179f60",
+  "previewSha256": "79a389f233e2c22de391aaa7b510d72e94504f39bfb28dd93c56a5b504f668e6",
+  "auditSha256": "d2aa06e958278dce05eecbc389621da42e2b9a7c5425adf08774126ed95ef04e"
+}

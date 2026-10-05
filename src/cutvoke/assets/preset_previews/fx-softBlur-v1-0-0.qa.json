@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.fx.softBlur",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.blur",
+      "version": "1.0.0",
+      "params": {
+        "sigma": 15
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 13.074,
+  "maxSampledMeanRgbDifference": 13.074,
+  "coverSha256": "6670de1c51f57a1243e1b06710fadcd80757c2894e355e63e65036e042e6c9fa",
+  "previewSha256": "1a0c80aee5174291f8fa51904d8e5afc3fd2a97a76edba669047912bc5fc3013",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

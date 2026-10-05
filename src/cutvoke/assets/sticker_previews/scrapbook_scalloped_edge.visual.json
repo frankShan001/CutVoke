@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_scalloped_edge",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "奶油色扇形边缘连续，适合作为短边框；浅底对比有限。",
+  "sourceSha256": "4105fcc49973a1162525bdda81a58f080a49a73f9718ca3eab91bf7debdc4afa",
+  "previewSha256": "6dffbe851d01c2bdf97f7a635f5ff04c5d460ff216f22e29600279ae6175e009",
+  "auditSha256": "cb31440643ad91c179780da4c2371141a1f1c310de092c12d53102e82727f405"
+}

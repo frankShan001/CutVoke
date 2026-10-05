@@ -1,0 +1,32 @@
+{
+  "presetId": "cutvoke.preset.fx.yellowPanel",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.shape",
+      "version": "1.0.0",
+      "params": {
+        "shape": "rect",
+        "mode": "fill",
+        "x": 0.5,
+        "y": 0.5,
+        "w": 0.45,
+        "h": 0.65,
+        "color": "#FFD60A",
+        "opacity": 0.8,
+        "strokeWidth": 4.0
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 27.078,
+  "maxSampledMeanRgbDifference": 27.078,
+  "coverSha256": "81d959d9321c1b26a5f4d383c161c3248b46884e8e7c87031128a0f4bbd3ccf2",
+  "previewSha256": "b01cf97fd868fa3f7e13e6ef52c9328a2f51d37e1e22606ed1a069625a0c4204",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

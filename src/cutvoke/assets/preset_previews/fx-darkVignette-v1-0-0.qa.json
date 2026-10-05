@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.fx.darkVignette",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.vignette",
+      "version": "1.0.0",
+      "params": {
+        "angle": "PI/4"
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 36.869,
+  "maxSampledMeanRgbDifference": 36.869,
+  "coverSha256": "976b824ea5ed6aa1ce2d2b1e5a4e176d71a9a77fc069bab3db9231a690aee257",
+  "previewSha256": "59b5ccd5b8c6e95b53a822027561be0de7eece302e561231193b9b9e53f1eb1b",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

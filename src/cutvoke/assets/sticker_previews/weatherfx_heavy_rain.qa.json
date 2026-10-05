@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_heavy_rain",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0fdd979f961ac84310684be862d5993d02bec86b3d09013a16f972fc7a8d351b",
+  "previewSha256": "bdaca0524dd7caa1e6aa57c091b042dde8e638c401d5bc0817ecbaaccc7dc20c",
+  "preview": "weatherfx_heavy_rain.mp4",
+  "bytes": 13977,
+  "visiblePixels": 12877,
+  "changedPixels": 0,
+  "motionVisible": false
+}

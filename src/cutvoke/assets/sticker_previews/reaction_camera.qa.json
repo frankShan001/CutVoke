@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_camera",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c1db8df05290cd5a18c9ac539139cfb8b0227fba63d44748441ddef289efb44a",
+  "previewSha256": "a2e14df217a8211f6367c8db73e4ac446e6242b8311a5249675b1a44ce345e1c",
+  "preview": "reaction_camera.mp4",
+  "bytes": 4216,
+  "visiblePixels": 2705,
+  "changedPixels": 0,
+  "motionVisible": false
+}

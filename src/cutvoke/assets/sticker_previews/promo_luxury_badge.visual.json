@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.promo_luxury_badge",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "observation": "The four-lobed gold badge is symmetrical and its center remains blank for user-added content.",
+  "sourceSha256": "e7c1854e867c60bef8a120fa66976d5935d77f9f6fd0045e4588e602bd2905e4",
+  "previewSha256": "40b1444c276b11e68d66de08babd761a0ce7b22032b05c0797f1c7bc8392ba26",
+  "auditSha256": "a63f514e646f5f06926feaa83dd0eb60edc04e184eeff57a9dbcce5be50f5e2d"
+}

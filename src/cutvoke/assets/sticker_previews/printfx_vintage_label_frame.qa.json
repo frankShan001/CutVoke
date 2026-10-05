@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_vintage_label_frame",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f51219d1d85cbdd24f40420b3e4b107348087e029e59be86de1627c88c08476a",
+  "previewSha256": "9c8c05e5986beb1f30437ac63cfa842cbd3c25a59e3631c964a671d6af56d7a7",
+  "preview": "printfx_vintage_label_frame.mp4",
+  "bytes": 11335,
+  "visiblePixels": 13057,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_wool_felt",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "observation": "Dense short fibers create a soft felt surface and stay distinct from the paper materials.",
+  "sourceSha256": "97a0ec7ae7385a7ac6489180e0f969f6a06848657d6264a66076cd7f681dab8b",
+  "previewSha256": "75ccba151da996a33ddafdaa7e0f4a683accfe68c94e6caed01316ef089b25e7",
+  "auditSha256": "1e0323f32f67227f22c692c1fa2a06400de031bbc49242dbb85fab1cce4d9d42"
+}

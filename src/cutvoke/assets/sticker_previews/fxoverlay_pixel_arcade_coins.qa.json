@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_arcade_coins",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "cf73977964d01cc1762eef20d81aa78d590e92db0a7ee0bbb07a571681ab6fa6",
+  "previewSha256": "98de8caf9bd88f3a2805d6a64e75562c2cb1fbdc4c2c1e9031f68625c255ae9c",
+  "preview": "fxoverlay_pixel_arcade_coins.mp4",
+  "bytes": 11214,
+  "visiblePixels": 6938,
+  "changedPixels": 0,
+  "motionVisible": false
+}

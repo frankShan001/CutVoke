@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_paper_tear",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "49a48dcb64369af26c43334a74e4e34c9b2e51c9234d284179db401196e42456",
+  "previewSha256": "0e0c97a337acf218401ef2a6bb26f854f7daf0508184d59383ebcf0978c8186c",
+  "preview": "texture_paper_tear.mp4",
+  "bytes": 7651,
+  "visiblePixels": 5997,
+  "changedPixels": 0,
+  "motionVisible": false
+}

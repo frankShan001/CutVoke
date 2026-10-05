@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.fx.rhythmSwing",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.swing",
+      "version": "1.0.0",
+      "params": {
+        "degrees": 9.0,
+        "hz": 1.4
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 17.855,
+  "maxSampledMeanRgbDifference": 17.855,
+  "coverSha256": "cedc07c42b77362eec593d66674e28848e999e2a2a51fa267cad0c32859d967a",
+  "previewSha256": "b361ed7ae9fc0ccfc9a2138525ab6967446aa66c1328141ab7db35765dc17480",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

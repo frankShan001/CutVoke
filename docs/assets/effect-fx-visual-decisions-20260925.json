@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Manual comparison of full dynamic previews and aligned motion sheets",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.fx.chromaticPulse",
+      "decision": "approved",
+      "motionPreviewSha256": "94eaca8bb6c3b9407ecca5b5f2cc3f29514fff7748356af5937016f1d315de40",
+      "observation": "红蓝通道沿相反对角方向位移，画框和线条边缘形成斜向色边；与纯横向 RGB 分离明显不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.mirrorGlass",
+      "decision": "approved",
+      "motionPreviewSha256": "72666048217678c2010e1e6ab0fdc720b5fa9a1ddd8396626518914982c616f8",
+      "observation": "场景整体左右反射，太阳和画框位置交换；结果与上下翻转方向不同，预设参数可切换镜像轴向。"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.rgbSplit",
+      "decision": "approved",
+      "motionPreviewSha256": "3f3903d7f35c0922912314c7db42db403b9b94ee6bf99ea0725a3fab3719257d",
+      "observation": "红蓝通道仅作水平分离，绿色几何线维持基准位置；和对角色差预设有明确视觉区别。"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.verticalFlip",
+      "decision": "approved",
+      "motionPreviewSha256": "388d0de85d0a07470356a4c1ef1323381faa3bb9d43e5426754120a8ccb13747",
+      "observation": "场景上下倒置，太阳与画框的纵向关系交换；与左右镜像能直接区分，翻转轴向可编辑。"
+    }
+  ]
+}

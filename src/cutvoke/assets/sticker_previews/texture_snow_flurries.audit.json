@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_snow_flurries",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "3b8eebd29de78ccaa16cfe1515a4bbc1e11cd2cea2612b3cad8ad45f88619b9b",
+  "previewSha256": "f6324a6618dccb9553732ed47c7fa533f985de48c285c0cb0a63b5e4d351aadd",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 650,
+  "visiblePixels": 581,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1,
+    "steady_entry": 582,
+    "steady_exit": 582,
+    "exit": 1
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1,
+      "withoutFade": 582
+    },
+    "steady_entry": {
+      "withFade": 582,
+      "withoutFade": 581
+    },
+    "steady_exit": {
+      "withFade": 582,
+      "withoutFade": 581
+    },
+    "exit": {
+      "withFade": 1,
+      "withoutFade": 580
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_snow_flurries.audit.mp4",
+  "auditExportSha256": "41b9f2aeefc773372933471bcccaaf43327c7ea8f937836b21040b49b344209a"
+}

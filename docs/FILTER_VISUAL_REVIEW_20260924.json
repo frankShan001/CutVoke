@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.filter.colorEdge",
+      "decision": "approved",
+      "motionPreviewSha256": "f7bdf80817b93d593de2c0b065a08d27d8cb47b49601ede34a4b84fe1fbc7eb7",
+      "observation": "Thin warm color outlines preserve much of the source scene, unlike blue wireframe."
+    },
+    {
+      "presetId": "cutvoke.preset.filter.monochrome",
+      "decision": "approved",
+      "motionPreviewSha256": "8d5ee1b10bf45cbb4a18ceec1dd2e1367699aad43e984d752bb4cb318f40d0ec",
+      "observation": "Even neutral grayscale retains midtone separation without exaggerated contrast."
+    },
+    {
+      "presetId": "cutvoke.preset.filter.negative",
+      "decision": "approved",
+      "motionPreviewSha256": "dbca1924193337bbfbf9b834cd52941a3eff0c72f32ef8887432bee04914a5aa",
+      "observation": "All major colors invert to complementary hues while shapes remain intact."
+    },
+    {
+      "presetId": "cutvoke.preset.filter.poster",
+      "decision": "approved",
+      "motionPreviewSha256": "1a0894b3b0515ffb3e5f436c4de37b9315ede0455da2c18066c2bc9e16613b97",
+      "observation": "Hard limited levels create gray and black blocks with a bright accent."
+    },
+    {
+      "presetId": "cutvoke.preset.filter.sepiaTone",
+      "decision": "approved",
+      "motionPreviewSha256": "6a1d4b0f2afbae2055ace0322c21d6f5dcd099d997ad3d9c13afa4da9d507fc2",
+      "observation": "Warm brown treatment replaces cool source hues with a classic sepia cast."
+    },
+    {
+      "presetId": "cutvoke.preset.filter.vintageTone",
+      "decision": "approved",
+      "motionPreviewSha256": "4373707f1ff7c848fb446f830048276dd249e6d58289d091eda9a0b8495db638",
+      "observation": "Soft warm fading keeps source colors while reducing their saturation."
+    },
+    {
+      "presetId": "cutvoke.preset.filter.noirContrast",
+      "decision": "approved",
+      "motionPreviewSha256": "2422b2404113ba68c20f8422a9be8716f5f99618fc138d576e1d0341df7059e8",
+      "observation": "Strong monochrome curve deepens shadows and brightens highlights."
+    },
+    {
+      "presetId": "cutvoke.preset.filter.noirBloom",
+      "decision": "approved",
+      "motionPreviewSha256": "ab4cb4490a3d709a8bc92d174545c43b3ef75eb6ec9819cd6b4389fb647ee812",
+      "observation": "Neutral grayscale highlights bloom softly; no chroma tint remains."
+    },
+    {
+      "presetId": "cutvoke.preset.filter.filmVignette",
+      "decision": "approved",
+      "motionPreviewSha256": "8d1cdcf0220963925567bcf36f8104da339d863360fa15c76463a0c2c96f43ae",
+      "observation": "Sepia picture has visibly darkened corners around the bright center."
+    },
+    {
+      "presetId": "cutvoke.preset.filter.filmContrast",
+      "decision": "approved",
+      "motionPreviewSha256": "1a28dafbc062da853c158f31277e69ed981b7371ab50df37d9eef4db6c752b26",
+      "observation": "Warm faded colors retain deeper shadows than the plain vintage treatment."
+    },
+    {
+      "presetId": "cutvoke.preset.filter.electricWire",
+      "decision": "approved",
+      "motionPreviewSha256": "195b8de849a9eec01827d45ca416b948015b030e1e2e35ac240a0fc451b3bbe3",
+      "observation": "Narrow light blue contours appear on a deep blue field."
+    },
+    {
+      "presetId": "cutvoke.preset.filter.colorPoster",
+      "decision": "approved",
+      "motionPreviewSha256": "925ca4f02a69bde0c82d288a7c587374a59fd19c887123cf5c70accbf7a5a4da",
+      "observation": "Large orange, green and turquoise color blocks create a graphic poster look."
+    }
+  ]
+}

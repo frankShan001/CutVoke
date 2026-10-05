@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.flipIn",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "10eec01109390d149ea3d94609109e909a6125819d05eb365f78c30bca1b57dd",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "10eec01109390d149ea3d94609109e909a6125819d05eb365f78c30bca1b57dd",
+  "auditExport": "animation-flipIn-v1-0-0.audit.mp4"
+}

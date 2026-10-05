@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项检查4×4透明贴图裁切表和4×4真实画面合成表；确认Alpha通道、裁切边缘、深浅背景对比、缩略图可辨性与每项轮廓差异。",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.glitch_horizontal_tear",
+      "decision": "approved",
+      "sourceSha256": "29857a2341bcf58f365dcfe9a8dbed249868384dda067ccddffaf9398041682f",
+      "previewSha256": "871882fe3a60bff7d58d4fdc31d3d3987f50d64837bdaf930df610a9ae4537d8",
+      "observation": "青粉色横向撕裂由多层细条组成，透明边缘干净，画面中线效果清晰。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_rgb_blocks",
+      "decision": "approved",
+      "sourceSha256": "0adcc63cd8d9d1210270f53b77de0bc3039aa47ff881cc728bb16c42b68046da",
+      "previewSha256": "e7175382adc1bfd0ec6d0806f5e7d73194c02e2d9556bd9124ff4c738e0e7b97",
+      "observation": "青蓝洋红离散色块集中在画面中部，方形像素轮廓清楚，四周保持透明。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_scan_bars",
+      "decision": "approved",
+      "sourceSha256": "3ea1b2bd4bb7bb25e0e130637f5637dbdef0a4c4de887f475eb1464702bd0e61",
+      "previewSha256": "d5a1be8cd7c3044c0ed1e99661290909dad5f06c91b9e4f8a1e23f0cbeca28af",
+      "observation": "三组横向扫描光条间距明确，发光边缘平滑，在深浅背景上都可见。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_data_slices",
+      "decision": "approved",
+      "sourceSha256": "72c398ccb9a7bbeefcad556a3d85287be5b0a574dc1fb30735e3718164ce5c71",
+      "previewSha256": "354657d758b0c8dea8f5ea77dfc7aeb034e7525f56d8cfd074781bc3280c428f",
+      "observation": "长短数据切片错位向右延伸，青粉色段落分层明显且未跨越裁切边缘。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_frame_echo",
+      "decision": "approved",
+      "sourceSha256": "7d58f00354c8cfff2fbdda8809a6169ec2e85d09c7973bf5bc00de0fbfd49eab",
+      "previewSha256": "6c09d7bbf8d5ec323c979281ef8e95100c1d22bed42772b49e71d419e7c74a0f",
+      "observation": "多层矩形轮廓向右递减形成跳帧残影，轮廓和间距都清晰可辨。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_pixel_dissolve",
+      "decision": "approved",
+      "sourceSha256": "4b040fde1e1168c43530d02fc00aed043ccd4ea6e8ac65a91af2c7fe39ec65ac",
+      "previewSha256": "4dea9a0b0e2b98e57f7e758ccf3eaf7d2334489f1f3e0b24cdafefd9814a8e16",
+      "observation": "方形像素块由左下向右上散开，块状轨迹明确，与RGB色块图样可区分。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_channel_corner",
+      "decision": "approved",
+      "sourceSha256": "cf691716eda0887120f8f323091c980974789107d372d428eacf0f805c599523",
+      "previewSha256": "a5b05c8df0389d63049815285809513c38960b553c1537cf8bccb8a127f3e76f",
+      "observation": "青粉分色直角沿单侧展开，构图与四角追踪框不同，边缘完整。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_sync_roll",
+      "decision": "approved",
+      "sourceSha256": "7ef77903b1e1a91705234079bd90dc9657f5fc97edcdee8da9ff227fc06a3f1a",
+      "previewSha256": "3eec691ff0e8f6114d614555ef6a558aea48fe1acb5266fea267cb69cfb45186",
+      "observation": "青紫纵向扫描带对比度高，透明间隙完整，适合竖向信号漂移构图。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_prism_shard",
+      "decision": "approved",
+      "sourceSha256": "ad1c2103cee6276e8d73d0605d249093e809a74060a6146531823eaaf215f2ca",
+      "previewSha256": "e20bec11b5c447391150e2502ae01cf38242dfe51b5aef4246cc63d815894f20",
+      "observation": "中心棱镜碎片呈放射星形，锐利色彩层次完整，明暗背景上均可见。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_signal_break",
+      "decision": "approved",
+      "sourceSha256": "01e5baa858419fd5b408365f6ca4431d9ab84b52bb1e4cd10bdc60a6a02eb39d",
+      "previewSha256": "e75444cec4e603035b55e2dbdb9b584a881d5e168d66ae45488636f1a11507cc",
+      "observation": "中央信号条以较厚色块断续排列，与细窄横向撕裂效果有明显区别。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_wave_interrupt",
+      "decision": "approved",
+      "sourceSha256": "756599f8f79333671a5282c9ddc39438c9b937b63f13cb0a10104d52af376ece",
+      "previewSha256": "c94cf82ddb780b9f6bba2262e8cde69f048bf8f85d8a4c92e6b72795c82530ce",
+      "observation": "青粉波形由细密线条组成并在中部断开，左右峰值轮廓清楚。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_tracking_brackets",
+      "decision": "approved",
+      "sourceSha256": "6b1d5b3aae0bb6597eb2354caa4a7b2a83374b641c956a742f2617e65f1299b7",
+      "previewSha256": "76668a15640edf568657278410e037ca49c077f99ce9d4041149580870259c80",
+      "observation": "四角霓虹追踪括号留出中心空位，青粉角标分布均匀且没有截断。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_packet_streaks",
+      "decision": "approved",
+      "sourceSha256": "5d185a0162c9f5b682cbb9002af0700214893f251c28e40028b6a9f04a9d3589",
+      "previewSha256": "1a40ed1a4c0d3e6bfecee6355ecbbeec98ad0118ecd65cd852e4e1f891b54ee7",
+      "observation": "青蓝洋红数据线以斜向速度轨迹伸展，线条长短各异且边缘干净。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_mosaic_tiles",
+      "decision": "approved",
+      "sourceSha256": "6c6c2c51dddad5e717a2ea9ebf3cb52359f7e9f54728a55049c491e5ad04a52b",
+      "previewSha256": "0a371bd36caba83153a56bb048f0113358bbb5ccf00fe62576965489d50f01f7",
+      "observation": "方形马赛克色块形成中央矩阵和外围跳点，与稀疏散点色块易区分。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_double_image",
+      "decision": "approved",
+      "sourceSha256": "430860109114c5d02ec246c90deb2a4edb4d8c9497b8027d39ed9f1e057ace64",
+      "previewSha256": "be5216035a954d179476b576457d6fb44735b42f3891cdf17e8f8e5f7628e929",
+      "observation": "青紫双影轮廓带横向断条，剪影居中且边缘留白充足。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.glitch_chromatic_edges",
+      "decision": "approved",
+      "sourceSha256": "936a884bc2b7369b90af3557789a7dff522759b28eb81724d4f2095f0d1c3ecc",
+      "previewSha256": "8f61852780fe9e5a8816bef8acbc7bddfb3f4bad88d05f1f8c2a8200c12ccac9",
+      "observation": "椭圆轮廓的青粉色通道彼此错开，环形完整，缩略图仍保持识别度。"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_toner_smudge",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e5647ab784098b00ea03e06adb91ae14ddede312464213531fc9c5f18978689f",
+  "previewSha256": "1b5bfab03d0d149c44a09cae04b99895c538bfd5b0f21f98c402190246afe937",
+  "preview": "printfx_toner_smudge.mp4",
+  "bytes": 8342,
+  "visiblePixels": 7204,
+  "changedPixels": 0,
+  "motionVisible": false
+}

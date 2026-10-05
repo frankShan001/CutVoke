@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "sourceMedia": "Generated transparent person-shaped video; 320x180 neutral stage.",
+  "limitations": [
+    "Does not establish real person cutout edge quality, natural motion, diverse body types, or complex footage performance.",
+    "Synthetic samples are sufficient only to review the preset visual treatments and effect distinction."
+  ],
+  "reviewSheets": [
+    "docs/assets/person-fx-preset-review-20260926-v1.4-motion/personFx-人物轮廓-motion.png",
+    "docs/assets/person-fx-preset-review-20260926-v1.4-motion/personFx-人物残影-motion.png",
+    "docs/assets/person-fx-preset-review-20260926-v1.4-motion/personFx-人物色彩-motion.png"
+  ],
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.personFx.aquaEdge",
+      "decision": "approved",
+      "observation": "The moving cutout keeps a visible sea-green halo around the head, arms and legs; it stays distinct from the brighter cyan and lime variants.",
+      "motionPreviewSha256": "cc4bb43734970b272f88c17402f0fd0ccb8d5b16908b8107179065225b24e7a3"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.amberEdge",
+      "decision": "approved",
+      "observation": "A warm amber-red halo is clearly visible around the moving figure and differs from the pink and green treatments.",
+      "motionPreviewSha256": "a3f6279d1569a60dec918968389e57ddfc6c94746f331e9e2813bb2a6cb9af6b"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.violetEdge",
+      "decision": "approved",
+      "observation": "A saturated magenta-violet outline remains legible through the sampled motion and reads as a narrow electric glow.",
+      "motionPreviewSha256": "cc57046a41d34724538003155e14d5493f715752188da0a6a0133e8ee19f153d"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.roseEdge",
+      "decision": "approved",
+      "observation": "A broad soft rose halo is visible around the silhouette and is less sharp than the violet and neon treatments.",
+      "motionPreviewSha256": "e2a7e8f861b2519b9c4320dd1993bd614a85430b1b35bd281567c85d7d472b4b"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.iceEdge",
+      "decision": "approved",
+      "observation": "A wide deep-blue halo follows the silhouette; its hue and spread differ from the pale pearl treatment.",
+      "motionPreviewSha256": "389a216fb2eef249acdea7c6ff56362c9c84ebc6009cdf8d0a488f2d03b472b9"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.limeEdge",
+      "decision": "approved",
+      "observation": "The bright green halo remains visible around the whole moving subject and is distinct from teal and cyan.",
+      "motionPreviewSha256": "dc46438f65304f380ac43c0a0e91cd59143b6d8575bf64f191e32cd5793f71e2"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.pearlEdge",
+      "decision": "approved",
+      "observation": "A pale blue-silver diffuse glow is now visible around the moving silhouette; it is softer and less saturated than the blue outline.",
+      "motionPreviewSha256": "6f16b62dfc404cd1aab2cbef7d92d5b5f475e45d82bcc96d316764266da73a9a"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.neonEdge",
+      "decision": "approved",
+      "observation": "A compact cyan glow follows the moving outline and is brighter and tighter than the sea-green halo.",
+      "motionPreviewSha256": "c710be9dbf894c45b5a99056a775886906f56dabeb5cdaebbd183a8ffe4742da"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.softEcho",
+      "decision": "approved",
+      "observation": "A subtle single trailing silhouette appears during movement without obscuring the main figure.",
+      "motionPreviewSha256": "cc3d0fecda260189bf653fea679d48e1baa95161bcc16062eb20b58f171575a7"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.blueEcho",
+      "decision": "approved",
+      "observation": "The motion leaves a clearly visible cool-blue offset echo behind the subject.",
+      "motionPreviewSha256": "fc52fc581007c5c5a29584bb05db2b4251d1293b3600fd5c6e6e8bdb301cafa2"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.longEcho",
+      "decision": "approved",
+      "observation": "Several separated translucent silhouettes create a long, readable motion trail.",
+      "motionPreviewSha256": "57bad9b02115e7c1ef2e1e95cae1cbe1c4eaa165de61757a641d0b23f4e023d5"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.staccatoEcho",
+      "decision": "approved",
+      "observation": "The subject produces discrete repeated silhouettes with a choppy rhythm, visibly separate from the smoother trails.",
+      "motionPreviewSha256": "640a5c4d0ee1dd6b30c1349ba10d17630749c93f654742be3ed978c3785cbaaa"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.mistEcho",
+      "decision": "approved",
+      "observation": "The movement leaves a soft, diffuse trailing figure that is lighter and less defined than the hard echoes.",
+      "motionPreviewSha256": "15733bf930ee6d8057391dfb1b987ede4973a9aaf37ac5eadd3273983fbd1153"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.pulseEcho",
+      "decision": "approved",
+      "observation": "The trailing silhouettes vary strongly in visibility, creating a distinct rhythmic echo treatment.",
+      "motionPreviewSha256": "a8d84ab85b780fa26f63b8ce641a866d70e5bfd29d1d32ef1c91c267eb5afd18"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.fastEcho",
+      "decision": "approved",
+      "observation": "A short, crisp duplicate trails the moving figure; the trail is tighter than the long and dream variants.",
+      "motionPreviewSha256": "ee25b81c17fc48fc85c6e01a43cec52c7059b883135482dd93cee11900023b62"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.dreamEcho",
+      "decision": "approved",
+      "observation": "A long translucent drift follows the figure, with a softer and more gradual fade than the crisp echoes.",
+      "motionPreviewSha256": "02494b5f1e953edd34291a9462ba88dd429c0fe822d37f30b457b03eec4cc126"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.warmPortrait",
+      "decision": "approved",
+      "observation": "The treated half has a clear warm amber skin and clothing cast against the unchanged source half.",
+      "motionPreviewSha256": "aaf4d286cc9440b5dbcb59fafdb1f7b19fdac882b6694648b822aa7556ce1126"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.coolPortrait",
+      "decision": "approved",
+      "observation": "The treated half shifts visibly toward cool cyan and blue-green compared with the original.",
+      "motionPreviewSha256": "59b057bb8acb032ab1f7a76b9941be144cfc2ff7cd95bc70430531196c381902"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.violetPortrait",
+      "decision": "approved",
+      "observation": "A strong violet-magenta cast is visible across the subject and differs from the rose and cinema looks.",
+      "motionPreviewSha256": "42c6428f80a1200d08da70a5013077c9caedceafb6a78b16c3c3a64d4404497d"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.rosePortrait",
+      "decision": "approved",
+      "observation": "A softer rose-magenta grade changes the subject color while retaining the scene contrast.",
+      "motionPreviewSha256": "aed186c95bbcb5b7cef6ceec8a60e6446b9f3d09be7a6a5c301c52c47f7da856"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.mintPortrait",
+      "decision": "approved",
+      "observation": "A fresh green-cyan grade is visible across the subject and is lighter than the cool and cinema variants.",
+      "motionPreviewSha256": "bab3f27aef384446445923abcaafd3cd130af73eab58c7c63f2cd7c37f67dfae"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.goldPortrait",
+      "decision": "approved",
+      "observation": "The subject takes on a saturated gold stage look, distinct from the subtler warm portrait treatment.",
+      "motionPreviewSha256": "158f2e1764c0f7fc9da175885b05f3bce541d96877865af3fc9ba6d7a95ee734"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.monoPortrait",
+      "decision": "approved",
+      "observation": "The treated subject is visibly desaturated to silver monochrome compared with the original color half.",
+      "motionPreviewSha256": "d428820577de5ecb0d29dafbe875b1093a2f8c4133860d7285cf4bbd239f0713"
+    },
+    {
+      "presetId": "cutvoke.preset.personFx.cinemaPortrait",
+      "decision": "approved",
+      "observation": "A darker teal-and-rose cinematic grade is visible on the treated subject and differs from the brighter cool look.",
+      "motionPreviewSha256": "b5d55ff3459cda324b4938dccb10f7b540568770906c2588b19494a3c76e281c"
+    }
+  ]
+}

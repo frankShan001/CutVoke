@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.poster",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.posterize",
+  "params": {
+    "levels": 3
+  },
+  "subcategory": "风格",
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Hard limited levels create gray and black blocks with a bright accent.",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "coverSha256": "02ae8941ded50db09b5eb81b6196e22b08bf6cbd80c80391e0f319ebc2a1b6b1",
+  "motionPreviewSha256": "1a0894b3b0515ffb3e5f436c4de37b9315ede0455da2c18066c2bc9e16613b97",
+  "auditSha256": "630d3b4062ab6fc6306e731422fcb1d5cc8ca26bf4bc63ec86d3f42055b262e4"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.marker_doodle_sunburst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "45b6e34caecbab6fb2704dc0680b10c6dd07cb8b3f7468d0ebe1dacbe0078cfb",
+  "previewSha256": "6ff7528426adffa1c5fa2692790378ab0a42ae52b92a9287fb38deef84180a3d",
+  "preview": "marker_doodle_sunburst.mp4",
+  "bytes": 4842,
+  "visiblePixels": 1442,
+  "changedPixels": 0,
+  "motionVisible": false
+}

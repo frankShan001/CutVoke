@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "A local video editing workspace shared by people and external AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
+dependencies = ["cryptography>=44.0.1", "fontTools>=4.59.0"]
 license = "MIT"
 authors = [{ name = "frankShan001" }]
 keywords = ["video", "editing", "agent", "mcp", "ffmpeg", "timeline", "nle"]
@@ -24,18 +25,31 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = ["pytest>=7", "numpy>=1.24", "Pillow>=10"]
+asr = ["faster-whisper==1.2.1", "OpenCC==1.4.2"]
+person = ["mediapipe==1.0.1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [project.scripts]
 cutvoke = "cutvoke.main:main"
 cutvoke-mcp = "cutvoke.core.mcp_server:main"
-
-[tool.setuptools.packages.find]
-where = ["src"]
+cutvoke-person-model = "cutvoke.core.person_model_setup:main"
+cutvoke-resource-pack = "cutvoke.core.resource_pack_signing:main"
 
 # Built Web files are copied into the wheel by setup.py. Keep package data
 # explicit so local __pycache__ files never leak into distributables.
 [tool.setuptools]
 include-package-data = false
+packages = ["cutvoke", "cutvoke.core"]
+package-dir = {"" = "src"}
 
 [tool.setuptools.package-data]
-cutvoke = ["assets/*/*.wav", "assets/*/*.png", "assets/*/*.json", "assets/*/*.cube"]
+cutvoke = ["assets/*/*.wav", "assets/*/*.png", "assets/*/*.jpg", "assets/*/*.mp4", "assets/*/*.json", "assets/*/*.cube", "assets/*/*.ttf", "assets/*/*.txt", "assets/*/*.md", "core/builtin_presets.json", "core/builtin_stickers.json", "core/builtin_resource_pack.json"]
+
+[tool.setuptools.exclude-package-data]
+cutvoke = [
+  "assets/preset_previews/text-flower_*-v1-0-0.*",
+  "assets/preset_previews/text-label_*-v1-0-0.*",
+  "assets/preset_previews/text-minimal_*-v1-0-0.*",
+]

@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.rhythmSwing",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "degrees",
+    "value": 5.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.401,
+  "exportSha256": "46ba55644e797bc06fb2a68ed93a3c79e489f55d85d4701b57f34ef660758ea4",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "46ba55644e797bc06fb2a68ed93a3c79e489f55d85d4701b57f34ef660758ea4",
+  "auditExport": "fx-rhythmSwing-v1-0-0.audit.mp4"
+}

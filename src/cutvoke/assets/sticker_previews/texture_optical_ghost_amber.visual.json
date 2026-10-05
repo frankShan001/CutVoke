@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_ghost_amber",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "琥珀色椭圆鬼影沿对角线逐渐变小，亮斑间距清楚，尾端没有裁断。",
+  "sourceSha256": "db5b7af5759efda8ec904156687dfe1a716d3cd2d0107ce72992026219ae2d75",
+  "previewSha256": "baab32854b3211f214ed9fb8a062bc96121eda33dc0f868995a5452e9b0fbb6d",
+  "auditSha256": "f7666ff46fef2b4c979a732f9053f7229edc1e08c40d8511b26237dc5a5d350c"
+}

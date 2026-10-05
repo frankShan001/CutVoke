@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_paper_tear",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "42968908bbbab172beada495d75eb3f8e901f37870c8bcfb67fb122bf53af795",
+  "previewSha256": "07743bb210507adcf449b763ee6029b70082f594fc33bb6a3637ce37b27a7205",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1264,
+  "visiblePixels": 954,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 291,
+    "steady_entry": 954,
+    "steady_exit": 954,
+    "exit": 291
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_v2_paper_tear.audit.mp4",
+  "auditExportSha256": "bf53588426413940010d8dda67a931ade2e23ba22334349f427298c15ca0389a"
+}

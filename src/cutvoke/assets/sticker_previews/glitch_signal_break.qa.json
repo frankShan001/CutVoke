@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_signal_break",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "01e5baa858419fd5b408365f6ca4431d9ab84b52bb1e4cd10bdc60a6a02eb39d",
+  "previewSha256": "e75444cec4e603035b55e2dbdb9b584a881d5e168d66ae45488636f1a11507cc",
+  "preview": "glitch_signal_break.mp4",
+  "bytes": 8996,
+  "visiblePixels": 6543,
+  "changedPixels": 0,
+  "motionVisible": false
+}

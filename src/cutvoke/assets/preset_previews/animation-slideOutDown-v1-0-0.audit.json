@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.slideOutDown",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.733333,
+  "previewExportMeanRgbDifference": 1.524,
+  "exportSha256": "1708f92e1bf3b2251edde55fc39b6d72ef0cfc831789f366c7c8c7aa71b853b7",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "1708f92e1bf3b2251edde55fc39b6d72ef0cfc831789f366c7c8c7aa71b853b7",
+  "auditExport": "animation-slideOutDown-v1-0-0.audit.mp4"
+}

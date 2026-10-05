@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_debris",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "b7adf10c31d880226f802a19a758aed189392ed2d418c2cb0f12a57a2db3aafb",
+  "previewSha256": "7f0fd802d8fc239b1ed6c8d76a5816208941251dd52878372e546336fc427494",
+  "preview": "fxoverlay_pixel_debris.mp4",
+  "bytes": 12858,
+  "visiblePixels": 8933,
+  "changedPixels": 0,
+  "motionVisible": false
+}

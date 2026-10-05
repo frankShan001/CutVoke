@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.radialblur",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.radialblur",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "模糊",
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-24T06:43:42Z",
+  "observation": "细节从中心向外形成放射拖影，边缘推进感与线性方向模糊不同。",
+  "method": "手工对照每项封面、五时间点动态表与真实导出帧表；分别核对模糊方向、焦点位置、画面明度和镜头顺序。动态表见 output/preset_review/transition-20260924-blur-fixed/transition-模糊-motion.png，真实导出帧见 output/preset_review/transition-20260924-blur-custom-export.png。另以透明导出样片确认 alpha 保留在 254–255。",
+  "coverSha256": "1938833245185fcacfe47ce42d9b6e9bb0f93c0938533ff92e39e908d52880b9",
+  "motionPreviewSha256": "ce1fe75ee8954e4e7b5a42e4c58fa01ed381cbba769959d8264b76a6f7f57ce4",
+  "auditSha256": "dcf975e03aeca3eab41d687159d499ee74ba300ed2d61790001964ba364515e7"
+}

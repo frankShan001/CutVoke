@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_selection_box",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Purple dashed selection frame and four handles remain legible over both test backgrounds.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "c652e1c198d686babd1672c7c21d452b00c65fe329bb868f957b078c6bb3f0a6",
+  "previewSha256": "44fcd292ae2464d190ba3535ebc011ebefbc39bb1521551007b2887bf4ba8ef6",
+  "auditSha256": "c1a4dce985bd64b969fd49b42388670216d51ab1f461f52faca66c1ba907dcd3"
+}

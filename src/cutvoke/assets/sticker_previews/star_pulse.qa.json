@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.star_pulse",
+  "version": "1.1.0",
+  "kind": "dynamic",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "14cd0b2ffbbe5cbd61a13645a748ffb854439219e0c205a6053d3520c672731d",
+  "previewSha256": "b471a4bed9971a261c6247b7ba85f67344d4a5b394740008c560dda8a66ea9ce",
+  "preview": "star_pulse.mp4",
+  "bytes": 22706,
+  "visiblePixels": 2290,
+  "changedPixels": 2947,
+  "motionVisible": true
+}

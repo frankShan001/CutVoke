@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_glitch_shards",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "7498bb247155c4cd733d0d728c1ac342e8533b4170e7da4b719419b2020d0d6a",
+  "previewSha256": "996219a1fc93d898190087e0b72ebd56473af3621a07d845f569310dd2d16f77",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3342,
+  "visiblePixels": 2320,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1646,
+    "steady_entry": 2319,
+    "steady_exit": 2320,
+    "exit": 1648
+  },
+  "previewExportMeanRgbDifferences": [
+    0.05,
+    0.05
+  ],
+  "auditExport": "texture_v2_glitch_shards.audit.mp4",
+  "auditExportSha256": "df618edfd68c62fba6b198ed78ef5eef05b09535071330826e63b0d6245d1812"
+}

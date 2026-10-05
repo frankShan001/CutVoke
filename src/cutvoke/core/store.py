@@ -249,7 +249,8 @@ class ProjectStore:
                 width      INTEGER,
                 height     INTEGER,
                 created_at REAL NOT NULL,
-                builtin    INTEGER NOT NULL DEFAULT 0
+                builtin    INTEGER NOT NULL DEFAULT 0,
+                audio_role TEXT NOT NULL DEFAULT 'unclassified'
             )
             """
         )
@@ -284,6 +285,10 @@ class ProjectStore:
         if "builtin" not in acols:
             self._conn.execute(
                 "ALTER TABLE assets ADD COLUMN builtin INTEGER NOT NULL DEFAULT 0")
+        if "audio_role" not in acols:
+            self._conn.execute(
+                "ALTER TABLE assets ADD COLUMN audio_role TEXT NOT NULL "
+                "DEFAULT 'unclassified'")
 
     # ------------------------------------------------------------------
     # WP-01 权威提交：工程 + 幂等 + 事件 + 历史 一个事务原子写
@@ -698,7 +703,11 @@ class ProjectStore:
     def create_export_job(self, *, job_id: str, project_id: str, revision: str,
                           request_hash: str, out_path: str, quality: str,
                           status: str = "queued",
-                          project_snapshot: Optional[dict] = None) -> dict:
+                          project_snapshot: Optional[dict] = None,
+                          command_id: Optional[str] = None,
+                          command_hash: Optional[str] = None,
+                          command_result: Optional[dict] = None,
+                          expected_revision: Optional[str] = None) -> dict:
         """V02 队列：直接落一条指定状态的任务记录（不参与同步路径的认领/缓存语义）。
 
         与 claim_export_job 的分工：claim 用于"同一请求只渲染一次"的幂等导出；
@@ -706,6 +715,19 @@ class ProjectStore:
         """
         now = time.time()
         with self._transaction():
+            if command_id:
+                existing = self.get_idempotent(project_id, command_id)
+                if existing is not None:
+                    if existing["request_hash"] != command_hash:
+                        raise ExportJobMismatch("commandId already used with different payload")
+                    result = json.loads(existing["result_json"])
+                    old_job = self.get_export_job(result["changedEntities"][0]["jobId"])
+                    return dict(old_job, _replayed=True)
+            if expected_revision is not None:
+                current = self.db_revision(project_id)
+                if current != expected_revision:
+                    raise RevisionConflict(
+                        f"expected revision {expected_revision}, current {current}")
             self._conn.execute(
                 "INSERT INTO export_jobs (job_id, project_id, revision, "
                 "request_hash, out_path, quality, status, project_json, "
@@ -716,6 +738,12 @@ class ProjectStore:
                  json.dumps(project_snapshot, ensure_ascii=False)
                  if project_snapshot is not None else None,
                  now, now))
+            if command_id:
+                self._conn.execute(
+                    "INSERT INTO idempotency (project_id, command_id, request_hash, result_json, committed_at) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (project_id, command_id, command_hash,
+                     json.dumps(command_result, ensure_ascii=False), now))
             row = self._conn.execute(
                 f"SELECT {self._EXPORT_COLS} FROM export_jobs WHERE job_id=?",
                 (job_id,)).fetchone()
@@ -906,7 +934,8 @@ class ProjectStore:
                   kind: str = "unknown", duration: Optional[float] = None,
                   has_video: bool = False, has_audio: bool = False,
                   width: Optional[int] = None, height: Optional[int] = None,
-                  builtin: bool = False) -> dict:
+                  builtin: bool = False,
+                  audio_role: Optional[str] = None) -> dict:
         """幂等登记一个素材（已上传并落盘后调用）。
 
         同 assetId 重复登记（重放 / 重启）时刷新为最新元数据（ON CONFLICT
@@ -920,8 +949,9 @@ class ProjectStore:
                 """
                 INSERT INTO assets
                     (asset_id, name, path, size, kind, duration,
-                     has_video, has_audio, width, height, created_at, builtin)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     has_video, has_audio, width, height, created_at, builtin,
+                     audio_role)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(asset_id) DO UPDATE SET
                     name      = excluded.name,
                     path      = excluded.path,
@@ -932,18 +962,21 @@ class ProjectStore:
                     has_audio = excluded.has_audio,
                     width     = excluded.width,
                     height    = excluded.height,
-                    builtin   = excluded.builtin
+                    builtin   = excluded.builtin,
+                    audio_role = CASE WHEN ? THEN excluded.audio_role
+                                      ELSE assets.audio_role END
                 """,
                 (asset_id, name, path, size, kind, duration,
                  1 if has_video else 0, 1 if has_audio else 0,
-                 width, height, time.time(), 1 if builtin else 0),
+                 width, height, time.time(), 1 if builtin else 0,
+                 audio_role or "unclassified", 1 if audio_role is not None else 0),
             )
         return self._asset_row_to_dict(self._asset_row(asset_id))
 
     def _asset_row(self, asset_id: str):
         return self._conn.execute(
             "SELECT asset_id, name, path, size, kind, duration, "
-            "has_video, has_audio, width, height, created_at, builtin "
+            "has_video, has_audio, width, height, created_at, builtin, audio_role "
             "FROM assets WHERE asset_id=?", (asset_id,),
         ).fetchone()
 
@@ -964,6 +997,7 @@ class ProjectStore:
             "height": row[9],
             "createdAt": _iso_utc(row[10]),
             "builtin": bool(row[11]),
+            "audioRole": row[12],
         }
 
     @_synchronized
@@ -971,10 +1005,25 @@ class ProjectStore:
         """列出素材库，最近导入在前。"""
         cur = self._conn.execute(
             "SELECT asset_id, name, path, size, kind, duration, "
-            "has_video, has_audio, width, height, created_at, builtin "
+            "has_video, has_audio, width, height, created_at, builtin, audio_role "
             "FROM assets ORDER BY created_at DESC"
         )
         return [self._asset_row_to_dict(r) for r in cur]
+
+    @_synchronized
+    def set_asset_audio_role(self, asset_id: str, audio_role: str) -> Optional[dict]:
+        """Persist an explicit user classification for an audio asset."""
+        if audio_role not in ("music", "sound_effect", "unclassified"):
+            raise ValueError("unsupported audio role")
+        with self._transaction():
+            cur = self._conn.execute(
+                "UPDATE assets SET audio_role=? WHERE asset_id=? AND kind='audio' "
+                "AND builtin=0",
+                (audio_role, asset_id),
+            )
+            if cur.rowcount != 1:
+                return None
+        return self._asset_row_to_dict(self._asset_row(asset_id))
 
     @_synchronized
     def get_asset(self, asset_id: str) -> Optional[dict]:

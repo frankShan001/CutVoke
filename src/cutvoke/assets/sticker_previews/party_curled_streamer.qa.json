@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_curled_streamer",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "65dbac48f50bcc66e8b83d0ee3a5cf8b83a4af3af2f5b5411fadc6fa886616e2",
+  "previewSha256": "8607ab505f752940ec6f372b7651f604c9c8c01efb00d82007b86ed3bfca6eb3",
+  "preview": "party_curled_streamer.mp4",
+  "bytes": 4043,
+  "visiblePixels": 1376,
+  "changedPixels": 0,
+  "motionVisible": false
+}

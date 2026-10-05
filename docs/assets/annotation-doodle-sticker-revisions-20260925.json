@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-09-25",
+  "stickerId": "cutvoke.sticker.marker_doodle_dotted_orbit",
+  "reason": "Dual-background visual review found the original navy dash stroke had insufficient contrast on dark footage.",
+  "source": {
+    "generator": "OpenAI image generation edit",
+    "assetId": "01a0cd0c-fb51-7ec3-af6c-6d7cad175079/exec-b8a36e42-f6a4-4337-ac2c-8ba731671c37.png",
+    "sha256": "490dbab1b4f12845f0e8425445f8887c1c7e7689aa3af1be906607f5229d04ea",
+    "size": [
+      1254,
+      1254
+    ],
+    "mode": "RGBA"
+  },
+  "previousAssetSha256": "50518527ba94fe1c94a28af5c5049659c0963aef211e15c937c75da5a7bafcdb",
+  "asset": {
+    "path": "src/cutvoke/assets/stickers/marker_doodle_dotted_orbit.png",
+    "sha256": "034b3f2bd1d336541c7ccaf471ee4eaeb57bec6a373a780ec7c43aeb25977be6",
+    "size": [
+      320,
+      320
+    ],
+    "mode": "RGBA"
+  },
+  "processing": "Lanczos resize to 320x320; original transparent RGBA background retained."
+}

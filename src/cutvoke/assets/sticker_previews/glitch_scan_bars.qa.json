@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_scan_bars",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3ea1b2bd4bb7bb25e0e130637f5637dbdef0a4c4de887f475eb1464702bd0e61",
+  "previewSha256": "d5a1be8cd7c3044c0ed1e99661290909dad5f06c91b9e4f8a1e23f0cbeca28af",
+  "preview": "glitch_scan_bars.mp4",
+  "bytes": 9358,
+  "visiblePixels": 9246,
+  "changedPixels": 0,
+  "motionVisible": false
+}

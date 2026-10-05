@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_spotlight_bloom_gold",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "The gold spotlight retains its source point and full downward cone.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "aa600002d7d2e79dd3b7b037b4d4d7f302c4d661316f26b274dd268cceb4c213",
+  "previewSha256": "cd16db84fcac4fa2f4f3390159dac9d04e6453c9480ca9dd3e440ab8ebc03a97",
+  "auditSha256": "7de1f66b64e8f00058fa0bdb8c534a61cafe1ad1eb75dcd0d5da1af7b2ba4243"
+}

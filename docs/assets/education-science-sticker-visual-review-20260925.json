@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.learn_open_book",
+      "decision": "approved",
+      "sourceSha256": "d44b1bbc32db069a0c64984d224d677a4c48f7f7a8d1c653235a0f2125eeeccc",
+      "previewSha256": "010c4e00e739e40d601372266844285c9f4c41087df20d1ba5cc83750c3e06e4",
+      "observation": "浅深底上的书页轮廓与书签清晰；页面保持空白，没有伪字、切边或邻格碎片。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_book_stack",
+      "decision": "approved",
+      "sourceSha256": "70192721dbfbe67ccb13fcfdd70f6b0dab126be211ddc9e47bb48448c62575eb",
+      "previewSha256": "d67a45bed64c656f7b5e82abd3892e681d770e5fc43512b157506f0bcc15a9e2",
+      "observation": "蓝红绿三册层次分开，书脊空白，书页边缘完整，暗底轮廓也清楚。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_stationery_cup",
+      "decision": "approved",
+      "sourceSha256": "5cecc39a3fbcb5ce9ff53b2ecd0b46bbf7240ee9fadc30346cb0fa4457e71025",
+      "previewSha256": "9fdb0b626a3fd44e22c1f02f8cbee0badea69c76bddea0a824e01f521da7a91c",
+      "observation": "铅笔、尺和剪刀收在杯内，剪刀环与杯口易辨；主体外没有残片。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_pencil",
+      "decision": "approved",
+      "sourceSha256": "c903282d9e431d0a8cec4b2bb479f36ca8010d96e779338cc267757b5462e25d",
+      "previewSha256": "692e043aa0a62c6164c80931ba7fb20b5c72174c90cddb6a231ce64d3dd34a55",
+      "observation": "木质铅笔的橡皮端、笔身与尖端完整，单体清爽，没有卷屑或格间残片。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_globe",
+      "decision": "approved",
+      "sourceSha256": "aafff573b5db46258417cb2112637c149c1c8a047090eb47198ae716be3b7ee7",
+      "previewSha256": "6f94cfa38f066261029e507c9e070fe4934ff77da7b10c4041dffa0f2a241a49",
+      "observation": "球面、陆块和弧形支架结构完整，蓝绿对比在深色背景上仍可辨。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_microscope",
+      "decision": "approved",
+      "sourceSha256": "41c8481156972827c1c4f01893215a3717950e55020dd45a5200c3f09d546ac0",
+      "previewSha256": "35495be12dd7f8b23386e4b97b788f6bce951d368938b1fbaa45341e51877fbc",
+      "observation": "目镜、物镜和底座都完整；白色机身边缘在浅色预览底上仍然清楚。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_flask",
+      "decision": "approved",
+      "sourceSha256": "707480d0c27b7ffc707de238200dcde02b667356f9fa0d6bbceb1cdfbeb5a61c",
+      "previewSha256": "59ed43c8c3f2a9e54f594dd1d70700d63d227f7ee6d4dea69a2c19db02b58953",
+      "observation": "玻璃轮廓和蓝色液面区分明确，透明区域未被填成实色背景。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_telescope",
+      "decision": "approved",
+      "sourceSha256": "fc13d642085a7d718c6e34205736a9211c15533136c832c8636001527fc88642",
+      "previewSha256": "f11c7982dfc2d21865b5cdf83e524d8d95296489cfbf81607c28f6711bc24e75",
+      "observation": "黄铜镜筒与三脚架轮廓完整，无切边；镜头高光在深底上可见。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_dna",
+      "decision": "approved",
+      "sourceSha256": "4dd41b9cc66d2c895a93773e8c242f7b18b2f90d266b5918a03bbdf2753b7ecc",
+      "previewSha256": "90ea0234087cd88d3a685786d815174c1afb147ab139d372a2cbe0c536234b2d",
+      "observation": "红蓝双螺旋和横向连接连续，底端干净；缩小后仍能辨认主题。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_atom",
+      "decision": "approved",
+      "sourceSha256": "e86ac331288cd8a08e150a40278164eaddb030a4d98b072b50a5d330acf7eef8",
+      "previewSha256": "6f270b053464edfea059662d30aa4615f0473e70653f8a3199ced6e848679427",
+      "observation": "中心核、轨道和电子位置清楚，细线在深浅背景上都保持可读。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_brain",
+      "decision": "approved",
+      "sourceSha256": "05c25780d17077424ef4caf63f47719cfb81f104cf41a4b35aa1d35c7412f168",
+      "previewSha256": "aafa0903855403fc518ae15d83a8991bd6b6245409ad57e15788b07c2032d9f0",
+      "observation": "脑部外形与沟回高光层次清楚，没有额外物件、伪字或背景块。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_calculator",
+      "decision": "approved",
+      "sourceSha256": "d3593610bb108795a0bc9e3b3e9b6ad8681727154ff71c4c3632568415188a26",
+      "previewSha256": "e411122a06cebf46eb0c2dd465e6beb41a4f8b26c4df36c3efb9dcf915996e12",
+      "observation": "空白屏幕、按键矩阵和外壳边界完整，没有可读伪字或边缘杂点。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_geometry_set",
+      "decision": "approved",
+      "sourceSha256": "77f5407ea363ae464a748b76dc273d0e5ae98ecf0f0d364c41be95601c90d4fd",
+      "previewSha256": "000df253ad1b9212b826b9d459753c70847645a19a8983df4251035f2ade087c",
+      "observation": "圆规与直尺交叠关系清楚，铰点、刻度和尖端完整，无格边裁切。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_graduation_cap",
+      "decision": "approved",
+      "sourceSha256": "18e842fe7be136f8328f45f6636f5f52ad80cf05baed967d3d249634eb74f07d",
+      "previewSha256": "ab46090a15a77741ce2067f307fddc3105690c3cf0b6cbd00a87aafe3c731f4f",
+      "observation": "帽顶、帽檐和流苏清晰连贯，没有文字伪影，缩小预览仍易辨认。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_idea_bulb",
+      "decision": "approved",
+      "sourceSha256": "765e42a451c8fd34a756fd4cd23210bd6b3613d6975a8002023f904b723b5cc6",
+      "previewSha256": "e9ad1efdd737274bbfb1d473aa1e01ffa166fe4a70de9615b6fb7ca8c40da557",
+      "observation": "灯泡玻璃与螺纹灯座层次分明，外缘干净，没有飘散光点。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.learn_robot",
+      "decision": "approved",
+      "sourceSha256": "d43d14d1fa9f497a784c129dae8d131e98f030c4b3477916d224863079ffeccc",
+      "previewSha256": "70f7835bbea0d0a951a4f6203eb0e348ee2ccd982c9b208047e516f1ca523ece",
+      "observation": "机器人面屏、手臂和书本均完整，手臂抱书关系清楚，深浅底均可读。"
+    }
+  ]
+}

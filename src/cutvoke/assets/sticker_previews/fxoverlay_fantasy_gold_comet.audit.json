@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_gold_comet",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "a7c3bbdea6efad198e43b88db6acbbdf75dca6aa21e2bb51ab1bae5c1e94dacc",
+  "previewSha256": "2e209925faf10cbf4b81c57a50ea194db929866584924caa2064773cbe75b5d6",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 11587,
+  "visiblePixels": 12782,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 4578,
+    "steady_entry": 12899,
+    "steady_exit": 12842,
+    "exit": 4539
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 4578,
+      "withoutFade": 12871
+    },
+    "steady_entry": {
+      "withFade": 12899,
+      "withoutFade": 12873
+    },
+    "steady_exit": {
+      "withFade": 12842,
+      "withoutFade": 12899
+    },
+    "exit": {
+      "withFade": 4539,
+      "withoutFade": 12899
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.474,
+    0.447
+  ],
+  "auditExport": "fxoverlay_fantasy_gold_comet.audit.mp4",
+  "auditExportSha256": "2a313fbd958f518845c41f7173ba1bec7b6e61f071c59a118feb6e0ec193d836"
+}

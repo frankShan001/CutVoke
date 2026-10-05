@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_lens_raindrops",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "364d736db0e50cb3df74bdd8820d7da9e550f12c6b5f9fa2de581914b4c7170f",
+  "previewSha256": "01b56226b93c0e111546c0d15f6687a1bf4f4d844d195b8b9ef5200fc3e1aa9a",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2392,
+  "visiblePixels": 1441,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 228,
+    "steady_entry": 1439,
+    "steady_exit": 1441,
+    "exit": 228
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 228,
+      "withoutFade": 1441
+    },
+    "steady_entry": {
+      "withFade": 1439,
+      "withoutFade": 1441
+    },
+    "steady_exit": {
+      "withFade": 1441,
+      "withoutFade": 1441
+    },
+    "exit": {
+      "withFade": 228,
+      "withoutFade": 1441
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "weatherfx_lens_raindrops.audit.mp4",
+  "auditExportSha256": "e00c5d57ac2a3f347c8ccf5c37f8313aac539e3624f8ef20fa4579c944c02cbc"
+}

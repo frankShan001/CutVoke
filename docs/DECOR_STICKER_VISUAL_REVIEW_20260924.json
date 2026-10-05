@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed transparent 4x3 artwork contact sheet and actual composited frames for every sticker, compared silhouettes, palette, use and edge quality against the existing sticker library.",
+  "decisions": [
+    {
+      "stickerId": "cutvoke.sticker.decor_neon_stroke",
+      "decision": "approved",
+      "sourceSha256": "6d36d0203d07f5b8f504fc7735f7f58a22d295b4c4f90beda57fd341d0314f1c",
+      "previewSha256": "944aedcdcc99a57323ead950ca76fc564f454dba3d06b862deeb52a04dcfc970",
+      "observation": "弯曲的蓝粉黄发光笔触有明确方向和多层色带，可作镜头强调线；轮廓与已有实心箭头不同。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.decor_paper_tape",
+      "decision": "approved",
+      "sourceSha256": "72e49bf547c4de93ecec87cf3e7c5d62602884aca93a30a3f14c8f739fc89757",
+      "previewSha256": "dad76173a946679bcc8612e20b01946e6db64ce104fa67a1646a0d0637652eea",
+      "observation": "青色半透明胶带有撕裂边缘和折痕，适合拼贴固定效果；在浅色合成画面上仍保留可见边界。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.decor_sparkles",
+      "decision": "approved",
+      "sourceSha256": "cebca6e1ea8cfc07961a9002806fecfb2dfa3d12836b62980a84b4e9f23adc8a",
+      "previewSha256": "c9ca7396bcef7121a502136edb68933d41c37e45ff1f8f93d0049a9303448af5",
+      "observation": "一大两小虹彩星芒与分离小珠构成闪光组，色泽和形状区别于现有纯色星形。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.decor_spiral",
+      "decision": "approved",
+      "sourceSha256": "5337378b26bcc846bdfbed48ce68564aa97f7be005b64934e261e92ccb33ba45",
+      "previewSha256": "9072c018d1385e72fd0f401e8c35924f6f550a43a77ef6dbf37bbd7e0fcf2c10",
+      "observation": "红色手绘螺旋配少量黄色和青色短笔，形成圈点式动势；合成预览中没有文字或背景框。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.decor_impact_burst",
+      "decision": "approved",
+      "sourceSha256": "27d647973977627f176d4f6dae20dc31a21326c71b347cce8b79efb433604917",
+      "previewSha256": "1855fe0e17a9868a40884cc49a80b33450601d6a4dcc60f3af117ebb4d663e4a",
+      "observation": "黄色中心和蓝红多层锯齿构成漫画冲击形，适合强调爆点；与普通星芒的轮廓和用途不同。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.decor_paint_splash",
+      "decision": "approved",
+      "sourceSha256": "4bc6a16badcad5797796252e2d4be12257cb1bf1abd2a2263538d63807773841",
+      "previewSha256": "7ee6d38da009ded91ecffe7925cddcb929e365318a971f90f8b040bc7e852015",
+      "observation": "粉黄蓝渐变泼溅有不规则伸展边缘和独立小滴，可作情绪装饰；透明底与合成底均无矩形背景。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.decor_wavy_ribbon",
+      "decision": "approved",
+      "sourceSha256": "be2bf7917342fb2d8e57947761ff331b8d251e886d192b2413aa872c977d12db",
+      "previewSha256": "a1db369663c029cb9de7b203be033bee96f9303b49292acbca5b920bbc235daa",
+      "observation": "蓝黄双层波浪线横向延伸，适合作为下划线或节奏线；与箭头和单色笔刷区分明显。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.decor_confetti",
+      "decision": "approved",
+      "sourceSha256": "a34f5addd1f969f4a7ca683981d5487d5e17ed0f38671fb96eea6fde711323b6",
+      "previewSha256": "0ddc4b8e7ef025015baa5f03a79da4283a2a348085a92288b980116945faf860",
+      "observation": "彩色纸片和圆珠分散成一组庆祝碎片，多个形状在合成预览中完整保留，未越过裁切边界。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.decor_torn_corner",
+      "decision": "approved",
+      "sourceSha256": "3f094efd3869fb5a2f72519d464adc6d9ffd91dd0fb4c5808f3892dd7c399fb6",
+      "previewSha256": "97311d9d43f6b76585f4dba055c626253a47495a97e34898862e89f5c005f8f5",
+      "observation": "紫色纸底和翻起的米白纸角具有独特拼贴层次，边缘保持透明，可置于标题或画面角落。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.decor_rainbow",
+      "decision": "approved",
+      "sourceSha256": "5b121bfa6c89e0c69ae89b659974c36f03b2d6e117557d70f7480a7748794c36",
+      "previewSha256": "407e5863999ac08f891bfcbb14963d30b999e07b49ef755a0df3d72dccf7e80d",
+      "observation": "粉黄青三层彩虹与两朵白云形成独立柔和装饰，弧线和云朵在缩小合成帧中仍可识别。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.decor_scribble_ring",
+      "decision": "approved",
+      "sourceSha256": "d22dcf0a9d486bbb11798861ee5a6ad55a5a70eaaf8a1cfd21793325e4ab58ee",
+      "previewSha256": "12968f17c1bdcd0f4f2a8511682f099dc6a77b9c8d167b96ec93bfb78ae6afc6",
+      "observation": "紫色多笔圆环中间留透明孔洞，可直接圈选主体；黄色和青色小笔触与红色实心螺旋区分。"
+    },
+    {
+      "stickerId": "cutvoke.sticker.decor_three_dots",
+      "decision": "approved",
+      "sourceSha256": "69d2501e62ca74409c7469a322fba3b849b774723482b3e7dd3f2f17ae405efe",
+      "previewSha256": "c85ee196d7ea074a4d4ba3e2ed485ab7cd4aef31676cd5d1198a87c83c98695c",
+      "observation": "红蓝黄三枚带高光的立体圆点从左下向右上排列，材质和组合方式区别于现有单色圆点。"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.comboZoomFlip",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "db85aeb3203ea35d603c4bd30456a2fe78f9187da9fdd8d38414db3a5ae69a23",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "db85aeb3203ea35d603c4bd30456a2fe78f9187da9fdd8d38414db3a5ae69a23",
+  "auditExport": "animation-comboZoomFlip-v1-0-0.audit.mp4"
+}

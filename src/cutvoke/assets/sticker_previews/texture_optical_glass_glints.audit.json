@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_glass_glints",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "b0e2751ef3e267b368df772cafef81550caaa9060cff4fdb1a9351503ae4f9bf",
+  "previewSha256": "c63041f0ff96fbc261a4cc7fee1b13e00f943dc7c062bbf95edcb2148d5dfc49",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 590,
+  "visiblePixels": 356,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 0,
+    "steady_entry": 359,
+    "steady_exit": 359,
+    "exit": 0
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 0,
+      "withoutFade": 359
+    },
+    "steady_entry": {
+      "withFade": 359,
+      "withoutFade": 359
+    },
+    "steady_exit": {
+      "withFade": 359,
+      "withoutFade": 356
+    },
+    "exit": {
+      "withFade": 0,
+      "withoutFade": 356
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_optical_glass_glints.audit.mp4",
+  "auditExportSha256": "dce87889ed748d3de8a9ff8954a88e2cb59052b9233da880a4d135677133d74a"
+}

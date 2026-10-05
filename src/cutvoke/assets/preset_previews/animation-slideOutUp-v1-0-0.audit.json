@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.slideOutUp",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.733333,
+  "previewExportMeanRgbDifference": 1.659,
+  "exportSha256": "6a8e53685e8345d59494c8fa2942ee38de595e88bd1a4a0337a43d086e8f4c46",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "6a8e53685e8345d59494c8fa2942ee38de595e88bd1a4a0337a43d086e8f4c46",
+  "auditExport": "animation-slideOutUp-v1-0-0.audit.mp4"
+}

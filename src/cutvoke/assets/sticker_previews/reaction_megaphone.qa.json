@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_megaphone",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "9a1d8d6d6da4f21a352f32a899cf50bbc48cd69d4f7469db1369e02b72249b67",
+  "previewSha256": "d881ebfc3434891b4880041af0a7deec6b07071d46cbf19efa4fc4cfcbe29e5c",
+  "preview": "reaction_megaphone.mp4",
+  "bytes": 4557,
+  "visiblePixels": 1982,
+  "changedPixels": 0,
+  "motionVisible": false
+}

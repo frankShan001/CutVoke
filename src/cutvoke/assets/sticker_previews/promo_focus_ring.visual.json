@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.promo_focus_ring",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "observation": "The pearl focus ring stays circular and readable, with the small flare attached to its rim.",
+  "sourceSha256": "4d4922978ed4962826547a1ee88fc85cad7fe99d75555a9d018da27deeef3ff3",
+  "previewSha256": "5db2cdb55c491f5599422b0d3fff48f2e7e753f80bc2480139369fee043a9656",
+  "auditSha256": "7d5387489fe156e0dc97af2725ba609a6eca2b677478e380c8eca06f0f38827a"
+}

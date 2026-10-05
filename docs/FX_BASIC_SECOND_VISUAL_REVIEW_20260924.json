@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Compared before/after frames at 0.20s and 0.95s from real previews, compared them with existing basic-effect covers, and decoded each MP4 fully; geometric sample only.",
+  "decisions": [
+    {
+      "presetId": "cutvoke.preset.fx.circleAperture",
+      "decision": "approved",
+      "motionPreviewSha256": "50a2e4fb37c508c453069735a785b76c9d8245c21155ed437b56a7261c31ebc0",
+      "observation": "黑色外围与中央圆形可见区域形成清楚的聚焦窗口，中心素材保留；区别于整幅模糊和其他着色类基础效果。"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.sharpMirror",
+      "decision": "approved",
+      "motionPreviewSha256": "338e77965067453f1ba31ea0268dc7e476510bec4a1d4b4cf8fe3dfa2543f520",
+      "observation": "太阳和主体从右侧反转到左侧，方向变化一眼可辨，同时边缘更锐；与线稿、网格和镜头畸变的画面不同。"
+    },
+    {
+      "presetId": "cutvoke.preset.fx.invertedLens",
+      "decision": "approved",
+      "motionPreviewSha256": "289e987d30bb2d237ad4b13631b1724235cd718e9195883e89493d880586a42e",
+      "observation": "整幅画面上下倒置并出现明显弧形桶状弯曲，主体变形但可辨；与水平镜像及单独反相、网格不同。"
+    }
+  ]
+}

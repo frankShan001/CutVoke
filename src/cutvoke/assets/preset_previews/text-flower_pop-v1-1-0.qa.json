@@ -1,0 +1,39 @@
+{
+  "presetId": "cutvoke.preset.text.flower_pop",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.text",
+      "version": "1.0.0",
+      "params": {
+        "content": "创作标题",
+        "animIn": 300,
+        "animOut": 200,
+        "scale": 1.8,
+        "fontSize": 138,
+        "color": "#fff149",
+        "strokeColor": "#e11671",
+        "strokeWidth": 8,
+        "bold": true,
+        "shadow": 2,
+        "rotation": -5,
+        "y": 0.43,
+        "fontFamily": "Noto Sans SC",
+        "lineSpacing": 1.0,
+        "align": "center",
+        "background": "",
+        "x": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.5,
+  "firstLastMeanRgbDifference": 8.434,
+  "coverSha256": "b6044700a45c5d4ef245a3ce100c6050ebbee891d32e14e1c3c4907990ffd4f5",
+  "previewSha256": "8ed0b4bb3acce9298667ed605684f19098f7e209d6c625dca12906dd1aa66577",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

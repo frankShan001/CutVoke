@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.staccatoEcho",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "frames",
+    "value": 5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.92,
+  "exportSha256": "3ea12a20b81029b266e36f90340f78d4eb705c658cb77463bdd8aeea59a2796e",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "3ea12a20b81029b266e36f90340f78d4eb705c658cb77463bdd8aeea59a2796e",
+  "auditExport": "personFx-staccatoEcho-v1-0-0.audit.mp4"
+}

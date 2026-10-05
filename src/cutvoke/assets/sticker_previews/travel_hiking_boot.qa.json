@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_hiking_boot",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4ef61d589f7df6915f9aeb2c13f6da7ec79ca4471332fe2cf90d3d3dae18037c",
+  "previewSha256": "84badd388dabe76aa2600f88126c4498168a833e44177a55e879f81d6e562d1c",
+  "preview": "travel_hiking_boot.mp4",
+  "bytes": 4017,
+  "visiblePixels": 1321,
+  "changedPixels": 0,
+  "motionVisible": false
+}

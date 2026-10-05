@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_peach",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The paired peach lobes and green leaf form a clear fruit silhouette without stray fragments.",
+  "sourceSha256": "4a796393a3d6892d17338f5722f7f6b26846e29e577b11e09f68e2bd2ae2e368",
+  "previewSha256": "f8493bee6534878fb15695a1931e1cceba18ee02a89da160f748cb11d448bff3",
+  "auditSha256": "c4bcc1c55609a6303e6a6790405928510c4a43b6817a84e078fcd44afa69a95d"
+}

@@ -1,0 +1,27 @@
+{
+  "presetId": "cutvoke.preset.animation.reveal",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.reveal",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "direction": "left",
+        "easing": "ease-out"
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 95.527,
+  "maxSampledMeanRgbDifference": 95.527,
+  "coverSha256": "41b4b479c8c41b2aa4654a4472cf5c6df8f06c4494f69558e9c5828620313a46",
+  "previewSha256": "d3527727aa9798b9295d118274317a2580d758364c41632e5fedddb6ac7e06cf",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

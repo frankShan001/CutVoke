@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_crimson_afterimage",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "8379c03e030f8e8f284e136024f75a8aa3a93750bc05c6b8fd7ac95c44d19f13",
+  "previewSha256": "c3f241b516a6d59621303f8f2229378b05270300f614fe96acf96c4fc7b8a00c",
+  "preview": "fxoverlay_fantasy_crimson_afterimage.mp4",
+  "bytes": 13346,
+  "visiblePixels": 10030,
+  "changedPixels": 0,
+  "motionVisible": false
+}

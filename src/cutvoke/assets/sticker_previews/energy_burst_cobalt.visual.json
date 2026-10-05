@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.energy_burst_cobalt",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T08:40:43+00:00",
+  "observation": "The cobalt radial burst has evenly separated rays and a clear central point.",
+  "method": "Reviewed all extracted RGBA overlays on dark and light checkerboard contacts and inspected the rendered player preview contact sheet. Checked silhouette clarity, alpha cleanup, edge safety, contrast, and use as a timeline compositing overlay.",
+  "sourceSha256": "b063bfde9f5aaf7c46d79e9e2a1f94ac4ae48531481de39285e0bb33e697a798",
+  "previewSha256": "ab8674c19e9daecaa2c5a97f52cb281033c12c462e225b226ffb9a047daba123",
+  "auditSha256": "ba16f4e9698c804873f328cf5a9380f6b4e3c8faf9a9ce1b07db9b8635767d9e"
+}

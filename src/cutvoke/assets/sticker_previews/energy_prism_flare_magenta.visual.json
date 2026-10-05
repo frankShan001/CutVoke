@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.energy_prism_flare_magenta",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T08:40:43+00:00",
+  "observation": "The magenta four-point prism flare is centered with clean, even rays.",
+  "method": "Reviewed all extracted RGBA overlays on dark and light checkerboard contacts and inspected the rendered player preview contact sheet. Checked silhouette clarity, alpha cleanup, edge safety, contrast, and use as a timeline compositing overlay.",
+  "sourceSha256": "824fbeca7dd5796520ea5992ff1aa078fd7a0181dea8e91a9fa161e4cf35f30a",
+  "previewSha256": "5df324799cdf9bb286b532f866f84fb9c6e2f6d1751b826c023f1f6e06e2af45",
+  "auditSha256": "f0da65b54d30283925df0099aa6af4c7f2cc329cb24e1eeea7f9b36c5245be76"
+}

@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.electricWire",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "low",
+    "value": 0.0392
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "5757d82e0b35ccbb93569f576d84b6cb3cedba3fd468ddb1fb6503d40e017215",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "5757d82e0b35ccbb93569f576d84b6cb3cedba3fd468ddb1fb6503d40e017215",
+  "auditExport": "filter-electricWire-v1-0-0.audit.mp4"
+}

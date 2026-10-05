@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.personFx.cinemaPortrait",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.person.tint",
+      "version": "1.0.0",
+      "params": {
+        "hue": 165,
+        "saturation": 0.82,
+        "intensity": 0.16,
+        "lightness": false
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 16.39,
+  "maxSampledMeanRgbDifference": 16.39,
+  "coverSha256": "5960622df5a3da2ccb0191db217bd086045f0b580792085c27ef13e95047726a",
+  "previewSha256": "b5d55ff3459cda324b4938dccb10f7b540568770906c2588b19494a3c76e281c",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

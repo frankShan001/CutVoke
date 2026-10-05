@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_cherry_blossom",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "粉色花簇、花蕾和木枝层次分明，边缘干净，可用于春日画面角饰。",
+  "sourceSha256": "598c0ab00688a83e63cd34c444a9e8a7317d97b6d2d0c017498d2e258b1b5628",
+  "previewSha256": "d49e34b0dc66adf5baa651a81f5df224f345ac12155419773189e9e5ab7006ed",
+  "auditSha256": "6e6dafe31310d69780b5157df0bef924ec651dcfaf2e0a6a204ed3397f559430"
+}

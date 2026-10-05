@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_gold_swoosh",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7dfc100994ae309c0c2ca258a9f871cf64a00772e18bcfd41615db61c50158d3",
+  "previewSha256": "5a26a975d4404532a046215795674c33cb85a7244af696ab2b9ead9e993f66c0",
+  "preview": "fxoverlay_gold_swoosh.mp4",
+  "bytes": 10609,
+  "visiblePixels": 7262,
+  "changedPixels": 0,
+  "motionVisible": false
+}

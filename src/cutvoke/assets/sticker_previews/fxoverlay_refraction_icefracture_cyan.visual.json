@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_icefracture_cyan",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "observation": "冰晶分枝锐利、放射方向清楚；在浅色素材上对比偏低，应优先用于暗画面。",
+  "sourceSha256": "640fcd1a90921eb66a1cef8fe4be2cef9c64107b40f44455052cabf9e763c337",
+  "previewSha256": "b3ecea2ee3f48b7722a113d0045ad7fe373419748a38560a05e0092c16377fbc",
+  "auditSha256": "d5727ca07e152c65397a7bfcc4f77c21992fa9effa710e8c8299355bfef0f8e3"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_skateboard",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "彩色滑板板面、支架和四轮结构可辨，倾斜轮廓完整，透明背景中无孤立杂点。",
+  "sourceSha256": "de24447f7b36032ecd80545751efe6bb5959af1e8a2e40ed0c1d2ef4943678e0",
+  "previewSha256": "9dfdf61209723a991e64374223d31ce618af1fb46cd8b1c2b1a91cbc5c1c034a",
+  "auditSha256": "906f2bae4d03995ef6b8e3703af34104e3cb394257c038cedf1c22e3230857d3"
+}
