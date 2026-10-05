@@ -46,11 +46,11 @@ async function projectWithImages(request: APIRequestContext, count = 1) {
   return { id, name, assets };
 }
 
-async function open(page: Page, name: string, repair = false) {
+async function open(page: Page, name: string, repair = false, preparationTimeout = 75_000) {
   await page.goto("/");
   await page.getByRole("button", { name: `打开工程 ${name}` }).click();
   if (repair) await page.getByRole("button", { name: "进入工程修复" }).click();
-  await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible({ timeout: 75_000 });
+  await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible({ timeout: preparationTimeout });
 }
 
 async function exportDialog(page: Page, id: string) {
@@ -214,10 +214,49 @@ test("an editor chunk load failure leaves a recovery action and the saved projec
 });
 
 test("a 200-asset project keeps the media list bounded and filtering responsive during playback", async ({ page, request }, testInfo) => {
-  test.setTimeout(120_000);
+  test.setTimeout(180_000);
   const { id, name } = await projectWithImages(request, 200);
+  let preparationJobId: string | undefined;
+  const preparations: Array<{ jobId: string; projectId: string; state: string; phase: string; error?: string; duration: number; completedWindows: number; totalWindows: number }> = [];
+  page.on("response", (response) => {
+    const pathname = new URL(response.url()).pathname;
+    const submission = pathname === `${api(id)}/preview-jobs` && response.request().method() === "POST";
+    if ((submission || /\/preview-jobs\/[^/]+$/.test(pathname)) && response.ok()) {
+      void response.json().then((job) => {
+        if (job.projectId !== id) return;
+        if (submission) preparationJobId ??= job.jobId;
+        if (job.jobId === preparationJobId) preparations.push(job);
+      }).catch(() => {});
+    }
+  });
   const started = Date.now();
-  await open(page, name);
+  // This is a real 400-second composition, not just a 200-row catalog.
+  // Ubuntu completed 48/50 windows at the former 75-second deadline.
+  let lastProgress = "";
+  let advancedAt = Date.now();
+  let watchdog: ReturnType<typeof setInterval> | undefined;
+  const progressing = new Promise<never>((_resolve, reject) => {
+    watchdog = setInterval(() => {
+      const job = preparations.at(-1);
+      const progress = job ? `${job.state}:${job.phase}:${job.completedWindows}` : "";
+      if (progress !== lastProgress) { lastProgress = progress; advancedAt = Date.now(); }
+      if (job?.state === "failed" || job?.state === "cancelled") {
+        reject(new Error(`Complete preview failed: ${job.error || job.state}`));
+      } else if (Date.now() - advancedAt > 30_000) {
+        reject(new Error(`Complete preview made no progress for 30 seconds: ${lastProgress}`));
+      }
+    }, 1000);
+  });
+  try {
+    await Promise.race([open(page, name, false, 120_000), progressing]);
+  } finally {
+    clearInterval(watchdog);
+  }
+  await expect.poll(() => preparations.some((job) => job.state === "completed")).toBe(true);
+  const prepared = preparations.find((job) => job.state === "completed")!;
+  expect(prepared.duration).toBe(400);
+  expect(prepared.totalWindows).toBe(50);
+  expect(prepared.completedWindows).toBe(50);
   await expect(page.getByRole("contentinfo")).toContainText("片段 200");
   expect((await current(request, id)).sequence.tracks[0].clips).toHaveLength(200);
   const openedMs = Date.now() - started;

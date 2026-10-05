@@ -74,7 +74,7 @@ from .luts import CubeInvalid, MAX_CUBE_BYTES, validate_cube
 
 # Bump when preview rendering changes so neither disk cache nor browser ETag can
 # treat media produced by an older renderer as current for the same project data.
-PREVIEW_RENDER_CACHE_VERSION = 16
+PREVIEW_RENDER_CACHE_VERSION = 17
 PREVIEW_WINDOW_SECONDS = 8
 ASSET_MEDIA_TYPES = {
     ".mp3": "audio/mpeg", ".wav": "audio/wav", ".flac": "audio/flac",
@@ -615,6 +615,8 @@ class HttpApi:
         # slicing a plain clip. Different windows are seeks, not newer edits.
         from .preview_prepare import preview_identity
         visual_identity = preview_identity(project, PREVIEW_RENDER_CACHE_VERSION)
+        # A late obsolete request must not cancel the newer active render.
+        self._require_current_preview(project, visual_identity)
         with self._preview_jobs_lock:
             active = self._preview_active_jobs.get(project_key)
             if active and active[0] != visual_identity:
@@ -627,6 +629,9 @@ class HttpApi:
         # The short disk-index lock never covers encoding. Recheck on admission
         # so duplicate requests share a render and cached reads bypass the queue.
         with self._preview_scheduler.slot(preview_cancel, priority):
+            # Requests aborted by the browser can already be waiting here.
+            # Do not encode obsolete snapshots ahead of a reopened project.
+            self._require_current_preview(project, visual_identity)
             cached = self.preview_cache.get(name, metadata, cached_window_is_valid)
             if cached:
                 return cached, digest, duration
@@ -658,7 +663,15 @@ class HttpApi:
                         self._preview_active_jobs.pop(project_key, None)
             return out_path, digest, duration
 
-    def _preview_frame_file(self, project, at: float, size) -> Optional[str]:
+    def _require_current_preview(self, project, visual_identity: str) -> None:
+        from .preview_prepare import preview_identity
+        from .render import RenderCancelled
+        current = self.service.get_project(str(project.project_id))
+        if preview_identity(current, PREVIEW_RENDER_CACHE_VERSION) != visual_identity:
+            raise RenderCancelled("preview superseded by a newer edit")
+
+    def _preview_frame_file(self, project, at: float, size,
+                            *, visual_identity: Optional[str] = None) -> Optional[str]:
         """Frame-aligned disk cache, with dependencies bounded to its interval."""
         import math
         from .preview_prepare import preview_identity
@@ -674,6 +687,7 @@ class HttpApi:
         sliced = self._slice_preview_window_project(project, start, stop)
         dependencies = sliced[0] if sliced else project
         identity = preview_identity(dependencies, PREVIEW_RENDER_CACHE_VERSION)
+        visual_identity = visual_identity or preview_identity(project, PREVIEW_RENDER_CACHE_VERSION)
         digest = hashlib.sha256(json.dumps([identity, frame, size]).encode()).hexdigest()[:32]
         name = f"frame_{digest}.png"
         metadata = {"frame": frame, "size": size}
@@ -681,6 +695,7 @@ class HttpApi:
         if cached:
             return cached
         with self._preview_scheduler.slot(threading.Event()):
+            self._require_current_preview(project, visual_identity)
             cached = self.preview_cache.get(name, metadata, lambda path: Path(path).stat().st_size > 0)
             if cached:
                 return cached
@@ -2156,6 +2171,8 @@ class HttpApi:
                 _os.close(fd)
                 try:
                     proj = self.service.get_project(pid)
+                    from .preview_prepare import preview_identity
+                    visual_identity = preview_identity(proj, PREVIEW_RENDER_CACHE_VERSION)
                     compare_clip_id = body.get("compareClipId")
                     if compare_clip_id is not None:
                         if not isinstance(compare_clip_id, str) or not compare_clip_id:
@@ -2164,7 +2181,7 @@ class HttpApi:
                         proj = self._without_clip_color(proj, compare_clip_id)
                     # 字幕由 Web 的可编辑 Canvas 叠层负责显示；服务端只抽取
                     # 无字幕基础画面，避免字幕修改触发重复烧录。
-                    out = self._preview_frame_file(proj, t, size)
+                    out = self._preview_frame_file(proj, t, size, visual_identity=visual_identity)
                     if out is None:
                         return 204, {}
                     with self.preview_cache.pin(out), open(out, "rb") as f:
@@ -2775,7 +2792,13 @@ def serve(api: HttpApi, host: str = "127.0.0.1", port: int = 8787,
     """
     bound = resolve_binding(host, allow_non_loopback=allow_non_loopback)
     handler = build_handler(api, web_dir)
-    server = ThreadingHTTPServer((bound, port), handler)
+    # Browsing a resource domain creates a burst of covers, media and API
+    # connections. The older Python default backlog of five makes Linux TCP
+    # retries delay unrelated API requests behind that burst.
+    class LocalHTTPServer(ThreadingHTTPServer):
+        request_queue_size = 128
+
+    server = LocalHTTPServer((bound, port), handler)
     api.shutdown_callback = server.shutdown
     api._log("INFO", "http.serve_start",
              detail={"host": bound, "port": port, "tokenRequired": api.session is not None})

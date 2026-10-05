@@ -979,7 +979,16 @@ test("resource category keeps target, filters, search, and scroll across panel c
 });
 
 test("eight creative domains share keyboard navigation and preserve the selected edit target", async ({ page, request }) => {
-  const { name } = await createProject(request);
+  const { id, name } = await createProject(request);
+  let finishAudit!: () => void;
+  const auditGate = new Promise<void>((resolve) => { finishAudit = resolve; });
+  const auditRequests = { packs: 0, presets: 0 };
+  await page.route(/\/api\/v1\/(resource-packs|presets)$/, async (route) => {
+    const key = route.request().url().endsWith("/presets") ? "presets" : "packs";
+    auditRequests[key]++;
+    await auditGate;
+    await route.continue();
+  });
   await page.route("**/api/v1/assets", (route) => route.fulfill({
     status: 200,
     contentType: "application/json",
@@ -1018,6 +1027,11 @@ test("eight creative domains share keyboard navigation and preserve the selected
     await domain.verify();
     await expect(inspectorTab).toHaveAttribute("aria-selected", "true");
   }
+  // Domain switches must share pending audits rather than queueing one
+  // expensive scan per panel and starving unrelated catalog requests.
+  await expect.poll(() => auditRequests).toEqual({ packs: 1, presets: 1 });
+  finishAudit();
+  await expect(page.getByRole("region", { name: "内置预设库" })).toBeVisible();
 
   await current.press("Home");
   current = creativeTabs.getByRole("tab", { name: "素材" });
@@ -1028,16 +1042,64 @@ test("eight creative domains share keyboard navigation and preserve the selected
   await creativeTabs.getByRole("tab", { name: "特效" }).click();
   const effectSearch = page.getByRole("searchbox", { name: "搜索预设和效果" });
   await effectSearch.fill("cutvoke.fx");
-  await expect(page.locator(".resource-grid:not(.resource-preset-grid) .resource-card").first()).toBeVisible();
+  await expect(page.locator(".resource-grid:visible:not(.resource-preset-grid) .resource-card").first()).toBeVisible();
   const leftScroll = page.locator(".zone-left__scroll");
   await leftScroll.evaluate((element) => { element.scrollTop = element.scrollHeight; });
   const effectScroll = await leftScroll.evaluate((element) => element.scrollTop);
   expect(effectScroll).toBeGreaterThan(0);
+  let finishRefresh!: () => void;
+  const refreshGate = new Promise<void>((resolve) => { finishRefresh = resolve; });
+  let refreshRequests = 0;
+  await page.route(/\/api\/v1\/projects\/[^/]+\/resources$/, async (route) => {
+    refreshRequests++;
+    await refreshGate;
+    const response = await route.fetch();
+    const catalog = await response.json();
+    const effect = catalog.effects.find((item: { effectId: string }) => item.effectId.startsWith("cutvoke.fx"));
+    catalog.effects.push({ ...effect, effectId: "cutvoke.fx.refreshProof", name: "Fresh catalog proof" });
+    await route.fulfill({ response, json: catalog });
+  });
   await creativeTabs.getByRole("tab", { name: "转场" }).click();
   await creativeTabs.getByRole("tab", { name: "特效" }).click();
+  await expect.poll(() => refreshRequests).toBeGreaterThan(0);
+  await expect(page.locator(".resource-grid:visible:not(.resource-preset-grid) .resource-card").first()).toBeVisible();
   await expect(effectSearch).toHaveValue("cutvoke.fx");
   await expect.poll(() => leftScroll.evaluate((element) => element.scrollTop)).toBe(effectScroll);
   await expect(page.locator(".resource-context:visible")).toContainText("视频片段");
+  finishRefresh();
+  await expect(page.locator(".resource-grid:visible:not(.resource-preset-grid)")
+    .getByText("Fresh catalog proof", { exact: true })).toBeVisible();
+  await page.unroute(/\/api\/v1\/projects\/[^/]+\/resources$/);
+  const pending: Array<{ release: () => void; done: Promise<void> }> = [];
+  await page.route(/\/api\/v1\/projects\/[^/]+\/resources$/, async (route) => {
+    const response = await route.fetch();
+    const catalog = await response.json();
+    const index = pending.length;
+    const effect = catalog.effects.find((item: { effectId: string }) => item.effectId.startsWith("cutvoke.fx"));
+    catalog.effects.push({ ...effect, effectId: `cutvoke.fx.generation${index}`, name: `Catalog generation ${index}` });
+    let release!: () => void;
+    let done!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const completed = new Promise<void>((resolve) => { done = resolve; });
+    pending.push({ release, done: completed });
+    await gate;
+    await route.fulfill({ response, json: catalog });
+    done();
+  });
+  await apply(request, id, "caption.update", { captionId: "caption-one", text: "refresh one" });
+  await expect.poll(() => pending.length).toBe(1);
+  await apply(request, id, "caption.update", { captionId: "caption-one", text: "refresh two" });
+  await expect.poll(() => pending.length).toBe(2);
+  pending[1].release();
+  const grid = page.locator(".resource-grid:visible:not(.resource-preset-grid)");
+  await expect(grid.getByText("Catalog generation 1", { exact: true })).toBeVisible();
+  const olderResponse = page.waitForResponse((response) => new URL(response.url()).pathname === `${apiPath(id)}/resources`);
+  pending[0].release();
+  await pending[0].done;
+  await (await olderResponse).finished();
+  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+  await expect(grid.getByText("Catalog generation 0", { exact: true })).toHaveCount(0);
+  await expect(grid.getByText("Catalog generation 1", { exact: true })).toBeVisible();
 });
 
 test("offline resource pack manager installs, activates, and rolls back a version", async ({ page, request }) => {
@@ -1951,6 +2013,9 @@ test("buffering keeps the video position and size fixed", async ({ page, request
   expect(before).toBeTruthy();
   // Exercise the real waiting/canplay handlers even on a fully cached window.
   await page.getByRole("button", { name: "播放", exact: true }).click();
+  // Native playing/canplay can otherwise arrive after the synthetic waiting
+  // event and immediately clear it. Wait for the play promise to settle first.
+  await video.evaluate((element) => (element as HTMLVideoElement).play());
   await video.dispatchEvent("waiting");
   await expect(page.getByText("播放缓冲中…", { exact: true })).toBeVisible();
   const waiting = await video.boundingBox();

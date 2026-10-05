@@ -91,3 +91,10 @@ jobs:
           npm ci
           npx playwright install --with-deps chromium
           npm run test:e2e
+      - name: Preserve browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: browser-failure-diagnostics
+          path: web/app/test-results/
+          retention-days: 7

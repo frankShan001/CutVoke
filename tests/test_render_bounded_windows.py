@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import inspect
+import json
 import shutil
 import subprocess
 import tempfile
@@ -97,11 +98,13 @@ class WindowContracts(unittest.TestCase):
             self.assertTrue(renderer.entered.wait(3))
             caption=copy.deepcopy(project); caption.revision="2"; caption.name="new name"
             caption.sequence.captions=[Caption("caption","text",r(0),r(1))]
+            project.name=caption.name; project.sequence.captions=caption.sequence.captions
             second=threading.Thread(target=call,args=(caption,)); second.start()
             # Identity computation completes before waiting on the cache lock.
             self.assertFalse(renderer.event.wait(.2))
             changed=copy.deepcopy(caption); changed.revision="3"
             changed.sequence.tracks[0].clips[0].effects=[{"effectId":"cutvoke.color","params":{"brightness":.1}}]
+            project.sequence.tracks=copy.deepcopy(changed.sequence.tracks)
             third=threading.Thread(target=call,args=(changed,)); third.start()
             self.assertTrue(renderer.event.wait(3))
             renderer.release.set()
@@ -189,8 +192,15 @@ class RealWindowRendering(unittest.TestCase):
                 with self.subTest(frame=i):
                     self.assertLess(sum(abs(x-y) for x,y in zip(a[i],b[i]))/len(a[i]),3)
             def pcm(path):
+                # FFmpeg 6.1 decodes the complete final AAC block, including
+                # encoder padding beyond the MP4 stream's declared end. Check
+                # that end independently, then compare the exact audible span.
+                metadata=json.loads(subprocess.run(["ffprobe","-v","error",
+                    "-select_streams","a:0","-show_entries","stream=duration",
+                    "-of","json",str(path)],check=True,capture_output=True).stdout)
+                self.assertAlmostEqual(float(metadata["streams"][0]["duration"]),13,places=6)
                 raw=subprocess.run(["ffmpeg","-v","error","-i",str(path),"-vn",
-                    "-ar","48000","-ac","1","-f","s16le","pipe:1"],check=True,capture_output=True).stdout
+                    "-t","13","-ar","48000","-ac","1","-f","s16le","pipe:1"],check=True,capture_output=True).stdout
                 values=array("h");values.frombytes(raw);return values
             aa,bb=pcm(actual),pcm(reference)
             self.assertEqual(len(aa),13*48000)
