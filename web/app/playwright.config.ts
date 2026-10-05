@@ -16,7 +16,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "uv run --project ../.. python ../../tests/e2e_server.py",
+    command: "python ../../tests/e2e_server.py",
     url: `${serverUrl}/api/v1/capabilities`,
     reuseExistingServer: !process.env.CI && !process.env.CUTVOKE_E2E_PORT,
     timeout: 120_000,

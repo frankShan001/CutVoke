@@ -1,0 +1,5 @@
+# The resource inventory and visual approvals pin the bytes of these JSON files.
+# Their audited representation uses CRLF; keep it identical on every checkout.
+/src/cutvoke/assets/**/*.json text eol=crlf
+/src/cutvoke/core/builtin_presets.json text eol=crlf
+/src/cutvoke/core/builtin_stickers.json text eol=crlf

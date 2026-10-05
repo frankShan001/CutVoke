@@ -34,6 +34,7 @@ import threading
 import time
 import copy
 from functools import lru_cache, wraps
+from fractions import Fraction
 from typing import Any, Optional
 from pathlib import Path
 
@@ -45,7 +46,7 @@ from .effects import (EffectRegistry, default_registry, find_transition,
                       xfade_transition_name, collect_used_effect_ids,
                       animation_slot)
 from .caption_render import (prepare_caption_render, CaptionFontError,
-                             resolve_title_font)
+                             _caption_font_instance)
 
 # subprocess resolves these names through PATH. Deployments that need a fixed
 # binary can pass an explicit path to RenderService.
@@ -2225,7 +2226,7 @@ class RenderService:
         # 统一缩放到序列画布并规范帧率（输出符合 sequence 设置）
         parts.append(
             f"[{current}]scale={seq.width}:{seq.height},"
-            f"fps={fps_expr}[outv]")
+            f"null[outv]")
 
         # ---- 字幕叠加（F22/F24/M1 基础字幕进入成片）----
         # 与预览 extract_frame 复用同一段逻辑（prepare_caption_render 生成 ASS +
@@ -2697,7 +2698,7 @@ class RenderService:
                     f"format=auto[{out}]")
                 current = out
             out_label = f"vtk{n}"
-            parts.append(f"[{current}]fps={fps_expr},null[{out_label}]")
+            parts.append(f"[{current}]null[{out_label}]")
             return out_label, total_dur
 
         # 组装轨内片段（A04：按绝对时间线位置，中间/开头空白必须保留）
@@ -2755,7 +2756,7 @@ class RenderService:
                         f"setpts=PTS-STARTPTS[{transition_outgoing}]")
                     offset = 0.0
                 else:
-                    current = self._pad_last_frame(current, d, parts, fps_expr)
+                    current = self._pad_last_frame(current, d, parts, fps_expr, film + d)
                     transition_outgoing = current
                     offset = film
                 out = f"xf{n}_{i}"
@@ -2763,6 +2764,13 @@ class RenderService:
                 transition_spec = self.effects.get(str(tr.get("effectId", "")))
                 blur_pattern = transition_spec.implementation.get("blurPattern")
                 squeeze_axis = transition_spec.implementation.get("squeezeAxis")
+                if squeeze_axis is not None and not handle:
+                    # Both the squeeze and timeline bed consume the held stream.
+                    # Explicitly split it; older FFmpeg cannot reuse an output pad.
+                    squeeze_source = f"squeezesrc{n}_{i}"
+                    timeline_source = f"squeezebed{n}_{i}"
+                    parts.append(f"[{current}]split=2[{squeeze_source}][{timeline_source}]")
+                    transition_outgoing, current = squeeze_source, timeline_source
                 # FFmpeg only evaluates expr when transition=custom. Keep all
                 # other transition names manifest-driven; blur presets provide
                 # their own bounded, spatially shaped expression.
@@ -2812,10 +2820,10 @@ class RenderService:
                     # it waiting forever at the seam. Place the seam and the
                     # incoming tail at their timeline timestamps instead.
                     current = self._pad_last_frame(
-                        current, clip_durs[i], parts, fps_expr)
+                        current, clip_durs[i], parts, fps_expr, film + clip_durs[i])
                     transition_at_seam = f"trseg{n}_{i}"
                     parts.append(
-                        f"[{out}]fps={fps_expr},setpts=PTS-STARTPTS+{film:.6f}/TB"
+                        f"[{out}]setpts=PTS-STARTPTS+{film:.6f}/TB"
                         f"[{transition_at_seam}]")
                     seam_mix = f"trmix{n}_{i}"
                     parts.append(
@@ -2841,19 +2849,26 @@ class RenderService:
         # lane to the canvas frame clock before framesync: otherwise a rounded
         # timestamp just after a canvas tick repeats its previous picture, and
         # the transition endpoint differs after a window origin shift.
-        parts.append(f"[{current}]fps={fps_expr},settb=expr={fps.denominator}/{fps.numerator},"
+        # FFmpeg 6.1 forwards overlay EOF at the last frame's timestamp. fps
+        # would discard that frame (and every one-frame animation segment).
+        # Supply one lookahead frame, then bound the lane to its actual duration.
+        parts.append(f"[{current}]tpad=stop_mode=clone:stop=1,fps={fps_expr},"
+                     f"trim=duration={film:.9f},settb=expr={fps.denominator}/{fps.numerator},"
                      f"setpts=N[{out_label}]")
         return out_label, film
 
     def _pad_last_frame(self, label: str, pad_secs: float, parts: list[str],
-                        fps_expr: str) -> str:
+                        fps_expr: str, total_duration: float) -> str:
         """为无重叠素材的转场复制前段末帧，且不改变绝对时间轴总时长。"""
         if pad_secs <= 0:
             return label
         out = f"hold{len(parts)}"
+        frame_rate = Fraction(fps_expr)
+        lookahead = float(1 / frame_rate)
         parts.append(
-            f"[{label}]tpad=stop_mode=clone:stop_duration={pad_secs:.6f}"
-            f",fps={fps_expr},setpts=PTS-STARTPTS[{out}]")
+            f"[{label}]tpad=stop_mode=clone:stop_duration={pad_secs + lookahead:.9f}"
+            f",fps={fps_expr},trim=duration={total_duration:.9f},"
+            f"setpts=PTS-STARTPTS[{out}]")
         return out
 
     def _pad_black(self, label: str, pad_secs: float, parts: list[str],
@@ -3907,8 +3922,12 @@ class RenderService:
                 scale_ref = f"fxrange_scale_ref{vseg[0]}"
                 scaled = f"fxrange_crop_scaled{vseg[0]}"
                 parts.append(f"[{base}]split=2[{blend_base}][{scale_ref}]")
+                unused = f"fxrange_scale_unused{vseg[0]}"
+                # scale's second reference input was added after FFmpeg 6.1.
+                # scale2ref supports the same geometry on our oldest CI renderer.
                 parts.append(
-                    f"[{processed}][{scale_ref}]scale=w=rw:h=rh[{scaled}]")
+                    f"[{processed}][{scale_ref}]scale2ref=w=iw:h=ih[{scaled}][{unused}]")
+                parts.append(f"[{unused}]nullsink")
                 base, processed = blend_base, scaled
             out = f"fxrange_out{vseg[0]}"
             vseg[0] += 1
@@ -3973,7 +3992,9 @@ class RenderService:
         feather = max(0.0, min(0.5, float(params.get("feather", 0.05))))
         invert = bool(params.get("invert", False))
         try:
-            font_path = resolve_title_font("Noto Sans SC")
+            # FreeType versions disagree on a variable font's default weight.
+            # Use the same explicit Regular instance for mask glyphs everywhere.
+            _family, font_path = _caption_font_instance("Noto Sans SC", False)
         except CaptionFontError as error:
             raise RenderError(f"无法准备文字蒙版字体: {error}") from error
         font_path = font_path.replace("\\", "/").replace(":", "\\:")
@@ -4094,10 +4115,11 @@ class RenderService:
         parts.append(
             f"[{bg}][{src_label}]overlay=shortest=0:eof_action=repeat:"
             f"format=auto:x={x}:y={y}[{out}]")
-        # 统一帧率，保证 xfade/concat 尺寸与 tb 一致
+        # The color bed already emits the sequence frame clock. Resampling it
+        # again loses its final frame on FFmpeg 6.1, including one-frame beds.
         fin = f"cf{vseg[0]}"
         vseg[0] += 1
-        parts.append(f"[{out}]fps={fps_expr}[{fin}]")
+        parts.append(f"[{out}]null[{fin}]")
         return fin
 
     def _build_clip_opacity_keyframes(self, clip: Clip, seq: Sequence,
