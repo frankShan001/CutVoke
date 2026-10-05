@@ -148,6 +148,9 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
 
   const [resources, setResources] = useState<ProjectResource[]>([]);
   const resourcesProject = useRef<string | null>(null);
+  const currentProject = useRef(pid);
+  currentProject.current = pid;
+  const resourcesRequest = useRef(0);
   const [builtinPresets, setBuiltinPresets] = useState<BuiltinPresetCatalog | null>(null);
   const [presetLoading, setPresetLoading] = useState(false);
   const [presetLoadError, setPresetLoadError] = useState<string | null>(null);
@@ -287,8 +290,12 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
 
   const load = useCallback(
     async () => {
+      const request = ++resourcesRequest.current;
+      const isCurrent = () => request === resourcesRequest.current && pid === currentProject.current;
       if (!pid) {
         setResources([]);
+        resourcesProject.current = null;
+        setLoading(false);
         setFavIds([]);
         setLoadError(null);
         return;
@@ -298,16 +305,18 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
       try {
         // 保留完整目录，搜索与两级分类在本地筛选；切分类不会让其它分类消失。
         const res = await listProjectResources(pid);
+        if (!isCurrent()) return;
         setResources(res.effects);
         resourcesProject.current = pid;
         setFavIds(res.favorites);
       } catch (err) {
+        if (!isCurrent()) return;
         setResources([]);
         setFavIds([]);
         setLoadError(err instanceof Error && err.message ? err.message : "请检查服务连接后重试。");
         showError(dispatch, err);
       } finally {
-        setLoading(false);
+        if (isCurrent()) setLoading(false);
       }
     },
     [pid, dispatch],
@@ -1237,7 +1246,7 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
       ) : null}
 
       {/* 列表 */}
-      {loading && (resources.length === 0 || resourcesProject.current !== pid) ? (
+      {(pid && resourcesProject.current !== pid) || (loading && resources.length === 0) ? (
         <div className="cv-loading" role="status">
           <Loader2 size={13} className="cv-spin" /> 加载中…
         </div>
