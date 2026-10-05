@@ -311,6 +311,7 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
         setFavIds(res.favorites);
       } catch (err) {
         if (!isCurrent()) return;
+        resourcesProject.current = pid;
         setResources([]);
         setFavIds([]);
         setLoadError(err instanceof Error && err.message ? err.message : "请检查服务连接后重试。");
@@ -1246,7 +1247,7 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
       ) : null}
 
       {/* 列表 */}
-      {!loadError && ((pid && resourcesProject.current !== pid) || (loading && resources.length === 0)) ? (
+      {(pid && resourcesProject.current !== pid) || (loading && resources.length === 0) ? (
         <div className="cv-loading" role="status">
           <Loader2 size={13} className="cv-spin" /> 加载中…
         </div>
