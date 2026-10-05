@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_foliage_dapple",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "090eb84c4a02fdc65bd660f91f90a2f568b2e03d11a0293285faa6c91900d346",
+  "previewSha256": "7474ff11cb23f19a82685929db81b4934aaf29bbed369515cbf74f3b51f9f0da",
+  "preview": "natural_light_foliage_dapple.mp4",
+  "bytes": 10038,
+  "visiblePixels": 12454,
+  "changedPixels": 0,
+  "motionVisible": false
+}

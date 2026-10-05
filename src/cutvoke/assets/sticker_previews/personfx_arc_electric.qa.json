@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_arc_electric",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f82f78196b20d3b59ba084cf2e745da4c582e12ddbc979b8d31f8c12d4216032",
+  "previewSha256": "76e0ed9e040c3b2c1e58b22dd727b1c1ecda3f73e14dae11467cb9cf1d7261f9",
+  "preview": "personfx_arc_electric.mp4",
+  "bytes": 9829,
+  "visiblePixels": 7388,
+  "changedPixels": 0,
+  "motionVisible": false
+}

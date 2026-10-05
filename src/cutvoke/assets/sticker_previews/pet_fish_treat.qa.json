@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_fish_treat",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "bc4e506c7907edbbf5ed07cfd69c2fb5b18cec36f850aa012af5f524a16b322a",
+  "previewSha256": "c530ef4e489ae7ad28414373878555e6c3dbac716c53b4ee9d278b68442a6e90",
+  "preview": "pet_fish_treat.mp4",
+  "bytes": 3813,
+  "visiblePixels": 1340,
+  "changedPixels": 0,
+  "motionVisible": false
+}

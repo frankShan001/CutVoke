@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.energy_orbs_multicolor",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "8d330bb21b273ea2adf5c58eedc1ad7b672b1b385c3fc34ea387fb915c60bd20",
+  "previewSha256": "526811f670b4088167f3720e0ff48d7bd44eb51ff879a5887c1ffe07d154edb8",
+  "preview": "energy_orbs_multicolor.mp4",
+  "bytes": 6368,
+  "visiblePixels": 1278,
+  "changedPixels": 0,
+  "motionVisible": false
+}

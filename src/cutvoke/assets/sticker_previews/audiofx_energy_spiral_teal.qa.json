@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_energy_spiral_teal",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "282af72eb57415ee720cc0ee649760a2493892e6511d230392c98400c275781a",
+  "previewSha256": "4f3f491c9bb3912a677b6ff5e9dbc04bc5fd301606048926de5f14e6fa12ecbe",
+  "preview": "audiofx_energy_spiral_teal.mp4",
+  "bytes": 9304,
+  "visiblePixels": 6821,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.solarBeat",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "hz",
+    "value": 1.3
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.306,
+  "exportSha256": "e4c2ac2a3f7ddeae0a7cacfc2eeddd31797a4b989348d41f067d5a9d9b42248f",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "e4c2ac2a3f7ddeae0a7cacfc2eeddd31797a4b989348d41f067d5a9d9b42248f",
+  "auditExport": "fx-solarBeat-v1-0-0.audit.mp4"
+}

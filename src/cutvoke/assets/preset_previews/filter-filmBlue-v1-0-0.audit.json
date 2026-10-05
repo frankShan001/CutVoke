@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.filmBlue",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 0.325
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "22ffe5d0409a64cba6046cc948420e7f9e90d1e708646d623e9336f666d7e85a",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "22ffe5d0409a64cba6046cc948420e7f9e90d1e708646d623e9336f666d7e85a",
+  "auditExport": "filter-filmBlue-v1-0-0.audit.mp4"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_check_badge",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "72a116a4d751f9e978f41d38eaa5f72796d96c18e9aa91b5be536a4f96f3bd36",
+  "previewSha256": "a0c673c98622038b6a0c0212e7b01c257efd73446c36aaf6fef3acf3c5a5e39d",
+  "preview": "guide_check_badge.mp4",
+  "bytes": 5041,
+  "visiblePixels": 2039,
+  "changedPixels": 0,
+  "motionVisible": false
+}

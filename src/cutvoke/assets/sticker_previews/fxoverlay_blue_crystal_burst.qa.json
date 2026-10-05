@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_blue_crystal_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "b102a74ddadd02e16d87d0c4137f85c85372b02ed547757aa28bf41e8e6a12df",
+  "previewSha256": "e39c7613418711e5e959146985de2ce37e6a340a77227c973079a18bce57cda5",
+  "preview": "fxoverlay_blue_crystal_burst.mp4",
+  "bytes": 13453,
+  "visiblePixels": 7483,
+  "changedPixels": 0,
+  "motionVisible": false
+}

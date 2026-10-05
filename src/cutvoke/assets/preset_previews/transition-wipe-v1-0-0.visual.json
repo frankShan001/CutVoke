@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.wipe",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.wipe",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "擦除",
+  "reviewer": "Codex manual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "A hard vertical boundary travels in the opposite direction to wiperight.",
+  "method": "Compared five aligned frames at 0.55, 0.65, 0.75, 0.85 and 0.95 seconds for all eight 擦除 transitions; inspected contact covers and the rendered motion sequence. Distinct direction or geometry is visible for each candidate. Technical apply/edit/reload/undo/export reports were checked separately.",
+  "coverSha256": "5f004e0424b694332029447dcc240b055b64786167a0559e3812390c98a9bb68",
+  "motionPreviewSha256": "8f0c50baaa62781f8ddb22b0fc890e5ec140dd09c003c5eafa8c281c8c5f1f8c",
+  "auditSha256": "149d2441e8f384e538af37114669abe327382bab4265c267a42e9685c5175388"
+}

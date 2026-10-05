@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_coral_impact_crack",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "珊瑚红裂纹呈不规则星爆，碎片分散但未碰格边，与直线速度贴图区别明显。",
+  "sourceSha256": "0a77d67b06c6330f095406e1acaa0ce3774e1b9bc8ab5395f060e9fc9f6a7c52",
+  "previewSha256": "6ca07233bf6231bdd8fb305ab78cfc579770eececd6c7cff1b83a5fbfb597984",
+  "auditSha256": "040f996db90491f557fb0f1c373e63a41d27e51bae1306148cbd73cf68b3c2e7"
+}

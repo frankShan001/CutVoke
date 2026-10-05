@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.personFx.neonEdge",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.person.halo",
+      "version": "1.0.0",
+      "params": {
+        "sigma": 4,
+        "hueShift": 165,
+        "saturation": 1.9,
+        "opacity": 0.95
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 16.266,
+  "maxSampledMeanRgbDifference": 16.266,
+  "coverSha256": "430be1953adf81ab65a4a37275f5b71fbe01c419c8446d5bce2c2821a94ef28d",
+  "previewSha256": "1e7d62fc9dd1421bb7ecce464d985dda4f23e0aa195cc7985eb4d3912a30d814",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

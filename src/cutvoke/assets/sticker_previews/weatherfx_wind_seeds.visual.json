@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_wind_seeds",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "浅色冠毛和细茎组合明确，疏散分布，适合风吹草籽氛围。",
+  "sourceSha256": "327f0eeb99fefc9a55331f7ef81482d4e5b7e4b9405d55c97d1ee5dea6228adb",
+  "previewSha256": "9f27ff681b0d43f00fa4c429517d265f7113a6235a6bce4cde5dfe09f19985d3",
+  "auditSha256": "9d801d0a9f03adc6b088af92b287e3a80a8beb5c8c2f16d76907b2480af1c59d"
+}

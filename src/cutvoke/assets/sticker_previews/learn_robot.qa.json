@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_robot",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d43d14d1fa9f497a784c129dae8d131e98f030c4b3477916d224863079ffeccc",
+  "previewSha256": "70f7835bbea0d0a951a4f6203eb0e348ee2ccd982c9b208047e516f1ca523ece",
+  "preview": "learn_robot.mp4",
+  "bytes": 4267,
+  "visiblePixels": 1756,
+  "changedPixels": 0,
+  "motionVisible": false
+}

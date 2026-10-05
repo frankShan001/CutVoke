@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pale_smoke_wisps",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2a2ecbcdab4870e78c85d54516f7b80c54300e64a3b4d1570007fcacd0dcc01d",
+  "previewSha256": "405a445e11555cb86064f0b3afba689740457c611c553d22974a9428e8c894e8",
+  "preview": "fxoverlay_pale_smoke_wisps.mp4",
+  "bytes": 9802,
+  "visiblePixels": 12091,
+  "changedPixels": 0,
+  "motionVisible": false
+}

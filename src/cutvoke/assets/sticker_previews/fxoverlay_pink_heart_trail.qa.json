@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pink_heart_trail",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "9487605c29c201c52bbc69340f34722280703a089a2ab9213cb88d9fce56788c",
+  "previewSha256": "4e491e2b8ac90674ea5dfb3ab653b818a6ade894bf918a0b519627f767e834c6",
+  "preview": "fxoverlay_pink_heart_trail.mp4",
+  "bytes": 9945,
+  "visiblePixels": 6828,
+  "changedPixels": 0,
+  "motionVisible": false
+}

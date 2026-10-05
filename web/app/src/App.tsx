@@ -3,7 +3,7 @@
       home   → 工程首页（最近工程 / 新建 / 重命名）
       editor → 剪映式四区工作区（顶部工具栏 / 左素材 / 中预览+时间线 / 右属性 / 状态栏）。 */
 
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { EditorProvider, useEditor } from "./store/editor";
 import { EditorBridge } from "./components/EditorBridge";
 import { getLatestState, redo, undo } from "./store/actions";
@@ -12,49 +12,15 @@ import { TopToolbar } from "./components/TopToolbar";
 import { StatusBar } from "./components/StatusBar";
 import { ErrorModal } from "./components/ErrorModal";
 import { HomeView } from "./components/HomeView";
-import { ProjectPanel } from "./components/ProjectPanel";
 import { TemplateGallery } from "./components/TemplateGallery";
-import { MediaPanel } from "./components/MediaPanel";
 import { ExportDialog } from "./components/ExportDialog";
-import { Player } from "./components/Player";
-import { Timeline } from "./components/timeline/Timeline";
-import { TimelineResizer } from "./components/TimelineResizer";
-import { RightPanel } from "./components/RightPanel";
 import { AgentActivityPanel } from "./components/AgentActivityPanel";
+import { WorkspaceBoundary } from "./components/WorkspaceBoundary";
+import { ProjectLoading, useProjectPreparation } from "./components/ProjectLoading";
 import { notifyTogglePlay } from "./hooks/useKeyboardShortcuts";
+import { LOCATE_PREFLIGHT_ISSUE, type LocatePreflightIssueEvent } from "./lib/preflight";
 
-function Workspace({ leftPanelOpen, rightPanelOpen }: { leftPanelOpen: boolean; rightPanelOpen: boolean }) {
-  const centerRef = useRef<HTMLDivElement | null>(null);
-  return (
-    <div className="workspace">
-      {/* 左：当前工程 + 素材区 */}
-      <aside className={`zone-left${leftPanelOpen ? "" : " zone-left--collapsed"}`}>
-        <div className="zone-left__scroll">
-          <ProjectPanel />
-          <MediaPanel />
-        </div>
-      </aside>
-
-      {/* 中：预览 + 时间线 */}
-      <main className="zone-center" ref={centerRef}>
-        <div className="zone-center__top">
-          <div className="zone-center__preview">
-            <Player />
-          </div>
-        </div>
-        <TimelineResizer containerRef={centerRef} />
-        <div className="zone-center__timeline">
-          <Timeline />
-        </div>
-      </main>
-
-      {/* 右：属性（上下文切换） */}
-      <aside className={`zone-right${rightPanelOpen ? "" : " zone-right--collapsed"}`}>
-        <RightPanel />
-      </aside>
-    </div>
-  );
-}
+const Workspace = lazy(() => import("./components/Workspace"));
 
 type PanelMode = "wide" | "medium" | "compact";
 
@@ -76,7 +42,8 @@ const SHORTCUT_IGNORE_SELECTOR = [
 ].join(", ");
 
 function AppShell() {
-  const { state, dispatch } = useEditor();
+  const { state, dispatch } = useEditor({ subscribeToClock: false });
+  const preparation = useProjectPreparation();
   const shortcutStateRef = useRef(state);
   shortcutStateRef.current = state;
   const [leftPanelOpen, setLeftPanelOpen] = useState(() =>
@@ -86,6 +53,21 @@ function AppShell() {
     typeof window === "undefined" || panelModeForWidth(window.innerWidth) !== "compact",
   );
   const panelPreferencesRef = useRef({ left: true, right: true });
+
+  useEffect(() => {
+    const locate = (event: Event) => {
+      const issue = (event as LocatePreflightIssueEvent).detail;
+      if (issue.resourceKind === "media") {
+        panelPreferencesRef.current.left = true;
+        setLeftPanelOpen(true);
+      } else {
+        panelPreferencesRef.current.right = true;
+        setRightPanelOpen(true);
+      }
+    };
+    window.addEventListener(LOCATE_PREFLIGHT_ISSUE, locate);
+    return () => window.removeEventListener(LOCATE_PREFLIGHT_ISSUE, locate);
+  }, []);
 
   // 窄窗口优先留出预览与时间线；中等宽度自动收起素材库，保留属性面板。
   // 手动开关会更新偏好，窗口恢复到桌面宽度后按用户偏好还原。
@@ -129,6 +111,7 @@ function AppShell() {
   useEffect(() => {
     if (
       state.view !== "editor" ||
+      state.opening ||
       state.editLock ||
       state.error ||
       state.exportOpen ||
@@ -138,7 +121,7 @@ function AppShell() {
     const handleEditorShortcut = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.repeat || event.isComposing || event.altKey) return;
       const latest = shortcutStateRef.current;
-      if (latest.view !== "editor" || latest.editLock || latest.error || latest.exportOpen || latest.templateOpen || latest.agentPanelOpen) return;
+      if (latest.view !== "editor" || latest.opening || latest.editLock || latest.error || latest.exportOpen || latest.templateOpen || latest.agentPanelOpen) return;
 
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
@@ -165,7 +148,7 @@ function AppShell() {
         return;
       }
       if (event.shiftKey) return;
-      if (key === " " && !target.closest("button, a, [role='button'], video")) {
+      if (key === " " && !target.closest("button, a, summary, [role='button'], video")) {
         event.preventDefault();
         notifyTogglePlay();
       } else if ((key === "delete" || key === "backspace") && latest.selection?.clipId) {
@@ -198,19 +181,24 @@ function AppShell() {
     state.exportOpen,
     state.templateOpen,
     state.view,
+    state.opening,
   ]);
 
   if (state.view === "home") {
     return (
-      <div className="app-shell">
+      <>
+      <div className="app-shell" inert={state.opening || undefined} aria-hidden={state.opening || undefined}>
         <HomeView />
         <ErrorModal />
         {state.templateOpen ? <TemplateGallery /> : null}
       </div>
+      {state.opening ? <ProjectLoading preparation={preparation} /> : null}
+      </>
     );
   }
   return (
-    <div className="app-shell">
+    <>
+    <div className="app-shell" inert={state.opening || undefined} aria-hidden={state.opening || undefined}>
       <TopToolbar
         leftPanelOpen={leftPanelOpen}
         rightPanelOpen={rightPanelOpen}
@@ -225,7 +213,11 @@ function AppShell() {
           return next;
         })}
       />
-      <Workspace leftPanelOpen={leftPanelOpen} rightPanelOpen={rightPanelOpen} />
+      <WorkspaceBoundary onFailure={preparation.repair}>
+        <Suspense fallback={<div className="workspace" role="status">编辑器加载中…</div>}>
+          <Workspace leftPanelOpen={leftPanelOpen} rightPanelOpen={rightPanelOpen} />
+        </Suspense>
+      </WorkspaceBoundary>
       <StatusBar />
       <ErrorModal />
       {state.exportOpen ? <ExportDialog /> : null}
@@ -241,6 +233,8 @@ function AppShell() {
         </div>
       ) : null}
     </div>
+    {state.opening ? <ProjectLoading preparation={preparation} /> : null}
+    </>
   );
 }
 

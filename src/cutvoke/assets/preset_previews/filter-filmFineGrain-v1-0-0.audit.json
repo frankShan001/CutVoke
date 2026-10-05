@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.filmFineGrain",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 36
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "55925df2e3a750f3c4c7499a7c7660e39ca243364d948882af062972a7e9f368",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "55925df2e3a750f3c4c7499a7c7660e39ca243364d948882af062972a7e9f368",
+  "auditExport": "filter-filmFineGrain-v1-0-0.audit.mp4"
+}

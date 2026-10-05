@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_glitch_shards",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "青紫绿的短条块错位明显，形状硬朗，与连续水平扫描线有明确区别。",
+  "sourceSha256": "7498bb247155c4cd733d0d728c1ac342e8533b4170e7da4b719419b2020d0d6a",
+  "previewSha256": "996219a1fc93d898190087e0b72ebd56473af3621a07d845f569310dd2d16f77",
+  "auditSha256": "36d8d92e333504da062cb146bfafe0b302926a69ca872131225df54f84db0681"
+}

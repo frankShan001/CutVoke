@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_underwater_blue",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "observation": "深蓝焦散与青绿色水纹同属水下主题但色温更冷，纹理更密；适合作为明显的蓝色变体。",
+  "sourceSha256": "7feb6dbc1196044bd1678e22d71125381959ad840e10a7790d20e2b5d4247bb3",
+  "previewSha256": "a67e010434888f63b31bedb2491881ab64caa92e892c5ea6268499359267681a",
+  "auditSha256": "d7f2d968f55dcc5f1ac17bb64f1fcfd607723353a5d484cae8809aa26ef5c792"
+}

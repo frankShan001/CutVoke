@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_tabby_cat",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "82b0f6ab1afba70f1a4a4cfbb72d241a9d48c9e778d2f33a90aec85f75315e16",
+  "previewSha256": "b6eadbd23b3ea1660fa14758fcf4d01c3bde07c28eaa9f16f9ae309581a641c4",
+  "preview": "pet_tabby_cat.mp4",
+  "bytes": 4410,
+  "visiblePixels": 2151,
+  "changedPixels": 0,
+  "motionVisible": false
+}

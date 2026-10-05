@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_motion_curl",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4d80acc995c13bdb138f583a48245cf80c779187feab9cf35fb9c93ca3fd997b",
+  "previewSha256": "0561cff734b51199e44b5749f9b3df916b8151134b1dc482ea3cc907fc165265",
+  "preview": "manga_motion_curl.mp4",
+  "bytes": 6459,
+  "visiblePixels": 3140,
+  "changedPixels": 0,
+  "motionVisible": false
+}

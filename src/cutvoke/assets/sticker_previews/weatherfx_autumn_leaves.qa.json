@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_autumn_leaves",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "354a5ab880261f6beea0ccd18b5619a675f344084eb20ea5a904db929d5aaf03",
+  "previewSha256": "4256a5dfcf0e30d627f8d6a5381faee04f8c9a79e8027494ad2b296e9db2df81",
+  "preview": "weatherfx_autumn_leaves.mp4",
+  "bytes": 10854,
+  "visiblePixels": 4649,
+  "changedPixels": 0,
+  "motionVisible": false
+}

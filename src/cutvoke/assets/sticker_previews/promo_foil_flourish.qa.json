@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_foil_flourish",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f3a3ed8a24525a2f38e9380ca9b2d60518733925d50dbc04e1f8a2f335621afc",
+  "previewSha256": "0bce16aff0da6436181882f38f0041360dfac79469ce115be6010e0d77341a1a",
+  "preview": "promo_foil_flourish.mp4",
+  "bytes": 7981,
+  "visiblePixels": 3682,
+  "changedPixels": 0,
+  "motionVisible": false
+}

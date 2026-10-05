@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.handheldShake",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.shake",
+  "params": {
+    "pixels": 14.0,
+    "hz": 5.2
+  },
+  "subcategory": "动感",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Four sampled frames move the horizon and foreground laterally with smaller vertical displacement, while retaining full-frame coverage; the straight horizon and jittered crop distinguish it from rotational rhythm swing.",
+  "method": "Manual comparison of four frames per preset and full MP4 decode",
+  "coverSha256": "054c2411cbfb7f43928537a311707a2437c7cc485290011b14adbf355f976c8d",
+  "motionPreviewSha256": "81b146f0a491b5cde1ded279640046041b8fbef1a55daefa95c806ed2f633dbd",
+  "auditSha256": "7a1d272bbe2aedd1a0d336f5094c0e44860da9e92b36d84f75333a32ee54262d"
+}

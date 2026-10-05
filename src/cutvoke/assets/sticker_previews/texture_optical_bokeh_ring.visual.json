@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_bokeh_ring",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "玫紫光斑构成闭合环形，圆环中心留空，裁切后上下边缘没有串格碎片。",
+  "sourceSha256": "485326d6bb4dba7a48d75737f95ab3b2aed563d5913b601c99b48dbbee918759",
+  "previewSha256": "d914c57b4fa1d6940e22a356457223d63617e0fd42d016811eb16a493138bc0c",
+  "auditSha256": "4aa63ad901af83c9c78f2d0312b9b97c3e63e75a824fd3c69c660ff6df3c0154"
+}

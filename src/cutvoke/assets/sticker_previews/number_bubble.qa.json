@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.number_bubble",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "32d17d1e04469793f33cfcc1e8c4127c0f4a37b97b2e96d824918aaba380160c",
+  "previewSha256": "9df75495d61ac40bd66a2b22b2c1d5dc8faf7debbf1244bf5d2b5eac21e43e59",
+  "preview": "number_bubble.mp4",
+  "bytes": 4465,
+  "visiblePixels": 3316,
+  "changedPixels": 0,
+  "motionVisible": false
+}

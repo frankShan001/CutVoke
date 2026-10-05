@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_horizontal_tear",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "29857a2341bcf58f365dcfe9a8dbed249868384dda067ccddffaf9398041682f",
+  "previewSha256": "871882fe3a60bff7d58d4fdc31d3d3987f50d64837bdaf930df610a9ae4537d8",
+  "preview": "glitch_horizontal_tear.mp4",
+  "bytes": 8267,
+  "visiblePixels": 5016,
+  "changedPixels": 0,
+  "motionVisible": false
+}

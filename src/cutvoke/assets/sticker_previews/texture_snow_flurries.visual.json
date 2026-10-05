@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_snow_flurries",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "observation": "Scattered snowflakes vary in size and remain crisp against the darker side of the preview.",
+  "sourceSha256": "3b8eebd29de78ccaa16cfe1515a4bbc1e11cd2cea2612b3cad8ad45f88619b9b",
+  "previewSha256": "f6324a6618dccb9553732ed47c7fa533f985de48c285c0cb0a63b5e4d351aadd",
+  "auditSha256": "4741cf0bd2fa8e2ffc06dffeed777ab948a9bdd7222b24c53b2e2d38a87960b3"
+}

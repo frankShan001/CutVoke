@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_emphasis_circle",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Open yellow loop leaves room for the target and remains separated from its cell edges.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "45b2db34dc753cd5265bcba96de164df2f7d3f9b1a4788bf11c51bbefa9e2479",
+  "previewSha256": "7b43f68097e51a100558a6e4948693d02be36d023d4bc1e395aaba2dd318fd57",
+  "auditSha256": "7e835585569e954e183f891245e8d0ee0799deee80373d55a6477956ebba918d"
+}

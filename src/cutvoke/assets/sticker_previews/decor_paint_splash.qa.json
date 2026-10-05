@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_paint_splash",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4bc6a16badcad5797796252e2d4be12257cb1bf1abd2a2263538d63807773841",
+  "previewSha256": "7ee6d38da009ded91ecffe7925cddcb929e365318a971f90f8b040bc7e852015",
+  "preview": "decor_paint_splash.mp4",
+  "bytes": 4510,
+  "visiblePixels": 1992,
+  "changedPixels": 0,
+  "motionVisible": false
+}

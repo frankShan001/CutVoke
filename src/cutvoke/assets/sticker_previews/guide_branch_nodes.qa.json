@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_branch_nodes",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f9f62b062b787fb619b82ff6c85c9f4b29b235c69ea4847988ca7769b9199e14",
+  "previewSha256": "807dd0a79e27a972e49185726ec1ddb90fac3eb11ffcb299c85d407078eda3ac",
+  "preview": "guide_branch_nodes.mp4",
+  "bytes": 4309,
+  "visiblePixels": 1072,
+  "changedPixels": 0,
+  "motionVisible": false
+}

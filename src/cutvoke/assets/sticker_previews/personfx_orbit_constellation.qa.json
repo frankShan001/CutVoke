@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_orbit_constellation",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e4296dd08788976198c44938b1c0a9f5803cc77228a98b7f4e61cf38bb3d0e28",
+  "previewSha256": "99e1054b2f341eeaba246ddde45d6d7b7a946e76792b6df8dfdfcd6321c4e71b",
+  "preview": "personfx_orbit_constellation.mp4",
+  "bytes": 8096,
+  "visiblePixels": 3113,
+  "changedPixels": 0,
+  "motionVisible": false
+}

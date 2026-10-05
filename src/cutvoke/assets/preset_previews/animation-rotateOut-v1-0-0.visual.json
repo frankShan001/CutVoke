@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.rotateOut",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.rotateOut",
+  "params": {
+    "duration": 1.0,
+    "toAngle": 35.0,
+    "easing": "ease-out"
+  },
+  "subcategory": "出场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "最后一秒逐帧旋转并淡出，倾角和亮度变化连续，片段结束时接近全暗。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "4277dd77ec938f479c14c1637478f18e247fdc43a5c7c9975b1f5dddf8f2f5ac",
+  "motionPreviewSha256": "ec39f84ae4778773ff5ef93b70858c266241067e7cd74fbbb28c9417c1ec693c",
+  "auditSha256": "9ed431296bb8bae1f22127b3839545f03e5ffa9f16ad133aca3dbf588bc4cffc",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_rotateOut.png",
+  "libraryReviewSheetSha256": "3481c65d146b2d9a13d009b29cdf489655c685627d209bfcfb2dc81e93b369a1"
+}

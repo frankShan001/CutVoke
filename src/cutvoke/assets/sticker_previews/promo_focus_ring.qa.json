@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_focus_ring",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4d4922978ed4962826547a1ee88fc85cad7fe99d75555a9d018da27deeef3ff3",
+  "previewSha256": "5db2cdb55c491f5599422b0d3fff48f2e7e753f80bc2480139369fee043a9656",
+  "preview": "promo_focus_ring.mp4",
+  "bytes": 8011,
+  "visiblePixels": 3402,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_energy_trail",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项比对透明原图、浅色/深色合成底图与实际渲染器样片，检查造型辨识、格线串入、边缘裁切、透明通道和背景对比；本次不代表复杂实拍素材的商业观感验收。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿，单独复审，原批次记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿并复审，原 13 项记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另纳入 2026-09-24 的 2×2 高对比图集审核记录。",
+  "observation": "荧光绿折线主轨和小碎片构成明确方向，缩小后仍可辨认。",
+  "sourceSha256": "949272c431b515cf70065fb81420264f611bb4ec299ea29d66154ab0575b9ad4",
+  "previewSha256": "aefd56b071734d23d4af876731932607722fb83544baaa1261c05ceba0000351",
+  "auditSha256": "bd176fbfb53e599bf511b0183a8ffedc29c8874e21c208714a18ba24609e2ecc"
+}

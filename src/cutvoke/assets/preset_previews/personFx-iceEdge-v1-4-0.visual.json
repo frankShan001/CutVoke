@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.iceEdge",
+  "version": "1.4.0",
+  "effectId": "cutvoke.person.halo",
+  "params": {
+    "sigma": 24,
+    "hueShift": -120,
+    "saturation": 1.8,
+    "opacity": 0.94
+  },
+  "subcategory": "人物轮廓",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A wide deep-blue halo follows the silhouette; its hue and spread differ from the pale pearl treatment.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "acde9f4771e59f7d1b29cc589ebb146e260738a119307dd2e176fe59985ebb8e",
+  "motionPreviewSha256": "389a216fb2eef249acdea7c6ff56362c9c84ebc6009cdf8d0a488f2d03b472b9",
+  "auditSha256": "dac23db80dedbf8ac18efff26a045012f1a9147e06769db0a3e278cd6250fff2"
+}

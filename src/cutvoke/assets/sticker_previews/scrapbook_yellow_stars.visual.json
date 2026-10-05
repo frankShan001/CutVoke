@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_yellow_stars",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "三颗剪纸星星彼此分离且轮廓完整；黄色在明亮背景上较淡。",
+  "sourceSha256": "79ff1235e510b0d43717d14fbde3c9fce412c98d286b58164a12a160a263534a",
+  "previewSha256": "4129ca34a9c52ccfb68a38126f0bd5c13780df8035c72c37fe04021087f45af4",
+  "auditSha256": "8c95b2e1e92d7725e13519d73ff633bac3051bb9e33a5dca448967e5d342668c"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_energy_ribbons",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a02b503d6dca61cf6d80e22ae337495b4bec19c344105ae94ea3f02c552a64a7",
+  "previewSha256": "9766cc36b645f86dc025ac5edd405bcd52ac97f6a1ff7081af8d19106844bfb1",
+  "preview": "personfx_energy_ribbons.mp4",
+  "bytes": 9598,
+  "visiblePixels": 5438,
+  "changedPixels": 0,
+  "motionVisible": false
+}

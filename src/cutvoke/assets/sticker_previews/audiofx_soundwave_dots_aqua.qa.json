@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_soundwave_dots_aqua",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "61bf7f24563a2a834c57205196ce3dfab9fa37a48895e6d280543693cebc7336",
+  "previewSha256": "bed2af66687edb37046c487ba94deec0c829db8d3dd12a062ea14636dcece69b",
+  "preview": "audiofx_soundwave_dots_aqua.mp4",
+  "bytes": 7707,
+  "visiblePixels": 3537,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_spectrum_halo_rainbow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "The rainbow ring has an open center and evenly spaced spectrum rays, distinct from the compact bar badge.",
+  "sourceSha256": "e272f30cb4db647d38b1696a1c1a4a8cff8ff6562ac5fcef4dc2cf2c6735b0c7",
+  "previewSha256": "f1cb37b3866e2938dbf11ed828da0dd0c707914070cfb737bd10f5f473babbec",
+  "auditSha256": "57858bf7ced9c6365678d33b1004a86b24d035f3f88220462060211e24b14f39"
+}

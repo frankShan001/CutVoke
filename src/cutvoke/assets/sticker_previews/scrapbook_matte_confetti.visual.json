@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_matte_confetti",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "金色圆片、珊瑚心形和天蓝星形区分清楚，三个独立轮廓均完整。",
+  "sourceSha256": "92526b9824038e13b2c593d71f44462df1a7ef4f725ea4421672ada8536ac135",
+  "previewSha256": "977bcfd81e4bd66f49321e4a88b646673262ca9f1c58d2955be9e97c43bbc5a8",
+  "auditSha256": "74570222d956252b64071858be91fe89f5fc5ca5375a7c24bde3da6b0c6739e1"
+}

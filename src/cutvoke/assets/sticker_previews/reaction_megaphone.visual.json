@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_megaphone",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Blue handheld megaphone with yellow sound rays; object reads clearly.",
+  "sourceSha256": "9a1d8d6d6da4f21a352f32a899cf50bbc48cd69d4f7469db1369e02b72249b67",
+  "previewSha256": "d881ebfc3434891b4880041af0a7deec6b07071d46cbf19efa4fc4cfcbe29e5c",
+  "auditSha256": "53161c1df8353d3dc64f274d387a463f57561cf6f070f4a1a7af9fe9b35a9d97"
+}

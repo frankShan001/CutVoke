@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_low_fog",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "observation": "Translucent white fog sits low in the frame and rises unevenly without hiding the gradient.",
+  "sourceSha256": "18e601dff0eed6d7ba69d2e2b51ee4a08017a816c94ff03a1ea8127f93b86af8",
+  "previewSha256": "bfeb829b096c154da5fa8fbe106749a819e17f4479b730fb0ea734d4d60f3a04",
+  "auditSha256": "a83a5e11e9349c8dd5a1e2db5e25f883235bdd7e6245df0ac401d9bbc1e8ac22"
+}

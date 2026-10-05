@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_basketball",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "圆形橙色篮球与黑色分缝清晰，白色描边完整，棋盘底与实际画布合成均无杂点或裁切。",
+  "sourceSha256": "96e70282741ad6c69fc43ee914d5bed7393c259c330b90f25c1a0bdc50b4359e",
+  "previewSha256": "56e409d493d055080c4569a9e599941f9c391aaebff54f50afb9bae6f26a2087",
+  "auditSha256": "37afbfe47cf8e578ed3e99f69fae3b959c09e8edeb0297290fd80aa1651a481d"
+}

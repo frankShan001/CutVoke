@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_double_bookmark",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "df180b0746714dd043ecf6c47beb7f0b0611e388956710d8e85c34cd52616a08",
+  "previewSha256": "c8a517857bcf7ef3967b157698fb9fbdfe2aeaf5f81ca96b6a2288251ec63d5c",
+  "preview": "scrapbook_double_bookmark.mp4",
+  "bytes": 2800,
+  "visiblePixels": 466,
+  "changedPixels": 0,
+  "motionVisible": false
+}

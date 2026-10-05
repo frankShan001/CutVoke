@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.tunnelShadow",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.lens",
+  "params": {
+    "k1": 0.48,
+    "k2": 0.05
+  },
+  "subcategory": "光影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "画面收在中心并叠加深暗角，主体周围出现黑色隧道边缘；编辑镜头畸变后中心画面大小明显变化，与普通枕形压缩区分。",
+  "method": "Viewed the full-size fx-光影 cover contact sheet and aligned untreated/default/edited frames from every generated MP4; compared each visual to its category siblings and confirmed numeric editing changes the actual rendered frame.",
+  "coverSha256": "a51583313f6f6e15364bae37fd79e1b514382e7d6e0434a7df1ddd6da76a9748",
+  "motionPreviewSha256": "2247e3c3be946556b663216c64a2580125818bb9dd8c950583f18cf96496f67b",
+  "auditSha256": "c55320722ea6bf8b7cfd401ae02b074bd77700931f2de14287c6789f056d0587"
+}

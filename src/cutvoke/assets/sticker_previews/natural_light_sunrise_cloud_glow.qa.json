@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_sunrise_cloud_glow",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "10307478bb6c9af6cf2199ae1a1f816488328026bba00bc591a1903b8af9a08e",
+  "previewSha256": "600dcdf1001de41852e10aa415420d7c450736ef5f207433b73ba9072604d49b",
+  "preview": "natural_light_sunrise_cloud_glow.mp4",
+  "bytes": 9434,
+  "visiblePixels": 13425,
+  "changedPixels": 0,
+  "motionVisible": false
+}

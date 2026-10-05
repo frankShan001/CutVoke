@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_seafoam_refraction",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "df68a15bdfd0a9c5f0a942eb5b0a14b20acbc42e099cbd5224af5aa2deb75c2d",
+  "previewSha256": "cab2d9e7765027604ce52ed73eadb0037ccd08501d12ed75a1bf1e6e48e72b58",
+  "preview": "texture_bg_seafoam_refraction.mp4",
+  "bytes": 17897,
+  "visiblePixels": 57599,
+  "changedPixels": 0,
+  "motionVisible": false
+}

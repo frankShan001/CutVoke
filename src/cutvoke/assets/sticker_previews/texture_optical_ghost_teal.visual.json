@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_ghost_teal",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "青绿色鬼影保留与琥珀版本相同的递减轨迹，冷色亮斑在渐变背景上清楚可见。",
+  "sourceSha256": "a7a93453f533795068a91151ee071a493000fce2b693419195ffc67fedcb1c40",
+  "previewSha256": "cf2a5a6947d96195902f5fb6ab6267b9214eab75a438b43d7641fd53b487b028",
+  "auditSha256": "2e14aff4ab111862b618244f7360ea09c6f2a844b7e37bf4f808a57a8dc50cfc"
+}

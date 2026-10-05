@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_violet_flame",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7dcf1da6f306e2d908c5a46de57b60b0a460e33fac0ec600a32c48feb699bc78",
+  "previewSha256": "cd6201e76db6a2ae1e723180c33808759f6d51500df5f9419a6e74c822793552",
+  "preview": "fxoverlay_fantasy_violet_flame.mp4",
+  "bytes": 13186,
+  "visiblePixels": 10541,
+  "changedPixels": 0,
+  "motionVisible": false
+}

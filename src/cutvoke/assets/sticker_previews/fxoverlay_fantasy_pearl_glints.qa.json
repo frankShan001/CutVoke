@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_pearl_glints",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ef2c43b38cf6aea87e3f0b146fb68282a1f11cf9da520b8b043404ad4b648bc8",
+  "previewSha256": "393b6db495b41b08bcf5528d46feb730f2ab831dca13690f5afb2be2fff1aae7",
+  "preview": "fxoverlay_fantasy_pearl_glints.mp4",
+  "bytes": 8848,
+  "visiblePixels": 4675,
+  "changedPixels": 0,
+  "motionVisible": false
+}

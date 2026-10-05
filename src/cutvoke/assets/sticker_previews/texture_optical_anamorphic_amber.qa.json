@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_anamorphic_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4b502576defb533e9023374007e0cec8f560b0a36ae85aa91c5ab87851863bf8",
+  "previewSha256": "65f193f50a1cab3f030086bae4a1ea0f0b8d790116bdb4b23daf7b78c046c927",
+  "preview": "texture_optical_anamorphic_amber.mp4",
+  "bytes": 6485,
+  "visiblePixels": 3314,
+  "changedPixels": 0,
+  "motionVisible": false
+}

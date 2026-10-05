@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_stopwatch",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "2dded051960ad0c4d8471ea88872cdfadbff0545b066c5641856ba9e54233bf2",
+  "previewSha256": "238c9635f20f1f59b71b945509148f3ea4f83447497a9ce00070464029a446e6",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1522,
+  "visiblePixels": 963,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 542,
+    "steady_entry": 963,
+    "steady_exit": 963,
+    "exit": 543
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 542,
+      "withoutFade": 963
+    },
+    "steady_entry": {
+      "withFade": 963,
+      "withoutFade": 963
+    },
+    "steady_exit": {
+      "withFade": 963,
+      "withoutFade": 963
+    },
+    "exit": {
+      "withFade": 543,
+      "withoutFade": 963
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.041,
+    0.041
+  ],
+  "auditExport": "sports_stopwatch.audit.mp4",
+  "auditExportSha256": "7d26aeb3e2fa1248cfd1f34305d496edb86c2df37b9680a3cdec69487b4e9fd8"
+}

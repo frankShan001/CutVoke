@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_bokeh_gold",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "疏密不同的香槟金散景圆点大小有变化，透明空隙充足。",
+  "sourceSha256": "611d46a30660dc230fe8e41640acf885a7610254d75a702cb6a28c12706b67c6",
+  "previewSha256": "c5dd9ce8e456692ca438df66f983b21232bd3d05b4910bce2044882aefd71c6a",
+  "auditSha256": "b107e0872b4aa0ee00dc4fa7a70b5cf5022a7e0ad51cd5807d446a55b34a2cd5"
+}

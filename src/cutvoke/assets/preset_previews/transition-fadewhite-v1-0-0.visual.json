@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.fadewhite",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.fadewhite",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "叠化",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "切换中心呈近白色闪光，前后画面围绕亮场显隐；与黑场、灰度和空间双影转场可直观区分。",
+  "method": "Viewed aligned five-frame motion sheets for all eight 叠化 candidates and compared their intermediate frames with adjacent presets. Approved only four transitions with clearly different visible motion or color behavior.",
+  "coverSha256": "f98697a8fc15dee42b57ce9ba6c4d1a30462050c52798ebe587152a3202c74ba",
+  "motionPreviewSha256": "4f292fbbb2b7ce23f091babe9cbb44dcbb3af60590a14055cbb7f565fa1a0d2e",
+  "auditSha256": "23b8d44c85e46694c81c9b649f3f59aa8c895480ae50045fc7340dc3769362db"
+}

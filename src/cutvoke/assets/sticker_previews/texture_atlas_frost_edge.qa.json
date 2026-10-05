@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_frost_edge",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e2927e25ec804aeb61319e2a19cff41e7b27bbda77f745e4fe7f95979a08fc0a",
+  "previewSha256": "a7d3cc0ca598447f4b58b495c06d6b797342ed40a7543c0f3b87bbb1f431764e",
+  "preview": "texture_atlas_frost_edge.mp4",
+  "bytes": 12177,
+  "visiblePixels": 8493,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.flower_candy",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 4670,
+  "exportSha256": "c65552b82dd45191bfddb0d2cc0bda6766469cd4c18fb7cab72c52b01f416289",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "c65552b82dd45191bfddb0d2cc0bda6766469cd4c18fb7cab72c52b01f416289",
+  "auditExport": "text-flower_candy-v1-0-0.audit.mp4"
+}

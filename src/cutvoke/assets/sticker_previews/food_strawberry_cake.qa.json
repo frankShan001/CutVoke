@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_strawberry_cake",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "25d943293c7d4f7b64ff5e4c05d722aeba43b209c7827459f363e01a62628cb5",
+  "previewSha256": "216405e01df83c4f95cea0115d7b5fc9a9368c283bda96a69f73eebbca555183",
+  "preview": "food_strawberry_cake.mp4",
+  "bytes": 5711,
+  "visiblePixels": 3402,
+  "changedPixels": 0,
+  "motionVisible": false
+}

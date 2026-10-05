@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.animation.ellipseOrbit",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.orbit",
+      "version": "1.0.0",
+      "params": {
+        "amplitude": 0.09,
+        "period": 1.7
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 31.889,
+  "maxSampledMeanRgbDifference": 27.204,
+  "coverSha256": "3ece2a7af6f547995b2d5e18cce43bf3018cdd6a02b74aecd221d2fcaa836a1b",
+  "previewSha256": "9a8077dfa46a527e6a262b33cd90bd03871bc3accdeaaa74ffeec4da47b07a9a",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

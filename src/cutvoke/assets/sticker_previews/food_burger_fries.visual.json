@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_burger_fries",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The burger layers and side fries remain readable as one deliberate food combination.",
+  "sourceSha256": "2e97c456ac9c52e6f5c0f0f6aa9ecaa9d08ca3ac031775528371da1c55f3e2be",
+  "previewSha256": "4eddbcfd5236836f1a9997a05d778738a3b7be76cdcd393a304acc65054fe9af",
+  "auditSha256": "f05dc63179bb8e475c5dfc5e7203a766b2f89a3f5c4e3b9420e8cbb2f80ab16b"
+}

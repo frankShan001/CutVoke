@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.label_lime",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 1357,
+  "exportSha256": "b03ac32596efb5d7b57090ee139099ce1d4852f936f5ffc1e6a00839cd76b2ad",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "b03ac32596efb5d7b57090ee139099ce1d4852f936f5ffc1e6a00839cd76b2ad",
+  "auditExport": "text-label_lime-v1-1-0.audit.mp4"
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.barrelWide",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.lens",
+  "params": {
+    "k1": -0.7,
+    "k2": -0.2
+  },
+  "subcategory": "光影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "画面外缘被桶形透镜明显拉伸，左侧窗口线条弯曲，太阳仍在右侧；编辑畸变系数后弯曲程度明显改变。",
+  "method": "Viewed the full-size fx-光影 cover contact sheet and aligned untreated/default/edited frames from every generated MP4; compared each visual to its category siblings and confirmed numeric editing changes the actual rendered frame.",
+  "coverSha256": "459aea4257155e975200a9d805f3a180a102aaef8851dac12640b660508fee9f",
+  "motionPreviewSha256": "5b45662f479b413301e64d8cd7fa97974ba857397aff1ae5257df165f25d5d87",
+  "auditSha256": "bcbe09bf0a397f8247fcbb2c003cc4659180f2a1b0bfefe12e31401d328f89b9"
+}

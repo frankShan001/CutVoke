@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.flower_gold",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 5565,
+  "exportSha256": "db95eeaf97763ab740f3d5b7a92189aab14e4eee63b8a8b4e82d8f4fb524a7ed",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "db95eeaf97763ab740f3d5b7a92189aab14e4eee63b8a8b4e82d8f4fb524a7ed",
+  "auditExport": "text-flower_gold-v1-0-0.audit.mp4"
+}

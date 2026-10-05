@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_glint_pearl",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "1ca5d66f5a266577ef2211a787cbd399fe5d43aa17bbc8960a888cc126314228",
+  "previewSha256": "ecc3de77a58976e82602ad8007266f6a4bde6ea28618adce9dd3252bdf830cf7",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1556,
+  "visiblePixels": 1151,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 6,
+    "steady_entry": 1151,
+    "steady_exit": 1150,
+    "exit": 6
+  },
+  "previewExportMeanRgbDifferences": [
+    0.051,
+    0.052
+  ],
+  "auditExport": "texture_glint_pearl.audit.mp4",
+  "auditExportSha256": "55679241330fa79c13f11f5563c98aca4a3538aa7f44ec6d3effea3bd19c71ca"
+}

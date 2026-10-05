@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_cyan_electric",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "03a9125d18447134250633ca0002844116833352d2368b0106a211edf9a8a18b",
+  "previewSha256": "d96052996eaab044b4e36f14337b0ad7b44480c368639927f9609a941ef51d8c",
+  "preview": "fxoverlay_fantasy_cyan_electric.mp4",
+  "bytes": 10686,
+  "visiblePixels": 6475,
+  "changedPixels": 0,
+  "motionVisible": false
+}

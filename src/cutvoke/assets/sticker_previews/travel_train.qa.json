@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_train",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c1337178b858c07b084437fbe3254058e08fd1567ee1ce968c66e54e9e87b230",
+  "previewSha256": "907cf8a4472dc931d74dcefccc2e36797c7d85e9370e9090b9e3945eef64c9af",
+  "preview": "travel_train.mp4",
+  "bytes": 4053,
+  "visiblePixels": 1481,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_twilight_clouds",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "Blue and rose twilight clouds form a coherent cinematic background while leaving the upper area open.",
+  "sourceSha256": "9ab5ed20b944dd5995eaaf2041169c90c764f97b319f32e7aa40b69e9143545f",
+  "previewSha256": "a1d109e2f8624927ab17c0c1a3f39903e8dd5a9f344cc465e660f467612d2ada",
+  "auditSha256": "2429843d498af754b13f97e54f2267e8b9adabacc213ac591c0dbea993a7f21e"
+}

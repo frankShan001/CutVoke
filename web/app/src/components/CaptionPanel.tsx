@@ -7,18 +7,21 @@ import { Captions, Plus, Trash2, Upload, Download, AlignLeft, AlignCenter, Align
 import { Button, Field, Panel, Row, TextInput } from "./ui";
 import { useEditor, showError, type CaptionDraftPreview } from "../store/editor";
 import { addCaption, removeCaption, updateCaption } from "../store/clipEdit";
-import { refreshProject } from "../store/actions";
+import { getLatestState, refreshProject, runCommand } from "../store/actions";
 import { trySecsToRational, rationalText, rationalToSecs } from "../lib/rational";
 import { ApiFailure, API_BASE } from "../lib/api";
 import { FontStylePanel } from "./FontStylePanel";
 import { CaptionAnimationSection } from "./CaptionAnimationSection";
 import { CaptionGeometryEditor } from "./CaptionGeometryEditor";
+import { SpeechRecognitionPanel } from "./SpeechRecognitionPanel";
 
 type Align = "left" | "center" | "right";
 
 interface StyleForm {
   fontSize: string;
+  fontFamily: "Noto Sans SC" | "Noto Serif SC";
   color: string;
+  wordHighlightColor: string;
   strokeWidth: string;
   align: Align;
   bold: boolean;
@@ -31,16 +34,20 @@ interface CaptionDraft {
 }
 
 export function CaptionPanel() {
-  const { state, dispatch } = useEditor();
+  const { state, dispatch } = useEditor({ subscribeToClock: false });
   const captions = state.project?.sequence.captions || [];
   const readOnly = Boolean(state.editLock);
   const [text, setText] = useState("");
   const [start, setStart] = useState("0");
   const [end, setEnd] = useState("3");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedId = state.selectedCaptionId;
+  const [captionSearch, setCaptionSearch] = useState("");
+  const [batchBusy, setBatchBusy] = useState(false);
   const [form, setForm] = useState<StyleForm>({
     fontSize: "",
+    fontFamily: "Noto Sans SC",
     color: "#ffffff",
+    wordHighlightColor: "#FFD54A",
     strokeWidth: "",
     align: "center",
     bold: false,
@@ -75,7 +82,7 @@ export function CaptionPanel() {
       selectedCaptionDraftSnapshot.current = null;
       captionDraftPreviewRef.current = null;
       dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-      setSelectedId(null);
+      dispatch({ type: "CAPTION_SELECTION_SET", captionId: null });
       return;
     }
     const snapshot = JSON.stringify(c);
@@ -83,7 +90,9 @@ export function CaptionPanel() {
     const draftSnapshot = JSON.stringify([c.id, c.text, c.start, c.end]);
     setForm({
       fontSize: c.fontSize != null ? String(c.fontSize) : "",
+      fontFamily: c.fontFamily === "Noto Serif SC" ? "Noto Serif SC" : "Noto Sans SC",
       color: c.color || "#ffffff",
+      wordHighlightColor: c.wordHighlightColor || "#FFD54A",
       strokeWidth: c.strokeWidth != null ? String(c.strokeWidth) : "",
       align: c.align || "center",
       bold: c.bold || false,
@@ -186,7 +195,9 @@ export function CaptionPanel() {
     selectedCaptionDraftSnapshot.current = draftSnapshot;
     setForm({
       fontSize: caption.fontSize != null ? String(caption.fontSize) : "",
+      fontFamily: caption.fontFamily === "Noto Serif SC" ? "Noto Serif SC" : "Noto Sans SC",
       color: caption.color || "#ffffff",
+      wordHighlightColor: caption.wordHighlightColor || "#FFD54A",
       strokeWidth: caption.strokeWidth != null ? String(caption.strokeWidth) : "",
       align: caption.align || "center",
       bold: caption.bold || false,
@@ -199,7 +210,7 @@ export function CaptionPanel() {
     captionDraftPreviewRef.current = null;
     dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
     dispatch({ type: "PLAYHEAD_SET", t: rationalToSecs(caption.start) });
-    setSelectedId(captionId);
+    dispatch({ type: "CAPTION_SELECTION_SET", captionId });
   };
 
   const beginNewCaption = () => {
@@ -213,7 +224,7 @@ export function CaptionPanel() {
     }
     captionDraftPreviewRef.current = null;
     dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-    setSelectedId(null);
+    dispatch({ type: "CAPTION_SELECTION_SET", captionId: null });
   };
 
   const handleAdd = () => {
@@ -250,7 +261,9 @@ export function CaptionPanel() {
       dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
     }
     void removeCaption(dispatch, state, id).then((res) => {
-      if (res.ok && selectedId === id) setSelectedId(null);
+      if (res.ok && selectedId === id) {
+        dispatch({ type: "CAPTION_SELECTION_SET", captionId: null });
+      }
     });
   };
 
@@ -266,8 +279,15 @@ export function CaptionPanel() {
       const fontSize = next.fontSize === "" ? 0 : Math.round(Number(next.fontSize));
       if (fontSize !== (caption.fontSize ?? 0)) update.fontSize = fontSize;
     }
+    if (patch.fontFamily !== undefined && next.fontFamily !== (caption.fontFamily || "Noto Sans SC")) {
+      update.fontFamily = next.fontFamily;
+    }
     if (patch.color !== undefined && next.color !== (caption.color || "#ffffff")) {
       update.color = next.color;
+    }
+    if (patch.wordHighlightColor !== undefined
+        && next.wordHighlightColor !== (caption.wordHighlightColor || "")) {
+      update.wordHighlightColor = next.wordHighlightColor;
     }
     if (patch.strokeWidth !== undefined) {
       const strokeWidth = next.strokeWidth === "" ? 0 : Math.round(Number(next.strokeWidth));
@@ -456,9 +476,31 @@ export function CaptionPanel() {
 
   const startPreview = trySecsToRational(start);
   const endPreview = trySecsToRational(end);
+  const visibleCaptions = captions.filter((caption) =>
+    caption.text.toLowerCase().includes(captionSearch.trim().toLowerCase()));
+  const batchTargets = visibleCaptions.filter((caption) => caption.id !== selectedId);
+  const applyStyleToVisible = async () => {
+    if (!selected || !batchTargets.length || readOnly || batchBusy) return;
+    setBatchBusy(true);
+    const style = {
+      fontSize: selected.fontSize, fontFamily: selected.fontFamily, color: selected.color,
+      strokeColor: selected.strokeColor, strokeWidth: selected.strokeWidth,
+      background: selected.background, align: selected.align, bold: selected.bold,
+      wordHighlightColor: selected.wordHighlightColor,
+    };
+    const result = await runCommand(dispatch, getLatestState() || state, "caption.patch", {
+      updates: batchTargets.map((caption) => ({ captionId: caption.id, ...style })),
+    });
+    setBatchBusy(false);
+    if (result.ok) {
+      dispatch({ type: "STATUS_SET", severity: "ok",
+        text: `已将当前字幕样式应用到 ${batchTargets.length} 条字幕，可一次撤销` });
+    } else if (result.error) showError(dispatch, result.error);
+  };
 
   return (
-    <Panel title="字幕" subtitle="纯文本字幕">
+    <Panel title="字幕" subtitle="识别、导入与逐条编辑">
+      <SpeechRecognitionPanel />
       <div className="cv-srt-row">
         <Row>
           <Button variant="secondary" size="sm" onClick={handleImportClick} aria-label="导入SRT" disabled={readOnly}>
@@ -520,11 +562,18 @@ export function CaptionPanel() {
         </>
       )}
 
+      {captions.length > 8 ? (
+        <input className="cv-input" aria-label="搜索工程字幕" placeholder="搜索字幕文字"
+          value={captionSearch} onChange={(event) => setCaptionSearch(event.target.value)}
+          style={{ width: "100%", marginTop: 10 }} />
+      ) : null}
       <div className="cv-tracks" style={{ marginTop: 10 }}>
         {captions.length === 0 ? (
           <span className="cv-empty cv-empty--tight">暂无字幕</span>
+        ) : visibleCaptions.length === 0 ? (
+          <span className="cv-empty cv-empty--tight">没有匹配的字幕</span>
         ) : (
-          captions.map((c) => (
+          visibleCaptions.map((c) => (
             <div
               key={c.id}
               className={`cv-caption-row${c.id === selectedId ? " cv-caption-row--active" : ""}`}
@@ -622,7 +671,50 @@ export function CaptionPanel() {
                 : "可一次改文字和时码；文字框按 Ctrl/⌘ + Enter 也可保存。"}
           </span>
           <CaptionGeometryEditor caption={selected} disabled={readOnly} />
+          <Field label="字体">
+            <select className="cv-select" aria-label="字幕字体" value={form.fontFamily}
+              disabled={readOnly}
+              onChange={(event) => commitStyle({ fontFamily: event.target.value as StyleForm["fontFamily"] })}>
+              <option value="Noto Sans SC">思源黑体 · Noto Sans SC</option>
+              <option value="Noto Serif SC">思源宋体 · Noto Serif SC</option>
+            </select>
+          </Field>
           <FontStylePanel captionId={selectedId} disabled={readOnly} />
+          <div className="cv-caption-word-highlight">
+            <Button
+              variant={selected.wordHighlightColor ? "primary" : "ghost"}
+              size="sm"
+              aria-label="逐词高亮"
+              aria-pressed={Boolean(selected.wordHighlightColor)}
+              disabled={readOnly || !selected.words?.length}
+              onClick={() => commitStyle({ wordHighlightColor: selected.wordHighlightColor
+                ? "" : (form.wordHighlightColor || "#FFD54A") })}
+            >
+              逐词高亮
+            </Button>
+            <input type="color" className="cv-input" aria-label="逐词高亮颜色"
+              value={form.wordHighlightColor || "#FFD54A"}
+              disabled={readOnly || !selected.words?.length || !selected.wordHighlightColor}
+              onChange={(event) => setStyleField({ wordHighlightColor: event.target.value })}
+              onBlur={() => commitStyle({ wordHighlightColor: form.wordHighlightColor })}
+            />
+            <span className="cv-hint">
+              {selected.words?.length
+                ? `${selected.words.length} 个词级时间点；可与逐字入场同时使用。更改字幕文字后需重新识别时间。`
+                : "此字幕没有词级时间点。可从本地语音识别结果中创建带词时间的字幕。"}
+            </span>
+          </div>
+          {batchTargets.length > 0 ? (
+            <div className="cv-caption-batch">
+              <span className="cv-hint">将这条字幕已保存的文字样式复制到
+                {captionSearch.trim() ? `搜索结果中的其它 ${batchTargets.length} 条` : `其它全部 ${batchTargets.length} 条`}；
+                不修改文字、时码、位置或动画。</span>
+              <Button variant="secondary" size="sm" full
+                onClick={() => void applyStyleToVisible()} disabled={readOnly || batchBusy}>
+                批量应用文字样式
+              </Button>
+            </div>
+          ) : null}
           <CaptionAnimationSection caption={selected} disabled={readOnly} />
           <Row>
             <Field label="字号">
@@ -697,6 +789,7 @@ export function CaptionPanel() {
             variant={form.bold ? "primary" : "ghost"}
             size="sm"
             aria-label="字幕加粗"
+            aria-pressed={form.bold}
             disabled={readOnly}
             onClick={() => commitStyle({ bold: !form.bold })}
           >

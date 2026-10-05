@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.printfx_film_dust_specks",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-26T22:26:35+08:00",
+  "method": "Inspected the original 4x4 RGBA atlas, transparent crop contact sheet, and all 16 actual composited sticker previews on light and dark neutral backgrounds at normal display size. Checked cell identity, crop boundaries, alpha edges, silhouette/readability at sticker scale, and uniqueness; subtle dust and scratch assets were judged at their intended low opacity.",
+  "observation": "稀疏尘点分布自然，与长划痕形状不同；透明底上没有可见方格残边。",
+  "sourceSha256": "796a4c7c632ce48e72b93f5c91bebe63e7b76fe1b1280c90c5102e280bb02d60",
+  "previewSha256": "249d5663fd201f9a20d8cc8394cb993b3451dd1fd7e30bb311a04e3ceaf5adb5",
+  "auditSha256": "9ec3bc1d45474356dfd9aebeef142ad9558ffe0382bdfeda4bdcda1e7ddd892b"
+}

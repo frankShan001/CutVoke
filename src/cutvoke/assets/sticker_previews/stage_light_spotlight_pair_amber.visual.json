@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_spotlight_pair_amber",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "The two amber cones read clearly after removal of the detached purple shard.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "de1727185cf9fc896cc01074e00e9fbe34b05ecd0ce5e80e4ff5af27076ebd74",
+  "previewSha256": "dd14e318c21b065f482339f091e00c7ef9433a141312b56ad7521ff98e3fc9c3",
+  "auditSha256": "8f4025b57a3668af75bfa2d5179ad94909ba1541c2f78e87e311827166bca2fe"
+}

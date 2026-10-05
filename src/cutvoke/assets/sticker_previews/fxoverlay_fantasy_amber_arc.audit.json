@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_amber_arc",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "98f44aef7d05299722c759793fcd6bff96d149d5b2fc8d298ab30af6ead1e6e7",
+  "previewSha256": "b394b97e9d6e900657931b11e32b179eef1dda065b1088f2f51f3898f4abbeaf",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 11628,
+  "visiblePixels": 11302,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 8787,
+    "steady_entry": 11305,
+    "steady_exit": 11305,
+    "exit": 8808
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 8787,
+      "withoutFade": 11303
+    },
+    "steady_entry": {
+      "withFade": 11305,
+      "withoutFade": 11302
+    },
+    "steady_exit": {
+      "withFade": 11305,
+      "withoutFade": 11305
+    },
+    "exit": {
+      "withFade": 8808,
+      "withoutFade": 11304
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.942,
+    0.983
+  ],
+  "auditExport": "fxoverlay_fantasy_amber_arc.audit.mp4",
+  "auditExportSha256": "7629f461c65849e28d3ea78206002b2416c6f6bdcd0352ac6cf996acfdf6ba84"
+}

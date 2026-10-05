@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_moving_head_magenta",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "262cf35f6aaf2d20a318e7b499e8565e1f0b8d0ae8208a5f1756b364908a008d",
+  "previewSha256": "8cdb004b9f05c829da2ee8dc46458996316facab7522d7a22984f14684b0f7ab",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3568,
+  "visiblePixels": 5329,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 4055,
+    "steady_entry": 5332,
+    "steady_exit": 5331,
+    "exit": 4060
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 4055,
+      "withoutFade": 5326
+    },
+    "steady_entry": {
+      "withFade": 5332,
+      "withoutFade": 5330
+    },
+    "steady_exit": {
+      "withFade": 5331,
+      "withoutFade": 5333
+    },
+    "exit": {
+      "withFade": 4060,
+      "withoutFade": 5329
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.302,
+    0.307
+  ],
+  "auditExport": "stage_light_moving_head_magenta.audit.mp4",
+  "auditExportSha256": "9ae8752e41d41a6a419c7b1e50f2cd637f67266d32bd61910d2c7fedb4a4d0e6"
+}

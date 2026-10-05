@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.mirrorGlass",
+  "version": "1.1.0",
+  "effectId": "cutvoke.fx.mirror",
+  "params": {
+    "axis": "horizontal"
+  },
+  "subcategory": "构图",
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "observation": "场景整体左右反射，太阳和画框位置交换；结果与上下翻转方向不同，预设参数可切换镜像轴向。",
+  "method": "Manual comparison of full dynamic previews and aligned motion sheets",
+  "coverSha256": "0a54c83b61d0feb165e86ad63c3bee3a375feb890ce86828ce9c74029e59e41a",
+  "motionPreviewSha256": "72666048217678c2010e1e6ab0fdc720b5fa9a1ddd8396626518914982c616f8",
+  "auditSha256": "12513ade8d72f0761d7fda99fcbd24cdcf16f444aeb1b1580a016b5b22334560"
+}

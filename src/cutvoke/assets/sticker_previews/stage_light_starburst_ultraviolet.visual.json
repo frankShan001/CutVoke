@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_starburst_ultraviolet",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "The violet starburst is centered and its rays remain evenly spaced.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "0d0fe2f3809fff158e3d511f036fd6613072e96cf728e4d2e93ae7e2ccb53422",
+  "previewSha256": "046c1912d2fb4f8500293397612aa99b712c30c9f7a6553d9885a43d9174a7f5",
+  "auditSha256": "bda6617ab7e67a1b87b57059ec3697745e6b07bac9c82ec81f7672586855929b"
+}

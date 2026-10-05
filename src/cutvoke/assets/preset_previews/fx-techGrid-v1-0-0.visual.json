@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.techGrid",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.grid",
+  "params": {
+    "cell": 48,
+    "thickness": 3,
+    "opacity": 0.8,
+    "color": "white"
+  },
+  "subcategory": "构图",
+  "reviewer": "Codex manual FX motion-sheet review",
+  "reviewedAt": "2026-09-24",
+  "observation": "A regular white grid covers the whole frame with transparent cells, distinct from the centered yellow block. Cell-size edit visibly changes the render.",
+  "method": "Manually compared actual rendered five-frame motion sheets and cover sheets across FX subcategories; checked edited audit renders against original preset previews at the same time.",
+  "coverSha256": "4994970fedbae2be36896e170b32b8a60bdb03a5ef2394690070eeb001970843",
+  "motionPreviewSha256": "320f02d88c1e2451e4c68286b2925f335b8a07cebf38f618a543c38243af093b",
+  "auditSha256": "929bb5914e6cd2cb0d805c8cd462676dca26734daa320efc55661d31717af645"
+}

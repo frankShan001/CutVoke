@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_sunrise_cloud_glow",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "10307478bb6c9af6cf2199ae1a1f816488328026bba00bc591a1903b8af9a08e",
+  "previewSha256": "600dcdf1001de41852e10aa415420d7c450736ef5f207433b73ba9072604d49b",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 15192,
+  "visiblePixels": 18018,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 8737,
+    "steady_entry": 18009,
+    "steady_exit": 18048,
+    "exit": 8784
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 8737,
+      "withoutFade": 18015
+    },
+    "steady_entry": {
+      "withFade": 18009,
+      "withoutFade": 17979
+    },
+    "steady_exit": {
+      "withFade": 18048,
+      "withoutFade": 18038
+    },
+    "exit": {
+      "withFade": 8784,
+      "withoutFade": 18048
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.395,
+    0.389
+  ],
+  "auditExport": "natural_light_sunrise_cloud_glow.audit.mp4",
+  "auditExportSha256": "1a77d800f172c04c34ba1d3f1414911ba884b346dca807db88bc9e584954abde"
+}

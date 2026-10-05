@@ -1,0 +1,34 @@
+{
+  "presetId": "cutvoke.preset.fx.wireOutline",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.sharpen",
+      "version": "1.0.0",
+      "params": {
+        "amount": 2.5
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.edge",
+      "version": "1.0.0",
+      "params": {
+        "mode": "wire",
+        "low": 0.05,
+        "high": 0.22
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 112.375,
+  "maxSampledMeanRgbDifference": 112.375,
+  "coverSha256": "72d7a4065e00719e1d37ca7c3a132b962c63cf53d0f53e92cf731951ea6208b5",
+  "previewSha256": "4f875245ce9257ae57b1271eb5c213f300a34962248385ae0c0aad3796c94a77",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_daisies",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c55330120e01f9d33e8bb809514ee00fda0d35bbf26b2389a6c3262b790d87f1",
+  "previewSha256": "0654458187d96f053a737139d848019f2ad857dd3b65cd9018bc360228c4af79",
+  "preview": "botanical_daisies.mp4",
+  "bytes": 4843,
+  "visiblePixels": 1792,
+  "changedPixels": 0,
+  "motionVisible": false
+}

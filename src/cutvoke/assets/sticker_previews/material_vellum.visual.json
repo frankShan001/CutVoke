@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_vellum",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "observation": "Broad translucent folds and pale layered bands make the tracing-paper surface recognizable.",
+  "sourceSha256": "e201491773b23317f90b8be6462bcdf576fd143200a6f5ab549c9010f3dae752",
+  "previewSha256": "652da7754c6d8f6bca8a12127e371e989a75458a3d92e39d6afacbbeab2f5842",
+  "auditSha256": "df02798df2fbb46bcffc0952e93991d03515b153705767be3d1298a4f867aaf3"
+}

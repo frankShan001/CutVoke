@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.transition.circleopen",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.circleopen",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 98.159,
+  "maxSampledMeanRgbDifference": 98.159,
+  "coverSha256": "4bdc31698714d37b70c870cfadea83aa60b6ec031e40e4b813390087ac3b02fa",
+  "previewSha256": "d7f6e4d89629aaf66c2169d8a8544ec5dd358aa21ead599cbd9c7a9e342d1622",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

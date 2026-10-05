@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_plum_blossom",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6995ceb1db84b9a05e7b922792f4d567cfa0ebaaecb79ee7d0c2a71827f9a528",
+  "previewSha256": "e7c81dada6f23d8d27815d67f7920c02b7b90974fe80bac9bb7ee6cb7b939b3f",
+  "preview": "inkfx_plum_blossom.mp4",
+  "bytes": 13256,
+  "visiblePixels": 9884,
+  "changedPixels": 0,
+  "motionVisible": false
+}

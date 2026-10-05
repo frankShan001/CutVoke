@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.monoInk",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "low",
+    "value": 0.015
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.001,
+  "exportSha256": "d27e64f82367b487facb0ab1b691c1a6161310a0a028f9af58a0977d5e465aab",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "d27e64f82367b487facb0ab1b691c1a6161310a0a028f9af58a0977d5e465aab",
+  "auditExport": "filter-monoInk-v1-0-0.audit.mp4"
+}

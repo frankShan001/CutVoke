@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_motion_curl",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "4d80acc995c13bdb138f583a48245cf80c779187feab9cf35fb9c93ca3fd997b",
+  "previewSha256": "0561cff734b51199e44b5749f9b3df916b8151134b1dc482ea3cc907fc165265",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5963,
+  "visiblePixels": 4309,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3519,
+    "steady_entry": 4314,
+    "steady_exit": 4312,
+    "exit": 3518
+  },
+  "previewExportMeanRgbDifferences": [
+    0.653,
+    0.655
+  ],
+  "auditExport": "manga_motion_curl.audit.mp4",
+  "auditExportSha256": "0877a59621fa040847f6f7ebde2f701aad7504d8dd8be9310d5d2bdf591ee37f"
+}

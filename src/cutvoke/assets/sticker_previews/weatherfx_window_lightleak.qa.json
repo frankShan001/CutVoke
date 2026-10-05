@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_window_lightleak",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "cef3086020b1ae9e7077d1f28ae78c2b7f3f359f86bdb46d4c702c4bb2e25b77",
+  "previewSha256": "cf1631488307db9ae501fd987f8bcd574d80608b139cb2ba0ffbda2b2ee44d93",
+  "preview": "weatherfx_window_lightleak.mp4",
+  "bytes": 8630,
+  "visiblePixels": 12223,
+  "changedPixels": 0,
+  "motionVisible": false
+}

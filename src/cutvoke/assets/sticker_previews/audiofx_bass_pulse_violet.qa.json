@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_bass_pulse_violet",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e198cd803d46d7e61bcc8f6f62934d0692c2b259885d7d12e7ecf78efd12f74e",
+  "previewSha256": "289a062c89a315841ac31e54a2963cc178f4b32232212a7ff26ea4226f8b7a4e",
+  "preview": "audiofx_bass_pulse_violet.mp4",
+  "bytes": 9508,
+  "visiblePixels": 7725,
+  "changedPixels": 0,
+  "motionVisible": false
+}

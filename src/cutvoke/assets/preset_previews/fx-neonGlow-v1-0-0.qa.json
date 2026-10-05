@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.fx.neonGlow",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.glow",
+      "version": "1.0.0",
+      "params": {
+        "intensity": 2
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 46.53,
+  "maxSampledMeanRgbDifference": 46.53,
+  "coverSha256": "9eefcb6a8b0419d4a64e17bbb80557a7b5a18b60b14b8b1606b3186c5d55315f",
+  "previewSha256": "72384a9f2d998e94d9a7a70ca4ba5fde5e2fd79f8ef844e57eab7980f69fb7cf",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

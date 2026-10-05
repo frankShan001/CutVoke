@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.glitch_packet_streaks",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项检查4×4透明贴图裁切表和4×4真实画面合成表；确认Alpha通道、裁切边缘、深浅背景对比、缩略图可辨性与每项轮廓差异。",
+  "observation": "青蓝洋红数据线以斜向速度轨迹伸展，线条长短各异且边缘干净。",
+  "sourceSha256": "5d185a0162c9f5b682cbb9002af0700214893f251c28e40028b6a9f04a9d3589",
+  "previewSha256": "1a40ed1a4c0d3e6bfecee6355ecbbeec98ad0118ecd65cd852e4e1f891b54ee7",
+  "auditSha256": "7c4eaadc1e99bd5d3d1cda17f32cdaaa53cd7076a93f60ba72ac4a19c18e0d5f"
+}

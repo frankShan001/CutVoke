@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_acoustic_arcs_pearl",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "d0f55b250ddb6dafce333826c9945ebc7fbd9132d6d533ba28332e220a6a8641",
+  "previewSha256": "b5daf768251cbfa0c2db02bdf374075ca7dcb308eafe86afca42bc033e7934c0",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2809,
+  "visiblePixels": 2045,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1287,
+    "steady_entry": 2043,
+    "steady_exit": 2043,
+    "exit": 1287
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1287,
+      "withoutFade": 2044
+    },
+    "steady_entry": {
+      "withFade": 2043,
+      "withoutFade": 2045
+    },
+    "steady_exit": {
+      "withFade": 2043,
+      "withoutFade": 2045
+    },
+    "exit": {
+      "withFade": 1287,
+      "withoutFade": 2042
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.074,
+    0.085
+  ],
+  "auditExport": "audiofx_acoustic_arcs_pearl.audit.mp4",
+  "auditExportSha256": "f1cdb5e28860968c61dd64551204063518a118eaccd5cbdd0ff0787f5f1b7031"
+}

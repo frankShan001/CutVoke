@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_walnut",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器合成预览；只批准纹理特征清晰、边缘完整且缩略图可辨的素材。批准仅覆盖贴图本身的识别度，不代表复杂实拍成片验收。",
+  "observation": "胡桃木横向木纹走向清楚，深浅层次足以与软木和皮革区分。",
+  "sourceSha256": "87554286121a0e275bc9d55cfccdc2f751552f54a71ce26c397441a87ef49864",
+  "previewSha256": "82fbc2cac5e82a05c1588e7f5082c2405f1c921f45460235ffcbd9979d3d6396",
+  "auditSha256": "4785a5df798cf06c02121920859d94fff26fe64852c924b04d264cdbf829e179"
+}

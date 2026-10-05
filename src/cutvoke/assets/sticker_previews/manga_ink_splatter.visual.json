@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_ink_splatter",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项比对透明原图、浅色/深色合成底图与实际渲染器样片，检查造型辨识、格线串入、边缘裁切、透明通道和背景对比；本次不代表复杂实拍素材的商业观感验收。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿，单独复审，原批次记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿并复审，原 13 项记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另纳入 2026-09-24 的 2×2 高对比图集审核记录。",
+  "observation": "珊瑚、金黄和青蓝放射墨迹有明确中心，白边保证深色底可见，透明边缘未见格线或裁切。",
+  "sourceSha256": "8f4709a81fc54067afbcf85ef5719d8de9d325bdfc63e76278331758823fc1f3",
+  "previewSha256": "bb85cde0ffefddd80fac367482ffc6deeb98058cd8bcb5ab24f678f9deb7163a",
+  "auditSha256": "d801cc8f08d9ebb1bd2422608b5917e86a40804b092bc046e89bd73b51da3567"
+}

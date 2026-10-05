@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_cloud_shadow_wisps",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Soft cool cloud-shadow streaks differ from the colorful sunrise and peach haze; subtle over pale scenes.",
+  "sourceSha256": "00b63e9e418545b95941f368641e0d6f20f0585aae47843f5536cc43f143b460",
+  "previewSha256": "d90c673cdfab3c2a29313d091b91c27370c78339909f8f825ece0bc56106d0a5",
+  "auditSha256": "a38825e4d7117a9eef8a1b7d8c8eb3f32731e876faa30f69423d96946a1e4d89"
+}

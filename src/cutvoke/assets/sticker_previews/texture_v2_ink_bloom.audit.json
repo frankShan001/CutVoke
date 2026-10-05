@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_ink_bloom",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "22b907685bb88af3d4df2d127aafb5d899a9bf3876c77bc77bc6808b0756dbff",
+  "previewSha256": "5b0e658826c610cb5517cb9dc44d8e639f6b4187d6520098438550fe009eaac8",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5711,
+  "visiblePixels": 4695,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3832,
+    "steady_entry": 4695,
+    "steady_exit": 4695,
+    "exit": 3832
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_v2_ink_bloom.audit.mp4",
+  "auditExportSha256": "b381e7010ae91e9785823b2b29e42fa95c70b01a2fd3bd74ed6e081c1814c346"
+}

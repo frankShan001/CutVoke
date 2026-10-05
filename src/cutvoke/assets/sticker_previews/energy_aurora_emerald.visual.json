@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.energy_aurora_emerald",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T08:40:43+00:00",
+  "observation": "The emerald aurora curl keeps an open center and a coherent luminous contour.",
+  "method": "Reviewed all extracted RGBA overlays on dark and light checkerboard contacts and inspected the rendered player preview contact sheet. Checked silhouette clarity, alpha cleanup, edge safety, contrast, and use as a timeline compositing overlay.",
+  "sourceSha256": "2d22bba1ce0f641987be4f939591aa72f37b48f62a606e33f30426a69c839396",
+  "previewSha256": "194b3af59f6267f82ae8538c992f85ab2a252409ce09522fc43e1114944fda82",
+  "auditSha256": "f981b46e34fff4193f839ecb87b8cf4bf9e12c409832e1b193be00b4a7375626"
+}

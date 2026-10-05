@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_film_dust_specks",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "796a4c7c632ce48e72b93f5c91bebe63e7b76fe1b1280c90c5102e280bb02d60",
+  "previewSha256": "249d5663fd201f9a20d8cc8394cb993b3451dd1fd7e30bb311a04e3ceaf5adb5",
+  "preview": "printfx_film_dust_specks.mp4",
+  "bytes": 6522,
+  "visiblePixels": 439,
+  "changedPixels": 0,
+  "motionVisible": false
+}

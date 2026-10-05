@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_shock_rings",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项比对透明原图、浅色/深色合成底图与实际渲染器样片，检查造型辨识、格线串入、边缘裁切、透明通道和背景对比；本次不代表复杂实拍素材的商业观感验收。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿，单独复审，原批次记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿并复审，原 13 项记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另纳入 2026-09-24 的 2×2 高对比图集审核记录。",
+  "observation": "蓝红双层圆环轮廓锐利，深浅背景均有足够对比。",
+  "sourceSha256": "3b11f7886c113157116463a3b061add02bb067d9f1cd9afca6b2abd569b0088a",
+  "previewSha256": "d13d6230707692f0f46b1b349a0f5016aa5d19b687db2a81ae1d359c05387ea4",
+  "auditSha256": "f177b096a6e89a0f30c42e90309a04286ce4f0e58b771a5a1d367063c7fd64de"
+}

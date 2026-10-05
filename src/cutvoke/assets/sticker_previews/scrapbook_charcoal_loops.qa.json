@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_charcoal_loops",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "504f819176f48911ae66879bef3ca790b0bab8a01b4735525c3d032bdd76af31",
+  "previewSha256": "fc8eca7f20119434324364e24132690703af22de5697f413c986c14524271a29",
+  "preview": "scrapbook_charcoal_loops.mp4",
+  "bytes": 2923,
+  "visiblePixels": 268,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.comboBannerIn",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.comboBannerIn",
+  "params": {
+    "duration": 1.0,
+    "easing": "ease-out",
+    "distance": 0.3,
+    "primary": "slideIn",
+    "secondary": "fadeIn",
+    "fromScale": 0.8
+  },
+  "subcategory": "组合",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "横向位移与淡入同步连续变化，末尾恢复正常位置和亮度，不留窄条或透明残区。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "696bb70a7cf61c50b046e8aa5ae6c869d07559f3ffb0b134391c829530e443d7",
+  "motionPreviewSha256": "aefdb686608c5804e3e8e9ba334fa4c126915e55d903fd848a8039f4c3840848",
+  "auditSha256": "38ffa0bc868fbe6599e00a09839dc7df921d816907432dbf43bd3e5ace950a42",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_comboBannerIn.png",
+  "libraryReviewSheetSha256": "886c49d2c613e00cdcb27a63d301221029c2b3443a569982239bec9aa4e70d86"
+}

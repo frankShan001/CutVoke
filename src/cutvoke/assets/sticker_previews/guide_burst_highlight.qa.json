@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_burst_highlight",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6dca84316c57e295ae83828979ab1fce0c94e3b143474d7975425b837b7cd743",
+  "previewSha256": "e7fc893d366b5c98cac58875cf5df06dd3a48bc636a15616bd15cded6a140aa2",
+  "preview": "guide_burst_highlight.mp4",
+  "bytes": 5687,
+  "visiblePixels": 2003,
+  "changedPixels": 0,
+  "motionVisible": false
+}

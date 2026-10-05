@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_dotted_orbit",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Mint orbit dashes now have white and navy keylines for contrast; the yellow sparkle remains distinct on both backgrounds.",
+  "sourceSha256": "034b3f2bd1d336541c7ccaf471ee4eaeb57bec6a373a780ec7c43aeb25977be6",
+  "previewSha256": "49ab10894c1821da49f11a53fb1e686378a2796b6aaa276ae7c44310328024e2",
+  "auditSha256": "35c9c67b00e71faaa46e6068d36ba54478c2594c7e9ed9f737c61d5315835f59"
+}

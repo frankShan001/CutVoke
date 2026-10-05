@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_poodle",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e21de15668240850ede885731ce2aae685db416e3847f6d6155e14c73ca59fc3",
+  "previewSha256": "2fd2e73de40cb9c056672a82953944ca64c7933766caff42a79ffbc9ebe785a8",
+  "preview": "pet_poodle.mp4",
+  "bytes": 4443,
+  "visiblePixels": 2020,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_window_blind_bands",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "837c87f5837ad932598b7f9e8ab8d43585c6aa8850b11a042375003773767004",
+  "previewSha256": "ac4c76c1f4538929c5ec1eb03e411ced588ed1e7ed1e1cee8257fc4327dc22c9",
+  "preview": "natural_light_window_blind_bands.mp4",
+  "bytes": 8457,
+  "visiblePixels": 7874,
+  "changedPixels": 0,
+  "motionVisible": false
+}

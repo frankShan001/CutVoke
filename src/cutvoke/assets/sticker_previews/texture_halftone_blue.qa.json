@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_halftone_blue",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4ea7355cc6714e36eb4b71f06c70e936125a4f24adb8cfc9c184836114e8523a",
+  "previewSha256": "b60f33ace74bbc52f83a93b81a3766c3c6cbf0fb5e7295101fff9c1e3d3f51b4",
+  "preview": "texture_halftone_blue.mp4",
+  "bytes": 4532,
+  "visiblePixels": 916,
+  "changedPixels": 0,
+  "motionVisible": false
+}

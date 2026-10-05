@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_lyric_spotlight_peach",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "Peach-lilac oval glow and its small waveform edge make a distinct soft lyric spotlight.",
+  "sourceSha256": "aada8eeb32d44ab5fc8d50277ad4d4383d44a6e93085992ef82f8bce83a2a4d9",
+  "previewSha256": "a55dc05ee6596cf624d4cd228cb69829814c613f3f2cf7b02b9b4e1c60c0cd27",
+  "auditSha256": "b9bc0775e08239396db0bd5e6417160cc0c5e336fb1110d8c937def290cd7083"
+}

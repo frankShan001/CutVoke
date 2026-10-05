@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.speech_bubble",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "蓝色对话气泡的尾部与主体连接自然，保持空白无文字。",
+  "sourceSha256": "5cd3e0f4f76070323773270e0013990f0a387f77dbe9e14c46204de055943ce9",
+  "previewSha256": "cbf646696cf582b108ccbd00ee82fccecca3becad668f854e08aac0578a136a4",
+  "auditSha256": "a2f4ba582f9c3bae86821dcee6ebfe559b560fc7b53c1f364da9ca222bf4dbc6"
+}

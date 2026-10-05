@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.glitch_signal_break",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项检查4×4透明贴图裁切表和4×4真实画面合成表；确认Alpha通道、裁切边缘、深浅背景对比、缩略图可辨性与每项轮廓差异。",
+  "observation": "中央信号条以较厚色块断续排列，与细窄横向撕裂效果有明显区别。",
+  "sourceSha256": "01e5baa858419fd5b408365f6ca4431d9ab84b52bb1e4cd10bdc60a6a02eb39d",
+  "previewSha256": "e75444cec4e603035b55e2dbdb9b584a881d5e168d66ae45488636f1a11507cc",
+  "auditSha256": "56165ffe03cf7cef0f9ad040d3920ab455b44c6f6ad5956eecee5640af6b24ef"
+}

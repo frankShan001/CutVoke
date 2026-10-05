@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.negativeViolet",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.invert",
+  "params": {
+    "strength": 0.88
+  },
+  "subcategory": "风格",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:51:00+08:00",
+  "observation": "反相结构呈亮紫和深紫两层色阶，与既有反相冲印的淡绿蓝配色明显不同。",
+  "method": "Manual comparison of 320x180 before-after covers and five aligned frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; monoMatte excluded as too close to existing bloom/gray",
+  "coverSha256": "05747c7001f33c7e13c2b3f69de421e754a7e6e49963dad5a028f23538bf1b2a",
+  "motionPreviewSha256": "5155b81b4487e7f4ab251e8c8bd23acfdfc811136981e7d47ee45c4cca679c68",
+  "auditSha256": "153905fa08371b9fa063dba77ed61a0b60c64f4e8bd02d3788aab3812fd605ac"
+}

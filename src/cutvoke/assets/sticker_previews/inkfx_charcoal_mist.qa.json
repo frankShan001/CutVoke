@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_charcoal_mist",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "704af31bf7158727d1cfe29af2f0f3261db5c77cea9629fed9c1b8d102cb0020",
+  "previewSha256": "7b0b840972603a45964f82039ac60842835fef5c96c37f1f3cbc01cf42b0acf5",
+  "preview": "inkfx_charcoal_mist.mp4",
+  "bytes": 9694,
+  "visiblePixels": 10864,
+  "changedPixels": 0,
+  "motionVisible": false
+}

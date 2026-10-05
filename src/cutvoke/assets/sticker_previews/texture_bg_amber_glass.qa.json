@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_amber_glass",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2d376ddaa1d764b67c33e8c8005096722d4dd8e2249e6cdf3f31dfc793352430",
+  "previewSha256": "86cbd691bcb086b1aea13636a735a421e2f98a90c8ea7872a4edf1d363d6d1eb",
+  "preview": "texture_bg_amber_glass.mp4",
+  "bytes": 17486,
+  "visiblePixels": 57600,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_kraft_torn_patch",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "32f6aa2bcc3df3bad330d94de845bce3556b3ba9f65345a9c3bdd6a68e3c982d",
+  "previewSha256": "5962b7d6b801fc6c8320fdb02b5817e6bfb06731b230e4b08acfeacbd5e388d0",
+  "preview": "scrapbook_kraft_torn_patch.mp4",
+  "bytes": 3037,
+  "visiblePixels": 792,
+  "changedPixels": 0,
+  "motionVisible": false
+}

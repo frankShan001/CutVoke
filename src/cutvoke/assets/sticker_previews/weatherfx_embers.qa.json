@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_embers",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3bc6b823db6e3fd2ec587d2a865dedb779ee3c0e0d5caf056658cbea054d4a36",
+  "previewSha256": "6a265ff5c9663cf67b77f0a89f2d3faa6de0061af289094d00f08339895b9782",
+  "preview": "weatherfx_embers.mp4",
+  "bytes": 8289,
+  "visiblePixels": 2757,
+  "changedPixels": 24,
+  "motionVisible": false
+}

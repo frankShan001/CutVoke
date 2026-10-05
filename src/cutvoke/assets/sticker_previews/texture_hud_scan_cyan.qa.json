@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_hud_scan_cyan",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0804e81d946d5eaba82832f4674057f3fb0f5799156284842c9fa5ed162a6479",
+  "previewSha256": "10aa4e01811bf73e658e139b02de129a7ad9762b36a8c8f7b83c13485af7de09",
+  "preview": "texture_hud_scan_cyan.mp4",
+  "bytes": 4686,
+  "visiblePixels": 1327,
+  "changedPixels": 0,
+  "motionVisible": false
+}

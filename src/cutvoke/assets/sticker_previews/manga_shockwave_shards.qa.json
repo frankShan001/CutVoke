@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_shockwave_shards",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7f8e04ad97f44704d8bdaa332d2821f9879ba414254617a9552b16ffa7e7d2ea",
+  "previewSha256": "9d3a563b40edd349b679fa951aea7149a16b751812ff6c87675b448be376c5a9",
+  "preview": "manga_shockwave_shards.mp4",
+  "bytes": 6140,
+  "visiblePixels": 2151,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_wavy_ribbon",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "be2bf7917342fb2d8e57947761ff331b8d251e886d192b2413aa872c977d12db",
+  "previewSha256": "a1db369663c029cb9de7b203be033bee96f9303b49292acbca5b920bbc235daa",
+  "preview": "decor_wavy_ribbon.mp4",
+  "bytes": 3953,
+  "visiblePixels": 1061,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_soap_bubbles",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0b657a391c134b9e043d08cf5021c0aa10cc39d7b014a51b1eda4c0f623fa785",
+  "previewSha256": "b31f6c3ad8d512e0d0294a8b7fe0af59f45bb0b326aed1d022614cffc7fa52c9",
+  "preview": "weatherfx_soap_bubbles.mp4",
+  "bytes": 9392,
+  "visiblePixels": 4495,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_autumn_leaves",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "橙金叶片保留叶脉和轮廓，与樱花花瓣色形均有区别。",
+  "sourceSha256": "354a5ab880261f6beea0ccd18b5619a675f344084eb20ea5a904db929d5aaf03",
+  "previewSha256": "4256a5dfcf0e30d627f8d6a5381faee04f8c9a79e8027494ad2b296e9db2df81",
+  "auditSha256": "56c59f7684fdf91d36c631ff07569cce04c7cdf5d0ccaa551ce67179d247ac6d"
+}

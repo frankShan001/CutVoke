@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_pointer_arrow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Curved cyan pointer reads clearly and keeps its full rounded tail and arrowhead.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "aabbb8b259cef49b9b726e3f3d3cd0d573b671c463d389e1e53cf7f689ba0ad2",
+  "previewSha256": "79730162798bdf3aa436c3d0729069c1317b8d5b6f7af3ca0974086c90a45a76",
+  "auditSha256": "74f4370839e92a062a07186e4385b0f611d5525c44ad1cbc13ae8302f3005ac4"
+}

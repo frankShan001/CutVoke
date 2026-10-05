@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_liquidglass_violet",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "observation": "紫色玻璃带有多处透明空隙和柔和高光，卷曲轮廓明确，和规则水纹不同。",
+  "sourceSha256": "318aac75f19ba8606625417594cb32caf4de0b331d3e0615831308f3ae63bc4e",
+  "previewSha256": "0e450f265c40a95d644d5a868955a83e21afef685743a1ce160fbb06be778427",
+  "auditSha256": "e614cbc285a9eb8a496bcc64b325c1160c4d36498ac5cee5d83db70b07754ae8"
+}

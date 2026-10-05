@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.warmAura",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.glow",
+  "params": {
+    "intensity": 1.5
+  },
+  "subcategory": "光影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "原紫红背景变为暖棕橙调，太阳和窗口边缘有漫射光；编辑发光强度后边缘亮度改变，与未染色霓虹柔光区分。",
+  "method": "Viewed the full-size fx-光影 cover contact sheet and aligned untreated/default/edited frames from every generated MP4; compared each visual to its category siblings and confirmed numeric editing changes the actual rendered frame.",
+  "coverSha256": "46e65f386c0d09cc1c9fa1fdfd011ec318a77d5c6e75a86d33c73262bb2a5e1b",
+  "motionPreviewSha256": "4817ac66f74d7ca8ee4e4c9f4be21f0260deb30f14cbe5a8bab183642f096e5c",
+  "auditSha256": "ab0cca35c74077ad8187f0c9f686f0597b2a4012d6c89904bb1e60142911d982"
+}

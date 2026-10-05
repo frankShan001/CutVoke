@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_jade_ripple",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "A textured jade-and-cyan oval ripple ring has a clear open center and water droplets, distinct from the bronze-and-teal ring.",
+  "sourceSha256": "7822c858ab047a113a2943de018b4d15417150cc74b2b19c45fd8fc73a369909",
+  "previewSha256": "9bdb59aa763cbe0e0885eb22cf5bdb7a8f1d76e392477b76d67de34d7e408e5a",
+  "auditSha256": "ae4424e47a5f988d790db2ea44d2921be3ef34a05ace65f13d719e8134613778"
+}

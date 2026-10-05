@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.invertedLens",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.lens",
+  "params": {
+    "k1": -0.62,
+    "k2": -0.12
+  },
+  "subcategory": "基础",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "整幅画面上下倒置并出现明显弧形桶状弯曲，主体变形但可辨；与水平镜像及单独反相、网格不同。",
+  "method": "Compared before/after frames at 0.20s and 0.95s from real previews, compared them with existing basic-effect covers, and decoded each MP4 fully; geometric sample only.",
+  "coverSha256": "d0163cb12c8ddb9f1f61771fe1ff66e7e77cf1e95db94096401b6d9efd0ea176",
+  "motionPreviewSha256": "289e987d30bb2d237ad4b13631b1724235cd718e9195883e89493d880586a42e",
+  "auditSha256": "1e4f94164d44079a8e3ba00c36ed316593cb819dba08ed94361b70ddd826b8a9"
+}

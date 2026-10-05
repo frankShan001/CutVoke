@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_shockwave_shards",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "7f8e04ad97f44704d8bdaa332d2821f9879ba414254617a9552b16ffa7e7d2ea",
+  "previewSha256": "9d3a563b40edd349b679fa951aea7149a16b751812ff6c87675b448be376c5a9",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4312,
+  "visiblePixels": 2929,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2224,
+    "steady_entry": 2929,
+    "steady_exit": 2929,
+    "exit": 2224
+  },
+  "previewExportMeanRgbDifferences": [
+    0.188,
+    0.173
+  ],
+  "auditExport": "manga_shockwave_shards.audit.mp4",
+  "auditExportSha256": "4c00522551a3c3560551017759859a382a5919b4f86e2ea3701c3f9c9d7cba81"
+}

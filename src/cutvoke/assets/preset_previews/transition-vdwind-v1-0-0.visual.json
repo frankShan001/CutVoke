@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.vdwind",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.vdwind",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "故障",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Fine vertical streaks descend from the upper edge, with the comb boundary moving opposite the upward wind variant.",
+  "method": "Manual comparison of five actual rendered frames per transition, neighboring presets, and complete MP4 decode",
+  "coverSha256": "e0e11141bcef2dfa7b1f54936a13f1c068dfa97476af48aad5ad6cfbfb14e054",
+  "motionPreviewSha256": "eefe63fe2fb8b1b17b54ceafaea0c25e61b6bca3b5f31dcd2bc94e500abb557a",
+  "auditSha256": "0a0fb6790dd1ed2053dcfe19d88e8c4260ab4b449b9d212bf2fcb4b4581c4694"
+}

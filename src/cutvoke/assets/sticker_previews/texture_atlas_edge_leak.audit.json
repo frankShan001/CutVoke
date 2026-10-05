@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_edge_leak",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "ebd2e4ea018c3604c3d0ab1ebd6791bee3c2109cd28ae4be57143432c4fdb1de",
+  "previewSha256": "443e8157fc2d84495219bb32b9c7d34a7513c084dea73e0c9763f14501e8d933",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2081,
+  "visiblePixels": 1374,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 642,
+    "steady_entry": 1375,
+    "steady_exit": 1375,
+    "exit": 642
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 642,
+      "withoutFade": 1373
+    },
+    "steady_entry": {
+      "withFade": 1375,
+      "withoutFade": 1375
+    },
+    "steady_exit": {
+      "withFade": 1375,
+      "withoutFade": 1374
+    },
+    "exit": {
+      "withFade": 642,
+      "withoutFade": 1375
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.008,
+    0.008
+  ],
+  "auditExport": "texture_atlas_edge_leak.audit.mp4",
+  "auditExportSha256": "46f85790f5f6dac6ee0b3d42ea94dc3509e9103525e4178bcf7d8fc6b493f9cf"
+}

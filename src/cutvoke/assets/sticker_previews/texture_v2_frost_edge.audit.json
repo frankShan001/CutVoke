@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_frost_edge",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "731b75cc87684f85760b373888d1d0ac0398854a0f114a254d8d78fb0156efac",
+  "previewSha256": "e5292bb45760be6fe229f06a0936ae36fd274fa67294c395e7cd56d44ed4205d",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5508,
+  "visiblePixels": 3823,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1931,
+    "steady_entry": 3823,
+    "steady_exit": 3823,
+    "exit": 1928
+  },
+  "previewExportMeanRgbDifferences": [
+    0.055,
+    0.055
+  ],
+  "auditExport": "texture_v2_frost_edge.audit.mp4",
+  "auditExportSha256": "c61f30816123feb7a46e4fc17b41b554462105372779c17f5dc5a01ec5a55d22"
+}

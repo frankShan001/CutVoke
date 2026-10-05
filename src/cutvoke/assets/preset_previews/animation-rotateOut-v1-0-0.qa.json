@@ -1,0 +1,27 @@
+{
+  "presetId": "cutvoke.preset.animation.rotateOut",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.rotateOut",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "toAngle": 35.0,
+        "easing": "ease-out"
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 106.16,
+  "maxSampledMeanRgbDifference": 106.16,
+  "coverSha256": "4277dd77ec938f479c14c1637478f18e247fdc43a5c7c9975b1f5dddf8f2f5ac",
+  "previewSha256": "ec39f84ae4778773ff5ef93b70858c266241067e7cd74fbbb28c9417c1ec693c",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

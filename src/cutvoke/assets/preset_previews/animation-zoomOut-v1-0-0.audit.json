@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.zoomOut",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.733333,
+  "previewExportMeanRgbDifference": 1.785,
+  "exportSha256": "2e56348f519280f65464bf89317e1339a2a0024af98041614cd05dd6b12a2b10",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "2e56348f519280f65464bf89317e1339a2a0024af98041614cd05dd6b12a2b10",
+  "auditExport": "animation-zoomOut-v1-0-0.audit.mp4"
+}

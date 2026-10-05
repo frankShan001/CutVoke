@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_pixel_shards",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "8e64d2ef16b222479b7b5608ccc67c29bb7c4df32e622db7270a1f50019a7814",
+  "previewSha256": "7224ca08433755cf15086af0a3c0d90a25d78411641461452573d6ab8a5b7b79",
+  "preview": "personfx_pixel_shards.mp4",
+  "bytes": 8635,
+  "visiblePixels": 4343,
+  "changedPixels": 0,
+  "motionVisible": false
+}

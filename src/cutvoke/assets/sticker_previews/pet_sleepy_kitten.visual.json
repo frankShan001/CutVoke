@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_sleepy_kitten",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "卷睡造型清楚；轮廓外有一个很小的孤立像素簇，正常贴纸尺寸下不干扰主体。",
+  "sourceSha256": "f6a61b4f16b35ccd8fbcee08891808af7181ce4f1b4d155eb22a6461cdfc1e05",
+  "previewSha256": "d2f863d35343a5fbf7495589a412946867b9b8841432b36ab155438b04fa2556",
+  "auditSha256": "aa0b003823be552539f4dfb945a1ddaae8dd4f26d3eb97456f4df4cc19414cac"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_boarding_pass",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "登机票轮廓和飞机符号清晰，空白票面没有生成文字或串格残片。",
+  "sourceSha256": "f3f0e197c1631104426ea7f0af917a9adacefa5073fe8cffd0177e31f8ec89cd",
+  "previewSha256": "f7fa22389469766b6fb48e6fb32124154a44fff8910c6f98dc1ac639f92cfc69",
+  "auditSha256": "3e46802c9992f7e76737b45c65c98bd89ec4a605b7f008125452c33da26f04fa"
+}

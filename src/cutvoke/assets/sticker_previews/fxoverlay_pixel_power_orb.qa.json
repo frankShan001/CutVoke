@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_power_orb",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "cd0d78b690445067bc2cfce632ea08c4820039b3dd74aa5486e933a930c67b75",
+  "previewSha256": "21ea11d876d430832c90868b7e5091f8ae0d6a9313661109415c55127bd3b589",
+  "preview": "fxoverlay_pixel_power_orb.mp4",
+  "bytes": 10464,
+  "visiblePixels": 7447,
+  "changedPixels": 0,
+  "motionVisible": false
+}

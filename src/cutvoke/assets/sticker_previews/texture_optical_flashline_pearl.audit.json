@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_flashline_pearl",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "d6ff0fb532d46aa260c00e51fe57f4932b59b74cf445955566c186962117557d",
+  "previewSha256": "aec08c6c99448789b799faa7ff5d5fe07e42beb6b54300984daee54b547102a3",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2324,
+  "visiblePixels": 1895,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 241,
+    "steady_entry": 1895,
+    "steady_exit": 1893,
+    "exit": 241
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 241,
+      "withoutFade": 1895
+    },
+    "steady_entry": {
+      "withFade": 1895,
+      "withoutFade": 1895
+    },
+    "steady_exit": {
+      "withFade": 1893,
+      "withoutFade": 1894
+    },
+    "exit": {
+      "withFade": 241,
+      "withoutFade": 1895
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.049,
+    0.048
+  ],
+  "auditExport": "texture_optical_flashline_pearl.audit.mp4",
+  "auditExportSha256": "3b2c0fdb8ea34aee6f7745cd60c2119af998d2b9ad6e6749cc909cde0193d1ac"
+}

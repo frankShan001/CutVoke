@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_film_scratches",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "82cdecc1589b81db68c531030fe5bb717948f7df2b01a56162885d2128ed31d2",
+  "previewSha256": "fc71c8c09816706478cb8a1365749185f1992be9aea045b89bc48e78c71a1c9b",
+  "preview": "texture_v2_film_scratches.mp4",
+  "bytes": 3790,
+  "visiblePixels": 411,
+  "changedPixels": 0,
+  "motionVisible": false
+}

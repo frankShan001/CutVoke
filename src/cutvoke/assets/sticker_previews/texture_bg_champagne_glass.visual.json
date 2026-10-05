@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_champagne_glass",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "Fine champagne vertical brushing stays even and restrained across the frame, leaving a quiet surface for title overlays.",
+  "sourceSha256": "7a5ed1df1e941f53e9fd982d4bdd157b3dba764cc628a6db9febd4139ff1499a",
+  "previewSha256": "8f176887a43486b0f9fb4e0c8f6ffa7fb66bc0eedfa1cd0a5b106c5be1bd3f27",
+  "auditSha256": "0c6dcee086debf69d59b1dbd46e60ba38ad071584c8117bc5ddb2964af25f4eb"
+}

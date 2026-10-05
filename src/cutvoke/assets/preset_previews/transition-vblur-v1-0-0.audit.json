@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.vblur",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.375,
+  "exportSha256": "3024c70ba3b5ff8df3f729c3dd5ad5c3d9f3c914d883115662a31fa709288507",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "3024c70ba3b5ff8df3f729c3dd5ad5c3d9f3c914d883115662a31fa709288507",
+  "auditExport": "transition-vblur-v1-0-0.audit.mp4"
+}

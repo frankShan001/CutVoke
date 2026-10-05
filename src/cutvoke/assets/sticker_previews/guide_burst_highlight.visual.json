@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_burst_highlight",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Yellow burst has a clear empty center and stays fully inside the extracted cell.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "6dca84316c57e295ae83828979ab1fce0c94e3b143474d7975425b837b7cd743",
+  "previewSha256": "e7fc893d366b5c98cac58875cf5df06dd3a48bc636a15616bd15cded6a140aa2",
+  "auditSha256": "c0f1393e3dc79ac3607971bd9dc82a3764f42772fa16d333db20707280b8b223"
+}

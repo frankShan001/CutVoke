@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.comboPullUp",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.comboPullUp",
+  "params": {
+    "duration": 1.0,
+    "easing": "ease-out",
+    "distance": 0.3,
+    "primary": "zoomOut",
+    "secondary": "slideUp",
+    "fromScale": 0.8,
+    "toScale": 0.8
+  },
+  "subcategory": "组合",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "近景缩放与上移同时回归正常画幅，0.967→1.000秒连续衔接，没有旧版本突然恢复整幅的问题。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "5019291bdd370b933f1db5a41521b770a00c68ca958c32ae8b60681414af1ef9",
+  "motionPreviewSha256": "c36bfae3d99b9b1e18ab907a30c8a5e5e0e2ac4e2162e1a39e97437edcfb25a7",
+  "auditSha256": "3f70a3310a894db58666e3d0628d48a05c72e9ae580a4f338c45071ad20615a0",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_comboPullUp.png",
+  "libraryReviewSheetSha256": "51b966bf6f747369076fc0affd45c0c46c0c0458a92a83ccb6445a5bc66d292c"
+}

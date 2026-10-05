@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.arrow_sway",
+  "version": "1.1.0",
+  "kind": "dynamic",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "bd4a469308db4d208dd9198a1d97442b609d4cf68465e7f12342b4b1118d1feb",
+  "previewSha256": "8f3b0e355115072c6ef6d716063e4f3d2d4cd010ba5a0c7fad7807da7097cf03",
+  "preview": "arrow_sway.mp4",
+  "bytes": 5252,
+  "visiblePixels": 2303,
+  "changedPixels": 4727,
+  "motionVisible": true
+}

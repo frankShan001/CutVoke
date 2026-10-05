@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.edgeblur",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.189,
+  "exportSha256": "b2a9efdd53bb0cf9433abe8a4b0cbf8e859507ec365f387c6b27f2f300abb41b",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "b2a9efdd53bb0cf9433abe8a4b0cbf8e859507ec365f387c6b27f2f300abb41b",
+  "auditExport": "transition-edgeblur-v1-0-0.audit.mp4"
+}

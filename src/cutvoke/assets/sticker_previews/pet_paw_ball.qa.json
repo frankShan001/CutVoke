@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_paw_ball",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f4c98c0e0907094d11e7084dcf82d723718650a3a7a972b998dc0ef6e04a5adb",
+  "previewSha256": "5ac40836dba38f525ab651e08ccbecd94e8f375ac66939341c90787439f22ace",
+  "preview": "pet_paw_ball.mp4",
+  "bytes": 4198,
+  "visiblePixels": 2166,
+  "changedPixels": 0,
+  "motionVisible": false
+}

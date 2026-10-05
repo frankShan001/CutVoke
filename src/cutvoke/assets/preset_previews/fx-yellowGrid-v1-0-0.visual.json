@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.yellowGrid",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.grid",
+  "params": {
+    "cell": 64,
+    "thickness": 3,
+    "opacity": 0.72,
+    "color": "#FFD60A"
+  },
+  "subcategory": "基础",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "黄色粗网格覆盖完整彩色原图，原图颜色和细节保留；属于明确的构图叠加而非全画面去色或反相。",
+  "method": "Compared untreated and treated frames at 0.20s and 0.95s from each real rendered preview, checked sibling covers and full MP4 decode; observations are specific to these geometric samples.",
+  "coverSha256": "dbf4d47b2c8929935376debea7b518ad16c2aa4d736004055818e01b424c758f",
+  "motionPreviewSha256": "fd98d3ab3d15945de238efad8d1e2f79532a9035e0dff9c19a6da85a207b2226",
+  "auditSha256": "468be1f9442ad833b54b7e5185ff684aea02284ff93d8a2e4f4d461937b0987b"
+}

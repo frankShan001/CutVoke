@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_terracotta_plaster",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "Terracotta plaster has subtle surface relief with an even warm tone; the crop contains no atlas divider.",
+  "sourceSha256": "5feb742b79f369e59e7f2d18d963ec0143fa48bc99d1aed2e608030266d8136d",
+  "previewSha256": "019b817405ce0ae6382a3ef42f8d4cb7589ca98db33266c6607765b9f4c228c9",
+  "auditSha256": "7f40fcd31e48191d1c5556623a843826dca9e6f6882305d54b7698547b6ee7ef"
+}

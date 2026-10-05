@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_prism_shard",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ad1c2103cee6276e8d73d0605d249093e809a74060a6146531823eaaf215f2ca",
+  "previewSha256": "e20bec11b5c447391150e2502ae01cf38242dfe51b5aef4246cc63d815894f20",
+  "preview": "glitch_prism_shard.mp4",
+  "bytes": 12112,
+  "visiblePixels": 7230,
+  "changedPixels": 0,
+  "motionVisible": false
+}

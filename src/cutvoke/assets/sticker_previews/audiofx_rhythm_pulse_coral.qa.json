@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_rhythm_pulse_coral",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "bb562ceb54ae897a0bd86df4118f32dd106b2a33320d14e8c476e5c8f8d3bf52",
+  "previewSha256": "4d0603f606afeff5cbb8f55c9fcb0dd3cb41c74a2aabe3b060b1ddbbbb7ce350",
+  "preview": "audiofx_rhythm_pulse_coral.mp4",
+  "bytes": 7160,
+  "visiblePixels": 3134,
+  "changedPixels": 0,
+  "motionVisible": false
+}

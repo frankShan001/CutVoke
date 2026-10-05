@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_rain_drops",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "705777f155d72206c525c39a5b09c913053dc5291805e7ee5148d20b155ef04d",
+  "previewSha256": "e265545fea86482bb6a5ecb19b49a47d4304828ae1fd9431b46e7948ba2a4c88",
+  "preview": "texture_v2_rain_drops.mp4",
+  "bytes": 5191,
+  "visiblePixels": 1394,
+  "changedPixels": 0,
+  "motionVisible": false
+}

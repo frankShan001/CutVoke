@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.monoBlocks",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "levels",
+    "value": 2.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "0daf1553c17988a071667cb2459eb7727cc968e22d4c08e21034c36c625283f9",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "0daf1553c17988a071667cb2459eb7727cc968e22d4c08e21034c36c625283f9",
+  "auditExport": "filter-monoBlocks-v1-0-0.audit.mp4"
+}

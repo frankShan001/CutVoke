@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.filter.colorEdge",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.edge",
+      "version": "1.0.0",
+      "params": {
+        "mode": "colormix",
+        "low": 0.0784314,
+        "high": 0.196078
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 56.623,
+  "maxSampledMeanRgbDifference": 56.623,
+  "coverSha256": "c749cd91b78b350889319574cfeba4012a625dee8d6041c8137b991f89242e63",
+  "previewSha256": "f7bdf80817b93d593de2c0b065a08d27d8cb47b49601ede34a4b84fe1fbc7eb7",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

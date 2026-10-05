@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_impact_gold",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex 视觉审阅",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切联系表和 320x180 浅深渐变实景合成联系表，并结合逐张机器应用/编辑/保存重开/撤销重做/入出场动画/MP4 预览与导出审计；只批准轮廓完整、边界干净、可见且彼此可辨的条目。",
+  "observation": "金色放射冲击星与小方粒边界清晰，中心亮点完整，浅深渐变上都有足够对比。",
+  "sourceSha256": "bd0ef7dd70ebc7a1b232e5c37ce45348fb10115f072a7359680611aafd2668ad",
+  "previewSha256": "79a773ec064bd8ec13bc4ae0d66f7eb5a3083f8ad8a6191c4dd875c3773888d3",
+  "auditSha256": "550f1efc4483f22211f741fcd2af65f1c5ab01c723d03d4e9717ebd6bb74d0f0"
+}

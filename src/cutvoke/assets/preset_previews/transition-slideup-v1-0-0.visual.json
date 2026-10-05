@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.slideup",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.slideup",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "运镜",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:46:00+08:00",
+  "observation": "新旧画面以水平硬边自下而上交接，中段下方先显示新画面；不同于平滑上移的混合边缘。",
+  "method": "Manual comparison of 320x180 rendered covers and five transition frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; zoom excluded for poor middle-frame composition",
+  "coverSha256": "ca1694c7ae853a07c7e712d43570be92f5c06f26e6b1e2a0fbacdda355dc80a5",
+  "motionPreviewSha256": "876ad20fa1c5c9790c517f1310be5522146047bf40e49dc35e27549f4003b56e",
+  "auditSha256": "73432e7b159f398ad78922b241c4a1054ebbe86b69266c9a881852fead1e9891"
+}

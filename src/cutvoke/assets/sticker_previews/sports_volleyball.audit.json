@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_volleyball",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "9a4e99893936bc21517973d423566e3bf6cebbb9a85268b73fc3b174da3aacd8",
+  "previewSha256": "acccc0ed4277721b0c0b6f482004a100d27792ee159b40468d5d3bc150206f4c",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1903,
+  "visiblePixels": 1222,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 976,
+    "steady_entry": 1222,
+    "steady_exit": 1222,
+    "exit": 976
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 976,
+      "withoutFade": 1222
+    },
+    "steady_entry": {
+      "withFade": 1222,
+      "withoutFade": 1222
+    },
+    "steady_exit": {
+      "withFade": 1222,
+      "withoutFade": 1222
+    },
+    "exit": {
+      "withFade": 976,
+      "withoutFade": 1222
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.123,
+    0.143
+  ],
+  "auditExport": "sports_volleyball.audit.mp4",
+  "auditExportSha256": "ef33bc6b375891cccabd8bf0aaa7b4703f6a4b76f08b3c7c2769d873f4f95021"
+}

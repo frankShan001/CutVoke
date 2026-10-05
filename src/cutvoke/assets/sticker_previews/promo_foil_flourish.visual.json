@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.promo_foil_flourish",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "observation": "The curved gold foil ribbon and its particle trail form one complete, clean silhouette.",
+  "sourceSha256": "f3a3ed8a24525a2f38e9380ca9b2d60518733925d50dbc04e1f8a2f335621afc",
+  "previewSha256": "0bce16aff0da6436181882f38f0041360dfac79469ce115be6010e0d77341a1a",
+  "auditSha256": "f070529e551e84e0ed045692778ab37aabffbe088b8cfcc8ee45fe35b671fddf"
+}

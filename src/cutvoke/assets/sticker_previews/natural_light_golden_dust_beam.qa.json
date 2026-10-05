@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_golden_dust_beam",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "b74ccabcea5219d753d1dc69ae4b8be6762752f8de972df9b8cea56403ab18f5",
+  "previewSha256": "a0a4f3df3d5414d69a5deb548c57ce23de81e4eef1c88bbfe972daa0a003a57e",
+  "preview": "natural_light_golden_dust_beam.mp4",
+  "bytes": 10833,
+  "visiblePixels": 14648,
+  "changedPixels": 0,
+  "motionVisible": false
+}

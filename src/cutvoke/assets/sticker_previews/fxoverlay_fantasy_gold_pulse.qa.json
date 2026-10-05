@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_gold_pulse",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3f50c2f242219a1fee365c79640336dffdac84751829f0fd8a2589099c5406ef",
+  "previewSha256": "09a57c087183b2a9b9940bfc4433f92cf322af75b24cf3748d0dfd9245a3daef",
+  "preview": "fxoverlay_fantasy_gold_pulse.mp4",
+  "bytes": 10285,
+  "visiblePixels": 6655,
+  "changedPixels": 0,
+  "motionVisible": false
+}

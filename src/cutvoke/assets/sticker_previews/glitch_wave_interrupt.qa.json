@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_wave_interrupt",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "756599f8f79333671a5282c9ddc39438c9b937b63f13cb0a10104d52af376ece",
+  "previewSha256": "c94cf82ddb780b9f6bba2262e8cde69f048bf8f85d8a4c92e6b72795c82530ce",
+  "preview": "glitch_wave_interrupt.mp4",
+  "bytes": 10653,
+  "visiblePixels": 5920,
+  "changedPixels": 0,
+  "motionVisible": false
+}

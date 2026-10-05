@@ -1,0 +1,37 @@
+{
+  "presetId": "cutvoke.preset.text.flower_neon",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.text",
+      "version": "1.0.0",
+      "params": {
+        "content": "创作标题",
+        "animIn": 300,
+        "animOut": 200,
+        "scale": 1.8,
+        "fontSize": 130,
+        "color": "#30f4ff",
+        "strokeColor": "#df24c8",
+        "strokeWidth": 6,
+        "bold": true,
+        "shadow": 8,
+        "y": 0.43,
+        "align": "center",
+        "background": "",
+        "x": 0.5,
+        "rotation": 0.0
+      }
+    }
+  ],
+  "durationSeconds": 1.5,
+  "firstLastMeanRgbDifference": 8.879,
+  "coverSha256": "2edcecf837642e903f7be1d315896bbbe01d17cf3c7a93d55032de20758b6ab8",
+  "previewSha256": "e9e35140a19a27997dd8ea6580cf83e10c9db2a62e6d2b664b817f63a6f5e1cf",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

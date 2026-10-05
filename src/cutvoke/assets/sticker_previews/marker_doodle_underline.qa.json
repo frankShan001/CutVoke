@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.marker_doodle_underline",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "23d12587292d6335a779b62fcb14a3026f5c140826fc10ede085eaa4e8cde782",
+  "previewSha256": "1d88c6b96802e977e15fc4c4477d2316e7d1aac87b7de222d57b2b31719091f1",
+  "preview": "marker_doodle_underline.mp4",
+  "bytes": 3578,
+  "visiblePixels": 868,
+  "changedPixels": 8,
+  "motionVisible": false
+}

@@ -12,6 +12,15 @@ export interface AssetReference {
   assetId: string;
   sourcePath: string;
   fingerprint?: string;
+  resourceRef?: ResourceReference;
+}
+
+export interface ResourceReference {
+  resourceId: string;
+  packId: string;
+  packVersion: string;
+  resourceVersion: string;
+  sha256: string;
 }
 
 export interface EffectInstance {
@@ -20,6 +29,8 @@ export interface EffectInstance {
   params: Record<string, unknown>;
   /** 旁路标记（effect.bypass 写入；false=保留在栈中但不参与渲染，缺省视为生效）。 */
   enabled?: boolean;
+  /** 效果在所属片段内生效的时间区间；缺省表示整个片段。 */
+  range?: { start: Rational; end: Rational };
 }
 
 /** 关键帧插值方式（与后端 Keyframe.VALID_INTERP 对齐）。 */
@@ -32,13 +43,26 @@ export interface Keyframe {
   interpolation: KeyframeInterpolation;
 }
 
+export interface SpeedCurve {
+  sourceDuration: Rational;
+  points: { at: Rational; speed: Rational }[];
+}
+
+export type FrameInterpolation = "none" | "motion";
+
 export interface Clip {
   id: string;
   assetRef: AssetReference;
+  role?: "sticker";
   timelineStart: Rational;
   timelineEnd: Rational;
   sourceStart: Rational;
   speed?: Rational;
+  speedCurve?: SpeedCurve | null;
+  /** Slow-motion frame synthesis; missing fields in older projects mean none. */
+  frameInterpolation?: FrameInterpolation;
+  /** 变速后是否保持源音频音高；旧工程缺省为 true。 */
+  preservePitch?: boolean;
   /** 相对音量有理数（1.0=原声，0=静音，可 >1）。clip.audio 设置。 */
   volume?: Rational;
   /** 淡入时长（秒，有理数）。clip.audio 设置。 */
@@ -47,6 +71,7 @@ export interface Clip {
   fadeOut?: Rational;
   effects?: EffectInstance[];
   linked?: boolean;
+  attachedToClipId?: string | null;
   hidden?: boolean;
   keyframes?: Record<string, Keyframe[]>;
 }
@@ -54,6 +79,7 @@ export interface Clip {
 export interface Track {
   id: string;
   kind: string; // "video" | "audio" | "text" | "caption"
+  role?: "sticker";
   clips: Clip[];
   locked?: boolean;
   muted?: boolean;
@@ -65,10 +91,18 @@ export interface Sequence {
   width: number;
   height: number;
   fps: Rational;
+  /** Opaque canvas fill shown through transparent pixels and uncovered regions. */
+  backgroundColor?: string;
   audioSampleRate?: number;
   tracks: Track[];
   captions?: Caption[];
   markers?: Marker[];
+}
+
+export interface CaptionWord {
+  text: string;
+  start: Rational;
+  end: Rational;
 }
 
 export interface Caption {
@@ -76,8 +110,14 @@ export interface Caption {
   text: string;
   start: Rational;
   end: Rational;
+  /** ASR word timings in absolute timeline time; absent/empty for ordinary captions. */
+  words?: CaptionWord[];
+  /** Karaoke word highlight color; empty/absent disables it. */
+  wordHighlightColor?: string;
   /** 样式字段（后端 caption.add/update 支持；缺省时后端给默认值）。 */
   fontSize?: number;
+  fontFamily?: "Noto Sans SC" | "Noto Serif SC";
+  lineSpacing?: number;
   color?: string;
   strokeColor?: string;
   strokeWidth?: number;
@@ -89,6 +129,10 @@ export interface Caption {
   animIn?: number;
   /** 出场动画（淡出）时长，毫秒；0=无。后端 caption.update 支持。 */
   animOut?: number;
+  animInStyle?: "fade" | "scale" | "typewriter" | "none";
+  /** Loop animation runs between entrance and exit; cycle duration is milliseconds. */
+  animLoopStyle?: "none" | "pulse" | "blink";
+  animLoopMs?: number;
   /** 画布几何（H01）：x 归一化 0~1，默认 0.5 居中。 */
   x?: number;
   /** 画布几何（H01）：y 归一化 0~1，默认 0.5 居中。 */
@@ -112,7 +156,9 @@ export interface Project {
   schemaVersion: string;
   projectId: string;
   revision: string;
+  favorites?: string[];
   sequence: Sequence;
+  sequences?: Sequence[];
 }
 
 /** 命令成功结果（CommandResult.to_dict()）。注意：不含 ok 字段。 */
@@ -129,6 +175,12 @@ export interface ChangedEntity {
   type: string;
   id: string;
   change: string;
+  reason?: string;
+  /** Dry-run impact for time-based entities; null marks creation or deletion. */
+  timelineRange?: {
+    before: { start: Rational; end: Rational } | null;
+    after: { start: Rational; end: Rational } | null;
+  };
 }
 
 /** 结构化错误（Error.to_dict() 的 error 字段）。 */

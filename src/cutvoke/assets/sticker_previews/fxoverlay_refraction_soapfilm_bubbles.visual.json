@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_soapfilm_bubbles",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "observation": "肥皂膜泡泡大小有层次，虹彩边缘明确且中心保持半透明，适合轻盈氛围叠加。",
+  "sourceSha256": "689644f92e671fa498237d0e2ca4d3d6892ca32917485428c704282e7e5596e1",
+  "previewSha256": "02f8788886bee71accd56e2601f8fa50d7531c311e89f7935ab602c0eeaca195",
+  "auditSha256": "53d250069509a21a2095bf3bad2293588a388c2d1016146eae3e25ccb715e360"
+}

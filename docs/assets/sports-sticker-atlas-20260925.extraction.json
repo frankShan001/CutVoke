@@ -1,0 +1,687 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "source": "sports-sticker-atlas-20260925.png",
+  "sourceSha256": "5a5aea858d502f5cbfc0fc033128cb6663597fc6d992d7c777fd0c9589647420",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4",
+  "extraction": "proportional cell crop, center square normalization, remove detached alpha islands below 32 pixels, resize to 256px with 32px transparent padding",
+  "contactSheet": "sports-sticker-contact-sheet-20260925.png",
+  "items": [
+    {
+      "index": 1,
+      "stem": "sports_basketball",
+      "name": "篮球",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "篮球",
+        "球类"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "normalizationCrop": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        102,
+        105,
+        242,
+        243
+      ],
+      "visiblePixels": 15091,
+      "removedIsolatedPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "96e70282741ad6c69fc43ee914d5bed7393c259c330b90f25c1a0bdc50b4359e"
+    },
+    {
+      "index": 2,
+      "stem": "sports_soccer_ball",
+      "name": "足球",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "足球",
+        "球类"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "normalizationCrop": [
+        314,
+        0,
+        627,
+        313
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        99,
+        106,
+        237,
+        242
+      ],
+      "visiblePixels": 14776,
+      "removedIsolatedPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "962a6a1afceecd8e3bbf7902aa3f214a36cc38dac80e0863d3002b0dd1762e9f"
+    },
+    {
+      "index": 3,
+      "stem": "sports_volleyball",
+      "name": "排球",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "排球",
+        "球类"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "normalizationCrop": [
+        627,
+        0,
+        940,
+        313
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        90,
+        105,
+        227,
+        241
+      ],
+      "visiblePixels": 14428,
+      "removedIsolatedPixels": 1,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "9a4e99893936bc21517973d423566e3bf6cebbb9a85268b73fc3b174da3aacd8"
+    },
+    {
+      "index": 4,
+      "stem": "sports_tennis_racket",
+      "name": "网球拍与网球",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "网球",
+        "球拍"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "normalizationCrop": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        72,
+        98,
+        208,
+        252
+      ],
+      "visiblePixels": 11958,
+      "removedIsolatedPixels": 6,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "1d4a0703acc0cb5606b4505074f16c82da40e634721b4e27754a5571e73df1ca"
+    },
+    {
+      "index": 5,
+      "stem": "sports_badminton",
+      "name": "羽毛球拍与羽毛球",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "羽毛球",
+        "球拍"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "normalizationCrop": [
+        0,
+        314,
+        313,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        97,
+        90,
+        237,
+        243
+      ],
+      "visiblePixels": 11099,
+      "removedIsolatedPixels": 3,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "1e1610b3dc9e6136761dddb274b5f0da4ea41d4de15b754c135d3fb39eaf2af2"
+    },
+    {
+      "index": 6,
+      "stem": "sports_baseball",
+      "name": "棒球与球棒手套",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "棒球",
+        "球棒"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "normalizationCrop": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        74,
+        86,
+        248,
+        234
+      ],
+      "visiblePixels": 13414,
+      "removedIsolatedPixels": 7,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "95b2e2840b3016fe8e8166d44bf0bde6df7ca68e00c8e5bd71d0174a2c369d7b"
+    },
+    {
+      "index": 7,
+      "stem": "sports_golf",
+      "name": "高尔夫球杆与球",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "高尔夫",
+        "球杆"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "normalizationCrop": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        87,
+        84,
+        222,
+        243
+      ],
+      "visiblePixels": 8652,
+      "removedIsolatedPixels": 5,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "86d0d18f7d6a90d9dbe5f8bad7c4a481f6c2621ce79bbf5cd9150d61b0b740c2"
+    },
+    {
+      "index": 8,
+      "stem": "sports_boxing_gloves",
+      "name": "拳击手套",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "拳击",
+        "手套"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "normalizationCrop": [
+        940,
+        314,
+        1253,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        71,
+        101,
+        236,
+        234
+      ],
+      "visiblePixels": 15924,
+      "removedIsolatedPixels": 4,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "d2ead3415bd698d5b0c5fa9db213b55314ab3eed854c723519c0d6038462de2c"
+    },
+    {
+      "index": 9,
+      "stem": "sports_trophy",
+      "name": "冠军奖杯",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "奖杯",
+        "冠军"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "normalizationCrop": [
+        0,
+        627,
+        313,
+        940
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        101,
+        75,
+        244,
+        231
+      ],
+      "visiblePixels": 14242,
+      "removedIsolatedPixels": 8,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "00ccec732a735643c7c52012f946f48a819feaf24e2d4de8277bb96c20f86100"
+    },
+    {
+      "index": 10,
+      "stem": "sports_medal",
+      "name": "运动奖牌",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "奖牌",
+        "荣誉"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "normalizationCrop": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        108,
+        74,
+        225,
+        229
+      ],
+      "visiblePixels": 12635,
+      "removedIsolatedPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "21ff37f9665c8e9a6e8706e24cb72d6a32d70f07b9cfb0afbc1ee02a9f3bb33e"
+    },
+    {
+      "index": 11,
+      "stem": "sports_running_shoe",
+      "name": "跑鞋",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "跑步",
+        "健身"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "normalizationCrop": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        73,
+        107,
+        238,
+        216
+      ],
+      "visiblePixels": 11559,
+      "removedIsolatedPixels": 8,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "a0b3fc408232fcefff0bb8f6aabd89b7e1de46c18359f7043eed76c2b65e7ce2"
+    },
+    {
+      "index": 12,
+      "stem": "sports_dumbbell",
+      "name": "哑铃",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "力量训练",
+        "健身"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "normalizationCrop": [
+        940,
+        627,
+        1253,
+        940
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        69,
+        114,
+        232,
+        204
+      ],
+      "visiblePixels": 10782,
+      "removedIsolatedPixels": 16,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "bcda0273402b85b232490c57d4c932f442eb6305c74a8f3236a7687c58a5b3ad"
+    },
+    {
+      "index": 13,
+      "stem": "sports_skateboard",
+      "name": "滑板",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "滑板",
+        "极限运动"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "normalizationCrop": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        98,
+        65,
+        235,
+        214
+      ],
+      "visiblePixels": 11715,
+      "removedIsolatedPixels": 3,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "de24447f7b36032ecd80545751efe6bb5959af1e8a2e40ed0c1d2ef4943678e0"
+    },
+    {
+      "index": 14,
+      "stem": "sports_surfboard",
+      "name": "冲浪板与浪花",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "冲浪",
+        "海浪"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "normalizationCrop": [
+        314,
+        940,
+        627,
+        1253
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        90,
+        60,
+        241,
+        220
+      ],
+      "visiblePixels": 14330,
+      "removedIsolatedPixels": 8,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "20c50b4590a2f9ed09a6be4ab9cc9b5ab9ecc492e49abc331373741c7b20f59d"
+    },
+    {
+      "index": 15,
+      "stem": "sports_whistle",
+      "name": "裁判哨子",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "裁判",
+        "哨子"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "normalizationCrop": [
+        627,
+        940,
+        940,
+        1253
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        86,
+        89,
+        239,
+        206
+      ],
+      "visiblePixels": 11531,
+      "removedIsolatedPixels": 1,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "c83623e9c143c89048ed30e3c49450652b5ed385fa00f32634b5bf7e13e66b6a"
+    },
+    {
+      "index": 16,
+      "stem": "sports_stopwatch",
+      "name": "运动秒表",
+      "subcategory": "运动",
+      "keywords": [
+        "运动",
+        "秒表",
+        "计时"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "normalizationCrop": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        91,
+        59,
+        212,
+        214
+      ],
+      "visiblePixels": 13649,
+      "removedIsolatedPixels": 2,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "2dded051960ad0c4d8471ea88872cdfadbff0545b066c5641856ba9e54233bf2"
+    }
+  ]
+}

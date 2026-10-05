@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_soccer_ball",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "黑白足球面片分布完整，圆形轮廓居中，外描边在棋盘底和合成画面中保持干净。",
+  "sourceSha256": "962a6a1afceecd8e3bbf7902aa3f214a36cc38dac80e0863d3002b0dd1762e9f",
+  "previewSha256": "4447449ab8d3b514b340898d92b5fa11d1d2c62d2f06a07a37d04fa1d4d55d10",
+  "auditSha256": "b807a6f346e22d23fd35fe108773077734341d161286040b14aede2766be82fa"
+}

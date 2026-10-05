@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.rgbSplit",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "offset",
+    "value": 7.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "9337f737f2bff85245d363d4913c999f37f49ab867132a43d4871e1c6102d670",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "9337f737f2bff85245d363d4913c999f37f49ab867132a43d4871e1c6102d670",
+  "auditExport": "fx-rgbSplit-v1-0-0.audit.mp4"
+}

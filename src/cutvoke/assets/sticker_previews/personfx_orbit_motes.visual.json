@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_orbit_motes",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "Sparse amber motes read as separate orbiting points, with restrained glow and no cell-edge bleed.",
+  "sourceSha256": "c6147177f104a9082d3c9634eb80ddebcc816dafd12103d4076ab1970c378609",
+  "previewSha256": "c94997091c60d03b1c19a351b1f0471ab3adc42c97f5bd6ec0036bb7c5eb488b",
+  "auditSha256": "f6b4c4a4c4c2777d3c924cbcb0ea0b41130a05a29b6390fa84c910429c9acd29"
+}

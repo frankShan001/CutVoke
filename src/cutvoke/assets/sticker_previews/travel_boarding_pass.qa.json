@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_boarding_pass",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f3f0e197c1631104426ea7f0af917a9adacefa5073fe8cffd0177e31f8ec89cd",
+  "previewSha256": "f7fa22389469766b6fb48e6fb32124154a44fff8910c6f98dc1ac639f92cfc69",
+  "preview": "travel_boarding_pass.mp4",
+  "bytes": 3832,
+  "visiblePixels": 1405,
+  "changedPixels": 0,
+  "motionVisible": false
+}

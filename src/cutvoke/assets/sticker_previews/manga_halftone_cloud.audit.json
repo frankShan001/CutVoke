@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_halftone_cloud",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "ec03cd3ce0f7c8cb7347ff7990081ff69d715a92a1b369be49e47abd9c1cefd4",
+  "previewSha256": "e92ea07299c8df20927067b3f618afba3b8cb16bc72a327cbe12e07dfd4ada87",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5402,
+  "visiblePixels": 4312,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2444,
+    "steady_entry": 4312,
+    "steady_exit": 4312,
+    "exit": 2444
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "manga_halftone_cloud.audit.mp4",
+  "auditExportSha256": "c637a708bf650280e636182042397f0bd772f146fa3cf371504850222ec22f69"
+}

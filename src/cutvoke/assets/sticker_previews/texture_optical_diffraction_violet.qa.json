@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_diffraction_violet",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d27b68d8d992249a29ba845512f2110e7bb8d18ba7bb42eb6acb07b005950bc1",
+  "previewSha256": "a04abdb0839fbaa7e6e3c49f93439339956cee4aafeeac209623c81d6fbdb2dd",
+  "preview": "texture_optical_diffraction_violet.mp4",
+  "bytes": 6884,
+  "visiblePixels": 3364,
+  "changedPixels": 0,
+  "motionVisible": false
+}

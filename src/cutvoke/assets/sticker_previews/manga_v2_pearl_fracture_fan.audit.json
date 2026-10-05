@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_pearl_fracture_fan",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "e15b9200ab6870c7b14eb1f2cf80161d883403830997eac4a490dc7e2a35cbac",
+  "previewSha256": "0230a137df163efae746eb1dc509b1a3600028a1c4209a4a8b9c8e7ed5a1c761",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3658,
+  "visiblePixels": 2774,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 448,
+    "steady_entry": 2774,
+    "steady_exit": 2773,
+    "exit": 451
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 448,
+      "withoutFade": 2774
+    },
+    "steady_entry": {
+      "withFade": 2774,
+      "withoutFade": 2774
+    },
+    "steady_exit": {
+      "withFade": 2773,
+      "withoutFade": 2774
+    },
+    "exit": {
+      "withFade": 451,
+      "withoutFade": 2774
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.065,
+    0.065
+  ],
+  "auditExport": "manga_v2_pearl_fracture_fan.audit.mp4",
+  "auditExportSha256": "eb93be30c2303626b0a54e0d35a1ff317f521d95bedc09d9fb8442a5178cea9c"
+}

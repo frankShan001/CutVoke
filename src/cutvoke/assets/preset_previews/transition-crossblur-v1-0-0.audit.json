@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.crossblur",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.245,
+  "exportSha256": "b15c2747c4ab42b1c664c4b95b6a298fc1a91df423668789ad47eeadccb738d6",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "b15c2747c4ab42b1c664c4b95b6a298fc1a91df423668789ad47eeadccb738d6",
+  "auditExport": "transition-crossblur-v1-0-0.audit.mp4"
+}

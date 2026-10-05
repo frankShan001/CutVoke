@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_badminton",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "蓝框羽毛球拍与白色羽毛球轮廓清楚，两件小物在同格内完整，棋盘底上没有邻格残片。",
+  "sourceSha256": "1e1610b3dc9e6136761dddb274b5f0da4ea41d4de15b754c135d3fb39eaf2af2",
+  "previewSha256": "97ea4c6cd1e982e9f1a9f9ab953214441a818b9485b2a10899207acbb14e2c92",
+  "auditSha256": "3671e9cb5df1c9f1e4a3fd09656090ef121bafbf33779127ef171be56fd18838"
+}

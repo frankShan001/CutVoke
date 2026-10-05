@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_vermilion_slashes",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "朱红斩击为数条倾斜锐角长线，方向一致，和其它爆裂/环绕形素材区分明确。",
+  "sourceSha256": "ee6ebcef0f2a58e6c6ad87bcb8a5062001ab60bbd3b1c1ab9bddbd15bfcab616",
+  "previewSha256": "5be83be433d309c0caa6bb514e37ad0ff9885bbbb6e81c00827006f1fa52babe",
+  "auditSha256": "c05a955e0524a655101a0d73deea1e3499ec307c04f280e0d29071787882b7d4"
+}

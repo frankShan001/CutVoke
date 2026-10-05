@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.animation.rhythmBounce",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.bounce",
+      "version": "1.0.0",
+      "params": {
+        "amplitude": 0.12,
+        "period": 1.4
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 14.931,
+  "maxSampledMeanRgbDifference": 14.833,
+  "coverSha256": "496405ddadf15e60a2afefb62efe5832d8edd9d4581c7290e8b5b202704f6f44",
+  "previewSha256": "a092819f52844ecb5f05ba6a4dde201348e99805895645a9752fbd504b40b9d1",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

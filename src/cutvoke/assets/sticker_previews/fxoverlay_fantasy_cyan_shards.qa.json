@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_cyan_shards",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "13d768fb4ca3920f2faae372ad5b6242356749acc0cb798671ef68ac2342f3be",
+  "previewSha256": "668c2954e1792a4d5564de4023ac929a255ac276c37afbe928f09d90433a3376",
+  "preview": "fxoverlay_fantasy_cyan_shards.mp4",
+  "bytes": 14096,
+  "visiblePixels": 8678,
+  "changedPixels": 0,
+  "motionVisible": false
+}

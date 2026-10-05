@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.boldPoster",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.grid",
+  "params": {
+    "cell": 88,
+    "thickness": 2,
+    "opacity": 1.0,
+    "color": "white"
+  },
+  "subcategory": "基础",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "修复后默认网格 opacity=1；海报量化块面保留，完整白色横纵网格清晰可读，不再仅剩十字短线；视频原素材淡入时也保持网格，静态图片各时点稳定。 实际库预览的 0–0.6s 为原图对照，0.7–1.0s 可清晰看到相应效果。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "5514540c17921a576a0b933e170aaf20841328437a1651a0917e62d046ee3f56",
+  "motionPreviewSha256": "d6aee9cdfd219ac394d26f211eba174b2f2f44149a2ee0ba018d24e939b75dc5",
+  "auditSha256": "d515b67728931b3f419472341a1995ced55f510efabf8a8ec587192169b6939f",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_fx_boldPoster.png",
+  "libraryReviewSheetSha256": "17c2cd7104cd9d1cf80a78f9a538d076ffe6b02b05afa13cb210127748ba10ec"
+}

@@ -1,0 +1,37 @@
+{
+  "presetId": "cutvoke.preset.text.flower_gold",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.text",
+      "version": "1.0.0",
+      "params": {
+        "content": "创作标题",
+        "animIn": 300,
+        "animOut": 200,
+        "scale": 1.8,
+        "fontSize": 148,
+        "color": "#ffd24a",
+        "strokeColor": "#281809",
+        "strokeWidth": 6,
+        "bold": true,
+        "shadow": 6,
+        "y": 0.43,
+        "align": "center",
+        "background": "",
+        "x": 0.5,
+        "rotation": 0.0
+      }
+    }
+  ],
+  "durationSeconds": 1.5,
+  "firstLastMeanRgbDifference": 4.362,
+  "coverSha256": "81813112b335555f23afcb8ede794f102c71529d31700e34646cc975bd15d1f4",
+  "previewSha256": "683e0f7823a359386380cbca7d99884197da19a83864c373d9e4e8711157f684",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

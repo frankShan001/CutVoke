@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_aura_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "bab3bfcaa16e25515f072eeb4a98c9a5643f80cb3445fc121d91a0fcc8a34d01",
+  "previewSha256": "e02ba3f0b0608f807ef15fdb18506914783e7e9e18fd8a7b5b37c0bd2ffd86ea",
+  "preview": "personfx_aura_amber.mp4",
+  "bytes": 10072,
+  "visiblePixels": 7356,
+  "changedPixels": 0,
+  "motionVisible": false
+}

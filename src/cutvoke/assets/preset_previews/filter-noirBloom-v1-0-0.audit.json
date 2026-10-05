@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.noirBloom",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 0.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.007,
+  "exportSha256": "23d100b7f397a5673a12c7909587c340e4522eed950517ad0516d0b48e97904c",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "23d100b7f397a5673a12c7909587c340e4522eed950517ad0516d0b48e97904c",
+  "auditExport": "filter-noirBloom-v1-0-0.audit.mp4"
+}

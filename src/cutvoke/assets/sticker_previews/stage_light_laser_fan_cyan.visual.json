@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_laser_fan_cyan",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "Cyan and violet rays converge at one clean source and remain separated at the fan edge.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "5be68efe9ac61efca85d421dbfa216bc42f259e82f9743d0ad601c55c6b89b2e",
+  "previewSha256": "93ba9f5e914f890993ea3d74859214379f300b6eb20aeecfc3cfee80c48c702d",
+  "auditSha256": "b111168a7e89c35b9b42b150af3c3135178662129e47b40d4031bcc7b20d0262"
+}

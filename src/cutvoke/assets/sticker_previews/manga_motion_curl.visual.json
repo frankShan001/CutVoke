@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_motion_curl",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项比对透明原图、浅色/深色合成底图与实际渲染器样片，检查造型辨识、格线串入、边缘裁切、透明通道和背景对比；本次不代表复杂实拍素材的商业观感验收。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿，单独复审，原批次记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿并复审，原 13 项记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另纳入 2026-09-24 的 2×2 高对比图集审核记录。",
+  "observation": "青色旋涡线形成连贯闭合运动方向，细线在深浅底图上均保持可见。",
+  "sourceSha256": "4d80acc995c13bdb138f583a48245cf80c779187feab9cf35fb9c93ca3fd997b",
+  "previewSha256": "0561cff734b51199e44b5749f9b3df916b8151134b1dc482ea3cc907fc165265",
+  "auditSha256": "1a1e7eeea5e3f6b35f9d2c3be10b9375c9e55055368272b5bbee0c900f3cd980"
+}

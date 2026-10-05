@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_candle_bloom",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Four warm candle glows form a distinct clustered bloom with feathered edges.",
+  "sourceSha256": "ff910b8d59af08c45414ce66cefbe8ed74f33285dc762082521a893d28082101",
+  "previewSha256": "f4bc5ecc1eaa94bc4c2e64fe3f5468c8776440f29442f6c353e70fe46c9d326b",
+  "auditSha256": "79142aa5e2be14d5f47a9786d2050f014904b2febb0b05c29af3a79dabab8df5"
+}

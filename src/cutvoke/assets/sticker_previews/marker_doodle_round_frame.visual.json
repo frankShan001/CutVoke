@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_round_frame",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Four coral rounded corner segments retain clear gaps and readable framing on both backgrounds.",
+  "sourceSha256": "82be943d868f3bde90f7a9d209267354900a60ac6adb210d9771072d96f63cde",
+  "previewSha256": "29da5c0e3462d576d8fa6b2550930287bf0b661c7c22a7c75e3803059f359942",
+  "auditSha256": "062604f69c6f928fa021eace1279e3530d7e8ad8f305cc7beb6e91f4332517a5"
+}

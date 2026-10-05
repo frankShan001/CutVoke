@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_dust_motes",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6be2cefe8fbdc7bcee4fd3050036e63318a4163ffc9504f257b9f00f66c29a39",
+  "previewSha256": "8909597ee05fdee6f9bc11d844b5f0bcad70598dca6906ad97802a95838912bc",
+  "preview": "texture_v2_dust_motes.mp4",
+  "bytes": 4563,
+  "visiblePixels": 2494,
+  "changedPixels": 0,
+  "motionVisible": false
+}

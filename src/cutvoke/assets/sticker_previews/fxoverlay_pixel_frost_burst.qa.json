@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_frost_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5a771cc427ad615a436cebcf8ea65a0013ddb71f0da1e2dc2729ddad7a78d831",
+  "previewSha256": "257c810af0c23b260f17b1a2520b16c46f8d25a3d7778179fda6231bf6e50333",
+  "preview": "fxoverlay_pixel_frost_burst.mp4",
+  "bytes": 12634,
+  "visiblePixels": 7836,
+  "changedPixels": 0,
+  "motionVisible": false
+}

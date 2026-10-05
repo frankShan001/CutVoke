@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_brain",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "脑部外形与沟回高光层次清楚，没有额外物件、伪字或背景块。",
+  "sourceSha256": "05c25780d17077424ef4caf63f47719cfb81f104cf41a4b35aa1d35c7412f168",
+  "previewSha256": "aafa0903855403fc518ae15d83a8991bd6b6245409ad57e15788b07c2032d9f0",
+  "auditSha256": "152235c0539802139bbfc5855440a7804544087277d6646eedb84ad539f0bbb0"
+}

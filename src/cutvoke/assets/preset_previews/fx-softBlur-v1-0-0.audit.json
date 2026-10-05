@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.softBlur",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "sigma",
+    "value": 8.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "ff2267015d3e72523bc17fd9baa000339d3ad112e8f94014cd80b1c94659f776",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "ff2267015d3e72523bc17fd9baa000339d3ad112e8f94014cd80b1c94659f776",
+  "auditExport": "fx-softBlur-v1-0-0.audit.mp4"
+}

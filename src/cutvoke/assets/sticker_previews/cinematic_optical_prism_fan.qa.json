@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_prism_fan",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "04b675ed9af4f7e5ef812be9eab7d637a0b5df8fe309ab08f53012aa0079081d",
+  "previewSha256": "79192849eecba14804cb392bc6295835ee44bb6a3e6294920c41a9e45d4b22c1",
+  "preview": "cinematic_optical_prism_fan.mp4",
+  "bytes": 6692,
+  "visiblePixels": 2204,
+  "changedPixels": 0,
+  "motionVisible": false
+}

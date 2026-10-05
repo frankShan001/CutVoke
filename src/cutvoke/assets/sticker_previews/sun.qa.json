@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sun",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d76d8b122cec896eab7da68131578221675cace50cf2fa666393037568c49564",
+  "previewSha256": "33bd68da571d18ed3962050f8259056e5eac6835979fb88f3d7d86c659f3be08",
+  "preview": "sun.mp4",
+  "bytes": 5024,
+  "visiblePixels": 2445,
+  "changedPixels": 0,
+  "motionVisible": false
+}

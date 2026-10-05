@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.pearlEdge",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "sigma",
+    "value": 10.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.515,
+  "exportSha256": "817989d0c8ba57d41eff317fefc8a6c7b426220606e81349708e6ba474988de7",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "817989d0c8ba57d41eff317fefc8a6c7b426220606e81349708e6ba474988de7",
+  "auditExport": "personFx-pearlEdge-v1-4-0.audit.mp4"
+}

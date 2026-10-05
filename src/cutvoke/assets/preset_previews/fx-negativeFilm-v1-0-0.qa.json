@@ -1,0 +1,32 @@
+{
+  "presetId": "cutvoke.preset.fx.negativeFilm",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.glow",
+      "version": "1.0.0",
+      "params": {
+        "intensity": 2.2
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.invert",
+      "version": "1.0.0",
+      "params": {
+        "strength": 1.0
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 113.652,
+  "maxSampledMeanRgbDifference": 113.652,
+  "coverSha256": "ee7858829ddc40f3f36257a3dee1313aed79c44a6ad2fa40092c2a45ad7bf43b",
+  "previewSha256": "8554e7680b8127f24136a0e2b516aef1cdb091ef6d3f6a9c74ff97bcb76d148c",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

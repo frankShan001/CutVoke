@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_stationery_cup",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5cecc39a3fbcb5ce9ff53b2ecd0b46bbf7240ee9fadc30346cb0fa4457e71025",
+  "previewSha256": "9fdb0b626a3fd44e22c1f02f8cbee0badea69c76bddea0a824e01f521da7a91c",
+  "preview": "learn_stationery_cup.mp4",
+  "bytes": 3975,
+  "visiblePixels": 1680,
+  "changedPixels": 0,
+  "motionVisible": false
+}

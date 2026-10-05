@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.backIn",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "d1acb37def8c5eb1641f8fab9375231ceee5b181b42b3bc20cf7b7d0c2757db2",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "d1acb37def8c5eb1641f8fab9375231ceee5b181b42b3bc20cf7b7d0c2757db2",
+  "auditExport": "animation-backIn-v1-0-0.audit.mp4"
+}

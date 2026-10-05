@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_cork",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器合成预览；只批准纹理特征清晰、边缘完整且缩略图可辨的素材。批准仅覆盖贴图本身的识别度，不代表复杂实拍成片验收。",
+  "observation": "软木颗粒和孔洞大小不一且清楚，暖棕色纹理辨识度高。",
+  "sourceSha256": "6e8f6e86bdbf9b78447e9b937157bb8aa487e0bb9611e86757f310047e47ebc8",
+  "previewSha256": "67831ae73558304bd4d2e8423c4d807a216167430dbc3efaeb11ac78c56d1249",
+  "auditSha256": "1e58c94cca7f81406fa3f0b2ffe80b53a43129034881d835ddc8de6f1e29d404"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.marker_doodle_zigzag",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "847586990d9605007050e1f7978c914422401c188294ce76648bb42397b7ea4d",
+  "previewSha256": "3a5c661f5b2096c3535f27e052a0bd7014d1028201a6a359417c23d06329b25d",
+  "preview": "marker_doodle_zigzag.mp4",
+  "bytes": 4353,
+  "visiblePixels": 1507,
+  "changedPixels": 0,
+  "motionVisible": false
+}

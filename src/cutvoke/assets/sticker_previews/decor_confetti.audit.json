@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_confetti",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "a34f5addd1f969f4a7ca683981d5487d5e17ed0f38671fb96eea6fde711323b6",
+  "previewSha256": "0ddc4b8e7ef025015baa5f03a79da4283a2a348085a92288b980116945faf860",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2516,
+  "visiblePixels": 1587,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1270,
+    "steady_entry": 1587,
+    "steady_exit": 1587,
+    "exit": 1270
+  },
+  "previewExportMeanRgbDifferences": [
+    0.134,
+    0.125
+  ],
+  "auditExport": "decor_confetti.audit.mp4",
+  "auditExportSha256": "94109268775f34639caf290d72d18603cce9bc3c455e149588ed9b31912c2627"
+}

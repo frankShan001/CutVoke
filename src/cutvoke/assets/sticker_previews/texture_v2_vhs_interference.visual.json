@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_vhs_interference",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "青紫水平干扰条有多组间隔，呈现录像扫描故障，区别于块状故障素材。",
+  "sourceSha256": "d63eb611bc23a0f8a3ac7bf296704dc7ee3127dced40d871e8b4c049494a9767",
+  "previewSha256": "9fd6327ea569ac0f6b55a30cdb3638edffede8aba7c481497f700f91a95d160f",
+  "auditSha256": "1b03555993a010e1f0b0ba075fbac159da2cec2f147c5c5110c235dd2870ece9"
+}

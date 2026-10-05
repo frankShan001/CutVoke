@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sun",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "黄色太阳圆心和八条短射线分布均匀，主体比例清楚。",
+  "sourceSha256": "d76d8b122cec896eab7da68131578221675cace50cf2fa666393037568c49564",
+  "previewSha256": "33bd68da571d18ed3962050f8259056e5eac6835979fb88f3d7d86c659f3be08",
+  "auditSha256": "3fa681c09b6c94d9444e094efa5ad222b56e47dea9ac4b78bcdd056724632758"
+}

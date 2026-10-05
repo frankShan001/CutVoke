@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.comboPullUp",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "19981fd98049753f07429a96899ac6ab9f25f912f865df49a6da8ed40b352246",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "19981fd98049753f07429a96899ac6ab9f25f912f865df49a6da8ed40b352246",
+  "auditExport": "animation-comboPullUp-v1-0-0.audit.mp4"
+}

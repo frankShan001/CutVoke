@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_creased_paper_sheet",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "fa4d34f35d33eb4fc25875b0ea37ea5124cecc28322a9d800d8339b20e5c6056",
+  "previewSha256": "63b922026fac4a77097309b28a5af6e6dcc0b9f10a943dd9e44b2709b5c5f4f2",
+  "preview": "printfx_creased_paper_sheet.mp4",
+  "bytes": 12909,
+  "visiblePixels": 16079,
+  "changedPixels": 0,
+  "motionVisible": false
+}

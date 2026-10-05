@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.fastEcho",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.echo",
+  "params": {
+    "frames": 3,
+    "decay": 0.9
+  },
+  "subcategory": "人物残影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A short, crisp duplicate trails the moving figure; the trail is tighter than the long and dream variants.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "4fb2ccda82bff17fe8e7b0fa120e4abd6977c8dab046a98ca1b3996e86b2be40",
+  "motionPreviewSha256": "ee25b81c17fc48fc85c6e01a43cec52c7059b883135482dd93cee11900023b62",
+  "auditSha256": "922633df4bdb69da03700ef4d0a6096062516eb42904d6d4c9114d4d78f992b4"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_podium_outline",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ff3ee74b35ead5369676de8b173c6d9a9e16986f553c8762f41e0c08c2567a8f",
+  "previewSha256": "dbb0a8708f48f0deb7d1e234d4c5ad5ac74ae7dea27afe4ad5c175ad35408066",
+  "preview": "promo_podium_outline.mp4",
+  "bytes": 6970,
+  "visiblePixels": 3965,
+  "changedPixels": 0,
+  "motionVisible": false
+}

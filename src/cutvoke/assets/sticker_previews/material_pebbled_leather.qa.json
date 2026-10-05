@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_pebbled_leather",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "9c33cb5ea39c934809c86f959a86267ff17e2815617488de83cffdd63b7a38aa",
+  "previewSha256": "1d80dc01a2b67807ed6b98b99684e9595026f5a27b0fc1a9a507a4f76244861b",
+  "preview": "material_pebbled_leather.mp4",
+  "bytes": 4834,
+  "visiblePixels": 3608,
+  "changedPixels": 0,
+  "motionVisible": false
+}

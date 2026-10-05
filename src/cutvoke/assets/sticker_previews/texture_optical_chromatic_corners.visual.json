@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_chromatic_corners",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "红色与青色角光分置对角，形成明确色差叠加效果，中心区域保持透明。",
+  "sourceSha256": "d3805c6d69e6e650e358ee886d3b79542924bc65ac88f811bd3c50a0eeb9ef87",
+  "previewSha256": "70e51d340d075fe876981479a86206de441be05fb33e1c411757091b26a71c44",
+  "auditSha256": "159654279d67cbff80bfeea2a0a98e14426b281ecf4397394e883ebe86d805f9"
+}

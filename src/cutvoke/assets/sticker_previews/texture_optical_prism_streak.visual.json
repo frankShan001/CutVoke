@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_prism_streak",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "彩虹棱镜斜向光束色带连续，主体集中且四周透明，不含格线。",
+  "sourceSha256": "edf499f6b1fdb5c404b99326efaa1c61ae20672c45dc38a611d54b21f63d6580",
+  "previewSha256": "4f19641b7b3aa62ce23ce9b0462bbf648b9c43855616831d1d18fa29376c9593",
+  "auditSha256": "c8401eb49b9c7c94729303bed62df15dc497fb766865340abfd8e92f609ca237"
+}

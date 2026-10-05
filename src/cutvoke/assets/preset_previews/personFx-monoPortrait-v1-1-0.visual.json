@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.monoPortrait",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.tint",
+  "params": {
+    "hue": 0,
+    "saturation": -1.0,
+    "intensity": -0.05,
+    "lightness": true
+  },
+  "subcategory": "人物色彩",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "The treated subject is visibly desaturated to silver monochrome compared with the original color half.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "9649c5726f0ede3ccbe9846e4b29d92fd5146652485144e1ef53851b50b54e7c",
+  "motionPreviewSha256": "d428820577de5ecb0d29dafbe875b1093a2f8c4133860d7285cf4bbd239f0713",
+  "auditSha256": "3f8ac1462922df171332ceb554ecee3cbef40691fbe832258421201f16b8b68a"
+}

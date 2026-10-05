@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_lightning_cluster",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5e00caae982a6744a2c669e1caffd5b540b32cff5f7f43d7efff9b9ed34ba036",
+  "previewSha256": "0be9f25f781722cc88163353863cc31b95417968843fad7a233b6ab2122f3268",
+  "preview": "manga_lightning_cluster.mp4",
+  "bytes": 5539,
+  "visiblePixels": 1698,
+  "changedPixels": 4,
+  "motionVisible": false
+}

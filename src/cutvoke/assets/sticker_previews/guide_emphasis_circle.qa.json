@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_emphasis_circle",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "45b2db34dc753cd5265bcba96de164df2f7d3f9b1a4788bf11c51bbefa9e2479",
+  "previewSha256": "7b43f68097e51a100558a6e4948693d02be36d023d4bc1e395aaba2dd318fd57",
+  "preview": "guide_emphasis_circle.mp4",
+  "bytes": 4896,
+  "visiblePixels": 1558,
+  "changedPixels": 0,
+  "motionVisible": false
+}

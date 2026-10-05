@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_teal_orbit_motes",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "dd9b81b914c27975bfd9faa918163f068af62dd5de78d12cb32932c8f7ee730f",
+  "previewSha256": "5917f20622fe176cf50ad95aa0123f5d375cfc09686b5f4b5e6833426685d400",
+  "preview": "fxoverlay_teal_orbit_motes.mp4",
+  "bytes": 9574,
+  "visiblePixels": 5854,
+  "changedPixels": 0,
+  "motionVisible": false
+}

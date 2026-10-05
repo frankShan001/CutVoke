@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_mica_trail",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "A sparse thin arc of warm-gold mica flecks leaves broad transparent space and remains distinguishable from the dense gold burst.",
+  "sourceSha256": "70e3123b8dc1e015cabfe7918cf77fe0263262608a3451df9ba941148270c74c",
+  "previewSha256": "dae88c4cdd0d3acc929265555a7b70dca82b4595a9b2134fc94673b43a2962eb",
+  "auditSha256": "3e2e634680b31fdb37264a0586b8ab1aa2e3da1df623539f918a36194b33925d"
+}

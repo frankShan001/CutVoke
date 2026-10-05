@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_velvet",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "534736d9fab06356202cea0b1efe8f84744a2985c6290000cecc065f5156cfef",
+  "previewSha256": "e264ae24aa4e3afdb43d497752bf116661cde48961ec1eed22d88c344dcee65d",
+  "preview": "material_velvet.mp4",
+  "bytes": 4731,
+  "visiblePixels": 4031,
+  "changedPixels": 0,
+  "motionVisible": false
+}

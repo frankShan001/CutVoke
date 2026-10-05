@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.bolt_orange",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e3f4001034c312f1cff0be7a4af899a51c12d8249f9f5168b909968600fccc43",
+  "previewSha256": "70269a1f4d9db901a7ff83688db77fcf06f1b3dd785dc3f28193487a7246abac",
+  "preview": "bolt_orange.mp4",
+  "bytes": 4290,
+  "visiblePixels": 1828,
+  "changedPixels": 0,
+  "motionVisible": false
+}

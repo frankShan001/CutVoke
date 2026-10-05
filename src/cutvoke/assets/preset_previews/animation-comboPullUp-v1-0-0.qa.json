@@ -1,0 +1,31 @@
+{
+  "presetId": "cutvoke.preset.animation.comboPullUp",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.comboPullUp",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "easing": "ease-out",
+        "distance": 0.3,
+        "primary": "zoomOut",
+        "secondary": "slideUp",
+        "fromScale": 0.8,
+        "toScale": 0.8
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 53.213,
+  "maxSampledMeanRgbDifference": 53.213,
+  "coverSha256": "5019291bdd370b933f1db5a41521b770a00c68ca958c32ae8b60681414af1ef9",
+  "previewSha256": "c36bfae3d99b9b1e18ab907a30c8a5e5e0e2ac4e2162e1a39e97437edcfb25a7",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

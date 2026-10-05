@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_waveform_teal_coral",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "56a37c8db31cb7e99df45c716ec50cfb39306fb6ec67b3f1f6ea7c2187f2e02d",
+  "previewSha256": "2c3166d88bde2c0067e86a9c4e1201e3df1d2f0b435b18828ee0bbf992f67109",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2570,
+  "visiblePixels": 1719,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1534,
+    "steady_entry": 1719,
+    "steady_exit": 1719,
+    "exit": 1529
+  },
+  "previewExportMeanRgbDifferences": [
+    0.226,
+    0.215
+  ],
+  "auditExport": "texture_waveform_teal_coral.audit.mp4",
+  "auditExportSha256": "023ddf50b4bcee571e658e45750cfdf2e5722de24042e1996aa700ff928a4dfb"
+}

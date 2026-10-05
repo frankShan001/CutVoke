@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_baseball",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "棒球棒、带红缝的白球和棕色手套均可辨认，组合未被裁切，缩放后边缘仍干净。",
+  "sourceSha256": "95b2e2840b3016fe8e8166d44bf0bde6df7ca68e00c8e5bd71d0174a2c369d7b",
+  "previewSha256": "85cb3e20725c7a0ee4edf5f718965c32f09e335db092ebd96f783d46e829a59a",
+  "auditSha256": "a8ddaefb996d5328298f3dafac90f60cf664a86192871bf84f2a165fe8172fc8"
+}

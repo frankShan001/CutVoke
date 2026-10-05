@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_caustics_turquoise",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "observation": "青绿色水纹焦散呈连续网状高光，在深浅渐变上均清晰；适合水面或折射叠加。",
+  "sourceSha256": "39976c2ec259b50ba64c5009769734b784a38c2ed6102b07400c338036954dd7",
+  "previewSha256": "dfffedfdfa2b6a774d1ff8443c267241b0e7559aca8c26f02b36ceff51805fc9",
+  "auditSha256": "34c1bfa83542b0343441be68647126281d0c8ebc763b4549e8169a3d770e51d8"
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_lime_spiral_motion",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "3347e906cde7e8ecf6c9454342275256cd24b07d558c5e673fc20f6a7cf58730",
+  "previewSha256": "65d8e46fcc2a0ef3f5b9b5adaaa79ca4453de0c66ced994b748c7401f35fb86f",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5036,
+  "visiblePixels": 3783,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3102,
+    "steady_entry": 3781,
+    "steady_exit": 3783,
+    "exit": 3104
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3102,
+      "withoutFade": 3784
+    },
+    "steady_entry": {
+      "withFade": 3781,
+      "withoutFade": 3784
+    },
+    "steady_exit": {
+      "withFade": 3783,
+      "withoutFade": 3784
+    },
+    "exit": {
+      "withFade": 3104,
+      "withoutFade": 3782
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.26,
+    0.255
+  ],
+  "auditExport": "manga_v2_lime_spiral_motion.audit.mp4",
+  "auditExportSha256": "4bce815c80a3974b2fbf72a617ce4e2e1d240f1ed118c372a742f2e4d36fdd92"
+}

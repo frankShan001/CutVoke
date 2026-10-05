@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_violet_halftone_wave",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "紫色半调由密至疏过渡成浪形，网点边缘透明，没有可见方形底板。",
+  "sourceSha256": "e89d7f72a952abf6fe46bbefb92d9443c02a973be5337a4a259d5b7c79297be3",
+  "previewSha256": "b70bcd6b1f630bf8b07d287fd0c210589b914c3b848cc80aad036861467e9d32",
+  "auditSha256": "bad8b25d281b38c4a5787930a257af96dff3051b4fb5e6ada01ded38003a216c"
+}

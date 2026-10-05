@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.chromaticPulse",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "offset",
+    "value": 6.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "0caa08dc9524912eb2189e700860df87233f469e0e1132fbb76e2beec5895d59",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "0caa08dc9524912eb2189e700860df87233f469e0e1132fbb76e2beec5895d59",
+  "auditExport": "fx-chromaticPulse-v1-0-0.audit.mp4"
+}

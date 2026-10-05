@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_frame_brackets",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a6a1210a08504f69e9f5d498371a59e6780760c42141c176eccf654ec9cf98eb",
+  "previewSha256": "bebf7d81e8dc4cabd6a1d38afc701ae826caaa3c80d5f64c1b2a11d112a40ccb",
+  "preview": "promo_frame_brackets.mp4",
+  "bytes": 6542,
+  "visiblePixels": 1772,
+  "changedPixels": 0,
+  "motionVisible": false
+}

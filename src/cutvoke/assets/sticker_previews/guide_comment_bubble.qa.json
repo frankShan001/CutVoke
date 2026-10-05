@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_comment_bubble",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3eecd39f66e64a1323af6df47e16f30f9559272fa13ae7955b4a39f7b7122d83",
+  "previewSha256": "28f1dbcad530c66a2664344050f77b00f68da63436eecf69e9e5588af63dfdb4",
+  "preview": "guide_comment_bubble.mp4",
+  "bytes": 4393,
+  "visiblePixels": 2531,
+  "changedPixels": 0,
+  "motionVisible": false
+}

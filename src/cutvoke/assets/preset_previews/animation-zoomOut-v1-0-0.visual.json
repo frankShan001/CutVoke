@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.zoomOut",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.zoomOut",
+  "params": {
+    "duration": 1.0,
+    "toScale": 0.55,
+    "easing": "ease-in"
+  },
+  "subcategory": "出场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "前半段稳定，最后一秒连续缩小到配置的0.55比例，长宽比例一致，没有缩放台阶。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "75ff69e92bd10344555b3ba95ad0978f683e7034109ad1323716f1f2d05fa020",
+  "motionPreviewSha256": "d736e549331d5c8de6e5d9ad7b0854ac9e70f963c6fb2a418b7d1a17e35345cf",
+  "auditSha256": "8e220f2375f5d7e023cac073bbd54f643532b3e15e7671fa1086218b4cc3e56d",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_zoomOut.png",
+  "libraryReviewSheetSha256": "672a5ac9ff3563e4bed090cb62c4a34d45a0e2127a48e4102e9c1f1378c66b27"
+}

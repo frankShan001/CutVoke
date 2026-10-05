@@ -1,0 +1,30 @@
+{
+  "presetId": "cutvoke.preset.animation.comboDriftLeft",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.comboDriftLeft",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "easing": "ease-out",
+        "distance": 0.3,
+        "primary": "zoomIn",
+        "secondary": "slideRight",
+        "fromScale": 0.8
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 51.648,
+  "maxSampledMeanRgbDifference": 51.648,
+  "coverSha256": "569b0b96882e3f2a92602df86d0ea11e2d50199163216672d3386393150159b8",
+  "previewSha256": "a589e5ddeaba761acc774e3cffd5cb0c8707f0327274d1d143db0c479732d1d6",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

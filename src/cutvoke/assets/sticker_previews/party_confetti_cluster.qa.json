@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_confetti_cluster",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2cb6b6aaf14b586987bf92bede4e73a1df2f981920265030be467c84bcba239f",
+  "previewSha256": "5b763184c5601ed182118dfdac463fab029a168a818aafd23e472f12db114cc1",
+  "preview": "party_confetti_cluster.mp4",
+  "bytes": 4737,
+  "visiblePixels": 1455,
+  "changedPixels": 0,
+  "motionVisible": false
+}

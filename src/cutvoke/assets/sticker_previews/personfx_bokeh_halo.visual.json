@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_bokeh_halo",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "Soft peach and lilac bokeh forms a distinct open halo without an opaque center or background.",
+  "sourceSha256": "3f87eae726f958551bef39ca5354c4d6d2932b15af652073354fec9c5dd452a7",
+  "previewSha256": "fc158d9a59d9e15c4ba6857bee3759b17152eda6dae7a3391dcbd2661312a9b2",
+  "auditSha256": "18d9bf45dbfa5b4e0e27ff6f91f5874be087474f529d2d378c951b0a21ba0121"
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_speedlines_white",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "a169eba011dbb389c55c568d1a58105cabc4bc502cee59341e0f8aff66155567",
+  "previewSha256": "bd8d016d57a9a833ab0387b28dd2dbe9431888a3802f2f52decb2a0aa6360958",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1070,
+  "visiblePixels": 665,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 55,
+    "steady_entry": 659,
+    "steady_exit": 663,
+    "exit": 55
+  },
+  "previewExportMeanRgbDifferences": [
+    0.018,
+    0.018
+  ],
+  "auditExport": "texture_speedlines_white.audit.mp4",
+  "auditExportSha256": "133f325a48fb426688dacfcdb0e8caece8dc55bedc70e7625f9b0a34da976375"
+}

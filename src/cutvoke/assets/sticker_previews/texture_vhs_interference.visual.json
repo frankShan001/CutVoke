@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_vhs_interference",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器浅底合成预览；只批准结构和颜色在缩略图中清楚、可与同类区分的素材。批准仅覆盖贴图本身的可辨识度，不代表复杂实拍成片验收。",
+  "observation": "多条青紫横向扫描干扰明显，缩略图能辨认为 VHS 横向信号纹理。",
+  "sourceSha256": "a4992207d75e45d76b5013a20db29c94b634a3d0ba92f32acb0c1b4e9cf6fab1",
+  "previewSha256": "b246516cd8ee39a9f6114b66c4363db584d68870d79473a0c7d050d09a9c809b",
+  "auditSha256": "603e8dd5594f0d25ab465b3cd7a8c875429ee53722576ee889228711f6fd27fe"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_dry_brush",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a72145b7b3cc58cc407221b22e9f690aa070664b96a93ae8d3dd38dff2d40c42",
+  "previewSha256": "f6e4f12c16891b7d5be45bc0bcd2ebc2647c78245602dd146469dcbcc4bae9ee",
+  "preview": "inkfx_dry_brush.mp4",
+  "bytes": 11364,
+  "visiblePixels": 11064,
+  "changedPixels": 0,
+  "motionVisible": false
+}

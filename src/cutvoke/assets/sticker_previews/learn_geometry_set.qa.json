@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_geometry_set",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "77f5407ea363ae464a748b76dc273d0e5ae98ecf0f0d364c41be95601c90d4fd",
+  "previewSha256": "000df253ad1b9212b826b9d459753c70847645a19a8983df4251035f2ade087c",
+  "preview": "learn_geometry_set.mp4",
+  "bytes": 4015,
+  "visiblePixels": 1208,
+  "changedPixels": 0,
+  "motionVisible": false
+}

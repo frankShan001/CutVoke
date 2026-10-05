@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_fireworks",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "df45368ca177de8134389041011b17fbb78cfbc333212506eb2eba5082b1f22f",
+  "previewSha256": "c5b24680185c49e04e287045422ec6d4a6a969648e604774e4a5d10cbe45c7ce",
+  "preview": "party_fireworks.mp4",
+  "bytes": 5259,
+  "visiblePixels": 2137,
+  "changedPixels": 0,
+  "motionVisible": false
+}

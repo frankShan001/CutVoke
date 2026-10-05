@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_halftone_gradient",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "a13f823ca9cf18db8dbabdc93e4a597f5b71d8089c2e0f32ab682ecc5c3b4f72",
+  "previewSha256": "c359fd0af5f3bb87d33b63de2d31fccbdb7b02557ebe8c9cd099988bdba68f01",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6557,
+  "visiblePixels": 5229,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 3038,
+    "steady_entry": 5229,
+    "steady_exit": 5229,
+    "exit": 3038
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3038,
+      "withoutFade": 5229
+    },
+    "steady_entry": {
+      "withFade": 5229,
+      "withoutFade": 5229
+    },
+    "steady_exit": {
+      "withFade": 5229,
+      "withoutFade": 5229
+    },
+    "exit": {
+      "withFade": 3038,
+      "withoutFade": 5229
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "printfx_halftone_gradient.audit.mp4",
+  "auditExportSha256": "c648445ae5aedf9d5859cb91d7497e4d573df2fb61a5728ede29418b51a76831"
+}

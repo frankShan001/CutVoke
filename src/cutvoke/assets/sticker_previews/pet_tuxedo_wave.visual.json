@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_tuxedo_wave",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "举起的爪子和黑白分区清楚；外轮廓留有透明边距，适合作为问候贴纸。",
+  "sourceSha256": "afe6fca11f3cc63ce5fe1e8f615d0a1dd21451fdb0186d88bf7e35413475ea79",
+  "previewSha256": "e81a00345f174e905e61bfd074facafacef0bfd72d71bdba551a272c4e138412",
+  "auditSha256": "3632858af99c954c5df7e01abd5de9cf865ed1a49af9dbf0eb0f15c077e7e14c"
+}

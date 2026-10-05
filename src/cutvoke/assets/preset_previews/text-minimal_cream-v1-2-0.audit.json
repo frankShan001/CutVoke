@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.minimal_cream",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 6647,
+  "exportSha256": "4ce527b7291c4e741ac9f03bc1dc0cb026c66453db4c7f2f86fc3c51a0f46342",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "4ce527b7291c4e741ac9f03bc1dc0cb026c66453db4c7f2f86fc3c51a0f46342",
+  "auditExport": "text-minimal_cream-v1-2-0.audit.mp4"
+}

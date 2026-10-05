@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_frost_edge",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "1c7383b3caa294c08cc602f59e598a8adf01367be4dcd71661ebc7cd57ed074b",
+  "previewSha256": "4f9a7910cf96c2eb02fd5aa6048c07b080b8488a0c64d14acb7d6edb1bb21865",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3810,
+  "visiblePixels": 2372,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 765,
+    "steady_entry": 2372,
+    "steady_exit": 2372,
+    "exit": 763
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 765,
+      "withoutFade": 2370
+    },
+    "steady_entry": {
+      "withFade": 2372,
+      "withoutFade": 2372
+    },
+    "steady_exit": {
+      "withFade": 2372,
+      "withoutFade": 2373
+    },
+    "exit": {
+      "withFade": 763,
+      "withoutFade": 2372
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.015,
+    0.015
+  ],
+  "auditExport": "texture_frost_edge.audit.mp4",
+  "auditExportSha256": "871302f5f7ffe3b9b08b6713b83fb1fe53a292a78e3c9878a8bfcd756a2b194e"
+}

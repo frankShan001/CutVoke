@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.vuslice",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.306,
+  "exportSha256": "609cb5072729f0a4ca6dbb4489e215184c8e45d4931e33aef40ea2a7d3305105",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "609cb5072729f0a4ca6dbb4489e215184c8e45d4931e33aef40ea2a7d3305105",
+  "auditExport": "transition-vuslice-v1-0-0.audit.mp4"
+}

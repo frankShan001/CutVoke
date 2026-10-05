@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_soft_snow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "柔焦雪点大小有层次，呈现散落飘雪，与锐利雪花素材区分明显。",
+  "sourceSha256": "0f0d092decea1790798648f452d29ab75bb9f17038234182feeb9c9d97830392",
+  "previewSha256": "22cb36f1ad5836cb397fefd0fff1b51e85dc19a53f5efc2c3b13ba3c8da80085",
+  "auditSha256": "03c01fae85b4baeaa82d3830a779286def3cb598d0a9faaccebf739e26bc7d16"
+}

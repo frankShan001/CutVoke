@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_teal_orbit_motes",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "dd9b81b914c27975bfd9faa918163f068af62dd5de78d12cb32932c8f7ee730f",
+  "previewSha256": "5917f20622fe176cf50ad95aa0123f5d375cfc09686b5f4b5e6833426685d400",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3312,
+  "visiblePixels": 2590,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 460,
+    "steady_entry": 2597,
+    "steady_exit": 2601,
+    "exit": 464
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 460,
+      "withoutFade": 2590
+    },
+    "steady_entry": {
+      "withFade": 2597,
+      "withoutFade": 2584
+    },
+    "steady_exit": {
+      "withFade": 2601,
+      "withoutFade": 2597
+    },
+    "exit": {
+      "withFade": 464,
+      "withoutFade": 2594
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.118,
+    0.119
+  ],
+  "auditExport": "fxoverlay_teal_orbit_motes.audit.mp4",
+  "auditExportSha256": "d654ca3266785fd1a9c1397d1dedc824b5cac92a9469a1dd2ee3706855218332"
+}

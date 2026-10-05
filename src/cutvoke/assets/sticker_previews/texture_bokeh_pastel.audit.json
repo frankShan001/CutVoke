@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bokeh_pastel",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "f4d1e2582f394d49fa6371fd60650ff5c10859ae12036ccd5bb9af4fa7e11f0f",
+  "previewSha256": "ad8ea34be8d53e478d88ae18dc00422ff0596fe1881f0790a810956843c2474a",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2197,
+  "visiblePixels": 1447,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 623,
+    "steady_entry": 1447,
+    "steady_exit": 1447,
+    "exit": 616
+  },
+  "previewExportMeanRgbDifferences": [
+    0.096,
+    0.096
+  ],
+  "auditExport": "texture_bokeh_pastel.audit.mp4",
+  "auditExportSha256": "d00ca2a40adda6d6172276402e2a25b1d47609507260aa82978acd24eeba6be6"
+}

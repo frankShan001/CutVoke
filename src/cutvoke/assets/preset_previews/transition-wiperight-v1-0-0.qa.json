@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.transition.wiperight",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.wiperight",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 90.742,
+  "maxSampledMeanRgbDifference": 90.742,
+  "coverSha256": "fb73c6610739b7eae2ed34e8991c207bb5363686271d6bbd73c59bc6bd6ad676",
+  "previewSha256": "3aed08b023601bdbebcbca055b84a303011bbdf25477c562500dae036c364c0c",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

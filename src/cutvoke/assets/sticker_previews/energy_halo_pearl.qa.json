@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.energy_halo_pearl",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "cbf343d0681579e507b5d66ab96d5a40125d1fdf4595947c1acc357de203c91e",
+  "previewSha256": "450f84ccb8046bab7f589da18ea7fd12a2263f5955447849ce9e10956847c828",
+  "preview": "energy_halo_pearl.mp4",
+  "bytes": 5939,
+  "visiblePixels": 1017,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_emerald_velvet",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "Deep emerald folds remain visible against the dark base and have no unexpected text or crop artifacts.",
+  "sourceSha256": "cced6d7fcac49ba878626b72a9edbb74b2a167daedbe36d814c09226fe1868c6",
+  "previewSha256": "dd4721c652006ebba941664d3746913e000ed90e9972a7f1f934e82f0311f118",
+  "auditSha256": "4e0c5359fcbcc5c2ed2d3a56313f14549213cae5e3573d152c49e07d52fa9bea"
+}

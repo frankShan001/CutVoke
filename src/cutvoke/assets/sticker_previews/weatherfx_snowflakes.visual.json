@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_snowflakes",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "晶形雪花轮廓清晰、分布疏朗，适合强调冬日雪花。",
+  "sourceSha256": "0572bbd3c47526276e20faa8d8f30f711a0f54cb462ea512652b76f212b68881",
+  "previewSha256": "ee8efc35e322c2b5f8e1fc97cd65158b42abd945597db73e7bace2d517313cb2",
+  "auditSha256": "6a7f473455eb01806baed34e668b5618314bcaf2887de1b2c5ff9c53f9f06bbd"
+}

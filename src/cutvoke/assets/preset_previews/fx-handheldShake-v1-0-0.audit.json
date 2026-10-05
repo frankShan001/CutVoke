@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.handheldShake",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "pixels",
+    "value": 8.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.171,
+  "exportSha256": "e4de1be6427d1a57f927f517b923222ff9015b84dcccb81fbd5f1804d7a9c29c",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "e4de1be6427d1a57f927f517b923222ff9015b84dcccb81fbd5f1804d7a9c29c",
+  "auditExport": "fx-handheldShake-v1-0-0.audit.mp4"
+}

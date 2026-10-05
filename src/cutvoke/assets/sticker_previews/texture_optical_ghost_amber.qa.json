@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_ghost_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "db5b7af5759efda8ec904156687dfe1a716d3cd2d0107ce72992026219ae2d75",
+  "previewSha256": "baab32854b3211f214ed9fb8a062bc96121eda33dc0f868995a5452e9b0fbb6d",
+  "preview": "texture_optical_ghost_amber.mp4",
+  "bytes": 7982,
+  "visiblePixels": 5768,
+  "changedPixels": 0,
+  "motionVisible": false
+}

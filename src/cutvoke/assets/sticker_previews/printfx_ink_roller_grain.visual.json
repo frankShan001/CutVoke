@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.printfx_ink_roller_grain",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-26T22:26:35+08:00",
+  "method": "Inspected the original 4x4 RGBA atlas, transparent crop contact sheet, and all 16 actual composited sticker previews on light and dark neutral backgrounds at normal display size. Checked cell identity, crop boundaries, alpha edges, silhouette/readability at sticker scale, and uniqueness; subtle dust and scratch assets were judged at their intended low opacity.",
+  "observation": "宽幅柔和墨色颗粒从边缘渐散，在浅色合成画面上能看见而不会形成硬矩形。",
+  "sourceSha256": "f5a7f32fd11e0da9547e9fe9c664fe7c4362f7eb50ac3b94dd72a778e0b96d83",
+  "previewSha256": "cf4c9e7f5db82624c1e1b08411c6db6218d3e6a88eb9d60a49f4c500c23151be",
+  "auditSha256": "d1229f58c2e01e6fb1f0d197e20ae35122de8e425b8a01cfa96110afdea7bbbe"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_beat_stars_cyan",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "A cyan curve links differently sized stars into a clear directional beat trail.",
+  "sourceSha256": "e2f379b1aa0ebd33fae3ce6880c2e57f05b32258bd3a1b42d7997c5457013c85",
+  "previewSha256": "918c3263be254d88374114988148e4ae6765c14f9b4c7f9aa3a4a3555acea78e",
+  "auditSha256": "0a8c871a3fb1d77de6833ead352ae247e53038f8a4e02423d32122690b1e69d9"
+}

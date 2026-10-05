@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_forest_rays",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "08b41c4a190ce25a8e478e696531150a47d4373b7a21faa9e89b556b18be3dce",
+  "previewSha256": "e8dc8821c45f7e72c7037c418696b11dbf09040d026025bdf1c4e788aae89bc9",
+  "preview": "natural_light_forest_rays.mp4",
+  "bytes": 10919,
+  "visiblePixels": 18048,
+  "changedPixels": 0,
+  "motionVisible": false
+}

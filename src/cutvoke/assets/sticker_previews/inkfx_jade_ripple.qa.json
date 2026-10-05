@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_jade_ripple",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7822c858ab047a113a2943de018b4d15417150cc74b2b19c45fd8fc73a369909",
+  "previewSha256": "9bdb59aa763cbe0e0885eb22cf5bdb7a8f1d76e392477b76d67de34d7e408e5a",
+  "preview": "inkfx_jade_ripple.mp4",
+  "bytes": 18993,
+  "visiblePixels": 15935,
+  "changedPixels": 0,
+  "motionVisible": false
+}

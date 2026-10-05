@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_rainbow",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "5b121bfa6c89e0c69ae89b659974c36f03b2d6e117557d70f7480a7748794c36",
+  "previewSha256": "407e5863999ac08f891bfcbb14963d30b999e07b49ef755a0df3d72dccf7e80d",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4066,
+  "visiblePixels": 2874,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2085,
+    "steady_entry": 2874,
+    "steady_exit": 2874,
+    "exit": 2088
+  },
+  "previewExportMeanRgbDifferences": [
+    0.264,
+    0.264
+  ],
+  "auditExport": "decor_rainbow.audit.mp4",
+  "auditExportSha256": "ffaab00734ef27b3c26828b0b9b72eb6189ee9fb6692ac11042167ae35d5843f"
+}

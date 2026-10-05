@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.star_burst",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "金色放射星芒中心与尖角完整，浅深背景均可辨。",
+  "sourceSha256": "14cd0b2ffbbe5cbd61a13645a748ffb854439219e0c205a6053d3520c672731d",
+  "previewSha256": "0d61d183c6bd0828fa16f3f645aae4d455d2c67de006fa988ec1801972e921bd",
+  "auditSha256": "74220c0a60b2ea6e5812c40d5af76ffe4d4fc4c00d5c61f4d018e6ae0ede46cc"
+}

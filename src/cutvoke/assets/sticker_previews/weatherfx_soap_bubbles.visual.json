@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_soap_bubbles",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "透明虹彩泡泡具有高光边缘，背景透过主体，不含实色底板。",
+  "sourceSha256": "0b657a391c134b9e043d08cf5021c0aa10cc39d7b014a51b1eda4c0f623fa785",
+  "previewSha256": "b31f6c3ad8d512e0d0294a8b7fe0af59f45bb0b326aed1d022614cffc7fa52c9",
+  "auditSha256": "2ac858dd971df9db7412db198437c4c5ef20c0614991e831cf436e1c93b98fb0"
+}

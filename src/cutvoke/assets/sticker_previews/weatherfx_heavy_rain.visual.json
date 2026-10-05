@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_heavy_rain",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "密集白色斜向雨丝形成明显雨幕，与细雨素材的密度差异清楚。",
+  "sourceSha256": "0fdd979f961ac84310684be862d5993d02bec86b3d09013a16f972fc7a8d351b",
+  "previewSha256": "bdaca0524dd7caa1e6aa57c091b042dde8e638c401d5bc0817ecbaaccc7dc20c",
+  "auditSha256": "677397b4befecef7a24f6b63fc66f1a37043b29c6d9661621bc4afa0fc7f581e"
+}

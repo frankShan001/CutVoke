@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_mosaic_tiles",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "6c6c2c51dddad5e717a2ea9ebf3cb52359f7e9f54728a55049c491e5ad04a52b",
+  "previewSha256": "0a371bd36caba83153a56bb048f0113358bbb5ccf00fe62576965489d50f01f7",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4364,
+  "visiblePixels": 3189,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2903,
+    "steady_entry": 3189,
+    "steady_exit": 3189,
+    "exit": 2903
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2903,
+      "withoutFade": 3189
+    },
+    "steady_entry": {
+      "withFade": 3189,
+      "withoutFade": 3189
+    },
+    "steady_exit": {
+      "withFade": 3189,
+      "withoutFade": 3189
+    },
+    "exit": {
+      "withFade": 2903,
+      "withoutFade": 3189
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.288,
+    0.289
+  ],
+  "auditExport": "glitch_mosaic_tiles.audit.mp4",
+  "auditExportSha256": "6ef851ba7eb21e9e84d1b604c57c5046237a035455c06370e725975eb1f06329"
+}

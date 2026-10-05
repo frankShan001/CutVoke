@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_crown",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "abef4daed6fad17dd8bc1422b293c23ac865ca36d064142061f0009eb5c2f477",
+  "previewSha256": "972d20a3fa0ba94b8209fcc6bceecb4e874959c5a8a5e7dbcc58ec5195916f43",
+  "preview": "reaction_crown.mp4",
+  "bytes": 4463,
+  "visiblePixels": 2178,
+  "changedPixels": 0,
+  "motionVisible": false
+}

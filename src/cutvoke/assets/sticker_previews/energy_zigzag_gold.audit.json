@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.energy_zigzag_gold",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "8e699c1af5c2e4197e4fc0ed987b3d454757601c0469d8b1b20ee5a608218560",
+  "previewSha256": "74e9e93e9fa7dca4507bf80581cfed78dffdbf8b6ee67ba6a5b850dc3f739dcf",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2147,
+  "visiblePixels": 1535,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 783,
+    "steady_entry": 1535,
+    "steady_exit": 1535,
+    "exit": 783
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 783,
+      "withoutFade": 1535
+    },
+    "steady_entry": {
+      "withFade": 1535,
+      "withoutFade": 1535
+    },
+    "steady_exit": {
+      "withFade": 1535,
+      "withoutFade": 1535
+    },
+    "exit": {
+      "withFade": 783,
+      "withoutFade": 1535
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.079,
+    0.086
+  ],
+  "auditExport": "energy_zigzag_gold.audit.mp4",
+  "auditExportSha256": "6a4b8cff75affaf743622b17357ff3e5123e549242daab9322072cff92519031"
+}

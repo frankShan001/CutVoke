@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_location_pin",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Coral pin silhouette and white-centered target remain distinct; the navy contour reads on both backgrounds.",
+  "sourceSha256": "f830a8cef869cd30ba8f99b6377112414e87b9c61ad7e2919531528d610aca0b",
+  "previewSha256": "4a44f3e04e451773f7c353a8381ef70ca8dd07d576dc1301393a156f3e5ab390",
+  "auditSha256": "d8be624458f718d1c20a1205b2a9b36302d2b0f28724baffe042f41ec6f1cc12"
+}

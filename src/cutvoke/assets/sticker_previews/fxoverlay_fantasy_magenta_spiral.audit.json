@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_magenta_spiral",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "60372ff66814099ddb4ca207ddb91c556e108fa84a98a3834feaadd59162c231",
+  "previewSha256": "5d7a949d836c72e8e150b4a48c37ca60dd915d491b72492f1892347b74f375b6",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 15015,
+  "visiblePixels": 13945,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 6928,
+    "steady_entry": 13927,
+    "steady_exit": 13938,
+    "exit": 6893
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 6928,
+      "withoutFade": 13957
+    },
+    "steady_entry": {
+      "withFade": 13927,
+      "withoutFade": 13957
+    },
+    "steady_exit": {
+      "withFade": 13938,
+      "withoutFade": 13932
+    },
+    "exit": {
+      "withFade": 6893,
+      "withoutFade": 13939
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.794,
+    0.861
+  ],
+  "auditExport": "fxoverlay_fantasy_magenta_spiral.audit.mp4",
+  "auditExportSha256": "19dc2af4a66f73b36877714edbb25d986c3e34767b0f3f3c8e7bc48b58dc7571"
+}

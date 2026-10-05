@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_prism_arc",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Rainbow arc is a distinct single curved highlight with gently fading alpha edges.",
+  "sourceSha256": "904292eb3a1c7f5b69b3931e15b7f306d2a8a8262c8bf9e5a73bb39a7a08eb87",
+  "previewSha256": "a898c34475d375c32edba7c9a1d4f5512f9b03032a50264488e30efd58fae35d",
+  "auditSha256": "2c812d605199946a56d0b834736c011f9a64f7997b367a0887774854148a76bb"
+}

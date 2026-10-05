@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.coolPortrait",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.tint",
+  "params": {
+    "hue": 145,
+    "saturation": 0.88,
+    "intensity": 0.02,
+    "lightness": true
+  },
+  "subcategory": "人物色彩",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "The treated half shifts visibly toward cool cyan and blue-green compared with the original.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "1d952662a67a2de59c5432231737cb0ef6e77cdc57fab71b9bcb2ae8ac7664f7",
+  "motionPreviewSha256": "59b057bb8acb032ab1f7a76b9941be144cfc2ff7cd95bc70430531196c381902",
+  "auditSha256": "541a5553bf0cd81a0273ef4080752ee96d227f8b33de666758ae4268b619662f"
+}

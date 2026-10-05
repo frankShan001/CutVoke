@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.decor_impact_burst",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed transparent 4x3 artwork contact sheet and actual composited frames for every sticker, compared silhouettes, palette, use and edge quality against the existing sticker library.",
+  "observation": "黄色中心和蓝红多层锯齿构成漫画冲击形，适合强调爆点；与普通星芒的轮廓和用途不同。",
+  "sourceSha256": "27d647973977627f176d4f6dae20dc31a21326c71b347cce8b79efb433604917",
+  "previewSha256": "1855fe0e17a9868a40884cc49a80b33450601d6a4dcc60f3af117ebb4d663e4a",
+  "auditSha256": "54e3d247e551e425d39b91da711ed001e01a79dccf6d19b3a3b57bfd8a501e58"
+}

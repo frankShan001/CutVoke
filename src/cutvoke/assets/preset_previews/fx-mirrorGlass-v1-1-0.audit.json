@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.mirrorGlass",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "axis",
+    "value": "vertical"
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "f6750ce76ba11ed77ff70222127909ff6c1be4116a94c5400e5c195d1d1713f3",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "f6750ce76ba11ed77ff70222127909ff6c1be4116a94c5400e5c195d1d1713f3",
+  "auditExport": "fx-mirrorGlass-v1-1-0.audit.mp4"
+}

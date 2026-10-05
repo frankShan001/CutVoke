@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.fadeIn",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "242fc7224e221ebf4bc74d8ce940b89d17fe4f7eba51ba57b747bb386d16f004",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "242fc7224e221ebf4bc74d8ce940b89d17fe4f7eba51ba57b747bb386d16f004",
+  "auditExport": "animation-fadeIn-v1-0-0.audit.mp4"
+}

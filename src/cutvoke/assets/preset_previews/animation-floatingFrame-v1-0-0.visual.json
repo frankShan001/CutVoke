@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.floatingFrame",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.float",
+  "params": {
+    "amplitude": 0.08,
+    "period": 1.6
+  },
+  "subcategory": "循环",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "圆门上下往返漂浮，运动与换向逐帧衔接，四周安全覆盖，没有黑边闪现。 已实际复看重建库预览的12个时间点，图形运动清楚，画幅和边缘正常。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "82d882e6cd45631f7b09651897d78ff7f2ebb51c798d93e0bbc785b3dd26153a",
+  "motionPreviewSha256": "2f7702f09e8c293e36708753c239419c68a28d6c4234ce0ee147e235ed6de529",
+  "auditSha256": "127413723c145b38b34d9e32b9a66e90ed29b70baac2be118566026774a787ea",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_floatingFrame.png",
+  "libraryReviewSheetSha256": "0d9dfe14fdad7ad3887f0952c6f463e36b7e4949811c6574d61b37324cf07335"
+}

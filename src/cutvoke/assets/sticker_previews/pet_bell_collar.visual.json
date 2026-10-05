@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_bell_collar",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "红色项圈、金属扣和铃铛形状清楚，透明背景边缘完整。",
+  "sourceSha256": "8960dfba02feb53940582e807eeae106ec5929ba48e089e8ff755b292e951b59",
+  "previewSha256": "2424ccc921674b66fb1fb130b531d65898f6a2b8d07689802015b301c921fabf",
+  "auditSha256": "f1f18ea10b9f88d6661db276d966035b7e5a110b85625b207637385610c0c13c"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_frost_edge",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "observation": "Blue-white crystals cluster along the upper-left edge and leave clear space toward the center.",
+  "sourceSha256": "1c7383b3caa294c08cc602f59e598a8adf01367be4dcd71661ebc7cd57ed074b",
+  "previewSha256": "4f9a7910cf96c2eb02fd5aa6048c07b080b8488a0c64d14acb7d6edb1bb21865",
+  "auditSha256": "862e24026471a7d15b47abd9ae0d85919054f912edf1f6e0af659eec91a7187b"
+}

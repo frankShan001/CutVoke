@@ -17,6 +17,70 @@ type Gesture =
   | { mode: "scale"; id: string; cx: number; cy: number; startDist: number; startScale: number }
   | { mode: "rotate"; id: string; cx: number; cy: number; startAngle: number; startRot: number };
 
+type CaptionTextRun = { text: string; active: boolean };
+
+function captionWordRuns(text: string, words: Caption["words"], playhead: number): CaptionTextRun[] {
+  if (!words?.length) return [{ text, active: false }];
+  const runs: CaptionTextRun[] = [];
+  let cursor = 0;
+  for (const word of words) {
+    const token = word.text.trim();
+    if (!token) continue;
+    const start = text.indexOf(token, cursor);
+    if (start < 0) return [{ text, active: false }];
+    if (start > cursor) runs.push({ text: text.slice(cursor, start), active: false });
+    const end = start + token.length;
+    runs.push({
+      text: token,
+      active: rationalToSecs(word.start) <= playhead && playhead < rationalToSecs(word.end),
+    });
+    cursor = end;
+  }
+  if (cursor < text.length) runs.push({ text: text.slice(cursor), active: false });
+  return runs.length ? runs : [{ text, active: false }];
+}
+
+function typewriterCharacterLimit(caption: Caption, playhead: number): number {
+  const characterCount = Array.from(caption.text.replace(/\r\n/g, "\n"))
+    .filter((character) => character !== "\n").length;
+  const start = rationalToSecs(caption.start);
+  const durationMs = Math.max(1, Math.round(
+    (rationalToSecs(caption.end) - start) * 1000,
+  ));
+  const typewriterMs = Math.min(Math.max(0, caption.animIn ?? 0), durationMs);
+  if (caption.animInStyle !== "typewriter" || typewriterMs <= 0 || characterCount <= 1) {
+    return characterCount;
+  }
+  const steps = Math.min(characterCount, Math.max(2, Math.floor(typewriterMs / 33)));
+  const elapsedMs = Math.max(0, (playhead - start) * 1000);
+  const stepIndex = Math.max(0, Math.min(
+    steps - 1,
+    Math.floor(elapsedMs * steps / typewriterMs),
+  ));
+  return Math.min(characterCount,
+    Math.ceil(characterCount * (stepIndex + 1) / steps));
+}
+
+function limitCaptionRuns(runs: CaptionTextRun[], characterLimit: number): CaptionTextRun[] {
+  let remaining = Math.max(0, characterLimit);
+  const visible: CaptionTextRun[] = [];
+  for (const run of runs) {
+    let text = "";
+    for (const character of run.text) {
+      if (character === "\n") {
+        if (remaining > 0) text += character;
+        continue;
+      }
+      if (remaining <= 0) break;
+      text += character;
+      remaining -= 1;
+    }
+    if (text) visible.push({ text, active: run.active });
+    if (remaining <= 0) break;
+  }
+  return visible;
+}
+
 const norm = (c: Caption): Geom => ({
   x: c.x ?? 0.5,
   y: c.y ?? 0.5,
@@ -32,7 +96,7 @@ export function CaptionCanvasOverlay() {
     : null;
   const captions = (project?.sequence.captions || []).map((caption) => (
     draft?.captionId === caption.id
-      ? { ...caption, text: draft.text, start: draft.start, end: draft.end }
+      ? { ...caption, text: draft.text, start: draft.start, end: draft.end, words: [] }
       : caption
   ));
   const projW = project?.sequence.width || 1920;
@@ -43,7 +107,6 @@ export function CaptionCanvasOverlay() {
   const [frameSize, setFrameSize] = useState({ width: 0, height: 0 });
   const [gesture, setGesture] = useState<Gesture | null>(null);
   const [preview, setPreview] = useState<Geom | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
 
   // Agent 在拖拽过程中取得租约时，立即丢弃尚未提交的本地预览；否则用户松开鼠标
   // 后可能试图把锁前的位置写回。后端仍是最终的权限边界。
@@ -76,7 +139,9 @@ export function CaptionCanvasOverlay() {
     const now = state.playhead;
     const start = rationalToSecs(c.start);
     const end = rationalToSecs(c.end);
-    const fadeIn = c.animIn ? Math.min(1, Math.max(0, ((now - start) * 1000) / c.animIn)) : 1;
+    const fadeIn = c.animIn && (c.animInStyle ?? "fade") === "fade"
+      ? Math.min(1, Math.max(0, ((now - start) * 1000) / c.animIn))
+      : 1;
     const fadeOut = c.animOut ? Math.min(1, Math.max(0, ((end - now) * 1000) / c.animOut)) : 1;
     return Math.min(fadeIn, fadeOut);
   };
@@ -93,13 +158,21 @@ export function CaptionCanvasOverlay() {
     if (Object.keys(update).length > 1) await updateCaption(dispatch, state, update);
   };
 
+  const requestSelection = (captionId: string) => {
+    const dirtyCaptionId = state.captionDraftPreview?.captionId;
+    const blocked = dirtyCaptionId === state.selectedCaptionId
+      && !!dirtyCaptionId && captionId !== state.selectedCaptionId;
+    dispatch({ type: "CAPTION_SELECTION_SET", captionId });
+    return !blocked;
+  };
+
   const beginMove = (e: ReactPointerEvent, c: Caption) => {
     if (state.editLock) return;
+    if (!requestSelection(c.id)) return;
     e.stopPropagation();
     const rect = overlayRef.current?.getBoundingClientRect();
     if (!rect) return;
     const g = norm(c);
-    setActiveId(c.id);
     setPreview(g);
     moveStartRef.current = { pointerId: e.pointerId, x: e.clientX, y: e.clientY };
     setGesture({
@@ -117,13 +190,13 @@ export function CaptionCanvasOverlay() {
 
   const beginScale = (e: ReactPointerEvent, c: Caption) => {
     if (state.editLock) return;
+    if (!requestSelection(c.id)) return;
     e.stopPropagation();
     const rect = overlayRef.current?.getBoundingClientRect();
     if (!rect) return;
     const g = norm(c);
     const cx = rect.left + g.x * rect.width;
     const cy = rect.top + g.y * rect.height;
-    setActiveId(c.id);
     setPreview(g);
     setGesture({ mode: "scale", id: c.id, cx, cy, startDist: Math.max(8, Math.hypot(e.clientX - cx, e.clientY - cy)), startScale: g.scale });
     (e.currentTarget as Element).setPointerCapture(e.pointerId);
@@ -131,13 +204,13 @@ export function CaptionCanvasOverlay() {
 
   const beginRotate = (e: ReactPointerEvent, c: Caption) => {
     if (state.editLock) return;
+    if (!requestSelection(c.id)) return;
     e.stopPropagation();
     const rect = overlayRef.current?.getBoundingClientRect();
     if (!rect) return;
     const g = norm(c);
     const cx = rect.left + g.x * rect.width;
     const cy = rect.top + g.y * rect.height;
-    setActiveId(c.id);
     setPreview(g);
     const startAngle = (Math.atan2(e.clientY - cy, e.clientX - cx) * 180) / Math.PI;
     setGesture({ mode: "rotate", id: c.id, cx, cy, startAngle, startRot: g.rotation });
@@ -186,20 +259,32 @@ export function CaptionCanvasOverlay() {
         // ASS 先按 sequence 高度把字号从 1080p 基准缩放并取整，再随画布显示比例缩放。
         const renderFontSize = Math.max(8, Math.round((c.fontSize ?? 32) * projH / 1080));
         const baseFont = renderFontSize * canvasScale;
-        const stroke = Math.max(0, c.strokeWidth ?? 2) * canvasScale;
-        const shadow = Math.max(0, c.shadow ?? 1) * canvasScale;
+        const outputScale = projH / 1080;
+        const stroke = Math.max(0, c.strokeWidth ?? 2) * outputScale * canvasScale;
+        const shadow = Math.max(0, c.shadow ?? 1) * outputScale * canvasScale;
         const align = c.align === "left" || c.align === "right" ? c.align : "center";
         const anchorX = align === "left" ? "0" : align === "right" ? "-100" : "-50";
+        const textRuns = c.wordHighlightColor && c.words?.length
+          ? captionWordRuns(c.text, c.words, state.playhead)
+          : [{ text: c.text, active: false }];
+        const visibleTextRuns = limitCaptionRuns(
+          textRuns, typewriterCharacterLimit(c, state.playhead),
+        );
         return (
           <div
             key={c.id}
-            className={`caption-overlay__box${c.id === activeId ? " caption-overlay__box--active" : ""}`}
+            className={`caption-overlay__box${c.id === state.selectedCaptionId ? " caption-overlay__box--active" : ""}`}
+            role="button"
+            tabIndex={0}
+            aria-label={`选择字幕：${c.text.slice(0, 48)}`}
+            aria-pressed={c.id === state.selectedCaptionId}
             style={{
               left: `${g.x * 100}%`,
               top: `${g.y * 100}%`,
               transform: `translate(${anchorX}%, -100%) rotate(${g.rotation}deg) scale(${g.scale})`,
               transformOrigin: `${align} bottom`,
               fontSize: `${baseFont}px`,
+              fontFamily: c.fontFamily || "Noto Sans SC",
               textAlign: align,
               justifyContent: align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center",
               backgroundColor: c.background || "transparent",
@@ -208,6 +293,13 @@ export function CaptionCanvasOverlay() {
             onPointerDown={state.editLock ? undefined : (e) => beginMove(e, c)}
             onPointerMove={state.editLock ? undefined : onMove}
             onPointerUp={state.editLock ? undefined : onUp}
+            onClick={() => requestSelection(c.id)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                requestSelection(c.id);
+              }
+            }}
           >
             <span
               className="caption-overlay__text"
@@ -215,13 +307,20 @@ export function CaptionCanvasOverlay() {
                 color: c.color || "#ffffff",
                 fontWeight: c.bold ? 700 : 400,
                 WebkitTextStroke: stroke ? `${stroke}px ${c.strokeColor || "#000000"}` : undefined,
+                // Draw the fill last so a small preview's outline does not cover it.
+                paintOrder: "stroke fill",
                 // ASS Shadow 是无模糊的右下偏移，颜色取 BackColour；保持预览与导出一致。
                 textShadow: shadow ? `${shadow}px ${shadow}px 0 ${c.background || "#000000"}` : "none",
               }}
             >
-              {c.text}
+              {visibleTextRuns.map((run, index) => (
+                <span key={`${index}-${run.text.slice(0, 8)}`}
+                  style={run.active ? { color: c.wordHighlightColor } : undefined}>
+                  {run.text}
+                </span>
+              ))}
             </span>
-            {c.id === activeId && !state.editLock ? (
+            {c.id === state.selectedCaptionId && !state.editLock ? (
               <>
                 <span
                   className="caption-overlay__handle caption-overlay__handle--scale"

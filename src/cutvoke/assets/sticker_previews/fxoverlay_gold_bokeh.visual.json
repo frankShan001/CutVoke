@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_gold_bokeh",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "Scattered warm-gold bokeh discs read as soft particles rather than a single burst; the light particles need a darker background.",
+  "method": "Inspected the rendered transparent artwork on split dark and light neutral panels; machine workflow audit hashes are pinned.",
+  "sourceSha256": "9a00da6bcea2cd8aff90f1b84b8038e6689b96546d42630f55fb09d7bfa9dbe8",
+  "previewSha256": "19fe109d0b4846a76057d23107e49e53ca6d7b668b17762ea4ff643f19af55c3",
+  "auditSha256": "0eef297c37233ba808c0ccc016d55a3bc370289ac0427151f17beb447a91b91a"
+}

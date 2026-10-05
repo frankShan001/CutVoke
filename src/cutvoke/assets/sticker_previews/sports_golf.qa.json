@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_golf",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "86d0d18f7d6a90d9dbe5f8bad7c4a481f6c2621ce79bbf5cd9150d61b0b740c2",
+  "previewSha256": "c816006f378b0254ab5c3b37ce86eacaceab8d0db292b4f15613c2ceba37b909",
+  "preview": "sports_golf.mp4",
+  "bytes": 3300,
+  "visiblePixels": 508,
+  "changedPixels": 0,
+  "motionVisible": false
+}

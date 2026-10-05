@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_anamorphic_amber",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "金色横向宽银幕光晕在明暗渐变背景上轮廓清楚，中心星点与两侧柔光过渡平滑。",
+  "sourceSha256": "4b502576defb533e9023374007e0cec8f560b0a36ae85aa91c5ab87851863bf8",
+  "previewSha256": "65f193f50a1cab3f030086bae4a1ea0f0b8d790116bdb4b23daf7b78c046c927",
+  "auditSha256": "ddfe16279644bb69eb88efe0ffddaeaa6cfc7b0673ce21f345456f328bae3594"
+}

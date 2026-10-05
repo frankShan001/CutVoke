@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.gift_float",
+  "version": "1.1.1",
+  "effectId": "cutvoke.anim.float",
+  "params": {
+    "amplitude": 0.12,
+    "period": 1.8
+  },
+  "reviewer": "Codex direct visual inspection",
+  "reviewedAt": "2026-10-02T20:24:22.486028+00:00",
+  "method": "Direct inspection of before/after alpha artwork, every library frame, and actual Tide project frames; dynamic 120-frame sequence inspected",
+  "observation": "蝴蝶结顶部圆弧与描边完整。已目视动态库预览全部30帧、潮汐工程全部120帧及10时刻大图；礼物平滑上下浮动，无形变、间歇消失或边缘裁切。",
+  "sourceSha256": "93bc27d7fe36abf0e0a3dba8372135c241c683841fbab610baba5e3c78dc9db6",
+  "previewSha256": "f3d09f35ead7bf17a25715688905254776a371ae04fd359de5654f24d6f304ae",
+  "auditSha256": "ffea541a86968f2793a94c9772a9fa41a36561e525d3d7c8816aac7d237148ac"
+}

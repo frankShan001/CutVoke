@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.wiperight",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.wiperight",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "擦除",
+  "reviewer": "Codex manual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "A hard vertical boundary travels from left to right.",
+  "method": "Compared five aligned frames at 0.55, 0.65, 0.75, 0.85 and 0.95 seconds for all eight 擦除 transitions; inspected contact covers and the rendered motion sequence. Distinct direction or geometry is visible for each candidate. Technical apply/edit/reload/undo/export reports were checked separately.",
+  "coverSha256": "fb73c6610739b7eae2ed34e8991c207bb5363686271d6bbd73c59bc6bd6ad676",
+  "motionPreviewSha256": "3aed08b023601bdbebcbca055b84a303011bbdf25477c562500dae036c364c0c",
+  "auditSha256": "cbfa2cf44be40ec8b92a95be9dafbb3f0d4e50c0c0d95eb7baf75ff328dcf74f"
+}

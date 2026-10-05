@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_crossing_lasers",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "Cyan and magenta beams cross cleanly and keep distinct color edges.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "a9e328ad507b5f3ef361afbc3964615c16f6079fffe24cdc339b3decfa47edf4",
+  "previewSha256": "c5ac6c78fdad9966ae56c072d92a70f1cf168c720cb66c787340825d2aa0afdd",
+  "auditSha256": "e7cd6b46383d16ba841afd4b6f94c817b4e8c3528acf0d60d6cf799f714af017"
+}

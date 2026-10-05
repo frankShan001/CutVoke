@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_storm_flash",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Violet-blue flash web has a clear central burst and branching lines; it reads differently from the blue water.",
+  "sourceSha256": "22e45ca14d1ff6d248b18658dda9672fb1b5869d8ac7c68df5af98370b48f992",
+  "previewSha256": "1504e0522cdc9dfedaf4b903573c95acf3d6f9af76263e6f9f286b85e5e9f12e",
+  "auditSha256": "105488b25d05486243a788ba26e1ea41b7a477ab4ab59d8d5dee184804086e34"
+}

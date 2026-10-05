@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_dumplings",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The three dumplings retain separate edges and clear green garnish without crop leakage.",
+  "sourceSha256": "1c59ebf6477e2f5eee3e8ffa20611dce417063f869cb4424a54c446e92c77dad",
+  "previewSha256": "f310a21bae0b1230c3790ebfe6ef0141dc1b4684c1ccba74c085f7ade874cdb7",
+  "auditSha256": "3ad950494090d9b071f2926ae09fa21707ce116d96a8656d589098bdcca35da0"
+}

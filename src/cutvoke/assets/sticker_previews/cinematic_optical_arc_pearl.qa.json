@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_arc_pearl",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d91f47335995156371037bc4d4a23bdbc0928ecac5c8c2a1db230a2f425d64f5",
+  "previewSha256": "e55f61def7acf7c3479e8d1519c134802178e9e018ecc67b8ac3350aa38bedcb",
+  "preview": "cinematic_optical_arc_pearl.mp4",
+  "bytes": 7556,
+  "visiblePixels": 2389,
+  "changedPixels": 0,
+  "motionVisible": false
+}

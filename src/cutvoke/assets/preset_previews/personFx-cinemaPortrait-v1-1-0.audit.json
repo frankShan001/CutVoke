@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.cinemaPortrait",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "hue",
+    "value": -7.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.94,
+  "exportSha256": "d65bc65d5d7cff6af0a7c87c72c50dc8cb2e72366d2620cbe79f1aa9c89d3cd8",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "d65bc65d5d7cff6af0a7c87c72c50dc8cb2e72366d2620cbe79f1aa9c89d3cd8",
+  "auditExport": "personFx-cinemaPortrait-v1-1-0.audit.mp4"
+}

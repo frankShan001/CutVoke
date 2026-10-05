@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_yarn_ball",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6acf3990ae9a619bfdb82fc9923d69406663ec85f4bcf6234b9e2f820669c130",
+  "previewSha256": "267d78f3c093505cd0983683a57ad4ff2d7091a99e564431624f2e70a781a514",
+  "preview": "pet_yarn_ball.mp4",
+  "bytes": 4463,
+  "visiblePixels": 2020,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_microscope",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "目镜、物镜和底座都完整；白色机身边缘在浅色预览底上仍然清楚。",
+  "sourceSha256": "41c8481156972827c1c4f01893215a3717950e55020dd45a5200c3f09d546ac0",
+  "previewSha256": "35495be12dd7f8b23386e4b97b788f6bce951d368938b1fbaa45341e51877fbc",
+  "auditSha256": "35356951c0bec538dd29cfbfbea263df6800a3114d27218cf72a7f22d9c0c99c"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_frosted_glass",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4d9267d5bcd7bf3e42e0f0885ea000f5102c72bc6cde8641ee4b89036e1002b9",
+  "previewSha256": "43a481a68a01150ac201e79dbcddac242581fb98f64d6f982867a7e25272f417",
+  "preview": "material_frosted_glass.mp4",
+  "bytes": 9530,
+  "visiblePixels": 10491,
+  "changedPixels": 0,
+  "motionVisible": false
+}

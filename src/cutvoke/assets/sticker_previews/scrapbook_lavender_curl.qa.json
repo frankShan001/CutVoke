@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_lavender_curl",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4a6c8c0456a117fccca87633dbb2aa6b39e11054f66f8f0696cc7b5cb0a05fa1",
+  "previewSha256": "57d86c2fc102df5aca24a232f8ecb684d88851543351d38a6a05b73ea9b3fd0a",
+  "preview": "scrapbook_lavender_curl.mp4",
+  "bytes": 2907,
+  "visiblePixels": 374,
+  "changedPixels": 0,
+  "motionVisible": false
+}

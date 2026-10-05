@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.neonEdge",
+  "version": "1.4.0",
+  "effectId": "cutvoke.person.halo",
+  "params": {
+    "sigma": 10,
+    "hueShift": 178,
+    "saturation": 2.0,
+    "opacity": 1.0
+  },
+  "subcategory": "人物轮廓",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A compact cyan glow follows the moving outline and is brighter and tighter than the sea-green halo.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "1f3a49ac102d83aadd1f2972c87cb390c741a9a01d10a5138604babf7235277f",
+  "motionPreviewSha256": "c710be9dbf894c45b5a99056a775886906f56dabeb5cdaebbd183a8ffe4742da",
+  "auditSha256": "488dcb6adf542522cd4473067a8c5133fa4dfc2068761f815e670fe35ffb361e"
+}

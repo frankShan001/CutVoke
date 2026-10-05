@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.smoothleft",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.676,
+  "exportSha256": "96907d76d18d95f67947d767dfa6cb1d61809d545f440b6cbdefd57a0df692e4",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "96907d76d18d95f67947d767dfa6cb1d61809d545f440b6cbdefd57a0df692e4",
+  "auditExport": "transition-smoothleft-v1-0-0.audit.mp4"
+}

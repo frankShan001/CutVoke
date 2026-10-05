@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_frost_edge",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "冰枝从两侧角落生长且保留画面中心，能作为边缘寒霜覆盖层。",
+  "sourceSha256": "731b75cc87684f85760b373888d1d0ac0398854a0f114a254d8d78fb0156efac",
+  "previewSha256": "e5292bb45760be6fe229f06a0936ae36fd274fa67294c395e7cd56d44ed4205d",
+  "auditSha256": "d788292d23daa67f238303fcce39eedb1f32854cba33e93bb8f285019bda76d6"
+}

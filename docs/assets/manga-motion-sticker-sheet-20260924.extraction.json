@@ -1,0 +1,466 @@
+{
+  "source": "manga-motion-sticker-sheet-20260924.png",
+  "sourceSha256": "afcac80a895c60e6d7a570faa0f67004fba988262789accbd8de66196a8d1fe4",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "normalizationCrop": [
+    0,
+    0,
+    314,
+    314
+  ],
+  "layout": "4x4",
+  "extraction": "proportional cell crops, centered square padding, alpha preserved",
+  "items": [
+    {
+      "stem": "manga_impact_burst",
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBounds": [
+        16,
+        14,
+        313,
+        303
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 27178,
+      "visiblePixelsWithin12pxBoundary": 34,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "f62cf66a68bc88eeac1d1aa24c988117ecde33430e81bcf5abd74939e4e253a8"
+    },
+    {
+      "stem": "manga_speedline_cobalt",
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "visibleBounds": [
+        10,
+        15,
+        303,
+        297
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 23998,
+      "visiblePixelsWithin12pxBoundary": 9,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "2bef8aba707d3af8d8b8fc0eee23b843a2f20603afe1e61b4bad8dca51259252"
+    },
+    {
+      "stem": "manga_lightning_cluster",
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "visibleBounds": [
+        35,
+        8,
+        284,
+        297
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 20247,
+      "visiblePixelsWithin12pxBoundary": 16,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "5e00caae982a6744a2c669e1caffd5b540b32cff5f7f43d7efff9b9ed34ba036"
+    },
+    {
+      "stem": "manga_halftone_cloud",
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "visibleBounds": [
+        8,
+        24,
+        302,
+        300
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 43243,
+      "visiblePixelsWithin12pxBoundary": 11,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "ec03cd3ce0f7c8cb7347ff7990081ff69d715a92a1b369be49e47abd9c1cefd4"
+    },
+    {
+      "stem": "manga_motion_curl",
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "visibleBounds": [
+        28,
+        17,
+        304,
+        301
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 40262,
+      "visiblePixelsWithin12pxBoundary": 54,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4d80acc995c13bdb138f583a48245cf80c779187feab9cf35fb9c93ca3fd997b"
+    },
+    {
+      "stem": "manga_slash_trails",
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "visibleBounds": [
+        24,
+        3,
+        300,
+        293
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 26519,
+      "visiblePixelsWithin12pxBoundary": 94,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "115fcfa806e7a6f53e93050985cb3a735cb1446ad4b6873b5ee739c731a53d30"
+    },
+    {
+      "stem": "manga_emphasis_rays",
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "visibleBounds": [
+        8,
+        6,
+        296,
+        302
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 14656,
+      "visiblePixelsWithin12pxBoundary": 58,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "464f27cddd7220564068542d35ed8ac0407055d13bfacce84b77a111bd1fb52d"
+    },
+    {
+      "stem": "manga_shockwave_shards",
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "visibleBounds": [
+        10,
+        4,
+        299,
+        300
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 27393,
+      "visiblePixelsWithin12pxBoundary": 37,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "7f8e04ad97f44704d8bdaa332d2821f9879ba414254617a9552b16ffa7e7d2ea"
+    },
+    {
+      "stem": "manga_ink_splatter",
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "visibleBounds": [
+        21,
+        17,
+        300,
+        299
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 20727,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "7044a58f89c53af51fecee8e7bfc00c7c860ca667ea115da30cb805b981150a8"
+    },
+    {
+      "stem": "manga_shock_rings",
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "visibleBounds": [
+        10,
+        7,
+        307,
+        303
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 29464,
+      "visiblePixelsWithin12pxBoundary": 45,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "3b11f7886c113157116463a3b061add02bb067d9f1cd9afca6b2abd569b0088a"
+    },
+    {
+      "stem": "manga_motion_arc",
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "visibleBounds": [
+        17,
+        29,
+        296,
+        289
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 17453,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "66b63a714339cc402b445cbf77040797af02e67b075219f7b1b7e427534da445"
+    },
+    {
+      "stem": "manga_wind_ribbons",
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "visibleBounds": [
+        18,
+        35,
+        301,
+        290
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 27519,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "415e255d87ebc156e3aa404dd73dcc1d4ca1597e9babbe3388b7298ca4afddb0"
+    },
+    {
+      "stem": "manga_crosshatch_burst",
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "visibleBounds": [
+        24,
+        11,
+        298,
+        291
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 32720,
+      "visiblePixelsWithin12pxBoundary": 2,
+      "alphaExtrema": [
+        0,
+        245
+      ],
+      "sha256": "5d6864ada4455c130c86d886c98141018a5cfc475597e25b5f526d13cfa8be8d"
+    },
+    {
+      "stem": "manga_energy_trail",
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "visibleBounds": [
+        15,
+        7,
+        305,
+        301
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 20338,
+      "visiblePixelsWithin12pxBoundary": 50,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "949272c431b515cf70065fb81420264f611bb4ec299ea29d66154ab0575b9ad4"
+    },
+    {
+      "stem": "manga_spark_burst",
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "visibleBounds": [
+        11,
+        1,
+        288,
+        294
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 16430,
+      "visiblePixelsWithin12pxBoundary": 55,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "b0300f1d48788274cce66c50dfb51c8169ffab5c529bfa0c0d2843d8fce50527"
+    },
+    {
+      "stem": "manga_glass_streaks",
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "visibleBounds": [
+        11,
+        1,
+        297,
+        296
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 28844,
+      "visiblePixelsWithin12pxBoundary": 111,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "1fe8565e5f5aeb0c838b3d6531e80a7bfaca4431c839c59e1f8a0dccbe045160"
+    }
+  ]
+}

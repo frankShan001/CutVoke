@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.blinkBeat",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "amplitude",
+    "value": 0.45
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "388fb92a98b3216262bb0b7cb09e590a30b7206f583f5a216f510a599c98063e",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "388fb92a98b3216262bb0b7cb09e590a30b7206f583f5a216f510a599c98063e",
+  "auditExport": "animation-blinkBeat-v1-0-0.audit.mp4"
+}

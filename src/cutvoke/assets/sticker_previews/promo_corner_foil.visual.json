@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.promo_corner_foil",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "observation": "The gold corner accent has one crisp vertical-to-horizontal turn and a complete star flare.",
+  "sourceSha256": "af7625d9ad08c93dfa18570d0fd5f0c9404e0122a121b2444dda8ed86cb5ffc5",
+  "previewSha256": "ce523e96fe313e3a98c4ac96f68c395261df107c7d669d80e416cba326fed846",
+  "auditSha256": "66daa586f55cbe3c4cfe44f71f308e7d404be533e0357e31b9481f922857b1df"
+}

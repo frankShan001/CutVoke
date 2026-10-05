@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.smoothright",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.smoothright",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "运镜",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:46:00+08:00",
+  "observation": "0.55 至 0.95 秒旧画面向右平滑推走，新画面随之露出；与硬边滑动转场的清晰拼接线不同。",
+  "method": "Manual comparison of 320x180 rendered covers and five transition frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; zoom excluded for poor middle-frame composition",
+  "coverSha256": "806e7f7bcf2d814e1fdd6bb78c37791129e7d095c223d21ef2a9cc681e199379",
+  "motionPreviewSha256": "534fdbe87a3ff41892fce2f870b26d8fd44d33f9585c053ea953659a8fbba1c0",
+  "auditSha256": "2d0f10a76312902835f69e6cb322e702ce0f6509f24dbf24da2e879bd54f47d6"
+}

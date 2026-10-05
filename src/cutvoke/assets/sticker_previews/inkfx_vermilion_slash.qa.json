@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.inkfx_vermilion_slash",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "b66b7dc4436e80e7ddc30c5e32620eb6c7632db6d78e578cc6e7e49148973a41",
+  "previewSha256": "14a3d23e4cbd593a88df24551170301f5664d3c2df053a82df8238c314c96ff4",
+  "preview": "inkfx_vermilion_slash.mp4",
+  "bytes": 15437,
+  "visiblePixels": 10677,
+  "changedPixels": 76,
+  "motionVisible": false
+}

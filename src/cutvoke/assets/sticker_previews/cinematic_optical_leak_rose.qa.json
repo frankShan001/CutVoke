@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_leak_rose",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "af0e602765cc368a9bb84886a96b7dbae850ff5c8f13516a352f8f65e1281571",
+  "previewSha256": "b7406f291373b177a11771ba39d3f43bc5e97958d6743f44d5dd85d095b08ea6",
+  "preview": "cinematic_optical_leak_rose.mp4",
+  "bytes": 7247,
+  "visiblePixels": 5221,
+  "changedPixels": 0,
+  "motionVisible": false
+}

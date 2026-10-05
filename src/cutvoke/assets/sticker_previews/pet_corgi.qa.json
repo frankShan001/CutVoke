@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_corgi",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "b66c16fbaf6f19a0a02a07294d7fd5045476148d2c49de7f8fddbe40731648f4",
+  "previewSha256": "8cd92623f3a5de320978f9577e32036256da9d6191fbf977236012480f69d003",
+  "preview": "pet_corgi.mp4",
+  "bytes": 4351,
+  "visiblePixels": 1873,
+  "changedPixels": 0,
+  "motionVisible": false
+}

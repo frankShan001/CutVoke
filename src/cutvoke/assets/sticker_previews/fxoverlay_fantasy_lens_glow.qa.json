@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_lens_glow",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "8233c1fe16ffdea001ad4dbee66c4af3b15eb39a5cc0c072fe6bcc1e4d986947",
+  "previewSha256": "ed202aba9ba914b64f3ed2583dd9202532b7d35ada80dc5b7fed963213698285",
+  "preview": "fxoverlay_fantasy_lens_glow.mp4",
+  "bytes": 6724,
+  "visiblePixels": 3627,
+  "changedPixels": 0,
+  "motionVisible": false
+}

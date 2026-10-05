@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_ramen",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e33529b98c401fba2b9757b3dfaa451b928a3daabb5ea266f95c918ac2328c93",
+  "previewSha256": "e7d1cd8197a726959059b4f31019262a8da5ff6789e4205504ac76a0feef2980",
+  "preview": "food_ramen.mp4",
+  "bytes": 6293,
+  "visiblePixels": 3778,
+  "changedPixels": 0,
+  "motionVisible": false
+}

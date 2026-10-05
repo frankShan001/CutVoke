@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_leaf_shadow",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2cf1a074c436d18b9c068a4de4857755bed379c48a132289e4b7a169301c37fa",
+  "previewSha256": "6a83f44582abfcaa0631d01e648fdf0eff45fb475fb44eb913f553bf500e04d2",
+  "preview": "promo_leaf_shadow.mp4",
+  "bytes": 7496,
+  "visiblePixels": 3764,
+  "changedPixels": 0,
+  "motionVisible": false
+}

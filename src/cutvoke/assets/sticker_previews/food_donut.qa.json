@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_donut",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1930702f68a7caa17df03a5112398100a5d95a7d4c32c32571c3415f7c51ca99",
+  "previewSha256": "6051f3961a42f913463f27b1ad1862061bab8bc4d54b1c6a25309e03358fa173",
+  "preview": "food_donut.mp4",
+  "bytes": 6205,
+  "visiblePixels": 4044,
+  "changedPixels": 0,
+  "motionVisible": false
+}

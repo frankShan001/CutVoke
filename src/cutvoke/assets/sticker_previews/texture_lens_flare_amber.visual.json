@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_lens_flare_amber",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "A distinct thin amber horizontal flare with a bright center and subdued circular lens ghosts; remains recognizable at the rendered overlay size.",
+  "sourceSha256": "daf994fd51dd02bf54eeae0639e70c373bff1304136a363726752470a3efce96",
+  "previewSha256": "13653ba5c5431b6f0cd44bfcea2415382a31482c21d4b3d9445a0614a45d7cff",
+  "auditSha256": "fbe6c974e068bdd1d56e6ff0785f9cb6a79e36fc994436bcb5bea9f8a5ef2233"
+}

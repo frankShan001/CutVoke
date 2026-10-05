@@ -1,0 +1,33 @@
+{
+  "presetId": "cutvoke.preset.fx.tunnelShadow",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.lens",
+      "version": "1.0.0",
+      "params": {
+        "k1": 0.48,
+        "k2": 0.05
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.vignette",
+      "version": "1.0.0",
+      "params": {
+        "angle": "PI/4"
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 59.228,
+  "maxSampledMeanRgbDifference": 59.228,
+  "coverSha256": "a51583313f6f6e15364bae37fd79e1b514382e7d6e0434a7df1ddd6da76a9748",
+  "previewSha256": "2247e3c3be946556b663216c64a2580125818bb9dd8c950583f18cf96496f67b",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

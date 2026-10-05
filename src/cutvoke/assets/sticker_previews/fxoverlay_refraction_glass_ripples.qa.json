@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_glass_ripples",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3bed47cce5977a885bd37876c0c1c5443ed0ee09dae2d43022d792e51c84305a",
+  "previewSha256": "84f309dc28c2ac71b688c263036019328aeddf9a4e1eeb5cea44316e68fd29db",
+  "preview": "fxoverlay_refraction_glass_ripples.mp4",
+  "bytes": 15341,
+  "visiblePixels": 11073,
+  "changedPixels": 0,
+  "motionVisible": false
+}

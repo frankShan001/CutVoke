@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_crop_rotate",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "bfa9fe6c0e1d055dd069bb32487a42e091b5b6511b7148618d2b8fd820661f8d",
+  "previewSha256": "35ca763a5694e4969b4e4fbe902667d300f135b0d60fd7877934e88fdc8cc8ff",
+  "preview": "guide_crop_rotate.mp4",
+  "bytes": 4206,
+  "visiblePixels": 1195,
+  "changedPixels": 0,
+  "motionVisible": false
+}

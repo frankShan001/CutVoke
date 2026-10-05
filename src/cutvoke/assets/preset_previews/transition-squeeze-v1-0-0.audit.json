@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.squeeze",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.008,
+  "exportSha256": "d274ba8ae274c859e82bbd6b7f6e1b9015fbccebeab085e0cc7a8d2c30c69fb2",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "d274ba8ae274c859e82bbd6b7f6e1b9015fbccebeab085e0cc7a8d2c30c69fb2",
+  "auditExport": "transition-squeeze-v1-0-0.audit.mp4"
+}

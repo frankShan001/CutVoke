@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.diagtl",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.diagtl",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "擦除",
+  "reviewer": "Codex manual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "A diagonal edge sweeps across the frame.",
+  "method": "Compared five aligned frames at 0.55, 0.65, 0.75, 0.85 and 0.95 seconds for all eight 擦除 transitions; inspected contact covers and the rendered motion sequence. Distinct direction or geometry is visible for each candidate. Technical apply/edit/reload/undo/export reports were checked separately.",
+  "coverSha256": "4e9e857203cfc823230940c93957253c44a24b3d82e42e27b8feebbcffee4a96",
+  "motionPreviewSha256": "410739f610134f368a1d0ef60317191097858de260ee696664da6b261f85f44d",
+  "auditSha256": "0f32fc7274386740a4c0185fb9f9a04ec61e04986aa532fe77af97cfe143ea6d"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_frame_echo",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7d58f00354c8cfff2fbdda8809a6169ec2e85d09c7973bf5bc00de0fbfd49eab",
+  "previewSha256": "6c09d7bbf8d5ec323c979281ef8e95100c1d22bed42772b49e71d419e7c74a0f",
+  "preview": "glitch_frame_echo.mp4",
+  "bytes": 10323,
+  "visiblePixels": 7786,
+  "changedPixels": 0,
+  "motionVisible": false
+}

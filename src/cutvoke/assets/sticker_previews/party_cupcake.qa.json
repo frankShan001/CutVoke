@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_cupcake",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e72de5be7174ea88388860613a433419f66e216abf57f43dbbde9be5ac58452c",
+  "previewSha256": "fe8b7f06ad1347df808564c74d27f3af5173c7c50a42193d5884b188cb25c8d8",
+  "preview": "party_cupcake.mp4",
+  "bytes": 4567,
+  "visiblePixels": 1903,
+  "changedPixels": 0,
+  "motionVisible": false
+}

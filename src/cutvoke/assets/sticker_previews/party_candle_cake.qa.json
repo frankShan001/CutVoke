@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_candle_cake",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "75b66c7df5b026865f75536af8be4bbd07a0872ee9aa855a55daa6bf2ca7b86f",
+  "previewSha256": "889cf0cf38b866c443a2425a19ffb9bf0815e5e3eb19b9bae609a945ac8edb97",
+  "preview": "party_candle_cake.mp4",
+  "bytes": 4815,
+  "visiblePixels": 2090,
+  "changedPixels": 0,
+  "motionVisible": false
+}

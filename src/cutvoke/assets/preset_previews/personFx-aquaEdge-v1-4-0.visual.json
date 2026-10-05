@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.aquaEdge",
+  "version": "1.4.0",
+  "effectId": "cutvoke.person.halo",
+  "params": {
+    "sigma": 16,
+    "hueShift": 165,
+    "saturation": 1.7,
+    "opacity": 0.95
+  },
+  "subcategory": "人物轮廓",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "The moving cutout keeps a visible sea-green halo around the head, arms and legs; it stays distinct from the brighter cyan and lime variants.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "ecb39d90fc83d4e1b175c358a1bf5526b7521a84f51fc0cdfb2e1c2ef336b223",
+  "motionPreviewSha256": "cc4bb43734970b272f88c17402f0fd0ccb8d5b16908b8107179065225b24e7a3",
+  "auditSha256": "770212c912aa3d820ee9798e45b1964fc9e8a5074dcceda7220bc337620bebac"
+}

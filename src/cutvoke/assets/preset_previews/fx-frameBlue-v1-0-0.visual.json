@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.frameBlue",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.shape",
+  "params": {
+    "shape": "rect",
+    "mode": "outline",
+    "x": 0.5,
+    "y": 0.5,
+    "w": 0.82,
+    "h": 0.78,
+    "strokeWidth": 8,
+    "color": "#0A84FF",
+    "opacity": 1
+  },
+  "subcategory": "构图",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "蓝色细线矩形取景框在画面边缘形成完整边框，入段前无边框；编辑水平位置后边框明显移动，与中心绿色圆环区分。",
+  "method": "Viewed the full-size composition cover contact sheet and aligned 0.10s/0.95s frames from each generated MP4; compared audited edited-X export frames to default frames and confirmed visible movement or boundary shift.",
+  "coverSha256": "7c1b786a053c5d33cae52df177b86380d42892ad01452534f2d1d3416d4add1b",
+  "motionPreviewSha256": "0ba89dc9a2b7d632279642dec6455b67cf171d443b39d06d46bb137c6862448d",
+  "auditSha256": "62870e1959136c4092e5ce3a3d579fe95401ddd04da130ad6a5b196a63b8ce9b"
+}

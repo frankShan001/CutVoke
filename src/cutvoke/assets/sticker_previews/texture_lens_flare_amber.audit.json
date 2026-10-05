@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_lens_flare_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "daf994fd51dd02bf54eeae0639e70c373bff1304136a363726752470a3efce96",
+  "previewSha256": "13653ba5c5431b6f0cd44bfcea2415382a31482c21d4b3d9445a0614a45d7cff",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2280,
+  "visiblePixels": 2028,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 945,
+    "steady_entry": 2028,
+    "steady_exit": 2025,
+    "exit": 945
+  },
+  "previewExportMeanRgbDifferences": [
+    0.027,
+    0.028
+  ],
+  "auditExport": "texture_lens_flare_amber.audit.mp4",
+  "auditExportSha256": "eb47c652986f666abdb14949375fe80224f669dc6eba4ad8fe7f9f935655e053"
+}

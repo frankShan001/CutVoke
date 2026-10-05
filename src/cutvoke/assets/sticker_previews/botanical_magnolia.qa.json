@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_magnolia",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f05e00c7f05669920919f6c468aa180177ef9fa6d07957324f6cad3d067d6e8f",
+  "previewSha256": "3f60ec447a897619b445d30bdc0660351f0508690907265e3dd3ded22b0b598c",
+  "preview": "botanical_magnolia.mp4",
+  "bytes": 4982,
+  "visiblePixels": 2695,
+  "changedPixels": 0,
+  "motionVisible": false
+}

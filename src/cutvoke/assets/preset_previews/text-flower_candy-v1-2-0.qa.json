@@ -1,0 +1,40 @@
+{
+  "presetId": "cutvoke.preset.text.flower_candy",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.text",
+      "version": "1.0.0",
+      "params": {
+        "content": "创作标题",
+        "animIn": 300,
+        "animOut": 200,
+        "scale": 1.8,
+        "fontSize": 140,
+        "color": "#ff7cbf",
+        "strokeColor": "#30ddf0",
+        "strokeWidth": 2,
+        "bold": true,
+        "shadow": 2,
+        "rotation": -7,
+        "y": 0.43,
+        "fontFamily": "Noto Sans SC",
+        "lineSpacing": 1.0,
+        "align": "center",
+        "background": "",
+        "x": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.5,
+  "firstLastMeanRgbDifference": 6.353,
+  "maxSampledMeanRgbDifference": 6.353,
+  "coverSha256": "6073a3c20b215324b63e30a1f279184cd22605c7eccc8e55c5460a16d4441ce7",
+  "previewSha256": "e62e39c84c9eeea9a8c46c3e93a09cbd61e6c7b54c962a6dc48628f61a9cf4d6",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

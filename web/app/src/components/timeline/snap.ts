@@ -33,6 +33,7 @@ export function collectSnapPoints(
   clips: { id: string; start: number; end: number }[],
   excludeId: string,
   playheadSecs: number,
+  markers: number[] = [],
 ): number[] {
   const pts = new Set<number>();
   for (const c of clips) {
@@ -41,6 +42,7 @@ export function collectSnapPoints(
     pts.add(c.end);
   }
   if (playheadSecs >= 0) pts.add(playheadSecs);
+  for (const marker of markers) if (Number.isFinite(marker) && marker >= 0) pts.add(marker);
   return [...pts];
 }
 

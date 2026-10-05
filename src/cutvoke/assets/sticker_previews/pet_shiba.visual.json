@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_shiba",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "奶油色柴犬的坐姿与面部表情可辨，与其它猫狗姿态不重复。",
+  "sourceSha256": "fc8ebf8f896f6afea333ae4e49a76b91b14b862cbea63cbec13889c46de674af",
+  "previewSha256": "759e684b376aa47ccb4882486467aa1f6a0374e59b15acdf443feb67a415ad9b",
+  "auditSha256": "fd9d535545d9683ad76cd3ff942bf0f41f6635d157ecba6dda0eba46e84013d8"
+}

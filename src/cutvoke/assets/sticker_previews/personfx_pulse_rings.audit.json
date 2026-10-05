@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_pulse_rings",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "86cdbf6115f9b7a3097b2a6221689e8084169337ec39007261e5a045afa987f2",
+  "previewSha256": "335053bc72324efa97d4816eaaab9ffb1321476ece69b244ad50277c5103a5bc",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 238,
+  "visiblePixels": 162,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 0,
+    "steady_entry": 162,
+    "steady_exit": 162,
+    "exit": 0
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 0,
+      "withoutFade": 162
+    },
+    "steady_entry": {
+      "withFade": 162,
+      "withoutFade": 162
+    },
+    "steady_exit": {
+      "withFade": 162,
+      "withoutFade": 162
+    },
+    "exit": {
+      "withFade": 0,
+      "withoutFade": 162
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "personfx_pulse_rings.audit.mp4",
+  "auditExportSha256": "d0afe84dc79532b05c4729ffca3ee71ad2d2a82f9c23f6e805d34ab2b51781e5"
+}

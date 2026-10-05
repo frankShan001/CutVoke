@@ -49,6 +49,53 @@ TERMINAL_STATUSES = frozenset({STATUS_SUCCEEDED, STATUS_FAILED,
 _QUEUE_HASH_PREFIX = "queue:"
 
 
+def _process_stamp(pid: int) -> str:
+    """Read process creation identity without sending signals on Windows."""
+    if os.name == "nt":
+        import ctypes
+        from ctypes import wintypes
+        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        kernel.OpenProcess.restype = wintypes.HANDLE
+        kernel.GetProcessTimes.argtypes = [wintypes.HANDLE, *([ctypes.POINTER(wintypes.FILETIME)] * 4)]
+        kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+        handle = kernel.OpenProcess(0x1000, False, pid)
+        if not handle:
+            return "dead" if ctypes.get_last_error() == 87 else "unknown"
+        try:
+            times = [wintypes.FILETIME() for _ in range(4)]
+            if not kernel.GetProcessTimes(handle, *(ctypes.byref(t) for t in times)):
+                return "unknown"
+            return str((times[0].dwHighDateTime << 32) | times[0].dwLowDateTime)
+        finally:
+            kernel.CloseHandle(handle)
+    try:
+        # Linux process start ticks distinguish PID reuse; no signal is sent.
+        from pathlib import Path
+        stat = Path(f"/proc/{pid}/stat").read_text()
+        return stat.rsplit(")", 1)[1].split()[19]
+    except FileNotFoundError:
+        return "dead" if os.path.isdir("/proc") else "unknown"
+    except OSError:
+        return "unknown"
+
+
+class _LedgerCancelEvent(threading.Event):
+    """Renderer watchdog observes cancellation from any connected interface."""
+    def __init__(self, store, job_id):
+        super().__init__()
+        self.store, self.job_id = store, job_id
+        self.last_check = 0.0
+
+    def is_set(self):
+        if not super().is_set() and self.store and time.monotonic() - self.last_check >= 0.1:
+            self.last_check = time.monotonic()
+            row = self.store.get_export_job(self.job_id)
+            if row and row["status"] == STATUS_CANCELLED:
+                self.set()
+        return super().is_set()
+
+
 def versioned_path(out_path: str) -> str:
     """多版本落点：已被占用则依次尝试 _v2 / _v3 …
 
@@ -85,6 +132,7 @@ class ExportQueue:
         self._lock = threading.RLock()
         self._worker: Optional[threading.Thread] = None
         self._stopping = False
+        self._owner = f"{os.getpid()}:{_process_stamp(os.getpid())}"
         if autostart:
             self.start()
         # 启动时把上一次进程遗留的 queued/running 标成 interrupted（不假装还在跑）
@@ -125,6 +173,14 @@ class ExportQueue:
             # 任务误标成 interrupted。队列任务的 request_hash 固定为 "queue:<id>"。
             if not str(row.get("requestHash") or "").startswith(_QUEUE_HASH_PREFIX):
                 continue
+            owner = str(row["requestHash"]).split(":")
+            # Old task rows did not identify their owner. Keep them observable;
+            # lack of ownership evidence must not cancel another live renderer.
+            if len(owner) != 4 or not owner[1].isdigit():
+                continue
+            stamp = _process_stamp(int(owner[1]))
+            if stamp in ("unknown", owner[2]):
+                continue
             try:
                 self._store.finish_export_job(
                     row["jobId"], status=STATUS_INTERRUPTED,
@@ -137,7 +193,9 @@ class ExportQueue:
     # ------------------------------------------------------------------
     # 提交 / 取消 / 查询
     # ------------------------------------------------------------------
-    def submit(self, project: Project, payload: dict) -> dict:
+    def submit(self, project: Project, payload: dict, *, command_id: Optional[str] = None,
+               command_hash: Optional[str] = None,
+               expected_revision: Optional[str] = None) -> dict:
         """入队一次导出。payload：{outPath, quality?, videoBitrateKbps?,
         audioBitrateKbps?, transparent?, versioned?}。"""
         out_path = payload.get("outPath")
@@ -160,20 +218,29 @@ class ExportQueue:
             "payload": dict(payload, outPath=out_path),
         }
         snapshot = project.to_dict()
-        with self._lock:
-            self._jobs[job_id] = job
-            self._snapshots[job_id] = snapshot
-            self._cancel_events[job_id] = threading.Event()
         if self._store is not None:
             # 队列任务用独立 request_hash（含 jobId）：允许"同一工程同样参数"
             # 排多次队，不撞 export_jobs 的自然键唯一索引。
-            self._store.create_export_job(
+            receipt = self._store.create_export_job(
                 job_id=job_id, project_id=project.project_id,
                 revision=project.revision,
-                request_hash=f"{_QUEUE_HASH_PREFIX}{job_id}",
+                request_hash=f"{_QUEUE_HASH_PREFIX}{self._owner}:{job_id}",
                 out_path=out_path, quality=job["quality"],
                 status=STATUS_QUEUED,
-                project_snapshot=snapshot)
+                project_snapshot=snapshot,
+                command_id=command_id, command_hash=command_hash,
+                expected_revision=expected_revision,
+                command_result={"commandId": command_id, "previousRevision": project.revision,
+                                "revision": project.revision, "transactionId": "",
+                                "changedEntities": [{"type": "export_enqueued", "jobId": job_id,
+                                                     "status": STATUS_QUEUED, "outPath": out_path,
+                                                     "versioned": job["versioned"]}]})
+            if receipt.get("_replayed"):
+                return receipt
+        with self._lock:
+            self._jobs[job_id] = job
+            self._snapshots[job_id] = snapshot
+            self._cancel_events[job_id] = _LedgerCancelEvent(self._store, job_id)
         self._q.put(job_id)
         return dict(job, payload=None)
 
@@ -190,6 +257,15 @@ class ExportQueue:
                     if row["status"] in TERMINAL_STATUSES:
                         return dict(row, cancelled=False,
                                     message=f"job already {row['status']}")
+                    owner = str(row.get("requestHash", "")).split(":")
+                    if len(owner) == 4 and owner[0] == "queue" and owner[1].isdigit():
+                        stamp = _process_stamp(int(owner[1]))
+                        if stamp == owner[2] and stamp != "unknown":
+                            changed = self._store.finish_export_job(
+                                job_id, status=STATUS_CANCELLED,
+                                error={"code": "CANCELLED", "message": "cancelled by another editor"},
+                                expected_status=row["status"])
+                            return dict(self._store.get_export_job(job_id), cancelled=changed)
                     raise KeyError(
                         f"job {job_id} is not in this process's queue "
                         f"(status={row['status']}); cannot cancel")
@@ -292,8 +368,8 @@ class ExportQueue:
             project = self._load_project(
                 job["projectId"], job["revision"],
                 self._snapshots.get(job["jobId"]))
-            result = svc.render(
-                project, job["outPath"], quality=job["quality"],
+            render_options = dict(
+                quality=job["quality"],
                 overwrite=bool(payload.get("overwrite", False)),
                 cancel_event=cancel_event,
                 video_bitrate_kbps=(int(payload["videoBitrateKbps"])
@@ -301,6 +377,13 @@ class ExportQueue:
                 audio_bitrate_kbps=(int(payload["audioBitrateKbps"])
                                     if payload.get("audioBitrateKbps") else None),
                 alpha=bool(payload.get("transparent", False)))
+            export_range = payload.get("range")
+            if export_range is not None:
+                start = float(export_range["start"])
+                end = float(export_range["end"])
+                render_options.update(output_start=start,
+                                      output_duration=end - start)
+            result = svc.render(project, job["outPath"], **render_options)
         except RenderCancelled:
             self._finish(job, STATUS_CANCELLED,
                          error={"code": "CANCELLED", "message": "render cancelled"},

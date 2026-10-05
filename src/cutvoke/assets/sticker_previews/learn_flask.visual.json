@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_flask",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "玻璃轮廓和蓝色液面区分明确，透明区域未被填成实色背景。",
+  "sourceSha256": "707480d0c27b7ffc707de238200dcde02b667356f9fa0d6bbceb1cdfbeb5a61c",
+  "previewSha256": "59ed43c8c3f2a9e54f594dd1d70700d63d227f7ee6d4dea69a2c19db02b58953",
+  "auditSha256": "4a8b89d23095f92f63750a9c9b471db012102f351830133e4bc5490345c62198"
+}

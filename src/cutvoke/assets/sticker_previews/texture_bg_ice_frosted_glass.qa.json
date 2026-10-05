@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_ice_frosted_glass",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "977fb3b76ea58f69ca064b45d85c6354fd4e4438d6881ad0df039e4f43cb2661",
+  "previewSha256": "153db87d23e7ef007866be6b3a7c28201024a981b1def902cd3b6cf7fc14703a",
+  "preview": "texture_bg_ice_frosted_glass.mp4",
+  "bytes": 26494,
+  "visiblePixels": 57600,
+  "changedPixels": 0,
+  "motionVisible": false
+}

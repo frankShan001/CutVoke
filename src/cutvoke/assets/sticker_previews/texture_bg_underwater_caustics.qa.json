@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_underwater_caustics",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4ad54b9c50a93a155254d3cd5d6519a4a0b18da7c7fa07339fd54a595fef20bb",
+  "previewSha256": "fd0fe94884e36fbafdfc7bd5023132e41b033f4618fadab9b0a26eacebc8dbf5",
+  "preview": "texture_bg_underwater_caustics.mp4",
+  "bytes": 20352,
+  "visiblePixels": 57600,
+  "changedPixels": 0,
+  "motionVisible": false
+}

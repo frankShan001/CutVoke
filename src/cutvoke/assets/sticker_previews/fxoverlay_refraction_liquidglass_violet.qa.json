@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_liquidglass_violet",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "318aac75f19ba8606625417594cb32caf4de0b331d3e0615831308f3ae63bc4e",
+  "previewSha256": "0e450f265c40a95d644d5a868955a83e21afef685743a1ce160fbb06be778427",
+  "preview": "fxoverlay_refraction_liquidglass_violet.mp4",
+  "bytes": 14391,
+  "visiblePixels": 10809,
+  "changedPixels": 0,
+  "motionVisible": false
+}

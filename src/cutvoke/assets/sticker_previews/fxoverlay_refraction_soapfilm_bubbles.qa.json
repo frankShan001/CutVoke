@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_soapfilm_bubbles",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "689644f92e671fa498237d0e2ca4d3d6892ca32917485428c704282e7e5596e1",
+  "previewSha256": "02f8788886bee71accd56e2601f8fa50d7531c311e89f7935ab602c0eeaca195",
+  "preview": "fxoverlay_refraction_soapfilm_bubbles.mp4",
+  "bytes": 12458,
+  "visiblePixels": 11041,
+  "changedPixels": 0,
+  "motionVisible": false
+}

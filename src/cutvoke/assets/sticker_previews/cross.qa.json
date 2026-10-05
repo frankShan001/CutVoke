@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cross",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a5f0db66ccc4f91d56de5ed01f813aab29fc252613d9b67aae855f6d085f4bb1",
+  "previewSha256": "ba34fdb0f2c13fe2cc74789a6f063e9bf187623a647f3f2fc106bd4c3fb64f22",
+  "preview": "cross.mp4",
+  "bytes": 4196,
+  "visiblePixels": 1889,
+  "changedPixels": 0,
+  "motionVisible": false
+}

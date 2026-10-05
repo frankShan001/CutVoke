@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_prism_flare",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "棱镜闪光由中心向多方向折射，颜色分散明显，和直线光束用途不同。",
+  "sourceSha256": "3f61869723b7836d996cebaa1de04caac450ccb9f16dea42d1fd2b51d890b733",
+  "previewSha256": "e0fec5140df31c041238f30e902565aa1ff1e92c451ce5b6727ee4f5b464f140",
+  "auditSha256": "a493afb575c0ac9137a592090a90e731c0554878239d73d9ac25b2861c29df69"
+}

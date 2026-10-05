@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_film_perforation_strip",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7eb67fcf5082f7db185be811b603c1ae846a78b5658db1dd9f3259930d023b30",
+  "previewSha256": "6bb33a131b6c4ed5b408e846cfa978684775162fb993d6b3902b9e013bb1871a",
+  "preview": "printfx_film_perforation_strip.mp4",
+  "bytes": 7868,
+  "visiblePixels": 5242,
+  "changedPixels": 0,
+  "motionVisible": false
+}

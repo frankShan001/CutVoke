@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_flare_cyan",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "青蓝横向光带与冷色中心高光清晰，颜色和暖琥珀、玫瑰、紫蓝版本可区分。",
+  "sourceSha256": "6ea7ffc35b060d04a51f72f6b5f6dc4a7a62c367418c8a550b5eee1e616c9785",
+  "previewSha256": "234dcfc72d9bf3a336712093031fcc3b5df2fb0ca0229fd489a3072c73b0744e",
+  "auditSha256": "92b44ab4a94576404aac1eb1b305e63660d6295faa72165a7759641040089d2d"
+}

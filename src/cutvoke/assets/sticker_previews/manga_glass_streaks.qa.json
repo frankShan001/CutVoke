@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_glass_streaks",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1fe8565e5f5aeb0c838b3d6531e80a7bfaca4431c839c59e1f8a0dccbe045160",
+  "previewSha256": "7820ca0218bd448092624dcf3190f44057b559c1f6e11f91243bbf55198cf234",
+  "preview": "manga_glass_streaks.mp4",
+  "bytes": 6310,
+  "visiblePixels": 2310,
+  "changedPixels": 0,
+  "motionVisible": false
+}

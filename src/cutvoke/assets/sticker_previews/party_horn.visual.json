@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_horn",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "派对吹龙从吹口到卷曲纸舌轮廓完整，色块干净。",
+  "sourceSha256": "4e5bd6ecfb68fad84cc468d030b8dff0a9a3b997f1d8e7de6ffe064593be7c05",
+  "previewSha256": "3a533d2e7cd18578900f02f9fed6a5bfb422888b342f30f7b79bf9ef720f6ed9",
+  "auditSha256": "9f784b3808ce483fb9985bffdcad3a38420a09600a15db3f19087a544d92186f"
+}

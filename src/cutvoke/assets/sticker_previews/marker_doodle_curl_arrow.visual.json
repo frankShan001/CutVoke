@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_curl_arrow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Mint loop arrow has a clear path and distinct arrowhead; the navy edge keeps it legible on both backgrounds.",
+  "sourceSha256": "4c4a6ddcdb0fc4fc06814de2544460ec713af682e1f9d66208f954384db88c33",
+  "previewSha256": "b45df305ff8bb951aa69e69c3cc2f619e0e4aedf324d11033248e991b494fe04",
+  "auditSha256": "7bd3cbc301d761216b4d9e5c594a6c0070251b89746646558e24db21f3e7732c"
+}

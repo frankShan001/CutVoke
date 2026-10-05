@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_pearl_sheen",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "27c8cb1a09f0caa5ee5b591b2a1464310374dd51439b549aef3f8e26c08a05b2",
+  "previewSha256": "b6a63119e2571226a906a710c3d40f0715cadca4e8c60d519608d60204b8b615",
+  "preview": "fxoverlay_refraction_pearl_sheen.mp4",
+  "bytes": 13159,
+  "visiblePixels": 12717,
+  "changedPixels": 0,
+  "motionVisible": false
+}

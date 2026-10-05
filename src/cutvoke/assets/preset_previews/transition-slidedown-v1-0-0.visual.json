@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.slidedown",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.slidedown",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "运镜",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:46:00+08:00",
+  "observation": "新旧画面以水平硬边自上而下交接，中段上方先显示新画面；不同于上滑转场的反方向。",
+  "method": "Manual comparison of 320x180 rendered covers and five transition frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; zoom excluded for poor middle-frame composition",
+  "coverSha256": "cb70ddd9e2daf528aae4c60df98de154d318435969778a53fbe6192541bc0f9f",
+  "motionPreviewSha256": "f11dcef3ac2345c777bf1ed9e74b1a9101d292ac124590bb4bdff9fc57aebdb9",
+  "auditSha256": "f2ea418fdaa4ec911c5815662f17d2c58da97992111b1b9acce42b06e7249a8b"
+}

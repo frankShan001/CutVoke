@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_wildflowers",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "9628e0d54fbfee847ef538de8d0e84f314a28ca7549ad495dd641358dcac2fbe",
+  "previewSha256": "f922a248403ee179121203ade4b6d91073aa062f63c52a4464ece93be78da1c4",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4615,
+  "visiblePixels": 3319,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2274,
+    "steady_entry": 3317,
+    "steady_exit": 3317,
+    "exit": 2274
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2274,
+      "withoutFade": 3317
+    },
+    "steady_entry": {
+      "withFade": 3317,
+      "withoutFade": 3319
+    },
+    "steady_exit": {
+      "withFade": 3317,
+      "withoutFade": 3319
+    },
+    "exit": {
+      "withFade": 2274,
+      "withoutFade": 3315
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.078,
+    0.078
+  ],
+  "auditExport": "botanical_wildflowers.audit.mp4",
+  "auditExportSha256": "d601fa785f79dbb861562eb8f872037eb07971883317e2de4965879a961721a0"
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_crossing_lasers",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "a9e328ad507b5f3ef361afbc3964615c16f6079fffe24cdc339b3decfa47edf4",
+  "previewSha256": "c5ac6c78fdad9966ae56c072d92a70f1cf168c720cb66c787340825d2aa0afdd",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5438,
+  "visiblePixels": 5951,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 4455,
+    "steady_entry": 5958,
+    "steady_exit": 5956,
+    "exit": 4460
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 4455,
+      "withoutFade": 5951
+    },
+    "steady_entry": {
+      "withFade": 5958,
+      "withoutFade": 5951
+    },
+    "steady_exit": {
+      "withFade": 5956,
+      "withoutFade": 5952
+    },
+    "exit": {
+      "withFade": 4460,
+      "withoutFade": 5957
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.393,
+    0.366
+  ],
+  "auditExport": "stage_light_crossing_lasers.audit.mp4",
+  "auditExportSha256": "dbf45d8c2b743a3f669640bb46dc357e64bda5ffb1cfb8093b0998dadd7c39e6"
+}

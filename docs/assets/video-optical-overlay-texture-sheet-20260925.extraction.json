@@ -1,0 +1,467 @@
+{
+  "source": "video-optical-overlay-texture-sheet-20260925.png",
+  "sourceSha256": "f505479a7777434ac36d78ef86da2abe06064108db51227d6382cd343e184b40",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "normalizationCrop": [
+    0,
+    0,
+    1254,
+    1254
+  ],
+  "layout": "4x4",
+  "edgeInsetPx": 16,
+  "extraction": "proportional cell crops with edge inset, centered square padding, alpha preserved",
+  "items": [
+    {
+      "stem": "texture_optical_anamorphic_amber",
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        16,
+        16,
+        298,
+        298
+      ],
+      "visibleBounds": [
+        0,
+        74,
+        282,
+        215
+      ],
+      "size": [
+        282,
+        282
+      ],
+      "visiblePixels": 16860,
+      "visiblePixelsWithin12pxBoundary": 154,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "4b502576defb533e9023374007e0cec8f560b0a36ae85aa91c5ab87851863bf8"
+    },
+    {
+      "stem": "texture_optical_anamorphic_cyan",
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        330,
+        16,
+        611,
+        298
+      ],
+      "visibleBounds": [
+        0,
+        82,
+        281,
+        208
+      ],
+      "size": [
+        282,
+        282
+      ],
+      "visiblePixels": 14736,
+      "visiblePixelsWithin12pxBoundary": 157,
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "838d2a7559bbfd54dc6163d7aeb77c8188c40938a75ed4837e0af64d59be1e2b"
+    },
+    {
+      "stem": "texture_optical_diffraction_violet",
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        643,
+        16,
+        924,
+        298
+      ],
+      "visibleBounds": [
+        45,
+        11,
+        241,
+        278
+      ],
+      "size": [
+        282,
+        282
+      ],
+      "visiblePixels": 16173,
+      "visiblePixelsWithin12pxBoundary": 18,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "d27b68d8d992249a29ba845512f2110e7bb8d18ba7bb42eb6acb07b005950bc1"
+    },
+    {
+      "stem": "texture_optical_diffraction_pearl",
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        956,
+        16,
+        1238,
+        298
+      ],
+      "visibleBounds": [
+        0,
+        3,
+        282,
+        279
+      ],
+      "size": [
+        282,
+        282
+      ],
+      "visiblePixels": 30952,
+      "visiblePixelsWithin12pxBoundary": 176,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "c9299dcb544f801588319f77b06a47df483f11743aa90879a7a32777d3e2f629"
+    },
+    {
+      "stem": "texture_optical_ghost_amber",
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        16,
+        330,
+        298,
+        611
+      ],
+      "visibleBounds": [
+        14,
+        10,
+        272,
+        235
+      ],
+      "size": [
+        282,
+        282
+      ],
+      "visiblePixels": 18892,
+      "visiblePixelsWithin12pxBoundary": 47,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "db5b7af5759efda8ec904156687dfe1a716d3cd2d0107ce72992026219ae2d75"
+    },
+    {
+      "stem": "texture_optical_ghost_teal",
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        330,
+        330,
+        611,
+        611
+      ],
+      "visibleBounds": [
+        13,
+        10,
+        267,
+        232
+      ],
+      "size": [
+        281,
+        281
+      ],
+      "visiblePixels": 18578,
+      "visiblePixelsWithin12pxBoundary": 32,
+      "alphaExtrema": [
+        0,
+        248
+      ],
+      "sha256": "a7a93453f533795068a91151ee071a493000fce2b693419195ffc67fedcb1c40"
+    },
+    {
+      "stem": "texture_optical_prism_streak",
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        643,
+        330,
+        924,
+        611
+      ],
+      "visibleBounds": [
+        39,
+        18,
+        253,
+        233
+      ],
+      "size": [
+        281,
+        281
+      ],
+      "visiblePixels": 14547,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "edf499f6b1fdb5c404b99326efaa1c61ae20672c45dc38a611d54b21f63d6580"
+    },
+    {
+      "stem": "texture_optical_prism_flare",
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        956,
+        330,
+        1238,
+        611
+      ],
+      "visibleBounds": [
+        40,
+        45,
+        243,
+        247
+      ],
+      "size": [
+        282,
+        282
+      ],
+      "visiblePixels": 23746,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "3f61869723b7836d996cebaa1de04caac450ccb9f16dea42d1fd2b51d890b733"
+    },
+    {
+      "stem": "texture_optical_bokeh_amber",
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        16,
+        643,
+        298,
+        924
+      ],
+      "visibleBounds": [
+        7,
+        20,
+        275,
+        240
+      ],
+      "size": [
+        282,
+        282
+      ],
+      "visiblePixels": 44876,
+      "visiblePixelsWithin12pxBoundary": 227,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "3dbd0028b20b60fbabe9c094e70b8122546e98e5d01f2b375bc02ca0cefd2602"
+    },
+    {
+      "stem": "texture_optical_bokeh_aqua",
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        330,
+        643,
+        611,
+        924
+      ],
+      "visibleBounds": [
+        29,
+        17,
+        267,
+        239
+      ],
+      "size": [
+        281,
+        281
+      ],
+      "visiblePixels": 36555,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "12a8a24747d29e4c16aac8b0272419e81daa27f9cb8930986342882e9de95f15"
+    },
+    {
+      "stem": "texture_optical_bokeh_ring",
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        643,
+        643,
+        924,
+        924
+      ],
+      "visibleBounds": [
+        18,
+        5,
+        258,
+        242
+      ],
+      "size": [
+        281,
+        281
+      ],
+      "visiblePixels": 34838,
+      "visiblePixelsWithin12pxBoundary": 253,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "485326d6bb4dba7a48d75737f95ab3b2aed563d5913b601c99b48dbbee918759"
+    },
+    {
+      "stem": "texture_optical_flashline_pearl",
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        956,
+        643,
+        1238,
+        924
+      ],
+      "visibleBounds": [
+        0,
+        37,
+        281,
+        210
+      ],
+      "size": [
+        282,
+        282
+      ],
+      "visiblePixels": 23730,
+      "visiblePixelsWithin12pxBoundary": 1074,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "d6ff0fb532d46aa260c00e51fe57f4932b59b74cf445955566c186962117557d"
+    },
+    {
+      "stem": "texture_optical_refraction_arc",
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        16,
+        956,
+        298,
+        1238
+      ],
+      "visibleBounds": [
+        28,
+        15,
+        254,
+        246
+      ],
+      "size": [
+        282,
+        282
+      ],
+      "visiblePixels": 15637,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        246
+      ],
+      "sha256": "75c8618cf21bdb6ead54d48fb3d8b1e6dbe121257d378a99e6b7082cbd12244e"
+    },
+    {
+      "stem": "texture_optical_glass_glints",
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        330,
+        956,
+        611,
+        1238
+      ],
+      "visibleBounds": [
+        3,
+        18,
+        249,
+        254
+      ],
+      "size": [
+        282,
+        282
+      ],
+      "visiblePixels": 36089,
+      "visiblePixelsWithin12pxBoundary": 443,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "b0e2751ef3e267b368df772cafef81550caaa9060cff4fdb1a9351503ae4f9bf"
+    },
+    {
+      "stem": "texture_optical_spotlight_dust",
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        643,
+        956,
+        924,
+        1238
+      ],
+      "visibleBounds": [
+        13,
+        0,
+        262,
+        272
+      ],
+      "size": [
+        282,
+        282
+      ],
+      "visiblePixels": 43715,
+      "visiblePixelsWithin12pxBoundary": 760,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "a8147ed0a9b423585fa82e68b21549960455a468d0ce31029273a66de87c0805"
+    },
+    {
+      "stem": "texture_optical_chromatic_corners",
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        956,
+        956,
+        1238,
+        1238
+      ],
+      "visibleBounds": [
+        0,
+        0,
+        282,
+        260
+      ],
+      "size": [
+        282,
+        282
+      ],
+      "visiblePixels": 15718,
+      "visiblePixelsWithin12pxBoundary": 4193,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "d3805c6d69e6e650e358ee886d3b79542924bc65ac88f811bd3c50a0eeb9ef87"
+    }
+  ]
+}

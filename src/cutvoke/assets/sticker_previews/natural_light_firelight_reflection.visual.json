@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_firelight_reflection",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Amber flowing caustic pattern forms a distinct warm reflective texture; best used as a stylized firelight overlay.",
+  "sourceSha256": "0b8ad5fa52df3d5c1dfda2936906418fd89a176737de2689ba26e2048cf087be",
+  "previewSha256": "b4be6f5fb59b1a13427ac7e84ab210509190e2def1612c75f6de795015e5009e",
+  "auditSha256": "8185cfea73732c2ffdfad15c0f5f8132fc1f4d9f488541c96d57cc60b5c88511"
+}

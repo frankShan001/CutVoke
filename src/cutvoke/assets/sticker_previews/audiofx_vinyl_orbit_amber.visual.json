@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_vinyl_orbit_amber",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "Amber elliptical orbit lines create a warm rotational music accent with a clean central opening.",
+  "sourceSha256": "d87b42e82bc910900a1e0d024d583e08718441cfd813a3213445724fd9509d5f",
+  "previewSha256": "4810804e36ef92a90ab45bb21b7703508a69c6e5712c675b64e33d156f90e5e4",
+  "auditSha256": "3ad5c7b19e57bea62db9ae195bde96de2f9adfd187feffb16d0a5f34de338071"
+}

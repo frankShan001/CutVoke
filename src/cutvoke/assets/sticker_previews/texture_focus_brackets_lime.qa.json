@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_focus_brackets_lime",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1435b7b45785150e85834ed9e5663c1ec58ecb80af0c5c0c79b6725bbc83640b",
+  "previewSha256": "6218f2828be4f7aec9324e1659664eb9bcc675dc81d7a3b2c4ad7f35745602ec",
+  "preview": "texture_focus_brackets_lime.mp4",
+  "bytes": 3338,
+  "visiblePixels": 517,
+  "changedPixels": 0,
+  "motionVisible": false
+}

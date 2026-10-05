@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_map_route",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "地图折页完整，虚线路径与定位点清晰，边缘无串格碎片。",
+  "sourceSha256": "291c30e642ed0df5ee3807f57d7307411530ce5b13a4a6eff6ee2acf11002d0e",
+  "previewSha256": "4e920da8e17c7779ec23ea28881dc10f4e7525b191b1e9f36f460afee3f16bc9",
+  "auditSha256": "0494bfbd1c55847065a08790212a1868698624bfb173c28ac56fd419840513f2"
+}

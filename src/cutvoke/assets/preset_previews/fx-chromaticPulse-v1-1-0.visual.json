@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.chromaticPulse",
+  "version": "1.1.0",
+  "effectId": "cutvoke.fx.chromatic",
+  "params": {
+    "offset": 12
+  },
+  "subcategory": "动感",
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "observation": "红蓝通道沿相反对角方向位移，画框和线条边缘形成斜向色边；与纯横向 RGB 分离明显不同。",
+  "method": "Manual comparison of full dynamic previews and aligned motion sheets",
+  "coverSha256": "d06281c482c6e4b6b28585dd2775f0b4e4f244dadce9b8a6dcaea54f154e5bb0",
+  "motionPreviewSha256": "94eaca8bb6c3b9407ecca5b5f2cc3f29514fff7748356af5937016f1d315de40",
+  "auditSha256": "b228cc8a0cdccca4ae30ff34e3af8d78b86e3abdfd68e076caa63c96ae4b6e6f"
+}

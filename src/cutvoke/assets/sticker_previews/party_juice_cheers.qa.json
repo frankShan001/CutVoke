@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_juice_cheers",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "79be302297827228093e777d4ad9ee3b7ef55b5bf77e19bb215e8b111742750f",
+  "previewSha256": "b134ef1f50a03937bd48c9681ca781b69be97a7a3f7b0c896c7be8b3add2df38",
+  "preview": "party_juice_cheers.mp4",
+  "bytes": 4656,
+  "visiblePixels": 1823,
+  "changedPixels": 0,
+  "motionVisible": false
+}

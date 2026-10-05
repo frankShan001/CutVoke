@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_volleyball",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "9a4e99893936bc21517973d423566e3bf6cebbb9a85268b73fc3b174da3aacd8",
+  "previewSha256": "acccc0ed4277721b0c0b6f482004a100d27792ee159b40468d5d3bc150206f4c",
+  "preview": "sports_volleyball.mp4",
+  "bytes": 3702,
+  "visiblePixels": 895,
+  "changedPixels": 0,
+  "motionVisible": false
+}

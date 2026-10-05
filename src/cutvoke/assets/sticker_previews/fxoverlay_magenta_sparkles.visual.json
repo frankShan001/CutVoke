@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_magenta_sparkles",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "Discrete magenta star points with varied sizes are separated across the transparent canvas.",
+  "method": "Inspected the rendered transparent artwork on split dark and light neutral panels; machine workflow audit hashes are pinned.",
+  "sourceSha256": "c27c7001e837f030ee48d71b113d67e56611fe1d3702acc268fbc7bf0dbc356f",
+  "previewSha256": "8eb822899136a9a51dddbc95f027be10c18a891fa332e05a4544e791caa1d9e0",
+  "auditSha256": "d7c3fb3ce40d7bb1a1911e89f38ec60cf84ef1f78a7eb15d185e65693410607e"
+}

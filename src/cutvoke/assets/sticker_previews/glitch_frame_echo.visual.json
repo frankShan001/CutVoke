@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.glitch_frame_echo",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项检查4×4透明贴图裁切表和4×4真实画面合成表；确认Alpha通道、裁切边缘、深浅背景对比、缩略图可辨性与每项轮廓差异。",
+  "observation": "多层矩形轮廓向右递减形成跳帧残影，轮廓和间距都清晰可辨。",
+  "sourceSha256": "7d58f00354c8cfff2fbdda8809a6169ec2e85d09c7973bf5bc00de0fbfd49eab",
+  "previewSha256": "6c09d7bbf8d5ec323c979281ef8e95100c1d22bed42772b49e71d419e7c74a0f",
+  "auditSha256": "4913ab548187aebfb9cf980924dfa3009898c9f1ba631f7f4ff7f404e68fdbde"
+}

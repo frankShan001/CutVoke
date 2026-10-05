@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_teal_orbit_motes",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A tilted teal orbit line and glowing nodes make a clear elliptical path distinct from the closed aura ring.",
+  "method": "Inspected the rendered transparent artwork on split dark and light neutral panels; machine workflow audit hashes are pinned.",
+  "sourceSha256": "dd9b81b914c27975bfd9faa918163f068af62dd5de78d12cb32932c8f7ee730f",
+  "previewSha256": "5917f20622fe176cf50ad95aa0123f5d375cfc09686b5f4b5e6833426685d400",
+  "auditSha256": "0f17bc08394e9f3a5873fccbf3daee51ff5addbc00e8fd5fd529cf1731094d8f"
+}

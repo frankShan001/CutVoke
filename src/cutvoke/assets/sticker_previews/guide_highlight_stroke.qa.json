@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_highlight_stroke",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d36a974793b94883bc7174adad2a984e19f7bfc7517318e381f837d0a1d42df3",
+  "previewSha256": "7beef7abb881d4a3d9379e00ead176f0ce0cac4da293279aaf2bd6fa051af9d4",
+  "preview": "guide_highlight_stroke.mp4",
+  "bytes": 3435,
+  "visiblePixels": 858,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.flower_flame",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 6352,
+  "exportSha256": "35d036f76596b59abe2c9d1a6315874ed6d27be8dbf3ceeea8f3a8217da7472d",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "35d036f76596b59abe2c9d1a6315874ed6d27be8dbf3ceeea8f3a8217da7472d",
+  "auditExport": "text-flower_flame-v1-0-0.audit.mp4"
+}

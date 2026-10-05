@@ -9,6 +9,7 @@ import "./styles/feedback.css";
 import "./styles/media.css";
 import "./styles/layout.css";
 import "./styles/player.css";
+import "./styles/project-loading.css";
 import "./styles/toolbar.css";
 import "./styles/agent.css";
 import "./styles/timeline.css";

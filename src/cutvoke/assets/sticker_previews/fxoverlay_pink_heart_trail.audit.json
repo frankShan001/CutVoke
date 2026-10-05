@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pink_heart_trail",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "9487605c29c201c52bbc69340f34722280703a089a2ab9213cb88d9fce56788c",
+  "previewSha256": "4e491e2b8ac90674ea5dfb3ab653b818a6ade894bf918a0b519627f767e834c6",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3952,
+  "visiblePixels": 2712,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 945,
+    "steady_entry": 2711,
+    "steady_exit": 2711,
+    "exit": 952
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 945,
+      "withoutFade": 2712
+    },
+    "steady_entry": {
+      "withFade": 2711,
+      "withoutFade": 2706
+    },
+    "steady_exit": {
+      "withFade": 2711,
+      "withoutFade": 2711
+    },
+    "exit": {
+      "withFade": 952,
+      "withoutFade": 2709
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.185,
+    0.185
+  ],
+  "auditExport": "fxoverlay_pink_heart_trail.audit.mp4",
+  "auditExportSha256": "791c4ee790aa1e9857da21a904fc578555e9667d201b4004b081d388801e5c2c"
+}

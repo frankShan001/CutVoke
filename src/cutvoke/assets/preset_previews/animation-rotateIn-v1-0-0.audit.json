@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.rotateIn",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "82c0c7c9ea3139e8cdadbfbb640fedbe0bbcc919afa3d59631ad8e2ef1827b6c",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "82c0c7c9ea3139e8cdadbfbb640fedbe0bbcc919afa3d59631ad8e2ef1827b6c",
+  "auditExport": "animation-rotateIn-v1-0-0.audit.mp4"
+}

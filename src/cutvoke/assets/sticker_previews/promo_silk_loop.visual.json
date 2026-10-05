@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.promo_silk_loop",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "observation": "The ivory silk loop keeps a smooth closed crossover and readable soft highlights.",
+  "sourceSha256": "ffeaad1c95f310f72739fcfd93afc31daa0bc51bf6a0ae9538c4de6497f93579",
+  "previewSha256": "d4b7bc319f26e6736dcbc9c448d3868f8f3a9432569dac03a9204a6c1ffa9407",
+  "auditSha256": "b06974d9ff2a7fbbbba7fadc7eabd37242bc877f60cd1697d0bd4139d0522b3d"
+}

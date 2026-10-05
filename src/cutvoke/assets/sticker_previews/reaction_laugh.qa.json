@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_laugh",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5126c02a630f3cef6e6e56a3e55e873c8692d14eea7fb464cbeb9fb30c5078e8",
+  "previewSha256": "6cf95d3ffa88c6c707cb43774de878002445af453a390ae204136f4a6aec54b8",
+  "preview": "reaction_laugh.mp4",
+  "bytes": 4388,
+  "visiblePixels": 2395,
+  "changedPixels": 0,
+  "motionVisible": false
+}

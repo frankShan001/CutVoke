@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_magnolia",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "大朵浅色玉兰、花蕊和绿叶区分明确，深底表现突出，适合春季和花卉主题。",
+  "sourceSha256": "f05e00c7f05669920919f6c468aa180177ef9fa6d07957324f6cad3d067d6e8f",
+  "previewSha256": "3f60ec447a897619b445d30bdc0660351f0508690907265e3dd3ded22b0b598c",
+  "auditSha256": "98111031dbd9813c779e9e7b716bb832f55aaed2d28d2b75889bede65fa9a655"
+}

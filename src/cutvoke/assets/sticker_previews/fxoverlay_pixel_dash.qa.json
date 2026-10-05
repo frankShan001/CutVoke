@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_dash",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2341b8a443a9bc6b70a6587f59a43a6b5bde3fd25fde87516a98ae5db854660a",
+  "previewSha256": "abba1bf2c2f96a027728c940982f1f0a8bd874b5502c4e4d11fcfc37782f556a",
+  "preview": "fxoverlay_pixel_dash.mp4",
+  "bytes": 10004,
+  "visiblePixels": 7575,
+  "changedPixels": 0,
+  "motionVisible": false
+}

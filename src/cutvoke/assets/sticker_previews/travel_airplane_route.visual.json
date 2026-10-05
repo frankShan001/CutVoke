@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_airplane_route",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "纸飞机与虚线航迹主题明确，虚线边缘干净且保持透明背景。",
+  "sourceSha256": "33ca1b115f14f0f44a3fc5bf67204145ea2ca6e2ac565adc88d533bc0bb287b2",
+  "previewSha256": "56563eda58995e343dc1aecd128161eecd246d52f4ffa5be1ab4bb8c8fdd33e0",
+  "auditSha256": "308602f71fd56392a2b97a1ea30d164eb8aa81047c2cfe35eefc3e8246882712"
+}

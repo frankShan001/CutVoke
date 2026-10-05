@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_charcoal_loops",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "两条炭黑手绘圈线完整，在浅色背景清晰，在深色背景可见度低。",
+  "sourceSha256": "504f819176f48911ae66879bef3ca790b0bab8a01b4735525c3d032bdd76af31",
+  "previewSha256": "fc8eca7f20119434324364e24132690703af22de5697f413c986c14524271a29",
+  "auditSha256": "92c5b79cf35494f8eeffe9537f5d0696a2b50255aa69461dd0cd0e74684ac503"
+}

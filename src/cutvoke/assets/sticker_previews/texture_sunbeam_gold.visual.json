@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_sunbeam_gold",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "Warm gold rays spread from an upper corner with smooth falloff; it functions as an edge-bleed light texture and overlays dark footage cleanly.",
+  "sourceSha256": "0cb5f787578c69d1fa90f67d208da2f04a2b49bd0c87801950b868df59f1ba53",
+  "previewSha256": "104e9c2f1cddea65448c168db7225868095edd0eff4e50d21b61494a553eb0f7",
+  "auditSha256": "1d3a0ab17b8c69196171d45d6f5b4fe7a8708494c7b6fb3063b8cbff87012666"
+}

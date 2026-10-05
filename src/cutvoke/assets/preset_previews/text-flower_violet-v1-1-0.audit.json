@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.flower_violet",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 5495,
+  "exportSha256": "beab76a6e6e0278dac68596437b557ab4406d344019b639f22e20eb04f6d031a",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "beab76a6e6e0278dac68596437b557ab4406d344019b639f22e20eb04f6d031a",
+  "auditExport": "text-flower_violet-v1-1-0.audit.mp4"
+}

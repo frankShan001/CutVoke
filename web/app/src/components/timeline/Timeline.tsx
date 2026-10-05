@@ -1,9 +1,8 @@
 /** 中央时间线：标尺 + 播放头 + 轨道泳道（可拖拽，含跨轨）+ 缩放按钮 + 空态。
-    持有共享拖拽系统（useTimelineDrag），拖动片段时渲染幽灵条块覆盖所有轨道。
-    不做全局快捷键（Web 环境与浏览器冲突）；缩放走工具条按钮。 */
+    持有共享拖拽系统（useTimelineDrag），拖动片段时渲染幽灵条块覆盖所有轨道。 */
 
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Maximize2, ZoomIn, ZoomOut, Plus } from "lucide-react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeftRight, CircleHelp, LocateFixed, Maximize2, ZoomIn, ZoomOut, Plus } from "lucide-react";
 import { useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
 import { insertClipAutoTrack, duplicateClip } from "../../store/clipEdit";
@@ -12,27 +11,42 @@ import { inferKind, type SessionAsset } from "../../lib/assetStore";
 import { Ruler } from "./Ruler";
 import { TrackRow } from "./TrackRow";
 import { EffectTrackRow } from "./EffectTrackRow";
+import { CaptionTrackRow } from "./CaptionTrackRow";
 import { Playhead } from "./Playhead";
 import { useTimelineDrag } from "./useTimelineDrag";
 import { niceMajorStep, timelineLengthSecs, trackEndSecs, toPx, ZOOM_LEVELS, zoomLabel, fmtTime, fmtTimePrecise } from "./util";
 import { playbackEndSecs } from "../playerUtils";
 import { getEffectCatalog, type EffectSpec } from "../../lib/effects";
+import { useTimelineViewport } from "./useTimelineViewport";
+
+function TimelineClock({ end, revealTime }: { end: number; revealTime: (time: number, force?: boolean) => void }) {
+  const { state } = useEditor();
+  const previous = useRef(state.playhead);
+  useLayoutEffect(() => {
+    if (Math.abs(previous.current - state.playhead) < 0.0001) return;
+    previous.current = state.playhead;
+    revealTime(state.playhead);
+  }, [state.playhead, revealTime]);
+  return <span className="cv-mono">{fmtTimePrecise(state.playhead)} / {fmtTime(end)}</span>;
+}
 
 export function Timeline() {
-  const { state, dispatch } = useEditor();
+  const { state, dispatch } = useEditor({ subscribeToClock: false });
   const [zoomIdx, setZoomIdx] = useState(3); // 40px/s 默认
   const [effectSpecs, setEffectSpecs] = useState<EffectSpec[]>([]);
 
   const tracks = state.project?.sequence.tracks || [];
+  const captions = state.project?.sequence.captions || [];
   const pxPerSec = ZOOM_LEVELS[zoomIdx];
 
   // Ctrl/⌘+D：复制当前选中片段（补充右键菜单）。浏览器 Ctrl+D 默认书签，需 preventDefault。
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!(e.ctrlKey || e.metaKey) || (e.key !== "d" && e.key !== "D")) return;
+      if (e.defaultPrevented || e.isComposing || state.view !== "editor" || state.editLock || state.exportOpen || state.templateOpen || state.agentPanelOpen) return;
       const ael = document.activeElement as HTMLElement | null;
       const tag = (ael?.tagName || "").toLowerCase();
-      if (tag === "input" || tag === "textarea" || tag === "select" || ael?.isContentEditable) return;
+      if (tag === "input" || tag === "textarea" || tag === "select" || ael?.isContentEditable || ael?.closest("[role='dialog'], [role='alertdialog']")) return;
       const st = getLatestState();
       const cur = st && st.currentId ? st : state;
       const sel = cur.selection;
@@ -64,17 +78,53 @@ export function Timeline() {
     const map = new Map<string, string>();
     let v = 0;
     let a = 0;
+    let s = 0;
+    let text = 0;
     for (const t of tracks) {
-      map.set(t.id, t.kind === "audio" ? `音频轨 ${++a}` : `视频轨 ${++v}`);
+      map.set(t.id, t.role === "sticker" ? `贴纸轨 ${++s}`
+        : t.kind === "audio" ? `音频轨 ${++a}`
+          : t.kind === "text" ? `文字轨 ${++text}` : `视频轨 ${++v}`);
     }
     return map;
   }, [tracks]);
   const widthPx = toPx(lengthSecs, pxPerSec);
-  const playheadSecs = state.playhead;
+  const currentPlayhead = () => (getLatestState() || state).playhead;
 
   const dragApi = useTimelineDrag();
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const fittedProjectRef = useRef<string | null>(null);
+  const viewport = useTimelineViewport(scrollerRef, pxPerSec);
+  const zoomAnchorRef = useRef<{ time: number; viewportX: number } | null>(null);
+
+  const getAxis = useCallback(() => {
+    const scroller = scrollerRef.current?.querySelector(".timeline__scroller") as HTMLElement | null;
+    const ruler = scrollerRef.current?.querySelector(".timeline-ruler") as HTMLElement | null;
+    if (!scroller || !ruler) return null;
+    const axisStart = ruler.getBoundingClientRect().left - scroller.getBoundingClientRect().left + scroller.scrollLeft;
+    return { scroller, axisStart };
+  }, []);
+
+  const revealTime = useCallback((time: number, force = false) => {
+    const axis = getAxis();
+    if (!axis) return;
+    const { scroller, axisStart } = axis;
+    const x = axisStart + Math.max(0, time) * pxPerSec;
+    const margin = Math.min(72, scroller.clientWidth * 0.15);
+    if (force || x < scroller.scrollLeft + margin || x > scroller.scrollLeft + scroller.clientWidth - margin) {
+      scroller.scrollLeft = Math.max(0, x - scroller.clientWidth * 0.4);
+    }
+  }, [getAxis, pxPerSec]);
+
+  // A zoom click keeps the current frame under the same point in the viewport.
+  // This makes close frame edits possible even deep in a long sequence.
+  useLayoutEffect(() => {
+    const anchor = zoomAnchorRef.current;
+    if (!anchor) return;
+    zoomAnchorRef.current = null;
+    const axis = getAxis();
+    if (!axis) return;
+    axis.scroller.scrollLeft = Math.max(0, axis.axisStart + anchor.time * pxPerSec - anchor.viewportX);
+  }, [zoomIdx, getAxis, pxPerSec]);
 
   useEffect(() => {
     let cancelled = false;
@@ -130,11 +180,26 @@ export function Timeline() {
     );
   }
 
-  const zoomOut = () => setZoomIdx((i) => Math.max(0, i - 1));
-  const zoomIn = () => setZoomIdx((i) => Math.min(ZOOM_LEVELS.length - 1, i + 1));
+  const zoomAroundPlayhead = (direction: -1 | 1) => {
+    const playheadSecs = currentPlayhead();
+    const next = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, zoomIdx + direction));
+    if (next === zoomIdx) return;
+    const axis = getAxis();
+    if (axis) {
+      const x = axis.axisStart + playheadSecs * pxPerSec - axis.scroller.scrollLeft;
+      zoomAnchorRef.current = {
+        time: playheadSecs,
+        viewportX: Math.max(48, Math.min(axis.scroller.clientWidth - 48, x)),
+      };
+    }
+    setZoomIdx(next);
+  };
 
   const ghost = dragApi.drop && dragApi.active?.mode === "move" ? dragApi.drop : null;
   const ghostKind = ghost?.kind === "audio" ? "audio" : "video";
+  const ghostFollowers = dragApi.active?.clipId
+    ? tracks.flatMap((track) => track.clips).filter((clip) => clip.attachedToClipId === dragApi.active?.clipId).length
+    : 0;
 
   return (
     <section className={`timeline ${state.toolMode === "cut" ? "timeline--cut" : ""}`}>
@@ -145,24 +210,55 @@ export function Timeline() {
           title="时间码显示播放头与最后一个片段的结束点；标尺会额外预留空白，便于继续添加片段。"
         >
           <span className="timeline__duration-label">播放头 / 片段末尾</span>
-          <span className="cv-mono">{fmtTimePrecise(playheadSecs)} / {fmtTime(contentEndSecs)}</span>
+          <TimelineClock end={contentEndSecs} revealTime={revealTime} />
           <span className="timeline__format">
             {state.project.sequence.width}×{state.project.sequence.height} · {state.project.sequence.fps.num}/{state.project.sequence.fps.den}
           </span>
         </span>
         <span className="timeline__spacer" />
+        <button
+          className={`tool-btn ${state.mainTrackAutoFitEnabled ? "tool-btn--on" : ""}`}
+          onClick={() => dispatch({ type: "MAIN_TRACK_AUTO_FIT_TOGGLE" })}
+          aria-label="主轨自动贴合开关"
+          aria-pressed={state.mainTrackAutoFitEnabled}
+          title={state.mainTrackAutoFitEnabled
+            ? "主轨自动贴合：开启。拖入主视频轨会按顺序插入并压紧片段；关闭后可保留空隙。"
+            : "主轨自动贴合：关闭。拖动可在主视频轨保留空隙。"}
+        >
+          <ArrowLeftRight size={14} />
+        </button>
+        <button className="timeline__zoom-btn" onClick={() => revealTime(currentPlayhead(), true)} aria-label="定位播放头" title="把播放头定位到时间线视野中">
+          <LocateFixed size={14} />
+        </button>
         <div className="timeline__zoom">
           <button className="timeline__zoom-btn" onClick={zoomToFit} aria-label="适应工程" title="缩放至完整显示当前工程">
             <Maximize2 size={14} />
           </button>
-          <button className="timeline__zoom-btn" onClick={zoomOut} disabled={zoomIdx === 0} aria-label="缩小">
+          <button className="timeline__zoom-btn" onClick={() => zoomAroundPlayhead(-1)} disabled={zoomIdx === 0} aria-label="缩小" title="以播放头为中心缩小">
             <ZoomOut size={14} />
           </button>
           <span className="timeline__zoom-val">{zoomLabel(pxPerSec)}</span>
-          <button className="timeline__zoom-btn" onClick={zoomIn} disabled={zoomIdx === ZOOM_LEVELS.length - 1} aria-label="放大">
+          <button className="timeline__zoom-btn" onClick={() => zoomAroundPlayhead(1)} disabled={zoomIdx === ZOOM_LEVELS.length - 1} aria-label="放大" title="以播放头为中心放大">
             <ZoomIn size={14} />
           </button>
         </div>
+        <details className="timeline__shortcuts">
+          <summary className="timeline__zoom-btn" aria-label="查看快捷键" title="查看快捷键"><CircleHelp size={14} /></summary>
+          <div className="timeline__shortcuts-card">
+            <strong>常用快捷键</strong>
+            <dl>
+              <dt>播放 / 暂停</dt><dd>空格</dd>
+              <dt>选择 / 切割工具</dt><dd>V / C</dd>
+              <dt>删除所选片段或效果</dt><dd>Delete / Backspace</dd>
+              <dt>复制所选片段</dt><dd>Ctrl / ⌘ + D</dd>
+              <dt>撤销 / 重做</dt><dd>Ctrl / ⌘ + Z · Ctrl / ⌘ + Shift + Z</dd>
+              <dt>逐帧定位</dt><dd>先点标尺，再按 ← / →</dd>
+              <dt>片段前后重排</dt><dd>先聚焦片段，再按 Alt + ← / →</dd>
+              <dt>临时独立移动</dt><dd>按住 Alt 拖动视频，关联片段保持原位</dd>
+            </dl>
+            <small>输入文字或打开弹窗时，编辑器快捷键暂停响应。</small>
+          </div>
+        </details>
       </header>
 
       <div className="timeline__body" ref={scrollerRef}>
@@ -198,6 +294,7 @@ export function Timeline() {
                     pxPerSec={pxPerSec}
                     dragApi={dragApi}
                     effectSpecs={effectSpecs}
+                    viewport={viewport}
                   />
                   {t.kind === "video" ? (
                     <EffectTrackRow
@@ -205,18 +302,26 @@ export function Timeline() {
                       displayName={`效果轨 ${videoTrackOrdinal(tracks, t.id)}`}
                       pxPerSec={pxPerSec}
                       effectSpecs={effectSpecs}
+                      viewport={viewport}
                     />
                   ) : null}
                 </Fragment>
               ))
             )}
+            {captions.length > 0 ? (
+              <CaptionTrackRow
+                captions={captions}
+                selectedCaptionId={state.selectedCaptionId}
+                pxPerSec={pxPerSec}
+              />
+            ) : null}
             {/* 素材拖到轨道区下方空白 → 自动建轨 */}
             <TimelineEmptyDrop />
             {ghost ? (
               <div
                 className={`clip-block clip-block--${ghostKind} clip-block--ghost ${ghost.snapped ? "clip-block--ghost--snapped" : ""} ${ghost.reorderMode ? "clip-block--ghost--reorder" : ""} ${ghost.invalidReason ? "clip-block--ghost--invalid" : ""}`}
                 style={{ left: ghost.ghostLeft, width: ghost.widthPx, top: ghost.ghostTop }}
-                title={ghost.invalidReason || `${ghost.reorderMode ? "插入片段间隙" : "放置位置"}：${fmtTime(ghost.startSecs)}`}
+                title={ghost.invalidReason || `${ghost.mainTrackAutoFit ? "主轨自动贴合插入" : ghost.reorderMode ? "插入片段间隙" : "放置位置"}：${fmtTime(ghost.startSecs)}`}
                 aria-hidden="true"
               />
             ) : null}
@@ -235,7 +340,7 @@ export function Timeline() {
                   top: Math.max(0, ghost.ghostTop - 5),
                 }}
               >
-                {ghost.invalidReason || `${ghost.reorderMode ? "插入到这里 · " : ""}${fmtTime(ghost.startSecs)}`}
+                {ghost.invalidReason || `${ghost.mainTrackAutoFit ? "主轨贴合 · 插入到这里 · " : ghost.reorderMode ? "插入到这里 · " : ""}${fmtTime(ghost.startSecs)}${ghostFollowers ? ` · 跟随 ${ghostFollowers} 个片段` : ""}`}
               </span>
             ) : null}
           </div>
@@ -281,6 +386,7 @@ function TimelineEmptyDrop() {
         Array.from(files),
         (media) => insertClipAutoTrack(dispatch, getLatestState() || state, {
           sourcePath: media.path,
+          assetId: media.assetId,
           trackKind: trackKindForMedia(media.kind),
         }),
         (name, message) => dispatch({ type: "STATUS_SET", severity: "warn", text: `导入 ${name} 失败：${message}` }),
@@ -288,11 +394,20 @@ function TimelineEmptyDrop() {
       return;
     }
     try {
-      const payload = JSON.parse(raw) as { sourcePath: string; kind?: SessionAsset["kind"] };
+      const payload = JSON.parse(raw) as { sourcePath: string; assetId?: string;
+        kind?: SessionAsset["kind"]; role?: "sticker";
+        stickerAnimation?: { effectId: string; params: Record<string, unknown> };
+        stickerScale?: number;
+        resourceRef?: import("../../types/api").ResourceReference };
       const kind = payload.kind ?? inferKind(payload.sourcePath, false, false);
       void insertClipAutoTrack(dispatch, getLatestState() || state, {
         sourcePath: payload.sourcePath,
-        trackKind: trackKindForMedia(kind),
+        assetId: payload.assetId,
+        trackKind: payload.role === "sticker" ? "video" : trackKindForMedia(kind),
+        trackRole: payload.role === "sticker" ? "sticker" : undefined,
+        stickerAnimation: payload.role === "sticker" ? payload.stickerAnimation : undefined,
+        resourceRef: payload.role === "sticker" ? payload.resourceRef : undefined,
+        stickerScale: payload.role === "sticker" ? payload.stickerScale : undefined,
       });
     } catch {
       /* ignore */

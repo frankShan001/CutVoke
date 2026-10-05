@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_juice_cheers",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "两只果汁杯的杯沿和杯脚完整，碰杯关系一眼可辨。",
+  "sourceSha256": "79be302297827228093e777d4ad9ee3b7ef55b5bf77e19bb215e8b111742750f",
+  "previewSha256": "b134ef1f50a03937bd48c9681ca781b69be97a7a3f7b0c896c7be8b3add2df38",
+  "auditSha256": "3fc0c3ba345fbb72a873fa1a0182f7fd4f93cdd722b0fb8d5e004f065e5d3fc4"
+}

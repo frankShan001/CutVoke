@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_taiyaki",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a9620b226ce562bf97f82ed37be8e4d173c5772fb8a4307e3df11062942c736b",
+  "previewSha256": "5bef40b6a981cea03c7f150bae8be2ad4ace8b4ee9943cf833445a6d56523dc5",
+  "preview": "food_taiyaki.mp4",
+  "bytes": 5467,
+  "visiblePixels": 3134,
+  "changedPixels": 0,
+  "motionVisible": false
+}

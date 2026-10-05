@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.motion_pulse",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 1655,
+  "exportSha256": "66c946a231b1ee01764a5a160a65a27f21e6e9ea5ddbe9b274b17c6b8a878eec",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "66c946a231b1ee01764a5a160a65a27f21e6e9ea5ddbe9b274b17c6b8a878eec",
+  "auditExport": "text-motion_pulse-v1-0-0.audit.mp4"
+}

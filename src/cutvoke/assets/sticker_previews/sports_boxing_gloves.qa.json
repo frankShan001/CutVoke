@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_boxing_gloves",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d2ead3415bd698d5b0c5fa9db213b55314ab3eed854c723519c0d6038462de2c",
+  "previewSha256": "e180f5b4b333b215dd2daf4fd6f24dbb9229c4a58e032c7bacda4f3ba6d390b3",
+  "preview": "sports_boxing_gloves.mp4",
+  "bytes": 3712,
+  "visiblePixels": 1103,
+  "changedPixels": 0,
+  "motionVisible": false
+}

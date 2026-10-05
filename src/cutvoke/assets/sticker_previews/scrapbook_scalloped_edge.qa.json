@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_scalloped_edge",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4105fcc49973a1162525bdda81a58f080a49a73f9718ca3eab91bf7debdc4afa",
+  "previewSha256": "6dffbe851d01c2bdf97f7a635f5ff04c5d460ff216f22e29600279ae6175e009",
+  "preview": "scrapbook_scalloped_edge.mp4",
+  "bytes": 2860,
+  "visiblePixels": 358,
+  "changedPixels": 0,
+  "motionVisible": false
+}

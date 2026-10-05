@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_graduation_cap",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "18e842fe7be136f8328f45f6636f5f52ad80cf05baed967d3d249634eb74f07d",
+  "previewSha256": "ab46090a15a77741ce2067f307fddc3105690c3cf0b6cbd00a87aafe3c731f4f",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2902,
+  "visiblePixels": 2048,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1973,
+    "steady_entry": 2048,
+    "steady_exit": 2048,
+    "exit": 1973
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1973,
+      "withoutFade": 2048
+    },
+    "steady_entry": {
+      "withFade": 2048,
+      "withoutFade": 2048
+    },
+    "steady_exit": {
+      "withFade": 2048,
+      "withoutFade": 2048
+    },
+    "exit": {
+      "withFade": 1973,
+      "withoutFade": 2048
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.099,
+    0.095
+  ],
+  "auditExport": "learn_graduation_cap.audit.mp4",
+  "auditExportSha256": "dc832634c022bd8abdbfdd4bcb505a63ba6245d8e70996f3e472834179518037"
+}

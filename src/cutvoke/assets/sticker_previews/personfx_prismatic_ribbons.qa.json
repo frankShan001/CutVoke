@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_prismatic_ribbons",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "caeaaa70de67c64fddf5ab7c7e42079c3b21b1c032fbc7f6be53a373ee0b7072",
+  "previewSha256": "e73966730d0e5ea82fc84a0a2b1794df3bfb49f5edbeb8446f8126197a7d4e91",
+  "preview": "personfx_prismatic_ribbons.mp4",
+  "bytes": 8804,
+  "visiblePixels": 6179,
+  "changedPixels": 0,
+  "motionVisible": false
+}

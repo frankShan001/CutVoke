@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_blue_vellum_ribbon",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0585afb83c4315636878f618e325c85efe633d547fc41f1f7f41713126379b8d",
+  "previewSha256": "950a51375ff923a6ebf44cf29eb4375b4f71bdda0655c4c8ccededfa8171ccd5",
+  "preview": "scrapbook_blue_vellum_ribbon.mp4",
+  "bytes": 2884,
+  "visiblePixels": 419,
+  "changedPixels": 0,
+  "motionVisible": false
+}

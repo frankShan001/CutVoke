@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_storm_flash",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "22e45ca14d1ff6d248b18658dda9672fb1b5869d8ac7c68df5af98370b48f992",
+  "previewSha256": "1504e0522cdc9dfedaf4b903573c95acf3d6f9af76263e6f9f286b85e5e9f12e",
+  "preview": "natural_light_storm_flash.mp4",
+  "bytes": 9119,
+  "visiblePixels": 16538,
+  "changedPixels": 0,
+  "motionVisible": false
+}

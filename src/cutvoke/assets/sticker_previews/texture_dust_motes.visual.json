@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_dust_motes",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器浅底合成预览；只批准结构和颜色在缩略图中清楚、可与同类区分的素材。批准仅覆盖贴图本身的可辨识度，不代表复杂实拍成片验收。",
+  "observation": "金色颗粒有大小和明暗层次，浅灰预览中仍清晰可辨，能表达暖色漂浮尘点。",
+  "sourceSha256": "b7bc7a1b7b21c93dcf46fb7763faeca62fcb5f802b475a7796d03b8be2c23d07",
+  "previewSha256": "77d1cb879101f39bbc2bc62ce1b64988b2505ac0966b1ddcf8f0cfeabccd8208",
+  "auditSha256": "b8d3fc9044cc963c7b80cee806c6789fc4721f16dab9a348007e0f00d1f9b491"
+}

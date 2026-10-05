@@ -7,7 +7,7 @@ import { getLatestState } from "../store/actions";
 import { addEffect, duplicateClip, removeClip, setClipSpeed, splitClip } from "../store/clipEdit";
 import type { EditorAction } from "../store/editor";
 import { rationalToSecs, secsToRational } from "../lib/rational";
-import { sourceBasename } from "../lib/media";
+import { assetDisplayName, useSessionAssets } from "../lib/assetStore";
 import { BUILTIN_TRANSFORM_ID, BUILTIN_COLOR_ID, BUILTIN_CROSSFADE_ID } from "../lib/effects";
 
 export interface CtxTarget {
@@ -29,6 +29,7 @@ export function ClipContextMenu({
   onClose: () => void;
   dispatch: Dispatch<EditorAction>;
 }) {
+  useSessionAssets();
   const st = getLatestState();
   if (!st || !st.currentId) return null;
   const ctx = st;
@@ -91,7 +92,7 @@ export function ClipContextMenu({
       />
       <div className="ctx-menu" style={{ left: target.x, top: target.y }}>
         <div className="ctx-menu__label">
-          {clip ? sourceBasename(clip.assetRef.sourcePath) : "片段"}
+          {clip ? assetDisplayName(clip.assetRef) : "片段"}
         </div>
         <button className="ctx-menu__item" onClick={handleSplit}>
           <Scissors size={14} /> 在播放头分割

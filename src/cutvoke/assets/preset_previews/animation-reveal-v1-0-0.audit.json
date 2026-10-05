@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.reveal",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "4b125fcffbd30978f4674b48dadfcf1c6eaa5d72a70b2ef34867bcec4a03a045",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "4b125fcffbd30978f4674b48dadfcf1c6eaa5d72a70b2ef34867bcec4a03a045",
+  "auditExport": "animation-reveal-v1-0-0.audit.mp4"
+}

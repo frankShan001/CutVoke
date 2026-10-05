@@ -1,0 +1,41 @@
+{
+  "presetId": "cutvoke.preset.filter.filmSunset",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.sepia",
+      "version": "1.0.0",
+      "params": {
+        "strength": 0.8
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.colorize",
+      "version": "1.0.0",
+      "params": {
+        "hue": 18,
+        "saturation": 0.75,
+        "mix": 0.55,
+        "lightness": 0.5
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.curves",
+      "version": "1.0.0",
+      "params": {
+        "preset": "vintage"
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 40.788,
+  "maxSampledMeanRgbDifference": 40.788,
+  "coverSha256": "dc94799fbfab3c9dbda4270dd6072e5c6876c1ce5313a2b6cb78b3769fcbf0f8",
+  "previewSha256": "948b4ab67f0ab39420db31c43d971b1adb77a835ccb8905d33103d317251a935",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

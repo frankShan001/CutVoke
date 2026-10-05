@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_golden_dust_burst",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A dense central burst of gold dust and glitter is distinct from the cleaner radial sunburst.",
+  "method": "Inspected the rendered transparent artwork on split dark and light neutral panels; machine workflow audit hashes are pinned.",
+  "sourceSha256": "4b34cd812cb7dec3d02cd36ad627eea77a3f0485fb77d9af849952a7e10b3d03",
+  "previewSha256": "0c026c9445e82e34e61de8cdae72a2cef151d848e73dc7ffbae7b5fc6b311848",
+  "auditSha256": "699ea0f0ce9972e9dcb2b4f19fb2128ed5e89b72fe5f67867d90dcc8c9416e31"
+}

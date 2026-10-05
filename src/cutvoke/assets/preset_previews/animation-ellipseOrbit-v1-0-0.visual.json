@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.ellipseOrbit",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.orbit",
+  "params": {
+    "amplitude": 0.09,
+    "period": 1.7
+  },
+  "subcategory": "循环",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "圆门沿椭圆轨迹左右和上下环绕，周期转向连续，没有固定六状态的跳转。 已实际复看重建库预览的12个时间点，图形运动清楚，画幅和边缘正常。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "3ece2a7af6f547995b2d5e18cce43bf3018cdd6a02b74aecd221d2fcaa836a1b",
+  "motionPreviewSha256": "9a8077dfa46a527e6a262b33cd90bd03871bc3accdeaaa74ffeec4da47b07a9a",
+  "auditSha256": "ace94046c60711d42c65c8f022b3e2893629d0c5c921c198d9e2fc2d6cf99704",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_ellipseOrbit.png",
+  "libraryReviewSheetSha256": "5b8b249a5fc29b7f4a7c0b7b8d6a64527e939972e2d9a935e7da2b90123a3c0a"
+}

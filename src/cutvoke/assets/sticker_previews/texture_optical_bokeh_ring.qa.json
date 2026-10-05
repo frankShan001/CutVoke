@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_bokeh_ring",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "485326d6bb4dba7a48d75737f95ab3b2aed563d5913b601c99b48dbbee918759",
+  "previewSha256": "d914c57b4fa1d6940e22a356457223d63617e0fd42d016811eb16a493138bc0c",
+  "preview": "texture_optical_bokeh_ring.mp4",
+  "bytes": 8865,
+  "visiblePixels": 7753,
+  "changedPixels": 0,
+  "motionVisible": false
+}

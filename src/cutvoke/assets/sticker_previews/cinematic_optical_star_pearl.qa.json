@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_star_pearl",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "919e1f6778a488f96b73e9a4bc2b38abe2e83b380f6374e55d88ba4965e83b82",
+  "previewSha256": "2afad8116f67e0cad1d9788f909ea1c920b36fb339059ef47b7688c6891f1fd9",
+  "preview": "cinematic_optical_star_pearl.mp4",
+  "bytes": 6734,
+  "visiblePixels": 2364,
+  "changedPixels": 0,
+  "motionVisible": false
+}

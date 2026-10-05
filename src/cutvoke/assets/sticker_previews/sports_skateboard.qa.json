@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_skateboard",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "de24447f7b36032ecd80545751efe6bb5959af1e8a2e40ed0c1d2ef4943678e0",
+  "previewSha256": "9dfdf61209723a991e64374223d31ce618af1fb46cd8b1c2b1a91cbc5c1c034a",
+  "preview": "sports_skateboard.mp4",
+  "bytes": 3623,
+  "visiblePixels": 793,
+  "changedPixels": 0,
+  "motionVisible": false
+}

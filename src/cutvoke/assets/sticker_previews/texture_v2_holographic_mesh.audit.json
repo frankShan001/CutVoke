@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_holographic_mesh",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "04680f2501ccf26bad5af89bed08f77f443dc08f6246f7849c99c11d2947a1a4",
+  "previewSha256": "110690fe16fb64603a1e4508366d4fc5558cfbfda22e9a2192ece1e66e110710",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5383,
+  "visiblePixels": 4531,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2621,
+    "steady_entry": 4531,
+    "steady_exit": 4531,
+    "exit": 2621
+  },
+  "previewExportMeanRgbDifferences": [
+    0.317,
+    0.309
+  ],
+  "auditExport": "texture_v2_holographic_mesh.audit.mp4",
+  "auditExportSha256": "877be3056fc1d9b9b51c411a9cdf4f786d05d79b80653dac2db6798d22457f88"
+}

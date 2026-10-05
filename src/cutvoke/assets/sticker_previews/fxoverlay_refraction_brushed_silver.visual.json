@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_brushed_silver",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "observation": "银色拉丝纹理有连续方向性的金属褶面，浅底对比偏弱，深色画面效果更明显。",
+  "sourceSha256": "1e9a11d5291cf74b65d10f1b52926afeb0dfca3ad830a0d13acd7f78709b9e8f",
+  "previewSha256": "e581e2104f8557bea60b1abe91302fb23e278588ff803f27073d4fd6deea939a",
+  "auditSha256": "386306b2749f170e2cf5991d10b8dec2584b783cfe23982a0bec92cb10881c94"
+}

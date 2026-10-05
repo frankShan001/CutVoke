@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.pearlEdge",
+  "version": "1.4.0",
+  "effectId": "cutvoke.person.halo",
+  "params": {
+    "sigma": 18,
+    "hueShift": -120,
+    "saturation": 0.45,
+    "opacity": 1.0
+  },
+  "subcategory": "人物轮廓",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A pale blue-silver diffuse glow is now visible around the moving silhouette; it is softer and less saturated than the blue outline.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "202c8080790c1eaae6558dc7735925ce1f3c85c10874ed1c961a22388fe1e5c6",
+  "motionPreviewSha256": "6f16b62dfc404cd1aab2cbef7d92d5b5f475e45d82bcc96d316764266da73a9a",
+  "auditSha256": "bfde5f302f8ca196eeb666695daef295aa95358336118c987ddf9c17b7a14ae8"
+}

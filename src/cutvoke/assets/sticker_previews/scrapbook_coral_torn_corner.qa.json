@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_coral_torn_corner",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a64b60b4662f897a009c6c4d48ec2cb17a9246aae93d3b8b8045253275b6fd3c",
+  "previewSha256": "b20aef51128e8d15326eaf4bcf1522f76ccf533c001e2ecd2101c2cd4fea8729",
+  "preview": "scrapbook_coral_torn_corner.mp4",
+  "bytes": 2944,
+  "visiblePixels": 449,
+  "changedPixels": 0,
+  "motionVisible": false
+}

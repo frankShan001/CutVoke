@@ -1,0 +1,25 @@
+{
+  "presetId": "cutvoke.preset.transition.zoom",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.zoom",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 91.947,
+  "maxSampledMeanRgbDifference": 91.947,
+  "coverSha256": "c8b5502f3f71b45ad6ab7eedcec0fa06f56946ced640620c4ea58e3347f52bd0",
+  "previewSha256": "0228cb6123c408885613de3254f91757f2a7ba3ae49563c03c2d0f9e825c4e73",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_energy_spiral_teal",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "Teal and gold ribbon strokes form a readable vertical sound-energy spiral.",
+  "sourceSha256": "282af72eb57415ee720cc0ee649760a2493892e6511d230392c98400c275781a",
+  "previewSha256": "4f3f491c9bb3912a677b6ff5e9dbc04bc5fd301606048926de5f14e6fa12ecbe",
+  "auditSha256": "131d88546e751ba78116b54a99a40018bb671db6077bffd3699fa8381df80063"
+}

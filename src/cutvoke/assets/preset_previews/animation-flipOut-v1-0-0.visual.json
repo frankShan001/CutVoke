@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.flipOut",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.flipOut",
+  "params": {
+    "duration": 1.0,
+    "easing": "ease-out"
+  },
+  "subcategory": "出场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "最后一秒逐帧收窄为居中竖条，翻牌退出无多帧停顿，后续镜头无残条。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "1792a357156e76ff8765e82ee97c77f4256827d14e7659e0971ea5d030d9202b",
+  "motionPreviewSha256": "d0a152e73a7130ef7f3fa4ceba97169f63b7b14fd73a79737c6d645fc53722c5",
+  "auditSha256": "e29be0c49545ffcdd91aa7cd7893c48121231027d538d1332f3ca6b6d53c2718",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_flipOut.png",
+  "libraryReviewSheetSha256": "9978de95ee11a3b5cfef60054fc5775623f2f2073f326b8c19f029ec2d9f80d1"
+}

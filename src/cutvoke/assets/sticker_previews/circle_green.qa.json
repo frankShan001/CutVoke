@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.circle_green",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e20cf73926ea41853fcb405f8c7c54bf24ca06f28c548f4811f80ba41bedc035",
+  "previewSha256": "8892e7961dc3459a1eebd88f541cfb3b40d0fd0d117a32aa9591ee693aa9270a",
+  "preview": "circle_green.mp4",
+  "bytes": 4370,
+  "visiblePixels": 1650,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_fireflies",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "独立黄绿色发光点带柔和光晕，粒子间距清晰。",
+  "sourceSha256": "59992634f5587a7761c2b3284b92e85e8e118b11ebf1d5c759be81021744ce43",
+  "previewSha256": "80093f6bc0ff5dadf50378fcd025864c5bfb0e69df35621636c4f21e081d5aee",
+  "auditSha256": "ac71b99a24ef86887062eae9241f0048782a123a1026bc12022b71e83da5def1"
+}

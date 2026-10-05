@@ -1,0 +1,25 @@
+{
+  "presetId": "cutvoke.preset.transition.diagblurdown",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.diagblurdown",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 91.178,
+  "maxSampledMeanRgbDifference": 91.178,
+  "coverSha256": "2c70ec2173a01f539572a63ed6d51af26b626b172f0100fc9c2c5ee2a13cf6ed",
+  "previewSha256": "c3c40cba6b5df0b26851a50afc1443fcfa40a585d469bf457a4848298ce7a3a3",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

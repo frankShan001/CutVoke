@@ -9,6 +9,43 @@ from cutvoke.core.service import EditError, EditService
 
 
 class AnimationAtomicTests(unittest.TestCase):
+    def test_transition_rejects_a_broken_seam_without_mutating_project(self) -> None:
+        service = EditService()
+        project = service.create_project("transition-gap")
+
+        def apply(command_type: str, payload: dict, command_id: str):
+            current = service.get_project(project.project_id)
+            return service.execute(Command(
+                type=command_type, payload=payload, command_id=command_id,
+                project_id=project.project_id, expected_revision=current.revision,
+                actor=Actor("agent", "transition-test"),
+            ))
+
+        apply("track.add", {"trackId": "v1", "kind": "video"}, "gap-track")
+        for clip_id, start, end in (("a", 0, 3), ("b", 4, 7)):
+            apply("clip.insert", {
+                "trackId": "v1", "clipId": clip_id,
+                "sourcePath": f"{clip_id}.png",
+                "timelineStart": {"num": start, "den": 1},
+                "timelineEnd": {"num": end, "den": 1},
+            }, f"gap-{clip_id}")
+        before = service.get_project(project.project_id).revision
+        with self.assertRaises(EditError) as error:
+            apply("effect.setTransition", {
+                "clipId": "b", "effectId": "cutvoke.transition.crossfade",
+                "params": {"duration": 0.5},
+            }, "gap-transition")
+        self.assertEqual(error.exception.code, ErrorCode.INVALID_ARGUMENT)
+        with self.assertRaises(EditError) as direct_error:
+            apply("effect.add", {
+                "clipId": "b", "effectId": "cutvoke.transition.crossfade",
+                "params": {"duration": 0.5},
+            }, "gap-transition-direct")
+        self.assertEqual(direct_error.exception.code, ErrorCode.INVALID_ARGUMENT)
+        after = service.get_project(project.project_id)
+        self.assertEqual(after.revision, before)
+        self.assertEqual(after.sequence.tracks[0].clips[1].effects, [])
+
     def test_transition_switch_is_one_revision_and_failed_switch_keeps_old(self) -> None:
         service = EditService()
         project = service.create_project("transition-atomic")

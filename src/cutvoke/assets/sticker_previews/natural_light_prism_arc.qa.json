@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_prism_arc",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "904292eb3a1c7f5b69b3931e15b7f306d2a8a8262c8bf9e5a73bb39a7a08eb87",
+  "previewSha256": "a898c34475d375c32edba7c9a1d4f5512f9b03032a50264488e30efd58fae35d",
+  "preview": "natural_light_prism_arc.mp4",
+  "bytes": 7482,
+  "visiblePixels": 9972,
+  "changedPixels": 0,
+  "motionVisible": false
+}

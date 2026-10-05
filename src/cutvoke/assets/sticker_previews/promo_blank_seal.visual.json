@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.promo_blank_seal",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "observation": "The blank double-line seal forms a continuous circle with a clear empty center.",
+  "sourceSha256": "ed611c0ad8679f4e0e63d673403392ce424dae7406a3786cc3c443b725ff3908",
+  "previewSha256": "89f867ae7125893e8f20004752fe63ad20e8e79c43de70b9f8b16cbdbbc27a68",
+  "auditSha256": "c3403de8e611cbad558e1f4824459db1692ec9af2048a5c4d4ff967473409c70"
+}

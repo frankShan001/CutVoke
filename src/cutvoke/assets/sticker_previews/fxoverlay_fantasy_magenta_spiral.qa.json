@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_magenta_spiral",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "60372ff66814099ddb4ca207ddb91c556e108fa84a98a3834feaadd59162c231",
+  "previewSha256": "5d7a949d836c72e8e150b4a48c37ca60dd915d491b72492f1892347b74f375b6",
+  "preview": "fxoverlay_fantasy_magenta_spiral.mp4",
+  "bytes": 14937,
+  "visiblePixels": 9718,
+  "changedPixels": 0,
+  "motionVisible": false
+}

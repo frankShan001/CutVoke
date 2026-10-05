@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.circleAperture",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "x",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "2b2e3d5b8728dfb164f14155f642561f1b2960d82e730f2ac56128e942543229",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "2b2e3d5b8728dfb164f14155f642561f1b2960d82e730f2ac56128e942543229",
+  "auditExport": "fx-circleAperture-v1-0-0.audit.mp4"
+}

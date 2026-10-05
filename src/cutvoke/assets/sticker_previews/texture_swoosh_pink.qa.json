@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_swoosh_pink",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "b2bc3660462adebe19cfd8b91388f6f4ed05bc29bf53eb20f18a061ce97f5fcf",
+  "previewSha256": "2d42dfa5e1983a7fefd477b196385ec90cab0a5c4d5f5db1bc2240c46fb1bb3b",
+  "preview": "texture_swoosh_pink.mp4",
+  "bytes": 3911,
+  "visiblePixels": 1143,
+  "changedPixels": 0,
+  "motionVisible": false
+}

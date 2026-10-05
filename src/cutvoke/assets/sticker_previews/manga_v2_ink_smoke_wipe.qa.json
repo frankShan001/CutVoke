@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_ink_smoke_wipe",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "40914a86f9bc3c314d020291c4902f9484f21a933c928537db62ea889e3af01e",
+  "previewSha256": "47a5534418f1241a2709b51b9daf850aeffe7c74c97997e13bc4fe7b941c540f",
+  "preview": "manga_v2_ink_smoke_wipe.mp4",
+  "bytes": 11612,
+  "visiblePixels": 8274,
+  "changedPixels": 0,
+  "motionVisible": false
+}

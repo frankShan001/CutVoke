@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.promo_callout_leaders",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "observation": "Both blank callout lines have intact endpoints and leave open space for later annotation.",
+  "sourceSha256": "d8ddebb374b72e7d8a89b14bfd61a6a839181870281f7cac64a676d3d0c1e392",
+  "previewSha256": "dd42b9c1d61c34cbb37b13b42f7b731a1d120d8497fc33887c5e9dcb9b9eb9f0",
+  "auditSha256": "7568316fd75059b258b887d53df7e3cd6ae5ce8839f47ebf5e96d43ffb31e5a5"
+}

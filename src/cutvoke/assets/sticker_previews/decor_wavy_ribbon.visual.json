@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.decor_wavy_ribbon",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed transparent 4x3 artwork contact sheet and actual composited frames for every sticker, compared silhouettes, palette, use and edge quality against the existing sticker library.",
+  "observation": "蓝黄双层波浪线横向延伸，适合作为下划线或节奏线；与箭头和单色笔刷区分明显。",
+  "sourceSha256": "be2bf7917342fb2d8e57947761ff331b8d251e886d192b2413aa872c977d12db",
+  "previewSha256": "a1db369663c029cb9de7b203be033bee96f9303b49292acbca5b920bbc235daa",
+  "auditSha256": "b4f6f38eb5acb2abaffb491ee0074c019a6b7e9402245ff0e9e867a721f3c514"
+}

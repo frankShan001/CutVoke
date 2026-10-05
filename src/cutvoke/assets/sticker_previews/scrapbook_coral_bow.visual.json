@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_coral_bow",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "珊瑚色蝴蝶结结心、双环和飘带轮廓完整。",
+  "sourceSha256": "a106cdffde477cb575208cbf093b88d46a5064b19ee7406ec7d33bfc5d5194e9",
+  "previewSha256": "d376dbe29df2ad9515b7e33dfd9b3f8a0d92f6b06c8ff4d1b4cb0064750c3a63",
+  "auditSha256": "39e54e88161d6613e433143e87c60b037836c10c3ee6784e7eef18686b80a599"
+}

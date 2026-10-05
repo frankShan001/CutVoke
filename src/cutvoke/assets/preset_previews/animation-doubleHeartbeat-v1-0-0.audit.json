@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.doubleHeartbeat",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "amplitude",
+    "value": 0.125
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "410afb3f416b95696de815bad9698ae35baf2ea70be568d1092bc5aa94702166",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "410afb3f416b95696de815bad9698ae35baf2ea70be568d1092bc5aa94702166",
+  "auditExport": "animation-doubleHeartbeat-v1-0-0.audit.mp4"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_map_route",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "291c30e642ed0df5ee3807f57d7307411530ce5b13a4a6eff6ee2acf11002d0e",
+  "previewSha256": "4e920da8e17c7779ec23ea28881dc10f4e7525b191b1e9f36f460afee3f16bc9",
+  "preview": "travel_map_route.mp4",
+  "bytes": 4245,
+  "visiblePixels": 1722,
+  "changedPixels": 0,
+  "motionVisible": false
+}

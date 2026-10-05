@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_music_notes_neon",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "386c55d1d612715faa77fa8d96c322aa6edcf26ed8e3d475aa9296a81417c7e3",
+  "previewSha256": "63488978972adb25c0d2ea7097b1ad04873bb224cf96c5ba08928fe36d61a86d",
+  "preview": "audiofx_music_notes_neon.mp4",
+  "bytes": 9105,
+  "visiblePixels": 5873,
+  "changedPixels": 0,
+  "motionVisible": false
+}

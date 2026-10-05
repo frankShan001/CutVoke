@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_smoke_wisps",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "132fde06344a241e350cc880162e58e7d2b999d346e7d6ccdf9d580db4a97598",
+  "previewSha256": "acf07f9be2b80e58f1e56fd6e5ea1ac964f5bbe6e64fbaf44bfe15d41fb5c445",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6482,
+  "visiblePixels": 5558,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2821,
+    "steady_entry": 5558,
+    "steady_exit": 5558,
+    "exit": 2819
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_v2_smoke_wisps.audit.mp4",
+  "auditExportSha256": "dd1a66deb54b6e816f697bc6295db2dc9f82dfd61f51ad31f4f0a13da12caaf9"
+}

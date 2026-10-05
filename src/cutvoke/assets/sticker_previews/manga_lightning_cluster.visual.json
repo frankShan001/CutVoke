@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_lightning_cluster",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项比对透明原图、浅色/深色合成底图与实际渲染器样片，检查造型辨识、格线串入、边缘裁切、透明通道和背景对比；本次不代表复杂实拍素材的商业观感验收。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿，单独复审，原批次记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿并复审，原 13 项记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另纳入 2026-09-24 的 2×2 高对比图集审核记录。",
+  "observation": "橙黄折线闪电有主次大小，边缘清楚，与直线速度束造型不同。",
+  "sourceSha256": "5e00caae982a6744a2c669e1caffd5b540b32cff5f7f43d7efff9b9ed34ba036",
+  "previewSha256": "0be9f25f781722cc88163353863cc31b95417968843fad7a233b6ab2122f3268",
+  "auditSha256": "f4e1e3f182c860b103c3f1a964fa350001da8bff50a8a1eb5a4bf11566a10452"
+}

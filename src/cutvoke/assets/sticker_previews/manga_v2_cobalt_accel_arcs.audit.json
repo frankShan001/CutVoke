@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_cobalt_accel_arcs",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "cce58df16467fa666ec585d79399a3577ca6c42b2367567211186a6545689dd2",
+  "previewSha256": "8741a9c0dee76f3d3b811c6f62d13188be6c827e55c1c2cb41563cd4135813a6",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3824,
+  "visiblePixels": 2571,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1921,
+    "steady_entry": 2571,
+    "steady_exit": 2570,
+    "exit": 1926
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1921,
+      "withoutFade": 2570
+    },
+    "steady_entry": {
+      "withFade": 2571,
+      "withoutFade": 2571
+    },
+    "steady_exit": {
+      "withFade": 2570,
+      "withoutFade": 2572
+    },
+    "exit": {
+      "withFade": 1926,
+      "withoutFade": 2569
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.412,
+    0.415
+  ],
+  "auditExport": "manga_v2_cobalt_accel_arcs.audit.mp4",
+  "auditExportSha256": "8207deac30d7b656dd7f44ada283573a5f5eef68d2618bf65ec4e560d4563d4c"
+}

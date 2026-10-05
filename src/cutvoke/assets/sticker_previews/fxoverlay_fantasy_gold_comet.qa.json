@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_gold_comet",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a7c3bbdea6efad198e43b88db6acbbdf75dca6aa21e2bb51ab1bae5c1e94dacc",
+  "previewSha256": "2e209925faf10cbf4b81c57a50ea194db929866584924caa2064773cbe75b5d6",
+  "preview": "fxoverlay_fantasy_gold_comet.mp4",
+  "bytes": 10967,
+  "visiblePixels": 8006,
+  "changedPixels": 0,
+  "motionVisible": false
+}

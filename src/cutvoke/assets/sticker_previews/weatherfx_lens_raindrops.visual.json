@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_lens_raindrops",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "多枚透明水滴保留高光和暗边，可读作镜头表面水珠。",
+  "sourceSha256": "364d736db0e50cb3df74bdd8820d7da9e550f12c6b5f9fa2de581914b4c7170f",
+  "previewSha256": "01b56226b93c0e111546c0d15f6687a1bf4f4d844d195b8b9ef5200fc3e1aa9a",
+  "auditSha256": "722cf6965f89a58262ecf796dbed88a41902fd05c3a94a7c54de11bf88c47352"
+}

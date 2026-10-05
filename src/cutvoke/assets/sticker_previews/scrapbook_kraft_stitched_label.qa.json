@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.scrapbook_kraft_stitched_label",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f533ca47a156fa5ae9ad4eb2e6c013896b1e7eaf16db07b679fc27e9ef6ddfa6",
+  "previewSha256": "af54012adc36cc78e9294add50bcc1c29096f5016c8b5d3523b20f59ca6ee446",
+  "preview": "scrapbook_kraft_stitched_label.mp4",
+  "bytes": 3006,
+  "visiblePixels": 770,
+  "changedPixels": 0,
+  "motionVisible": false
+}

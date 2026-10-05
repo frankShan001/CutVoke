@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.wipedown",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.wipedown",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "擦除",
+  "reviewer": "Codex manual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "A hard horizontal boundary moves downward.",
+  "method": "Compared five aligned frames at 0.55, 0.65, 0.75, 0.85 and 0.95 seconds for all eight 擦除 transitions; inspected contact covers and the rendered motion sequence. Distinct direction or geometry is visible for each candidate. Technical apply/edit/reload/undo/export reports were checked separately.",
+  "coverSha256": "b808cfbddae95892515897cb4686d60fa7de5101eda66cb381bed7b11519552a",
+  "motionPreviewSha256": "8bd637b85c90035628d2c3060da5fca74e11ca3fd6d2c5e0196c5496b39e9b1a",
+  "auditSha256": "d34068e5cfad6dd2e9a6ac90b97bd81253216338bdb7be6a1885b48d6e6d3d36"
+}

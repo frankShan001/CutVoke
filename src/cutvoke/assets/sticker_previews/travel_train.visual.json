@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_train",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "列车车头、车窗和轨道连成完整图形，形态可与其他交通贴纸区分。",
+  "sourceSha256": "c1337178b858c07b084437fbe3254058e08fd1567ee1ce968c66e54e9e87b230",
+  "previewSha256": "907cf8a4472dc931d74dcefccc2e36797c7d85e9370e9090b9e3945eef64c9af",
+  "auditSha256": "4069f56bd056877eae521db6ee7859633791a27ad957fa037509363d2f5091ef"
+}

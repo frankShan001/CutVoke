@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.iceEdge",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "sigma",
+    "value": 13.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.279,
+  "exportSha256": "43c620becf016d87a1abc90f1706be0f987e82a2d34e17dbe1c1dd03318a69cb",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "43c620becf016d87a1abc90f1706be0f987e82a2d34e17dbe1c1dd03318a69cb",
+  "auditExport": "personFx-iceEdge-v1-2-0.audit.mp4"
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_caustics_turquoise",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "39976c2ec259b50ba64c5009769734b784a38c2ed6102b07400c338036954dd7",
+  "previewSha256": "dfffedfdfa2b6a774d1ff8443c267241b0e7559aca8c26f02b36ceff51805fc9",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 18115,
+  "visiblePixels": 20462,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 16339,
+    "steady_entry": 20465,
+    "steady_exit": 20472,
+    "exit": 16353
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 16339,
+      "withoutFade": 20467
+    },
+    "steady_entry": {
+      "withFade": 20465,
+      "withoutFade": 20472
+    },
+    "steady_exit": {
+      "withFade": 20472,
+      "withoutFade": 20471
+    },
+    "exit": {
+      "withFade": 16353,
+      "withoutFade": 20472
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    1.286,
+    1.392
+  ],
+  "auditExport": "fxoverlay_refraction_caustics_turquoise.audit.mp4",
+  "auditExportSha256": "a5530e1dbb23f8aa1856fba9b701808ccc496651c8011110a726fe1423b0b61b"
+}

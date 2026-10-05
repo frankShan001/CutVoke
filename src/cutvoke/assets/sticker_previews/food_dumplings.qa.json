@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_dumplings",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1c59ebf6477e2f5eee3e8ffa20611dce417063f869cb4424a54c446e92c77dad",
+  "previewSha256": "f310a21bae0b1230c3790ebfe6ef0141dc1b4684c1ccba74c085f7ade874cdb7",
+  "preview": "food_dumplings.mp4",
+  "bytes": 5302,
+  "visiblePixels": 3160,
+  "changedPixels": 0,
+  "motionVisible": false
+}

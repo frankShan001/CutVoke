@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.blur",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.blur",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "模糊",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "The old and new shots smear horizontally during the join, then the incoming image sharpens. The broad motion blur across the full frame differs from a clean dissolve and every directional hard wipe.",
+  "method": "Inspected five aligned frames through each full transition and compared with the existing dissolve, wipe and camera-motion sheets; checked the command/edit/reload/preview/export audits.",
+  "coverSha256": "7e42960db8d29570b6eef101eea40dc00e4002e3c535924b1d7b6d3fb534d774",
+  "motionPreviewSha256": "98dfed562b870fe79c918703ec5f5bde6fa6fda4d84fd1a04d93f7d1f6ce35de",
+  "auditSha256": "60586365cfed6969facfb94c6249fad8fb5593ba6a973670ea6613407ca96f56"
+}

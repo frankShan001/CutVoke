@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_ice_speed_streaks",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "8dc7e462336f899a3e7ea9f7da6d1bf8725d276b07e646f6ed396e4e25bbd41a",
+  "previewSha256": "0f9fdcdce892e3c3d45fbe72383cd3df691a7389475778f071c46cdf7592fa57",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3846,
+  "visiblePixels": 2984,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1624,
+    "steady_entry": 2982,
+    "steady_exit": 2979,
+    "exit": 1617
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1624,
+      "withoutFade": 2984
+    },
+    "steady_entry": {
+      "withFade": 2982,
+      "withoutFade": 2979
+    },
+    "steady_exit": {
+      "withFade": 2979,
+      "withoutFade": 2980
+    },
+    "exit": {
+      "withFade": 1617,
+      "withoutFade": 2984
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.218,
+    0.217
+  ],
+  "auditExport": "fxoverlay_ice_speed_streaks.audit.mp4",
+  "auditExportSha256": "16d80064de29c6c3e00688579f648dd1c55d238b6e1a676a2ebfd184062a3758"
+}

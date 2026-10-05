@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_egg_tart",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The custard center and ridged pastry shell stay distinct with a clean outer outline.",
+  "sourceSha256": "4fc79d87e0e58d07fae07fa3e0e79e47d5600c2485873307432e7486ce15225e",
+  "previewSha256": "ac05daf8f3fe7526826d92090b23f7a892728a2b3dedb6bae65ceecacef34e22",
+  "auditSha256": "e5e636a607586fda61fbf2b10bd742e11624fc36c059bf77f70020f3301b2186"
+}

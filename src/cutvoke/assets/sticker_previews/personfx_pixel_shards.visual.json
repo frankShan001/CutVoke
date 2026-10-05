@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_pixel_shards",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "The cyan-violet shards are varied in size, cleanly isolated, and visibly distinct from the smooth line effects.",
+  "sourceSha256": "8e64d2ef16b222479b7b5608ccc67c29bb7c4df32e622db7270a1f50019a7814",
+  "previewSha256": "7224ca08433755cf15086af0a3c0d90a25d78411641461452573d6ab8a5b7b79",
+  "auditSha256": "5555bba5286bca66432f53f22101bab71d77bb3feb63c112543d90cc7b81d93d"
+}

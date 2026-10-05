@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_pool_caustics",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Cyan caustic network reads as pool water rather than a solid panel and keeps good line contrast.",
+  "sourceSha256": "c9bb039256f811af2f5618e04e604e7867ac77fc2fdc163fae4c7ddc5d8cc079",
+  "previewSha256": "7ddeef695efdddcdf7744bf8a0a518c378e14b7a330602a116385d58a02a4126",
+  "auditSha256": "fc4a485a31a979b6bddef6201a015118cb6f90aa739b4730a23b4cec3b9e6731"
+}

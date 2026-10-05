@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_snow_glints",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "b9096a403635ed372e6af53e7c6fe1e1614fbabd58950141b7730a93efa9721d",
+  "previewSha256": "e6c1143144fb1c860f57d9110bf43d492efe9a5186917b2541bb939f60be019b",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 16556,
+  "visiblePixels": 21091,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 3293,
+    "steady_entry": 21088,
+    "steady_exit": 21091,
+    "exit": 3307
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3293,
+      "withoutFade": 21091
+    },
+    "steady_entry": {
+      "withFade": 21088,
+      "withoutFade": 21091
+    },
+    "steady_exit": {
+      "withFade": 21091,
+      "withoutFade": 21091
+    },
+    "exit": {
+      "withFade": 3307,
+      "withoutFade": 21091
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.464,
+    0.5
+  ],
+  "auditExport": "natural_light_snow_glints.audit.mp4",
+  "auditExportSha256": "82f234fbad341548d157ced34caa258c5cd8e24e3d825b36c85828f7b09a31bd"
+}

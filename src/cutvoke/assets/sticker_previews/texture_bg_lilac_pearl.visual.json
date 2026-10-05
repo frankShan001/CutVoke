@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_lilac_pearl",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "The lilac pearl wash has gentle iridescent color variation and stays uncluttered enough for foreground text.",
+  "sourceSha256": "a6e00d5a416cf54de4cf7835ec497a2606124941399849a6aab8127d8c427ef2",
+  "previewSha256": "e25e2d52101ec00245982d8052d399305a001867e2033b05a5a694fa8aa1921d",
+  "auditSha256": "665ee58dcf14aaad6fe6913e5105eef6f74b836179a17576d6d00a05a8e84b25"
+}

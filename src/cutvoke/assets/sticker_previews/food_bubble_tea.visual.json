@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_bubble_tea",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The cup, striped straw, face and tapioca pearls remain distinct against the preview background.",
+  "sourceSha256": "74322726b30b04e6a9cbf0e0c6f5fcacbb02245d03181c51fbe1adbd069bf663",
+  "previewSha256": "eec6f2c71dcebfc3d1385f75be267ab0ed0b43e4360ea2ea4d68c7ff99f5abf8",
+  "auditSha256": "95ef817be001f3b2349fc716229bd28c57ab3ea1b1d3ef8ad2172ebdca1ebad5"
+}

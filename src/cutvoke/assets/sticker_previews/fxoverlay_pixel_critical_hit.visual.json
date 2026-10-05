@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_critical_hit",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex 视觉审阅",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切联系表和 320x180 浅深渐变实景合成联系表，并结合逐张机器应用/编辑/保存重开/撤销重做/入出场动画/MP4 预览与导出审计；只批准轮廓完整、边界干净、可见且彼此可辨的条目。",
+  "observation": "红白冲击星呈不对称锐角放射并带块状残影，与金色冲击星配色和外形不同。",
+  "sourceSha256": "332d99a6ba7224977097e8f57e9af57a85c4c51d0d1936a3ee5686b3839f57af",
+  "previewSha256": "96018da9b267625e85b146e920bbd7e2c1c2efda95afc616107a4b0c96b6f894",
+  "auditSha256": "9e30e76f815bf1074cab8ce6f818c1aef1c78ea5264cc12c6086ede46f959ce0"
+}

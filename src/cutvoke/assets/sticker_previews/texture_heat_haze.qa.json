@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_heat_haze",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "43f39713a40f4cf83a1dbc03ae0db271038e5a7ad4c0871236d3fe253862d04d",
+  "previewSha256": "2f7668119d2f5164d9889aef17cc62ff03c21bed6c549263afc95579b5e1878b",
+  "preview": "texture_heat_haze.mp4",
+  "bytes": 4576,
+  "visiblePixels": 1895,
+  "changedPixels": 0,
+  "motionVisible": false
+}

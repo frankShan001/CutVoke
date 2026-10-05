@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.radial",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.radial",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "擦除",
+  "reviewer": "Codex manual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "A rotating wedge reveals the next shot around its center.",
+  "method": "Compared five aligned frames at 0.55, 0.65, 0.75, 0.85 and 0.95 seconds for all eight 擦除 transitions; inspected contact covers and the rendered motion sequence. Distinct direction or geometry is visible for each candidate. Technical apply/edit/reload/undo/export reports were checked separately.",
+  "coverSha256": "0ad813a1bca1a4fa63b1dc0128c3e1ce36276fdce615ec75eea6f09168b39bef",
+  "motionPreviewSha256": "70ed0bed36f33b28114159bf00398606619b1567cfcb231f3c41198d7b777466",
+  "auditSha256": "2dde3f1ae4686ebf6608c7765a946dd41e3269e912338e992d9d0834c7123e60"
+}

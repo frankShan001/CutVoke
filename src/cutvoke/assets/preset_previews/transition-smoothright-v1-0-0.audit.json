@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.smoothright",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.877,
+  "exportSha256": "da9b5e6cffdedef49ba88af197f722f68cad6d69fa04b2d7437d100185912ee2",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "da9b5e6cffdedef49ba88af197f722f68cad6d69fa04b2d7437d100185912ee2",
+  "auditExport": "transition-smoothright-v1-0-0.audit.mp4"
+}

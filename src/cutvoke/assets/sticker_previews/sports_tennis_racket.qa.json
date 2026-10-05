@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_tennis_racket",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1d4a0703acc0cb5606b4505074f16c82da40e634721b4e27754a5571e73df1ca",
+  "previewSha256": "e6eb21df5aee72a1455d3b1d7e67eba7813ced89a7897bb10ca7a789a07c1304",
+  "preview": "sports_tennis_racket.mp4",
+  "bytes": 3375,
+  "visiblePixels": 601,
+  "changedPixels": 0,
+  "motionVisible": false
+}

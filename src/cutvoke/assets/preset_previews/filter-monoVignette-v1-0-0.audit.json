@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.monoVignette",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 0.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 1.938,
+  "exportSha256": "4f7e50ec99f946ec9e72227b33649963172dab20cccbedc4d6f92e6317cd662a",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "4f7e50ec99f946ec9e72227b33649963172dab20cccbedc4d6f92e6317cd662a",
+  "auditExport": "filter-monoVignette-v1-0-0.audit.mp4"
+}

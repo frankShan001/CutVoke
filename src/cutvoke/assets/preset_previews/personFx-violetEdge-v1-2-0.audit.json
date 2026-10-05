@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.violetEdge",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "sigma",
+    "value": 8.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.503,
+  "exportSha256": "a651e604f7cc6eb3ab0a2490f1a5c96253e8afceebadbcfc65e9eff2e7da9305",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "a651e604f7cc6eb3ab0a2490f1a5c96253e8afceebadbcfc65e9eff2e7da9305",
+  "auditExport": "personFx-violetEdge-v1-2-0.audit.mp4"
+}

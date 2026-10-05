@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_rosette_badge",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "6bd1f4d2c7acdf4799a31539f0f9efce38a96b01d14bbc8a3f01b746d5d2760d",
+  "previewSha256": "d3511540685d5a7c7a090ab3868db8af1159b5f992cca610336bd39eaaa4eaee",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4546,
+  "visiblePixels": 3154,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 1935,
+    "steady_entry": 3154,
+    "steady_exit": 3154,
+    "exit": 1933
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1935,
+      "withoutFade": 3154
+    },
+    "steady_entry": {
+      "withFade": 3154,
+      "withoutFade": 3154
+    },
+    "steady_exit": {
+      "withFade": 3154,
+      "withoutFade": 3154
+    },
+    "exit": {
+      "withFade": 1933,
+      "withoutFade": 3154
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.13,
+    0.092
+  ],
+  "auditExport": "party_rosette_badge.audit.mp4",
+  "auditExportSha256": "036ebc39690dd49bcea1ee7b20d97d8d9d05fa28fc40b30278da7333b548d0b1"
+}

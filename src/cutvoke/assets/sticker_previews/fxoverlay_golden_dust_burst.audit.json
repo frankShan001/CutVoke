@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_golden_dust_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "4b34cd812cb7dec3d02cd36ad627eea77a3f0485fb77d9af849952a7e10b3d03",
+  "previewSha256": "0c026c9445e82e34e61de8cdae72a2cef151d848e73dc7ffbae7b5fc6b311848",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4056,
+  "visiblePixels": 3290,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1342,
+    "steady_entry": 3299,
+    "steady_exit": 3294,
+    "exit": 1366
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1342,
+      "withoutFade": 3301
+    },
+    "steady_entry": {
+      "withFade": 3299,
+      "withoutFade": 3301
+    },
+    "steady_exit": {
+      "withFade": 3294,
+      "withoutFade": 3302
+    },
+    "exit": {
+      "withFade": 1366,
+      "withoutFade": 3302
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.093,
+    0.116
+  ],
+  "auditExport": "fxoverlay_golden_dust_burst.audit.mp4",
+  "auditExportSha256": "c6c5933f0f6e5013ce830ed6bd98850205500796b8d4486cc379f7e908d12386"
+}

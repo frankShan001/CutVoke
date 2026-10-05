@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_dust_motes",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "稀疏细小金色光点与柔焦尘斑形成前后层次。",
+  "sourceSha256": "5868c18a0fadc992aacad25174bf3a751833e71b4beab7e87ed42a9a07315021",
+  "previewSha256": "da1da438ac29f736c4d5dde338e3690a06159598fc1fed257bfc718730192857",
+  "auditSha256": "655671709d2c640af1f74decddadb911eb349c48bf354de0681f0ade2fc7d394"
+}

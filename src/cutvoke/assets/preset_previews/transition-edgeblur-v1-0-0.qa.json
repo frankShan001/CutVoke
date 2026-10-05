@@ -1,0 +1,25 @@
+{
+  "presetId": "cutvoke.preset.transition.edgeblur",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.edgeblur",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 91.346,
+  "maxSampledMeanRgbDifference": 91.346,
+  "coverSha256": "117daa240fe18c0b53638385030ee8e55acf1a4a9c09126a269079020689daae",
+  "previewSha256": "0ba7bd99b09957bd8a6906fe72f0b94cb30b03a3a09847c45396e4767248ada9",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

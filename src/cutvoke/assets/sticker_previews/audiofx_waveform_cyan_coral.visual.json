@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.audiofx_waveform_cyan_coral",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the transparent extraction contact sheet and the actual 320x180 composited preview for each sticker over a dark-to-light neutral gradient; reviewed crop edges, visibility, category fit, and distinctness.",
+  "observation": "Thin cyan and coral waveform remains legible over both dark and pale halves of the composited preview.",
+  "sourceSha256": "8861bce21af1dcb174902beb3e9e46c1367a86a74a3e9c834b9c3be714c682e3",
+  "previewSha256": "15c620e83967f0776456d3745a3c7b9f80b2612493a776d11b8ce8b162ca1174",
+  "auditSha256": "995615e825a63f1acd9f851974b196e05fb4ae49fa41f1acad3ff43207e86c76"
+}

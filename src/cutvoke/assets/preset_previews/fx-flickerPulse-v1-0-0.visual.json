@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.flickerPulse",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.flicker",
+  "params": {
+    "hz": 3
+  },
+  "subcategory": "动感",
+  "reviewer": "Codex manual FX motion-sheet review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Brightness visibly flashes across the sampled moments while geometry stays intact; unlike static RGB split or noisy glitch. Changing hz alters the rendered sequence.",
+  "method": "Manually compared actual rendered five-frame motion sheets and cover sheets across FX subcategories; checked edited audit renders against original preset previews at the same time.",
+  "coverSha256": "7a91cb8dc627a5ea56b7e2e7e5ce9fa727b6f24f5f58323dffb0eff86bd11e90",
+  "motionPreviewSha256": "b4df12cca65fedcec0b6198381461bc7e11cdd7898784c7628f1df366b1b2ebe",
+  "auditSha256": "48880c377e9a9c9f0d465b96065fdf7e4c2596d17911a463327fab133a11cdfe"
+}

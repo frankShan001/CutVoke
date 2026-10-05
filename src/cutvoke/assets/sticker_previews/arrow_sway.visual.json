@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.arrow_sway",
+  "version": "1.1.0",
+  "effectId": "cutvoke.anim.sway",
+  "params": {
+    "amplitude": 0.13,
+    "period": 1.2
+  },
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-10-02T19:42:50+00:00",
+  "method": "Codex actually inspected all 30 chronological continuous frames (15fps, 2 seconds) from this regenerated library sample using view_image, checking motion, alpha edges, shape preservation and canvas containment. Preview QA and full apply/edit/saveReload/undo/export machine audits were rerun before binding.",
+  "observation": "蓝色右箭头按默认1.2秒周期左右平移，换向和跨周期连续；箭头始终朝右，尖端、杆部及描边完整，全部30帧无越界、抖动式突跳或透明背景错误。",
+  "sourceSha256": "bd4a469308db4d208dd9198a1d97442b609d4cf68465e7f12342b4b1118d1feb",
+  "previewSha256": "8f3b0e355115072c6ef6d716063e4f3d2d4cd010ba5a0c7fad7807da7097cf03",
+  "auditSha256": "cb655df931cf8a6f45f7c995718b0e0029fff1dc2a32df62ea72533bd8dced63",
+  "rendererSha256": "019717a0438118bdb3a8a852d000a065e8eac7be52fecea1e33090128fcc318a",
+  "evidencePaths": [
+    "E:/myproject/opencut/output/acceptance/effects-visual-review-20261003/sticker-library/arrow_sway-continuous.png"
+  ]
+}

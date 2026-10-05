@@ -16,8 +16,8 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   return (
     <>
       <div className="inspector__sep" />
-      <div className="inspector__subrow">
-        <span className="inspector__key">关键帧（opacity）</span>
+      <div id="clip-opacity-keyframes" tabIndex={-1} className="inspector__subrow">
+        <span className="inspector__key">不透明度关键帧</span>
       </div>
       <KeyframeList
         keyframes={clip.keyframes?.opacity ?? []}

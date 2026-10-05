@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_petal_arc",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "Small pink petals travel along a curved spray with a bright blossom cluster; the motion arc differs from the compact white plum cluster.",
+  "sourceSha256": "e9f3e20425460a581e7605b8f507e538f26b9f74e9d1dc874159b534cb58e6ee",
+  "previewSha256": "df7f76a2648f4678475ab8de6c2777f4f43b23dd2bc0014761859ce87fe6f8f6",
+  "auditSha256": "6c06557eadca396c92552ae94931fe640ef3bf6f0424b8447aeb6075743c0f2d"
+}

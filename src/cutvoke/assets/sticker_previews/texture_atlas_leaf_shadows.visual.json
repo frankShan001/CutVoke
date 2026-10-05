@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_atlas_leaf_shadows",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "叶影呈半透明斜向层次，明暗背景上仍能辨认且不形成硬边框。",
+  "sourceSha256": "eb23ca2bbddb3d450dcc2dd30e7e3ed700e6e1a94e1a49a237c3964a66d61d77",
+  "previewSha256": "1663a16349700dca4d730bcdf9caf403786ad1c464a8ee13fdb8b38cfd3d981d",
+  "auditSha256": "2d2e6a24d66770c678164f064c17141f7575ac0e79cb2ef606b98bc78ff0aef4"
+}

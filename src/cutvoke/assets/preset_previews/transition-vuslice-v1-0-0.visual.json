@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.vuslice",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.vuslice",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "故障",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Several horizontal stripes reveal the incoming scene upward, with discrete hard band edges that differ from vertical-bar slicing and fine wind streaks.",
+  "method": "Manual comparison of five actual rendered frames per transition, neighboring presets, and complete MP4 decode",
+  "coverSha256": "a034bd97b70021f42fad8c1d6bd7f133e190cfb9c965d12dfbb411929b2cf518",
+  "motionPreviewSha256": "6db58971e770b156025a9b05228476b00f8398f3916c971848b92e6bf14427e4",
+  "auditSha256": "e661601e2468e0df7473a0108c21717459680ac786de1ee977009c3518127c4a"
+}

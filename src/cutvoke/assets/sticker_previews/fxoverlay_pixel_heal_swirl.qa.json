@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_heal_swirl",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ec4246e2f6a47fbd89e5f6168f3cc3fcdac4797e360a882663dda844c5adef32",
+  "previewSha256": "6cca7012b43b45669b1df482f308015ebfb4f43a8321ce1f6b626630175071af",
+  "preview": "fxoverlay_pixel_heal_swirl.mp4",
+  "bytes": 12906,
+  "visiblePixels": 9430,
+  "changedPixels": 0,
+  "motionVisible": false
+}

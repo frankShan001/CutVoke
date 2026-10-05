@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_sage_leaf_shadows",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "Soft sage leaf shadows read as a natural light pattern while keeping broad pale areas clear for titles.",
+  "sourceSha256": "1fecd8b5a31ac86be141f841bfafe48ece5dcd9a95a7b99b5075f64861a398b8",
+  "previewSha256": "4b8fbf429feb467333c67322cc8c3c87d2304bb606a3a1a73a7c4f990563f834",
+  "auditSha256": "bbe02510172af817f89c091f27c1b341980ff7f9c60db81e3f4955615d273555"
+}

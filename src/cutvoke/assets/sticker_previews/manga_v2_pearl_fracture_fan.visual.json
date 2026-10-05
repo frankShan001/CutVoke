@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_pearl_fracture_fan",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "珍珠碎片以单一偏心点放射，虹彩碎面清楚，与黑白速度线的色彩和几何感不同。",
+  "sourceSha256": "e15b9200ab6870c7b14eb1f2cf80161d883403830997eac4a490dc7e2a35cbac",
+  "previewSha256": "0230a137df163efae746eb1dc509b1a3600028a1c4209a4a8b9c8e7ed5a1c761",
+  "auditSha256": "c45b9267ef1bfc50154b57f76fe32689385c74e4b06e44185f3588a608ac726f"
+}

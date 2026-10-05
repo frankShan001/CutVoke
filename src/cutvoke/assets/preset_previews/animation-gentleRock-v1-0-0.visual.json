@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.gentleRock",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.rock",
+  "params": {
+    "amplitude": 0.07,
+    "period": 1.5
+  },
+  "subcategory": "循环",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "门框轻微左右倾斜，倾角和覆盖画幅逐帧变化，换向连续，没有黑三角或尺寸跳闪。 已实际复看重建库预览的12个时间点，图形运动清楚，画幅和边缘正常。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "6eddbc7b4a1c8465ed7e75118cf39213c2b7c7fdca515e63821fbb8e6c83fd90",
+  "motionPreviewSha256": "bc6015815c09d0c8ad8fef44113d8b29ab0cf74602429d9d98e87d0e084056c8",
+  "auditSha256": "aa03903ed86925a14db3327b177f2ecf8fabded8e379cafc4963c620e680591e",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_gentleRock.png",
+  "libraryReviewSheetSha256": "0e14449a20887552055478e37b66c562c9d68ae113eda0b07690e277d5f25213"
+}

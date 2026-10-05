@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_analog_scanline_sweep",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "161d01f15942f316fce955e7cd90ce0c5eede7563dcca202b031adc2c2d1ea70",
+  "previewSha256": "e84a3f949c623af34adec17cd4cb4e8cb08c2878640378d488fe5293db9c3460",
+  "preview": "printfx_analog_scanline_sweep.mp4",
+  "bytes": 8964,
+  "visiblePixels": 4058,
+  "changedPixels": 0,
+  "motionVisible": false
+}

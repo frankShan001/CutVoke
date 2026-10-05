@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_ghost_ring",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "半透明虹彩圆环包含可辨识的内部鬼影光斑，与星芒和散景类不同。",
+  "sourceSha256": "a9574cd11333274740066e9b11a24ce56c59654c9ad73a426444f8f9dc7bfc4c",
+  "previewSha256": "49e5c7f23ae08b9c96ee8134ed810cede3600fd142a93f4fabd111992b47e3f6",
+  "auditSha256": "aa7b8f5ea607c9447ed9e6c849a7d9af7941ee7c8d3df84fe673037669781424"
+}

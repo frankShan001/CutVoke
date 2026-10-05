@@ -120,6 +120,28 @@
 .zone-right--collapsed {
   display: none;
 }
+/* 特效、转场与滤镜在左侧统一浏览时需要更多横向空间。 */
+@media (min-width: 1281px) {
+  .zone-left:has(#creative-domain-effects[aria-selected="true"]),
+  .zone-left:has(#creative-domain-transition[aria-selected="true"]),
+  .zone-left:has(#creative-domain-filter[aria-selected="true"]) {
+    width: 420px;
+  }
+  .zone-left:has(#creative-domain-effects[aria-selected="true"]) .resource-grid,
+  .zone-left:has(#creative-domain-transition[aria-selected="true"]) .resource-grid,
+  .zone-left:has(#creative-domain-filter[aria-selected="true"]) .resource-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+@media (min-width: 901px) and (max-width: 1280px) {
+  .zone-left:has(#creative-domain-effects[aria-selected="true"]),
+  .zone-left:has(#creative-domain-transition[aria-selected="true"]),
+  .zone-left:has(#creative-domain-filter[aria-selected="true"]) {
+    width: 320px;
+  }
+}
 .zone-right__scroll {
   flex: 1;
   min-height: 0;

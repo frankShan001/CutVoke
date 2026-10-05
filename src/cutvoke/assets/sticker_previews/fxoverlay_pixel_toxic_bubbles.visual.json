@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_toxic_bubbles",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex 视觉审阅",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切联系表和 320x180 浅深渐变实景合成联系表，并结合逐张机器应用/编辑/保存重开/撤销重做/入出场动画/MP4 预览与导出审计；只批准轮廓完整、边界干净、可见且彼此可辨的条目。",
+  "observation": "青柠色毒雾泡泡大小有别并分布松散，卷曲雾边没有触及裁切边界。",
+  "sourceSha256": "4150fcca0861d1daf5d64411ee3e8d81d0b9df911c7f1a457c7d560f8e55276a",
+  "previewSha256": "5ce36f371b2d9b09f5cefef5f9515f368c8442ed3c152486b8a8d3950ef6632d",
+  "auditSha256": "47c40c8e5878bf1aca16bd1a8735747868fdd454dec1c52ee49cdc4dda8611b6"
+}

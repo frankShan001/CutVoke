@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_happy_dog",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "aec8e1351c7529b4441b8e59dfb24310eb1f91a1b86f105bee8bbd7524830127",
+  "previewSha256": "6225caa8f3effd0a40d5c5237467c9bb365b260e271b0ba02bd4ad3758a1467c",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4943,
+  "visiblePixels": 3883,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3689,
+    "steady_entry": 3883,
+    "steady_exit": 3883,
+    "exit": 3690
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3689,
+      "withoutFade": 3883
+    },
+    "steady_entry": {
+      "withFade": 3883,
+      "withoutFade": 3883
+    },
+    "steady_exit": {
+      "withFade": 3883,
+      "withoutFade": 3883
+    },
+    "exit": {
+      "withFade": 3690,
+      "withoutFade": 3883
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.247,
+    0.245
+  ],
+  "auditExport": "pet_happy_dog.audit.mp4",
+  "auditExportSha256": "e673c623c6b5f2e0eac5ca34595e70650d49cbb4c718240e637e99dea809a4de"
+}

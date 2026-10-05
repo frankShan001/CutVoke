@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_violet_magic_ribbon",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A continuous violet S-shaped ribbon has a flowing path unlike the closed energy halo.",
+  "method": "Inspected the rendered transparent artwork on split dark and light neutral panels; machine workflow audit hashes are pinned.",
+  "sourceSha256": "bf8e1ceaaf9f46738093f123607e689fd1ff63ec6bb2943038103fa9358d37a6",
+  "previewSha256": "eeaed26eade25fd53df5254b88884e45c34592a6f9f8be5e9982337011bb7c5a",
+  "auditSha256": "e3210bac88add0f1d17b89535b5a5898d2bc7bae6fc0112e7bcbbef43949afff"
+}

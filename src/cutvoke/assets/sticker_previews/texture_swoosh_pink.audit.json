@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_swoosh_pink",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "b2bc3660462adebe19cfd8b91388f6f4ed05bc29bf53eb20f18a061ce97f5fcf",
+  "previewSha256": "2d42dfa5e1983a7fefd477b196385ec90cab0a5c4d5f5db1bc2240c46fb1bb3b",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2635,
+  "visiblePixels": 1621,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1160,
+    "steady_entry": 1621,
+    "steady_exit": 1621,
+    "exit": 1160
+  },
+  "previewExportMeanRgbDifferences": [
+    0.139,
+    0.139
+  ],
+  "auditExport": "texture_swoosh_pink.audit.mp4",
+  "auditExportSha256": "e6b0b0a9fd73ce998909fd939be054e41adbcfb3b1175f5fe075403dab530a40"
+}

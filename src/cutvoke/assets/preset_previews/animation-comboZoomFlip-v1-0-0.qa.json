@@ -1,0 +1,30 @@
+{
+  "presetId": "cutvoke.preset.animation.comboZoomFlip",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.combo",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "primary": "zoomIn",
+        "secondary": "flipIn",
+        "fromScale": 0.45,
+        "easing": "ease-out",
+        "distance": 0.3
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 111.035,
+  "maxSampledMeanRgbDifference": 111.035,
+  "coverSha256": "79fb259f90bcdc0c7c207c07834099fc34ba711736c1ee295dbb3e80df8bdd23",
+  "previewSha256": "b9f6b9ed3f70487d7d5b9604b1f9f6cfb32514220f4222996e2874933267b6b4",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

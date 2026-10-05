@@ -1,0 +1,38 @@
+{
+  "presetId": "cutvoke.preset.filter.filmFaded",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.vintage",
+      "version": "1.0.0",
+      "params": {
+        "strength": 0.9
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.curves",
+      "version": "1.0.0",
+      "params": {
+        "preset": "vintage"
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.glow",
+      "version": "1.0.0",
+      "params": {
+        "intensity": 0.35
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 15.231,
+  "maxSampledMeanRgbDifference": 15.231,
+  "coverSha256": "1d3f559210615d97ac78308956bc27d77a4e6f83a72e664632b1b9085eefb4ab",
+  "previewSha256": "b6b7c2c3d371aacb056d7db1f2225a3936dfe91846f0da408655f0d47f90a0c8",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

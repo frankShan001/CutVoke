@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_basketball",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "96e70282741ad6c69fc43ee914d5bed7393c259c330b90f25c1a0bdc50b4359e",
+  "previewSha256": "56e409d493d055080c4569a9e599941f9c391aaebff54f50afb9bae6f26a2087",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2264,
+  "visiblePixels": 1465,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1288,
+    "steady_entry": 1465,
+    "steady_exit": 1465,
+    "exit": 1288
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1288,
+      "withoutFade": 1465
+    },
+    "steady_entry": {
+      "withFade": 1465,
+      "withoutFade": 1465
+    },
+    "steady_exit": {
+      "withFade": 1465,
+      "withoutFade": 1465
+    },
+    "exit": {
+      "withFade": 1288,
+      "withoutFade": 1465
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.232,
+    0.232
+  ],
+  "auditExport": "sports_basketball.audit.mp4",
+  "auditExportSha256": "e492a0599136a96408618498edbf9a8c79bf027c42612e3ea0ae2577701a2abd"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_surfboard",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "20c50b4590a2f9ed09a6be4ab9cc9b5ab9ecc492e49abc331373741c7b20f59d",
+  "previewSha256": "e984f3e830cdd8ca5dcb0a4c708380d6837d9a2003bce96e830634010f4e21d3",
+  "preview": "sports_surfboard.mp4",
+  "bytes": 3645,
+  "visiblePixels": 926,
+  "changedPixels": 0,
+  "motionVisible": false
+}

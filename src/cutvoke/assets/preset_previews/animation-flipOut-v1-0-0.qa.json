@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.animation.flipOut",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.flipOut",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "easing": "ease-out"
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 107.206,
+  "maxSampledMeanRgbDifference": 107.206,
+  "coverSha256": "1792a357156e76ff8765e82ee97c77f4256827d14e7659e0971ea5d030d9202b",
+  "previewSha256": "d0a152e73a7130ef7f3fa4ceba97169f63b7b14fd73a79737c6d645fc53722c5",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

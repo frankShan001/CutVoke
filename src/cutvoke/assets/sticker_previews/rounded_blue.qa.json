@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.rounded_blue",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5628451fb6a5959ecbf0a9f7822d55d5e0f929080b0d739f6c009847ee3a1f17",
+  "previewSha256": "0da3304d5642ce029a97abbda901cec8a7e3403b99b520d63dc5cd13343c03c4",
+  "preview": "rounded_blue.mp4",
+  "bytes": 3594,
+  "visiblePixels": 2919,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.monoNegative",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.invert",
+  "params": {
+    "strength": 1
+  },
+  "subcategory": "黑白",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:51:00+08:00",
+  "observation": "明暗完全翻转，白色底域和深灰圆形形成负片观感；与经典黑白的黑底亮圆相反。",
+  "method": "Manual comparison of 320x180 before-after covers and five aligned frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; monoMatte excluded as too close to existing bloom/gray",
+  "coverSha256": "8fbd6ee13917f60f2cd2a02e8a1b71255b9a10d8e458fc7f97fd45c1c9b21cd8",
+  "motionPreviewSha256": "4c26746ee10da8f9768f2a0f3defdf27acc7a21c84bb145073a3de761cc20fbb",
+  "auditSha256": "4359e42f2e122f6da0ea144cade496d46d22f5458267ba688d7f20492c373aeb"
+}

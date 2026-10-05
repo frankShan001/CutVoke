@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.weatherfx_ground_fog",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and actual 320x180 composited previews over a dark-to-light neutral gradient; checked per-item visibility, crop boundaries, distinction, and category fit.",
+  "observation": "低位灰白雾带横向铺开，上部保留透明空间，适合作为地面薄雾叠层。",
+  "sourceSha256": "54e1b3f393330641dde83f5674692565a9a1d40e7a821ae9670d62ae2b158d2c",
+  "previewSha256": "3584d22c154601eedabf4d799cee95d4cdd768a8b963af4303677aa186797d69",
+  "auditSha256": "6dfe3cd80c843b82ab783f4c1830508768256c09e539075f1b0ebfe469b044fe"
+}

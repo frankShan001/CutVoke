@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_heat_haze",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "observation": "橙色热浪表现为轻薄扭曲光带，暖色线条在渐变底上可见，适合作为局部热扰动。",
+  "sourceSha256": "7d60d6f6fd23e76e7f7d003bd9281a4cf1c6b150b796dd929e9a020939e366d1",
+  "previewSha256": "d0eb3d6685e80ad75b09f8010fc24fec228937d1e10e1b8927cbcba176cf3000",
+  "auditSha256": "5898d3b833bdcc45a84e3d1d43463881b6e691040bdeb67cf909ed57f82c1ebf"
+}

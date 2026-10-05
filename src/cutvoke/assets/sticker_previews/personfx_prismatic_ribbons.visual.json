@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_prismatic_ribbons",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "Prismatic ribbon strokes have a separate flowing silhouette and avoid filling the frame with an opaque color wash.",
+  "sourceSha256": "caeaaa70de67c64fddf5ab7c7e42079c3b21b1c032fbc7f6be53a373ee0b7072",
+  "previewSha256": "e73966730d0e5ea82fc84a0a2b1794df3bfb49f5edbeb8446f8126197a7d4e91",
+  "auditSha256": "920b62c6756e14677893828473932a72c25a49aed320af3d3c130b4ab0b9f8a1"
+}

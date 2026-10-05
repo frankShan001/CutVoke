@@ -1,0 +1,25 @@
+{
+  "presetId": "cutvoke.preset.transition.hlslice",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.hlslice",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 98.786,
+  "maxSampledMeanRgbDifference": 98.786,
+  "coverSha256": "0f4626a2772ee1a2a79ac620a48f6d8afa39a1652b239b04dbc9dde2a96cb253",
+  "previewSha256": "12a9b00bfa2dc3f7b39a5240c7af00bc04f65f23ea4fce049c2b7d3cf050a224",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_ginkgo",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "8e76d39642cd714d96b7b4fc8f6f841733a0fc9227f9edf924c8d469d513cf40",
+  "previewSha256": "61b41436feac56ac15a3639d81280d571a5bcdee37d88558f92a7b107f1242d1",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4388,
+  "visiblePixels": 3162,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2910,
+    "steady_entry": 3162,
+    "steady_exit": 3162,
+    "exit": 2902
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2910,
+      "withoutFade": 3162
+    },
+    "steady_entry": {
+      "withFade": 3162,
+      "withoutFade": 3162
+    },
+    "steady_exit": {
+      "withFade": 3162,
+      "withoutFade": 3160
+    },
+    "exit": {
+      "withFade": 2902,
+      "withoutFade": 3162
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.302,
+    0.308
+  ],
+  "auditExport": "botanical_ginkgo.audit.mp4",
+  "auditExportSha256": "3efa1eeb3569afd3ee6256fad833e93c1e5002bbe742793793cd26677dc49820"
+}

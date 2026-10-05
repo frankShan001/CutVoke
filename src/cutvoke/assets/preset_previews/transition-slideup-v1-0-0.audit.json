@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.slideup",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.152,
+  "exportSha256": "de2acae2d9f06e5304ba31dbf1a78f2ca024bfe0fc7a475d7e8e3006f0687e53",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "de2acae2d9f06e5304ba31dbf1a78f2ca024bfe0fc7a475d7e8e3006f0687e53",
+  "auditExport": "transition-slideup-v1-0-0.audit.mp4"
+}

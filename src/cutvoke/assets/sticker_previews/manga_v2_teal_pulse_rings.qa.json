@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_teal_pulse_rings",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "93f9409e68d3fc9f7648d8127c9b93e1803fd5e4660a99b19cf265839a52cf48",
+  "previewSha256": "dbb81c89a4ae149ed992c7eb741a06b0cac257b1b4028b9c27c8a91509ef895a",
+  "preview": "manga_v2_teal_pulse_rings.mp4",
+  "bytes": 13452,
+  "visiblePixels": 8117,
+  "changedPixels": 0,
+  "motionVisible": false
+}

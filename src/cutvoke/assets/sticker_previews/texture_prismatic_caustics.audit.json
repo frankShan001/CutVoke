@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_prismatic_caustics",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "249fc410bf7f21ce02946edc99df74eb2a631b8ba4bcbc93b93d886ae498677f",
+  "previewSha256": "88bd66f4c1c4560769a5a6d88608869afbc1d43f05345ee5638f914da5b8697f",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3685,
+  "visiblePixels": 3519,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 146,
+    "steady_entry": 3520,
+    "steady_exit": 3519,
+    "exit": 146
+  },
+  "previewExportMeanRgbDifferences": [
+    0.111,
+    0.107
+  ],
+  "auditExport": "texture_prismatic_caustics.audit.mp4",
+  "auditExportSha256": "760c2a9ca56421f7caf11fce74c02401b026b1a1842738a18bf23738b9faa845"
+}

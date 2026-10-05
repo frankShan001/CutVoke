@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_running_shoe",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a0b3fc408232fcefff0bb8f6aabd89b7e1de46c18359f7043eed76c2b65e7ce2",
+  "previewSha256": "fe2697c9639f8436e9218ebb788153e42dff9f36cf0669928a55b4582a366976",
+  "preview": "sports_running_shoe.mp4",
+  "bytes": 3583,
+  "visiblePixels": 684,
+  "changedPixels": 0,
+  "motionVisible": false
+}

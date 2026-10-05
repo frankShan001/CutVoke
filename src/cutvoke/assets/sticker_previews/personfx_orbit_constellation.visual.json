@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_orbit_constellation",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "Blue orbit path and colored points are individually legible and do not merge with the bokeh halo.",
+  "sourceSha256": "e4296dd08788976198c44938b1c0a9f5803cc77228a98b7f4e61cf38bb3d0e28",
+  "previewSha256": "99e1054b2f341eeaba246ddde45d6d7b7a946e76792b6df8dfdfcd6321c4e71b",
+  "auditSha256": "847d59df8df6b5c6e917d7c942ada66b0b6868b28614e25154ffb7e79ba34dfe"
+}

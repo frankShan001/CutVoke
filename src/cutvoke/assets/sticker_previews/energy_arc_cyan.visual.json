@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.energy_arc_cyan",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T08:40:43+00:00",
+  "observation": "The branching cyan arc has a sharp readable silhouette with no detached edge flecks.",
+  "method": "Reviewed all extracted RGBA overlays on dark and light checkerboard contacts and inspected the rendered player preview contact sheet. Checked silhouette clarity, alpha cleanup, edge safety, contrast, and use as a timeline compositing overlay.",
+  "sourceSha256": "7e52dd1d21b26389479e4e02c2c4a07019f030fe7e0c2ee12b869dcc323a2f4b",
+  "previewSha256": "1249bdcb645adc14163fa33831bd243f2807b0adceebde8ba4a47713cc3c64bf",
+  "auditSha256": "073cd87fe811cdc8165d9809c93b7e9d22f86898f62193215eb13fda94fed11c"
+}

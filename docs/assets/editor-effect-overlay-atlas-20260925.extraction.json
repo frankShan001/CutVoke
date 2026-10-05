@@ -1,0 +1,592 @@
+{
+  "generator": "OpenAI ImageGen",
+  "source": "editor-effect-overlay-atlas-20260925.png",
+  "sourceSha256": "4cef2e55062b40cd9c900b5ffb691baa1dc58f1049a36ac538247620fdc4e687",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4",
+  "keyColor": "#00FF00",
+  "extraction": "equal proportional 4x4 crops, green-screen distance matte, despill, centered square RGBA PNG",
+  "items": [
+    {
+      "stem": "fxoverlay_cyan_aura_ring",
+      "name": "青色气场光环",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "气场",
+        "光环",
+        "青色"
+      ],
+      "row": 0,
+      "column": 0,
+      "cell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBounds": [
+        33,
+        39,
+        288,
+        287
+      ],
+      "visiblePixels": 40329,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "9a4c8597059af827131f92100cc4c12354e671dbdabc318eecf004daefa0fe41",
+      "meanKeyedAlpha": 0.160083
+    },
+    {
+      "stem": "fxoverlay_violet_energy_halo",
+      "name": "紫色能量光环",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "能量",
+        "光环",
+        "紫色"
+      ],
+      "row": 0,
+      "column": 1,
+      "cell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "visibleBounds": [
+        9,
+        81,
+        302,
+        255
+      ],
+      "visiblePixels": 34477,
+      "visiblePixelsWithin12pxBoundary": 78,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "453d6613cf1e3e630074c9b86487ac875f92a6db0f1a2f4d93c05ac8727fc36d",
+      "meanKeyedAlpha": 0.166546
+    },
+    {
+      "stem": "fxoverlay_gold_sunburst",
+      "name": "金色放射星芒",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "放射",
+        "星芒",
+        "金色"
+      ],
+      "row": 0,
+      "column": 2,
+      "cell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "visibleBounds": [
+        30,
+        30,
+        284,
+        286
+      ],
+      "visiblePixels": 42098,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "2cc8d3c39e1a26f2c88826feeff591e08bf4987d0d56bf7ff6b78ffc97d39fc5",
+      "meanKeyedAlpha": 0.170779
+    },
+    {
+      "stem": "fxoverlay_blue_lens_flare",
+      "name": "蓝白镜头星芒",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "镜头",
+        "星芒",
+        "蓝白"
+      ],
+      "row": 0,
+      "column": 3,
+      "cell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "visibleBounds": [
+        19,
+        27,
+        298,
+        291
+      ],
+      "visiblePixels": 28236,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "86a072110abf807f2b129680b7a81f524d574f7ea7ac5eae6486ae6907469d34",
+      "meanKeyedAlpha": 0.115372
+    },
+    {
+      "stem": "fxoverlay_magenta_sparkles",
+      "name": "桃紫闪烁星群",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "星群",
+        "闪烁",
+        "桃紫"
+      ],
+      "row": 1,
+      "column": 0,
+      "cell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "visibleBounds": [
+        30,
+        25,
+        291,
+        286
+      ],
+      "visiblePixels": 47260,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "c27c7001e837f030ee48d71b113d67e56611fe1d3702acc268fbc7bf0dbc356f",
+      "meanKeyedAlpha": 0.145097
+    },
+    {
+      "stem": "fxoverlay_gold_bokeh",
+      "name": "金色散景粒子",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "散景",
+        "光点",
+        "金色"
+      ],
+      "row": 1,
+      "column": 1,
+      "cell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "visibleBounds": [
+        17,
+        17,
+        287,
+        286
+      ],
+      "visiblePixels": 31014,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        245
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "9a00da6bcea2cd8aff90f1b84b8038e6689b96546d42630f55fb09d7bfa9dbe8",
+      "meanKeyedAlpha": 0.072456
+    },
+    {
+      "stem": "fxoverlay_teal_orbit_motes",
+      "name": "青绿环绕光点",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "环绕",
+        "光点",
+        "青绿"
+      ],
+      "row": 1,
+      "column": 2,
+      "cell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "visibleBounds": [
+        19,
+        32,
+        293,
+        271
+      ],
+      "visiblePixels": 34505,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "dd9b81b914c27975bfd9faa918163f068af62dd5de78d12cb32932c8f7ee730f",
+      "meanKeyedAlpha": 0.096202
+    },
+    {
+      "stem": "fxoverlay_pink_heart_trail",
+      "name": "粉色爱心光迹",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "爱心",
+        "光迹",
+        "粉色"
+      ],
+      "row": 1,
+      "column": 3,
+      "cell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "visibleBounds": [
+        22,
+        17,
+        291,
+        282
+      ],
+      "visiblePixels": 33830,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "9487605c29c201c52bbc69340f34722280703a089a2ab9213cb88d9fce56788c",
+      "meanKeyedAlpha": 0.151492
+    },
+    {
+      "stem": "fxoverlay_ice_speed_streaks",
+      "name": "冰蓝速度光线",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "速度",
+        "光线",
+        "冰蓝"
+      ],
+      "row": 2,
+      "column": 0,
+      "cell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "visibleBounds": [
+        12,
+        64,
+        298,
+        257
+      ],
+      "visiblePixels": 34911,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "8dc7e462336f899a3e7ea9f7da6d1bf8725d276b07e646f6ed396e4e25bbd41a",
+      "meanKeyedAlpha": 0.159695
+    },
+    {
+      "stem": "fxoverlay_gold_swoosh",
+      "name": "金色弧形拖尾",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "弧形",
+        "拖尾",
+        "金色"
+      ],
+      "row": 2,
+      "column": 1,
+      "cell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "visibleBounds": [
+        12,
+        27,
+        295,
+        286
+      ],
+      "visiblePixels": 35370,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "7dfc100994ae309c0c2ca258a9f871cf64a00772e18bcfd41615db61c50158d3",
+      "meanKeyedAlpha": 0.149559
+    },
+    {
+      "stem": "fxoverlay_violet_magic_ribbon",
+      "name": "紫色魔法飘带",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "魔法",
+        "飘带",
+        "紫色"
+      ],
+      "row": 2,
+      "column": 2,
+      "cell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "visibleBounds": [
+        23,
+        7,
+        290,
+        304
+      ],
+      "visiblePixels": 53502,
+      "visiblePixelsWithin12pxBoundary": 177,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "bf8e1ceaaf9f46738093f123607e689fd1ff63ec6bb2943038103fa9358d37a6",
+      "meanKeyedAlpha": 0.28512
+    },
+    {
+      "stem": "fxoverlay_cyan_electric_arc",
+      "name": "青色电弧",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "电弧",
+        "能量",
+        "青色"
+      ],
+      "row": 2,
+      "column": 3,
+      "cell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "visibleBounds": [
+        17,
+        30,
+        295,
+        271
+      ],
+      "visiblePixels": 34365,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "e89e1b0ccac4a9eded05fc33c27fb8f3f65ea57bcca54b50a38c8b237eae8eef",
+      "meanKeyedAlpha": 0.137699
+    },
+    {
+      "stem": "fxoverlay_pale_smoke_wisps",
+      "name": "浅色烟雾",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "烟雾",
+        "薄雾",
+        "浅色"
+      ],
+      "row": 3,
+      "column": 0,
+      "cell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "visibleBounds": [
+        27,
+        11,
+        298,
+        296
+      ],
+      "visiblePixels": 52424,
+      "visiblePixelsWithin12pxBoundary": 5,
+      "alphaExtrema": [
+        0,
+        233
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "2a2ecbcdab4870e78c85d54516f7b80c54300e64a3b4d1570007fcacd0dcc01d",
+      "meanKeyedAlpha": 0.223725
+    },
+    {
+      "stem": "fxoverlay_golden_dust_burst",
+      "name": "金色尘光爆发",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "尘光",
+        "爆发",
+        "金色"
+      ],
+      "row": 3,
+      "column": 1,
+      "cell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "visibleBounds": [
+        12,
+        19,
+        293,
+        290
+      ],
+      "visiblePixels": 42214,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "4b34cd812cb7dec3d02cd36ad627eea77a3f0485fb77d9af849952a7e10b3d03",
+      "meanKeyedAlpha": 0.17714
+    },
+    {
+      "stem": "fxoverlay_blue_crystal_burst",
+      "name": "冰蓝水晶碎片",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水晶",
+        "碎片",
+        "冰蓝"
+      ],
+      "row": 3,
+      "column": 2,
+      "cell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "visibleBounds": [
+        18,
+        25,
+        295,
+        287
+      ],
+      "visiblePixels": 31188,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "b102a74ddadd02e16d87d0c4137f85c85372b02ed547757aa28bf41e8e6a12df",
+      "meanKeyedAlpha": 0.177406
+    },
+    {
+      "stem": "fxoverlay_rainbow_confetti",
+      "name": "彩虹纸屑爆发",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "纸屑",
+        "彩虹",
+        "庆祝"
+      ],
+      "row": 3,
+      "column": 3,
+      "cell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "visibleBounds": [
+        28,
+        20,
+        287,
+        281
+      ],
+      "visiblePixels": 12653,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "dc668cc2472149670bd0767294e514b2895489a064dd789faf3d8b9554fafa00",
+      "meanKeyedAlpha": 0.084167
+    }
+  ],
+  "contactSheet": "editor-effect-overlay-contact-20260925.png",
+  "license": "Project-internal original AI-generated assets; not separately licensed for redistribution"
+}

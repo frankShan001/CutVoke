@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_prismatic_caustics",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d01a3635b13af8b909c855f5ad72ae2f3c67130db5483c92acdc69e4cd35e9a2",
+  "previewSha256": "930cdce4a1175b584baa397f9d84aea4f0466fccac2f73ffd514d410973df4f1",
+  "preview": "texture_v2_prismatic_caustics.mp4",
+  "bytes": 5229,
+  "visiblePixels": 3807,
+  "changedPixels": 0,
+  "motionVisible": false
+}

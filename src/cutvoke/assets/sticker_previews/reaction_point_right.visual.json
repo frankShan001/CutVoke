@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_point_right",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Blue-cuffed hand extends one index finger horizontally to the right.",
+  "sourceSha256": "d1be992fbe70fe651d39fa319cf073a512b20a68fe9e5e54869b8c6a0f294b02",
+  "previewSha256": "1506d62f5cb04260089574dae1bdc0f13935a5a6bdb326f46609c219f9acf653",
+  "auditSha256": "f9194530e462910ec5d0a7ba4b56b59619763a842579762288dac62707ba2fa1"
+}

@@ -22,6 +22,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Optional
 
+from .luts import CubeInvalid, MAX_CUBE_BYTES, validate_cube
+
 # ---------------------------------------------------------------------------
 # 分类常量（与 manifest.category 对应）
 # ---------------------------------------------------------------------------
@@ -31,6 +33,71 @@ CATEGORY_COLOR = "color"
 CATEGORY_ANIMATION = "animation"
 CATEGORY_FX = "fx"
 CATEGORY_TEXT = "text"
+
+
+def _builtin_subcategory(effect_id: str, category: str) -> str:
+    """Browse taxonomy for built-ins; never changes effect identity or rendering."""
+    leaf = effect_id.rsplit(".", 1)[-1].lower()
+    if category == CATEGORY_ANIMATION:
+        if leaf.startswith("combo"):
+            return "组合"
+        if leaf in {"fadeout", "zoomout", "slideoutleft", "slideoutright",
+                    "slideoutup", "slideoutdown", "rotateout", "flipout"}:
+            return "出场"
+        if leaf in {"breathe", "float", "sway", "rock", "bounce", "orbit",
+                    "heartbeat", "blink"}:
+            return "循环"
+        return "入场"
+    if category == CATEGORY_TRANSITION:
+        if leaf in {"crossfade", "dissolve", "fade", "fadewhite",
+                    "fadegrays", "fadefast", "fadeslow", "distance"}:
+            return "叠化"
+        if leaf in {"blur", "vblur", "diagblurdown", "diagblurup", "crossblur",
+                    "radialblur", "edgeblur", "centerblur"}:
+            return "模糊"
+        if leaf in {"pixelize", "hlslice", "hrslice", "vuslice", "vdslice",
+                    "hlwind", "hrwind", "vuwind", "vdwind"}:
+            return "故障"
+        if leaf in {"slide", "slideup", "slidedown", "smoothleft", "zoom",
+                    "smoothright", "smoothup", "squeezev"}:
+            return "运镜"
+        return "擦除"
+    if category == CATEGORY_FX:
+        if leaf in {"compressor", "equalizer", "loudnorm", "pan"}:
+            return "音频"
+        if leaf in {"chromatic", "flicker", "glitch", "rgbsplit", "trail",
+                    "swing", "shake"}:
+            return "动感"
+        if leaf in {"glow", "vignette", "lens"}:
+            return "光影"
+        if leaf in {"colorbalance", "colorize", "curves", "hsl", "lut", "vibrance"}:
+            return "调色"
+        if leaf in {"grayscale", "invert", "posterize", "sepia", "vintage", "filmgrain", "edge"}:
+            return "风格"
+        if leaf in {"crop", "grid", "mask", "mirror", "shape", "vflip", "chromakey"}:
+            return "构图"
+        return "基础"
+    return "基础"
+
+
+def animation_slot(effect_id: str) -> str | None:
+    """Return the editing/rendering lane for one built-in animation effect."""
+    if not effect_id.startswith("cutvoke.anim."):
+        return None
+    return _builtin_subcategory(effect_id, CATEGORY_ANIMATION)
+
+
+def _browse_category(category: str, subcategory: str) -> str:
+    """Expose creative domains without changing engine categories or saved effect IDs."""
+    if subcategory == "音频":
+        return "audio"
+    if category == CATEGORY_FX and subcategory.startswith("人物"):
+        return "personFx"
+    if category == CATEGORY_FX and subcategory == "风格":
+        return "filter"
+    if category == CATEGORY_FX and subcategory == "调色":
+        return "color"
+    return category
 
 # 引擎标识
 ENGINE_XFADE = "ffmpeg-xfade"
@@ -221,6 +288,7 @@ class EffectSpec:
     applies_to: tuple[str, ...] = ("video",)   # 适用对象：image / video / text
     preview: str = ""                # 预览提示（缩略/试用的展示说明）
     dependencies: tuple[str, ...] = ()  # 资源依赖（如 font / face-detection / lut）
+    subcategory: str = ""              # 资源库二级分类；外部 manifest 可自定义
 
     # ---- 便捷属性 ----
     @property
@@ -278,7 +346,8 @@ class EffectSpec:
             return True
         hay = [self.id.lower(), self.label("zh-CN").lower(),
                self.label("en").lower(), self.describe("zh-CN").lower(),
-               self.category.lower()]
+               self.category.lower(),
+               (self.subcategory or _builtin_subcategory(self.id, self.category)).lower()]
         hay.extend(k.lower() for k in self.keywords)
         return any(needle in h for h in hay)
 
@@ -289,6 +358,9 @@ class EffectSpec:
             "version": self.version,
             "name": self.label(lang),
             "category": self.category,
+            "browseCategory": _browse_category(
+                self.category, self.subcategory or _builtin_subcategory(self.id, self.category)),
+            "subcategory": self.subcategory or _builtin_subcategory(self.id, self.category),
             "description": self.describe(lang),
             "license": self.license,
             "inputs": list(self.inputs),
@@ -356,6 +428,9 @@ class EffectSpec:
             dependencies = [dependencies]
         if not isinstance(dependencies, list):
             raise ManifestInvalid(f"manifest.dependencies 必须是数组: {source}")
+        subcategory = data.get("subcategory", "")
+        if not isinstance(subcategory, str):
+            raise ManifestInvalid(f"manifest.subcategory 必须是字符串: {source}")
 
         return cls(
             id=eid,
@@ -374,6 +449,7 @@ class EffectSpec:
             applies_to=tuple(str(x) for x in applies_to),
             preview=str(data.get("preview", "")),
             dependencies=tuple(str(x) for x in dependencies),
+            subcategory=subcategory.strip(),
         )
 
 
@@ -390,10 +466,15 @@ def _builtin_specs() -> list[EffectSpec]:
                         EFFECT_ANIM_FADE_IN, EFFECT_ANIM_ZOOM_IN,
                         EFFECT_ANIM_SLIDE_IN, EFFECT_ANIM_FADE_OUT,
                         EFFECT_ANIM_ZOOM_OUT, EFFECT_ANIM_BREATHE,
+                        EFFECT_ANIM_SLIDE_OUT_LEFT, EFFECT_ANIM_SLIDE_OUT_RIGHT,
+                        EFFECT_ANIM_SLIDE_OUT_UP, EFFECT_ANIM_SLIDE_OUT_DOWN,
+                        EFFECT_ANIM_ROTATE_OUT, EFFECT_ANIM_FLIP_OUT,
                         EFFECT_ANIM_SLIDE_UP, EFFECT_ANIM_SLIDE_DOWN,
                         EFFECT_ANIM_SLIDE_RIGHT, EFFECT_ANIM_ROTATE_IN,
                         EFFECT_ANIM_FLIP_IN, EFFECT_ANIM_BACK_IN,
                         EFFECT_ANIM_REVEAL, EFFECT_ANIM_FLOAT, EFFECT_ANIM_SWAY,
+                        EFFECT_ANIM_ROCK, EFFECT_ANIM_BOUNCE, EFFECT_ANIM_ORBIT,
+                        EFFECT_ANIM_HEARTBEAT, EFFECT_ANIM_BLINK,
                         EFFECT_ANIM_COMBO,
                         EFFECT_ANIM_COMBO_PUSH_RIGHT, EFFECT_ANIM_COMBO_PULL_UP,
                         EFFECT_ANIM_COMBO_ROTATE_ZOOM,
@@ -409,7 +490,8 @@ def _builtin_specs() -> list[EffectSpec]:
                         EFFECT_FX_EQ, EFFECT_FX_COMPRESSOR,
                         EFFECT_FX_FLICKER, EFFECT_FX_PAN,
                         EFFECT_FX_CROP,
-                        EFFECT_FX_TRAIL, EFFECT_FX_HSL, EFFECT_FX_COLORBALANCE,
+                        EFFECT_FX_TRAIL, EFFECT_FX_SWING, EFFECT_FX_SHAKE,
+                        EFFECT_FX_HSL, EFFECT_FX_COLORBALANCE,
                         EFFECT_FX_MASK, EFFECT_FX_SHAPE,
                         EFFECT_FX_VIBRANCE, EFFECT_FX_COLORIZE, EFFECT_FX_DEBAND,
                         EFFECT_FX_LENS, EFFECT_FX_CAS, EFFECT_FX_VFLIP,
@@ -673,13 +755,24 @@ def _builtin_specs() -> list[EffectSpec]:
             },
             "additionalProperties": False,
         },
-        implementation={"engine": ENGINE_XFADE, "filter": "xfade", "transition": "zoomin"},
+        # FFmpeg's built-in zoomin samples the previous shot's center pixel
+        # over much of the middle frame. Zoom the incoming shot instead and
+        # crossfade, so both shots remain recognizable throughout the seam.
+        implementation={"engine": ENGINE_XFADE, "filter": "xfade",
+                        "transition": "fade", "incomingZoom": 1.28},
         source="builtin",
         keywords=("缩放", "推进", "冲击", "过渡", "zoom"),
     )
 
     # ---- 转场家族扩充（1.5-B 计划 5.2）：全部由 ffmpeg xfade 桥接 ----
-    def _trans(tid, cn, en, xfade_name, desc_cn, keywords):
+    def _trans(tid, cn, en, xfade_name, desc_cn, keywords, blur_pattern=None,
+               squeeze_axis=None):
+        implementation = {"engine": ENGINE_XFADE, "filter": "xfade",
+                          "transition": xfade_name}
+        if blur_pattern is not None:
+            implementation["blurPattern"] = blur_pattern
+        if squeeze_axis is not None:
+            implementation["squeezeAxis"] = squeeze_axis
         return EffectSpec(
             id=tid, version="1.0.0",
             name={"zh-CN": cn, "en": en},
@@ -697,8 +790,7 @@ def _builtin_specs() -> list[EffectSpec]:
                 },
                 "additionalProperties": False,
             },
-            implementation={"engine": ENGINE_XFADE, "filter": "xfade",
-                            "transition": xfade_name},
+            implementation=implementation,
             source="builtin", keywords=tuple(keywords),
             applies_to=("video",),
         )
@@ -726,9 +818,82 @@ def _builtin_specs() -> list[EffectSpec]:
                          "自左向右平滑推移，比滑动更柔和。", ["推移", "平滑", "柔和"])
     radial = _trans(EFFECT_RADIAL, "径向旋转", "Radial", "radial",
                     "以径向扫描方式旋转切换，适合动感段落。", ["径向", "旋转", "扫描", "动感"])
-    squeeze = _trans(EFFECT_SQUEEZE, "横向挤压", "Squeeze horizontal", "squeezeh",
-                     "后段从两侧向中间挤压式切入，节奏干脆有力。",
-                     ["挤压", "压缩", "横向", "力度", "squeeze"])
+    squeeze = _trans(EFFECT_SQUEEZE, "横向挤压", "Squeeze horizontal", "custom",
+                     "前段沿水平方向向中心压缩，后段从左右两侧显露。",
+                     ["挤压", "压缩", "横向", "力度", "squeeze"],
+                     squeeze_axis="horizontal")
+    # 每项绑定不同的 xfade 算法，不用同一滤镜的小幅数值改动充数。
+    extra_transitions = [
+        _trans("cutvoke.transition.fadegrays", "灰度叠化", "Fade through grays",
+               "fadegrays", "两段画面经灰阶中间态叠化，保留明暗轮廓。",
+               ["灰度", "叠化", "黑白", "fadegrays"]),
+        _trans("cutvoke.transition.fadefast", "快速叠化", "Fast fade",
+               "fadefast", "前段迅速退去、后段快速显现，过渡重心靠前。",
+               ["快速", "叠化", "节奏", "fadefast"]),
+        _trans("cutvoke.transition.fadeslow", "慢速叠化", "Slow fade",
+               "fadeslow", "透明度在过渡前半段变化较慢，收尾更集中。",
+               ["缓慢", "叠化", "柔和", "fadeslow"]),
+        _trans("cutvoke.transition.distance", "距离溶接", "Distance",
+               "distance", "依据画面像素距离渐进切换，呈现不同于均匀透明叠化的纹理。",
+               ["距离", "溶接", "纹理", "distance"]),
+        _trans("cutvoke.transition.smoothright", "右向平滑推移", "Smooth right",
+               "smoothright", "画面沿相反方向连续推移，适合保持运动方向。",
+               ["向右", "平滑", "推移", "smoothright"]),
+        _trans("cutvoke.transition.smoothup", "上向平滑推移", "Smooth up",
+               "smoothup", "画面沿竖直方向平滑推进，形成向上抬升感。",
+               ["向上", "平滑", "推移", "smoothup"]),
+        _trans("cutvoke.transition.squeezev", "纵向挤压", "Squeeze vertical",
+               "custom", "前段沿竖直方向向中心压缩，后段从上下两侧显露。",
+               ["纵向", "挤压", "压缩", "squeezev"], squeeze_axis="vertical"),
+        _trans("cutvoke.transition.wiperight", "右擦转场", "Wipe right",
+               "wiperight", "后段从右侧擦入覆盖前段，方向与左擦相反。",
+               ["右擦", "擦除", "方向", "wiperight"]),
+        _trans("cutvoke.transition.hlslice", "左向信号切片", "Left signal slices",
+               "hlslice", "画面被竖条分割后向左错位，形成数字信号撕裂。",
+               ["故障", "切片", "横向", "撕裂", "hlslice"]),
+        _trans("cutvoke.transition.hrslice", "右向信号切片", "Right signal slices",
+               "hrslice", "竖条切片向右错位，方向与左向切片相反。",
+               ["故障", "切片", "横向", "撕裂", "hrslice"]),
+        _trans("cutvoke.transition.vuslice", "上向信号切片", "Up signal slices",
+               "vuslice", "横条切片向上错位，形成分层式信号撕裂。",
+               ["故障", "切片", "纵向", "撕裂", "vuslice"]),
+        _trans("cutvoke.transition.vdslice", "下向信号切片", "Down signal slices",
+               "vdslice", "横条切片向下错位，形成分层式信号撕裂。",
+               ["故障", "切片", "纵向", "撕裂", "vdslice"]),
+        _trans("cutvoke.transition.hlwind", "左向信号风切", "Left signal wind",
+               "hlwind", "水平像素带被依次卷向左侧，模拟模拟信号扫动。",
+               ["故障", "风切", "横向", "信号", "hlwind"]),
+        _trans("cutvoke.transition.hrwind", "右向信号风切", "Right signal wind",
+               "hrwind", "水平像素带被依次卷向右侧，形成反向信号扫动。",
+               ["故障", "风切", "横向", "信号", "hrwind"]),
+        _trans("cutvoke.transition.vuwind", "上向信号风切", "Up signal wind",
+               "vuwind", "竖向像素带依次向上卷入，模拟垂直同步错位。",
+               ["故障", "风切", "纵向", "信号", "vuwind"]),
+        _trans("cutvoke.transition.vdwind", "下向信号风切", "Down signal wind",
+               "vdwind", "竖向像素带依次向下卷入，形成反向垂直同步错位。",
+               ["故障", "风切", "纵向", "信号", "vdwind"]),
+        _trans("cutvoke.transition.vblur", "纵向拖影模糊", "Vertical motion blur",
+               "custom", "转场中段沿竖直方向拉开轮廓，起止帧保持清晰。",
+               ["模糊", "纵向", "拖影", "vblur"], "vertical"),
+        _trans("cutvoke.transition.diagblurdown", "右下斜向模糊", "Down diagonal blur",
+               "custom", "像素沿右下斜线扩散，再聚焦到后镜头。",
+               ["模糊", "斜向", "右下", "diagblur"], "diagonalDown"),
+        _trans("cutvoke.transition.diagblurup", "右上斜向模糊", "Up diagonal blur",
+               "custom", "像素沿右上斜线扩散，方向与右下相反。",
+               ["模糊", "斜向", "右上", "diagblur"], "diagonalUp"),
+        _trans("cutvoke.transition.crossblur", "十字柔焦模糊", "Cross blur",
+               "custom", "转场中段同时沿水平和竖直方向柔化结构。",
+               ["模糊", "柔焦", "十字", "crossblur"], "cross"),
+        _trans("cutvoke.transition.radialblur", "径向速度模糊", "Radial speed blur",
+               "custom", "像素围绕画面中心向内外扩散，形成径向速度感。",
+               ["模糊", "径向", "速度", "radialblur"], "radial"),
+        _trans("cutvoke.transition.edgeblur", "边缘失焦模糊", "Edge focus blur",
+               "custom", "中心维持较清晰，边缘在转场中段明显柔化。",
+               ["模糊", "边缘", "失焦", "edgeblur"], "edgeFocus"),
+        _trans("cutvoke.transition.centerblur", "中心失焦模糊", "Center focus blur",
+               "custom", "中心在转场中段失焦，画面边缘保留结构。",
+               ["模糊", "中心", "失焦", "centerblur"], "centerFocus"),
+    ]
 
     # ---- 入场动画（1.5-A 图片动画）：声明式参数化，渲染时展开成关键帧 ----
     anim_fade = EffectSpec(
@@ -918,24 +1083,24 @@ def _builtin_specs() -> list[EffectSpec]:
             applies_to=("image", "video"),
         )
 
-    def _anim_loop(aid, cn, en, kind, desc_cn, keywords):
+    def _anim_loop(aid, cn, en, kind, desc_cn, keywords, extra_props=None):
+        props = {
+            "amplitude": {"type": "number", "minimum": 0.005, "maximum": 0.15,
+                          "default": 0.03,
+                          "description": {"zh-CN": "运动幅度（占画面比例）"}},
+            "period": {"type": "number", "minimum": 0.5, "maximum": 8.0,
+                       "default": 3.0, "unit": "s",
+                       "description": {"zh-CN": "一个循环周期（秒）"}},
+        }
+        if extra_props:
+            props.update(extra_props)
         return EffectSpec(
             id=aid, version="1.0.0",
             name={"zh-CN": cn, "en": en}, category=CATEGORY_ANIMATION,
             description={"zh-CN": desc_cn, "en": f"Animation: {en}"},
             license="MIT", inputs=("video",), output="video",
-            parameters={
-                "type": "object",
-                "properties": {
-                    "amplitude": {"type": "number", "minimum": 0.005, "maximum": 0.15,
-                                  "default": 0.03,
-                                  "description": {"zh-CN": "运动幅度（占画面比例）"}},
-                    "period": {"type": "number", "minimum": 0.5, "maximum": 8.0,
-                               "default": 3.0, "unit": "s",
-                               "description": {"zh-CN": "一个循环周期（秒）"}},
-                },
-                "additionalProperties": False,
-            },
+            parameters={"type": "object", "properties": props,
+                        "additionalProperties": False},
             implementation={"engine": ENGINE_INTERNAL, "kind": kind},
             source="builtin", keywords=tuple(keywords),
             applies_to=("image", "video"),
@@ -976,12 +1141,55 @@ def _builtin_specs() -> list[EffectSpec]:
                                        "enum": ["left", "right", "up", "down"],
                                        "default": "left",
                                        "description": {"zh-CN": "揭示方向"}}})
+    anim_slide_out_left = _anim(
+        EFFECT_ANIM_SLIDE_OUT_LEFT, "左滑出", "Slide out left", "anim-slide-out-left",
+        "片段末尾向左滑出画面。", ["左滑", "出场", "方向移动"], dict(distance_prop))
+    anim_slide_out_right = _anim(
+        EFFECT_ANIM_SLIDE_OUT_RIGHT, "右滑出", "Slide out right", "anim-slide-out-right",
+        "片段末尾向右滑出画面。", ["右滑", "出场", "方向移动"], dict(distance_prop))
+    anim_slide_out_up = _anim(
+        EFFECT_ANIM_SLIDE_OUT_UP, "上滑出", "Slide out up", "anim-slide-out-up",
+        "片段末尾向上滑出画面。", ["上滑", "出场", "方向移动"], dict(distance_prop))
+    anim_slide_out_down = _anim(
+        EFFECT_ANIM_SLIDE_OUT_DOWN, "下滑出", "Slide out down", "anim-slide-out-down",
+        "片段末尾向下滑出画面。", ["下滑", "出场", "方向移动"], dict(distance_prop))
+    anim_rotate_out = _anim(
+        EFFECT_ANIM_ROTATE_OUT, "旋转退场", "Rotate out", "anim-rotate-out",
+        "片段末尾旋转并淡出。", ["旋转", "淡出", "出场"],
+        {"toAngle": {"type": "number", "minimum": -360.0, "maximum": 360.0,
+                     "default": 18.0, "description": {"zh-CN": "结束角度（度）"}}})
+    anim_flip_out = _anim(
+        EFFECT_ANIM_FLIP_OUT, "翻牌退场", "Flip out", "anim-flip-out",
+        "片段末尾沿竖轴翻折消失。", ["翻牌", "翻折", "出场"])
     anim_float = _anim_loop(EFFECT_ANIM_FLOAT, "漂浮", "Float", "anim-float",
                             "画面缓慢上下浮动循环，适合图片与封面。",
                             ["漂浮", "浮动", "缓慢", "float", "循环"])
     anim_sway = _anim_loop(EFFECT_ANIM_SWAY, "摇摆", "Sway", "anim-sway",
                            "画面左右轻微摇摆循环，比漂浮更有节奏。",
                            ["摇摆", "左右", "轻摆", "sway", "循环"])
+    anim_rock = _anim_loop(EFFECT_ANIM_ROCK, "轻摇倾斜", "Rock", "anim-rock",
+                           "画面围绕中心往复倾斜，保留四角余量。",
+                           ["倾斜", "旋转", "轻摇", "rock", "循环"])
+    anim_bounce = _anim_loop(EFFECT_ANIM_BOUNCE, "节奏弹跳", "Bounce", "anim-bounce",
+                             "以底部为落点上下弹跳，落地时有轻微压缩。",
+                             ["弹跳", "落地", "节奏", "bounce", "循环"])
+    anim_orbit = _anim_loop(EFFECT_ANIM_ORBIT, "椭圆环绕", "Orbit", "anim-orbit",
+                            "画面沿小椭圆轨道绕行，水平与垂直位移同时变化。",
+                            ["环绕", "椭圆", "运镜", "orbit", "循环"])
+    anim_heartbeat = _anim_loop(
+        EFFECT_ANIM_HEARTBEAT, "双拍心跳", "Heartbeat", "anim-heartbeat",
+        "一个周期内快速放大两次，随后回到静止大小。",
+        ["心跳", "双拍", "脉冲", "heartbeat", "循环"],
+        {"amplitude": {"type": "number", "minimum": 0.03, "maximum": 0.3,
+                       "default": 0.16,
+                       "description": {"zh-CN": "心跳放大幅度"}}})
+    anim_blink = _anim_loop(
+        EFFECT_ANIM_BLINK, "明灭闪现", "Blink", "anim-blink",
+        "画面按周期短暂变暗再恢复，适合标记与节拍强调。",
+        ["明灭", "闪现", "透明度", "blink", "循环"],
+        {"amplitude": {"type": "number", "minimum": 0.2, "maximum": 0.95,
+                       "default": 0.7,
+                       "description": {"zh-CN": "最低亮度降低比例"}}})
 
     # ---- 组合动画（1.5 批次2 E04）：一次叠加两个入场动画 ----
     anim_combo = EffectSpec(
@@ -1101,9 +1309,9 @@ def _builtin_specs() -> list[EffectSpec]:
 
     # ---- 视频特效（1.5-B）：可浏览的画面滤镜（ffmpeg 现成滤镜，全部真渲染）----
     def _fx(cn, en, fxid, filter_name, desc_cn, keywords, props=None,
-            dependencies=None):
+            dependencies=None, version="1.0.0", subcategory=""):
         return EffectSpec(
-            id=fxid, version="1.0.0",
+            id=fxid, version=version,
             name={"zh-CN": cn, "en": en},
             category=CATEGORY_FX,
             description={"zh-CN": desc_cn, "en": f"Video effect: {en}"},
@@ -1114,11 +1322,14 @@ def _builtin_specs() -> list[EffectSpec]:
             source="builtin", keywords=tuple(keywords),
             applies_to=("image", "video"),
             dependencies=tuple(dependencies) if dependencies else (),
+            subcategory=subcategory,
         )
 
     pix_props = lambda k, lo, hi, dv, label: {   # noqa: E731
         k: {"type": "number", "minimum": lo, "maximum": hi, "default": dv,
             "description": {"zh-CN": label}}}
+    filter_strength = pix_props("strength", 0.0, 1.0, 1.0,
+                                "滤镜强度；0 为原画面，1 为完整滤镜效果")
 
     fx_blur = _fx("高斯模糊", "Gaussian blur", EFFECT_FX_BLUR, "gblur",
                   "整体高斯模糊，用于背景虚化与柔化。",
@@ -1130,27 +1341,26 @@ def _builtin_specs() -> list[EffectSpec]:
                   pix_props("intensity", 0.1, 3.0, 1.0, "发光强度"))
     fx_chromatic = _fx("色彩分离", "Chromatic aberration", EFFECT_FX_CHROMATIC,
                        "chromatic",
-                       "RGB 通道错位产生色边，制造故障与镜头畸变感。",
+                       "红蓝通道沿对角方向错位，形成径向色边；与水平 RGB 分离效果区分。",
                        ["色彩分离", "色差", "RGB", "错位", "色边"],
-                       pix_props("offset", 1.0, 20.0, 4.0, "通道偏移像素"))
+                       pix_props("offset", 1.0, 20.0, 4.0, "红蓝通道对角偏移像素"),
+                       version="1.1.0")
     fx_glitch = _fx("故障", "Glitch", EFFECT_FX_GLITCH, "glitch",
                     "噪点与色带扰动叠加，模拟信号故障画面。",
                     ["故障", "glitch", "噪点", "数字", "赛博"],
                     pix_props("amount", 0.05, 1.0, 0.4, "故障强度"))
-    fx_sepia = _fx("复古棕褐", "Sepia", EFFECT_SEPIA,
-                   "colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131",
+    fx_sepia = _fx("复古棕褐", "Sepia", EFFECT_SEPIA, "sepia",
                    "经典棕褐色调，怀旧胶片观感。",
-                   ["复古", "棕褐", "怀旧", "胶片", "sepia"])
-    fx_vintage = _fx("复古褪色", "Vintage fade", EFFECT_FX_VINTAGE,
-                     "colorchannelmixer=.9:.1:0:0:.1:.9:.1:0:0:.1:.8:.1",
+                   ["复古", "棕褐", "怀旧", "胶片", "sepia"], filter_strength)
+    fx_vintage = _fx("复古褪色", "Vintage fade", EFFECT_FX_VINTAGE, "vintage",
                      "整体降饱和并偏暖，褪色老照片质感。",
-                     ["复古", "褪色", "老照片", "旧", "vintage"])
+                     ["复古", "褪色", "老照片", "旧", "vintage"], filter_strength)
     fx_gray = _fx("灰度", "Grayscale", EFFECT_GRAYSCALE, "grayscale",
                   "去除全部色彩，转为黑白画面。",
-                  ["黑白", "灰度", "去色", "mono", "gray"])
+                  ["黑白", "灰度", "去色", "mono", "gray"], filter_strength)
     fx_invert = _fx("反色", "Invert", EFFECT_FX_INVERT, "invert",
                     "颜色取反，负片效果。",
-                    ["反色", "负片", "反转", "invert"])
+                    ["反色", "负片", "反转", "invert"], filter_strength)
     fx_posterize = _fx("海报化", "Posterize", EFFECT_FX_POSTERIZE, "posterize",
                        "压缩色阶形成色块，波普海报质感。",
                        ["海报", "色块", "波普", "色阶", "poster"],
@@ -1165,10 +1375,21 @@ def _builtin_specs() -> list[EffectSpec]:
                   {"mode": {"type": "string",
                             "enum": ["colormix", "wire", "canny"],
                             "default": "colormix",
-                            "description": {"zh-CN": "描边模式"}}})
+                            "description": {"zh-CN": "描边模式"}},
+                   "low": {"type": "number", "minimum": 0.0, "maximum": 1.0,
+                           "default": 0.0784314,
+                           "description": {"zh-CN": "边缘低阈值"}},
+                   "high": {"type": "number", "minimum": 0.0, "maximum": 1.0,
+                            "default": 0.196078,
+                            "description": {"zh-CN": "边缘高阈值"}}})
     fx_mirror = _fx("水平镜像", "Mirror", EFFECT_FX_MIRROR, "mirror",
-                    "左右镜像拼接，制造对称构图。",
-                    ["镜像", "对称", "左右", "mirror"])
+                    "镜像反射并可选择水平、垂直或双轴翻转。",
+                    ["镜像", "对称", "左右", "上下", "mirror"],
+                    {"axis": {"type": "string",
+                              "enum": ["horizontal", "vertical", "both"],
+                              "default": "horizontal",
+                              "description": {"zh-CN": "镜像轴向"}}},
+                    version="1.1.0")
     fx_vig = _fx("暗角", "Vignette", EFFECT_VIGNETTE, "vignette",
                  "四周压暗聚焦视线，适合强调主体。",
                  ["暗角", "聚焦", "压暗", "vignette"],
@@ -1191,11 +1412,15 @@ def _builtin_specs() -> list[EffectSpec]:
                                   "maximum": 1.0, "default": 0.0,
                                   "description": {"zh-CN": "边缘羽化混合量"}}})
     fx_lut = _fx("LUT 调色", "LUT grade", EFFECT_FX_LUT, "lut3d",
-                 "用内置 3D 查找表（cool/warm/retro）做电影感调色。",
+                 "可用内置 3D 查找表或导入 .cube LUT 调色；输入按 Rec.709/sRGB 画面解释。",
                  ["LUT", "调色", "电影感", "冷色", "暖色", "复古", "lut"],
                  {"preset": {"type": "string", "enum": ["cool", "warm", "retro"],
                              "default": "cool",
-                             "description": {"zh-CN": "预设 LUT（对应内置 .cube 资源）"}}},
+                             "description": {"zh-CN": "预设 LUT（对应内置 .cube 资源）"}},
+                  "file": {"type": "string", "default": "",
+                           "description": {"zh-CN": "已导入的自定义 3D .cube 文件；为空时使用内置预设"}},
+                  "name": {"type": "string", "default": "",
+                           "description": {"zh-CN": "导入时的原文件名，仅用于显示"}}},
                  dependencies=("lut",))
     fx_curves = _fx("调色曲线", "Color curves", EFFECT_FX_CURVES, "curves",
                     "用 ffmpeg curves 的预设曲线调整对比度与色调。",
@@ -1357,6 +1582,25 @@ def _builtin_specs() -> list[EffectSpec]:
                               "default": 0.6,
                               "description": {"zh-CN": "逐帧权重衰减（越小残影越淡）"}}})
 
+    fx_swing = _fx("画面摆动", "Frame swing", EFFECT_FX_SWING, "swing",
+                   "画面围绕中心随时间轻摆，适合卡点和手绘节奏。",
+                   ["摆动", "旋转", "节奏", "swing"],
+                   {"degrees": {"type": "number", "minimum": 1.0,
+                                 "maximum": 12.0, "default": 7.0,
+                                 "description": {"zh-CN": "左右摆动角度（度）"}},
+                    "hz": {"type": "number", "minimum": 0.3,
+                           "maximum": 5.0, "default": 1.5,
+                           "description": {"zh-CN": "每秒摆动次数"}}})
+    fx_shake = _fx("取景框震动", "Camera shake", EFFECT_FX_SHAKE, "shake",
+                   "对画面逐帧改变取景位置，再放大回原尺寸，形成无黑边震动。",
+                   ["震动", "抖动", "手持", "shake"],
+                   {"pixels": {"type": "number", "minimum": 2.0,
+                                "maximum": 18.0, "default": 10.0,
+                                "description": {"zh-CN": "位移幅度（像素）"}},
+                    "hz": {"type": "number", "minimum": 0.5,
+                           "maximum": 10.0, "default": 4.0,
+                           "description": {"zh-CN": "每秒震动次数"}}})
+
     # O02 HSL：色相 / 饱和度 / 明度三轴调节
     fx_hsl = _fx("HSL 调节", "HSL adjust", EFFECT_FX_HSL, "hsl",
                  "色相、饱和度、明度三轴精细调节（huesaturation），并可选保持亮度。",
@@ -1410,26 +1654,53 @@ def _builtin_specs() -> list[EffectSpec]:
                                                  "default": False,
                                                  "description": {"zh-CN": "保持亮度"}}})
 
-    # N02 几何蒙版：矩形/椭圆框选，其余压黑（就地改亮度，不产生 alpha）
-    fx_mask = _fx("几何蒙版", "Shape mask", EFFECT_FX_MASK, "mask",
-                  "只保留画面中指定的矩形或椭圆区域，其余压黑；支持羽化与反转。"
-                  "用 geq 就地改亮度，不产生 alpha，因此可安全叠加其它特效与转场。",
-                  ["蒙版", "遮罩", "矩形", "椭圆", "圆形", "羽化", "mask"],
-                  {"shape": {"type": "string", "enum": ["rect", "circle"],
+    # N02 蒙版：几何、钢笔自由路径和文字都写入真实 Alpha，透出下层轨道。
+    fx_mask = _fx("几何/文字/钢笔蒙版", "Shape, text and pen mask", EFFECT_FX_MASK, "mask",
+                  "按矩形、椭圆、文字或画布自由路径生成透明蒙版；钢笔路径可选折线或平滑曲线，"
+                  "贝塞尔路径点支持切线联动或独立编辑，并支持羽化与反转。",
+                  ["蒙版", "遮罩", "矩形", "椭圆", "圆形", "钢笔", "文字蒙版", "羽化", "mask"],
+                  {"shape": {"type": "string", "enum": ["rect", "circle", "freehand", "text"],
                              "default": "rect",
-                             "description": {"zh-CN": "形状：矩形 rect / 椭圆 circle"}},
+                             "description": {"zh-CN": "形状：矩形、椭圆、钢笔自由路径或文字"}},
                    "x": {"type": "number", "minimum": 0.0, "maximum": 1.0,
                          "default": 0.15,
-                         "description": {"zh-CN": "矩形左上角或椭圆中心的 X（比例 0~1）"}},
+                         "description": {"zh-CN": "蒙版左上角/文字起点或椭圆中心的 X（比例 0~1）"}},
                    "y": {"type": "number", "minimum": 0.0, "maximum": 1.0,
                          "default": 0.15,
-                         "description": {"zh-CN": "矩形左上角或椭圆中心的 Y（比例 0~1）"}},
+                         "description": {"zh-CN": "蒙版左上角/文字起点或椭圆中心的 Y（比例 0~1）"}},
                    "w": {"type": "number", "minimum": 0.01, "maximum": 1.0,
                          "default": 0.7,
-                         "description": {"zh-CN": "矩形宽或椭圆横向直径（比例）"}},
+                         "description": {"zh-CN": "蒙版宽或椭圆横向直径（比例）"}},
                    "h": {"type": "number", "minimum": 0.01, "maximum": 1.0,
                          "default": 0.7,
-                         "description": {"zh-CN": "矩形高或椭圆纵向直径（比例）"}},
+                         "description": {"zh-CN": "蒙版高或椭圆纵向直径（比例）"}},
+                   "aspectMode": {"type": "string", "enum": ["bounds", "circle"],
+                                  "description": {"zh-CN": "椭圆比例：默认保持宽高边界，或在边界内保持真圆"}},
+                   "content": {"type": "string",
+                               "description": {"zh-CN": "文字蒙版内容"}},
+                   "fontSize": {"type": "number", "minimum": 0.02, "maximum": 0.5,
+                                "unit": "画布高度比例",
+                                "description": {"zh-CN": "文字蒙版字号"}},
+                   "points": {"type": "array", "maxItems": 128,
+                              "items": {"type": "object",
+                                        "properties": {
+                                            "x": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+                                            "y": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+                                            "inHandle": {"type": "object", "properties": {
+                                                "x": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+                                                "y": {"type": "number", "minimum": 0.0, "maximum": 1.0}},
+                                                "required": ["x", "y"], "additionalProperties": False},
+                                            "outHandle": {"type": "object", "properties": {
+                                                "x": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+                                                "y": {"type": "number", "minimum": 0.0, "maximum": 1.0}},
+                                                "required": ["x", "y"], "additionalProperties": False},
+                                            "handlesLinked": {"type": "boolean",
+                                                              "description": {"zh-CN": "联动入/出切线手柄"}}},
+                                        "required": ["x", "y"],
+                                        "additionalProperties": False},
+                              "description": {"zh-CN": "钢笔蒙版归一化路径点，由画布绘制"}},
+                   "pathMode": {"type": "string", "enum": ["linear", "smooth", "bezier"],
+                                "description": {"zh-CN": "钢笔路径：折线、自动平滑或可编辑贝塞尔曲线"}},
                    "feather": {"type": "number", "minimum": 0.0, "maximum": 0.5,
                                "default": 0.05,
                                "description": {"zh-CN": "边缘羽化（0 为硬边）"}},
@@ -1554,8 +1825,13 @@ def _builtin_specs() -> list[EffectSpec]:
                                "default": 0.45,
                                "description": {"zh-CN": "细节增强强度"}}})
     fx_vflip = _fx("垂直翻转", "Vertical flip", EFFECT_FX_VFLIP, "vflip",
-                   "上下翻转画面，可用于倒影、镜面与风格化构图。",
-                   ["翻转", "上下", "倒影", "镜面", "vflip"])
+                   "翻转画面方向，可切换水平、垂直或双轴翻转。",
+                   ["翻转", "上下", "左右", "倒影", "镜面", "vflip"],
+                   {"axis": {"type": "string",
+                             "enum": ["vertical", "horizontal", "both"],
+                             "default": "vertical",
+                             "description": {"zh-CN": "翻转轴向"}}},
+                   version="1.1.0")
     fx_film_grain = _fx("胶片颗粒", "Film grain", EFFECT_FX_FILM_GRAIN, "filmgrain",
                         "以固定随机种子添加可复现的细颗粒；默认强度轻，需要时再用。",
                         ["胶片", "颗粒", "噪点", "质感", "film", "grain"],
@@ -1580,6 +1856,47 @@ def _builtin_specs() -> list[EffectSpec]:
                              "default": "white",
                              "description": {"zh-CN": "网格颜色"}}})
 
+    # ---- 人物特效：作用于人物抠像生成的 Alpha 视频层 ----
+    person_fx_dependency = ["person-cutout-alpha"]
+    fx_person_halo = _fx(
+        "人物光晕", "Person halo", "cutvoke.person.halo", "person_halo",
+        "对透明人物抠像图层生成彩色柔边光晕；普通不透明视频不会产生人物轮廓光。",
+        ["人物", "光晕", "轮廓", "抠像"],
+        props={
+            "sigma": {"type": "number", "minimum": 2.0, "maximum": 28.0,
+                      "default": 9.0, "description": {"zh-CN": "光晕扩散半径"}},
+            "hueShift": {"type": "number", "minimum": -180.0, "maximum": 180.0,
+                         "default": 30.0, "description": {"zh-CN": "光晕色相偏移（度）"}},
+            "saturation": {"type": "number", "minimum": 0.0, "maximum": 2.0,
+                           "default": 1.0, "description": {"zh-CN": "光晕饱和度"}},
+            "opacity": {"type": "number", "minimum": 0.1, "maximum": 1.0,
+                        "default": 0.75, "description": {"zh-CN": "光晕不透明度"}},
+        }, dependencies=person_fx_dependency, version="1.1.0", subcategory="人物轮廓")
+    fx_person_echo = _fx(
+        "人物动态残影", "Person echo", "cutvoke.person.echo", "trail",
+        "对透明人物抠像图层混合连续帧，形成随动作方向延展的残影。",
+        ["人物", "残影", "动作", "抠像"],
+        props={
+            "frames": {"type": "integer", "minimum": 2, "maximum": 12,
+                       "default": 5, "description": {"zh-CN": "残影混合帧数"}},
+            "decay": {"type": "number", "minimum": 0.0, "maximum": 1.0,
+                      "default": 0.62, "description": {"zh-CN": "较早画面的衰减比例"}},
+        }, dependencies=person_fx_dependency, subcategory="人物残影")
+    fx_person_tint = _fx(
+        "人物色彩映射", "Person color grade", "cutvoke.person.tint", "hsl",
+        "只对透明人物抠像素材的可见像素调节色相、饱和度与亮度。",
+        ["人物", "色彩", "色相", "抠像"],
+        props={
+            "hue": {"type": "number", "minimum": -180.0, "maximum": 180.0,
+                    "default": 24.0, "description": {"zh-CN": "色相偏移（度）"}},
+            "saturation": {"type": "number", "minimum": -1.0, "maximum": 1.0,
+                           "default": 0.2, "description": {"zh-CN": "饱和度增减"}},
+            "intensity": {"type": "number", "minimum": -1.0, "maximum": 1.0,
+                          "default": 0.0, "description": {"zh-CN": "综合色彩强度"}},
+            "lightness": {"type": "boolean", "default": False,
+                          "description": {"zh-CN": "保持人物原亮度"}},
+        }, dependencies=person_fx_dependency, subcategory="人物色彩")
+
     # ---- 文字图层轨（J04）：text 轨片段的内容标记效果 ----
     # 纯描述性（不入画面滤镜链）：渲染层把带此效果的 text 轨 clip 按
     # clip 时间与参数转成 Caption 进 ASS 字幕轨道（字体/颜色/描边/对齐）。
@@ -1602,6 +1919,12 @@ def _builtin_specs() -> list[EffectSpec]:
                 "fontSize": {"type": "number", "minimum": 8.0, "maximum": 200.0,
                              "default": 48.0,
                              "description": {"zh-CN": "字号（像素）"}},
+                "fontFamily": {"type": "string", "enum": ["Noto Sans SC", "Noto Serif SC"],
+                               "default": "Noto Sans SC",
+                               "description": {"zh-CN": "随软件打包的中文字族"}},
+                "lineSpacing": {"type": "number", "minimum": 0.5, "maximum": 2.5,
+                                "default": 1.0,
+                                "description": {"zh-CN": "多行标题行距倍率"}},
                 "color": {"type": "string", "default": "#ffffff",
                           "description": {"zh-CN": "文字颜色"}},
                 "strokeColor": {"type": "string", "default": "#000000",
@@ -1614,13 +1937,47 @@ def _builtin_specs() -> list[EffectSpec]:
                           "description": {"zh-CN": "水平对齐"}},
                 "bold": {"type": "boolean", "default": False,
                          "description": {"zh-CN": "是否加粗"}},
+                "background": {"type": "string", "default": "",
+                               "description": {"zh-CN": "文字背景色；空字符串表示透明"}},
+                "panelWidth": {"type": "number", "minimum": 0.0, "maximum": 1.0,
+                               "default": 0.0,
+                               "description": {"zh-CN": "独立背景条宽度，占画布宽度比例；0 表示随文字宽度"}},
+                "panelHeight": {"type": "number", "minimum": 0.0, "maximum": 1.0,
+                                "default": 0.0,
+                                "description": {"zh-CN": "独立背景条高度，占画布高度比例"}},
+                "x": {"type": "number", "minimum": 0.0, "maximum": 1.0,
+                      "default": 0.5, "description": {"zh-CN": "画布水平位置（0 到 1）"}},
+                "y": {"type": "number", "minimum": 0.0, "maximum": 1.0,
+                      "default": 0.5, "description": {"zh-CN": "画布垂直位置（0 到 1）"}},
+                "scale": {"type": "number", "minimum": 0.1, "maximum": 5.0,
+                          "default": 1.0, "description": {"zh-CN": "文字缩放倍率"}},
+                "rotation": {"type": "number", "minimum": -180.0, "maximum": 180.0,
+                             "default": 0.0, "description": {"zh-CN": "文字旋转角度"}},
+                "shadow": {"type": "integer", "minimum": 0, "maximum": 12,
+                           "default": 1, "description": {"zh-CN": "文字阴影宽度"}},
+                "animIn": {"type": "integer", "minimum": 0, "maximum": 3000,
+                           "default": 0, "description": {"zh-CN": "淡入时长（毫秒）"}},
+                "animOut": {"type": "integer", "minimum": 0, "maximum": 3000,
+                            "default": 0, "description": {"zh-CN": "淡出时长（毫秒）"}},
+                "animInStyle": {"type": "string",
+                                "enum": ["none", "fade", "scale", "typewriter"],
+                                "description": {"zh-CN": "文字入场方式；缺省沿用淡入"}},
+                "animOutStyle": {"type": "string",
+                                 "enum": ["none", "fade", "scale"],
+                                 "description": {"zh-CN": "文字出场方式；缺省沿用淡出"}},
+                "animLoopStyle": {"type": "string",
+                                  "enum": ["none", "pulse", "blink"],
+                                  "description": {"zh-CN": "文字循环方式；缺省不循环"}},
+                "animLoopMs": {"type": "integer", "minimum": 300, "maximum": 3000,
+                               "description": {"zh-CN": "循环周期（毫秒）；缺省 1000"}},
             },
             "additionalProperties": False,
         },
         implementation={"engine": ENGINE_INTERNAL, "filter": ""},
         source="builtin",
         keywords=("文字", "标题", "字幕", "叠加", "text", "ass"),
-        applies_to=("video",),
+        applies_to=("text",),
+        subcategory="简约",
     )
 
     specs = [transform, color, crossfade, fade, wipe, slide, blur, zoom,
@@ -1629,7 +1986,10 @@ def _builtin_specs() -> list[EffectSpec]:
              anim_fade, anim_zoom, anim_slide,
              anim_slide_up, anim_slide_down, anim_slide_right,
              anim_rotate_in, anim_flip_in, anim_back_in, anim_reveal,
-             anim_fade_out, anim_zoom_out, anim_breathe, anim_float, anim_sway,
+             anim_fade_out, anim_zoom_out, anim_slide_out_left,
+             anim_slide_out_right, anim_slide_out_up, anim_slide_out_down,
+             anim_rotate_out, anim_flip_out, anim_breathe, anim_float, anim_sway,
+             anim_rock, anim_bounce, anim_orbit, anim_heartbeat, anim_blink,
              anim_combo,
              anim_combo_push_right, anim_combo_pull_up, anim_combo_rotate_zoom,
              anim_combo_banner_in, anim_combo_card_in, anim_combo_drift_left,
@@ -1639,10 +1999,13 @@ def _builtin_specs() -> list[EffectSpec]:
              fx_chromakey, fx_lut, fx_curves, fx_denoise, fx_rgbsplit,
              fx_loudnorm, fx_crop,
              fx_equalizer, fx_compressor, fx_flicker,
-             fx_pan, fx_trail, fx_hsl, fx_colorbalance, fx_mask, fx_shape,
+             fx_pan, fx_trail, fx_swing, fx_shake, fx_hsl, fx_colorbalance,
+             fx_mask, fx_shape,
              fx_vibrance, fx_colorize, fx_deband, fx_lens, fx_cas, fx_vflip,
              fx_film_grain, fx_grid,
+             fx_person_halo, fx_person_echo, fx_person_tint,
              fx_text]
+    specs.extend(extra_transitions)
 
     # 统一补齐元数据。图片与视频都能进入视觉渲染链，因此画面变换、调色、
     # 动画、视觉特效和转场均可用于这两类片段；转场仍由时间线层保证它发生在
@@ -1674,7 +2037,9 @@ def _builtin_specs() -> list[EffectSpec]:
                     updated[name] = {**properties[name],
                                      "description": {"zh-CN": description}}
                 s = _replace(s, parameters={**s.parameters, "properties": updated})
-        if s.id in audio_effect_ids:
+        if "person-cutout-alpha" in s.dependencies:
+            s = _replace(s, applies_to=("video",))
+        elif s.id in audio_effect_ids:
             s = _replace(s, applies_to=("audio", "video"))
         elif s.id == EFFECT_TEXT:
             s = _replace(s, applies_to=("text",))
@@ -1758,6 +2123,7 @@ class EffectRegistry:
         return [s for s in self.all() if s.category == category]
 
     def search(self, *, q: Optional[str] = None, category: Optional[str] = None,
+               subcategory: Optional[str] = None,
                applies_to: Optional[str] = None,
                ids: Optional[Iterable[str]] = None) -> list[EffectSpec]:
         """资源检索（J01 / 计划 5.1）：按关键词 + 分类 + 适用对象筛选。
@@ -1768,7 +2134,10 @@ class EffectRegistry:
         id_set = None if ids is None else set(ids)
         out: list[EffectSpec] = []
         for s in self.all():
-            if category and s.category != category:
+            if category and s.category != category and _browse_category(
+                    s.category, s.subcategory or _builtin_subcategory(s.id, s.category)) != category:
+                continue
+            if subcategory and (s.subcategory or _builtin_subcategory(s.id, s.category)) != subcategory:
                 continue
             if applies_to and applies_to not in s.applies_to:
                 continue
@@ -1798,6 +2167,27 @@ class EffectRegistry:
         if errors:
             raise EffectParamInvalid(f"{effect_id} 参数非法: " + "; ".join(errors))
         resolved = resolve_defaults(spec.parameters, value)
+        if effect_id == "cutvoke.fx.mask" and isinstance(resolved, dict):
+            content = resolved.get("content", "")
+            if isinstance(content, str) and len(content) > 240:
+                raise EffectParamInvalid(
+                    f"{effect_id} 参数非法: 文字蒙版最多 240 个字符")
+        if effect_id == "cutvoke.fx.edge" and isinstance(resolved, dict):
+            if float(resolved["low"]) >= float(resolved["high"]):
+                raise EffectParamInvalid(
+                    f"{effect_id} 参数非法: low must be less than high")
+        if effect_id == "cutvoke.fx.lut" and isinstance(resolved, dict):
+            file = resolved.get("file", "")
+            if file:
+                path = Path(file)
+                if not path.is_absolute() or path.suffix.lower() != ".cube" or not path.is_file():
+                    raise EffectParamInvalid("LUT file 必须是已存在的绝对 .cube 文件路径")
+                try:
+                    if path.stat().st_size > MAX_CUBE_BYTES:
+                        raise CubeInvalid("LUT 文件过大")
+                    validate_cube(path.read_bytes())
+                except (OSError, CubeInvalid) as error:
+                    raise EffectParamInvalid(f"LUT 文件无效: {error}") from error
         return resolved if isinstance(resolved, dict) else value
 
     def default_params(self, effect_id: str) -> dict:

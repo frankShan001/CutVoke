@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_flare_rose",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "299712a33f094ca02b448c842864fb9544ccb910f1ab00a53746290741ee15bd",
+  "previewSha256": "d5d86d054f7c9f5a91e4e0d3de3df6c79e134b28414aacdca8dcc0d893241031",
+  "preview": "cinematic_optical_flare_rose.mp4",
+  "bytes": 6411,
+  "visiblePixels": 2783,
+  "changedPixels": 0,
+  "motionVisible": false
+}

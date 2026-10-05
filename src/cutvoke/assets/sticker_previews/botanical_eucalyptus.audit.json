@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_eucalyptus",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "e2491627e0898d97210ec2ae5ccd6cd63ad79147b37045b5aa15205ac7b1d538",
+  "previewSha256": "de4498f6ae5f0256c9d37fc5074ab4e9c48f9b3a3f5e7c92ccef7e28f4ff27d7",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4128,
+  "visiblePixels": 2737,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2422,
+    "steady_entry": 2737,
+    "steady_exit": 2737,
+    "exit": 2422
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2422,
+      "withoutFade": 2736
+    },
+    "steady_entry": {
+      "withFade": 2737,
+      "withoutFade": 2737
+    },
+    "steady_exit": {
+      "withFade": 2737,
+      "withoutFade": 2736
+    },
+    "exit": {
+      "withFade": 2422,
+      "withoutFade": 2737
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.007,
+    0.007
+  ],
+  "auditExport": "botanical_eucalyptus.audit.mp4",
+  "auditExportSha256": "71cb3bafd3f88427d98e27fd05f09854b288465193f560cbb35300e079c72ee5"
+}

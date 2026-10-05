@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_lavender",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1b6b29e50adbbf80991662fb3005ebc553a0229f3e775916b0a38eafa1cd10f6",
+  "previewSha256": "5d106312e70a20bf327dd3b0c0d3519530a2b5e7722b916dc816d154ebc52969",
+  "preview": "botanical_lavender.mp4",
+  "bytes": 4321,
+  "visiblePixels": 1438,
+  "changedPixels": 0,
+  "motionVisible": false
+}

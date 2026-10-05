@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_orange_blossom",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "94974435bc65f5884c57ef102917d119afee8b8fc5ae7ba711ec0e5253d48480",
+  "previewSha256": "0d9733ba37b397312da30ad80874900b39a26043d11ab5d99ac5d62abffc6eb8",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5484,
+  "visiblePixels": 4179,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3763,
+    "steady_entry": 4179,
+    "steady_exit": 4179,
+    "exit": 3764
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3763,
+      "withoutFade": 4179
+    },
+    "steady_entry": {
+      "withFade": 4179,
+      "withoutFade": 4178
+    },
+    "steady_exit": {
+      "withFade": 4179,
+      "withoutFade": 4179
+    },
+    "exit": {
+      "withFade": 3764,
+      "withoutFade": 4179
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.031,
+    0.031
+  ],
+  "auditExport": "botanical_orange_blossom.audit.mp4",
+  "auditExportSha256": "3d799798c96b6f017473b87e4b42ffb73abbefba117f588ae39ba49148c55daa"
+}

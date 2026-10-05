@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_sunbeam_gold",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "0cb5f787578c69d1fa90f67d208da2f04a2b49bd0c87801950b868df59f1ba53",
+  "previewSha256": "104e9c2f1cddea65448c168db7225868095edd0eff4e50d21b61494a553eb0f7",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4942,
+  "visiblePixels": 4099,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2491,
+    "steady_entry": 4099,
+    "steady_exit": 4098,
+    "exit": 2491
+  },
+  "previewExportMeanRgbDifferences": [
+    0.112,
+    0.112
+  ],
+  "auditExport": "texture_sunbeam_gold.audit.mp4",
+  "auditExportSha256": "90144db9d940b100c30e62ae318da24aadea7f71a97bb244861a201468aa59b0"
+}

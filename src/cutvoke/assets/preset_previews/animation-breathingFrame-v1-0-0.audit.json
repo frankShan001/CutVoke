@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.breathingFrame",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "amplitude",
+    "value": 0.055
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "84d90780e0783a9f41d6e7d4086e895a3efc2f0beb10dcedc15992d541650d6a",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "84d90780e0783a9f41d6e7d4086e895a3efc2f0beb10dcedc15992d541650d6a",
+  "auditExport": "animation-breathingFrame-v1-0-0.audit.mp4"
+}

@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.flipOut",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.733333,
+  "previewExportMeanRgbDifference": 1.163,
+  "exportSha256": "588761a2f4d4c8f3daec7df1cf3e33ccc5b31513db7ea56813012009b076e792",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "588761a2f4d4c8f3daec7df1cf3e33ccc5b31513db7ea56813012009b076e792",
+  "auditExport": "animation-flipOut-v1-0-0.audit.mp4"
+}

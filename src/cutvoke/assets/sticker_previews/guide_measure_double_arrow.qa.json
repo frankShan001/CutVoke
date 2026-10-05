@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_measure_double_arrow",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "42bce0ab8a08be6e994a9b5ed5a19a7ca03c60ad4cbac4043f1491a45e253fcc",
+  "previewSha256": "a1f5855f2501dc4f76fd9280375530551490fd08990d12cdd07fe4e9922a70dc",
+  "preview": "guide_measure_double_arrow.mp4",
+  "bytes": 3597,
+  "visiblePixels": 1128,
+  "changedPixels": 0,
+  "motionVisible": false
+}

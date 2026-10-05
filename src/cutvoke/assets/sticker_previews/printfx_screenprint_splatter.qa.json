@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_screenprint_splatter",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "73946589e1f0a8382bb548762c9078f33758a3c392c2a2a93043dae5c63009fe",
+  "previewSha256": "e93798ec2b7a6ee6db1243fb88907687e79fb59d49b03bd9bd295d9ee255a96f",
+  "preview": "printfx_screenprint_splatter.mp4",
+  "bytes": 10690,
+  "visiblePixels": 5230,
+  "changedPixels": 0,
+  "motionVisible": false
+}

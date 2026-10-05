@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_donut",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The pink icing, central hole and colored sprinkles stay distinct over the dough outline.",
+  "sourceSha256": "1930702f68a7caa17df03a5112398100a5d95a7d4c32c32571c3415f7c51ca99",
+  "previewSha256": "6051f3961a42f913463f27b1ad1862061bab8bc4d54b1c6a25309e03358fa173",
+  "auditSha256": "a50181529e2cdb2da5452a590be3a4c5e3c25631adbe1fc74bd7b63edcb89bbf"
+}

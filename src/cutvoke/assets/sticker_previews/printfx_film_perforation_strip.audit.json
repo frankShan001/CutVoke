@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_film_perforation_strip",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "7eb67fcf5082f7db185be811b603c1ae846a78b5658db1dd9f3259930d023b30",
+  "previewSha256": "6bb33a131b6c4ed5b408e846cfa978684775162fb993d6b3902b9e013bb1871a",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5227,
+  "visiblePixels": 6648,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 5999,
+    "steady_entry": 6651,
+    "steady_exit": 6652,
+    "exit": 6003
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 5999,
+      "withoutFade": 6652
+    },
+    "steady_entry": {
+      "withFade": 6651,
+      "withoutFade": 6652
+    },
+    "steady_exit": {
+      "withFade": 6652,
+      "withoutFade": 6651
+    },
+    "exit": {
+      "withFade": 6003,
+      "withoutFade": 6648
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.135,
+    0.142
+  ],
+  "auditExport": "printfx_film_perforation_strip.audit.mp4",
+  "auditExportSha256": "5af87078f15da33b1af23cef9410e2ca659c6f8e8e47857e85a743671cdd6ec0"
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.filmBlue",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.vintage",
+  "params": {
+    "strength": 0.65
+  },
+  "subcategory": "胶片",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:51:00+08:00",
+  "observation": "旧片整体为冷蓝和浅青两个主色区，完全区别于胶片组其它暖黄、粉紫样张。",
+  "method": "Manual comparison of 320x180 before-after covers and five aligned frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; monoMatte excluded as too close to existing bloom/gray",
+  "coverSha256": "da266251963da1a746b9172bc40daa67f3550df08c6177260fe702f6f25ab613",
+  "motionPreviewSha256": "5dc9b2a6fe834f2f9d0d0fd9760205bdf5fee1708f9a81d7a59ac3e04123d89f",
+  "auditSha256": "9fa5f0639eb23587231da96b0a4bb4e0dd61b6c1cbea402ea579d9bde266372b"
+}

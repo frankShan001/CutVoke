@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.sideSway",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.sway",
+  "params": {
+    "amplitude": 0.1,
+    "period": 1.5
+  },
+  "subcategory": "循环",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "圆门水平往返移动，左右换向连续，主体没有每三帧才跳一次的台阶。 已实际复看重建库预览的12个时间点，图形运动清楚，画幅和边缘正常。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "6aec68146e64a61ad62551e945284839c50902ac540ca61f9818f67e3fed3c40",
+  "motionPreviewSha256": "bcf575144897160472be907140d0ad22288eda1029a6bfadc355671a6a1cbc72",
+  "auditSha256": "08434e6cd78f9fadb18892e2d6ffb9335a40d6f4dfed6e4d7b500552056bbb4e",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_sideSway.png",
+  "libraryReviewSheetSha256": "04d7aad947ef28a8111d75cca25b86ee4b2adac55bfac3726d47797a181681e5"
+}

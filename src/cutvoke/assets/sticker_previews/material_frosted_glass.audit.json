@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_frosted_glass",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "4d9267d5bcd7bf3e42e0f0885ea000f5102c72bc6cde8641ee4b89036e1002b9",
+  "previewSha256": "43a481a68a01150ac201e79dbcddac242581fb98f64d6f982867a7e25272f417",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5113,
+  "visiblePixels": 4834,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1352,
+    "steady_entry": 4834,
+    "steady_exit": 4834,
+    "exit": 1352
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1352,
+      "withoutFade": 4834
+    },
+    "steady_entry": {
+      "withFade": 4834,
+      "withoutFade": 4834
+    },
+    "steady_exit": {
+      "withFade": 4834,
+      "withoutFade": 4834
+    },
+    "exit": {
+      "withFade": 1352,
+      "withoutFade": 4834
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "material_frosted_glass.audit.mp4",
+  "auditExportSha256": "68d3829ea6043fd15cfb1873f5c9eb2e394d59838607a42b4ab248092d41fde7"
+}

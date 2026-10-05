@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.personFx.limeEdge",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated transparent person-shaped video over a dark neutral stage",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "sigma",
+    "value": 7.0
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 1.3,
+  "exportSha256": "946a488f96a3f8329d77d39fcebcb70ac7c228d5da9ec4f6bf704601239783df",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "946a488f96a3f8329d77d39fcebcb70ac7c228d5da9ec4f6bf704601239783df",
+  "auditExport": "personFx-limeEdge-v1-4-0.audit.mp4"
+}

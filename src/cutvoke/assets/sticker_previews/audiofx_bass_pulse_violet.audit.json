@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_bass_pulse_violet",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "e198cd803d46d7e61bcc8f6f62934d0692c2b259885d7d12e7ecf78efd12f74e",
+  "previewSha256": "289a062c89a315841ac31e54a2963cc178f4b32232212a7ff26ea4226f8b7a4e",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3699,
+  "visiblePixels": 2820,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2586,
+    "steady_entry": 2818,
+    "steady_exit": 2820,
+    "exit": 2583
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2586,
+      "withoutFade": 2820
+    },
+    "steady_entry": {
+      "withFade": 2818,
+      "withoutFade": 2820
+    },
+    "steady_exit": {
+      "withFade": 2820,
+      "withoutFade": 2820
+    },
+    "exit": {
+      "withFade": 2583,
+      "withoutFade": 2820
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.402,
+    0.393
+  ],
+  "auditExport": "audiofx_bass_pulse_violet.audit.mp4",
+  "auditExportSha256": "4bc6268bbf16c1d43ecaeb6fa68d7d50eca36718bc2e18acea576985c17fc938"
+}

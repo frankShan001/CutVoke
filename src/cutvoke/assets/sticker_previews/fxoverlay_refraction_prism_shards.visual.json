@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_prism_shards",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "observation": "棱镜碎片具有独立棱面和散布小晶片，中心结构清楚，颜色与其它光效区分明显。",
+  "sourceSha256": "240132c9c1f1da6af7edc011e729b7bc712543933aa9088fa8d7ad395827da13",
+  "previewSha256": "6389d3a184c1285d041aeb8640ec3a8bc06024c58001f5dc50bba20ccb12388c",
+  "auditSha256": "0526627ff04b60e2f37e5d19f182d8084f4663db0020079690d5771c3ef1bebc"
+}

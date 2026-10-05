@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_book_stack",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "70192721dbfbe67ccb13fcfdd70f6b0dab126be211ddc9e47bb48448c62575eb",
+  "previewSha256": "d67a45bed64c656f7b5e82abd3892e681d770e5fc43512b157506f0bcc15a9e2",
+  "preview": "learn_book_stack.mp4",
+  "bytes": 4257,
+  "visiblePixels": 2438,
+  "changedPixels": 0,
+  "motionVisible": false
+}

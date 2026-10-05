@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_sparkle_glints",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "19504765c9412187fc17a1d17c89ffd96b796991c2d41c37515f0e7eb2d2b5e1",
+  "previewSha256": "113654ea0816557c49e773ee0a90339fa76a409fe82d063ab1e4b2519343a02a",
+  "preview": "promo_sparkle_glints.mp4",
+  "bytes": 6377,
+  "visiblePixels": 1701,
+  "changedPixels": 0,
+  "motionVisible": false
+}

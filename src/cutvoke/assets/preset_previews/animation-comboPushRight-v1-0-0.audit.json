@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.comboPushRight",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "0a1083be5ba6e4b54d207ced344dab619541889687e449914cd4fe1ae3b81487",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "0a1083be5ba6e4b54d207ced344dab619541889687e449914cd4fe1ae3b81487",
+  "auditExport": "animation-comboPushRight-v1-0-0.audit.mp4"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_plum_blossom",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "A compact diagonal group of white plum blossoms and gold leaves reads as a floral cluster, separate from the pink petal trail.",
+  "sourceSha256": "6995ceb1db84b9a05e7b922792f4d567cfa0ebaaecb79ee7d0c2a71827f9a528",
+  "previewSha256": "e7c81dada6f23d8d27815d67f7920c02b7b90974fe80bac9bb7ee6cb7b939b3f",
+  "auditSha256": "640c9619ecf2e471c481e83502ede70c7ce538e75e32149a9c4747680fc2e8d7"
+}

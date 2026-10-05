@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.comboCardIn",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.comboCardIn",
+  "params": {
+    "duration": 1.0,
+    "easing": "ease-out",
+    "distance": 0.3,
+    "primary": "flipIn",
+    "secondary": "slideIn",
+    "fromScale": 0.8
+  },
+  "subcategory": "组合",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "窄竖条翻牌展开并横移入场，两个动作同步连续，完成后整幅不变形。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "2cc30bf22b5d777f4485c0c8002f837f99d28537dce96d173ed477a23eb07d55",
+  "motionPreviewSha256": "1b8449c7245b8bdc83180f3ebe7889b9ccad9ebd4260bca2d4cb2c5e9ecd5378",
+  "auditSha256": "55da39b5c8f9abddf1fae6e2d1bf0afe1acd14d8470b2ea932784474db6e7286",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_comboCardIn.png",
+  "libraryReviewSheetSha256": "1870d7461614bcf546fd75bdf5737c0a61ea63c0a2d02f059598017d2d4255eb"
+}

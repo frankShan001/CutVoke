@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_bokeh_amber",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "琥珀散景由大小不一的柔焦圆组成，叠加后层次可辨且没有硬边。",
+  "sourceSha256": "3dbd0028b20b60fbabe9c094e70b8122546e98e5d01f2b375bc02ca0cefd2602",
+  "previewSha256": "8860903df09670a46cff41ddf123e0f0206e06fae70ca04a1fb636b6f8b18ff3",
+  "auditSha256": "993074837ee2e50b8c671660af5169e27c6616e592409f81f0930817154397ec"
+}

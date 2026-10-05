@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_fern",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "141ca98ca1bad0b0e79a95c0f2110fb562486101c09a90c4929441db853a435d",
+  "previewSha256": "08664029e1375d32e27528fd87be2ff1a1ab012f216fce50c81c82728ab98eaa",
+  "preview": "botanical_fern.mp4",
+  "bytes": 4610,
+  "visiblePixels": 2140,
+  "changedPixels": 0,
+  "motionVisible": false
+}

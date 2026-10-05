@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_golf",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "86d0d18f7d6a90d9dbe5f8bad7c4a481f6c2621ce79bbf5cd9150d61b0b740c2",
+  "previewSha256": "c816006f378b0254ab5c3b37ce86eacaceab8d0db292b4f15613c2ceba37b909",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1088,
+  "visiblePixels": 679,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 437,
+    "steady_entry": 679,
+    "steady_exit": 679,
+    "exit": 437
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 437,
+      "withoutFade": 679
+    },
+    "steady_entry": {
+      "withFade": 679,
+      "withoutFade": 679
+    },
+    "steady_exit": {
+      "withFade": 679,
+      "withoutFade": 679
+    },
+    "exit": {
+      "withFade": 437,
+      "withoutFade": 679
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "sports_golf.audit.mp4",
+  "auditExportSha256": "a04bad322db17dcde015db083b3584459497cabe57e0195d5aa432ba65cd07f7"
+}

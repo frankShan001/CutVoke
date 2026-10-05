@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_atlas_rain_glass",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "水滴大小和高光不同，透明底没有整块玻璃底色。",
+  "sourceSha256": "79972e389293b59595e46a968f50ab402861d04dd7c9cd20eb7499d0fe0f9069",
+  "previewSha256": "5cfaa859365acac81507d8574b3a5374f2c87dc0c9b374f7ff1379d5ebccce4f",
+  "auditSha256": "81e569faf687c4efae9d6440a3371e4b4a29d750b1a811d8b5a46b8ba574aa31"
+}

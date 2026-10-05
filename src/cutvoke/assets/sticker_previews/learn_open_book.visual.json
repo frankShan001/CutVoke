@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_open_book",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "浅深底上的书页轮廓与书签清晰；页面保持空白，没有伪字、切边或邻格碎片。",
+  "sourceSha256": "d44b1bbc32db069a0c64984d224d677a4c48f7f7a8d1c653235a0f2125eeeccc",
+  "previewSha256": "010c4e00e739e40d601372266844285c9f4c41087df20d1ba5cc83750c3e06e4",
+  "auditSha256": "0529c47d9ab12eb7e296a5cfa8d14447c85627dca4f3466ac0594f245b19a96d"
+}

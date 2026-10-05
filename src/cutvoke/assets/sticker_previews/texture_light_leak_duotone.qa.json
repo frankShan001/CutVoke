@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_light_leak_duotone",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a0339078f38edcf4a1dc7e568f660e54be6d07d4d2f90ff39b902e980316d973",
+  "previewSha256": "e8cf2bd92099776aa8e1ee0c686d7fefd99faa6175bb2474b2148c2a17435980",
+  "preview": "texture_light_leak_duotone.mp4",
+  "bytes": 3596,
+  "visiblePixels": 1333,
+  "changedPixels": 0,
+  "motionVisible": false
+}

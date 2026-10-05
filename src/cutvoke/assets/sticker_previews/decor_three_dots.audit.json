@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_three_dots",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "69d2501e62ca74409c7469a322fba3b849b774723482b3e7dd3f2f17ae405efe",
+  "previewSha256": "c85ee196d7ea074a4d4ba3e2ed485ab7cd4aef31676cd5d1198a87c83c98695c",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1528,
+  "visiblePixels": 892,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 794,
+    "steady_entry": 893,
+    "steady_exit": 892,
+    "exit": 793
+  },
+  "previewExportMeanRgbDifferences": [
+    0.091,
+    0.095
+  ],
+  "auditExport": "decor_three_dots.audit.mp4",
+  "auditExportSha256": "bc3b2f4e80bd9fefcc5f69dfefc1df33e9c18f8ef46f1352450444a0aca8b8d1"
+}

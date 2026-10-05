@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_aluminum",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "87c9d97e68b85fd9ac53f75367caeffb60dc8ce8ab086a70854d1058b03ff4c9",
+  "previewSha256": "331e03b4535667c65c62f00a607cdae74414e57e95afd9a8b3c7aac24019da54",
+  "preview": "material_aluminum.mp4",
+  "bytes": 9242,
+  "visiblePixels": 11415,
+  "changedPixels": 0,
+  "motionVisible": false
+}

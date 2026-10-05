@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_blank_seal",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ed611c0ad8679f4e0e63d673403392ce424dae7406a3786cc3c443b725ff3908",
+  "previewSha256": "89f867ae7125893e8f20004752fe63ad20e8e79c43de70b9f8b16cbdbbc27a68",
+  "preview": "promo_blank_seal.mp4",
+  "bytes": 8085,
+  "visiblePixels": 2877,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_taiyaki",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The fish-shaped pastry keeps a clear head, body scales and tail silhouette in the preview.",
+  "sourceSha256": "a9620b226ce562bf97f82ed37be8e4d173c5772fb8a4307e3df11062942c736b",
+  "previewSha256": "5bef40b6a981cea03c7f150bae8be2ad4ace8b4ee9943cf833445a6d56523dc5",
+  "auditSha256": "6451c1cd5acbaf85cac437c90116de1b041b5af14deb5f8d38c3e4e811f51f91"
+}

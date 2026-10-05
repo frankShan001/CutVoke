@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_zigzag",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Mint zigzag has a clean continuous contour and navy outline, remaining distinct on both backgrounds.",
+  "sourceSha256": "847586990d9605007050e1f7978c914422401c188294ce76648bb42397b7ea4d",
+  "previewSha256": "3a5c661f5b2096c3535f27e052a0bd7014d1028201a6a359417c23d06329b25d",
+  "auditSha256": "b57b75edee43d97fc2eacf1f8367aedf9f7f49e6739d5a4dcb779c04ce14ec63"
+}

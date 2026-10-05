@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_dust_motes",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "金色尘点疏密和尺寸有变化，较亮的大颗粒形成清楚焦点，不像噪点铺满。",
+  "sourceSha256": "6be2cefe8fbdc7bcee4fd3050036e63318a4163ffc9504f257b9f00f66c29a39",
+  "previewSha256": "8909597ee05fdee6f9bc11d844b5f0bcad70598dca6906ad97802a95838912bc",
+  "auditSha256": "a58777be9c5236a538643b26b4b78a38161aa6a4d104a5a8bf0a8e4973082fab"
+}

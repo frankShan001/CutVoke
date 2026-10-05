@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.glitch_mosaic_tiles",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项检查4×4透明贴图裁切表和4×4真实画面合成表；确认Alpha通道、裁切边缘、深浅背景对比、缩略图可辨性与每项轮廓差异。",
+  "observation": "方形马赛克色块形成中央矩阵和外围跳点，与稀疏散点色块易区分。",
+  "sourceSha256": "6c6c2c51dddad5e717a2ea9ebf3cb52359f7e9f54728a55049c491e5ad04a52b",
+  "previewSha256": "0a371bd36caba83153a56bb048f0113358bbb5ccf00fe62576965489d50f01f7",
+  "auditSha256": "9400ccce4dbbdddb5c33895c12a5b5e6379e669075a170baa2dc7de800ca92be"
+}

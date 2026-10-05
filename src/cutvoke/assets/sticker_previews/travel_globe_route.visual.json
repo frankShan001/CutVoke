@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_globe_route",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "地球仪、支架和航线完整，明暗轮廓清楚且无边缘污染。",
+  "sourceSha256": "6ca964d84f95f91549e2c521ff68bcac7600cc76fff32c9cab4f10558ca7adfd",
+  "previewSha256": "97e9b9f2978d2cc9b10b1229d41fac9347aa48598df761fbc8d5b061459a7ea8",
+  "auditSha256": "4f5710f455c76278cb7ef8d9cd8fffadfcb3c9a988388552c20eafe56ac37e45"
+}

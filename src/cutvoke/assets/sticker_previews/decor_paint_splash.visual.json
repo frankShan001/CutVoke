@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.decor_paint_splash",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed transparent 4x3 artwork contact sheet and actual composited frames for every sticker, compared silhouettes, palette, use and edge quality against the existing sticker library.",
+  "observation": "粉黄蓝渐变泼溅有不规则伸展边缘和独立小滴，可作情绪装饰；透明底与合成底均无矩形背景。",
+  "sourceSha256": "4bc6a16badcad5797796252e2d4be12257cb1bf1abd2a2263538d63807773841",
+  "previewSha256": "7ee6d38da009ded91ecffe7925cddcb929e365318a971f90f8b040bc7e852015",
+  "auditSha256": "81ca190a333117d5c19713cf5aead04d307d58ecbd1d00df5be4ff54c7b5b1a3"
+}

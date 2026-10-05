@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.personFx.roseEdge",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.person.halo",
+      "version": "1.1.0",
+      "params": {
+        "sigma": 22,
+        "hueShift": -20,
+        "saturation": 1.4,
+        "opacity": 0.9
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 19.432,
+  "maxSampledMeanRgbDifference": 19.432,
+  "coverSha256": "811d4ec880f46237a184253f81d37c01ae5af805c0525e0caac732865fb99fe2",
+  "previewSha256": "f8e4f3f55ee4bdc55604821c1d1e94e19214e8eb5987c7087d25b5057878cbcb",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

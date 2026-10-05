@@ -9,6 +9,8 @@
 
 import type { Clip, EffectInstance } from "../types/api";
 
+export const TRANSITION_DND_TYPE = "application/x-cutvoke-transition";
+
 export function isTransitionEffectId(effectId: string): boolean {
   return effectId.startsWith("cutvoke.transition.");
 }

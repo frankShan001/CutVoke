@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_rain_drops",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "水珠大小有层次并带少量纵向雨痕；浅底与深底都能读成玻璃雨滴。",
+  "sourceSha256": "705777f155d72206c525c39a5b09c913053dc5291805e7ee5148d20b155ef04d",
+  "previewSha256": "e265545fea86482bb6a5ecb19b49a47d4304828ae1fd9431b46e7948ba2a4c88",
+  "auditSha256": "583f24de8987e410a61aaf613b2117c89ff413bf072308dd3be1142f274e27a5"
+}

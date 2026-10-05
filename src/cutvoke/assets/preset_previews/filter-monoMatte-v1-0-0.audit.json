@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.monoMatte",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 99
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "1b9fb2bfcf14c7c9b722dfa1818918a75f8fa45602b192671f6fff23b1c359d7",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "1b9fb2bfcf14c7c9b722dfa1818918a75f8fa45602b192671f6fff23b1c359d7",
+  "auditExport": "filter-monoMatte-v1-0-0.audit.mp4"
+}

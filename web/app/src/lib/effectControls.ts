@@ -31,16 +31,26 @@ const PARAM_LABELS: Record<string, string> = {
   amplitude: "幅度",
   period: "周期",
   intensity: "强度",
+  strength: "强度",
+  low: "低阈值",
+  high: "高阈值",
   offset: "偏移",
   amount: "强度",
   levels: "色阶",
   mode: "模式",
+  axis: "翻转轴向",
   brightness: "亮度",
   contrast: "对比度",
   saturation: "饱和度",
   opacity: "不透明度",
   scale: "缩放",
   rotation: "旋转",
+  content: "蒙版文字",
+  fontSize: "文字大小",
+};
+
+const PARAM_ENUM_LABELS: Record<string, Record<string, string>> = {
+  axis: { horizontal: "水平", vertical: "垂直", both: "水平 + 垂直" },
 };
 
 function localizedDescriptor(v: unknown): string {
@@ -106,7 +116,13 @@ export function paramControls(
       ctrl.step = t === "integer" ? 1 : 0.05;
     }
     if (kind === "enum") {
-      ctrl.options = (sub.enum || []).map((v) => ({ value: String(v), label: String(v) }));
+      ctrl.options = (sub.enum || []).map((v) => {
+        const value = String(v);
+        return {
+          value,
+          label: PARAM_ENUM_LABELS[name]?.[value] ?? value,
+        };
+      });
     }
     out.push(ctrl);
   }

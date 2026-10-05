@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.energy_aurora_emerald",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "2d22bba1ce0f641987be4f939591aa72f37b48f62a606e33f30426a69c839396",
+  "previewSha256": "194b3af59f6267f82ae8538c992f85ab2a252409ce09522fc43e1114944fda82",
+  "preview": "energy_aurora_emerald.mp4",
+  "bytes": 6114,
+  "visiblePixels": 1605,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.star_pulse",
+  "version": "1.1.0",
+  "effectId": "cutvoke.anim.breathe",
+  "params": {
+    "amplitude": 0.15,
+    "period": 1.0
+  },
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-10-02T19:42:50+00:00",
+  "method": "Codex actually inspected all 30 chronological continuous frames (15fps, 2 seconds) from this regenerated library sample using view_image, checking motion, alpha edges, shape preservation and canvas containment. Preview QA and full apply/edit/saveReload/undo/export machine audits were rerun before binding.",
+  "observation": "黄色星芒按默认1秒周期连续缩放，两轮变化可见；各条尖角和外描边保持完整，位置稳定，无画布边缘裁剪或异常闪黑。",
+  "sourceSha256": "14cd0b2ffbbe5cbd61a13645a748ffb854439219e0c205a6053d3520c672731d",
+  "previewSha256": "b471a4bed9971a261c6247b7ba85f67344d4a5b394740008c560dda8a66ea9ce",
+  "auditSha256": "19621bf5cac64fecfcbffa56a7bf11ca3058941c8553d41e293bb6c2a67d08d8",
+  "rendererSha256": "019717a0438118bdb3a8a852d000a065e8eac7be52fecea1e33090128fcc318a",
+  "evidencePaths": [
+    "E:/myproject/opencut/output/acceptance/effects-visual-review-20261003/sticker-library/star_pulse-continuous.png"
+  ]
+}

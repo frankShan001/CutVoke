@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_paw_trail",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "大小递进的爪印形成明确斜向路径，各个爪印完整且彼此分开。",
+  "sourceSha256": "36744b4e176dd80bd3c61869ba3670757c4b4059923e25224177bbfce694a7cb",
+  "previewSha256": "35adc69b5b6139bd5262c4acf4174659e461c67a1d11a3bcd80047f1282155b0",
+  "auditSha256": "5cfe248cd869e94c96559385d24fe1c4ab97f690052e1b275ea6ac726333435c"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_atlas_snow_crystals",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "蓝白雪晶大小有变化，晶形清晰，散布间距保留。",
+  "sourceSha256": "c94750660a8afb0fb9c00983aa1a6d5c98f0093d3ba71848d6166088996cf6eb",
+  "previewSha256": "4a0e2edb90bdb534f33da7768459e7e9dd53b7277f2da8b2a662bf683db6ae58",
+  "auditSha256": "6de573875b1f56ff83b1c0c8d4069e390c96bb3c2906626d325863d0425725f5"
+}

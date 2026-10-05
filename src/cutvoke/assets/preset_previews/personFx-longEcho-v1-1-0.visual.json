@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.longEcho",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.echo",
+  "params": {
+    "frames": 8,
+    "decay": 0.62
+  },
+  "subcategory": "人物残影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "Several separated translucent silhouettes create a long, readable motion trail.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "3552ff0d31c48eae41c9e141c1d908098f1e558cd4df018269d408672280e3e8",
+  "motionPreviewSha256": "57bad9b02115e7c1ef2e1e95cae1cbe1c4eaa165de61757a641d0b23f4e023d5",
+  "auditSha256": "677e9ee47080e0211f614f4cad35062164b5fafa8f05f22a49df293b87abf551"
+}

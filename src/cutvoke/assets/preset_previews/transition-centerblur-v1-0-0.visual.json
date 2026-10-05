@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.centerblur",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.centerblur",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "模糊",
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-24T06:43:42Z",
+  "observation": "模糊权重集中在画面中央，外围轮廓保留，和边缘柔焦的重心相反。",
+  "method": "手工对照每项封面、五时间点动态表与真实导出帧表；分别核对模糊方向、焦点位置、画面明度和镜头顺序。动态表见 output/preset_review/transition-20260924-blur-fixed/transition-模糊-motion.png，真实导出帧见 output/preset_review/transition-20260924-blur-custom-export.png。另以透明导出样片确认 alpha 保留在 254–255。",
+  "coverSha256": "192ad9297a4ae6474aba9a53c71a5e9757d39c78f531bb717f62e1cc7620d0f4",
+  "motionPreviewSha256": "03ca6f3b36a0aec40364b3b17daf98db32181810f8d5786be33c882a0392e9eb",
+  "auditSha256": "1370d64500d54ea33546ffebef514fdab918d2d9bca25af53075b5805a1adc23"
+}

@@ -1,0 +1,456 @@
+{
+  "source": "video-overlay-texture-sheet-20260924.png",
+  "sourceSha256": "26a1aad405a673065b7d5a1152346be7d0c66985c45eb386a16684c68500047f",
+  "layout": "4x4",
+  "extraction": "proportional cell crops, centered square padding, alpha preserved",
+  "items": [
+    {
+      "stem": "texture_lens_flare_amber",
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBounds": [
+        16,
+        82,
+        312,
+        272
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 24149,
+      "visiblePixelsWithin12pxBoundary": 47,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "daf994fd51dd02bf54eeae0639e70c373bff1304136a363726752470a3efce96"
+    },
+    {
+      "stem": "texture_light_leak_duotone",
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "visibleBounds": [
+        100,
+        50,
+        239,
+        309
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 22337,
+      "visiblePixelsWithin12pxBoundary": 80,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "a0339078f38edcf4a1dc7e568f660e54be6d07d4d2f90ff39b902e980316d973"
+    },
+    {
+      "stem": "texture_bokeh_pastel",
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "visibleBounds": [
+        32,
+        93,
+        290,
+        284
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 21230,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "f4d1e2582f394d49fa6371fd60650ff5c10859ae12036ccd5bb9af4fa7e11f0f"
+    },
+    {
+      "stem": "texture_arc_electric",
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "visibleBounds": [
+        40,
+        73,
+        254,
+        298
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 22416,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "0f13a556e966166c6716f88444196ec9f9b3019b6e06533af01fac7a4e0afa2b"
+    },
+    {
+      "stem": "texture_orbit_magic",
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "visibleBounds": [
+        37,
+        50,
+        303,
+        267
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 33706,
+      "visiblePixelsWithin12pxBoundary": 6,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "b76104bf443f37be3d1791ed0b2b7750a6c34f944cbe9bc261cdb5d4c43d8573"
+    },
+    {
+      "stem": "texture_speedlines_white",
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "visibleBounds": [
+        59,
+        45,
+        290,
+        268
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 22022,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "a169eba011dbb389c55c568d1a58105cabc4bc502cee59341e0f8aff66155567"
+    },
+    {
+      "stem": "texture_halftone_blue",
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "visibleBounds": [
+        36,
+        60,
+        278,
+        267
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 8266,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4ea7355cc6714e36eb4b71f06c70e936125a4f24adb8cfc9c184836114e8523a"
+    },
+    {
+      "stem": "texture_swoosh_pink",
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "visibleBounds": [
+        23,
+        60,
+        290,
+        263
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 17794,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "b2bc3660462adebe19cfd8b91388f6f4ed05bc29bf53eb20f18a061ce97f5fcf"
+    },
+    {
+      "stem": "texture_sunbeam_gold",
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "visibleBounds": [
+        47,
+        7,
+        301,
+        269
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 45899,
+      "visiblePixelsWithin12pxBoundary": 81,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "0cb5f787578c69d1fa90f67d208da2f04a2b49bd0c87801950b868df59f1ba53"
+    },
+    {
+      "stem": "texture_hud_scan_cyan",
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "visibleBounds": [
+        39,
+        23,
+        283,
+        313
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 20540,
+      "visiblePixelsWithin12pxBoundary": 143,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "0804e81d946d5eaba82832f4674057f3fb0f5799156284842c9fa5ed162a6479"
+    },
+    {
+      "stem": "texture_focus_brackets_lime",
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "visibleBounds": [
+        56,
+        48,
+        262,
+        233
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "visiblePixels": 8453,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "1435b7b45785150e85834ed9e5663c1ec58ecb80af0c5c0c79b6725bbc83640b"
+    },
+    {
+      "stem": "texture_waveform_teal_coral",
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "visibleBounds": [
+        13,
+        75,
+        291,
+        216
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 17897,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "56a37c8db31cb7e99df45c716ec50cfb39306fb6ec67b3f1f6ea7c2187f2e02d"
+    },
+    {
+      "stem": "texture_spark_trail_amber",
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "visibleBounds": [
+        28,
+        22,
+        297,
+        249
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 21488,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "7d5390004e578315b66be7888b6333a86c6ebed8b5f845e39eae8a85a78d669d"
+    },
+    {
+      "stem": "texture_portal_violet",
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "visibleBounds": [
+        43,
+        0,
+        294,
+        247
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 31611,
+      "visiblePixelsWithin12pxBoundary": 579,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "bbcad44008e356bcaf9c011b92c9600c87f31a9616f9aef6d639f0bd1e5b4df0"
+    },
+    {
+      "stem": "texture_corner_grid_cyan",
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "visibleBounds": [
+        46,
+        28,
+        271,
+        219
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 7928,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "3c7785d307ce234f3f002a27036d7be0f9a6abf0056bf928874e4259910e80a4"
+    },
+    {
+      "stem": "texture_glint_pearl",
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "visibleBounds": [
+        14,
+        15,
+        288,
+        233
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "visiblePixels": 19247,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "1ca5d66f5a266577ef2211a787cbd399fe5d43aa17bbc8960a888cc126314228"
+    }
+  ]
+}

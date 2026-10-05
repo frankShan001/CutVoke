@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_flower_wreath",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f398b85acb6a58392f2ea05a5e5b73a6673940d3e795582c601503d56c8d420c",
+  "previewSha256": "2ca453570755db8e4899ddb30af5f6aa6447803f8b9630cf11b5f73d56244ac2",
+  "preview": "botanical_flower_wreath.mp4",
+  "bytes": 4825,
+  "visiblePixels": 1976,
+  "changedPixels": 0,
+  "motionVisible": false
+}

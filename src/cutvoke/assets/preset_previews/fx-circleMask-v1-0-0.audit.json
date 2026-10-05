@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.circleMask",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "x",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "7475cb6aeb8197c1db0854216918d3d1dacf23006ece323ede42ad2dad622c22",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "7475cb6aeb8197c1db0854216918d3d1dacf23006ece323ede42ad2dad622c22",
+  "auditExport": "fx-circleMask-v1-0-0.audit.mp4"
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.slideRight",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.slideRight",
+  "params": {
+    "duration": 1.0,
+    "distance": 0.45,
+    "easing": "ease-out"
+  },
+  "subcategory": "入场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "画面从右侧逐帧回到原位，移动与缓出连续，完成后画面稳定。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "194966088b2c25d14dbb16fe1e857480be40c895ce26d588826c087f8d1663b3",
+  "motionPreviewSha256": "10b1fa089588fd89dfb628daccd4b27a1bcc336b2ccb06a3d60139c53b77bc93",
+  "auditSha256": "1beca77361d97aec83b8070e57c2d20704456e59e739082e2cc662a1eb391ce3",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_slideRight.png",
+  "libraryReviewSheetSha256": "5165ff392a8c1763b6b520d7a5328ad46a9b6eb74f81c9a93001e47c93bf59b0"
+}

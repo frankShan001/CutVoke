@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_foliage_dapple",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Leaf-shadow pattern has a coherent canopy silhouette with soft transparent margins; green marks remain identifiable.",
+  "sourceSha256": "090eb84c4a02fdc65bd660f91f90a2f568b2e03d11a0293285faa6c91900d346",
+  "previewSha256": "7474ff11cb23f19a82685929db81b4934aaf29bbed369515cbf74f3b51f9f0da",
+  "auditSha256": "0ab1f1c44f566b1b64195c3185c31fa7a88f66f6fc347c394f0fe55d07bd2a81"
+}

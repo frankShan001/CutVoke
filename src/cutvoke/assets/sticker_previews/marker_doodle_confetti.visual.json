@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_confetti",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Separate blue, coral, yellow and mint pieces retain clear gaps and color contrast on both backgrounds.",
+  "sourceSha256": "c13f1e2adaa0accdfa044883ff461a8b91cbd9f8916bef3250103ce71085df51",
+  "previewSha256": "56a109e42ab0174dcd17f191969385d2a97db7650e23af3a6d78ab7ec0805b9d",
+  "auditSha256": "0ef425aca1c65e807c4f9adf7e9b5df1093c516d78020536da20f3db62a191bb"
+}

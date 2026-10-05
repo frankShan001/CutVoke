@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_linen",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ced6baec6e2fa1c283ce882689fd0f36cf2e81681c251a6e9cb2835285380b18",
+  "previewSha256": "e1cb7388f2bbdf2d202d490bc6f23433106636bde3911b7f7176f764da7d9263",
+  "preview": "material_linen.mp4",
+  "bytes": 4409,
+  "visiblePixels": 3654,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_violet_star_shards",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f7eeed1f9e511a4f64cf67bac3fe84de1bb3da3950d62e32ca70889650a39e85",
+  "previewSha256": "c84cdf5accdfdd9aebf8963161081e2b2581b9499b76316f70c2db37f8da68a2",
+  "preview": "manga_v2_violet_star_shards.mp4",
+  "bytes": 15429,
+  "visiblePixels": 8500,
+  "changedPixels": 0,
+  "motionVisible": false
+}

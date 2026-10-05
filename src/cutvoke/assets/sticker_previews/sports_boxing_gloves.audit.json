@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_boxing_gloves",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "d2ead3415bd698d5b0c5fa9db213b55314ab3eed854c723519c0d6038462de2c",
+  "previewSha256": "e180f5b4b333b215dd2daf4fd6f24dbb9229c4a58e032c7bacda4f3ba6d390b3",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2293,
+  "visiblePixels": 1542,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1342,
+    "steady_entry": 1542,
+    "steady_exit": 1542,
+    "exit": 1342
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1342,
+      "withoutFade": 1542
+    },
+    "steady_entry": {
+      "withFade": 1542,
+      "withoutFade": 1542
+    },
+    "steady_exit": {
+      "withFade": 1542,
+      "withoutFade": 1542
+    },
+    "exit": {
+      "withFade": 1342,
+      "withoutFade": 1542
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.119,
+    0.119
+  ],
+  "auditExport": "sports_boxing_gloves.audit.mp4",
+  "auditExportSha256": "abfc448ebcf75601821e4458f558ab0d78b80c782e4af8419213cce07592bb85"
+}

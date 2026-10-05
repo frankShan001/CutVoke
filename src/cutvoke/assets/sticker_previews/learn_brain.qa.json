@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_brain",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "05c25780d17077424ef4caf63f47719cfb81f104cf41a4b35aa1d35c7412f168",
+  "previewSha256": "aafa0903855403fc518ae15d83a8991bd6b6245409ad57e15788b07c2032d9f0",
+  "preview": "learn_brain.mp4",
+  "bytes": 4540,
+  "visiblePixels": 2144,
+  "changedPixels": 0,
+  "motionVisible": false
+}

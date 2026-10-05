@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.label_outline",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 224,
+  "exportSha256": "071c468bf7bbd891fe81234add9c0dc9748904367298380e4b4ca1d1c4c0dbda",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "071c468bf7bbd891fe81234add9c0dc9748904367298380e4b4ca1d1c4c0dbda",
+  "auditExport": "text-label_outline-v1-0-0.audit.mp4"
+}

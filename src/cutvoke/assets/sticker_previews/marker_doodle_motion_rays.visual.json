@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_motion_rays",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Three blue rays have rounded ends, consistent navy edging and clear separation on both backgrounds.",
+  "sourceSha256": "b6dd54e2f269cc0d61dd5d56dcfecb89951b0b457773f52fa2ef6e6231b465d1",
+  "previewSha256": "56a34e13b8f107ead970ed5ffc5c513334fb01185eb97d6c4294e0960fc22ea5",
+  "auditSha256": "8f266329c279e67e7c6e4dfe17867151d6d8c881054bb6122062414f4716c588"
+}

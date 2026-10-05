@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_dust_bokeh",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "431002098597770124c5f014ae38879c59f6094a634c4f0b376070f41bae8f10",
+  "previewSha256": "96c74a006d3645ef4c0a487e507f2430f3c3b8f48170e2219062d8c2b402da8f",
+  "preview": "texture_atlas_dust_bokeh.mp4",
+  "bytes": 7297,
+  "visiblePixels": 1550,
+  "changedPixels": 0,
+  "motionVisible": false
+}

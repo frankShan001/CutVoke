@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_nose_greeting",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "720c6f731a587098c498933c4fc3a3f58fc2c53ac4cbda0b41efc0b5ab06af39",
+  "previewSha256": "303a0322e822c06d4624b9c6990f2e148204c65b8778c5b3959696faf362b99b",
+  "preview": "pet_nose_greeting.mp4",
+  "bytes": 4589,
+  "visiblePixels": 2618,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.filter.vintageTone",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.vintage",
+      "version": "1.0.0",
+      "params": {
+        "strength": 1.0
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 10.296,
+  "maxSampledMeanRgbDifference": 10.296,
+  "coverSha256": "a3602dd0617cdd5176e0fecd9ff9e06f1a6ecbfa3777fe59c87e82fa01526e60",
+  "previewSha256": "4373707f1ff7c848fb446f830048276dd249e6d58289d091eda9a0b8495db638",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_cloud_shadow_wisps",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "00b63e9e418545b95941f368641e0d6f20f0585aae47843f5536cc43f143b460",
+  "previewSha256": "d90c673cdfab3c2a29313d091b91c27370c78339909f8f825ece0bc56106d0a5",
+  "preview": "natural_light_cloud_shadow_wisps.mp4",
+  "bytes": 9525,
+  "visiblePixels": 14431,
+  "changedPixels": 0,
+  "motionVisible": false
+}

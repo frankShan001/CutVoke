@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_luxury_badge",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e7c1854e867c60bef8a120fa66976d5935d77f9f6fd0045e4588e602bd2905e4",
+  "previewSha256": "40b1444c276b11e68d66de08babd761a0ce7b22032b05c0797f1c7bc8392ba26",
+  "preview": "promo_luxury_badge.mp4",
+  "bytes": 7352,
+  "visiblePixels": 4921,
+  "changedPixels": 0,
+  "motionVisible": false
+}

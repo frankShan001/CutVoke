@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_edge_leak",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ebd2e4ea018c3604c3d0ab1ebd6791bee3c2109cd28ae4be57143432c4fdb1de",
+  "previewSha256": "443e8157fc2d84495219bb32b9c7d34a7513c084dea73e0c9763f14501e8d933",
+  "preview": "texture_atlas_edge_leak.mp4",
+  "bytes": 6850,
+  "visiblePixels": 2806,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_energy_ribbons",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "Paired teal ribbons frame an empty center and keep their edges distinct against both checkerboard tones.",
+  "sourceSha256": "a02b503d6dca61cf6d80e22ae337495b4bec19c344105ae94ea3f02c552a64a7",
+  "previewSha256": "9766cc36b645f86dc025ac5edd405bcd52ac97f6a1ff7081af8d19106844bfb1",
+  "auditSha256": "a3dd984d87675b5c4736fe55e824145b4fcf902e9982e00ceb0bb05706d08ae8"
+}

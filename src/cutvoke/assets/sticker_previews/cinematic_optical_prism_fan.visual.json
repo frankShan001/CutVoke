@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_prism_fan",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "彩虹色扇形棱镜从单一亮点向外展开，色带分离清楚。",
+  "sourceSha256": "04b675ed9af4f7e5ef812be9eab7d637a0b5df8fe309ab08f53012aa0079081d",
+  "previewSha256": "79192849eecba14804cb392bc6295835ee44bb6a3e6294920c41a9e45d4b22c1",
+  "auditSha256": "a535dcd0393999fb8ef637bc7e522dd23908784cbc5253b93d0b6787274d87f0"
+}

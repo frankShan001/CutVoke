@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_optical_flashline_pearl",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Inspected the 4x4 extracted artwork contact sheet and the actual rendered category contact sheet over a dark-to-light background; checked transparency, edge isolation and visual distinctness.",
+  "observation": "珍珠色闪耀光带呈横向细线，中心和两侧星点可区分，未见原图格线。",
+  "sourceSha256": "d6ff0fb532d46aa260c00e51fe57f4932b59b74cf445955566c186962117557d",
+  "previewSha256": "aec08c6c99448789b799faa7ff5d5fe07e42beb6b54300984daee54b547102a3",
+  "auditSha256": "153162e3a1b392f9422ef1670f7268c86248a216bad465a0005ffc08c5f4d263"
+}

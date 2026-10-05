@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_location_pin",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "珊瑚定位标轮廓完整，内部风景可辨，浅深底对比稳定。",
+  "sourceSha256": "98d53890758a33e65af0a6e5e76dbc7378ea652a0c2ab913c083a7ef573d43e8",
+  "previewSha256": "79c83862c18688c552ce670f3b641b40a926fb33176bfd5372088656dbda538b",
+  "auditSha256": "8664c76bdb876a49960ea9fa23c5d577cad594ca21eab05a2a3ad6c7c7353cac"
+}

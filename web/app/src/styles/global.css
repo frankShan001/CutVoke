@@ -176,3 +176,19 @@ button {
     transition-duration: 0.01ms !important;
   }
 }
+/* Captions share the bundled font files used by the export renderer. */
+@font-face {
+  font-family: "Noto Sans SC";
+  src: url("/api/v1/fonts/NotoSansSC-VF.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Serif SC";
+  src: url("/api/v1/fonts/NotoSerifSC-VF.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}

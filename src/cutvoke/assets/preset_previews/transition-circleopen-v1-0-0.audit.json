@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.circleopen",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.617,
+  "exportSha256": "dfd43fb28c6a4199c00421d552c11f103d587318bae82c13f8e209304a063f29",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "dfd43fb28c6a4199c00421d552c11f103d587318bae82c13f8e209304a063f29",
+  "auditExport": "transition-circleopen-v1-0-0.audit.mp4"
+}

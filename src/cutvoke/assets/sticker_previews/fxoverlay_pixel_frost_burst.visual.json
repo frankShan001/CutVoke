@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_frost_burst",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex 视觉审阅",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切联系表和 320x180 浅深渐变实景合成联系表，并结合逐张机器应用/编辑/保存重开/撤销重做/入出场动画/MP4 预览与导出审计；只批准轮廓完整、边界干净、可见且彼此可辨的条目。",
+  "observation": "冰蓝霜晶呈独立六向爆发，冷色轮廓与金色冲击星明显不同，边缘无裁切。",
+  "sourceSha256": "5a771cc427ad615a436cebcf8ea65a0013ddb71f0da1e2dc2729ddad7a78d831",
+  "previewSha256": "257c810af0c23b260f17b1a2520b16c46f8d25a3d7778179fda6231bf6e50333",
+  "auditSha256": "bc60e33f55502ab149945f5fa887f3d096678b62aea20400ad17a98c2240fae9"
+}

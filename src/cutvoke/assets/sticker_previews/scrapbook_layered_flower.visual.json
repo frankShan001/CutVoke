@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_layered_flower",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "珊瑚与奶油色花瓣分层明显，金色花心清楚，轮廓完整。",
+  "sourceSha256": "6ff26c2402f3c8e4e3feddce13b9f76155002d3fb3f98e55a4a9d30f5d7182a3",
+  "previewSha256": "b87d54b7f6edda68d286e45968af4ea0590db64494a509fa08366024e84719bc",
+  "auditSha256": "4593e23d06dadde21fbf7cf22ecf927fb1fda5050a664675780be5ba3cb8d1f7"
+}

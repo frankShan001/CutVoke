@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_prism_arc",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "43cb84f432095e9ad9fd3cb17ccf8e62ba3fa4000e5e0dc20cd4cc00ea783426",
+  "previewSha256": "bb7a7cc3cfdc78324d24649617345951e6c88a5f26a71672c3aec2acfd55ccc1",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3078,
+  "visiblePixels": 2167,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 933,
+    "steady_entry": 2171,
+    "steady_exit": 2171,
+    "exit": 934
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 933,
+      "withoutFade": 2170
+    },
+    "steady_entry": {
+      "withFade": 2171,
+      "withoutFade": 2171
+    },
+    "steady_exit": {
+      "withFade": 2171,
+      "withoutFade": 2171
+    },
+    "exit": {
+      "withFade": 934,
+      "withoutFade": 2165
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.004,
+    0.004
+  ],
+  "auditExport": "texture_atlas_prism_arc.audit.mp4",
+  "auditExportSha256": "d588a42b745106e44b9bcb1c13a8004dc9a5f7138b938bfd6343d46a40dee9c4"
+}

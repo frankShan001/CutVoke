@@ -1,0 +1,38 @@
+{
+  "presetId": "cutvoke.preset.filter.monoVignette",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.grayscale",
+      "version": "1.0.0",
+      "params": {
+        "strength": 1
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.vignette",
+      "version": "1.0.0",
+      "params": {
+        "angle": "PI/6"
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.curves",
+      "version": "1.0.0",
+      "params": {
+        "preset": "medium_contrast"
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 42.535,
+  "maxSampledMeanRgbDifference": 42.535,
+  "coverSha256": "3177372ece849e7300e4689c9b05d47d1a7c90eda5596d946f1d74ad83f21dfc",
+  "previewSha256": "88238162cfa9a11303be8940971a31b9a890085d311f83fb4722333e0df82096",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

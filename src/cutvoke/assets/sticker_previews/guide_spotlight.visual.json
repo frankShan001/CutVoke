@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_spotlight",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Amber spotlight cone retains its circular source and base; the soft fill suits dark footage.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "4137cd293b3d01e0e4a84f9307601bb61e10e8a1ed49c836379700e1966d9b5b",
+  "previewSha256": "1bfdd65eb97420983b1f88c31afb25c6bc95454f1dc6f7d3d90baa86483474e9",
+  "auditSha256": "8862b341f5957298a510955b8049733a448f2fbc6279bd41657b3fa2e6239638"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_cream_terrazzo",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "Sparse terrazzo chips are distributed cleanly over cream and remain visually separate at full-frame scale.",
+  "sourceSha256": "9c1cc6c9fb35f93fdc07717ef34b63cb27da1bc5465d6743806648fa8c6fac8f",
+  "previewSha256": "cd41462a11a5b03066f1fba1c557a8385da6de964c9642655868b115455492d7",
+  "auditSha256": "812fe23b482a65778f6d683b3df74e1f51d54805625eb8db2f57a6ba9a597322"
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.glitchBurst",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.glitch",
+  "params": {
+    "amount": 0.65
+  },
+  "subcategory": "动感",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Dense irregular color noise covers the frame. Unlike the clean chromatic edge offset and RGB split effects, this changes the surface texture and reads as a noisy signal fault; the display name now describes that output.",
+  "method": "Compared each effect at 0.55, 0.65, 0.75, 0.85 and 0.95 seconds in the four fx motion sheets; checked single-effect audit media and editable controls.",
+  "coverSha256": "ce95d85c291bc42594b390d2693c5b970409914939eadb7f842ed1da1d7fa58f",
+  "motionPreviewSha256": "c76067835477beff3982f8feaf006cdc60676742d665e226798a2b5dc090d86a",
+  "auditSha256": "6583da4aea09ab693dcffecfbeffc478c18874718b95d358768341a8623f6dc0"
+}

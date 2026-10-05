@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.posterAmber",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.posterize",
+  "params": {
+    "levels": 5
+  },
+  "subcategory": "风格",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:51:00+08:00",
+  "observation": "画面被归并为琥珀、棕和橙黄大色块；与既有撞色海报的荧绿和高饱和青色不同。",
+  "method": "Manual comparison of 320x180 before-after covers and five aligned frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; monoMatte excluded as too close to existing bloom/gray",
+  "coverSha256": "342eaf867ed5cfc7a23d92cdc15dc547b0f5ccacd0f0c68584922eff861b5872",
+  "motionPreviewSha256": "e6d1611cdceeb20e728addc905b5f0355490083931ade474652961cf25de7337",
+  "auditSha256": "963255c83bf3404bc0cb4b6fb4ac18f1a453523c307fa3573088b669f1adcbe9"
+}

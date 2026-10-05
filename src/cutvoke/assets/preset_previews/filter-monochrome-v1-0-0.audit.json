@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.monochrome",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 0.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "ecf5abba20e410c77610976085cc1bc178a5779d93eeaae110a731e55a89dcb5",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "ecf5abba20e410c77610976085cc1bc178a5779d93eeaae110a731e55a89dcb5",
+  "auditExport": "filter-monochrome-v1-0-0.audit.mp4"
+}

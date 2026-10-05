@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_bubble_tea",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "74322726b30b04e6a9cbf0e0c6f5fcacbb02245d03181c51fbe1adbd069bf663",
+  "previewSha256": "eec6f2c71dcebfc3d1385f75be267ab0ed0b43e4360ea2ea4d68c7ff99f5abf8",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5525,
+  "visiblePixels": 3960,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2831,
+    "steady_entry": 3960,
+    "steady_exit": 3960,
+    "exit": 2831
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2831,
+      "withoutFade": 3960
+    },
+    "steady_entry": {
+      "withFade": 3960,
+      "withoutFade": 3960
+    },
+    "steady_exit": {
+      "withFade": 3960,
+      "withoutFade": 3960
+    },
+    "exit": {
+      "withFade": 2831,
+      "withoutFade": 3960
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.02,
+    0.02
+  ],
+  "auditExport": "food_bubble_tea.audit.mp4",
+  "auditExportSha256": "80caaa3138b23e964df2b9c0b1fb57cba639ab91d98dda38af51846ea7b8d77f"
+}

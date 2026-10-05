@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_pulse_rings",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "Cyan scan-like pulse rings are clearly visible over both halves and differ from the single halo assets.",
+  "sourceSha256": "86cdbf6115f9b7a3097b2a6221689e8084169337ec39007261e5a045afa987f2",
+  "previewSha256": "335053bc72324efa97d4816eaaab9ffb1321476ece69b244ad50277c5103a5bc",
+  "auditSha256": "2b29139a56599412ec02f9c21a1069cdff303b1012f25d5db845137e1036f2fe"
+}

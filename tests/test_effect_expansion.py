@@ -13,7 +13,7 @@ import subprocess
 from cutvoke.core.effects import default_registry
 from cutvoke.core.mcp_server import MCPServer
 from cutvoke.core.protocol import Actor, Command
-from cutvoke.core.render import RenderService, _AUDIO_FX_STEPS
+from cutvoke.core.render import RenderService, _AUDIO_FX_STEPS, _FX_STEPS
 from cutvoke.core.service import EditService
 
 
@@ -30,6 +30,61 @@ NEW_EFFECT_IDS = {
 
 
 class BuiltinEffectExpansionTests(unittest.TestCase):
+    def test_mirror_effects_offer_distinct_editable_axes(self) -> None:
+        registry = default_registry(refresh=True)
+        expected = {
+            "cutvoke.fx.mirror": ("horizontal", "hflip"),
+            "cutvoke.fx.vflip": ("vertical", "vflip"),
+        }
+        for effect_id, (default_axis, default_filter) in expected.items():
+            with self.subTest(effect_id=effect_id):
+                spec = registry.get(effect_id)
+                self.assertEqual(spec.version, "1.1.0")
+                self.assertEqual(spec.default_params(), {"axis": default_axis})
+                self.assertEqual(
+                    _FX_STEPS[str(spec.implementation["filter"])](spec.default_params()),
+                    default_filter,
+                )
+                for axis, expected_filter in (
+                    ("horizontal", "hflip"),
+                    ("vertical", "vflip"),
+                    ("both", "hflip,vflip"),
+                ):
+                    params = registry.validate_params(effect_id, {"axis": axis})
+                    self.assertEqual(
+                        _FX_STEPS[str(spec.implementation["filter"])](params),
+                        expected_filter,
+                    )
+
+    @unittest.skipUnless(shutil.which("ffmpeg"), "ffmpeg is required for effect render smoke test")
+    def test_chromatic_aberration_differs_from_horizontal_rgb_split(self) -> None:
+        registry = default_registry(refresh=True)
+        renderer = RenderService(registry=registry)
+        frames: dict[str, bytes] = {}
+        for effect_id in ("cutvoke.fx.chromatic", "cutvoke.fx.rgbsplit"):
+            spec = registry.get(effect_id)
+            parts: list[str] = []
+            output = renderer._fx_one(
+                str(spec.implementation["filter"]), spec.default_params(),
+                "0:v", parts, [0], 0,
+            )
+            result = subprocess.run(
+                [
+                    "ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin",
+                    "-f", "lavfi", "-i", "testsrc2=size=160x90:rate=1:duration=1",
+                    "-filter_complex", ";".join(parts), "-map", f"[{output}]",
+                    "-frames:v", "1", "-pix_fmt", "rgb24", "-f", "rawvideo", "-",
+                ],
+                capture_output=True, timeout=15,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr.decode(errors="replace"))
+            frames[effect_id] = result.stdout
+        self.assertEqual(len(frames["cutvoke.fx.chromatic"]), 160 * 90 * 3)
+        mean_difference = sum(abs(a - b) for a, b in zip(
+            frames["cutvoke.fx.chromatic"], frames["cutvoke.fx.rgbsplit"])) / len(
+                frames["cutvoke.fx.chromatic"])
+        self.assertGreater(mean_difference, 1.0)
+
     def test_builtin_effect_parameters_have_explanations(self) -> None:
         for spec in default_registry(refresh=True).all():
             for name, schema in spec.parameters.get("properties", {}).items():

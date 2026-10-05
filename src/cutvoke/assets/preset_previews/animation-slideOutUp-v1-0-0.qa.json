@@ -1,0 +1,27 @@
+{
+  "presetId": "cutvoke.preset.animation.slideOutUp",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.slideOutUp",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "distance": 0.55,
+        "easing": "ease-out"
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 74.274,
+  "maxSampledMeanRgbDifference": 74.274,
+  "coverSha256": "9262cb081d5cd874363b6b09339b620f5b1d5c26f02f713cb29cea5a362dbf2d",
+  "previewSha256": "06a003cb4c1ba2971b1506937929b1d3105e26ce9523eaa48aa1c2373b3c3af0",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

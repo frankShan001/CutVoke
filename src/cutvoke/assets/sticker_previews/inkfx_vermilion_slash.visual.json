@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_vermilion_slash",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "A vermilion dry-brush arc with separated pigment flecks; the directional slash is distinct from the radial gold burst.",
+  "sourceSha256": "b66b7dc4436e80e7ddc30c5e32620eb6c7632db6d78e578cc6e7e49148973a41",
+  "previewSha256": "14a3d23e4cbd593a88df24551170301f5664d3c2df053a82df8238c314c96ff4",
+  "auditSha256": "2e63dfa891272a20ceaadb852ea7272e0044275b7a483915dd4de36bd4d75fc9"
+}

@@ -1,0 +1,32 @@
+{
+  "presetId": "cutvoke.preset.fx.whiteMist",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.blur",
+      "version": "1.0.0",
+      "params": {
+        "sigma": 5
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.glow",
+      "version": "1.0.0",
+      "params": {
+        "intensity": 2.6
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 48.769,
+  "maxSampledMeanRgbDifference": 48.769,
+  "coverSha256": "c1019dedc1b409da82d5c30373878f62386f302eef738597fe85a802b9bc76bb",
+  "previewSha256": "7e4cf804cdb3a013c03cc14feb4244482eb8d5684b3628678f52a4cb5ce68cf1",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

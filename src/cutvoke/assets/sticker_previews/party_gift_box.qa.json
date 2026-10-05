@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_gift_box",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ca776060840b0a23d3267e38cfa80a937f1ed62ec5b608f72c75a2c1dc96f8a0",
+  "previewSha256": "27b1a54f80e163d664cc1291509a54bbd517d7c71b5bbd4187c0b0777d2b564b",
+  "preview": "party_gift_box.mp4",
+  "bytes": 4815,
+  "visiblePixels": 2604,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.barrelWide",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "k1",
+    "value": -0.85
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "e66c2b9fa463174a2d163dc32d854eb32161f87400c23de918f488080f4d332f",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "e66c2b9fa463174a2d163dc32d854eb32161f87400c23de918f488080f4d332f",
+  "auditExport": "fx-barrelWide-v1-0-0.audit.mp4"
+}

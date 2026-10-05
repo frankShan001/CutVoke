@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.energy_shards_crystal",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "b9921866876bea12ad9ce04ef225ee6bf969802ab7dc3265580b376781595b79",
+  "previewSha256": "cfe44e0fb541cd5fcbad0ae14225682c3c4edd06a7334a4cb3ca1f0dfb52e7b3",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3071,
+  "visiblePixels": 2539,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 1204,
+    "steady_entry": 2542,
+    "steady_exit": 2542,
+    "exit": 1232
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1204,
+      "withoutFade": 2542
+    },
+    "steady_entry": {
+      "withFade": 2542,
+      "withoutFade": 2542
+    },
+    "steady_exit": {
+      "withFade": 2542,
+      "withoutFade": 2542
+    },
+    "exit": {
+      "withFade": 1232,
+      "withoutFade": 2539
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.235,
+    0.24
+  ],
+  "auditExport": "energy_shards_crystal.audit.mp4",
+  "auditExportSha256": "8acefc29d52d33ba6e415b45d647ca4624d4ba0c75eb2dc8d93b87575233ba9a"
+}

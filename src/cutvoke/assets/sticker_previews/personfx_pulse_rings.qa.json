@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_pulse_rings",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "86cdbf6115f9b7a3097b2a6221689e8084169337ec39007261e5a045afa987f2",
+  "previewSha256": "335053bc72324efa97d4816eaaab9ffb1321476ece69b244ad50277c5103a5bc",
+  "preview": "personfx_pulse_rings.mp4",
+  "bytes": 7669,
+  "visiblePixels": 3843,
+  "changedPixels": 0,
+  "motionVisible": false
+}

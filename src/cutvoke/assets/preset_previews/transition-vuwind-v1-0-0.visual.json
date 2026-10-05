@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.vuwind",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.vuwind",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "故障",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Fine vertical streaks rise from the lower edge, producing a soft comb-shaped vertical reveal rather than hard horizontal stripes.",
+  "method": "Manual comparison of five actual rendered frames per transition, neighboring presets, and complete MP4 decode",
+  "coverSha256": "88bf8f7213ce93872cf57f90e2b2ca6d519adffac287fbd8cc73b631904d4920",
+  "motionPreviewSha256": "d0e6d7aa7eb3fdff496a7cd474fde9526038b0b4181f1515775e5c3f49d8ea9e",
+  "auditSha256": "f8581bb7e36422dd17b75daa2743075b6ab6bc135fd3dee7af50899e7555eea3"
+}

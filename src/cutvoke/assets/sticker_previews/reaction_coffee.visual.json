@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_coffee",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Pink steaming cup and saucer; handle and steam separate cleanly from the body.",
+  "sourceSha256": "036087da79d0e52e3771256858917535022af9f652b08fb9592267a4f952f2cc",
+  "previewSha256": "bed3d87f47bac6c0c38e9510276227fe4669d3cb3270aaf9a91623267c5c6dc4",
+  "auditSha256": "b73959ddb441d8ff5ef4cda784c4787656edcec9e9d70f79a4ff5f1fef4a3657"
+}

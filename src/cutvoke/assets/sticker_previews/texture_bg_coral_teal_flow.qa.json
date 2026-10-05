@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_coral_teal_flow",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7c8d9c4a130737404bf320615b040fe576292e00b5cc81f34bedcd28d79323e0",
+  "previewSha256": "cc9f7878b82f135d972b206c53effa273b291b218bebb3ff998b12556c7b4cd0",
+  "preview": "texture_bg_coral_teal_flow.mp4",
+  "bytes": 15626,
+  "visiblePixels": 56756,
+  "changedPixels": 0,
+  "motionVisible": false
+}

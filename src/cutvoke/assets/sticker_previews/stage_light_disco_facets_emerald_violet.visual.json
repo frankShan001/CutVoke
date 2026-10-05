@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_disco_facets_emerald_violet",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "Emerald and violet reflected facets form a distinct clustered light pattern.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "6b88e5ffd3475925d288e43b6c3bb1c9596cd0999aadbddb4d62a4f2a42913da",
+  "previewSha256": "b747571ce8e92f50db5e535b7ff71aab9977852493cf140b5c4962297d673457",
+  "auditSha256": "bae0ecb1f7b377fc1ddc218f22910b2d416fd6389ed39d9474a3f5c23c58ff7a"
+}

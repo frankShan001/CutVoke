@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_motion_arc",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e4da0169c4add10c6cd90a690a9bb59c4affa269c52780d40974ba5f2460a59a",
+  "previewSha256": "6f712fc7a13de207fa06280b3130118b71bf493a7470699619d9be81fd959cd4",
+  "preview": "manga_motion_arc.mp4",
+  "bytes": 5140,
+  "visiblePixels": 1826,
+  "changedPixels": 0,
+  "motionVisible": false
+}

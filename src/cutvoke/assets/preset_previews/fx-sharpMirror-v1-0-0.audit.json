@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.sharpMirror",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "amount",
+    "value": 1.35
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "dabae554b9e2032e39dda517c656a7696c31e17b832bb0156aa460a91a5582bf",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "dabae554b9e2032e39dda517c656a7696c31e17b832bb0156aa460a91a5582bf",
+  "auditExport": "fx-sharpMirror-v1-0-0.audit.mp4"
+}

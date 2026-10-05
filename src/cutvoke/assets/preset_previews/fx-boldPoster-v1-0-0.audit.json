@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.boldPoster",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "cell",
+    "value": 89
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "b353d0279ce80f417f3ad5f9cf0f9886a75f17968c1b5bc7ce9fe4168451aa3c",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "b353d0279ce80f417f3ad5f9cf0f9886a75f17968c1b5bc7ce9fe4168451aa3c",
+  "auditExport": "fx-boldPoster-v1-0-0.audit.mp4"
+}

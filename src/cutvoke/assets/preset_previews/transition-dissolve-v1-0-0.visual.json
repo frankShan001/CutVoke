@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.dissolve",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.dissolve",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "叠化",
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-24T06:25:32Z",
+  "observation": "约0.55秒开始出现分散的彩色像素点，并逐步铺满画面；这是颗粒式图案溶解，不是均匀透明叠化，适合作为强风格选项。",
+  "method": "手工对照逐项封面、五时间点并排样片与 0.05–0.95 秒十帧密集序列；动态证据见 output/preset_review/transition-20260924-review/transition-dissolve-density.png。仅批准可辨且用途明确的算法差异。",
+  "coverSha256": "4e863068f70a5b4ddb1ab9072701feebb9ad9824eb150ea737ce768e8a8716eb",
+  "motionPreviewSha256": "3f112fdb65280aae7a3928eccb18e399c62fbd8ad313624f71f12e6b62dbdff6",
+  "auditSha256": "4ea6d023fde30b93d7a4b46e7ab63024db2311bcfe48d4303716606fac06eaf6"
+}

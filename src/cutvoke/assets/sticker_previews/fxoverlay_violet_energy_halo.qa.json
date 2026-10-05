@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_violet_energy_halo",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "453d6613cf1e3e630074c9b86487ac875f92a6db0f1a2f4d93c05ac8727fc36d",
+  "previewSha256": "fbfe584b8d3f5b668bdfb3ce8532ee45d4de4e03f1a24752b40606a41c6bc848",
+  "preview": "fxoverlay_violet_energy_halo.mp4",
+  "bytes": 9054,
+  "visiblePixels": 7306,
+  "changedPixels": 0,
+  "motionVisible": false
+}

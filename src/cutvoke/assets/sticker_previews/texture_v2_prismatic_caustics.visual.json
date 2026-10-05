@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_prismatic_caustics",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "青金紫粉光带与星点高光清晰，形态轻盈，适合点状折射氛围。",
+  "sourceSha256": "d01a3635b13af8b909c855f5ad72ae2f3c67130db5483c92acdc69e4cd35e9a2",
+  "previewSha256": "930cdce4a1175b584baa397f9d84aea4f0466fccac2f73ffd514d410973df4f1",
+  "auditSha256": "58acca1cfc7394eaec9dffbf7ca5c82469dfa93f81b1e2d0ff2ff51274f255ee"
+}

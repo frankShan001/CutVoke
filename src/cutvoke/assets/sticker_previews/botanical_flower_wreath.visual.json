@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_flower_wreath",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "白色小花沿弧线枝叶分布，开口和端点完整，可作标题侧边半环装饰。",
+  "sourceSha256": "f398b85acb6a58392f2ea05a5e5b73a6673940d3e795582c601503d56c8d420c",
+  "previewSha256": "2ca453570755db8e4899ddb30af5f6aa6447803f8b9630cf11b5f73d56244ac2",
+  "auditSha256": "720db21e33d2e3c35cb1d66a20869fb83bcba9af2c3598737708502c0a3929fc"
+}

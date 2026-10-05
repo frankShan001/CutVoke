@@ -246,6 +246,8 @@
   z-index: 1;
   width: 420px;
   max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
   background: var(--bg-3);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
@@ -282,6 +284,23 @@
   gap: var(--space-2);
   margin-top: 14px;
 }
+.export-dialog__range-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+  color: var(--text);
+  font-size: 12px;
+}
+.export-dialog__range-toggle input {
+  accent-color: var(--accent);
+}
+.export-dialog__range-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-top: 8px;
+}
 .export-dialog__result {
   margin-top: 14px;
   border-top: 1px solid var(--border);
@@ -297,6 +316,43 @@
 }
 .export-dialog__result--error .export-dialog__result-head {
   color: var(--err);
+}
+
+.export-preflight__issues {
+  margin: 8px 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+  overflow-wrap: anywhere;
+}
+.export-preflight__issues p {
+  margin: 4px 0;
+}
+.export-preflight__issues details {
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+.export-preflight__issues code {
+  display: block;
+  margin-top: 4px;
+  user-select: text;
+}
+
+.workspace-recovery {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 32px;
+  text-align: center;
+}
+.workspace-recovery h2, .workspace-recovery p {
+  margin: 0;
+}
+.workspace-recovery p {
+  max-width: 520px;
+  color: var(--text-dim);
 }
 .export-dialog__divider {
   height: 1px;

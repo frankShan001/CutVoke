@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_frost_edge",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "e2927e25ec804aeb61319e2a19cff41e7b27bbda77f745e4fe7f95979a08fc0a",
+  "previewSha256": "a7d3cc0ca598447f4b58b495c06d6b797342ed40a7543c0f3b87bbb1f431764e",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4602,
+  "visiblePixels": 3069,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 796,
+    "steady_entry": 3070,
+    "steady_exit": 3070,
+    "exit": 796
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 796,
+      "withoutFade": 3070
+    },
+    "steady_entry": {
+      "withFade": 3070,
+      "withoutFade": 3069
+    },
+    "steady_exit": {
+      "withFade": 3070,
+      "withoutFade": 3069
+    },
+    "exit": {
+      "withFade": 796,
+      "withoutFade": 3069
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.004,
+    0.004
+  ],
+  "auditExport": "texture_atlas_frost_edge.audit.mp4",
+  "auditExportSha256": "ec3b78c28359a6aa6071f3b2b9bc2d863effcff65d0b8d375619439fd0eabf63"
+}

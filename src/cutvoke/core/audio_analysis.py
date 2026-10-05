@@ -6,7 +6,7 @@
 
 返回字典：
     {"duration": float, "sampleRate": int, "channels": int,
-     "loudnessI": float|None, "bpm": float|None}
+     "loudnessI": float|None, "bpm": float|None, "beats": list[float]}
 loudnessI / bpm 在无意义场景（静音 / 纯正弦无节拍）返回 None，不伪造数字。
 """
 
@@ -106,11 +106,11 @@ def _rms_loudness(samples: list[float]) -> Optional[float]:
     return round(-0.691 + 10.0 * math.log10(mean_sq), 2)
 
 
-def _detect_bpm(samples: list[float], sr: int) -> Optional[float]:
-    """能量通量峰检测估算 BPM（±10 粗糙可用）。无清晰起拍返回 None。"""
+def _detect_tempo(samples: list[float], sr: int) -> tuple[Optional[float], list[float]]:
+    """Return estimated BPM and detected onset times for review before marking."""
     n = len(samples)
     if n < _FRAME * 4:
-        return None
+        return None, []
     # 帧能量包络
     energies: list[float] = []
     i = 0
@@ -120,13 +120,13 @@ def _detect_bpm(samples: list[float], sr: int) -> Optional[float]:
         energies.append(e)
         i += _HOP
     if len(energies) < 8:
-        return None
+        return None, []
     mx = max(energies) or 1e-9
     norm = [e / mx for e in energies]
     # 能量通量（正差分）作为起拍强度
     flux = [max(0.0, norm[k + 1] - norm[k]) for k in range(len(norm) - 1)]
     if not flux or max(flux) <= 0:
-        return None
+        return None, []
     peak_thr = max(0.05, 0.5 * max(flux))
     # 最短拍间隔 ~120ms（防倍频/半频误判）
     min_spacing = max(1, int(0.12 * sr / _HOP))
@@ -140,20 +140,26 @@ def _detect_bpm(samples: list[float], sr: int) -> Optional[float]:
         beats.append(idx)
         prev = idx
     if len(beats) < 2:
-        return None
+        return None, []
     intervals = [(beats[k + 1] - beats[k]) * _HOP / sr
                  for k in range(len(beats) - 1)]
     intervals.sort()
     med = intervals[len(intervals) // 2]
     if med <= 0:
-        return None
+        return None, []
     bpm = 60.0 / med
     # 折叠到常见音乐区间
     while bpm > 240:
         bpm /= 2
     while bpm < 40:
         bpm *= 2
-    return round(bpm, 1)
+    return round(bpm, 1), [round((index + 1) * _HOP / sr, 3)
+                           for index in beats[:512]]
+
+
+def _detect_bpm(samples: list[float], sr: int) -> Optional[float]:
+    """Backward-compatible BPM estimate for callers that only need tempo."""
+    return _detect_tempo(samples, sr)[0]
 
 
 def analyze_audio(path: str) -> dict:
@@ -164,11 +170,12 @@ def analyze_audio(path: str) -> dict:
     samples = _read_pcm(path, DEFAULT_FFMPEG, sr)
     if loud is None:
         loud = _rms_loudness(samples)
-    bpm = _detect_bpm(samples, sr)
+    bpm, beats = _detect_tempo(samples, sr)
     return {
         "duration": round(duration, 3),
         "sampleRate": sr,
         "channels": ch,
         "loudnessI": None if loud is None else float(loud),
         "bpm": bpm,
+        "beats": beats,
     }

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.speech_bubble",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5cd3e0f4f76070323773270e0013990f0a387f77dbe9e14c46204de055943ce9",
+  "previewSha256": "cbf646696cf582b108ccbd00ee82fccecca3becad668f854e08aac0578a136a4",
+  "preview": "speech_bubble.mp4",
+  "bytes": 4360,
+  "visiblePixels": 3004,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_coral_impact_crack",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "0a77d67b06c6330f095406e1acaa0ce3774e1b9bc8ab5395f060e9fc9f6a7c52",
+  "previewSha256": "6ca07233bf6231bdd8fb305ab78cfc579770eececd6c7cff1b83a5fbfb597984",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3233,
+  "visiblePixels": 2175,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1662,
+    "steady_entry": 2176,
+    "steady_exit": 2178,
+    "exit": 1665
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1662,
+      "withoutFade": 2179
+    },
+    "steady_entry": {
+      "withFade": 2176,
+      "withoutFade": 2176
+    },
+    "steady_exit": {
+      "withFade": 2178,
+      "withoutFade": 2179
+    },
+    "exit": {
+      "withFade": 1665,
+      "withoutFade": 2176
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.298,
+    0.318
+  ],
+  "auditExport": "manga_v2_coral_impact_crack.audit.mp4",
+  "auditExportSha256": "1dbbcb411e0514c82ed775cd6bd650e5c7a3f96e153b2001993b9f10a9093b91"
+}

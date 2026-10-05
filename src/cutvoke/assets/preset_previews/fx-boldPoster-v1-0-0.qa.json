@@ -1,0 +1,35 @@
+{
+  "presetId": "cutvoke.preset.fx.boldPoster",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.grid",
+      "version": "1.0.0",
+      "params": {
+        "cell": 88,
+        "thickness": 2,
+        "opacity": 1.0,
+        "color": "white"
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.posterize",
+      "version": "1.0.0",
+      "params": {
+        "levels": 3
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 60.666,
+  "maxSampledMeanRgbDifference": 60.666,
+  "coverSha256": "5514540c17921a576a0b933e170aaf20841328437a1651a0917e62d046ee3f56",
+  "previewSha256": "d6aee9cdfd219ac394d26f211eba174b2f2f44149a2ee0ba018d24e939b75dc5",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

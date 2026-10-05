@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_ramen",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The bowl, noodles, chopsticks and toppings remain visually separated in the composited frame.",
+  "sourceSha256": "e33529b98c401fba2b9757b3dfaa451b928a3daabb5ea266f95c918ac2328c93",
+  "previewSha256": "e7d1cd8197a726959059b4f31019262a8da5ff6789e4205504ac76a0feef2980",
+  "auditSha256": "fce02f9fb990d07adf8ed6e291a52f231d6106e10f48fc940507d2561a4387b9"
+}

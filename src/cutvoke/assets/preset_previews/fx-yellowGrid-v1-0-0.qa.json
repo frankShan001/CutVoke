@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.fx.yellowGrid",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.grid",
+      "version": "1.0.0",
+      "params": {
+        "cell": 64,
+        "thickness": 3,
+        "opacity": 0.72,
+        "color": "#FFD60A"
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 8.491,
+  "maxSampledMeanRgbDifference": 8.491,
+  "coverSha256": "dbf4d47b2c8929935376debea7b518ad16c2aa4d736004055818e01b424c758f",
+  "previewSha256": "fd98d3ab3d15945de238efad8d1e2f79532a9035e0dff9c19a6da85a207b2226",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

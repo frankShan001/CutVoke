@@ -1,0 +1,606 @@
+{
+  "schemaVersion": 1,
+  "source": "travel-vlog-sticker-sheet-20260925-v2.png",
+  "sourceSha256": "c5dec537d4592f04d90b1d0007d7d01c4fd7c7f936be5ff8b58f524cece0ee4d",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4",
+  "extraction": "proportional full-cell crops with alpha preserved, fit to 256px and centered in 320px transparent PNGs",
+  "contactSheet": "travel-vlog-sticker-contact-sheet-20260925.png",
+  "items": [
+    {
+      "index": 1,
+      "stem": "travel_map_route",
+      "name": "旅行路线地图",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "地图",
+        "路线",
+        "vlog"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 39302,
+      "sourceBoundaryPixelsWithin8px": 64,
+      "visibleBounds": [
+        91,
+        114,
+        282,
+        282
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "291c30e642ed0df5ee3807f57d7307411530ce5b13a4a6eff6ee2acf11002d0e"
+    },
+    {
+      "index": 2,
+      "stem": "travel_location_pin",
+      "name": "风景定位标",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "定位",
+        "地点",
+        "风景"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 23398,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        103,
+        108,
+        233,
+        280
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "98d53890758a33e65af0a6e5e76dbc7378ea652a0c2ab913c083a7ef573d43e8"
+    },
+    {
+      "index": 3,
+      "stem": "travel_instant_camera",
+      "name": "复古拍立得",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "相机",
+        "拍立得",
+        "记录"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 38835,
+      "sourceBoundaryPixelsWithin8px": 518,
+      "visibleBounds": [
+        64,
+        96,
+        254,
+        282
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "1b0e86877bebec66fbe40e047191bb30b87a19857749bef46aba1e2ee333ce38"
+    },
+    {
+      "index": 4,
+      "stem": "travel_suitcase",
+      "name": "海盐行李箱",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "行李",
+        "出发",
+        "手帐"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 32092,
+      "sourceBoundaryPixelsWithin8px": 741,
+      "visibleBounds": [
+        86,
+        88,
+        218,
+        282
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "21998d2b64393c3de888945bda2f8425727cf6dca7c4e52e95d56b30307495c5"
+    },
+    {
+      "index": 5,
+      "stem": "travel_mountain_sun",
+      "name": "山野日出",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "山野",
+        "日出",
+        "风景"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 36507,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        85,
+        91,
+        281,
+        265
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "b70d1d1477123ba3bc2aef323b9c443dcce07776dac34be25e0bc8010001d2f1"
+    },
+    {
+      "index": 6,
+      "stem": "travel_compass",
+      "name": "旅行罗盘",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "罗盘",
+        "方向",
+        "路线"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 29225,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        94,
+        73,
+        245,
+        264
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "9b6e059c8c20fd360646be86d6a829c62dd177859e326ca5c29601379319c200"
+    },
+    {
+      "index": 7,
+      "stem": "travel_train",
+      "name": "山海列车",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "列车",
+        "交通",
+        "沿途"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 33329,
+      "sourceBoundaryPixelsWithin8px": 48,
+      "visibleBounds": [
+        41,
+        116,
+        272,
+        259
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "c1337178b858c07b084437fbe3254058e08fd1567ee1ce968c66e54e9e87b230"
+    },
+    {
+      "index": 8,
+      "stem": "travel_boarding_pass",
+      "name": "空白登机票",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "机票",
+        "登机",
+        "留白"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 32693,
+      "sourceBoundaryPixelsWithin8px": 299,
+      "visibleBounds": [
+        42,
+        38,
+        250,
+        246
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "f3f0e197c1631104426ea7f0af917a9adacefa5073fe8cffd0177e31f8ec89cd"
+    },
+    {
+      "index": 9,
+      "stem": "travel_airplane_route",
+      "name": "航线纸飞机",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "飞机",
+        "航线",
+        "路线"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 16702,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        82,
+        69,
+        280,
+        223
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "33ca1b115f14f0f44a3fc5bf67204145ea2ca6e2ac565adc88d533bc0bb287b2"
+    },
+    {
+      "index": 10,
+      "stem": "travel_postcard",
+      "name": "海边明信片",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "明信片",
+        "海边",
+        "手帐"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 41645,
+      "sourceBoundaryPixelsWithin8px": 316,
+      "visibleBounds": [
+        66,
+        75,
+        269,
+        224
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "d64261add7adb13fe49a27098639c0a51eb46b669d94b9f14ebec4c6340858bc"
+    },
+    {
+      "index": 11,
+      "stem": "travel_hiking_boot",
+      "name": "山行靴印",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "徒步",
+        "登山",
+        "脚印"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 30366,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        58,
+        71,
+        268,
+        237
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4ef61d589f7df6915f9aeb2c13f6da7ec79ca4471332fe2cf90d3d3dae18037c"
+    },
+    {
+      "index": 12,
+      "stem": "travel_beach_umbrella",
+      "name": "海岛遮阳伞",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "海岛",
+        "海浪",
+        "夏日"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 31760,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        56,
+        58,
+        245,
+        241
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "be11d647389aaa1e7fc39ac98ff47f0a8749f253ef6d54168cb2828336c2bae9"
+    },
+    {
+      "index": 13,
+      "stem": "travel_camcorder",
+      "name": "复古摄像机",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "摄像机",
+        "视频",
+        "记录"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 33082,
+      "sourceBoundaryPixelsWithin8px": 175,
+      "visibleBounds": [
+        76,
+        56,
+        282,
+        197
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "5d9bf0f9f883ff2e10f82c9699101a4cfe0b85025856551482d1f97b0410ab6c"
+    },
+    {
+      "index": 14,
+      "stem": "travel_globe_route",
+      "name": "环游地球仪",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "地球",
+        "环球",
+        "航线"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 36491,
+      "sourceBoundaryPixelsWithin8px": 809,
+      "visibleBounds": [
+        81,
+        38,
+        249,
+        223
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "6ca964d84f95f91549e2c521ff68bcac7600cc76fff32c9cab4f10558ca7adfd"
+    },
+    {
+      "index": 15,
+      "stem": "travel_film_frame",
+      "name": "胶片取景框",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "胶片",
+        "取景框",
+        "复古"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 43506,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        72,
+        38,
+        248,
+        205
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "5454d3f4fc1131f65ec5860dd29503f1e00e6abf97bbed7bae084f7fcce2858c"
+    },
+    {
+      "index": 16,
+      "stem": "travel_seashell_leaf",
+      "name": "贝壳与棕榈",
+      "subcategory": "旅行手帐",
+      "keywords": [
+        "旅行",
+        "贝壳",
+        "海岛",
+        "装饰"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 32356,
+      "sourceBoundaryPixelsWithin8px": 33,
+      "visibleBounds": [
+        49,
+        38,
+        241,
+        222
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "3ecc9ec82b7d3f8fbefb68e59260ea6f3d1b63b25cae4561c9bdc0b2cdc5ab94"
+    }
+  ]
+}

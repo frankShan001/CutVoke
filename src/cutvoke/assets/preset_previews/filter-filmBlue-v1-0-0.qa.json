@@ -1,0 +1,34 @@
+{
+  "presetId": "cutvoke.preset.filter.filmBlue",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.vintage",
+      "version": "1.0.0",
+      "params": {
+        "strength": 0.65
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.colorize",
+      "version": "1.0.0",
+      "params": {
+        "hue": 205,
+        "saturation": 0.45,
+        "mix": 0.5,
+        "lightness": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 65.793,
+  "maxSampledMeanRgbDifference": 65.793,
+  "coverSha256": "da266251963da1a746b9172bc40daa67f3550df08c6177260fe702f6f25ab613",
+  "previewSha256": "5dc9b2a6fe834f2f9d0d0fd9760205bdf5fee1708f9a81d7a59ac3e04123d89f",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

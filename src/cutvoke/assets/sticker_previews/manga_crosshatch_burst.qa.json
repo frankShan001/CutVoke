@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_crosshatch_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "93770b9bc3738cec9c2cc1578c55090c73aa80c840ad055c130c075d8a6f711d",
+  "previewSha256": "f50798ec6db2325e23c36f39ecad7cddb1352b73501e99ec6b869fd21f42fc0f",
+  "preview": "manga_crosshatch_burst.mp4",
+  "bytes": 5918,
+  "visiblePixels": 2304,
+  "changedPixels": 0,
+  "motionVisible": false
+}

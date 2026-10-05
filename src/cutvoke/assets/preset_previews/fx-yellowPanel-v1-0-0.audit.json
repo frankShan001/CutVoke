@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.yellowPanel",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "x",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "da87c94a0d52f7d6d220143e63024e9838f0d7dc66ec846443f322f49957d2e0",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "da87c94a0d52f7d6d220143e63024e9838f0d7dc66ec846443f322f49957d2e0",
+  "auditExport": "fx-yellowPanel-v1-0-0.audit.mp4"
+}

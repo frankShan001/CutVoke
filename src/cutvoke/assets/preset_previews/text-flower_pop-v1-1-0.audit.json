@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.flower_pop",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 5325,
+  "exportSha256": "c3cf289c32ecbad3a5f3aade328b402c265dd028ae5bfbc211656abcb9ab4a9c",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "c3cf289c32ecbad3a5f3aade328b402c265dd028ae5bfbc211656abcb9ab4a9c",
+  "auditExport": "text-flower_pop-v1-1-0.audit.mp4"
+}

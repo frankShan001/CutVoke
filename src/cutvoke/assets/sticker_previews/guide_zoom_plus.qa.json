@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_zoom_plus",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c77b52fd92f9d4e3067defdccded0e2069b39e6453c15a4de6585d274d1db48c",
+  "previewSha256": "cfe2a13d78059362af59b71dc87b66d9189e37ca54fa83ad0955f7f65176bae9",
+  "preview": "guide_zoom_plus.mp4",
+  "bytes": 4439,
+  "visiblePixels": 1660,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.botanical_poppy",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ff782349fcbadf784350579d2eb53828e77b7fe72e179c4af29067b38620dc1b",
+  "previewSha256": "6585014a96fd59b704ca2b114e4b11cba059875674e48b7a19a838e5bfb9c491",
+  "preview": "botanical_poppy.mp4",
+  "bytes": 4985,
+  "visiblePixels": 2450,
+  "changedPixels": 0,
+  "motionVisible": false
+}

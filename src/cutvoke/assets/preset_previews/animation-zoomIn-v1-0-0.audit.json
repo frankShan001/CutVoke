@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.zoomIn",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.55
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "55ba7a01c0e13e6ad42f451223202fc748fc742f7f38c01bdeea5824c088fa08",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "55ba7a01c0e13e6ad42f451223202fc748fc742f7f38c01bdeea5824c088fa08",
+  "auditExport": "animation-zoomIn-v1-0-0.audit.mp4"
+}

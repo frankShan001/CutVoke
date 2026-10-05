@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.dissolve",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.161,
+  "exportSha256": "8393ec216868b698f5527a1f1c7d9734078567a9d4006013a2af010e9c0d5987",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "8393ec216868b698f5527a1f1c7d9734078567a9d4006013a2af010e9c0d5987",
+  "auditExport": "transition-dissolve-v1-0-0.audit.mp4"
+}

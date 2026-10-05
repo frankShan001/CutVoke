@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_speedlines_white",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a169eba011dbb389c55c568d1a58105cabc4bc502cee59341e0f8aff66155567",
+  "previewSha256": "bd8d016d57a9a833ab0387b28dd2dbe9431888a3802f2f52decb2a0aa6360958",
+  "preview": "texture_speedlines_white.mp4",
+  "bytes": 4365,
+  "visiblePixels": 591,
+  "changedPixels": 0,
+  "motionVisible": false
+}

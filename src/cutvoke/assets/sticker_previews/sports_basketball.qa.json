@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_basketball",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "96e70282741ad6c69fc43ee914d5bed7393c259c330b90f25c1a0bdc50b4359e",
+  "previewSha256": "56e409d493d055080c4569a9e599941f9c391aaebff54f50afb9bae6f26a2087",
+  "preview": "sports_basketball.mp4",
+  "bytes": 3575,
+  "visiblePixels": 1039,
+  "changedPixels": 0,
+  "motionVisible": false
+}

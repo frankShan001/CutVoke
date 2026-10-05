@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_energy_trail",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "949272c431b515cf70065fb81420264f611bb4ec299ea29d66154ab0575b9ad4",
+  "previewSha256": "aefd56b071734d23d4af876731932607722fb83544baaa1261c05ceba0000351",
+  "preview": "manga_energy_trail.mp4",
+  "bytes": 5426,
+  "visiblePixels": 1714,
+  "changedPixels": 0,
+  "motionVisible": false
+}

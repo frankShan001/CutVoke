@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_bokeh_ring",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "485326d6bb4dba7a48d75737f95ab3b2aed563d5913b601c99b48dbbee918759",
+  "previewSha256": "d914c57b4fa1d6940e22a356457223d63617e0fd42d016811eb16a493138bc0c",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4149,
+  "visiblePixels": 2848,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 491,
+    "steady_entry": 2857,
+    "steady_exit": 2857,
+    "exit": 494
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 491,
+      "withoutFade": 2858
+    },
+    "steady_entry": {
+      "withFade": 2857,
+      "withoutFade": 2851
+    },
+    "steady_exit": {
+      "withFade": 2857,
+      "withoutFade": 2857
+    },
+    "exit": {
+      "withFade": 494,
+      "withoutFade": 2857
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.072,
+    0.061
+  ],
+  "auditExport": "texture_optical_bokeh_ring.audit.mp4",
+  "auditExportSha256": "429262cd16b03e85df11a7bc1b6e92dc4426fbe412cacd45fd61d3042474f074"
+}

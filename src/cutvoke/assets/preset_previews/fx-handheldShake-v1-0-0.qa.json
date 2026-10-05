@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.fx.handheldShake",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.shake",
+      "version": "1.0.0",
+      "params": {
+        "pixels": 14.0,
+        "hz": 5.2
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 19.415,
+  "maxSampledMeanRgbDifference": 19.415,
+  "coverSha256": "054c2411cbfb7f43928537a311707a2437c7cc485290011b14adbf355f976c8d",
+  "previewSha256": "81b146f0a491b5cde1ded279640046041b8fbef1a55daefa95c806ed2f633dbd",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

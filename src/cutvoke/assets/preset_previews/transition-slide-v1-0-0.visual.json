@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.slide",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.slide",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "运镜",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:46:00+08:00",
+  "observation": "左右两幅画面沿水平硬边交接，中段可见双方并排；与带混合边缘的平滑推移不同。",
+  "method": "Manual comparison of 320x180 rendered covers and five transition frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; zoom excluded for poor middle-frame composition",
+  "coverSha256": "42db738447a14fa8d221924ac16f463196425e0f37937c970511c168d40d7401",
+  "motionPreviewSha256": "e14f7f2f237f7da574a0c8e7b56823ebc6ca22c330e605708cdf7fca46fe9787",
+  "auditSha256": "79e122d2b1d608bd12d1945fb6232bfe5dd5eaef3a65beed2b962fc9203275e8"
+}

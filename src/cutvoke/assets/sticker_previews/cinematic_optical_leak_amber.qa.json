@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_leak_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "42248dea73a153e19b89bcb1802d4257ef53765639dbcd249a898621b6871b24",
+  "previewSha256": "f5814058d6fbb01c474f84bd65470e35eb1e70c3aec55e171cf5d635a56249f4",
+  "preview": "cinematic_optical_leak_amber.mp4",
+  "bytes": 7350,
+  "visiblePixels": 8081,
+  "changedPixels": 0,
+  "motionVisible": false
+}

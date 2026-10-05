@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_vinyl_orbit_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d87b42e82bc910900a1e0d024d583e08718441cfd813a3213445724fd9509d5f",
+  "previewSha256": "4810804e36ef92a90ab45bb21b7703508a69c6e5712c675b64e33d156f90e5e4",
+  "preview": "audiofx_vinyl_orbit_amber.mp4",
+  "bytes": 9219,
+  "visiblePixels": 6293,
+  "changedPixels": 0,
+  "motionVisible": false
+}

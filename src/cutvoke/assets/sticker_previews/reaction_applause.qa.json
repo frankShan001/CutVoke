@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_applause",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "78a7252642ea7a17a1ffed7c1d0d082c949c2bf6a1f1576eb564f813824a3004",
+  "previewSha256": "2e9f8480508ff12d4a09f162810855e006a2baa9228817875831a190baaccd48",
+  "preview": "reaction_applause.mp4",
+  "bytes": 4612,
+  "visiblePixels": 2229,
+  "changedPixels": 0,
+  "motionVisible": false
+}

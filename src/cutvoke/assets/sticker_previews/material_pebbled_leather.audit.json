@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_pebbled_leather",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "9c33cb5ea39c934809c86f959a86267ff17e2815617488de83cffdd63b7a38aa",
+  "previewSha256": "1d80dc01a2b67807ed6b98b99684e9595026f5a27b0fc1a9a507a4f76244861b",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5384,
+  "visiblePixels": 5189,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 5002,
+    "steady_entry": 5189,
+    "steady_exit": 5189,
+    "exit": 5002
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 5002,
+      "withoutFade": 5189
+    },
+    "steady_entry": {
+      "withFade": 5189,
+      "withoutFade": 5189
+    },
+    "steady_exit": {
+      "withFade": 5189,
+      "withoutFade": 5189
+    },
+    "exit": {
+      "withFade": 5002,
+      "withoutFade": 5189
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "material_pebbled_leather.audit.mp4",
+  "auditExportSha256": "3f45ff1d143af01c440774035b95596ccbe72273f1e3506510ed4310ba73befb"
+}

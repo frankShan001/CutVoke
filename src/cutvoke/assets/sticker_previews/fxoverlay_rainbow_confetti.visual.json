@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_rainbow_confetti",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "Bright multicolor confetti fragments create a high-energy scattered pattern unlike the single-hue overlays.",
+  "method": "Inspected the rendered transparent artwork on split dark and light neutral panels; machine workflow audit hashes are pinned.",
+  "sourceSha256": "dc668cc2472149670bd0767294e514b2895489a064dd789faf3d8b9554fafa00",
+  "previewSha256": "209471ea48bca00a442d3cf6a917d150c879f308d42c11c1dcb345140008920d",
+  "auditSha256": "c4da475fa6b9122512dfd8897dc2460e59c3510da97bd44fed86b1aa1216ca6a"
+}

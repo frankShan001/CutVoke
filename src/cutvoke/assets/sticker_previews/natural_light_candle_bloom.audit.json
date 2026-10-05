@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_candle_bloom",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "ff910b8d59af08c45414ce66cefbe8ed74f33285dc762082521a893d28082101",
+  "previewSha256": "f4bc5ecc1eaa94bc4c2e64fe3f5468c8776440f29442f6c353e70fe46c9d326b",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 10054,
+  "visiblePixels": 13147,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 5780,
+    "steady_entry": 13103,
+    "steady_exit": 13143,
+    "exit": 5823
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 5780,
+      "withoutFade": 13132
+    },
+    "steady_entry": {
+      "withFade": 13103,
+      "withoutFade": 13147
+    },
+    "steady_exit": {
+      "withFade": 13143,
+      "withoutFade": 13143
+    },
+    "exit": {
+      "withFade": 5823,
+      "withoutFade": 13110
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.521,
+    0.516
+  ],
+  "auditExport": "natural_light_candle_bloom.audit.mp4",
+  "auditExportSha256": "f96a9a3b37d8dbcf59c656896fca1313573461101fd9ec153662edca5ba39b6e"
+}

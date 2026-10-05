@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_check_badge",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Green check and tilted badge are visually separable from the transparent background.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "72a116a4d751f9e978f41d38eaa5f72796d96c18e9aa91b5be536a4f96f3bd36",
+  "previewSha256": "a0c673c98622038b6a0c0212e7b01c257efd73446c36aaf6fef3acf3c5a5e39d",
+  "auditSha256": "732a5c501c76f0478010b04b7eca989613e80f74701194c5d534ed8ebd26a81a"
+}

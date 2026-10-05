@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.sports_whistle",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c83623e9c143c89048ed30e3c49450652b5ed385fa00f32634b5bf7e13e66b6a",
+  "previewSha256": "081b8fe5eae2ddf6456e65c21fbc2c4a94251d760b860c9473e5d3647abad41a",
+  "preview": "sports_whistle.mp4",
+  "bytes": 3478,
+  "visiblePixels": 726,
+  "changedPixels": 0,
+  "motionVisible": false
+}

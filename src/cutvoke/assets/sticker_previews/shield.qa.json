@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.shield",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "8c3f74b3e6f009f68f4e6c76a52d0d37fbfcf744494c9c8a61c85dc8eaaf1d04",
+  "previewSha256": "ae7e11e12031cac5235604f036f2ce07b687626660e5506750c9950c89fd85f1",
+  "preview": "shield.mp4",
+  "bytes": 4014,
+  "visiblePixels": 2162,
+  "changedPixels": 0,
+  "motionVisible": false
+}

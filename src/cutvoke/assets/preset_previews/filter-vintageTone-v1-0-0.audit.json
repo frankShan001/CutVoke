@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.vintageTone",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 0.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "57734a4a448d4807398ce993a0e79ab12c037d885576af5ef26814674de43084",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "57734a4a448d4807398ce993a0e79ab12c037d885576af5ef26814674de43084",
+  "auditExport": "filter-vintageTone-v1-0-0.audit.mp4"
+}

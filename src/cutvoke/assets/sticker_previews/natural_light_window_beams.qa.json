@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_window_beams",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "674351e800acffada34e667c5c7bb98c60064b20a38d33fd4f02662aba5e1dc7",
+  "previewSha256": "7f5951a33d760b03a1632302215c8f49c9f62e1026447bb4a3a25ef758750a88",
+  "preview": "natural_light_window_beams.mp4",
+  "bytes": 7632,
+  "visiblePixels": 11598,
+  "changedPixels": 0,
+  "motionVisible": false
+}

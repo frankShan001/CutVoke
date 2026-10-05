@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.personFx.iceEdge",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.person.halo",
+      "version": "1.1.0",
+      "params": {
+        "sigma": 24,
+        "hueShift": -120,
+        "saturation": 1.8,
+        "opacity": 0.94
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 18.983,
+  "maxSampledMeanRgbDifference": 18.983,
+  "coverSha256": "00fa8db1cdb497d2041578c47a22253dd2dd8fcc2be77c5e2155352ccd24b199",
+  "previewSha256": "4acd93dfaa71b1e0b3bc4b4d3f539aca2596678510cf967a4d59b9e5be4ef867",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

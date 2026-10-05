@@ -1,0 +1,25 @@
+{
+  "presetId": "cutvoke.preset.fx.verticalFlip",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.vflip",
+      "version": "1.1.0",
+      "params": {
+        "axis": "vertical"
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 29.959,
+  "maxSampledMeanRgbDifference": 29.959,
+  "coverSha256": "8fe101e8359f4e27b9d1110a3d551633fb69b62ad861c1c46b528c99b4a32a0b",
+  "previewSha256": "388d0de85d0a07470356a4c1ef1323381faa3bb9d43e5426754120a8ccb13747",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

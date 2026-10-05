@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.neonGlow",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.glow",
+  "params": {
+    "intensity": 2
+  },
+  "subcategory": "光影",
+  "reviewer": "Codex manual FX motion-sheet review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Highlights bloom around the sun and outlined card while the scene remains colored; unlike the dark vignette. Intensity visibly changes the render.",
+  "method": "Manually compared actual rendered five-frame motion sheets and cover sheets across FX subcategories; checked edited audit renders against original preset previews at the same time.",
+  "coverSha256": "9eefcb6a8b0419d4a64e17bbb80557a7b5a18b60b14b8b1606b3186c5d55315f",
+  "motionPreviewSha256": "72384a9f2d998e94d9a7a70ca4ba5fde5e2fd79f8ef844e57eab7980f69fb7cf",
+  "auditSha256": "dd422fff1621ea195b870c5710227648533fdc924c4394d457c68bcc5065e2e4"
+}

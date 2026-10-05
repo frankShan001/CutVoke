@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_bg_plum_silk",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T01:53:00Z",
+  "method": "Compared the extracted transparent artwork and 320x180 full-frame RenderService previews; inspected cell isolation, crop edges, texture clarity, text artifacts, and title legibility.",
+  "observation": "The plum silk folds keep rich contrast and smooth highlights across the canvas, without unwanted streaks.",
+  "sourceSha256": "ec76d6390cacbb24a5808c0235a3fec2045cdbfd55e7745cac4d078fea1bc599",
+  "previewSha256": "69075d1ecc3f1613a271e32070dd3440dba5ecb19d0af11d8e246cf41364e1de",
+  "auditSha256": "a63d1c00140f1d843f29a8fd8d8a57adaa092194b3f68b49706a09d5a33c5d64"
+}

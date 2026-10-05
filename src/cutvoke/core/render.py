@@ -21,27 +21,50 @@ MP4(H.264 + AAC)。
 
 from __future__ import annotations
 
+import contextlib
+import ctypes
+import inspect
 import json
 import math
 import os
 import shutil
 import subprocess
+import tempfile
 import threading
+import time
 import copy
+from functools import lru_cache, wraps
 from typing import Any, Optional
 from pathlib import Path
 
 from .rational import Rational
 from .model import Project, Sequence, Clip, AssetReference, Track, Caption
 from .keyframes import evaluate as kf_evaluate
+from .keyframes import expression as kf_expression
 from .effects import (EffectRegistry, default_registry, find_transition,
-                      xfade_transition_name, collect_used_effect_ids)
-from .caption_render import prepare_caption_render, CaptionFontError
+                      xfade_transition_name, collect_used_effect_ids,
+                      animation_slot)
+from .caption_render import (prepare_caption_render, CaptionFontError,
+                             resolve_title_font)
 
 # subprocess resolves these names through PATH. Deployments that need a fixed
 # binary can pass an explicit path to RenderService.
 DEFAULT_FFMPEG = "ffmpeg"
 DEFAULT_FFPROBE = "ffprobe"
+
+
+def _process_cpu_seconds(process: subprocess.Popen) -> Optional[float]:
+    """Read the Windows worker's CPU clock without an extra dependency."""
+    if os.name != "nt":
+        return None
+    from ctypes import wintypes
+    get_times = ctypes.WinDLL("kernel32", use_last_error=True).GetProcessTimes
+    get_times.argtypes = [wintypes.HANDLE, *([ctypes.POINTER(wintypes.FILETIME)] * 4)]
+    get_times.restype = wintypes.BOOL
+    times = [wintypes.FILETIME() for _ in range(4)]
+    if not get_times(wintypes.HANDLE(int(process._handle)), *(ctypes.byref(t) for t in times)):
+        return None
+    return sum((t.dwHighDateTime << 32) + t.dwLowDateTime for t in times[2:]) / 10_000_000
 
 # 质量预设：映射到 libx264 的 crf / preset（第 12.5 章：至少支持一个 MP4 H.264 预设）
 QUALITY_PRESETS: dict[str, dict[str, str]] = {
@@ -49,6 +72,39 @@ QUALITY_PRESETS: dict[str, dict[str, str]] = {
     "medium": {"crf": "23", "preset": "medium"},
     "low": {"crf": "28", "preset": "veryfast"},
 }
+
+# Windows CreateProcess caps the full command line at 32,767 UTF-16 code
+# units. Long multi-track timelines can produce a filter graph large enough to
+# exceed that limit even when they reuse only a few source files. Keep room for
+# the remaining FFmpeg arguments and pass larger graphs through a script file.
+_FILTER_COMPLEX_INLINE_LIMIT = 12_000
+_PREVIEW_IDLE_SECONDS = 8
+
+
+@lru_cache(maxsize=8)
+def _filter_complex_file_option(ffmpeg_path: str) -> str:
+    """Choose the installed FFmpeg syntax for reading a filtergraph file.
+
+    FFmpeg replaced ``-filter_complex_script`` with ``-/filter_complex`` in
+    newer releases. Probe the parser once per binary so packaged older builds
+    can keep using the legacy spelling without making long renders fail.
+    """
+    try:
+        with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", suffix=".ffgraph") as graph_file:
+            graph_file.write("[0:v]null[outv]")
+            graph_file.flush()
+            probe = subprocess.run(
+                [ffmpeg_path, "-hide_banner", "-loglevel", "error",
+                 "-/filter_complex", graph_file.name],
+                capture_output=True, text=True, timeout=5,
+                encoding="utf-8", errors="replace")
+    except (OSError, subprocess.SubprocessError):
+        # The actual render will produce the more useful startup diagnostic.
+        return "-filter_complex_script"
+    if "Unrecognized option '/filter_complex'" in probe.stderr:
+        return "-filter_complex_script"
+    return "-/filter_complex"
 
 # ---- V05 透明通道输出（alpha）----
 # 只认 ProRes 4444(.mov)：它是剪辑软件交接透明素材的通用口径，且 ffprobe
@@ -154,18 +210,14 @@ def _is_effect_enabled(e: dict) -> bool:
     return e.get("enabled", True) is not False
 
 
-def _find_animation(clip: Clip) -> Optional[dict]:
-    """返回 clip 上的动画效果实例（J01），无则 None。
-
-    动画效果 effectId 以 cutvoke.anim. 开头；一个片段只取第一个**启用**的；
-    被旁路（enabled=False）的动画跳过，按顺序找下一个。
-    """
+def _find_animations(clip: Clip) -> list[dict]:
+    """Return enabled animations in separate entrance/exit/loop/combo lanes."""
+    found: dict[str, dict] = {}
     for e in getattr(clip, "effects", []) or []:
-        eid = e.get("effectId", "")
-        if isinstance(eid, str) and eid.startswith("cutvoke.anim."):
-            if _is_effect_enabled(e):
-                return e
-    return None
+        slot = animation_slot(str(e.get("effectId", "")))
+        if slot and slot not in found and _is_effect_enabled(e):
+            found[slot] = e
+    return list(found.values())
 
 
 # ---------------------------------------------------------------------------
@@ -185,6 +237,31 @@ def _fx_posterize_expr(p: dict) -> str:
     step = 255.0 / (levels - 1)
     q = f"'round(val/{step:.4f})*{step:.4f}'"
     return f"lutyuv=y={q}:u={q}:v={q}"
+
+
+def _fx_matrix_strength_expr(p: dict, target: tuple[float, ...]) -> str:
+    """Blend a 3×4 color matrix from identity to the named look."""
+    strength = max(0.0, min(1.0, float(p.get("strength", 1.0))))
+    identity = (1.0, 0.0, 0.0, 0.0,
+                0.0, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0)
+    values = (base + strength * (styled - base)
+              for base, styled in zip(identity, target, strict=True))
+    return "colorchannelmixer=" + ":".join(f"{value:.6f}" for value in values)
+
+
+def _fx_invert_strength_expr(p: dict) -> str:
+    """Invert RGB with a continuous strength while keeping source alpha."""
+    strength = max(0.0, min(1.0, float(p.get("strength", 1.0))))
+    channel = f"'val*{1.0 - strength:.6f}+(255-val)*{strength:.6f}'"
+    return f"lutrgb=r={channel}:g={channel}:b={channel}"
+
+
+def _fx_edge_expr(p: dict) -> str:
+    mode = "wires" if p.get("mode") == "wire" else str(p.get("mode", "colormix"))
+    low = max(0.0, min(1.0, float(p.get("low", 0.0784314))))
+    high = max(0.0, min(1.0, float(p.get("high", 0.196078))))
+    return f"edgedetect=mode={mode}:low={low:.6f}:high={high:.6f}"
 
 
 # ---------------------------------------------------------------------------
@@ -207,21 +284,29 @@ _CURVES_PRESET_INT = {
 
 
 def _fx_lut3d_expr(p: dict) -> str:
-    """LUT 3D 调色：读取随包分发的内置 .cube 预设（cool/warm/retro）。
+    """LUT 3D 调色：读取内置预设或已导入的 3D .cube 文件。
 
     预设文件位于 src/cutvoke/assets/luts/<preset>.cube。render.py 位于
     src/cutvoke/core/，须向上两级到包根再进 assets（渲染可能切换 cwd 到
     字幕临时目录，相对路径会失效，必须解析为绝对路径）。
     """
-    preset = str(p.get("preset", "cool"))
-    if preset not in ("cool", "warm", "retro"):
-        preset = "cool"
-    cube = (Path(__file__).resolve().parent.parent / "assets" / "luts"
-            / f"{preset}.cube")
-    # Windows 盘符冒号是 filtergraph 的选项分隔符——引号内的冒号也须转义
-    # （实测 file='E:/...' 会报 "No option name near '/...'"，file='E\:/...' 才合法）
-    posix = cube.as_posix().replace(":", r"\:")
-    return f"lut3d=file='{posix}'"
+    imported = str(p.get("file", "") or "")
+    if imported:
+        cube = Path(imported)
+        if not cube.is_absolute() or cube.suffix.lower() != ".cube" or not cube.is_file():
+            raise RenderError(f"imported LUT missing: {imported}")
+    else:
+        preset = str(p.get("preset", "cool"))
+        if preset not in ("cool", "warm", "retro"):
+            raise RenderError(f"unknown built-in LUT preset: {preset}")
+        cube = (Path(__file__).resolve().parent.parent / "assets" / "luts"
+                / f"{preset}.cube")
+    # ffmpeg 分两层解析：先解析 filtergraph，再解析 lut3d 的选项值。
+    # 每层都要转义反斜杠和单引号；选项层还须转义 Windows 盘符冒号。
+    option_path = (cube.as_posix().replace("\\", r"\\")
+                   .replace("'", r"\'").replace(":", r"\:"))
+    graph_path = option_path.replace("\\", r"\\").replace("'", r"\'")
+    return f"lut3d=file={graph_path}"
 
 
 def _fx_curves_expr(p: dict) -> str:
@@ -264,27 +349,167 @@ def _fx_hsl_expr(p: dict) -> str:
             f"intensity={inten:.4f}:lightness={light}")
 
 
+def _smooth_closed_path(points: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    """Sample a closed Catmull-Rom path without changing its saved control points."""
+    count = len(points)
+    if count < 8:
+        # A handful of anchors usually means an intentional polygon. Keep its corners.
+        return points
+    steps = max(1, min(4, 256 // count))
+    sampled: list[tuple[float, float]] = []
+    for index in range(count):
+        p0, p1 = points[(index - 1) % count], points[index]
+        p2, p3 = points[(index + 1) % count], points[(index + 2) % count]
+        for step in range(steps):
+            t = step / steps
+            t2, t3 = t * t, t * t * t
+            x = 0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t
+                       + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2
+                       + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3)
+            y = 0.5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * t
+                       + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2
+                       + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)
+            sampled.append((max(0.0, min(1.0, x)), max(0.0, min(1.0, y)))
+                           if math.isfinite(x) and math.isfinite(y) else p1)
+    return sampled
+
+
+def _bezier_closed_path(points: list[tuple[float, float]],
+                       raw_points: list[dict]) -> list[tuple[float, float]]:
+    """Sample closed cubic Bezier segments, defaulting absent handles to smooth tangents."""
+    count = len(points)
+    if count < 3:
+        return points
+    steps = max(1, min(8, 256 // count))
+    handles: list[tuple[tuple[float, float], tuple[float, float]]] = []
+    for index, point in enumerate(points):
+        previous, following = points[(index - 1) % count], points[(index + 1) % count]
+        tangent = ((following[0] - previous[0]) / 6,
+                   (following[1] - previous[1]) / 6)
+        defaults = {
+            "inHandle": (point[0] - tangent[0], point[1] - tangent[1]),
+            "outHandle": (point[0] + tangent[0], point[1] + tangent[1]),
+        }
+        raw = raw_points[index] if index < len(raw_points) else {}
+        controls: dict[str, tuple[float, float]] = {}
+        for key, default in defaults.items():
+            candidate = raw.get(key) if isinstance(raw, dict) else None
+            try:
+                x, y = float(candidate["x"]), float(candidate["y"])
+            except (KeyError, TypeError, ValueError):
+                x, y = default
+            if not math.isfinite(x) or not math.isfinite(y):
+                x, y = default
+            controls[key] = (max(0.0, min(1.0, x)), max(0.0, min(1.0, y)))
+        handles.append((controls["inHandle"], controls["outHandle"]))
+
+    sampled: list[tuple[float, float]] = []
+    for index, start in enumerate(points):
+        end = points[(index + 1) % count]
+        control1 = handles[index][1]
+        control2 = handles[(index + 1) % count][0]
+        for step in range(steps):
+            t = step / steps
+            inverse = 1 - t
+            a, b, c, d = inverse ** 3, 3 * inverse ** 2 * t, 3 * inverse * t ** 2, t ** 3
+            x = a * start[0] + b * control1[0] + c * control2[0] + d * end[0]
+            y = a * start[1] + b * control1[1] + c * control2[1] + d * end[1]
+            sampled.append((max(0.0, min(1.0, x)), max(0.0, min(1.0, y)))
+                           if math.isfinite(x) and math.isfinite(y) else start)
+    return sampled
+
+
 def _fx_mask_expr(p: dict) -> str:
-    """N02 几何蒙版：只保留画面某个矩形/椭圆区域，其余压黑。
+    """N02 几何/钢笔蒙版：按形状生成真实 Alpha，保留原画面色彩。
 
-    实测实现路线（2026-09-21）：用 `geq` 就地改亮度，**不产生 alpha**。
-    这一点很关键——抠像类 alpha 在非画布合成路径上会被编码器静默丢弃，
-    而蒙版只改 luma、保持 yuv420p，因此能安全穿过后续的缩放/合成/转场链。
-
-    geq 表达式里 X/Y/W/H 都是像素，参数按归一化比例换算；
-    函数调用里的逗号在 filtergraph 中必须转义成 `\\,`（实测不转义会被
-    当作滤镜分隔符，直接报 "Unable to parse"）。
+    `format=rgba` 先建立透明度平面；geq 的 alpha(X,Y) 让原素材自身的
+    透明度与蒙版相乘。表达式逗号必须转义，避免被 filtergraph 拆开。
     """
     shape = str(p.get("shape", "rect")).strip().lower()
+    feather = max(0.0, min(0.5, float(p.get("feather", 0.05))))
+    invert = bool(p.get("invert", False))
+    if shape == "freehand":
+        raw_points = p.get("points", [])
+        points: list[tuple[float, float]] = []
+        valid_raw_points: list[dict] = []
+        if isinstance(raw_points, list):
+            for raw in raw_points:
+                if not isinstance(raw, dict):
+                    continue
+                try:
+                    px, py = float(raw["x"]), float(raw["y"])
+                except (KeyError, TypeError, ValueError):
+                    continue
+                if math.isfinite(px) and math.isfinite(py):
+                    point = (max(0.0, min(1.0, px)), max(0.0, min(1.0, py)))
+                    if not points or point != points[-1]:
+                        points.append(point)
+                        valid_raw_points.append(raw)
+        if len(points) < 3:
+            raise RenderError("钢笔蒙版至少需要 3 个路径点；请在画布按住拖动绘制")
+        path_mode = str(p.get("pathMode", "linear")).strip().lower()
+        if path_mode in ("smooth", "bezier"):
+            if len(points) > 128:
+                raise RenderError("曲线钢笔蒙版最多支持 128 个控制点")
+            points = (_smooth_closed_path(points) if path_mode == "smooth"
+                      else _bezier_closed_path(points, valid_raw_points))
+
+        crossings: list[str] = []
+        distances: list[str] = []
+        for index, (x1, y1) in enumerate(points):
+            x2, y2 = points[(index + 1) % len(points)]
+            dx, dy = x2 - x1, y2 - y1
+            if abs(dy) > 1e-9:
+                line_x = (f"{x1:.6f}*W+(Y-{y1:.6f}*H)*"
+                          f"({dx:.6f}*W)/({dy:.6f}*H)")
+                crossings.append(
+                    f"gte(Y\\,{min(y1, y2):.6f}*H)*"
+                    f"lt(Y\\,{max(y1, y2):.6f}*H)*lt(X\\,{line_x})")
+            dx2, dy2 = dx * dx, dy * dy
+            denominator = f"({dx2:.9f}*W*W+{dy2:.9f}*H*H)"
+            projection = (
+                f"clip(((X-{x1:.6f}*W)*({dx:.6f}*W)+"
+                f"(Y-{y1:.6f}*H)*({dy:.6f}*H))/{denominator}\\,0\\,1)")
+            distances.append(
+                "sqrt(" +
+                f"pow(X-({x1:.6f}*W+{projection}*{dx:.6f}*W)\\,2)+"
+                f"pow(Y-({y1:.6f}*H+{projection}*{dy:.6f}*H)\\,2))")
+
+        if not crossings:
+            raise RenderError("钢笔蒙版路径不能全部落在同一水平线上")
+        # FFmpeg reports ENOMEM when a long left-associated sum exceeds its
+        # expression parser's recursion limit. Keep both sums and min trees balanced.
+        while len(crossings) > 1:
+            crossings = [f"({crossings[index]}+{crossings[index + 1]})"
+                         if index + 1 < len(crossings) else crossings[index]
+                         for index in range(0, len(crossings), 2)]
+        inside = f"mod({crossings[0]}\\,2)"
+        # A balanced min tree keeps FFmpeg's expression nesting shallow when a
+        # smooth path expands into as many as 256 short edge segments.
+        while len(distances) > 1:
+            distances = [
+                f"min({distances[index]}\\,{distances[index + 1]})"
+                if index + 1 < len(distances) else distances[index]
+                for index in range(0, len(distances), 2)
+            ]
+        nearest = distances[0]
+        if feather > 0:
+            mask = (f"clip(0.5+(2*{inside}-1)*({nearest})/"
+                    f"max({feather:.6f}*min(W\\,H)\\,0.5)\\,0\\,1)")
+        else:
+            mask = f"if({inside}\\,1\\,0)"
+        if invert:
+            mask = f"(1-{mask})"
+        return ("format=rgba,geq="
+                "r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
+                f"a='alpha(X,Y)*{mask}'")
+
     if shape not in ("rect", "circle"):
         shape = "rect"
     x = max(0.0, min(1.0, float(p.get("x", 0.15))))
     y = max(0.0, min(1.0, float(p.get("y", 0.15))))
     w = max(0.01, min(1.0, float(p.get("w", 0.7))))
     h = max(0.01, min(1.0, float(p.get("h", 0.7))))
-    feather = max(0.0, min(0.5, float(p.get("feather", 0.05))))
-    invert = bool(p.get("invert", False))
-
     if shape == "rect":
         x0, x1 = f"{x:.6f}*W", f"{x + w:.6f}*W"
         y0, y1 = f"{y:.6f}*H", f"{y + h:.6f}*H"
@@ -296,13 +521,28 @@ def _fx_mask_expr(p: dict) -> str:
         cx, cy = f"{x:.6f}*W", f"{y:.6f}*H"
         rx = f"max({w / 2.0:.6f}*W\\,0.5)"
         ry = f"max({h / 2.0:.6f}*H\\,0.5)"
+        if p.get("aspectMode", "bounds") == "circle":
+            # Existing normalized ellipse bounds remain the default. Curated
+            # circular masks opt in to one pixel radius on either axis.
+            rx = ry = f"max(min({w / 2.0:.6f}*W\\,{h / 2.0:.6f}*H)\\,0.5)"
         dist = (f"sqrt(pow((X-{cx})/{rx}\\,2)+pow((Y-{cy})/{ry}\\,2))")
         f_r = f"max({feather:.6f}\\,0.0001)"
         mask = f"clip((1-{dist})/{f_r}\\,0\\,1)"
 
     if invert:
         mask = f"(1-{mask})"
-    return (f"geq=lum='lum(X,Y)*{mask}':cb='cb(X,Y)':cr='cr(X,Y)'")
+    return ("format=rgba,geq="
+            "r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
+            f"a='alpha(X,Y)*{mask}'")
+
+
+def _escape_drawtext(value: str) -> str:
+    """Escape literal text for FFmpeg drawtext with expansion disabled."""
+    normalized = value.replace("\r\n", "\n").replace("\r", "\n")
+    escaped = normalized.replace("\\", "\\\\")
+    for character in ("'", ":", ",", "[", "]"):
+        escaped = escaped.replace(character, "\\" + character)
+    return escaped.replace("\n", "\\n")
 
 
 # R02 形状/标注调色板——固定色板而非任意色值：
@@ -500,20 +740,152 @@ def _fx_grid_expr(p: dict) -> str:
             f"color={colors.get(color, 'white')}@{opacity:.3f}")
 
 
+def _fx_swing_expr(p: dict) -> str:
+    """Rotate a slightly enlarged frame so the oscillation has no black corners."""
+    degrees = max(1.0, min(12.0, float(p.get("degrees", 7.0))))
+    hz = max(0.3, min(5.0, float(p.get("hz", 1.5))))
+    return ("scale=w=iw*1.25:h=ih*1.25,"
+            f"rotate=angle={degrees:.4f}*PI/180*sin(2*PI*t*{hz:.4f}):fillcolor=black,"
+            "crop=w=iw/1.25:h=ih/1.25:x=(iw-ow)/2:y=(ih-oh)/2")
+
+
+def _fx_shake_expr(p: dict) -> str:
+    """Sample a moving inner window, then restore canvas size without borders."""
+    pixels = max(2, min(18, int(round(float(p.get("pixels", 10.0))))))
+    hz = max(0.5, min(10.0, float(p.get("hz", 4.0))))
+    margin = max(4, int(round(pixels * 1.3)))
+    return (f"crop=w=iw-{2 * margin}:h=ih-{2 * margin}:"
+            f"x={margin}+{pixels}*sin(2*PI*t*{hz:.4f}):"
+            f"y={margin}+{pixels}*cos(2*PI*t*{hz:.4f}),"
+            f"scale=w=iw+{2 * margin}:h=ih+{2 * margin}:flags=bicubic")
+
+
+def _build_squeeze_transition(outgoing: str, incoming: str, output: str,
+                              axis: str, duration: float, offset: float,
+                              parts: list[str]) -> None:
+    """Compress only the outgoing seam segment, with finite safe endpoints.
+
+    Native xfade squeeze can divide by zero at its final progress frame and
+    uses names for the retained band rather than the compressed axis. Scaling
+    once per frame also avoids a costly custom expression for every pixel.
+    """
+    if axis not in ("horizontal", "vertical"):
+        raise RenderError(f"unknown transition squeeze axis: {axis}")
+    factor = f"max(0,min(1,1-t/{duration:.6f}))"
+    width = f"max(2,trunc(iw*({factor})/2)*2)" if axis == "horizontal" else "iw"
+    height = f"max(2,trunc(ih*({factor})/2)*2)" if axis == "vertical" else "ih"
+    compressed = f"{output}squeezed"
+    background = f"{output}incoming"
+    parts.append(
+        f"[{outgoing}]trim=start={offset:.6f}:duration={duration:.6f},"
+        f"setpts=PTS-STARTPTS,format=rgba,"
+        f"scale=w='{width}':h='{height}':eval=frame,setsar=1[{compressed}]")
+    parts.append(f"[{incoming}]setpts=PTS-STARTPTS[{background}]")
+    # A zero-width/height frame is never created. At t=duration the outgoing
+    # layer is explicitly disabled and B is exact, including its alpha plane.
+    parts.append(
+        f"[{background}][{compressed}]overlay=x=(W-w)/2:y=(H-h)/2:"
+        f"shortest=0:eof_action=pass:repeatlast=0:format=auto:"
+        f"enable='lt(t,{duration:.6f})'[{output}]")
+
+
+def _xfade_blur_expr(pattern: str, *, has_alpha: bool = False) -> str:
+    """Bounded transition-local blur: sharp at both ends, spatially varied midway.
+
+    xfade evaluates the expression independently for each color plane. Only
+    built-in pattern names reach this function; project data cannot inject an
+    FFmpeg expression. Relative tap distances keep the blur consistent across
+    preview and export sizes; clamping prevents out-of-frame samples from
+    pulling the transition toward black.
+    """
+    def axis(base: str, dimension: str, fraction: float) -> str:
+        if not fraction:
+            return base
+        sign = "+" if fraction > 0 else "-"
+        return f"{base}{sign}{dimension}*{abs(fraction):.4f}"
+
+    def tap(dx: float, dy: float, weight: int) -> tuple[str, str, int]:
+        return axis("X", "W", dx), axis("Y", "H", dy), weight
+
+    positions: dict[str, tuple[tuple[str, str, int], ...]] = {
+        "vertical": tuple(tap(0, offset, weight)
+                          for offset, weight in ((-.05, 1), (-.034, 2), (-.017, 3),
+                                                 (0, 4), (.017, 3), (.034, 2), (.05, 1))),
+        "diagonalDown": tuple(tap(dx, dy, weight)
+                              for dx, dy, weight in ((-.05, -.028, 1), (-.034, -.019, 2),
+                                                     (-.017, -.009, 3), (0, 0, 4),
+                                                     (.017, .009, 3), (.034, .019, 2),
+                                                     (.05, .028, 1))),
+        "diagonalUp": tuple(tap(dx, dy, weight)
+                            for dx, dy, weight in ((-.05, .028, 1), (-.034, .019, 2),
+                                                   (-.017, .009, 3), (0, 0, 4),
+                                                   (.017, -.009, 3), (.034, -.019, 2),
+                                                   (.05, -.028, 1))),
+        "cross": (tap(-.05, 0, 1), tap(-.025, 0, 2), tap(0, -.05, 1),
+                  tap(0, -.025, 2), tap(0, 0, 8), tap(0, .025, 2),
+                  tap(0, .05, 1), tap(.025, 0, 2), tap(.05, 0, 1)),
+        "radial": tuple((f"X{factor:+.3f}*(X-W/2)" if factor else "X",
+                         f"Y{factor:+.3f}*(Y-H/2)" if factor else "Y", weight)
+                        for factor, weight in ((-.10, 1), (-.067, 2), (-.033, 3),
+                                               (0, 4), (.033, 3), (.067, 2), (.10, 1))),
+        "edgeFocus": (tap(-.04, 0, 1), tap(0, -.04, 1), tap(0, 0, 4),
+                      tap(0, .04, 1), tap(.04, 0, 1)),
+        "centerFocus": (tap(-.04, 0, 1), tap(0, -.04, 1), tap(0, 0, 4),
+                        tap(0, .04, 1), tap(.04, 0, 1)),
+    }
+    if pattern not in positions:
+        raise RenderError(f"unknown transition blur pattern: {pattern}")
+    taps = positions[pattern]
+
+    def blurred(source: str) -> str:
+        def plane(index: int) -> str:
+            return ("(" + "+".join(
+                        f"{weight}*{source}{index}(clip({x},0,W-1),clip({y},0,H-1))"
+                                   for x, y, weight in taps)
+                    + f")/{sum(weight for _, _, weight in taps)}")
+
+        # xfade evaluates the expression once per plane. Select the matching
+        # source plane, including alpha for transparent exports.
+        if has_alpha:
+            return (f"if(eq(PLANE,0),{plane(0)},"
+                    f"if(eq(PLANE,1),{plane(1)},"
+                    f"if(eq(PLANE,2),{plane(2)},{plane(3)})))")
+        return (f"if(eq(PLANE,0),{plane(0)},"
+                f"if(eq(PLANE,1),{plane(1)},{plane(2)}))")
+
+    weight = "4*P*(1-P)"
+    if pattern in ("edgeFocus", "centerFocus"):
+        distance = "min(1,2*(abs(X-W/2)/W+abs(Y-H/2)/H))"
+        weight += f"*({distance})" if pattern == "edgeFocus" else f"*(1-({distance}))"
+    # xfade's custom P decreases from 1 (old shot) to 0 (new shot).
+    original = "(A*P+B*(1-P))"
+    mixed_blur = f"(({blurred('a')})*P+({blurred('b')})*(1-P))"
+    return f"{original}*(1-({weight}))+{mixed_blur}*({weight})"
+
+
 _FX_STEPS: dict[str, "Callable[[dict], str]"] = {
     "gblur": lambda p: f"gblur=sigma={float(p.get('sigma', 5.0)):.2f}",
-    "grayscale": lambda p: "hue=s=0",
+    "grayscale": lambda p: f"hue=s={1.0 - float(p.get('strength', 1.0)):.6f}",
     "chromatic": lambda p: (
-        f"rgbashift=rh={int(p.get('offset', 4))}:bh=-{int(p.get('offset', 4))}"),
+        f"rgbashift=rh={int(p.get('offset', 4))}:rv={int(p.get('offset', 4))}:"
+        f"bh=-{int(p.get('offset', 4))}:bv=-{int(p.get('offset', 4))}"),
     "glitch": lambda p: (
-        f"noise=alls={max(1, int(float(p.get('amount', 0.4)) * 100))}:allf=t,"
+        f"noise=all_seed=271828:alls={max(1, int(float(p.get('amount', 0.4)) * 100))}:allf=u,"
         f"rgbashift=rh=2:bh=-2"),
-    "invert": lambda p: "negate",
+    "swing": _fx_swing_expr,
+    "shake": _fx_shake_expr,
+    "invert": _fx_invert_strength_expr,
+    "sepia": lambda p: _fx_matrix_strength_expr(p, (
+        .393, .769, .189, 0, .349, .686, .168, 0, .272, .534, .131, 0)),
+    "vintage": lambda p: _fx_matrix_strength_expr(p, (
+        .9, .1, 0, 0, .1, .9, .1, 0, 0, .1, .8, .1)),
     "posterize": _fx_posterize_expr,
     "sharpen": lambda p: (
         f"unsharp=5:5:{float(p.get('amount', 1.0)):.2f}:5:5:0"),
-    "edge": lambda p: f"edgedetect=mode={p.get('mode', 'colormix')}",
-    "mirror": lambda p: "hflip",
+    "edge": _fx_edge_expr,
+    "mirror": lambda p: {
+        "horizontal": "hflip", "vertical": "vflip", "both": "hflip,vflip",
+    }.get(str(p.get("axis", "horizontal")), "hflip"),
     "vignette": lambda p: f"vignette=angle={p.get('angle', 'PI/5')}",
     # ---- J06 进阶画面特效（真实可渲染的 ffmpeg 滤镜，数据驱动扩展）----
     "chromakey": lambda p: (
@@ -555,13 +927,26 @@ _FX_STEPS: dict[str, "Callable[[dict], str]"] = {
     "lens": _fx_lens_expr,
     "cas": lambda p: (
         f"cas=strength={max(0.0, min(1.0, float(p.get('strength', 0.45)))):.4f}"),
-    "vflip": lambda _p: "vflip",
+    "vflip": lambda p: {
+        "horizontal": "hflip", "vertical": "vflip", "both": "hflip,vflip",
+    }.get(str(p.get("axis", "vertical")), "vflip"),
     "filmgrain": _fx_film_grain_expr,
     "grid": _fx_grid_expr,
 }
 
 # 需要多输入建图的滤镜（不能内联续接），由 RenderService._fx_one 单独实现
 _FX_MULTI = frozenset({"glow"})
+
+# These filters depend on the current source frame and fixed parameters only.
+# Transition-handle streams can safely run the same filter on frames after the
+# selected range. Time-driven, random, and temporal-context filters deliberately
+# stay on the last-frame fallback path.
+_TRANSITION_HANDLE_STATIC_FX = frozenset({
+    "cas", "chromakey", "chromatic", "colorbalance", "colorize", "crop",
+    "curves", "deband", "edge", "glow", "grayscale", "grid", "gblur",
+    "invert", "lens", "lut3d", "mask", "mirror", "posterize", "rgbsplit",
+    "sepia", "shape", "sharpen", "vflip", "vibrance", "vignette", "vintage",
+})
 
 
 # ---------------------------------------------------------------------------
@@ -712,12 +1097,48 @@ def _atempo_chain(speed_f: float) -> list[str]:
     return parts
 
 
+@lru_cache(maxsize=8)
+def _has_rubberband(ffmpeg_path: str) -> bool:
+    """The time-varying, pitch-preserving speed curve needs this FFmpeg filter."""
+    try:
+        result = subprocess.run(
+            [ffmpeg_path, "-hide_banner", "-h", "filter=rubberband"],
+            capture_output=True, text=True, timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0 and "rubberband AVOptions" in result.stdout
+
+
+@lru_cache(maxsize=8)
+def _has_minterpolate(ffmpeg_path: str) -> bool:
+    """Check the optional FFmpeg filter used for motion-compensated slow motion."""
+    try:
+        result = subprocess.run(
+            [ffmpeg_path, "-hide_banner", "-h", "filter=minterpolate"],
+            capture_output=True, text=True, timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0 and "minterpolate AVOptions" in result.stdout
+
+
 class RenderError(Exception):
     """渲染失败（工程不合法、ffmpeg 非零、ffprobe 验证不通过等）。"""
 
 
 class RenderCancelled(RenderError):
     """渲染被取消（cancel_event 触发），不留下误导性的成功成片。"""
+
+
+def _prepare_static_masks(method):
+    signature = inspect.signature(method)
+    @wraps(method)
+    def prepared(self, project, *args, **kwargs):
+        arguments = signature.bind(self, project, *args, **kwargs)
+        with self._static_mask_sources(project, arguments.arguments.get("cancel_event")) as snapshot:
+            return method(self, snapshot, *args, **kwargs)
+    return prepared
 
 
 class RenderService:
@@ -734,9 +1155,81 @@ class RenderService:
         # 都会"静默变成黑底"（alpha 存在但内容不透明），比报错更难发现。
         self._render_ctx = threading.local()
 
+    @contextlib.contextmanager
+    def _static_mask_sources(self, project: Project, cancel_event=None):
+        """Evaluate a static image's path mask once, using the same exact FFmpeg filter."""
+        static_sources = {}
+        def is_static(source):
+            if source in static_sources:
+                return static_sources[source]
+            suffix = Path(source).suffix.lower()
+            result = suffix in {".jpg", ".jpeg", ".bmp"}
+            if suffix == ".png":
+                # APNG may use .png too. Its acTL precedes IDAT; never flatten
+                # animated media into a single masked picture.
+                try:
+                    with open(source, "rb") as image:
+                        if image.read(8) == b"\x89PNG\r\n\x1a\n":
+                            while header := image.read(8):
+                                if len(header) != 8:
+                                    break
+                                size, kind = int.from_bytes(header[:4], "big"), header[4:]
+                                if kind == b"acTL":
+                                    break
+                                if kind == b"IDAT":
+                                    result = True
+                                    break
+                                image.seek(size + 4, os.SEEK_CUR)
+                except OSError:
+                    pass
+            static_sources[source] = result
+            return result
+        def eligible(clip):
+            effects = self._enabled_fx(clip)
+            return (len(effects) == 1 and effects[0].get("range") is None
+                    and self._fx_key_params(effects[0])[0] == "mask"
+                    and effects[0].get("params", {}).get("shape") == "freehand"
+                    and is_static(clip.asset_ref.source_path))
+        if not any(eligible(c) for t in project.sequence.tracks if t.visible for c in t.clips if not c.hidden):
+            yield project
+            return
+        snapshot = copy.deepcopy(project)
+        with tempfile.TemporaryDirectory(prefix="cutvoke-static-mask-") as directory:
+            prepared = {}
+            for track in snapshot.sequence.tracks:
+                if not track.visible:
+                    continue
+                for clip in track.clips:
+                    if clip.hidden or not eligible(clip):
+                        continue
+                    effect = self._enabled_fx(clip)[0]
+                    source = clip.asset_ref.source_path
+                    if not os.path.isfile(source):
+                        raise RenderError(f"source file missing for clip {clip.id}: {source}")
+                    if cancel_event is not None and cancel_event.is_set():
+                        raise RenderCancelled("mask preparation cancelled")
+                    key = json.dumps([source, effect["params"]], sort_keys=True)
+                    if key not in prepared:
+                        output = str(Path(directory) / f"mask-{len(prepared)}.png")
+                        command = [self.ffmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
+                                   "-filter_threads", "2", "-threads", "2", "-i", source,
+                                   "-vf", _fx_mask_expr(effect["params"]), "-frames:v", "1",
+                                   "-threads", "2", "-pix_fmt", "rgba", output]
+                        result = subprocess.run(command, stdin=subprocess.DEVNULL,
+                                                capture_output=True, timeout=30)
+                        if result.returncode:
+                            raise RenderError("static mask preparation failed: " + result.stderr.decode("utf-8", "replace")[-800:])
+                        prepared[key] = output
+                    clip.asset_ref.source_path = prepared[key]
+                    clip.effects = [e for e in clip.effects if e is not effect]
+            if cancel_event is not None and cancel_event.is_set():
+                raise RenderCancelled("mask preparation cancelled")
+            yield snapshot
+
     # ------------------------------------------------------------------
     # 公共入口
     # ------------------------------------------------------------------
+    @_prepare_static_masks
     def render(self, project: Project, out_path: str, quality: str = "high",
                overlay_position: tuple[int, int] = (0, 0),
                overwrite: bool = False,
@@ -748,7 +1241,9 @@ class RenderService:
                color_space: Optional[str] = None,
                source_color_space: Optional[str] = None,
                tone_map: Optional[str] = None,
-               source_transfer: Optional[str] = None) -> dict[str, Any]:
+               source_transfer: Optional[str] = None,
+               output_start: Optional[float] = None,
+               output_duration: Optional[float] = None) -> dict[str, Any]:
         """把工程渲染为 MP4(H.264 + AAC) 视频。
 
         返回 dict：output_path, duration, width, height, has_audio, warnings。
@@ -760,6 +1255,14 @@ class RenderService:
         才降级导出，并在 warnings 里留明确记录。
         """
         seq = project.sequence
+        requested_range = output_start is not None or output_duration is not None
+        preflight_range = None
+        if requested_range:
+            if (output_start is None or output_duration is None
+                    or not math.isfinite(output_start) or not math.isfinite(output_duration)
+                    or output_start < 0 or output_duration <= 0):
+                raise RenderError("output range requires finite start >= 0 and duration > 0")
+            preflight_range = (output_start, output_start + output_duration)
 
         # V05 透明通道：容器必须支持 alpha，否则编码器会静默丢 alpha。
         # 只认 ProRes 4444(.mov) 与 VP9(.webm) 两个"真带 alpha"的口径。
@@ -776,7 +1279,7 @@ class RenderService:
         # 1. 预检（第 12.5 章：导出先预检工程合法性 / 原件 / 效果可用性 / 目标目录）
         preflight_warnings = self._preflight(
             project, out_path, overwrite,
-            allow_unknown_effects=allow_unknown_effects)
+            allow_unknown_effects=allow_unknown_effects, output_range=preflight_range)
 
         # O06 色彩管理：参数先校验（未知枚举直接报错，不静默忽略），再建滤镜链。
         if color_space is not None and color_space not in COLOR_SPACE_TRIPLE:
@@ -808,11 +1311,44 @@ class RenderService:
                 "the color chain forces an opaque pixel format and would "
                 "silently drop alpha")
 
+        requested_range = output_start is not None or output_duration is not None
+        render_window = None
+        if requested_range:
+            if (output_start is None or output_duration is None
+                    or not math.isfinite(output_start) or not math.isfinite(output_duration)
+                    or output_start < 0 or output_duration <= 0):
+                raise RenderError("output range requires finite start >= 0 and duration > 0")
+            full_duration = self._sequence_duration(seq)
+            if output_start + output_duration > full_duration + 1e-6:
+                raise RenderError(
+                    f"output range ends at {output_start + output_duration:.6f}s, "
+                    f"after timeline duration {full_duration:.6f}s")
+            render_window = (output_start, output_start + output_duration)
+        if cancel_event is not None and cancel_event.is_set():
+            raise RenderCancelled("render cancelled before compilation")
+        # Only dense long timelines pay for temporary lossless media and a
+        # final encoding pass. Small projects retain their direct export path.
+        clip_count = sum(len(_flatten_compound([c for c in t.clips if not c.hidden])[0])
+                         for t in seq.tracks if t.visible and t.kind in {"video", "audio"})
+        if clip_count > 24:
+            full_duration = self._sequence_duration(seq)
+            start = output_start or 0.0
+            duration = output_duration if requested_range else full_duration
+            if duration > 8:
+                return self._render_in_windows(
+                    seq, out_path, quality, overlay_position, cancel_event,
+                    alpha, color_chain, color_space if tm == "none" else None,
+                    video_bitrate_kbps, audio_bitrate_kbps, start, duration,
+                    preflight_warnings)
+
         # 2. 编译 filter_complex 图 + 输入列表（有理数→float 仅在此层）
         #    _compile 在含字幕时会生成 ASS 临时目录（caption_cwd），需调用方清理。
         graph, input_paths, expected_duration, has_audio, warnings, caption_cwd = (
-            self._compile(seq, overlay_position, alpha=alpha))
+            self._compile(seq, overlay_position, alpha=alpha, render_window=render_window))
         warnings = preflight_warnings + warnings
+        verify_duration = expected_duration
+        if output_start is not None or output_duration is not None:
+            verify_duration = output_duration
 
         # 3. 临时文件 + 最终路径（后缀跟随容器，编码器靠后缀选）
         out_dir = os.path.dirname(os.path.abspath(out_path))
@@ -827,12 +1363,15 @@ class RenderService:
                              cancel_event, has_audio, caption_cwd=caption_cwd,
                              video_bitrate_kbps=video_bitrate_kbps,
                              audio_bitrate_kbps=audio_bitrate_kbps,
-                             alpha=alpha, color_chain=color_chain)
+                             alpha=alpha, color_chain=color_chain,
+                             output_start=(output_start - self._render_ctx.compile_origin
+                                           if output_start is not None else None),
+                             output_duration=output_duration)
             # 5. ffprobe 验证真实可解码 + 时长/尺寸正确（透明导出另验 alpha；
             #    色彩管理另验输出 primaries 真的落到位）
             # 色调映射会把输出锁成 bt709，此时不该再按 color_space 断言。
             probed_space = color_space if (tm == "none" and color_space) else None
-            probe = self._verify(tmp_path, expected_duration, seq.width,
+            probe = self._verify(tmp_path, verify_duration, seq.width,
                                  seq.height, expect_alpha=alpha,
                                  expect_primaries=probed_space)
         except BaseException:
@@ -849,6 +1388,10 @@ class RenderService:
                 shutil.rmtree(caption_cwd, ignore_errors=True)
 
         # 6. 验证通过 → 原子发布到最终文件名（同文件系统内 os.replace 原子）
+        if cancel_event is not None and cancel_event.is_set():
+            with contextlib.suppress(OSError):
+                os.remove(tmp_path)
+            raise RenderCancelled("render cancelled before publication")
         os.replace(tmp_path, out_path)
 
         return {
@@ -865,8 +1408,109 @@ class RenderService:
             "warnings": warnings,
         }
 
+    def _render_in_windows(
+            self, seq: Sequence, out_path: str, quality: str,
+            overlay_position: tuple[int, int], cancel_event: Optional[threading.Event],
+            alpha: bool, color_chain: str, expected_primaries: Optional[str],
+            video_bitrate_kbps: Optional[int], audio_bitrate_kbps: Optional[int],
+            start: float, duration: float, preflight_warnings: list[str]) -> dict[str, Any]:
+        """Render dense long timelines with at most one window's inputs alive.
+
+        FFV1/PCM intermediates avoid repeated lossy video/AAC encoding and AAC
+        priming gaps at window boundaries. The final concat has one media input,
+        applies export color management once, and publishes only after verify.
+        All intermediates belong to this request's unique temporary directory.
+        """
+        out_dir = os.path.dirname(os.path.abspath(out_path))
+        warnings = list(preflight_warnings)
+        has_audio = False
+        chunks = []
+        def check_cancel() -> None:
+            if cancel_event is not None and cancel_event.is_set():
+                raise RenderCancelled("render cancelled between windows")
+        with tempfile.TemporaryDirectory(prefix="cutvoke-export-windows-", dir=out_dir) as directory:
+            temporary = Path(directory)
+            # All chunks share an audio stream whenever the project contains
+            # one; windows in silence receive PCM silence, never a missing track.
+            probed = {}
+            for track in seq.tracks:
+                if not track.visible or track.muted or track.kind not in {"audio", "video"}:
+                    continue
+                clips, _ = _flatten_compound([c for c in track.clips if not c.hidden])
+                for clip in clips:
+                    check_cancel()
+                    if (float(clip.timeline_end.to_fraction()) <= start or
+                            float(clip.timeline_start.to_fraction()) >= start + duration):
+                        continue
+                    source = clip.asset_ref.source_path
+                    if source not in probed:
+                        probed[source] = self.probe_media(source)
+                    if probed[source].get("has_audio"):
+                        has_audio = True
+                        break
+                if has_audio:
+                    break
+            cursor = start
+            end = start + duration
+            frame_rate = seq.fps.to_fraction()
+            window_duration = max(1, round(float(frame_rate) * 8)) / float(frame_rate)
+            while cursor < end - 1e-7:
+                check_cancel()
+                chunk_duration = min(window_duration, end - cursor)
+                graph, inputs, _expected, chunk_audio, messages, caption_cwd = self._compile(
+                    seq, overlay_position, alpha=alpha,
+                    render_window=(cursor, cursor + chunk_duration))
+                origin = self._render_ctx.compile_origin
+                warnings.extend(message for message in messages if message not in warnings)
+                if has_audio and not chunk_audio:
+                    graph += (f";anullsrc=r={seq.audio_sample_rate}:cl=stereo:"
+                              f"d={cursor + chunk_duration - origin:.9f}[outa]")
+                path = temporary / f"window-{len(chunks):05d}.mkv"
+                try:
+                    self._run_ffmpeg(seq, graph, inputs, str(path), quality,
+                        cancel_event, has_audio, caption_cwd=caption_cwd,
+                        alpha=alpha, output_start=cursor - origin,
+                        output_duration=chunk_duration, lossless=True)
+                    self._verify(str(path), chunk_duration, seq.width, seq.height,
+                                 expect_alpha=alpha)
+                finally:
+                    if caption_cwd and os.path.isdir(caption_cwd):
+                        shutil.rmtree(caption_cwd, ignore_errors=True)
+                chunks.append((path, chunk_duration))
+                cursor += chunk_duration
+            check_cancel()
+            manifest = temporary / "windows.ffconcat"
+            lines = ["ffconcat version 1.0"]
+            for path, chunk_duration in chunks:
+                escaped = path.as_posix().replace("'", "'\\''")
+                lines.extend((f"file '{escaped}'", f"duration {chunk_duration:.9f}"))
+            manifest.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            graph = f"[0:v]fps={frame_rate.numerator}/{frame_rate.denominator},setpts=N/FRAME_RATE/TB[outv]"
+            if has_audio:
+                graph += (f";[0:a]aresample={seq.audio_sample_rate}:async=1:first_pts=0,"
+                          f"atrim=duration={duration:.9f},asetpts=PTS-STARTPTS[outa]")
+            final = temporary / ("final" + os.path.splitext(out_path)[1])
+            self._run_ffmpeg(seq, graph, [str(manifest)], str(final), quality,
+                cancel_event, has_audio, video_bitrate_kbps=video_bitrate_kbps,
+                audio_bitrate_kbps=audio_bitrate_kbps, alpha=alpha,
+                color_chain=color_chain, output_duration=duration, concat_input=True)
+            probe = self._verify(str(final), duration, seq.width, seq.height,
+                                 expect_alpha=alpha, expect_primaries=expected_primaries)
+            check_cancel()
+            os.replace(final, out_path)
+        return {"output_path":out_path, "duration":probe["duration"],
+                "width":probe["width"], "height":probe["height"],
+                "has_audio":has_audio, "has_alpha":_pix_fmt_has_alpha(probe.get("pix_fmt")),
+                "pix_fmt":probe.get("pix_fmt"), "color_primaries":probe.get("color_primaries"),
+                "color_transfer":probe.get("color_transfer"), "color_space":probe.get("color_space"),
+                "warnings":warnings, "renderStrategy":"lossless-windows", "windowCount":len(chunks)}
+
+    @_prepare_static_masks
     def render_preview_window(self, project: Project, out_path: str,
-                              start: float, duration: float) -> dict[str, Any]:
+                              start: float, duration: float,
+                              render_modes: Optional[list[dict[str, Any]]] = None,
+                              cancel_event: Optional[threading.Event] = None
+                              ) -> dict[str, Any]:
         """Encode only the requested timeline interval for interactive playback.
 
         The same compiled video/audio graph drives export. Output-side seeking
@@ -875,20 +1519,28 @@ class RenderService:
         """
         if not (0 <= start and 0 < duration <= 8):
             raise RenderError("preview window must have start >= 0 and duration in (0, 8]")
-        self._preflight(project, out_path, True)
+        self._preflight(project, out_path, True, output_range=(start, start + duration))
         seq = project.sequence
-        graph, inputs, expected, has_audio, _warnings, caption_cwd = self._compile(seq, (0, 0))
+        expected = self._sequence_duration(seq)
         if start >= expected - 1e-6:
             raise RenderError("preview window begins after the end of the project")
         actual_duration = min(duration, expected - start)
+        if cancel_event is not None and cancel_event.is_set():
+            raise RenderCancelled("preview cancelled before compilation")
+        graph, inputs, expected, has_audio, _warnings, caption_cwd = self._compile(
+            seq, (0, 0), render_modes=render_modes,
+            render_window=(start, start + actual_duration))
         temp_path = out_path + ".tmp.mp4"
         try:
             self._run_ffmpeg(
-                seq, graph, inputs, temp_path, "low", None, has_audio,
-                caption_cwd=caption_cwd, output_start=start,
+                seq, graph, inputs, temp_path, "low", cancel_event, has_audio,
+                caption_cwd=caption_cwd, output_start=start - self._render_ctx.compile_origin,
                 output_duration=actual_duration,
+                preview_source_duration=expected,
             )
             probe = self._verify(temp_path, actual_duration, seq.width, seq.height)
+            if cancel_event is not None and cancel_event.is_set():
+                raise RenderCancelled("preview cancelled before publication")
             os.replace(temp_path, out_path)
         except BaseException:
             if os.path.isfile(temp_path):
@@ -898,7 +1550,9 @@ class RenderService:
             if caption_cwd and os.path.isdir(caption_cwd):
                 shutil.rmtree(caption_cwd, ignore_errors=True)
         return {"output_path": out_path, "duration": probe["duration"],
-                "windowStart": start, "has_audio": has_audio}
+                "windowStart": start, "has_audio": has_audio,
+                "retryCount": getattr(self._render_ctx, "window_retry_count", 0),
+                "recoveryMode": getattr(self._render_ctx, "window_recovery_mode", None)}
 
     def render_audio_only(self, project: Project, out_path: str,
                           overwrite: bool = False,
@@ -963,6 +1617,7 @@ class RenderService:
     # ------------------------------------------------------------------
     # 预览帧抽取（F32 准确预览的最小形态：单帧）
     # ------------------------------------------------------------------
+    @_prepare_static_masks
     def extract_frame(self, project: Project, timeline_time: float,
                       out_png: str, size: Optional[tuple[int, int]] = None,
                       timeout: float = 30.0,
@@ -1003,6 +1658,25 @@ class RenderService:
         if not any(covers(track) for track in source_seq.tracks):
             return None
 
+        # Frame previews do not run the full export preflight because an
+        # uncovered playhead is a valid black frame. Still report a missing
+        # active source directly: _compile probes video streams and would
+        # otherwise skip a missing file, then report that the timeline has no
+        # visible video at all.
+        for track in source_seq.tracks:
+            if not covers(track):
+                continue
+            for clip in track.clips:
+                if (clip.hidden or clip.nested is not None or
+                        not clip.timeline_start <= t_rat < clip.timeline_end):
+                    continue
+                source_path = clip.asset_ref.source_path
+                if not source_path:
+                    raise RenderError(f"clip {clip.id} has empty source_path")
+                if not os.path.exists(source_path):
+                    raise RenderError(
+                        f"source file missing for clip {clip.id}: {source_path}")
+
         preview_project = copy.deepcopy(project)
         if not include_captions:
             # 多序列模型中 sequence 与 sequences 中的活动序列是两个引用视图，
@@ -1011,17 +1685,22 @@ class RenderService:
                 sequence.captions = []
             preview_project.sequence.captions = []
         seq = preview_project.sequence
+        frame_time, frame_duration = self._static_frame_time(seq, timeline_time)
         graph, input_paths, _expected, has_audio, _warnings, caption_cwd = (
-            self._compile(seq, (0, 0)))
-        video_label = "[outv]"
+            self._compile(seq, (0, 0), render_window=(frame_time,
+                frame_time + 2 * frame_duration)))
+        frame_offset = frame_time - self._render_ctx.compile_origin
+        graph += f";[outv]trim=start={frame_offset:.9f},setpts=PTS-STARTPTS[previewbase]"
+        video_label = "[previewbase]"
         try:
             if size is not None:
-                graph = (graph + f";[outv]scale={size[0]}:{size[1]}:"
+                graph = (graph + f";[previewbase]scale={size[0]}:{size[1]}:"
                          f"force_original_aspect_ratio=decrease[previewv]")
                 video_label = "[previewv]"
-            t_sec = float(t_rat.to_fraction())
-            cmd: list[str] = [self.ffmpeg, "-y"]
+            cmd: list[str] = [self.ffmpeg, "-y", "-nostdin",
+                              "-filter_complex_threads", "2", "-filter_threads", "2"]
             for src in input_paths:
+                cmd += ["-threads", "2"]
                 if _is_image_src(src):
                     fps_rat = seq.fps.to_fraction()
                     cmd += ["-loop", "1", "-framerate",
@@ -1035,7 +1714,7 @@ class RenderService:
                 # 否则 ffmpeg 会因未连接的 filter 输出而失败。
                 cmd += ["-map", "[outa]", "-f", "null", "-"]
             cmd += ["-map", video_label,
-                    "-ss", f"{t_sec:.6f}", "-frames:v", "1",
+                    "-frames:v", "1", "-threads", "2",
                     "-f", "image2", out_png]
             r = subprocess.run(
                 cmd, capture_output=True, text=True, timeout=timeout,
@@ -1050,6 +1729,20 @@ class RenderService:
         if r.returncode != 0 or not os.path.isfile(out_png):
             raise RenderError(f"preview frame failed: {r.stderr[-400:]}")
         return out_png
+
+    @staticmethod
+    def _static_frame_time(seq: Sequence, timeline_time: float) -> tuple[float, float]:
+        """Select the sequence frame containing the playhead, including EOF."""
+        fps = seq.fps.to_fraction()
+        frame_duration = float(1 / fps)
+        frame_index = max(0, math.floor(timeline_time * float(fps) + 1e-7))
+        end = max((float(c.timeline_end.to_fraction()) for t in seq.tracks
+                   if t.visible and t.kind in {"video", "audio"}
+                   for c in t.clips if not c.hidden), default=0)
+        if end > 0:
+            last_frame = max(0, math.ceil(end * float(fps) - 1e-7) - 1)
+            frame_index = min(frame_index, last_frame)
+        return float(frame_index / fps), frame_duration
 
     def extract_still(self, project: Project, timeline_time: float,
                       out_path: str, alpha: bool = False,
@@ -1066,9 +1759,12 @@ class RenderService:
         失败抛 RenderError，且不留下半成品文件。
         """
         seq = project.sequence
-        t_rat = Rational.from_float(timeline_time)
+        frame_time, frame_duration = self._static_frame_time(seq, timeline_time)
         graph, input_paths, _expected, _has_audio, _warnings, caption_cwd = (
-            self._compile(seq, (0, 0), alpha=alpha))
+            self._compile(seq, (0, 0), alpha=alpha, render_window=(frame_time,
+                frame_time + 2 * frame_duration)))
+        frame_offset = frame_time - self._render_ctx.compile_origin
+        graph += f";[outv]trim=start={frame_offset:.9f},setpts=PTS-STARTPTS[outv]"
         tmp_path = out_path + ".tmp" + (os.path.splitext(out_path)[1] or ".png")
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
@@ -1079,8 +1775,7 @@ class RenderService:
             else:
                 # 明确 rgb24：否则 PNG 默认落在 rgba，会让 API 消费者误以为带透明
                 graph = graph + ";[outv]format=rgb24[outv]"
-            t_sec = float(t_rat.to_fraction())
-            cmd: list[str] = [self.ffmpeg, "-y"]
+            cmd: list[str] = [self.ffmpeg, "-y", "-nostdin"]
             for src in input_paths:
                 if _is_image_src(src):
                     fps_rat = seq.fps.to_fraction()
@@ -1095,7 +1790,7 @@ class RenderService:
                 # "Filter 'anull' has output 0 (outa) unconnected"（静帧不要声音）
                 cmd += ["-map", "[outa]", "-f", "null", "-"]
             cmd += ["-map", "[outv]",
-                    "-ss", f"{t_sec:.6f}", "-frames:v", "1",
+                    "-frames:v", "1",
                     "-f", "image2", tmp_path]
             r = subprocess.run(
                 cmd, capture_output=True, text=True, timeout=timeout,
@@ -1133,22 +1828,33 @@ class RenderService:
     # 预检
     # ------------------------------------------------------------------
     def _preflight(self, project: Project, out_path: str, overwrite: bool,
-                   allow_unknown_effects: bool = False) -> list[str]:
+                   allow_unknown_effects: bool = False,
+                   output_range: Optional[tuple[float, float]] = None) -> list[str]:
         """导出前预检。返回非阻断性 warning 列表（阻断性问题直接抛 RenderError）。"""
         seq = project.sequence
         video_tracks = [t for t in seq.tracks if t.kind == "video"]
-        # 至少一条带可见片段的视频轨
-        if not any(any(not c.hidden for c in t.clips) for t in video_tracks):
+        has_visible_video = any(t.visible and any(not c.hidden for c in t.clips)
+                                for t in video_tracks)
+        has_audible_audio = any(t.kind == "audio" and t.visible and not t.muted and
+                                any(not c.hidden for c in t.clips) for t in seq.tracks)
+        if not has_visible_video and not has_audible_audio:
             raise RenderError(
-                "EMPTY_TIMELINE: no visible video clips to render "
-                "(empty timeline or all clips hidden)")
+                "EMPTY_TIMELINE: no visible video or audible audio clips to render")
+
+        from .project_health import project_preflight
+        dependency_report = project_preflight(project, output_range=output_range)
+        required_clip_ids = {reference["clipId"] for item in dependency_report["files"]
+                             for reference in item["references"] if reference["required"]}
+        for error in dependency_report["errors"]:
+            if error.get("resourceKind") == "media":
+                required_clip_ids.update(error.get("clipIds", []))
 
         # 所有视频 clip 必须指向真实存在的源文件（M0 不做代理回退）。
         # 复合片段（clip.nested 非空）是容器：内容在内部子序列，源在展开
         # 后的内层片段上（渲染收集时由 _flatten_compound 展开），此处跳过。
         for t in video_tracks:
             for c in t.clips:
-                if c.hidden:
+                if c.hidden or c.id not in required_clip_ids:
                     continue
                 if c.nested is not None:
                     continue  # 复合片段：容器，源校验交给内部片段
@@ -1163,7 +1869,7 @@ class RenderService:
             if t.kind != "audio":
                 continue
             for c in t.clips:
-                if c.hidden:
+                if c.hidden or c.id not in required_clip_ids:
                     continue
                 src = c.asset_ref.source_path
                 if not src:
@@ -1171,6 +1877,18 @@ class RenderService:
                 if not os.path.exists(src):
                     raise RenderError(
                         f"audio source file missing for clip {c.id}: {src}")
+
+        # Include nested media, empty/non-file sources and custom LUT files.
+        # This guard belongs to real rendering, so MCP/queue exports receive
+        # the same missing-dependency rejection as the Web preflight. Keep
+        # _compile injectable for graph tests with mocked media probes.
+        dependency_errors = [error for error in dependency_report["errors"]
+                             if error["code"] in {"MISSING_SOURCE_PATH", "MISSING_FILE",
+                                                  "EMPTY_FILE", "NOT_A_FILE"}]
+        if dependency_errors:
+            error = dependency_errors[0]
+            raise RenderError(f"{error['code']}: {error['message']} "
+                              f"{error.get('path', '')}; clips={error.get('clipIds', [])}")
 
         # 目标目录必须可写；覆盖需显式授权
         out_dir = os.path.dirname(os.path.abspath(out_path))
@@ -1199,18 +1917,111 @@ class RenderService:
                 raise RenderError(
                     msg + "；请安装对应效果，或显式传 allow_unknown_effects=True 降级导出")
 
+        # Person FX works on the transparent layer produced by the cutout job.
+        # Reject opaque sources early so preview and export cannot silently look unchanged.
+        probed: dict[str, dict[str, Any]] = {}
+        for track in video_tracks:
+            for clip in track.clips:
+                if clip.hidden or clip.nested is not None or clip.id not in required_clip_ids:
+                    continue
+                for effect in clip.effects:
+                    spec = self.effects.find(str(effect.get("effectId", "")))
+                    if not spec or "person-cutout-alpha" not in spec.dependencies:
+                        continue
+                    src = clip.asset_ref.source_path
+                    if src not in probed:
+                        probed[src] = self.probe_media(src)
+                    if not _pix_fmt_has_alpha(probed[src].get("pix_fmt")):
+                        raise RenderError(
+                            f"PERSON_FX_REQUIRES_ALPHA: {spec.label()} 需要人物抠像生成的透明视频；"
+                            "请先抠像并在时间线上选中带 Alpha 的人物层")
+
         return warnings
 
     # ------------------------------------------------------------------
     # 编译：工程快照 -> ffmpeg filter_complex + 输入列表
     # ------------------------------------------------------------------
+    def _sequence_duration(self, seq: Sequence) -> float:
+        """Find the real timeline end without probing every earlier source.
+
+        A visual clip's declared duration remains authoritative, as in the full
+        compiler. Audio tails stop at the source's actual available duration.
+        Inspect latest candidates first; earlier audio cannot extend a later
+        known picture/audio end and needs no probe for this duration query.
+        """
+        visual = []
+        audible = []
+        multicam = getattr(seq, "multicam", None)
+        active = multicam.get("activeTrackId") if isinstance(multicam, dict) else None
+        info: dict[str, dict] = {}
+        for track in seq.tracks:
+            if not track.visible or track.kind not in {"video", "audio"}:
+                continue
+            clips, _warnings = _flatten_compound([c for c in track.clips if not c.hidden])
+            if track.kind == "video" and (active is None or track.id == active):
+                visual.extend(clips)
+            if not track.muted:
+                audible.extend(clips)
+        def media(clip: Clip) -> dict:
+            src = clip.asset_ref.source_path
+            if src not in info:
+                try:
+                    info[src] = self.probe_media(src)
+                except RenderError:
+                    # Missing media outside an authorized range is a warning.
+                    # Keep its declared video extent for range bounds without
+                    # requiring that unrelated source to decode successfully.
+                    info[src] = {"has_video":True, "has_audio":False, "duration":0}
+            return info[src]
+        end = 0.0
+        for clip in sorted(visual, key=lambda c:c.timeline_end, reverse=True):
+            if media(clip).get("has_video"):
+                end = float(clip.timeline_end.to_fraction())
+                break
+        for clip in sorted(audible, key=lambda c:c.timeline_end, reverse=True):
+            if float(clip.timeline_end.to_fraction()) <= end:
+                continue
+            source = media(clip)
+            if not source.get("has_audio"):
+                continue
+            available = max(0.0, float(source.get("duration") or 0) -
+                            float(clip.source_start.to_fraction()))
+            if clip.speed_curve is not None:
+                available = clip.speed_curve.timeline_at_source(available)
+            else:
+                available /= abs(float(clip.speed.to_fraction())) or 1.0
+            duration = min(float(clip.duration.to_fraction()), available)
+            end = max(end, float(clip.timeline_start.to_fraction()) + duration)
+        return end
+
     def _compile(self, seq: Sequence,
                  overlay_position: tuple[int, int],
-                 alpha: bool = False
+                 alpha: bool = False,
+                 render_modes: Optional[list[dict[str, Any]]] = None,
+                 render_window: Optional[tuple[float, float]] = None
                  ) -> tuple[str, list[str], float, bool, list[str], Optional[str]]:
         warnings: list[str] = []
         # 渲染期标志（见 __init__ 注释）：供深层画布构建读取，避免层层传参漏传
         self._render_ctx.alpha = alpha
+        self._render_ctx.canvas_height = seq.height
+        self._render_ctx.window = render_window
+        canvas_color = getattr(seq, "background_color", "#000000")
+        if (not isinstance(canvas_color, str) or len(canvas_color) != 7
+                or canvas_color[0] != "#"
+                or any(char not in "0123456789abcdefABCDEF" for char in canvas_color[1:])):
+            raise RenderError("canvas background must be an opaque #RRGGBB value")
+        canvas_fill = "0x" + canvas_color[1:]
+        def in_window(clip: Clip) -> bool:
+            return (render_window is None or
+                    (float(clip.timeline_start.to_fraction()) < render_window[1]
+                     and float(clip.timeline_end.to_fraction()) > render_window[0]))
+        original_video_tracks = sorted(
+            (t for t in seq.tracks if t.kind == "video" and t.visible
+             and any(not c.hidden for c in t.clips)),
+            key=lambda t:t.role == "sticker")
+        original_track_positions = {t.id:i for i,t in enumerate(original_video_tracks)}
+        original_canvas = {t.id:any(self._clip_needs_canvas(c) for c in t.clips if not c.hidden)
+                           for t in original_video_tracks}
 
         # 媒体流探测缓存：同一源文件只 probe 一次。除了音轨提取，也用于
         # 容错历史工程中“纯音频被误放进视频轨”的脏数据；这种片段保留声音，
@@ -1233,6 +2044,10 @@ class RenderService:
         def has_video(src: str) -> bool:
             return bool(media_info(src).get("has_video"))
 
+        def video_duration(src: str) -> float:
+            info = media_info(src)
+            return float(info.get("video_duration") or info.get("duration") or 0.0)
+
         # 源素材时长缓存（2026-09-21 修）：音轨的"期望时长"必须按**实际可渲染
         # 时长**算，而不是片段在时间线上的声明时长。反例：模板把 BGM 片段声明成
         # 覆盖 0→16.0s，但内置 ambient_pad.wav 只有 12.0s——atrim 只能取到 12.0s，
@@ -1254,8 +2069,12 @@ class RenderService:
             total = source_duration(src)
             if total <= 0:
                 return declared
-            sp = abs(float(speed.to_fraction())) or 1.0
-            avail = max(0.0, total - float(ss)) / sp
+            curve = seg[11]
+            if curve is not None:
+                avail = curve.timeline_at_source(max(0.0, total - float(ss)))
+            else:
+                sp = abs(float(speed.to_fraction())) or 1.0
+                avail = max(0.0, total - float(ss)) / sp
             return min(declared, avail)
 
         # 音频轨是否存在可见片段（用于「无可用音轨」warning 判定）
@@ -1277,7 +2096,7 @@ class RenderService:
             return i
 
         # ---- 视频轨收集（同 M0：按 timeline_start 排序，尊重时间线顺序）----
-        track_clips: list[list[Clip]] = []
+        track_clips: list[tuple[Track, list[Clip]]] = []
         # 多机位（J08）：seq.multicam 存在时，只渲染 activeTrackId 那一轨
         # （其余机位轨是备选画面，不参与成片）——输出即「剪辑师当前切换机位」。
         multicam = getattr(seq, "multicam", None)
@@ -1292,6 +2111,24 @@ class RenderService:
             # 复合片段（J08）：把 nested 子序列片段提升到外层时轴
             clips, flat_warnings = _flatten_compound(clips)
             warnings.extend(flat_warnings)
+            if render_window is not None:
+                selected = {i for i,c in enumerate(clips) if in_window(c)}
+                # An incoming transition mixes the outgoing picture after the
+                # cut. Keep its true original predecessor, even when that clip
+                # itself ends before the requested window begins.
+                for i in tuple(selected):
+                    if i == 0:
+                        continue
+                    outgoing, incoming = clips[i - 1], clips[i]
+                    transition = find_transition(incoming, self.effects)
+                    if transition is None or outgoing.timeline_end != incoming.timeline_start:
+                        continue
+                    d = min(_duration_to_float(transition.get("params", {}).get("duration", 0)),
+                            float(outgoing.duration.to_fraction()) / 2,
+                            float(incoming.duration.to_fraction()) / 2)
+                    if float(incoming.timeline_start.to_fraction()) + d > render_window[0]:
+                        selected.add(i - 1)
+                clips = [c for i,c in enumerate(clips) if i in selected]
             renderable: list[Clip] = []
             for clip in clips:
                 src = clip.asset_ref.source_path
@@ -1303,10 +2140,18 @@ class RenderService:
                         f"video track {t.id!r} clip {clip.id!r} has no video "
                         "stream; picture skipped and its audio kept")
             if renderable:
-                track_clips.append(renderable)
+                track_clips.append((t, renderable))
 
-        if not track_clips:
-            raise RenderError("no visible video track with clips")
+        # Sticker lanes are visual overlays. Keep them above ordinary video
+        # regardless of where the lane was inserted in the editable track list.
+        track_clips.sort(key=lambda item: item[0].role == "sticker")
+        # Recent short clips do not need hundreds of seconds of generated black
+        # frames before a late preview. Keep clip-local source/effect clocks,
+        # but give this compiled timeline a nearby presentation origin.
+        origin = min(render_window[0], min((float(c.timeline_start.to_fraction())
+                     for _track, clips in track_clips for c in clips),
+                     default=render_window[0])) if render_window else 0.0
+        self._render_ctx.compile_origin = origin
 
         parts: list[str] = []
 
@@ -1314,58 +2159,68 @@ class RenderService:
         vseg = [0]  # 用列表包一层，便于内层闭包自增
 
         track_streams: list[tuple[str, float]] = []
-        for n, clips in enumerate(track_clips):
-            label, dur = self._build_video_track(
-                clips, seq, n, get_input, parts, vseg, overlay_position)
+        mode_by_track_id = {
+            str(mode.get("trackId")): mode for mode in (render_modes or [])
+            if isinstance(mode, dict) and mode.get("trackId") is not None
+        }
+        for n, (track, clips) in enumerate(track_clips):
+            mode = mode_by_track_id.get(track.id, {})
+            original_position = original_track_positions[track.id] if render_window is not None else n
+            transparent_layer = alpha or bool(mode.get(
+                "overlay", original_position > 0 or track.role == "sticker"))
+            self._render_ctx.alpha = transparent_layer
+            try:
+                label, dur = self._build_video_track(
+                    clips, seq, n, get_input, parts, vseg, overlay_position,
+                    transparent_layer=transparent_layer,
+                    video_duration=video_duration,
+                    force_canvas=bool(mode.get("canvas", False) or
+                        (render_window is not None and original_canvas[track.id])))
+            finally:
+                self._render_ctx.alpha = alpha
             track_streams.append((label, dur))
+
+        if not track_streams:
+            # Audio-only timelines still need a video canvas for the editor's
+            # synchronized preview and MP4 export. The real audio mix below
+            # remains authoritative; only the configured canvas fill is shown.
+            audio_end = max((float(clip.timeline_end.to_fraction())
+                             for track in audio_tracks if track.visible and not track.muted
+                             for clip in track.clips if not clip.hidden), default=0.0)
+            if render_window is not None:
+                audio_end = render_window[1] - origin
+            if audio_end <= 0:
+                raise RenderError("no visible video or audible audio clips")
+            frame_rate = seq.fps.to_fraction()
+            fps_value = f"{frame_rate.numerator}/{frame_rate.denominator}"
+            audio_only_color = "black@0.0" if alpha else canvas_fill
+            audio_only_format = ",format=yuva420p" if alpha else ""
+            parts.append(f"color=c={audio_only_color}:s={seq.width}x{seq.height}:"
+                         f"r={fps_value}:d={audio_end:.6f}"
+                         f"{audio_only_format}[audioonlyv]")
+            track_streams.append(("audioonlyv", audio_end))
 
         track_labels = [lab for lab, _ in track_streams]
         track_durs = [dur for _, dur in track_streams]
 
-        # 多轨：主轴取「绝对结束时间最长」的轨（A04：偏移轨不截断总长），
-        # 其余轨作为叠加层 overlay 上去（shortest=0 跟随主轴时长）。
-        longest_idx = track_durs.index(max(track_durs))
-        track_labels[0], track_labels[longest_idx] = (
-            track_labels[longest_idx], track_labels[0])
-        track_durs[0], track_durs[longest_idx] = (
-            track_durs[longest_idx], track_durs[0])
-
-        # 多轨：primary 主轴叠加其余轨（位置可传参，默认左上角）
+        # A full-duration base preserves absolute timeline duration without
+        # swapping layer order when an upper sticker lane runs longer.
         x, y = int(overlay_position[0]), int(overlay_position[1])
         fps = seq.fps.to_fraction()
         fps_expr = f"{fps.numerator}/{fps.denominator}"
-
-        if alpha:
-            # V05 透明通道（2026-09-21）：透明导出**不能把主轴当底**——
-            # 底层的像素 alpha 恒为 255，抠像/空白区域导出后仍是黑块。
-            # 正确做法：底 = 全透明画布（color=black@0.0 + format=yuva420p），
-            # 所有视频轨都 overlay 上去。实测：角落 alpha=0、前景 alpha=255，
-            # 即 alpha 真实保留（配 prores_ks -profile:v 4 / yuva420p vp9）。
-            canvas_dur = max(track_durs)
-            layer_labels = list(track_labels)
+        canvas_dur = max(max(track_durs), render_window[1] - origin if render_window else 0)
+        base_color = "black@0.0" if alpha else canvas_fill
+        base_format = ",format=yuva420p" if alpha else ""
+        parts.append(
+            f"color=c={base_color}:s={seq.width}x{seq.height}:"
+            f"r={fps_expr}:d={canvas_dur:.6f}{base_format}[trackbase]")
+        current = "trackbase"
+        for n, t_label in enumerate(track_labels):
+            out_label = "ovout" if n == len(track_labels) - 1 else f"ov{n}"
             parts.append(
-                f"color=c=black@0.0:s={seq.width}x{seq.height}:"
-                f"r={fps_expr}:d={canvas_dur:.6f},format=yuva420p[alphabase]")
-            current = "alphabase"
-            for n, t_label in enumerate(layer_labels):
-                out_label = ("ovout" if n == len(layer_labels) - 1
-                             else f"aov{n}")
-                # format=auto：让 overlay 跟随底层 alpha 格式，不强制 yuv420
-                parts.append(
-                    f"[{current}][{t_label}]overlay=shortest=0:"
-                    f"eof_action=pass:format=auto:"
-                    f"x={x}:y={y}[{out_label}]")
-                current = out_label
-        else:
-            current = track_labels[0]
-            for n, t_label in enumerate(track_labels[1:], start=1):
-                out_label = "ovout" if n == len(track_labels) - 1 else f"ov{n}"
-                # 主轴定长：shortest=0 让输出长度跟随 main（primary）轨；
-                # eof_action=pass 使 overlay 片段结束后不再叠加（消失而非冻结末帧）
-                parts.append(
-                    f"[{current}][{t_label}]overlay=shortest=0:eof_action=pass:"
-                    f"x={x}:y={y}[{out_label}]")
-                current = out_label
+                f"[{current}][{t_label}]overlay=shortest=0:eof_action=pass:"
+                f"format=auto:x={x}:y={y}[{out_label}]")
+            current = out_label
 
         # 统一缩放到序列画布并规范帧率（输出符合 sequence 设置）
         parts.append(
@@ -1379,12 +2234,16 @@ class RenderService:
         caption_cwd: Optional[str] = None
         # J04 文字图层轨：把 text 轨上的 cutvoke.text 片段转成 Caption，
         # 与 sequence.captions 合并进 ASS 字幕轨道（文字叠加到画面）。
-        merge_captions = list(seq.captions)
+        merge_captions = [c for c in seq.captions if render_window is None or
+                          (float(c.start.to_fraction()) < render_window[1] and
+                           float(c.end.to_fraction()) > render_window[0])]
         for _t in seq.tracks:
             if _t.kind != "text" or not _t.visible:
                 continue
             for _c in sorted(_t.clips, key=lambda c: c.timeline_start):
                 if _c.hidden:
+                    continue
+                if not in_window(_c):
                     continue
                 _p = _text_clip_params(_c)
                 if _p is None:
@@ -1396,12 +2255,27 @@ class RenderService:
                         start=_c.timeline_start,
                         end=_c.timeline_end,
                         fontSize=float(_p.get("fontSize", 48.0)),
+                        fontFamily=str(_p.get("fontFamily", "Noto Sans SC")),
+                        lineSpacing=float(_p.get("lineSpacing", 1.0)),
                         color=str(_p.get("color", "#ffffff")),
                         strokeColor=str(_p.get("strokeColor", "#000000")),
                         strokeWidth=float(_p.get("strokeWidth", 2.0)),
-                        background="",
+                        background=str(_p.get("background", "")),
+                        panelWidth=float(_p.get("panelWidth", 0.0)),
+                        panelHeight=float(_p.get("panelHeight", 0.0)),
                         align=str(_p.get("align", "center")),
                         bold=bool(_p.get("bold", False)),
+                        x=float(_p.get("x", 0.5)),
+                        y=float(_p.get("y", 0.5)),
+                        scale=float(_p.get("scale", 1.0)),
+                        rotation=float(_p.get("rotation", 0.0)),
+                        shadow=int(_p.get("shadow", 1)),
+                        animIn=int(_p.get("animIn", 0)),
+                        animOut=int(_p.get("animOut", 0)),
+                        animInStyle=str(_p.get("animInStyle", "fade")),
+                        animOutStyle=str(_p.get("animOutStyle", "fade")),
+                        animLoopStyle=str(_p.get("animLoopStyle", "none")),
+                        animLoopMs=int(_p.get("animLoopMs", 1000)),
                     )
                 except (TypeError, ValueError):
                     continue  # 参数异常：跳过该文字片段，不阻断渲染
@@ -1409,12 +2283,16 @@ class RenderService:
                     merge_captions.append(_cap)
         if merge_captions:
             caption_cwd = prepare_caption_render(
-                merge_captions, seq.width, seq.height)
-            parts.append(
-                f"[outv]ass=cutvoke_captions.ass:fontsdir=.[outv]")
+                merge_captions, seq.width, seq.height,
+                css_caption_ids={caption.id for caption in seq.captions})
+            # ASS animation/fades retain their original absolute timeline clock.
+            # Rebase only around libass; geometry/source clocks remain local.
+            before = f"setpts=PTS+{origin:.9f}/TB," if origin else ""
+            after = f",setpts=PTS-{origin:.9f}/TB" if origin else ""
+            parts.append(f"[outv]{before}ass=cutvoke_captions.ass:fontsdir=.{after}[outv]")
 
         # 主轴时长：取所有视频轨的绝对结束时间最大值（A04：偏移轨不能截断总长）
-        video_expected = max(track_durs)
+        video_expected = canvas_dur
 
         # ---- 音频轨收集（T16 混音）----
         # 每条「音轨」= 一组按绝对时间放置的音频分段：
@@ -1425,15 +2303,17 @@ class RenderService:
         def _collect_audio_segs(clips: list[Clip]) -> list[tuple]:
             segs: list[tuple] = []
             for c in sorted(clips, key=lambda c: c.timeline_start):
+                if not in_window(c):
+                    continue
                 src = c.asset_ref.source_path
                 if not has_audio(src):
                     continue
                 ss = float(c.source_start.to_fraction())
                 # 该片段上的音频特效（如 loudnorm），在逐段音频链应用
                 afx = self._enabled_audio_fx(c)
-                segs.append((src, ss, c.duration, c.speed, c.volume,
+                segs.append((src, ss, c.duration, c.speed, c.preserve_pitch, c.volume,
                              c.fade_in, c.fade_out, c.pitch, afx,
-                             c.timeline_start))
+                             c.timeline_start, c.speed_curve))
             return segs
 
         # 音频轨（静音轨不产生音轨）
@@ -1460,25 +2340,42 @@ class RenderService:
             aseg = 0
             for g, segs in enumerate(audio_groups):
                 labels: list[str] = []
-                for (src, ss, tl_dur, speed, vol, fade_in, fade_out, pitch, afx,
-                     timeline_start) in segs:
+                for (src, ss, tl_dur, speed, preserve_pitch, vol, fade_in, fade_out, pitch, afx,
+                     timeline_start, curve) in segs:
                     ai = get_input(src)
                     seg = f"aseg{aseg}"
                     aseg += 1
                     # 变速：源素材覆盖时长 = 时间线时长 * |speed|（有理数精确）
-                    src_dur = float((tl_dur * _abs_rat(speed)).to_fraction())
+                    src_dur = (float(curve.source_duration.to_fraction()) if curve is not None
+                               else float((tl_dur * _abs_rat(speed)).to_fraction()))
                     speed_f = float(speed.to_fraction())
-                    if speed_f >= 0:
-                        # 正向：atempo 链缩放播放速度（speed=1 无害透传）
-                        atempo = _atempo_chain(speed_f)
-                        speed_filters = "," + ",".join(atempo) if atempo else ""
+                    if curve is not None:
+                        if not preserve_pitch:
+                            raise RenderError("curve speed requires preservePitch=true")
+                        if not _has_rubberband(self.ffmpeg):
+                            raise RenderError(
+                                "curve speed requires an FFmpeg build with the rubberband filter")
+                        initial, commands = curve.audio_commands(f"ramp{aseg}")
+                        speed_filters = ""
+                        if commands.strip():
+                            if caption_cwd is None:
+                                caption_cwd = tempfile.mkdtemp(prefix="cutvoke_render_")
+                            command_file = f"curve{aseg}.cmd"
+                            with open(os.path.join(caption_cwd, command_file), "w",
+                                      encoding="utf-8") as script:
+                                script.write(commands)
+                            speed_filters += f",asendcmd=f={command_file}"
+                        speed_filters += f",rubberband@ramp{aseg}=tempo={initial:.9f}"
                     else:
-                        # 倒放：areverse 翻转，asetpts=N/SR/TB 复位单调 PTS，
-                        # 再 atempo 链按 |speed| 缩放时长
-                        abs_f = float(_abs_rat(speed).to_fraction())
-                        atempo = _atempo_chain(abs_f)
-                        speed_filters = (",areverse,asetpts=N/SR/TB,"
-                                         + ",".join(atempo))
+                        speed_filters = ",areverse,asetpts=N/SR/TB" if speed_f < 0 else ""
+                    abs_f = abs(speed_f)
+                    if curve is None and preserve_pitch:
+                        # atempo changes duration without changing the tone.
+                        speed_filters += "," + ",".join(_atempo_chain(abs_f))
+                    elif curve is None:
+                        # Changing the sample rate changes duration and pitch
+                        # together. Resample back before mixing at project rate.
+                        speed_filters += f",asetrate={round(sr * abs_f)},aresample={sr}"
                     # 音频音量 / 淡入淡出（D06 F27/F28）
                     audio_fx = ""
                     vol_f = float(vol.to_fraction())
@@ -1497,12 +2394,12 @@ class RenderService:
                         fo = min(fade_out_f, max(seg_dur - 0.01, 0.0))
                         if fo > 0:
                             audio_fx += f",afade=t=out:st={max(seg_dur - fo, 0):.4f}:d={fo:.4f}"
-                    # 音高（1.5-C 变声）：asetrate 改采样率（变调）→ aresample 还原采样率
-                    # → atempo 补偿时长（保持原时长不变，只变音高）。
+                    # 独立变调：asetrate 改音高和时长，再用 1/pitch 的
+                    # atempo 补回时长；它与变速时是否保调是两项独立设置。
                     pitch_f = float(pitch.to_fraction())
                     if abs(pitch_f - 1.0) > 1e-6:
-                        audio_fx += (f",asetrate={int(sr * pitch_f)},"
-                                     f"atempo={pitch_f:.4f}")
+                        audio_fx += (f",asetrate={round(sr * pitch_f)},aresample={sr},"
+                                     + ",".join(_atempo_chain(1 / pitch_f)))
                     # 音频特效（J06：loudnorm 响度标准化等）：逐段应用，
                     # 单遍近似（不依赖双遍测量），作为片段级滤镜生效。
                     for e in (afx or []):
@@ -1510,7 +2407,12 @@ class RenderService:
                         fn = _AUDIO_FX_STEPS.get(key)
                         if fn is not None:
                             audio_fx += "," + fn(params)
-                    delay_ms = max(0, round(float(timeline_start.to_fraction()) * 1000))
+                    relative_start = float(timeline_start.to_fraction()) - origin
+                    if relative_start < 0:
+                        # Run original fades/pitch/temporal audio FX before the
+                        # crop, preserving a long music clip's phase/history.
+                        audio_fx += f",atrim=start={-relative_start:.9f},asetpts=PTS-STARTPTS"
+                    delay_ms = max(0, round(relative_start * 1000))
                     if delay_ms:
                         audio_fx += f",adelay={delay_ms}:all=1"
                     parts.append(
@@ -1533,7 +2435,7 @@ class RenderService:
                 # 空白是静音，不能被 concat 吞掉。
                 audio_expected = max(
                     audio_expected,
-                    max(float(s[9].to_fraction()) + effective_audio_dur(s)
+                    max(float(s[10].to_fraction()) - origin + effective_audio_dur(s)
                         for s in segs))
 
             # 多条音轨 amix；单条直接透传 [outa]
@@ -1567,9 +2469,21 @@ class RenderService:
         if alpha:
             parts.append("[outv]format=yuva420p[outv]")
 
+        if render_window is not None:
+            # Keep original clocks inside clips/effects/ASS/audio delays. Only
+            # terminate the final streams at the window end; output-side seek
+            # below still selects the absolute requested start.
+            local_end = render_window[1] - origin
+            parts.append(f"[outv]trim=end={local_end:.9f},setpts=PTS-STARTPTS[outv]")
+            if has_audio:
+                parts.append(f"[outa]apad=whole_dur={local_end:.9f},"
+                             f"atrim=end={local_end:.9f},asetpts=PTS-STARTPTS[outa]")
+
         graph = ";".join(parts)
         # 期望总时长取视频主轴与音频最长轨的较大者；amix duration=longest 与之对齐
         expected = max(video_expected, audio_expected)
+        if render_window is not None:
+            expected = render_window[1] - origin
         return graph, input_paths, expected, has_audio, warnings, caption_cwd
 
     # ------------------------------------------------------------------
@@ -1587,7 +2501,7 @@ class RenderService:
         """
         if _is_image_src(clip.asset_ref.source_path):
             return True
-        if _find_animation(clip) is not None:
+        if _find_animations(clip):
             return True
         tr = clip.transform()
         if (tr["opacity"] != 1.0 or tr["scale"] != 1.0 or tr["rotation"] != 0.0
@@ -1601,7 +2515,10 @@ class RenderService:
 
     def _build_video_track(self, clips: list[Clip], seq: Sequence, n: int,
                             get_input, parts: list[str], vseg: list[int],
-                            overlay_position: tuple[int, int]
+                            overlay_position: tuple[int, int],
+                            transparent_layer: bool = False,
+                            video_duration=None,
+                            force_canvas: bool = False,
                             ) -> tuple[str, float]:
         """编译一条视频轨为单条视频流 [vtk{n}]，返回 (label, 时长秒)。
 
@@ -1611,7 +2528,11 @@ class RenderService:
         """
         fps = seq.fps.to_fraction()
         fps_expr = f"{fps.numerator}/{fps.denominator}"
-        needs_canvas = any(self._clip_needs_canvas(c) for c in clips)
+        origin = getattr(self._render_ctx, "compile_origin", 0.0)
+        needs_canvas = (transparent_layer or force_canvas or
+                        any(self._clip_needs_canvas(c) for c in clips))
+        if video_duration is None:
+            video_duration = lambda _path: 0.0
 
         clip_labels: list[str] = []
         clip_durs: list[float] = []
@@ -1624,8 +2545,160 @@ class RenderService:
                     c, seq, get_input, parts, vseg, fps_expr)
             else:
                 label = self._build_clip_plain(
-                    c, get_input, parts, vseg)
+                    c, seq, get_input, parts, vseg, fps_expr)
             clip_labels.append(label)
+
+        # Reuse unused source frames after an outgoing clip's selected range as
+        # its transition handle. Clips without real handle frames retain the
+        # last-frame hold fallback so existing projects preserve their timing.
+        transition_durations: dict[int, float] = {}
+        for i in range(1, len(clips)):
+            outgoing, incoming = clips[i - 1], clips[i]
+            start = float(incoming.timeline_start.to_fraction())
+            outgoing_end = float(outgoing.timeline_end.to_fraction())
+            if abs(start - outgoing_end) > 1e-6:
+                continue
+            transition = find_transition(incoming, self.effects)
+            if transition is None:
+                continue
+            requested = _duration_to_float(transition.get("params", {}).get("duration", 0.0))
+            d = min(requested, clip_durs[i - 1] / 2.0, clip_durs[i] / 2.0)
+            if requested > 0 and d > 0:
+                transition_durations[i - 1] = d
+
+        transition_handles: dict[int, str] = {}
+        fps_value = float(fps)
+        for clip_index, d in transition_durations.items():
+            outgoing = clips[clip_index]
+            speed = float(outgoing.speed.to_fraction())
+            curve = outgoing.speed_curve
+            # Continue static picture treatment over the source handle. Timed
+            # effect strips and freeze frames need their own extension semantics.
+            effect_ids = {str(effect.get("effectId", ""))
+                          for effect in outgoing.effects}
+            effect_ids.discard("")
+            effect_ids = {effect_id for effect_id in effect_ids
+                          if not effect_id.startswith("cutvoke.transition.")}
+            safe_static_fx_ids = {
+                str(effect.get("effectId", ""))
+                for effect in self._enabled_fx(outgoing)
+                if (effect.get("range") is None
+                    and self._fx_key_params(effect)[0] in _TRANSITION_HANDLE_STATIC_FX)
+            }
+            unsupported_effect_ids = (
+                effect_ids - {"cutvoke.color", "cutvoke.transform"} - safe_static_fx_ids)
+            if (speed <= 0 or outgoing.freeze_at is not None
+                    or unsupported_effect_ids):
+                continue
+
+            source_end = outgoing.source_start + outgoing.consumed_source_duration
+            source_end_seconds = float(source_end.to_fraction())
+            tail_speed = (curve.speed_at_source(
+                float(curve.source_duration.to_fraction())) if curve is not None else speed)
+            added_source_seconds = d * tail_speed
+            available_video = video_duration(outgoing.asset_ref.source_path)
+            # Motion-compensated interpolation needs a few source frames to
+            # estimate motion. A short transition handle can be shorter than
+            # that window (for example, two 10 fps frames); minterpolate then
+            # emits no frames. Render extra source context and trim the handle
+            # back to the transition duration when it is connected below.
+            handle_source_seconds = max(
+                added_source_seconds,
+                0.3 if outgoing.frame_interpolation == "motion" else 0.0,
+            )
+            handle_timeline_seconds = handle_source_seconds / tail_speed
+            needed_source_end = source_end_seconds + handle_source_seconds
+            handle_tolerance = max(0.001, 0.51 / fps_value)
+            if (available_video <= 0
+                    or needed_source_end > available_video + handle_tolerance):
+                continue
+
+            extended_curve = None
+            if curve is not None:
+                # The handle is a new clip beginning at the selected source
+                # end, so its curve is just the outgoing curve's terminal
+                # speed across the extra source range.
+                handle_source_duration = Rational.of(
+                    round(handle_source_seconds * 1_000_000), 1_000_000)
+                points = [{"at": Rational.of(0),
+                           "speed": Rational.from_float(tail_speed)},
+                          {"at": Rational.of(1),
+                           "speed": Rational.from_float(tail_speed)}]
+                try:
+                    extended_curve = type(curve).from_points(
+                        handle_source_duration, points)
+                except (TypeError, ValueError, ZeroDivisionError):
+                    continue
+
+            handle_clip = copy.copy(outgoing)
+            handle_clip.id = f"{outgoing.id}__transition_handle_{clip_index}"
+            handle_clip.timeline_start = outgoing.timeline_end
+            handle_clip.timeline_end = outgoing.timeline_end + Rational.of(
+                round(handle_timeline_seconds * 1_000_000), 1_000_000)
+            handle_clip.source_start = source_end
+            handle_clip.effects = [
+                effect for effect in outgoing.effects
+                if not str(effect.get("effectId", "")).startswith(
+                    "cutvoke.transition.")
+            ]
+            handle_clip.keyframes = {}
+            for name, keyframes in outgoing.keyframes.items():
+                if not keyframes:
+                    continue
+                terminal = copy.copy(max(
+                    keyframes, key=lambda keyframe: keyframe.time.to_fraction()))
+                terminal.time = Rational.of(0)
+                terminal.value = kf_evaluate(keyframes, outgoing.duration)
+                handle_clip.keyframes[name] = [terminal]
+            handle_clip.speed_curve = extended_curve
+            handle_clip.freeze_at = None
+            handle_clip.frame_interpolation = outgoing.frame_interpolation
+            # Resolve the handle through the same canvas/effect pipeline as the
+            # selected outgoing clip, including transparent overlay tracks.
+            handle_label = self._build_clip_canvas(
+                handle_clip, seq, get_input, parts, vseg, fps_expr)
+            transition_handles[clip_index] = handle_label
+
+        # FFmpeg's concat filter drops clip-level changes from later
+        # alpha-bearing segments (for example, a mirrored sticker or PersonFX
+        # layer). Composite transparent clips on a shared timeline bed instead
+        # so each clip's rendered pixels survive the segment boundary. Explicit
+        # transitions keep the xfade path below.
+        if transparent_layer and not any(
+                find_transition(clips[i], self.effects) is not None
+                for i in range(1, len(clips))):
+            first_start = float(clips[0].timeline_start.to_fraction()) - origin
+            offsets = [first_start]
+            total_dur = first_start + clip_durs[0]
+            tl = total_dur + origin
+            for i in range(1, len(clips)):
+                abs_start = float(clips[i].timeline_start.to_fraction())
+                gap = max(0.0, abs_start - tl)
+                if gap > 0:
+                    total_dur += gap
+                    tl = abs_start
+                offsets.append(total_dur)
+                total_dur += clip_durs[i]
+                tl += clip_durs[i]
+
+            bed = f"tlbed{n}"
+            parts.append(
+                f"color=c=black@0.0:s={seq.width}x{seq.height}:"
+                f"r={fps_expr}:d={total_dur:.6f},format=yuva420p[{bed}]")
+            current = bed
+            for i, (label, offset) in enumerate(zip(clip_labels, offsets)):
+                shifted = f"tlclip{n}_{i}"
+                parts.append(
+                    f"[{label}]trim=duration={clip_durs[i]:.6f},"
+                    f"setpts=PTS-STARTPTS+{offset:.6f}/TB[{shifted}]")
+                out = f"tlmix{n}_{i}"
+                parts.append(
+                    f"[{current}][{shifted}]overlay=shortest=0:eof_action=pass:"
+                    f"format=auto[{out}]")
+                current = out
+            out_label = f"vtk{n}"
+            parts.append(f"[{current}]fps={fps_expr},null[{out_label}]")
+            return out_label, total_dur
 
         # 组装轨内片段（A04：按绝对时间线位置，中间/开头空白必须保留）
         #
@@ -1639,23 +2712,28 @@ class RenderService:
         current = clip_labels[0]
         first_start = float(clips[0].timeline_start.to_fraction())
         tl = first_start
-        film = first_start
+        film = first_start - origin
         # 开头空白：第一片段不在 t=0 → 补在流**前面**
-        if first_start > 0:
-            current = self._pad_black(current, first_start, parts, fps_expr,
-                                      at_start=True)
+        if first_start > origin:
+            current = self._pad_black(current, first_start - origin, parts, fps_expr,
+                                      at_start=True, transparent=transparent_layer,
+                                      canvas_size=(seq.width, seq.height))
         tl += clip_durs[0]
         film += clip_durs[0]
         for i in range(1, len(clip_labels)):
             # 绝对时间起点与**时间线游标**的差 = 真实空白（转场不产生空白）
             abs_start = float(clips[i].timeline_start.to_fraction())
+            gap = max(0.0, abs_start - tl)
             if abs_start > tl + 1e-6:
-                gap = abs_start - tl
                 # 中间空白 → 必须补在流**后面**，否则前面内容整体后移、音画不同步
-                current = self._pad_black(current, gap, parts, fps_expr)
+                current = self._pad_black(current, gap, parts, fps_expr,
+                                          transparent=transparent_layer)
                 film += gap
                 tl = abs_start
-            tr = find_transition(clips[i], self.effects)
+            # A transition belongs to the seam. If a later trim/speed/move has
+            # opened a real gap, keep the effect instance editable but do not
+            # blend the incoming clip with the black gap or a frozen old frame.
+            tr = find_transition(clips[i], self.effects) if gap <= 1e-6 else None
             if tr is not None:
                 # 转场时长 D 钳制到相邻两段较短者显示时长的一半（剪映硬规则：
                 # 4s+8s 两段转场最长 2s；保证转场不超出较短的素材）。
@@ -1667,23 +2745,89 @@ class RenderService:
                     film += clip_durs[i]
                     tl += clip_durs[i]
                     continue
-                # 时间线上两段首尾相接、没有素材重叠。复制 A 的末帧作为过渡把手，
-                # 从剪切点开始与 B 的前 d 秒混合；总时长仍增加 B 的完整时长。
-                current = self._pad_last_frame(current, d, parts, fps_expr)
-                offset = film
+                # 有源素材余量时用 A 的真实后续帧作为把手；源文件到头或剪辑处理
+                # 不支持延伸时才复制末帧。两种路径都从剪切点开始，工程总时长不变。
+                handle = transition_handles.get(i - 1)
+                if handle:
+                    transition_outgoing = f"trhandle{n}_{i}"
+                    parts.append(
+                        f"[{handle}]trim=duration={d:.6f},"
+                        f"setpts=PTS-STARTPTS[{transition_outgoing}]")
+                    offset = 0.0
+                else:
+                    current = self._pad_last_frame(current, d, parts, fps_expr)
+                    transition_outgoing = current
+                    offset = film
                 out = f"xf{n}_{i}"
-                # xfade 的 transition 名来自效果清单声明（AC18：新增转场无需改内核）
-                xname = xfade_transition_name(clips[i], self.effects)
-                # xfade 要求两路同 timebase；concat 输出默认微秒时基(1/1000000)，
-                # 与单片段 fps= 的 1/fps 时基不一致会直接报错。这里两路统一
-                # settb=AVTB（ffmpeg 通用微秒时基），offset/duration 仍按秒解析。
-                parts.append(
-                    f"[{current}]settb=AVTB[inA];"
-                    f"[{clip_labels[i]}]settb=AVTB[inB];"
-                    f"[inA][inB]"
-                    f"xfade=transition={xname}:offset={offset:.6f}:"
-                    f"duration={d:.6f}[{out}]")
-                current = out
+                incoming = clip_labels[i]
+                transition_spec = self.effects.get(str(tr.get("effectId", "")))
+                blur_pattern = transition_spec.implementation.get("blurPattern")
+                squeeze_axis = transition_spec.implementation.get("squeezeAxis")
+                # FFmpeg only evaluates expr when transition=custom. Keep all
+                # other transition names manifest-driven; blur presets provide
+                # their own bounded, spatially shaped expression.
+                xname = ("custom" if blur_pattern is not None else
+                         xfade_transition_name(clips[i], self.effects))
+                has_alpha = bool(getattr(self._render_ctx, "alpha", False))
+                xfade_expr = (_xfade_blur_expr(str(blur_pattern), has_alpha=has_alpha)
+                              if blur_pattern is not None else None)
+                expr_option = f":expr='{xfade_expr}'" if xfade_expr else ""
+                incoming_zoom = float(transition_spec.implementation.get("incomingZoom", 1.0))
+                if 1.0 < incoming_zoom <= 1.5:
+                    # A bounded zoom on B avoids xfade=zoomin's near-solid
+                    # midpoint while keeping both source shots legible. d=1
+                    # emits one frame per incoming frame, so timeline length and
+                    # audio alignment remain unchanged.
+                    zoom_frames = max(1, round(d * float(fps)))
+                    incoming = f"zoom{n}_{i}"
+                    parts.append(
+                        f"[{clip_labels[i]}]zoompan="
+                        f"z='max(1\\,{incoming_zoom:.4f}-"
+                        f"{incoming_zoom - 1.0:.4f}*on/{zoom_frames})':"
+                        f"d=1:s={seq.width}x{seq.height}:fps={fps_expr},"
+                        f"setpts=PTS-STARTPTS[{incoming}]")
+                # Concat uses a microsecond time base. Rebuild both clocks on
+                # the exact sequence frame lattice before xfade; rounding a
+                # 1/30 frame to microseconds otherwise changes the transition
+                # end frame when a window's presentation origin is shifted.
+                # The manual xfade blur expression samples every plane by X/Y.
+                # Convert subsampled YUV420/alpha inputs to full-resolution
+                # planes first; otherwise chroma/alpha samples use incompatible
+                # coordinates and the midpoint collapses toward dark colors.
+                xfade_format = (f"format={'yuva444p' if has_alpha else 'yuv444p'},"
+                                if blur_pattern is not None else "")
+                if squeeze_axis is not None:
+                    _build_squeeze_transition(transition_outgoing, incoming, out,
+                                              str(squeeze_axis), d, offset, parts)
+                else:
+                    parts.append(
+                        f"[{transition_outgoing}]{xfade_format}settb=expr={fps.denominator}/{fps.numerator},setpts=N[inA];"
+                        f"[{incoming}]{xfade_format}settb=expr={fps.denominator}/{fps.numerator},setpts=N[inB];"
+                        f"[inA][inB]"
+                        f"xfade=transition={xname}:offset={offset:.6f}:"
+                        f"duration={d:.6f}{expr_option}[{out}]")
+                if handle or squeeze_axis is not None:
+                    # Canvas clips may carry repeated EOF frames. Concatenating
+                    # a short transition segment after such a stream can leave
+                    # it waiting forever at the seam. Place the seam and the
+                    # incoming tail at their timeline timestamps instead.
+                    current = self._pad_last_frame(
+                        current, clip_durs[i], parts, fps_expr)
+                    transition_at_seam = f"trseg{n}_{i}"
+                    parts.append(
+                        f"[{out}]fps={fps_expr},setpts=PTS-STARTPTS+{film:.6f}/TB"
+                        f"[{transition_at_seam}]")
+                    seam_mix = f"trmix{n}_{i}"
+                    parts.append(
+                        f"[{current}][{transition_at_seam}]overlay=shortest=0:"
+                        f"eof_action=pass:format=auto[{seam_mix}]")
+                    bounded = f"trbounded{n}_{i}"
+                    parts.append(
+                        f"[{seam_mix}]trim=duration={film + clip_durs[i]:.6f},"
+                        f"setpts=PTS-STARTPTS[{bounded}]")
+                    current = bounded
+                else:
+                    current = out
                 film += clip_durs[i]
                 tl += clip_durs[i]
                 continue
@@ -1693,7 +2837,12 @@ class RenderService:
             tl += clip_durs[i]
 
         out_label = f"vtk{n}"
-        parts.append(f"[{current}]null[{out_label}]")
+        # Concat timestamps are rounded to microseconds. Align the completed
+        # lane to the canvas frame clock before framesync: otherwise a rounded
+        # timestamp just after a canvas tick repeats its previous picture, and
+        # the transition endpoint differs after a window origin shift.
+        parts.append(f"[{current}]fps={fps_expr},settb=expr={fps.denominator}/{fps.numerator},"
+                     f"setpts=N[{out_label}]")
         return out_label, film
 
     def _pad_last_frame(self, label: str, pad_secs: float, parts: list[str],
@@ -1708,7 +2857,9 @@ class RenderService:
         return out
 
     def _pad_black(self, label: str, pad_secs: float, parts: list[str],
-                   fps_expr: str, at_start: bool = False) -> str:
+                   fps_expr: str, at_start: bool = False,
+                   transparent: bool = False,
+                   canvas_size: Optional[tuple[int, int]] = None) -> str:
         """补 pad_secs 秒黑帧（A04：绝对时间空白）。
 
         `at_start=True` → 补在该流**前面**（仅用于"首片段不在 t=0"的开头空白）；
@@ -1723,13 +2874,23 @@ class RenderService:
         if pad_secs <= 0:
             return label
         out = f"tpad{len(parts)}"
-        if at_start:
+        pad_color = ":color=black@0.0" if transparent else ""
+        if at_start and canvas_size is not None:
+            prefix = f"padstart{len(parts)}"
+            width, height = canvas_size
+            fmt = ",format=yuva420p" if transparent else ""
+            color = "black@0.0" if transparent else "black"
+            parts.append(f"color=c={color}:s={width}x{height}:r={fps_expr}:"
+                         f"d={pad_secs:.9f}{fmt}[{prefix}]")
+            parts.append(f"[{prefix}][{label}]concat=n=2:v=1:a=0,fps={fps_expr},"
+                         f"setpts=N/FRAME_RATE/TB[{out}]")
+        elif at_start:
             parts.append(
-                f"[{label}]tpad=start_mode=add:start_duration={pad_secs:.6f}"
+                f"[{label}]tpad=start_mode=add:start_duration={pad_secs:.6f}{pad_color}"
                 f",fps={fps_expr},setpts=PTS-STARTPTS[{out}]")
         else:
             parts.append(
-                f"[{label}]tpad=stop_mode=add:stop_duration={pad_secs:.6f}"
+                f"[{label}]tpad=stop_mode=add:stop_duration={pad_secs:.6f}{pad_color}"
                 f",fps={fps_expr},setpts=PTS-STARTPTS[{out}]")
         return out
 
@@ -1739,9 +2900,13 @@ class RenderService:
         parts.append(f"[{a}][{b}]concat=n=2:v=1:a=0[{out}]")
         return out
 
-    def _build_clip_plain(self, clip: Clip, get_input, parts: list[str],
-                          vseg: list[int]) -> str:
-        """旧路径单片段：trim + 变速（+ 可选 eq 调色），尺寸保持源尺寸。"""
+    def _build_clip_plain(self, clip: Clip, seq: Sequence, get_input, parts: list[str],
+                          vseg: list[int], fps_expr: str) -> str:
+        """普通路径单片段：变速、画面效果与画布归一化后再参加轨道拼接。"""
+        def fit_to_canvas(label: str) -> str:
+            return self._scale_to_canvas(
+                label, seq.width, seq.height, 1.0, 1.0, parts, vseg)
+
         vi = get_input(clip.asset_ref.source_path)
         seg = f"vseg{vseg[0]}"
         vseg[0] += 1
@@ -1766,13 +2931,15 @@ class RenderService:
                 mid = f"vfx{vseg[0]}"
                 vseg[0] += 1
                 parts.append(f"{chain}[{mid}]")
-                return self._apply_fx(clip, mid, parts, vseg)
+                return fit_to_canvas(self._apply_fx(clip, mid, parts, vseg))
             parts.append(f"{chain}[{seg}]")
-            return seg
-        src_dur = float((clip.duration * _abs_rat(speed)).to_fraction())
+            return fit_to_canvas(seg)
+        src_dur = float(clip.consumed_source_duration.to_fraction())
         ss = float(clip.source_start.to_fraction())
         speed_f = float(speed.to_fraction())
-        if speed_f >= 0:
+        if clip.speed_curve is not None:
+            speed_expr = clip.speed_curve.video_setpts()
+        elif speed_f >= 0:
             speed_expr = f"setpts=PTS/{speed_f}"
         else:
             abs_f = float(_abs_rat(speed).to_fraction())
@@ -1780,6 +2947,7 @@ class RenderService:
                           f"setpts=PTS/{abs_f}")
         chain = (f"[{vi}:v]trim=start={ss}:duration={src_dur},"
                  f"setpts=PTS-STARTPTS,{speed_expr}")
+        chain += self._slow_motion_interpolation_filter(clip, fps_expr)
         # F18 调色（尺寸不变，inline）
         col = clip.color_grade()
         if (col["brightness"] != 0.0 or col["contrast"] != 1.0
@@ -1792,13 +2960,14 @@ class RenderService:
             mid = f"vfx{vseg[0]}"
             vseg[0] += 1
             parts.append(f"{chain}[{mid}]")
-            return self._apply_fx(clip, mid, parts, vseg)
+            return fit_to_canvas(self._apply_fx(clip, mid, parts, vseg))
         parts.append(f"{chain}[{seg}]")
-        return seg
+        return fit_to_canvas(seg)
 
     def _scale_to_canvas(self, cur: str, W: int, H: int,
                          sx: float, sy: float,
-                         parts: list[str], vseg: list[int]) -> str:
+                         parts: list[str], vseg: list[int],
+                         sticker: bool = False) -> str:
         """把片段流归一到画布尺寸。
 
         语义：`scale` 是**画布占比**（1.0 = 铺满画布）；transform 的用途是
@@ -1809,11 +2978,14 @@ class RenderService:
         左上角——实测只占 3.7% 面积、其余全黑；而且与普通路径末尾的
         `scale=W:H`（铺满）行为不一致，会出现"给片段加一个转场，画面尺寸就变了"。
         """
-        sw = max(1, round(W * sx))
-        sh = max(1, round(H * sy))
+        unit = min(W, H) if sticker else None
+        sw = max(1, round((unit or W) * sx))
+        sh = max(1, round((unit or H) * sy))
         nxt = f"vs{vseg[0]}"
         vseg[0] += 1
-        parts.append(f"[{cur}]scale={sw}:{sh}[{nxt}]")
+        # Canvas coordinates describe square pixels. Crop/pad effects can
+        # change SAR during scale; normalize before concat/xfade joins.
+        parts.append(f"[{cur}]scale={sw}:{sh},setsar=1[{nxt}]")
         return nxt
 
     def _build_clip_canvas(self, clip: Clip, seq: Sequence, get_input,
@@ -1829,14 +3001,17 @@ class RenderService:
 
         # 1.5-A 入场动画：把动画效果动态展开成关键帧（不污染工程存储）。
         # 动画时长默认 1s（或片段时长，取小），起始帧在 t=0，结束帧在 t=duration。
-        anim = _find_animation(clip)
-        if anim is not None:
+        animations = _find_animations(clip)
+        if animations:
             return self._build_animated_clip(
-                clip, seq, get_input, parts, vseg, fps_expr, color, W, H, anim)
+                clip, seq, get_input, parts, vseg, fps_expr, color, W, H, animations)
 
-        opacity_kfs = clip.keyframes.get("opacity")
-        if opacity_kfs:
-            return self._build_clip_opacity_keyframes(
+        animated_keyframes = any(
+            clip.keyframes.get(param)
+            for param in ("opacity", "x", "y", "scale", "rotation")
+        )
+        if animated_keyframes:
+            return self._build_keyframed_clip(
                 clip, seq, get_input, parts, vseg, fps_expr, color, W, H)
 
         # 常数透明度（来自 transform 的 opacity 参数；默认 1.0）
@@ -1844,19 +3019,19 @@ class RenderService:
         opacity = tr["opacity"]
 
         # 1) trim + 变速 + 调色（源尺寸）
-        base = self._trim_speed_color(clip, get_input, parts, vseg, color)
+        base = self._trim_speed_color(clip, get_input, parts, vseg, color, fps_expr)
         cur = base
 
         # 2) 归一到画布（必须无条件做，见 _scale_to_canvas 的说明）
         cur = self._scale_to_canvas(cur, W, H, tr["scale"], tr["scale"],
-                                    parts, vseg)
+                                    parts, vseg, sticker=clip.role == "sticker")
 
         # 3) 旋转（度 -> 弧度）
         if tr["rotation"] != 0.0:
             rad = math.radians(tr["rotation"])
             nxt = f"vr{vseg[0]}"
             vseg[0] += 1
-            parts.append(f"[{cur}]rotate=angle={rad:.6f}[{nxt}]")
+            parts.append(f"[{cur}]rotate=angle={rad:.6f}:c=none[{nxt}]")
             cur = nxt
 
         # 4) 透明度（<1 时转 RGBA 并按 alpha 混合）
@@ -1873,32 +3048,87 @@ class RenderService:
                                           float(clip.duration.to_fraction()))
         return out
 
+    def _build_keyframed_clip(self, clip: Clip, seq: Sequence, get_input,
+                             parts: list[str], vseg: list[int], fps_expr: str,
+                             color: dict, W: int, H: int) -> str:
+        """Resample transforms at every output frame with subpixel geometry.
+
+        A single fixed-size perspective stream avoids the old 15 fps staircase,
+        integer scale/position jumps, and one filter branch per motion sample.
+        Transparent padding prevents perspective's edge clamp from extending
+        the picture into uncovered canvas or lower tracks.
+        """
+        tr = clip.transform()
+        fps = seq.fps.to_fraction()
+        # perspective increments `on` before evaluating the first frame.
+        time = f"((on-1)*{fps.denominator}/{fps.numerator})"
+        x = kf_expression(clip.keyframes.get("x", []), time, tr["position"]["x"])
+        y = kf_expression(clip.keyframes.get("y", []), time, tr["position"]["y"])
+        scale = kf_expression(clip.keyframes.get("scale", []), time, tr["scale"])
+        scale = f"max(0.000001,({scale}))"
+        sx = sy = scale
+        if clip.role == "sticker":
+            unit = min(W, H)
+            sx, sy = f"({scale})*{unit}/{W}", f"({scale})*{unit}/{H}"
+        rotation = kf_expression(clip.keyframes.get("rotation", []), time, tr["rotation"])
+        has_rotation = tr["rotation"] != 0 or any(
+            keyframe.value != 0 for keyframe in clip.keyframes.get("rotation", []))
+        corners = []
+        for index, (px, py) in enumerate(((-2, -2), (W + 2, -2),
+                                         (-2, H + 2), (W + 2, H + 2))):
+            if has_rotation:
+                angle = f"({rotation})*PI/180"
+                dx, dy = f"({px}-{W}/2)*({sx})", f"({py}-{H}/2)*({sy})"
+                cx = f"({x})+{W}/2*({sx})+({dx})*cos({angle})-({dy})*sin({angle})"
+                cy = f"({y})+{H}/2*({sy})+({dx})*sin({angle})+({dy})*cos({angle})"
+            else:
+                cx, cy = f"({x})+{px}*({sx})", f"({y})+{py}*({sy})"
+            corners.extend((f"x{index}='{cx}'", f"y{index}='{cy}'"))
+
+        base = self._trim_speed_color(clip, get_input, parts, vseg, color, fps_expr)
+        cur = f"kgeom{vseg[0]}"; vseg[0] += 1
+        parts.append(
+            f"[{base}]fps={fps_expr},scale={W}:{H},setsar=1,format=yuva444p,"
+            f"pad={W + 4}:{H + 4}:2:2:color=black@0,"
+            f"perspective={':'.join(corners)}:sense=destination:eval=frame:"
+            f"interpolation=cubic,crop={W}:{H}:0:0[{cur}]")
+        opacity_lane = clip.keyframes.get("opacity", [])
+        if tr["opacity"] < 1 or any(keyframe.value != 1 for keyframe in opacity_lane):
+            opacity = kf_expression(opacity_lane, f"(N*{fps.denominator}/{fps.numerator})",
+                                    tr["opacity"])
+            nxt = f"kop{vseg[0]}"; vseg[0] += 1
+            parts.append(f"[{cur}]geq=lum='p(X,Y)':cb='p(X,Y)':cr='p(X,Y)':"
+                         f"a='alpha(X,Y)*clip({opacity},0,1)'[{nxt}]")
+            cur = nxt
+        return self._composite_on_canvas(
+            cur, clip, seq, parts, vseg, fps_expr, W, H, {"x": 0, "y": 0},
+            float(clip.duration.to_fraction()))
+
     def _build_animated_clip(self, clip: Clip, seq: Sequence, get_input,
                             parts: list[str], vseg: list[int], fps_expr: str,
-                            color: dict, W: int, H: int, anim: dict) -> str:
+                            color: dict, W: int, H: int,
+                            animations: list[dict]) -> str:
         """入场动画（1.5-A/B）：把动画效果渲染成时间插值的画布流。
 
-        统一机制：把动画时长切成 N 个子段，每段按插值取中点常数
+        统一机制：按序列帧率把动画切成子段，每帧按插值取中点常数
         (opacity/scale/position)，逐段渲染后 concat。fadeIn/zoomIn/slideIn
         都走同一条路径，得到真实的时间维运动，而非静态起始状态。
+        普通不透明纯循环使用固定画布的逐帧仿射流，避免长片段创建
+        数百个 scale/rotate 上下文而占用数 GB 内存。
 
         缓动：easing 参数影响插值曲线（linear / ease-in / ease-out）。
         """
-        eid = anim.get("effectId", "")
-        params = anim.get("params", {}) or {}
-        duration = float(params.get("duration", 1.0))
-        easing = params.get("easing", "linear")
         dur_f = float(clip.duration.to_fraction())
-        duration = min(max(duration, 0.05), dur_f)
+        tr = clip.transform()
 
-        def _ease(t: float) -> float:
+        def _ease(t: float, easing: str) -> float:
             if easing == "ease-in":
                 return t * t
             if easing == "ease-out":
                 return 1.0 - (1.0 - t) * (1.0 - t)
             return t  # linear
 
-        def _state_at(t: float) -> dict:
+        def _state_at(anim: dict, t: float) -> dict:
             """返回片段局部时间 t 的合成状态。
 
             入场/出场动画：t 是**动画进度 p∈[0,1]**（已缓动）。
@@ -1907,7 +3137,9 @@ class RenderService:
             返回 opacity / scale / sx / sy / rot / x / y。
             sx/sy 为分轴缩放（翻转、遮罩显现用），缺省时渲染层回退到 scale。
             """
-            p = _ease(t)
+            eid = str(anim.get("effectId", ""))
+            params = anim.get("params", {}) or {}
+            p = _ease(t, str(params.get("easing", "linear")))
             st = {"opacity": 1.0, "scale": 1.0, "sx": None, "sy": None,
                   "rot": 0.0, "x": 0, "y": 0}
             if eid == "cutvoke.anim.fadeIn":
@@ -1943,48 +3175,98 @@ class RenderService:
                 st["scale"] = (1.0 - 2.0 * o * (1.0 - p)
                                + 2.0 * o * math.sin(math.pi * p))
                 st["opacity"] = min(1.0, p * 2.0)
-            elif eid == "cutvoke.anim.reveal":         # 遮罩显现（沿方向揭示）
-                d = params.get("direction", "left")
-                if d in ("up", "down"):
-                    st["sx"], st["sy"] = 1.0, max(0.01, p)
-                    st["y"] = int(H * (1.0 - p)) if d == "up" else 0
-                else:
-                    st["sx"], st["sy"] = max(0.01, p), 1.0
-                    st["x"] = int(W * (1.0 - p)) if d == "right" else 0
+            elif eid == "cutvoke.anim.reveal":         # 揭开遮罩，保持素材原比例
+                st["reveal"] = (str(params.get("direction", "left")), p)
             elif eid == "cutvoke.anim.fadeOut":
                 st["opacity"] = 1.0 - p
             elif eid == "cutvoke.anim.zoomOut":
                 to_scale = float(params.get("toScale", 0.8))
                 st["scale"] = 1.0 - (1.0 - to_scale) * p
+            elif eid == "cutvoke.anim.slideOutLeft":
+                st["x"] = int(-W * float(params.get("distance", 0.3)) * p)
+            elif eid == "cutvoke.anim.slideOutRight":
+                st["x"] = int(W * float(params.get("distance", 0.3)) * p)
+            elif eid == "cutvoke.anim.slideOutUp":
+                st["y"] = int(-H * float(params.get("distance", 0.3)) * p)
+            elif eid == "cutvoke.anim.slideOutDown":
+                st["y"] = int(H * float(params.get("distance", 0.3)) * p)
+            elif eid == "cutvoke.anim.rotateOut":
+                st["rot"] = float(params.get("toAngle", 18.0)) * p
+                st["opacity"] = 1.0 - p
+                st["scale"] = 1.0 + 0.18 * p
+            elif eid == "cutvoke.anim.flipOut":
+                sxv = max(0.02, 1.0 - p)
+                st["sx"] = sxv
+                st["sy"] = 1.0
+                st["x"] = int(W * (1.0 - sxv) / 2.0)
             elif eid in ("cutvoke.anim.breathe", "cutvoke.anim.float",
-                         "cutvoke.anim.sway"):
+                         "cutvoke.anim.sway", "cutvoke.anim.rock",
+                         "cutvoke.anim.bounce", "cutvoke.anim.orbit",
+                         "cutvoke.anim.heartbeat", "cutvoke.anim.blink"):
                 # 循环：t 为绝对秒；period 秒一个周期
                 period = float(params.get("period", 2.0))
                 amp = float(params.get("amplitude", 0.03))
                 phase = (t / period) * 2.0 * math.pi if period > 0 else 0.0
                 if eid == "cutvoke.anim.breathe":
-                    st["scale"] = 1.0 + amp * math.sin(phase)
+                    st["scale"] = 1.0 + amp * (1.0 + math.sin(phase))
                 elif eid == "cutvoke.anim.float":
-                    # 轻微放大做余量，位移时四边不露黑
-                    st["scale"] = 1.0 + amp
+                    st["scale"] = 1.0 + 2.2 * amp
                     st["y"] = int(H * amp * math.sin(phase))
-                else:  # sway
-                    st["scale"] = 1.0 + amp
+                elif eid == "cutvoke.anim.sway":
+                    st["scale"] = 1.0 + 2.2 * amp
                     st["x"] = int(W * amp * math.sin(phase))
+                elif eid == "cutvoke.anim.rock":
+                    angle = min(12.0, amp * 100.0) * math.sin(phase)
+                    theta = math.radians(abs(angle))
+                    aspect = max(W / H, H / W)
+                    st["rot"] = angle
+                    st["scale"] = min(2.5, 1.0 / max(0.4,
+                        math.cos(theta) - aspect * math.sin(theta)))
+                elif eid == "cutvoke.anim.bounce":
+                    lift = max(0.0, math.sin(phase))
+                    st["scale"] = 1.0 + 2.2 * amp
+                    st["y"] = -int(H * amp * lift)
+                    if lift < 0.1:
+                        st["sx"], st["sy"] = 1.0 + amp, 1.0 - amp * 0.6
+                elif eid == "cutvoke.anim.orbit":
+                    st["scale"] = 1.0 + 2.2 * amp
+                    st["x"] = int(W * amp * math.cos(phase))
+                    st["y"] = int(H * amp * math.sin(phase))
+                elif eid == "cutvoke.anim.heartbeat":
+                    cycle = (t / period) % 1.0 if period > 0 else 0.0
+                    first = math.exp(-((cycle - 0.18) / 0.065) ** 2)
+                    second = math.exp(-((cycle - 0.39) / 0.075) ** 2)
+                    st["scale"] = 1.0 + amp * (first + 0.7 * second)
+                else:  # blink: a short dark interval followed by a full return
+                    cycle = (t / period) % 1.0 if period > 0 else 0.0
+                    st["opacity"] = 1.0 - amp if cycle < 0.3 else 1.0
+                # _scale_to_canvas anchors its enlarged image at top-left.
+                # Center the extra pixels before applying intentional motion,
+                # so a pan or rotation does not reveal the black base canvas.
+                axis_x = st["scale"] * (st["sx"] if st["sx"] is not None else 1.0)
+                axis_y = st["scale"] * (st["sy"] if st["sy"] is not None else 1.0)
+                base_w = (min(W, H) if clip.role == "sticker" else W) * tr["scale"]
+                base_h = (min(W, H) if clip.role == "sticker" else H) * tr["scale"]
+                st["x"] -= round(base_w * (axis_x - 1.0) / 2.0)
+                st["y"] -= round(base_h * (axis_y - 1.0) / 2.0)
             elif eid.startswith("cutvoke.anim.combo"):   # 组合动画 / 组合运镜预设（E04/D04）
                 # primary/secondary 各自按 p 计算基础状态，然后合成：
-                # opacity/scale 相乘（两动画同时透明/缩放）、x/y/rot 相加（位移叠加）。
+                # opacity/scale/axis scale 相乘，x/y/rot 相加；翻牌保留横轴折叠。
                 # D04：预设效果（cutvoke.anim.comboXxx）复用同一合成逻辑，
                 # 仅把 primary/secondary 在 spec 里固化为预设值，内核零新增分支。
                 def _combo_base(sel: str, dist: float, fscale: float,
                                 toScale: float = 0.8) -> dict:
-                    s = {"opacity": 1.0, "scale": 1.0, "x": 0, "y": 0, "rot": 0.0}
+                    s = {"opacity": 1.0, "scale": 1.0, "sx": 1.0, "sy": 1.0,
+                         "x": 0, "y": 0, "rot": 0.0}
                     if sel == "fadeIn":
                         s["opacity"] = p
                     elif sel == "zoomIn":
                         s["scale"] = fscale + (1.0 - fscale) * p
                     elif sel == "zoomOut":
-                        s["scale"] = 1.0 + (toScale - 1.0) * p
+                        # A combination entrance must finish at its normal
+                        # transform. Pull back from a closer view instead of
+                        # shrinking below 1 and snapping back at the lane end.
+                        s["scale"] = 1.0 + (1.0 - toScale) * (1.0 - p)
                     elif sel == "slideIn":
                         s["x"] = int(-W * dist * (1.0 - p))
                     elif sel == "slideUp":
@@ -1996,7 +3278,8 @@ class RenderService:
                     elif sel == "rotateIn":
                         s["rot"] = float(params.get("fromAngle", -12.0)) * (1.0 - p)
                     elif sel == "flipIn":
-                        s["opacity"] = p
+                        s["sx"] = max(0.02, p)
+                        s["x"] = int(W * (1.0 - s["sx"]) / 2.0)
                     return s
                 pri = str(params.get("primary", "fadeIn"))
                 sec = str(params.get("secondary", "slideUp"))
@@ -2007,18 +3290,18 @@ class RenderService:
                         _combo_base(sec, dist, fscale, toScale))
                 st["opacity"] = a["opacity"] * b["opacity"]
                 st["scale"] = a["scale"] * b["scale"]
+                # Axis factors are relative to the uniform scale; the lane
+                # composer below multiplies that uniform factor exactly once.
+                st["sx"] = a["sx"] * b["sx"]
+                st["sy"] = a["sy"] * b["sy"]
                 st["x"] = a["x"] + b["x"]
                 st["y"] = a["y"] + b["y"]
                 st["rot"] = a["rot"] + b["rot"]
             return st
 
-        # 动画时序：入场在 [0,duration]、出场在 [dur-duration,dur]、循环贯穿整段
-        OUT_ANIMS = ("cutvoke.anim.fadeOut", "cutvoke.anim.zoomOut")
-        LOOP_ANIMS = ("cutvoke.anim.breathe", "cutvoke.anim.float",
-                      "cutvoke.anim.sway")
-        is_out = eid in OUT_ANIMS
-        is_loop = eid in LOOP_ANIMS
-        tr = clip.transform()
+        # Each lane contributes its own transform. Segment boundaries are the
+        # union of their frame-aligned sample points, so an exit animation no
+        # longer hides an entrance or loop animation on the same clip.
         sub_labels: list[str] = []
         boundaries: list[tuple[float, float, dict]] = []
 
@@ -2042,102 +3325,441 @@ class RenderService:
 
         rest = {"opacity": 1.0, "scale": 1.0, "sx": None, "sy": None,
                 "rot": 0.0, "x": 0, "y": 0}
+        total_frames = max(1, int(round(dur_f / frame_dur)))
+        cut_frames: set[int] = {0, total_frames}
+        keyframe_lanes = {
+            param: clip.keyframes.get(param, [])
+            for param in ("opacity", "x", "y", "scale", "rotation")
+        }
+        keyframe_lanes = {param: lane for param, lane in keyframe_lanes.items() if lane}
+        sample_step = 1
+        for keyframes in keyframe_lanes.values():
+            frames = sorted({
+                max(0, min(total_frames,
+                           int(round(float(kf.time.to_fraction()) / frame_dur))))
+                for kf in keyframes
+            })
+            cut_frames.update(frames)
+            # A smooth animation must update its composed keyframes every
+            # sequence frame, too; sparse samples visibly hold then jump.
+            for left, right in zip(frames, frames[1:]):
+                for frame in range(left + sample_step, right, sample_step):
+                    cut_frames.add(frame)
+        lanes: list[tuple[dict, str, float, float]] = []
+        for animation in animations:
+            slot = animation_slot(str(animation.get("effectId", ""))) or "入场"
+            params = animation.get("params", {}) or {}
+            duration = min(max(float(params.get("duration", 1.0)), 0.05), dur_f)
+            if slot == "循环":
+                edges = _frame_edges(dur_f, total_frames)
+                start_frame = 0
+            else:
+                edges = _frame_edges(duration, max(1, int(round(duration / frame_dur))))
+                animation_frames = min(total_frames, int(round(edges[-1] / frame_dur)))
+                start_frame = total_frames - animation_frames if slot == "出场" else 0
+            edge_frames = [min(total_frames, start_frame + int(round(edge / frame_dur)))
+                           for edge in edges]
+            cut_frames.update(edge_frames)
+            lane_start = start_frame * frame_dur
+            lane_duration = max(frame_dur, (edge_frames[-1] - start_frame) * frame_dur)
+            lanes.append((animation, slot, lane_start, lane_duration))
 
-        if is_loop:
-            # 循环动画：整段帧对齐切分，每段 6 帧（~0.2s @30fps）
-            edges = _frame_edges(dur_f, max(1, int(round(dur_f / (frame_dur * 6)))))
-            for a, b in zip(edges, edges[1:]):
-                if b <= a:
+        frame_points = sorted(cut_frames)
+        for left, right in zip(frame_points, frame_points[1:]):
+            if right <= left:
+                continue
+            a, b = left * frame_dur, right * frame_dur
+            mid = (a + b) / 2.0
+            state = dict(rest)
+            axis_x = axis_y = 1.0
+            has_axis = False
+            position = dict(tr["position"])
+            base_scale = tr["scale"]
+            base_rotation = tr["rotation"]
+            base_opacity = tr["opacity"]
+            for animation, slot, lane_start, lane_duration in lanes:
+                if slot == "循环":
+                    contribution = _state_at(animation, mid)
+                elif lane_start <= mid < lane_start + lane_duration:
+                    contribution = _state_at(animation, (mid - lane_start) / lane_duration)
+                else:
                     continue
-                boundaries.append((a, b, _state_at((a + b) / 2.0)))
-        elif is_out:
-            # 出场：前段静止，末段帧对齐插值
-            anim_end = min(duration, dur_f)
-            edges = _frame_edges(anim_end, max(2, min(20, int(anim_end / 0.1) + 1)))
-            start = dur_f - edges[-1]
-            if start > 1e-6:
-                boundaries.append((0.0, start, dict(rest)))
-            total = edges[-1]
-            for a, b in zip(edges, edges[1:]):
-                ma = a + (b - a) / 2.0
-                p = ma / total if total > 0 else 1.0
-                boundaries.append((start + a, start + b, _state_at(p)))
-        else:
-            # 入场：动画段在 [0,duration]，后段静止
-            anim_end = min(duration, dur_f)
-            edges = _frame_edges(anim_end, max(2, min(20, int(anim_end / 0.1) + 1)))
-            total = edges[-1]
-            for a, b in zip(edges, edges[1:]):
-                ma = a + (b - a) / 2.0
-                boundaries.append((a, b, _state_at(ma / total if total > 0 else 1.0)))
-            if total < dur_f - 1e-6:
-                boundaries.append((total, dur_f, dict(rest)))
+                state["opacity"] *= contribution["opacity"]
+                state["scale"] *= contribution["scale"]
+                state["x"] += contribution["x"]
+                state["y"] += contribution["y"]
+                state["rot"] += contribution["rot"]
+                if "reveal" in contribution:
+                    state["reveal"] = contribution["reveal"]
+                if contribution["sx"] is not None or contribution["sy"] is not None:
+                    has_axis = True
+                    axis_x *= contribution["sx"] if contribution["sx"] is not None else 1.0
+                    axis_y *= contribution["sy"] if contribution["sy"] is not None else 1.0
+            opacity_keyframes = keyframe_lanes.get("opacity", [])
+            if opacity_keyframes:
+                keyframed_opacity = kf_evaluate(
+                    opacity_keyframes, Rational.from_float(mid))
+                base_opacity = max(0.0, min(1.0, keyframed_opacity))
+            for param, keyframes in keyframe_lanes.items():
+                if param == "opacity":
+                    continue
+                value = kf_evaluate(keyframes, Rational.from_float(mid))
+                if param == "x":
+                    position["x"] = int(round(value))
+                elif param == "y":
+                    position["y"] = int(round(value))
+                elif param == "scale":
+                    base_scale = value
+                elif param == "rotation":
+                    base_rotation = value
+            if has_axis:
+                state["sx"] = state["scale"] * axis_x
+                state["sy"] = state["scale"] * axis_y
+            state["base_position"] = position
+            state["base_scale"] = base_scale
+            state["base_rotation"] = base_rotation
+            state["base_opacity"] = base_opacity
+            # Blink and zero-amplitude loops often have many identical frames.
+            # Keep source timing continuous but share their geometry context.
+            if boundaries and boundaries[-1][2] == state:
+                boundaries[-1] = (boundaries[-1][0], b, state)
+            else:
+                boundaries.append((a, b, state))
 
         speed = clip.speed
-        src_dur = float((clip.duration * _abs_rat(speed)).to_fraction())
+        curve = clip.speed_curve
+        src_dur = float(clip.consumed_source_duration.to_fraction())
         ss = float(clip.source_start.to_fraction())
         speed_f = float(speed.to_fraction())
-        for (a, b, st) in boundaries:
+        if curve is not None:
+            speed_expr = curve.video_setpts()
+        elif speed_f >= 0:
+            speed_expr = f"setpts=PTS/{speed_f}"
+        else:
+            abs_f = float(_abs_rat(speed).to_fraction())
+            speed_expr = f"reverse,setpts=N/FRAME_RATE/TB,setpts=PTS/{abs_f}"
+        chain = (f"[{get_input(clip.asset_ref.source_path)}:v]"
+                 f"trim=start={ss:.6f}:duration={src_dur:.6f},"
+                 f"setpts=PTS-STARTPTS,{speed_expr}")
+        chain += self._slow_motion_interpolation_filter(clip, fps_expr)
+        if (color["brightness"] != 0.0 or color["contrast"] != 1.0
+                or color["saturation"] != 1.0):
+            chain += (f",eq=brightness={color['brightness']:.6f}:"
+                      f"contrast={color['contrast']:.6f}:"
+                      f"saturation={color['saturation']:.6f}")
+        # Evaluate temporal filters once over the whole clip. Restarting tmix
+        # for each one-frame geometry segment erased trails; splitting a shared
+        # timeline stream also avoids duplicating source resampling per frame.
+        full = f"animsrc{vseg[0]}"; vseg[0] += 1
+        parts.append(f"{chain},fps={fps_expr},"
+                     f"tpad=stop_mode=clone:stop_duration={dur_f:.6f},"
+                     f"trim=end_frame={total_frames},setpts=N/FRAME_RATE/TB[{full}]")
+        if self._has_fx(clip):
+            full = self._apply_fx(clip, full, parts, vseg)
+        streaming = self._build_streaming_loop(
+            clip, animations, full, W, H, frame_dur, total_frames, parts, vseg)
+        if streaming is not None:
+            return streaming
+        if len(boundaries) > 64:
+            # One filter context per sampled frame can exceed 12 GiB for an
+            # eight-second 1080p layer. Keep the exact sampled state clock but
+            # evaluate its geometry in a single fixed-size alpha-bearing stream.
+            sampled_boundaries = boundaries
+            window = getattr(self._render_ctx, "window", None)
+            if window is not None:
+                local_start = window[0] - float(clip.timeline_start.to_fraction())
+                local_end = window[1] - float(clip.timeline_start.to_fraction())
+                sampled_boundaries = [(a,b,state) for a,b,state in boundaries
+                                      if b > local_start and a < local_end]
+                if not sampled_boundaries:
+                    sampled_boundaries = boundaries[-1:]
+            return self._build_sampled_animation_stream(
+                clip, seq, full, sampled_boundaries, W, H, frame_dur, total_frames,
+                parts, vseg, fps_expr)
+        segment_inputs = [f"animpart{vseg[0] + i}" for i in range(len(boundaries))]
+        vseg[0] += len(segment_inputs)
+        if len(segment_inputs) == 1:
+            parts.append(f"[{full}]null[{segment_inputs[0]}]")
+        else:
+            outputs = "".join(f"[{label}]" for label in segment_inputs)
+            parts.append(f"[{full}]split={len(segment_inputs)}{outputs}")
+        for segment_input, (a, b, st) in zip(segment_inputs, boundaries):
             sub_local = b - a
             if sub_local <= 0:
                 continue
-            sub_ss = ss + (a / dur_f) * src_dur if dur_f > 0 else ss
-            sub_src_dur = sub_local * (src_dur / dur_f) if dur_f > 0 else 0.0
-            seg = f"vseg{vseg[0]}"; vseg[0] += 1
-            if speed_f >= 0:
-                speed_expr = f"setpts=PTS/{speed_f}"
-            else:
-                abs_f = float(_abs_rat(speed).to_fraction())
-                speed_expr = (f"reverse,setpts=N/FRAME_RATE/TB,"
-                              f"setpts=PTS/{abs_f}")
-            chain = (f"[{get_input(clip.asset_ref.source_path)}:v]"
-                     f"trim=start={sub_ss:.6f}:duration={sub_src_dur:.6f},"
-                     f"setpts=PTS-STARTPTS,{speed_expr}")
-            if (color["brightness"] != 0.0 or color["contrast"] != 1.0
-                    or color["saturation"] != 1.0):
-                chain += (f",eq=brightness={color['brightness']:.6f}:"
-                          f"contrast={color['contrast']:.6f}:"
-                          f"saturation={color['saturation']:.6f}")
-            base = f"va{vseg[0]}"
-            vseg[0] += 1
-            parts.append(f"{chain}[{base}]")
-            # J01 效果栈：动画子段同样应用 fx（顺序/旁路一致）
-            cur = (self._apply_fx(clip, base, parts, vseg)
-                   if self._has_fx(clip) else base)
+            cur = f"va{vseg[0]}"; vseg[0] += 1
+            first_frame = int(round(a / frame_dur))
+            end_frame = int(round(b / frame_dur))
+            parts.append(f"[{segment_input}]trim=start_frame={first_frame}:"
+                         f"end_frame={end_frame},setpts=PTS-STARTPTS[{cur}]")
             sc = float(st.get("scale", 1.0))
             sx = st.get("sx")
             sy = st.get("sy")
-            sx = sc if sx is None else float(sx)
-            sy = sc if sy is None else float(sy)
-            cur = self._scale_to_canvas(cur, W, H, sx, sy, parts, vseg)
-            rot = float(st.get("rot", 0.0))
+            base_scale = float(st.get("base_scale", tr["scale"]))
+            sx = base_scale * (sc if sx is None else float(sx))
+            sy = base_scale * (sc if sy is None else float(sy))
+            cur = self._scale_to_canvas(cur, W, H, sx, sy, parts, vseg,
+                                        sticker=clip.role == "sticker")
+            if "reveal" in st:
+                direction, progress = st["reveal"]
+                unit = min(W, H) if clip.role == "sticker" else None
+                sw = max(1, round((unit or W) * sx))
+                sh = max(1, round((unit or H) * sy))
+                cw, ch, cx, cy = sw, sh, 0, 0
+                if direction in ("up", "down"):
+                    ch = max(1, min(sh, round(sh * progress)))
+                    cy = sh - ch if direction == "up" else 0
+                else:
+                    cw = max(1, min(sw, round(sw * progress)))
+                    cx = sw - cw if direction == "right" else 0
+                revealed = f"vreveal{vseg[0]}"; vseg[0] += 1
+                parts.append(
+                    f"[{cur}]format=rgba,crop={cw}:{ch}:{cx}:{cy}:exact=1,"
+                    f"pad={sw}:{sh}:{cx}:{cy}:color=black@0[{revealed}]")
+                cur = revealed
+            rot = float(st.get("base_rotation", tr["rotation"])) + float(st.get("rot", 0.0))
             if abs(rot) > 1e-6:
                 nxt = f"vr{vseg[0]}"; vseg[0] += 1
                 parts.append(
                     f"[{cur}]rotate={math.radians(rot):.6f}:"
-                    f"ow=iw:oh=ih:c=black[{nxt}]")
+                    f"ow=iw:oh=ih:c=none[{nxt}]")
                 cur = nxt
-            if st["opacity"] < 1.0:
+            opacity = float(st.get("base_opacity", tr["opacity"])) * st["opacity"]
+            if opacity < 1.0:
                 nxt = f"va{vseg[0]}"; vseg[0] += 1
                 parts.append(f"[{cur}]format=rgba,"
-                             f"colorchannelmixer=aa={st['opacity']:.6f}[{nxt}]")
+                             f"colorchannelmixer=aa={opacity:.6f}[{nxt}]")
                 cur = nxt
-            sub_labels.append(
-                self._composite_on_canvas(
-                    cur, clip, seq, parts, vseg, fps_expr, W, H,
-                    {"x": st["x"] + int(tr["position"]["x"]),
-                     "y": st["y"] + int(tr["position"]["y"])},
-                    sub_local))
+            canvas = self._composite_on_canvas(
+                cur, clip, seq, parts, vseg, fps_expr, W, H,
+                {"x": st["x"] + int(st.get("base_position", tr["position"])["x"]),
+                 "y": st["y"] + int(st.get("base_position", tr["position"])["y"])},
+                sub_local)
+            # A one-frame subsegment can lose its last frame when color/overlay
+            # rounds a decimal duration down. Give concat an exact frame count
+            # for every segment, including adjacent animation lane boundaries.
+            exact = f"cfix{vseg[0]}"; vseg[0] += 1
+            frame_count = int(round(sub_local / frame_dur))
+            timestamps = "(N+1)/FRAME_RATE/TB" if frame_count == 1 else "N/FRAME_RATE/TB"
+            parts.append(
+                f"[{canvas}]tpad=stop_mode=clone:stop_duration={sub_local:.6f},"
+                f"trim=end_frame={frame_count},"
+                f"setpts={timestamps}[{exact}]")
+            sub_labels.append(exact)
 
         if len(sub_labels) == 1:
-            return sub_labels[0]
+            out = f"canim{vseg[0]}"; vseg[0] += 1
+            parts.append(f"[{sub_labels[0]}]setpts=PTS-STARTPTS[{out}]")
+            return out
         ins = "".join(f"[{s}]" for s in sub_labels)
         out = f"canim{vseg[0]}"; vseg[0] += 1
-        parts.append(f"{ins}concat=n={len(sub_labels)}:v=1:a=0[{out}]")
+        parts.append(f"{ins}concat=n={len(sub_labels)}:v=1:a=0,"
+                     f"tpad=stop_mode=clone:stop_duration={frame_dur:.9f},"
+                     f"trim=end_frame={total_frames},"
+                     f"setpts=N/FRAME_RATE/TB[{out}]")
         return out
 
+    @staticmethod
+    def _sampled_state_expression(samples: list[tuple[int, float]], variable: str) -> str:
+        """A balanced decision tree selects a held frame state in O(log n).
+
+        Adjacent equal values collapse before building the expression. Unlike
+        a nested linear lookup, long clips do not exceed FFmpeg's expression
+        nesting limit or require scanning every preceding frame per pixel.
+        """
+        compact: list[tuple[int, float]] = []
+        for first, value in samples:
+            if not compact or value != compact[-1][1]:
+                compact.append((first, value))
+
+        def build(items: list[tuple[int, float]]) -> str:
+            if len(items) == 1:
+                return f"{items[0][1]:.9f}"
+            middle = len(items) // 2
+            return (f"if(lt({variable},{items[middle][0]}),"
+                    f"{build(items[:middle])},{build(items[middle:])})")
+
+        return build(compact)
+
+    def _build_sampled_animation_stream(
+            self, clip: Clip, seq: Sequence, source: str,
+            boundaries: list[tuple[float, float, dict]], W: int, H: int,
+            frame_dur: float, total_frames: int, parts: list[str],
+            vseg: list[int], fps_expr: str) -> str:
+        """Retain composed animation/FX/alpha semantics with bounded contexts.
+
+        Source trim, speed, interpolation and temporal FX have already run once
+        upstream. Only geometry and opacity are sampled here. Transparent source
+        padding prevents perspective's edge clamp from stretching source pixels
+        into uncovered canvas. A destination mask retains rotate's original
+        fixed scaled-image crop; reveal uses an upstream source alpha mask.
+        """
+        coordinates = [[] for _ in range(8)]
+        rectangle = [[] for _ in range(4)]
+        opacity_samples = []
+        reveal_samples = [[] for _ in range(4)]
+        needs_rectangle = False
+        needs_opacity = False
+        needs_reveal = False
+        unit = min(W, H) if clip.role == "sticker" else None
+        for a, _b, state in boundaries:
+            frame = int(round(a / frame_dur))
+            uniform = float(state["scale"])
+            base = float(state["base_scale"])
+            sx = base * (uniform if state["sx"] is None else float(state["sx"]))
+            sy = base * (uniform if state["sy"] is None else float(state["sy"]))
+            sw, sh = max(1, round((unit or W) * sx)), max(1, round((unit or H) * sy))
+            x = int(state["base_position"]["x"]) + state["x"]
+            y = int(state["base_position"]["y"]) + state["y"]
+            rotation = float(state["base_rotation"]) + float(state["rot"])
+            angle = float(f"{math.radians(rotation):.6f}") if abs(rotation) > 1e-6 else 0.0
+            cosine, sine = math.cos(angle), math.sin(angle)
+            for index, (px, py) in enumerate(((-2, -2), (W + 2, -2),
+                                              (-2, H + 2), (W + 2, H + 2))):
+                dx, dy = px * sw / W - sw / 2, py * sh / H - sh / 2
+                coordinates[index * 2].append((frame, x + sw / 2 + dx * cosine - dy * sine))
+                coordinates[index * 2 + 1].append((frame, y + sh / 2 + dx * sine + dy * cosine))
+            for lane, value in zip(rectangle, (x, x + sw - 1, y, y + sh - 1)):
+                lane.append((frame, value))
+            needs_rectangle |= x > 0 or y > 0 or x + sw < W or y + sh < H
+            opacity = float(state["base_opacity"]) * float(state["opacity"])
+            opacity_samples.append((frame, opacity))
+            needs_opacity |= opacity < 1
+            left, right, top, bottom = 0.0, 1.0, 0.0, 1.0
+            if "reveal" in state:
+                direction, progress = state["reveal"]
+                needs_reveal = True
+                if direction in ("up", "down"):
+                    fraction = max(1, min(sh, round(sh * progress))) / sh
+                    if direction == "up": top = 1 - fraction
+                    else: bottom = fraction
+                else:
+                    fraction = max(1, min(sw, round(sw * progress))) / sw
+                    if direction == "right": left = 1 - fraction
+                    else: right = fraction
+            for lane, value in zip(reveal_samples, (left, right, top, bottom)):
+                lane.append((frame, value))
+        cur = f"astreamsrc{vseg[0]}"; vseg[0] += 1
+        parts.append(f"[{source}]scale={W}:{H},setsar=1,format=yuva444p,"
+                     f"pad={W + 4}:{H + 4}:2:2:color=black@0[{cur}]")
+        if needs_reveal:
+            bounds = [self._sampled_state_expression(lane, "N") for lane in reveal_samples]
+            mask = (f"gte(X-2,({bounds[0]})*{W})*lt(X-2,({bounds[1]})*{W})*"
+                    f"gte(Y-2,({bounds[2]})*{H})*lt(Y-2,({bounds[3]})*{H})")
+            nxt = f"astreveal{vseg[0]}"; vseg[0] += 1
+            parts.append(f"[{cur}]geq=lum='p(X,Y)':cb='p(X,Y)':cr='p(X,Y)':"
+                         f"a='alpha(X,Y)*({mask})'[{nxt}]")
+            cur = nxt
+        geometry = [self._sampled_state_expression(lane, "in") for lane in coordinates]
+        options = ":".join(f"{'x' if i % 2 == 0 else 'y'}{i // 2}='{value}'"
+                           for i, value in enumerate(geometry))
+        nxt = f"astgeom{vseg[0]}"; vseg[0] += 1
+        parts.append(f"[{cur}]perspective={options}:sense=destination:eval=frame:"
+                     f"interpolation=linear,crop={W}:{H}:0:0[{nxt}]")
+        cur = nxt
+        if needs_rectangle or needs_opacity:
+            mask = self._sampled_state_expression(opacity_samples, "N")
+            if needs_rectangle:
+                bounds = [self._sampled_state_expression(lane, "N") for lane in rectangle]
+                mask += (f"*between(X,({bounds[0]}),({bounds[1]}))*"
+                         f"between(Y,({bounds[2]}),({bounds[3]}))")
+            nxt = f"astalpha{vseg[0]}"; vseg[0] += 1
+            parts.append(f"[{cur}]geq=lum='p(X,Y)':cb='p(X,Y)':cr='p(X,Y)':"
+                         f"a='alpha(X,Y)*({mask})'[{nxt}]")
+            cur = nxt
+        out = f"astout{vseg[0]}"; vseg[0] += 1
+        parts.append(f"[{cur}]trim=end_frame={total_frames},"
+                     f"setpts=N/FRAME_RATE/TB[{out}]")
+        return out
+
+    def _build_streaming_loop(self, clip: Clip, animations: list[dict],
+                              source: str, W: int, H: int, frame_dur: float,
+                              total_frames: int, parts: list[str],
+                              vseg: list[int]) -> Optional[str]:
+        """Use one fixed-size affine filter for an ordinary opaque loop.
+
+        Dynamic scale dimensions followed by rotate/overlay crash some FFmpeg
+        builds. Perspective keeps every frame W x H while sampling the same
+        loop trajectory at sequence-frame midpoints. Its one-pass interpolation
+        can differ slightly from the segmented scale-then-rotate path.
+
+        Preserve the general path for transparent/sticker/FX layers, keyframes
+        and combined lanes; those require clipping/alpha semantics beyond this
+        full-frame affine shortcut. Source speed and color remain upstream.
+        """
+        geometric = {"breathe", "float", "sway", "rock", "bounce", "orbit", "heartbeat"}
+        if (len(animations) != 1 or clip.role == "sticker" or clip.keyframes
+                or self._has_fx(clip) or getattr(self._render_ctx, "alpha", False)):
+            return None
+        animation = animations[0]
+        effect_id = str(animation.get("effectId", ""))
+        key = effect_id.removeprefix("cutvoke.anim.")
+        if not effect_id.startswith("cutvoke.anim.") or key not in geometric:
+            return None
+        transform = clip.transform()
+        if (transform["scale"] != 1.0 or transform["rotation"] != 0.0
+                or transform["opacity"] != 1.0
+                or transform["position"]["x"] != 0
+                or transform["position"]["y"] != 0):
+            return None
+        pixel_format = self.probe_media(clip.asset_ref.source_path).get("pix_fmt")
+        # A paletted image may carry palette alpha even though its format name
+        # contains no alpha marker. Keep unknown/transparent sources on the
+        # compositing path so transparent pixels expose lower tracks correctly.
+        if (not pixel_format or pixel_format == "pal8"
+                or _pix_fmt_has_alpha(pixel_format)):
+            return None
+        params = animation.get("params", {}) or {}
+        amplitude = float(params.get("amplitude", 0.03))
+        period = float(params.get("period", 2.0))
+        local_time = f"((in+0.5)*{frame_dur:.12f})"
+        phase = f"({local_time}*2*PI/{period:.12f})" if period > 0 else "0"
+        sine = f"sin({phase})"
+        constant_scale = f"{1 + 2.2 * amplitude:.12f}"
+        sx = sy = "1"
+        dx = dy = "0"
+        angle = "0"
+        if key == "breathe":
+            sx = sy = f"(1+{amplitude:.12f}*(1+{sine}))"
+        elif key in {"float", "sway", "orbit"}:
+            sx = sy = constant_scale
+            if key in {"sway", "orbit"}:
+                wave = f"cos({phase})" if key == "orbit" else sine
+                dx = f"trunc(W*{amplitude:.12f}*{wave})"
+            if key in {"float", "orbit"}:
+                dy = f"trunc(H*{amplitude:.12f}*{sine})"
+        elif key == "rock":
+            raw_angle = f"({min(12.0, amplitude * 100.0):.12f}*PI/180*{sine})"
+            angle = f"(round({raw_angle}*1000000)/1000000)"
+            sx = sy = (f"min(2.5,1/max(0.4,cos(abs({raw_angle}))-"
+                       f"{max(W / H, H / W):.12f}*sin(abs({raw_angle}))))")
+        elif key == "bounce":
+            lift = f"max(0,{sine})"
+            sx = f"({constant_scale}*if(lt({lift},0.1),{1 + amplitude:.12f},1))"
+            sy = f"({constant_scale}*if(lt({lift},0.1),{1 - amplitude * .6:.12f},1))"
+            dy = f"(-trunc(H*{amplitude:.12f}*{lift}))"
+        elif key == "heartbeat":
+            cycle = f"mod({local_time}/{period:.12f},1)" if period > 0 else "0"
+            first = f"exp(-pow(({cycle}-0.18)/0.065,2))"
+            second = f"exp(-pow(({cycle}-0.39)/0.075,2))"
+            sx = sy = f"(1+{amplitude:.12f}*({first}+0.7*{second}))"
+        coordinates = []
+        for index, (x, y) in enumerate((("0", "0"), ("W", "0"),
+                                        ("0", "H"), ("W", "H"))):
+            rx, ry = f"(({x})-W/2-({dx}))", f"(({y})-H/2-({dy}))"
+            xexpr = f"W/2+({rx}*cos({angle})+{ry}*sin({angle}))/({sx})"
+            yexpr = f"H/2+(-{rx}*sin({angle})+{ry}*cos({angle}))/({sy})"
+            coordinates.extend((f"x{index}='{xexpr}'", f"y{index}='{yexpr}'"))
+        output = f"loopstream{vseg[0]}"; vseg[0] += 1
+        parts.append(
+            f"[{source}]scale={W}:{H},setsar=1,perspective="
+            + ":".join(coordinates)
+            + f":sense=source:eval=frame:interpolation=linear,"
+              f"trim=end_frame={total_frames},setpts=N/FRAME_RATE/TB[{output}]")
+        return output
+
     def _trim_speed_color(self, clip: Clip, get_input, parts: list[str],
-                          vseg: list[int], color: dict) -> str:
+                          vseg: list[int], color: dict, fps_expr: str) -> str:
         """生成 trim + 变速（+ eq 调色）的源尺寸分段，返回 label。"""
         vi = get_input(clip.asset_ref.source_path)
         seg = f"vseg{vseg[0]}"
@@ -2146,7 +3768,9 @@ class RenderService:
         ss = float(clip.source_start.to_fraction())
         src_dur = float((clip.duration * _abs_rat(speed)).to_fraction())
         speed_f = float(speed.to_fraction())
-        if speed_f >= 0:
+        if clip.speed_curve is not None:
+            speed_expr = clip.speed_curve.video_setpts()
+        elif speed_f >= 0:
             speed_expr = f"setpts=PTS/{speed_f}"
         else:
             abs_f = float(_abs_rat(speed).to_fraction())
@@ -2154,6 +3778,7 @@ class RenderService:
                           f"setpts=PTS/{abs_f}")
         chain = (f"[{vi}:v]trim=start={ss}:duration={src_dur},"
                  f"setpts=PTS-STARTPTS,{speed_expr}")
+        chain += self._slow_motion_interpolation_filter(clip, fps_expr)
         if (color["brightness"] != 0.0 or color["contrast"] != 1.0
                 or color["saturation"] != 1.0):
             chain += (f",eq=brightness={color['brightness']:.6f}:"
@@ -2167,6 +3792,21 @@ class RenderService:
             return self._apply_fx(clip, mid, parts, vseg)
         parts.append(f"{chain}[{seg}]")
         return seg
+
+    def _slow_motion_interpolation_filter(self, clip: Clip, fps_expr: str) -> str:
+        mode = clip.frame_interpolation
+        if mode == "none":
+            return ""
+        if mode != "motion":
+            raise RenderError(f"unknown frame interpolation mode {mode!r}")
+        if clip.freeze_at is not None or not clip.has_slow_motion:
+            raise RenderError(
+                "motion frame interpolation requires a non-frozen clip with a speed interval below 1x")
+        if not _has_minterpolate(self.ffmpeg):
+            raise RenderError(
+                "this FFmpeg build does not include minterpolate; choose 'none' or configure an FFmpeg build with that filter")
+        return (f",minterpolate=fps={fps_expr}:mi_mode=mci:mc_mode=aobmc:"
+                "me_mode=bidir:vsbmc=1")
 
     # ------------------------------------------------------------------
     # J01 效果栈渲染：fx 画面滤镜（顺序 = 效果栈顺序，旁路 = enabled=False）
@@ -2184,7 +3824,7 @@ class RenderService:
             if not _is_effect_enabled(e):
                 continue
             eid = e.get("effectId", "")
-            if not (isinstance(eid, str) and eid.startswith("cutvoke.fx.")):
+            if not isinstance(eid, str):
                 continue
             if reg is None:
                 try:
@@ -2192,6 +3832,8 @@ class RenderService:
                 except Exception:
                     reg = None
             spec = reg.find(eid) if reg is not None else None
+            if not eid.startswith("cutvoke.fx.") and not (spec and spec.category == "fx"):
+                continue
             key = (str(spec.implementation.get("filter", ""))
                    if spec is not None
                    else eid.rsplit(".", 1)[-1])
@@ -2232,11 +3874,51 @@ class RenderService:
         return bool(self._enabled_fx(clip))
 
     def _apply_fx(self, clip: Clip, cur: str, parts: list[str],
-                  vseg: list[int]) -> str:
+                  vseg: list[int], time_offset: float = 0.0) -> str:
         """按效果栈顺序把片段上的 fx 滤镜接到标签 cur 上，返回末标签。"""
         for i, e in enumerate(self._enabled_fx(clip)):
             key, params = self._fx_key_params(e)
-            cur = self._fx_one(key, params, cur, parts, vseg, i)
+            effect_range = e.get("range")
+            if effect_range is None:
+                cur = self._fx_one(key, params, cur, parts, vseg, i)
+                continue
+            try:
+                start = Rational.from_json(**effect_range["start"])
+                end = Rational.from_json(**effect_range["end"])
+            except (KeyError, TypeError, ValueError, ZeroDivisionError) as exc:
+                raise RenderError(f"invalid temporal range for {e.get('effectId')}") from exc
+            if start < Rational.of(0) or end > clip.duration or start >= end:
+                raise RenderError(f"temporal range is outside clip {clip.id}")
+            if start == Rational.of(0) and end == clip.duration:
+                cur = self._fx_one(key, params, cur, parts, vseg, i)
+                continue
+
+            # Keep an unmodified branch beside the effected branch, then switch
+            # between them at the clip-local boundaries. This gives previews and
+            # exports the same frame-accurate interval without altering clip timing.
+            base = f"fxrange_base{vseg[0]}"
+            branch = f"fxrange_src{vseg[0]}"
+            parts.append(f"[{cur}]split=2[{base}][{branch}]")
+            processed = self._fx_one(key, params, branch, parts, vseg, i)
+            if key == "crop":
+                # crop changes frame dimensions. Scale only its active branch
+                # back to the unchanged branch dimensions before frame blending.
+                blend_base = f"fxrange_blend_base{vseg[0]}"
+                scale_ref = f"fxrange_scale_ref{vseg[0]}"
+                scaled = f"fxrange_crop_scaled{vseg[0]}"
+                parts.append(f"[{base}]split=2[{blend_base}][{scale_ref}]")
+                parts.append(
+                    f"[{processed}][{scale_ref}]scale=w=rw:h=rh[{scaled}]")
+                base, processed = blend_base, scaled
+            out = f"fxrange_out{vseg[0]}"
+            vseg[0] += 1
+            start_s = float(start.to_fraction())
+            end_s = float(end.to_fraction())
+            local_time = f"(T+{time_offset:.12f})"
+            expr = (f"if(gte({local_time},{start_s:.12f})*"
+                    f"lt({local_time},{end_s:.12f}),B,A)")
+            parts.append(f"[{base}][{processed}]blend=all_expr='{expr}':shortest=1[{out}]")
+            cur = out
         return cur
 
     def _fx_key_params(self, e: dict) -> tuple[str, dict]:
@@ -2262,8 +3944,12 @@ class RenderService:
     def _fx_one(self, key: str, params: dict, cur: str, parts: list[str],
                 vseg: list[int], idx: int) -> str:
         """应用单个滤镜：多流滤镜显式建图，其余内联续接。"""
+        if key == "person_halo":
+            return self._fx_person_halo(params, cur, parts, vseg, idx)
         if key in _FX_MULTI:
             return self._fx_glow(params, cur, parts, vseg, idx)
+        if key == "mask" and str(params.get("shape", "rect")) == "text":
+            return self._fx_text_mask(params, cur, parts, vseg)
         fn = _FX_STEPS.get(key)
         expr = fn(params) if fn is not None else key  # 表外键按字面滤镜表达式
         if not expr:
@@ -2273,9 +3959,54 @@ class RenderService:
         parts.append(f"[{cur}]{expr}[{nxt}]")
         return nxt
 
+    def _fx_text_mask(self, params: dict, cur: str,
+                      parts: list[str], vseg: list[int]) -> str:
+        """Render literal text to a grayscale matte and multiply source alpha."""
+        content = str(params.get("content", "文字"))
+        if not content.strip():
+            raise RenderError("文字蒙版内容不能为空")
+        if len(content) > 240:
+            raise RenderError("文字蒙版最多 240 个字符")
+        font_size = max(0.02, min(0.5, float(params.get("fontSize", 0.16))))
+        x = max(0.0, min(1.0, float(params.get("x", 0.15))))
+        y = max(0.0, min(1.0, float(params.get("y", 0.15))))
+        feather = max(0.0, min(0.5, float(params.get("feather", 0.05))))
+        invert = bool(params.get("invert", False))
+        try:
+            font_path = resolve_title_font("Noto Sans SC")
+        except CaptionFontError as error:
+            raise RenderError(f"无法准备文字蒙版字体: {error}") from error
+        font_path = font_path.replace("\\", "/").replace(":", "\\:")
+        font_path = font_path.replace("'", "\\'")
+        literal = _escape_drawtext(content)
+
+        stem = f"masktext{vseg[0]}"
+        vseg[0] += 1
+        source, matte, alpha_source = f"{stem}_src", f"{stem}_matte", f"{stem}_alpha_src"
+        original_alpha, mask, combined_alpha, output = (
+            f"{stem}_original_alpha", f"{stem}_mask", f"{stem}_combined", f"{stem}_out")
+        parts.append(f"[{cur}]format=rgba,split=3[{source}][{matte}][{alpha_source}]")
+        parts.append(f"[{alpha_source}]alphaextract[{original_alpha}]")
+
+        base_luma, glyph_color = ("255", "black") if invert else ("0", "white")
+        drawtext = (
+            f"drawtext=fontfile='{font_path}':text='{literal}':expansion=none:"
+            f"fontsize=h*{font_size:.6f}:fontcolor={glyph_color}:"
+            f"x=w*{x:.6f}:y=h*{y:.6f}")
+        sigma = font_size * feather * float(getattr(self._render_ctx, "canvas_height", 1080))
+        blur = f",gblur=sigma={max(0.1, sigma):.3f}:steps=2" if feather > 0 else ""
+        parts.append(
+            f"[{matte}]format=gray,geq=lum='{base_luma}',{drawtext}{blur},"
+            f"format=gray[{mask}]")
+        parts.append(
+            f"[{original_alpha}][{mask}]blend=all_expr='A*B/255':shortest=1"
+            f"[{combined_alpha}]")
+        parts.append(f"[{source}][{combined_alpha}]alphamerge[{output}]")
+        return output
+
     def _fx_glow(self, params: dict, cur: str, parts: list[str],
                  vseg: list[int], idx: int) -> str:
-        """发光：原图与模糊图以 screen 模式叠加（需要 split 多流建图）。"""
+        """Screen-blend RGB light without screening YUV chroma or source alpha."""
         intensity = float(params.get("intensity", 1.0))
         a = f"vga{idx}_{vseg[0]}"
         vseg[0] += 1
@@ -2285,10 +4016,50 @@ class RenderService:
         vseg[0] += 1
         out = f"vgo{idx}_{vseg[0]}"
         vseg[0] += 1
-        parts.append(f"[{cur}]split=2[{a}][{b}]")
+        # Screen on YUV U/V raises the chroma planes and turns a monochrome
+        # glow magenta. Work in planar RGB; keep the original alpha component.
+        parts.append(f"[{cur}]format=gbrap,split=2[{a}][{b}]")
         parts.append(f"[{b}]gblur=sigma=12[{blurred}]")
-        parts.append(f"[{a}][{blurred}]blend=all_mode=screen:"
-                     f"all_opacity={max(0.05, min(1.0, intensity / 2.0)):.3f}[{out}]")
+        opacity = max(0.05, min(1.0, intensity / 2.0))
+        parts.append(
+            f"[{a}][{blurred}]blend=c0_mode=screen:c1_mode=screen:"
+            f"c2_mode=screen:c3_mode=normal:c0_opacity={opacity:.3f}:"
+            f"c1_opacity={opacity:.3f}:c2_opacity={opacity:.3f}[{out}]")
+        return out
+
+    def _fx_person_halo(self, params: dict, cur: str, parts: list[str],
+                        vseg: list[int], idx: int) -> str:
+        """Blur a transparent cutout below itself to create a colored silhouette halo."""
+        sigma = max(2.0, min(28.0, float(params.get("sigma", 9.0))))
+        hue = max(-180.0, min(180.0, float(params.get("hueShift", 30.0))))
+        saturation = max(0.0, min(2.0, float(params.get("saturation", 1.0))))
+        opacity = max(0.1, min(1.0, float(params.get("opacity", 0.75))))
+        base = f"phb{idx}_{vseg[0]}"
+        vseg[0] += 1
+        source = f"phs{idx}_{vseg[0]}"
+        vseg[0] += 1
+        alpha = f"pha{idx}_{vseg[0]}"
+        vseg[0] += 1
+        matte = f"phm{idx}_{vseg[0]}"
+        vseg[0] += 1
+        colored = f"phc{idx}_{vseg[0]}"
+        vseg[0] += 1
+        halo_alpha = f"phx{idx}_{vseg[0]}"
+        vseg[0] += 1
+        halo = f"phh{idx}_{vseg[0]}"
+        vseg[0] += 1
+        out = f"pho{idx}_{vseg[0]}"
+        vseg[0] += 1
+        parts.append(f"[{cur}]format=gbrap,split=3[{base}][{source}][{alpha}]")
+        parts.append(
+            f"[{alpha}]alphaextract,gblur=sigma={sigma:.3f}:steps=2,format=gray[{matte}]")
+        parts.append(
+            f"[{source}]lutrgb=r=255:g=0:b=0,hue=h={hue:.3f}:s={saturation:.3f},"
+            f"format=gbrap[{colored}]")
+        parts.append(f"[{colored}][{matte}]alphamerge=shortest=1[{halo_alpha}]")
+        parts.append(f"[{halo_alpha}]colorchannelmixer=aa={opacity:.3f}[{halo}]")
+        parts.append(
+            f"[{halo}][{base}]overlay=eof_action=pass:shortest=1:format=auto[{out}]")
         return out
 
     def _composite_on_canvas(self, src_label: str, clip: Clip, seq: Sequence,
@@ -2317,9 +4088,11 @@ class RenderService:
                 f"color=c=black:s={W}x{H}:r={fps_expr}:d={dur:.6f}[{bg}]")
         out = f"cv{vseg[0]}"
         vseg[0] += 1
-        # format=auto：跟随画布 alpha 格式，透明导出时不要把 alpha 压掉
+        # 源帧率低于工程帧率时，动画子段可能只有一帧输入而有两帧画布。
+        # 保持该子段末帧至画布结束，避免 eof_action=pass 在边界闪出黑帧。
+        # format=auto：跟随画布 alpha 格式，透明导出时不要把 alpha 压掉。
         parts.append(
-            f"[{bg}][{src_label}]overlay=shortest=0:eof_action=pass:"
+            f"[{bg}][{src_label}]overlay=shortest=0:eof_action=repeat:"
             f"format=auto:x={x}:y={y}[{out}]")
         # 统一帧率，保证 xfade/concat 尺寸与 tb 一致
         fin = f"cf{vseg[0]}"
@@ -2343,13 +4116,14 @@ class RenderService:
         dur_f = float(dur.to_fraction())
         src_dur = float((dur * _abs_rat(speed)).to_fraction())
         ss = float(clip.source_start.to_fraction())
+        curve = clip.speed_curve
 
         if float(speed.to_fraction()) < 0:
             # 倒放 + 透明度关键帧：当前退化为整体中点常数透明度
             op = kf_evaluate(kfs, dur / 2)
-            base = self._trim_speed_color(clip, get_input, parts, vseg, color)
+            base = self._trim_speed_color(clip, get_input, parts, vseg, color, fps_expr)
             cur = self._scale_to_canvas(base, W, H, tr["scale"], tr["scale"],
-                                        parts, vseg)
+                                        parts, vseg, sticker=clip.role == "sticker")
             if op < 1.0:
                 nxt = f"va{vseg[0]}"; vseg[0] += 1
                 parts.append(f"[{cur}]format=rgba,colorchannelmixer=aa={op:.6f}[{nxt}]")
@@ -2366,24 +4140,32 @@ class RenderService:
             # 子段局部时长
             sub_local = float((b_t - a_t).to_fraction())
             # 子段源窗（线性映射，speed>=0）
-            sub_ss = ss + float((a_t.to_fraction() / dur_f)) * src_dur
-            sub_src_dur = sub_local * (src_dur / dur_f) if dur_f > 0 else 0.0
+            if curve is not None:
+                source_a = curve.source_at_timeline(float(a_t.to_fraction()))
+                source_b = curve.source_at_timeline(float(b_t.to_fraction()))
+                sub_ss = ss + source_a
+                sub_src_dur = source_b - source_a
+                speed_expr = curve.slice(source_a, source_b).video_setpts()
+            else:
+                sub_ss = ss + float((a_t.to_fraction() / dur_f)) * src_dur
+                sub_src_dur = sub_local * (src_dur / dur_f) if dur_f > 0 else 0.0
+                speed_f = float(speed.to_fraction())
+                if speed_f >= 0:
+                    speed_expr = f"setpts=PTS/{speed_f}"
+                else:
+                    abs_f = float(_abs_rat(speed).to_fraction())
+                    speed_expr = (f"reverse,setpts=N/FRAME_RATE/TB,"
+                                  f"setpts=PTS/{abs_f}")
             # 子段常数透明度 = 中点求值
             mid = a_t + (b_t - a_t) * Rational.of(1, 2)
             op = float(kf_evaluate(kfs, mid))
             # 生成该子段的 trim 源窗
             seg = f"vseg{vseg[0]}"
             vseg[0] += 1
-            speed_f = float(speed.to_fraction())
-            if speed_f >= 0:
-                speed_expr = f"setpts=PTS/{speed_f}"
-            else:
-                abs_f = float(_abs_rat(speed).to_fraction())
-                speed_expr = (f"reverse,setpts=N/FRAME_RATE/TB,"
-                              f"setpts=PTS/{abs_f}")
             chain = (f"[{get_input(clip.asset_ref.source_path)}:v]"
                      f"trim=start={sub_ss:.6f}:duration={sub_src_dur:.6f},"
                      f"setpts=PTS-STARTPTS,{speed_expr}")
+            chain += self._slow_motion_interpolation_filter(clip, fps_expr)
             if (color["brightness"] != 0.0 or color["contrast"] != 1.0
                     or color["saturation"] != 1.0):
                 chain += (f",eq=brightness={color['brightness']:.6f}:"
@@ -2392,7 +4174,7 @@ class RenderService:
             chain += f"[{seg}]"
             parts.append(chain)
             cur = self._scale_to_canvas(seg, W, H, tr["scale"], tr["scale"],
-                                        parts, vseg)
+                                        parts, vseg, sticker=clip.role == "sticker")
             if op < 1.0:
                 nxt = f"va{vseg[0]}"; vseg[0] += 1
                 parts.append(f"[{cur}]format=rgba,colorchannelmixer=aa={op:.6f}[{nxt}]")
@@ -2430,7 +4212,7 @@ class RenderService:
         cmd = [
             self.ffprobe, "-v", "error",
             "-show_entries", "format=duration,format_name",
-            "-show_entries", "stream=codec_type,width,height,pix_fmt",
+            "-show_entries", "stream=codec_type,width,height,pix_fmt,duration",
             "-of", "json", src,
         ]
         try:
@@ -2465,8 +4247,13 @@ class RenderService:
         if duration is None:
             # 最后手段：ffprobe 无时长则用 ffmpeg -t 试探不可靠，标记未知
             duration = 0.0
+        try:
+            video_duration = float(v.get("duration") or duration or 0.0) if v else 0.0
+        except (TypeError, ValueError):
+            video_duration = float(duration or 0.0)
         return {
             "duration": duration,
+            "video_duration": video_duration,
             "width": int(v.get("width", 0)) if v else 0,
             "height": int(v.get("height", 0)) if v else 0,
             "has_video": v is not None,
@@ -2508,6 +4295,27 @@ class RenderService:
             raise RenderError(f"thumbnail failed on {src!r}: {r.stderr[-400:]}")
         return out_png
 
+    def waveform_media(self, src: str, out_png: str, *, width: int = 320,
+                       timeout: float = 60.0) -> str:
+        """Decode an audio asset into a compact, full-duration waveform PNG."""
+        if not os.path.isfile(src):
+            raise RenderError(f"waveform: source file not found: {src!r}")
+        width = max(160, min(960, int(width)))
+        cmd = [self.ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
+               "-i", src, "-filter_complex",
+               f"[0:a:0]aformat=channel_layouts=mono,"
+               f"showwavespic=s={width}x48:colors=0x58dcc7[wave]",
+               "-map", "[wave]", "-frames:v", "1", out_png]
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True,
+                                    encoding="utf-8", errors="replace",
+                                    timeout=timeout)
+        except subprocess.TimeoutExpired as error:
+            raise RenderError(f"waveform timed out on {src!r}") from error
+        if result.returncode != 0 or not os.path.isfile(out_png):
+            raise RenderError(f"waveform failed on {src!r}: {result.stderr[-400:]}")
+        return out_png
+
     def _has_audio_stream(self, src: str) -> bool:
         cmd = [
             self.ffprobe, "-v", "error",
@@ -2542,7 +4350,9 @@ class RenderService:
                     alpha: bool = False,
                     color_chain: str = "",
                     output_start: Optional[float] = None,
-                    output_duration: Optional[float] = None) -> None:
+                    output_duration: Optional[float] = None,
+                    preview_source_duration: Optional[float] = None,
+                    lossless: bool = False, concat_input: bool = False) -> None:
         preset = QUALITY_PRESETS.get(quality)
         if preset is None:
             raise RenderError(f"unknown quality preset: {quality!r} "
@@ -2555,9 +4365,18 @@ class RenderService:
             graph = f"{graph};[outv]{color_chain}[outvcm]"
             out_label = "[outvcm]"
 
-        cmd: list[str] = [self.ffmpeg, "-y"]
+        # This is a background worker, not an interactive terminal command.
+        # Inherited stdin can stop processing while other tools use its parent
+        # session; never let FFmpeg consume that session's input.
+        # Bound per-input decoder and filter pools. On many-core Windows hosts,
+        # auto-sized pools for every clip can exhaust memory during preparation.
+        cmd: list[str] = [self.ffmpeg, "-y", "-nostdin",
+                          "-filter_complex_threads", "2", "-filter_threads", "2"]
         for src in input_paths:
-            if _is_image_src(src):
+            cmd += ["-threads", "2"]
+            if concat_input:
+                cmd += ["-f", "concat", "-safe", "0", "-i", src]
+            elif _is_image_src(src):
                 # 静态图片：-loop 1 无限循环 + 显式帧率，使单帧源能作为
                 # 有持续时间的片段参与时间线（1.5-A 图片素材，F03/F07）。
                 fps_rat = seq.fps.to_fraction()
@@ -2566,21 +4385,53 @@ class RenderService:
             else:
                 cmd += ["-i", src]
 
+        filter_args = ["-filter_complex", graph]
+        filter_script_path: Optional[str] = None
+        graph_command_length = len(graph.encode("utf-16-le")) // 2
+        if graph_command_length > _FILTER_COMPLEX_INLINE_LIMIT:
+            script_fd, filter_script_path = tempfile.mkstemp(
+                prefix="cutvoke-filter-", suffix=".ffgraph",
+                dir=caption_cwd if caption_cwd else None)
+            try:
+                with os.fdopen(script_fd, "w", encoding="utf-8", newline="") as script:
+                    script.write(graph)
+            except BaseException:
+                with contextlib.suppress(OSError):
+                    os.remove(filter_script_path)
+                raise
+            filter_args = [
+                _filter_complex_file_option(self.ffmpeg), filter_script_path]
+
         ext = os.path.splitext(out_path)[1].lower()
-        if alpha:
-            # V05：ProRes 4444（剪辑软件交接透明素材的通用口径）。
-            # 容器白名单已在 render() 入口收敛，这里只可能有 .mov。
-            cmd += ["-filter_complex", graph, "-map", "[outv]",
-                    "-c:v", "prores_ks", "-profile:v", "4",
-                    "-pix_fmt", "yuva444p10le"]
+        if lossless:
+            cmd += [*filter_args, "-map", "[outv]", "-c:v", "ffv1", "-level", "3",
+                    "-threads", "2", "-pix_fmt", "yuva444p" if alpha else "yuv420p"]
             if has_audio:
                 cmd += ["-map", "[outa]", "-c:a", "pcm_s16le"]
+            if output_start is not None:
+                cmd += ["-ss", f"{output_start:.6f}"]
+            if output_duration is not None:
+                cmd += ["-t", f"{output_duration:.6f}"]
+            cmd += [out_path]
+        elif alpha:
+            # V05：ProRes 4444（剪辑软件交接透明素材的通用口径）。
+            # 容器白名单已在 render() 入口收敛，这里只可能有 .mov。
+            cmd += [*filter_args, "-map", "[outv]",
+                    "-c:v", "prores_ks", "-profile:v", "4",
+                    "-pix_fmt", "yuva444p10le", "-threads", "4"]
+            if has_audio:
+                cmd += ["-map", "[outa]", "-c:a", "pcm_s16le"]
+            if output_start is not None:
+                cmd += ["-ss", f"{output_start:.6f}"]
+            if output_duration is not None:
+                cmd += ["-t", f"{output_duration:.6f}"]
             cmd += [out_path]
         else:
             cmd += [
-                "-filter_complex", graph,
+                *filter_args,
                 "-map", out_label,
                 "-c:v", "libx264", "-pix_fmt", "yuv420p",
+                "-threads", "4",
             ]
             # V01 导出预设：给 video_bitrate_kbps 用 -b:v 目标码率，否则走 crf 画质档
             if video_bitrate_kbps:
@@ -2598,26 +4449,75 @@ class RenderService:
             cmd += ["-movflags", "+faststart", out_path]
 
         # 取消支持：用 Popen + 看门狗线程，在 cancel_event 置位时终止 ffmpeg
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                cwd=caption_cwd if caption_cwd else None)
-        watcher = None
-        if cancel_event is not None:
-            def _watch() -> None:
-                while proc.poll() is None:
-                    if cancel_event.is_set():
-                        try:
+        try:
+            self._render_ctx.window_retry_count = 0
+            self._render_ctx.window_recovery_mode = None
+            for attempt in range(2 if output_duration is not None else 1):
+                proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL,
+                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                        cwd=caption_cwd if caption_cwd else None)
+                watcher = None
+                if cancel_event is not None:
+                    def _watch() -> None:
+                        while proc.poll() is None:
+                            if cancel_event.is_set():
+                                with contextlib.suppress(OSError):
+                                    proc.terminate()
+                                return
+                            cancel_event.wait(0.2)
+                    watcher = threading.Thread(target=_watch, daemon=True)
+                    watcher.start()
+                cpu = _process_cpu_seconds(proc) if output_duration is not None else None
+                previous_size = 0
+                idle_since = time.monotonic()
+                stalled = False
+                while True:
+                    try:
+                        stdout, stderr = proc.communicate(timeout=2 if cpu is not None else None)
+                        break
+                    except subprocess.TimeoutExpired:
+                        current_cpu = _process_cpu_seconds(proc)
+                        current_size = os.path.getsize(out_path) if os.path.isfile(out_path) else 0
+                        if current_cpu is None:
+                            cpu = None
+                            continue
+                        if current_cpu - cpu > 0.05 or current_size != previous_size:
+                            idle_since = time.monotonic()
+                        cpu, previous_size = current_cpu, current_size
+                        if time.monotonic() - idle_since >= _PREVIEW_IDLE_SECONDS:
+                            # Observed FFmpeg 9.0.1 windows can stop at frame=0
+                            # indefinitely. Retry the same immutable graph once
+                            # only when both CPU work and file growth stop.
                             proc.terminate()
-                        except OSError:
-                            pass
-                        return
-                    cancel_event.wait(0.2)
-            watcher = threading.Thread(target=_watch, daemon=True)
-            watcher.start()
-
-        stdout, stderr = proc.communicate()
-        if watcher is not None:
-            watcher.join(timeout=5)
+                            stdout, stderr = proc.communicate(timeout=5)
+                            stalled = True
+                            break
+                if watcher is not None:
+                    watcher.join(timeout=5)
+                if cancel_event is not None and cancel_event.is_set():
+                    break
+                if not stalled:
+                    break
+                if (attempt == 0 and not alpha and cancel_event is None
+                        and preview_source_duration is not None
+                        and preview_source_duration <= 8):
+                    # Short complex graphs with looping images can stall when
+                    # FFmpeg stops them mid-stream. Render the finite graph to
+                    # a lossless intermediate, then seek a single media input.
+                    # Keep this bounded to short previews, never full projects.
+                    self._render_ctx.window_retry_count = 1
+                    self._recover_preview_window(cmd, out_path, preset, has_audio,
+                                                 caption_cwd, output_start or 0,
+                                                 output_duration)
+                    self._render_ctx.window_recovery_mode = "finite-intermediate"
+                    return
+                if attempt == 1:
+                    raise RenderError("preview encoder stopped making progress after one retry")
+                self._render_ctx.window_retry_count = 1
+        finally:
+            if filter_script_path:
+                with contextlib.suppress(OSError):
+                    os.remove(filter_script_path)
 
         if cancel_event is not None and cancel_event.is_set():
             raise RenderCancelled("render cancelled before completion")
@@ -2625,6 +4525,42 @@ class RenderService:
             tail = (stderr or b"").decode("utf-8", "replace")[-1500:]
             raise RenderError(
                 f"ffmpeg exited with code {proc.returncode}\n{tail}")
+
+    def _recover_preview_window(self, cmd: list[str], out_path: str,
+                                preset: dict[str, str], has_audio: bool,
+                                caption_cwd: Optional[str], start: float,
+                                duration: float) -> None:
+        """Recover a stalled short preview without changing its effect clock."""
+        intermediate = out_path + ".recovery.mkv"
+        # All inputs and the compiled graph precede the first output mapping.
+        # Reuse them, including caption cwd and export color management.
+        first_map = cmd.index("-map")
+        full_cmd = cmd[:first_map] + [
+            "-map", cmd[first_map + 1], "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            "-crf", "0", "-preset", "veryfast"]
+        if has_audio:
+            full_cmd += ["-map", "[outa]", "-c:a", "flac"]
+        full_cmd += [intermediate]
+        cut_cmd = [self.ffmpeg, "-y", "-nostdin", "-ss", f"{start:.6f}",
+                   "-i", intermediate, "-t", f"{duration:.6f}",
+                   "-map", "0:v:0", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+                   "-crf", preset["crf"], "-preset", preset["preset"]]
+        if has_audio:
+            cut_cmd += ["-map", "0:a:0", "-c:a", "aac", "-b:a", "192k"]
+        cut_cmd += ["-movflags", "+faststart", out_path]
+        try:
+            for command in (full_cmd, cut_cmd):
+                result = subprocess.run(command, stdin=subprocess.DEVNULL,
+                                        capture_output=True, cwd=caption_cwd,
+                                        timeout=180)
+                if result.returncode:
+                    tail = result.stderr.decode("utf-8", "replace")[-1500:]
+                    raise RenderError(f"preview recovery failed: {tail}")
+        except subprocess.TimeoutExpired as exc:
+            raise RenderError("preview recovery timed out") from exc
+        finally:
+            with contextlib.suppress(OSError):
+                os.remove(intermediate)
 
     # ------------------------------------------------------------------
     # ffprobe 验证真实可解码 + 时长/尺寸正确

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_impact_gold",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "bd0ef7dd70ebc7a1b232e5c37ce45348fb10115f072a7359680611aafd2668ad",
+  "previewSha256": "79a773ec064bd8ec13bc4ae0d66f7eb5a3083f8ad8a6191c4dd875c3773888d3",
+  "preview": "fxoverlay_pixel_impact_gold.mp4",
+  "bytes": 12388,
+  "visiblePixels": 7778,
+  "changedPixels": 0,
+  "motionVisible": false
+}

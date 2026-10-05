@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_motion_arc",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项比对透明原图、浅色/深色合成底图与实际渲染器样片，检查造型辨识、格线串入、边缘裁切、透明通道和背景对比；本次不代表复杂实拍素材的商业观感验收。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿，单独复审，原批次记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另于 2026-09-24 对 3 个低对比漫画候选替换高对比图稿并复审，原 13 项记录保存在 visual-decisions-pre-contrast-v2-20260924.json。；另纳入 2026-09-24 的 2×2 高对比图集审核记录。",
+  "observation": "青蓝、金黄和暖白三条速度弧连续清楚，深浅底均能分辨，细线无跨格残留。",
+  "sourceSha256": "e4da0169c4add10c6cd90a690a9bb59c4affa269c52780d40974ba5f2460a59a",
+  "previewSha256": "6f712fc7a13de207fa06280b3130118b71bf493a7470699619d9be81fd959cd4",
+  "auditSha256": "6e7ea9b2a940aa563aa8f243c4f27889d54603d3296f888e758663a56982fb4a"
+}

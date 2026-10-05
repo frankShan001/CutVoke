@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.diagblurup",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.593,
+  "exportSha256": "fcc1c3a6a2c251e668a5d25b4577f41dc59ed52f40da8c5ea77346836ca32e2e",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "fcc1c3a6a2c251e668a5d25b4577f41dc59ed52f40da8c5ea77346836ca32e2e",
+  "auditExport": "transition-diagblurup-v1-0-0.audit.mp4"
+}

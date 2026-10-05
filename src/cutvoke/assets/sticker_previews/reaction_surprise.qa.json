@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_surprise",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "960da5cb15bfa22f0d51c651ddd0e885c7c3be504cff328a7c8a23ee41bd3640",
+  "previewSha256": "cc8f14c71d2bf7a1d2ca4698554b517c7f455286ff9a14091b86735406cb083f",
+  "preview": "reaction_surprise.mp4",
+  "bytes": 4559,
+  "visiblePixels": 2199,
+  "changedPixels": 0,
+  "motionVisible": false
+}

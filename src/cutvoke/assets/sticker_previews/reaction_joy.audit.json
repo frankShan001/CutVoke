@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_joy",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "f6d189896766a658ca25c42cb0ca7d44952e593ecc70e261aa068cf3164a46fe",
+  "previewSha256": "3858ad55a7202930e8988eb95e4ea400fc91d67f0b373040c4a1d95de0e8f178",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4053,
+  "visiblePixels": 3201,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3048,
+    "steady_entry": 3201,
+    "steady_exit": 3201,
+    "exit": 3047
+  },
+  "previewExportMeanRgbDifferences": [
+    0.482,
+    0.478
+  ],
+  "auditExport": "reaction_joy.audit.mp4",
+  "auditExportSha256": "301560a99f575e7a70329126ec1f5a58e71712da0e0b874d619cd373306145ba"
+}

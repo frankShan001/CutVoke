@@ -1,0 +1,25 @@
+{
+  "presetId": "cutvoke.preset.transition.vuwind",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.vuwind",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 98.577,
+  "maxSampledMeanRgbDifference": 98.577,
+  "coverSha256": "88bf8f7213ce93872cf57f90e2b2ca6d519adffac287fbd8cc73b631904d4920",
+  "previewSha256": "d0e6d7aa7eb3fdff496a7cd474fde9526038b0b4181f1515775e5c3f49d8ea9e",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_focus_brackets_lime",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "1435b7b45785150e85834ed9e5663c1ec58ecb80af0c5c0c79b6725bbc83640b",
+  "previewSha256": "6218f2828be4f7aec9324e1659664eb9bcc675dc81d7a3b2c4ad7f35745602ec",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1224,
+  "visiblePixels": 746,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 468,
+    "steady_entry": 746,
+    "steady_exit": 746,
+    "exit": 468
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_focus_brackets_lime.audit.mp4",
+  "auditExportSha256": "f1f8c73787824b8292747c1104bbedcdbb212e2d42be807b310c10bed6c3cf37"
+}

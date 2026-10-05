@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_fireworks",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "烟花射线与外围星点完整，缩小显示仍可辨认。",
+  "sourceSha256": "df45368ca177de8134389041011b17fbb78cfbc333212506eb2eba5082b1f22f",
+  "previewSha256": "c5b24680185c49e04e287045422ec6d4a6a969648e604774e4a5d10cbe45c7ce",
+  "auditSha256": "7a1f97d759ba2f39da5816f7d8842ee8875fc2ad68787653f0af92f869c341bd"
+}

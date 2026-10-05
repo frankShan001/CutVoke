@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.pet_carrier",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1d4a8dabc21e660f088e3da8469dafaf03e041aa40f0ba23902d70afa93955fe",
+  "previewSha256": "64d326e94e8c6be5560f3cc1fe12f79a1e14fc9a8ddb929c604d5881cabd3588",
+  "preview": "pet_carrier.mp4",
+  "bytes": 4499,
+  "visiblePixels": 2769,
+  "changedPixels": 0,
+  "motionVisible": false
+}

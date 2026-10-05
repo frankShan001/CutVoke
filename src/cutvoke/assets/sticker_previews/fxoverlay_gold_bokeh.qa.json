@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_gold_bokeh",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "9a00da6bcea2cd8aff90f1b84b8038e6689b96546d42630f55fb09d7bfa9dbe8",
+  "previewSha256": "19fe109d0b4846a76057d23107e49e53ca6d7b668b17762ea4ff643f19af55c3",
+  "preview": "fxoverlay_gold_bokeh.mp4",
+  "bytes": 9494,
+  "visiblePixels": 4041,
+  "changedPixels": 0,
+  "motionVisible": false
+}

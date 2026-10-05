@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.reveal",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.reveal",
+  "params": {
+    "duration": 1.0,
+    "direction": "left",
+    "easing": "ease-out"
+  },
+  "subcategory": "入场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "从左向右裁切揭开，圆形门洞保持原比例，未把整幅图横向挤压；遮罩边界连续移动。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "41b4b479c8c41b2aa4654a4472cf5c6df8f06c4494f69558e9c5828620313a46",
+  "motionPreviewSha256": "d3527727aa9798b9295d118274317a2580d758364c41632e5fedddb6ac7e06cf",
+  "auditSha256": "c56c543351adf53881c68758151c95a1b3f3b15ca34532a2434879bed482af94",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_reveal.png",
+  "libraryReviewSheetSha256": "b0ae777ed520f089ce585c4c86c06ebc9f13223c016ec2165181e8fed5703938"
+}

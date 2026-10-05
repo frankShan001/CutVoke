@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_selection_box",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c652e1c198d686babd1672c7c21d452b00c65fe329bb868f957b078c6bb3f0a6",
+  "previewSha256": "44fcd292ae2464d190ba3535ebc011ebefbc39bb1521551007b2887bf4ba8ef6",
+  "preview": "guide_selection_box.mp4",
+  "bytes": 4354,
+  "visiblePixels": 1209,
+  "changedPixels": 0,
+  "motionVisible": false
+}

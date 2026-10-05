@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_suitcase",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "行李箱把手、箱体、标签与滚轮完整，配色和深色轮廓清晰。",
+  "sourceSha256": "21998d2b64393c3de888945bda2f8425727cf6dca7c4e52e95d56b30307495c5",
+  "previewSha256": "46d8aea9860384e10e9d19b35f71a2f751f0e60ef6e12c85040eb390c92b07a0",
+  "auditSha256": "9683ac710ca1e291205913d6afb4afae974ec39089ef4278736cec4bdebfc2d6"
+}

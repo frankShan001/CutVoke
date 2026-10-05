@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_glint_pearl",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1ca5d66f5a266577ef2211a787cbd399fe5d43aa17bbc8960a888cc126314228",
+  "previewSha256": "ecc3de77a58976e82602ad8007266f6a4bde6ea28618adce9dd3252bdf830cf7",
+  "preview": "texture_glint_pearl.mp4",
+  "bytes": 3663,
+  "visiblePixels": 928,
+  "changedPixels": 0,
+  "motionVisible": false
+}

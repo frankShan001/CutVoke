@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_rainbow_confetti",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "dc668cc2472149670bd0767294e514b2895489a064dd789faf3d8b9554fafa00",
+  "previewSha256": "209471ea48bca00a442d3cf6a917d150c879f308d42c11c1dcb345140008920d",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2335,
+  "visiblePixels": 1458,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 887,
+    "steady_entry": 1457,
+    "steady_exit": 1457,
+    "exit": 887
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 887,
+      "withoutFade": 1457
+    },
+    "steady_entry": {
+      "withFade": 1457,
+      "withoutFade": 1458
+    },
+    "steady_exit": {
+      "withFade": 1457,
+      "withoutFade": 1458
+    },
+    "exit": {
+      "withFade": 887,
+      "withoutFade": 1458
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.219,
+    0.21
+  ],
+  "auditExport": "fxoverlay_rainbow_confetti.audit.mp4",
+  "auditExportSha256": "3914ec23a9001928b5959afe0af7dfcc8d6bb969100ab50c0ec666975a6b0c7a"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_flare_violet",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5f08b64dec8262fc0791bc93ff0974242c5c7079f74bb350672e99122a234ae6",
+  "previewSha256": "5b2fe8a0b9efecb77a9eac0085787319f3da231419f5cf4b4aa0ccf2ac807261",
+  "preview": "cinematic_optical_flare_violet.mp4",
+  "bytes": 6452,
+  "visiblePixels": 3386,
+  "changedPixels": 0,
+  "motionVisible": false
+}

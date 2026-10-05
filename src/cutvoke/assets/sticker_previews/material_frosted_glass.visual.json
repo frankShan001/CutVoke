@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_frosted_glass",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "observation": "The diffuse cloudy center and softly frosted border read as glass without becoming an opaque card.",
+  "sourceSha256": "4d9267d5bcd7bf3e42e0f0885ea000f5102c72bc6cde8641ee4b89036e1002b9",
+  "previewSha256": "43a481a68a01150ac201e79dbcddac242581fb98f64d6f982867a7e25272f417",
+  "auditSha256": "10631f1f03f4e1a248fed66d057fa8dc0f2872658306d8fa3cf82d1bbb8c59c9"
+}

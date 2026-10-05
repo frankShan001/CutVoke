@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_cyan_aura_ring",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "9a4c8597059af827131f92100cc4c12354e671dbdabc318eecf004daefa0fe41",
+  "previewSha256": "7283cef8612f7116bf1d091dca13e54b9b5806167c9bebc01f7c309c58774b9f",
+  "preview": "fxoverlay_cyan_aura_ring.mp4",
+  "bytes": 10802,
+  "visiblePixels": 8861,
+  "changedPixels": 0,
+  "motionVisible": false
+}

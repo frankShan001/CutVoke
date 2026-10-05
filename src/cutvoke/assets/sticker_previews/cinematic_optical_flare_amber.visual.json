@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_flare_amber",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "细长琥珀色横向光带，中心星点与右侧小光斑分层清晰，叠在深浅渐变画面均可辨认。",
+  "sourceSha256": "c8555af15ed4b74cfad407e0ff1d76b3e5665757ab69c0d35fc70fab3224c0ae",
+  "previewSha256": "4a9ee248c6d65c339523118242f0a852680f1da073bf20db67fb8f25caaa10ba",
+  "auditSha256": "68dc6e9d8745969027c565e92be5e75dd407144197aec8cbfe7c0fb25860a89e"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_violet_halftone_wave",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e89d7f72a952abf6fe46bbefb92d9443c02a973be5337a4a259d5b7c79297be3",
+  "previewSha256": "b70bcd6b1f630bf8b07d287fd0c210589b914c3b848cc80aad036861467e9d32",
+  "preview": "manga_v2_violet_halftone_wave.mp4",
+  "bytes": 15504,
+  "visiblePixels": 9233,
+  "changedPixels": 0,
+  "motionVisible": false
+}

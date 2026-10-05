@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_tennis_racket",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "网球拍线床与绿色网球分离可辨，球拍柄和拍框全部保留，画面合成无透明边缘污染。",
+  "sourceSha256": "1d4a0703acc0cb5606b4505074f16c82da40e634721b4e27754a5571e73df1ca",
+  "previewSha256": "e6eb21df5aee72a1455d3b1d7e67eba7813ced89a7897bb10ca7a789a07c1304",
+  "auditSha256": "e68a95670feff9edd610fe8057fce06787b62d1c183abe8a26e988808e246b00"
+}

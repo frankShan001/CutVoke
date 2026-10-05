@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.iceAura",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "intensity",
+    "value": 0.8
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "a3184491b6dca0048f4c8b6ba0dfcac71fd4af112e633d7ea9407b7cde674eb7",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "a3184491b6dca0048f4c8b6ba0dfcac71fd4af112e633d7ea9407b7cde674eb7",
+  "auditExport": "fx-iceAura-v1-0-0.audit.mp4"
+}

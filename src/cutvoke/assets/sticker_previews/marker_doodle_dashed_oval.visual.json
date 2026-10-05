@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_dashed_oval",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Yellow dash segments form a readable oval, with consistent spacing and navy outlines on both backgrounds.",
+  "sourceSha256": "3f019a24028e7e23bb767006508a16e737b2df599f81e06942aba0747967f5d8",
+  "previewSha256": "4ff9a27c1fdab0759ca3676c54126f80833a30444eb7fbffcbce53ce5bf4b528",
+  "auditSha256": "6f41aba3bbf0fb1a5e661e49c5f84f76a560d71ef19bbf047bb18436d6ad92c4"
+}

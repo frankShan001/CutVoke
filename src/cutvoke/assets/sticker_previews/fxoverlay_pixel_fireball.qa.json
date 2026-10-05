@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_fireball",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "b83fb80b2255f61b5668b5f5425206785e0330c117528d80efca0ce791c0e5a0",
+  "previewSha256": "a5e3e87d9e9292b9e303cd637bd3f0792c21e3a0a07f4ce9472ffede42570b97",
+  "preview": "fxoverlay_pixel_fireball.mp4",
+  "bytes": 11003,
+  "visiblePixels": 6871,
+  "changedPixels": 0,
+  "motionVisible": false
+}

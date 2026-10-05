@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.magnifier",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "镜片、内孔和手柄边界分明，青色玻璃与深色轮廓对比稳定。",
+  "sourceSha256": "7e4a82c49077431357405053afdc1ec84cda9555837ba563789e34e061e4e4f6",
+  "previewSha256": "92429777444d1c3bfc6b5c34b349dd608a39873149f9ee24145ba78cb18b919c",
+  "auditSha256": "775726dd69bf49ce4f3269889f73294e4f2bcaee428a536b3cd41e1ed4d33b14"
+}

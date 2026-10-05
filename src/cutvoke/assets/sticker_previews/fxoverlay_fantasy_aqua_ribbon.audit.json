@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_aqua_ribbon",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "d98481ca9ff85548dfc52aeec27e7de6d2e08d8d0eca2511dfa216732bb68628",
+  "previewSha256": "52b0f9e2ac47b7e673b45346c64b0161c986854763425f510b5db2c5cd70caa5",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 13332,
+  "visiblePixels": 11528,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 9545,
+    "steady_entry": 11527,
+    "steady_exit": 11530,
+    "exit": 9579
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 9545,
+      "withoutFade": 11528
+    },
+    "steady_entry": {
+      "withFade": 11527,
+      "withoutFade": 11523
+    },
+    "steady_exit": {
+      "withFade": 11530,
+      "withoutFade": 11534
+    },
+    "exit": {
+      "withFade": 9579,
+      "withoutFade": 11532
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.784,
+    0.881
+  ],
+  "auditExport": "fxoverlay_fantasy_aqua_ribbon.audit.mp4",
+  "auditExportSha256": "24b5f7035b173957dc40d1cd1efeed5ac7be2e4e51b83367b81af3ebbb2de6a7"
+}

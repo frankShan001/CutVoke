@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_smoke_wisps",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "132fde06344a241e350cc880162e58e7d2b999d346e7d6ccdf9d580db4a97598",
+  "previewSha256": "acf07f9be2b80e58f1e56fd6e5ea1ac964f5bbe6e64fbaf44bfe15d41fb5c445",
+  "preview": "texture_v2_smoke_wisps.mp4",
+  "bytes": 4431,
+  "visiblePixels": 3930,
+  "changedPixels": 0,
+  "motionVisible": false
+}

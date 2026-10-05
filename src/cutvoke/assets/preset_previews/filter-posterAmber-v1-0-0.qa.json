@@ -1,0 +1,34 @@
+{
+  "presetId": "cutvoke.preset.filter.posterAmber",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.posterize",
+      "version": "1.0.0",
+      "params": {
+        "levels": 5
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.colorize",
+      "version": "1.0.0",
+      "params": {
+        "hue": 34,
+        "saturation": 0.85,
+        "mix": 0.75,
+        "lightness": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 54.555,
+  "maxSampledMeanRgbDifference": 54.555,
+  "coverSha256": "342eaf867ed5cfc7a23d92cdc15dc547b0f5ccacd0f0c68584922eff861b5872",
+  "previewSha256": "e6d1611cdceeb20e728addc905b5f0355490083931ade474652961cf25de7337",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

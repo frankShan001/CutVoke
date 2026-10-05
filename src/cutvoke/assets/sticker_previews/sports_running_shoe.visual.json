@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_running_shoe",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "白色跑鞋的珊瑚色装饰、鞋带和鞋底轮廓清楚，横向构图完整且适合画面叠加。",
+  "sourceSha256": "a0b3fc408232fcefff0bb8f6aabd89b7e1de46c18359f7043eed76c2b65e7ce2",
+  "previewSha256": "fe2697c9639f8436e9218ebb788153e42dff9f36cf0669928a55b4582a366976",
+  "auditSha256": "d62d0b58217d5851466d93e433bcd11333fad4094ed51c226462a221987e7344"
+}

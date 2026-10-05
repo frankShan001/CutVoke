@@ -1,0 +1,1400 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "layout": "4x4 equal square cells; atlas 3 uses its first two cells",
+  "extraction": "centered 94% square cell crop, removes connected visible components under 80px, and centers on transparent 320px PNG with 18px padding",
+  "contactSheet": "docs/assets/legacy-icon-atlases-contact-sheet-20260925.png",
+  "atlases": [
+    {
+      "source": "docs/assets/basic-navigation-sticker-atlas-20260925.png",
+      "sourceSha256": "5893f053c2e7308aa1e46571da873b2e17017154e899c12060c7e349c73082ae",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "items": [
+        {
+          "stem": "arrow_down",
+          "name": "向下箭头",
+          "keywords": [
+            "方向",
+            "向下"
+          ],
+          "row": 0,
+          "column": 0,
+          "sourceCell": [
+            0,
+            0,
+            314,
+            314
+          ],
+          "cropBox": [
+            9,
+            9,
+            304,
+            304
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 24325,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            98,
+            93,
+            273,
+            300
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "5086b831be4234567a00ef3c02c632b252432687b2753b133dd9078cab5d2829"
+        },
+        {
+          "stem": "arrow_left",
+          "name": "向左箭头",
+          "keywords": [
+            "方向",
+            "向左"
+          ],
+          "row": 0,
+          "column": 1,
+          "sourceCell": [
+            314,
+            0,
+            627,
+            314
+          ],
+          "cropBox": [
+            323,
+            10,
+            617,
+            304
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 24676,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            54,
+            112,
+            269,
+            294
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "9aa2bf7f1b29e7a589f112712178a2a30cc279070a3e6b6c0bc840b7e03ba019"
+        },
+        {
+          "stem": "arrow_ne",
+          "name": "右上箭头",
+          "keywords": [
+            "方向",
+            "右上"
+          ],
+          "row": 0,
+          "column": 2,
+          "sourceCell": [
+            627,
+            0,
+            940,
+            314
+          ],
+          "cropBox": [
+            636,
+            10,
+            930,
+            304
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 25036,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            56,
+            108,
+            248,
+            300
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "73275865a1850889522c7b5e7e5479f66ce40e0e64960e45be646473b234106b"
+        },
+        {
+          "stem": "arrow_nw",
+          "name": "左上箭头",
+          "keywords": [
+            "方向",
+            "左上"
+          ],
+          "row": 0,
+          "column": 3,
+          "sourceCell": [
+            940,
+            0,
+            1254,
+            314
+          ],
+          "cropBox": [
+            949,
+            9,
+            1244,
+            304
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 25226,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            49,
+            108,
+            238,
+            300
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "98fa9573ec3ac51477dea17531cd7ac92c33f08e9cbaa0023949a16cefe11470"
+        },
+        {
+          "stem": "arrow_red",
+          "name": "红色箭头",
+          "keywords": [
+            "方向",
+            "红色"
+          ],
+          "row": 1,
+          "column": 0,
+          "sourceCell": [
+            0,
+            314,
+            314,
+            627
+          ],
+          "cropBox": [
+            10,
+            323,
+            304,
+            617
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 24314,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            72,
+            81,
+            290,
+            260
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "6bdce9417c5f83efb868b103ac5bdb2f3a531f894c7c0e45e473fdb42e7c60f3"
+        },
+        {
+          "stem": "arrow_right",
+          "name": "向右箭头",
+          "keywords": [
+            "方向",
+            "向右"
+          ],
+          "row": 1,
+          "column": 1,
+          "sourceCell": [
+            314,
+            314,
+            627,
+            627
+          ],
+          "cropBox": [
+            323,
+            323,
+            617,
+            617
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 23985,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            68,
+            82,
+            283,
+            260
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "bd4a469308db4d208dd9198a1d97442b609d4cf68465e7f12342b4b1118d1feb"
+        },
+        {
+          "stem": "arrow_up",
+          "name": "向上箭头",
+          "keywords": [
+            "方向",
+            "向上"
+          ],
+          "row": 1,
+          "column": 2,
+          "sourceCell": [
+            627,
+            314,
+            940,
+            627
+          ],
+          "cropBox": [
+            636,
+            323,
+            930,
+            617
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 24503,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            72,
+            63,
+            248,
+            280
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "ac2eea10fda7d4bd9941e70cc7cec83554d10eb9ed514a0f5f388bf576e39b08"
+        },
+        {
+          "stem": "cross",
+          "name": "叉号",
+          "keywords": [
+            "标记",
+            "叉号"
+          ],
+          "row": 1,
+          "column": 3,
+          "sourceCell": [
+            940,
+            314,
+            1254,
+            627
+          ],
+          "cropBox": [
+            950,
+            323,
+            1244,
+            617
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 31139,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            44,
+            76,
+            248,
+            278
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "a5f0db66ccc4f91d56de5ed01f813aab29fc252613d9b67aae855f6d085f4bb1"
+        },
+        {
+          "stem": "location",
+          "name": "位置标记",
+          "keywords": [
+            "位置",
+            "地点"
+          ],
+          "row": 2,
+          "column": 0,
+          "sourceCell": [
+            0,
+            627,
+            314,
+            940
+          ],
+          "cropBox": [
+            10,
+            636,
+            304,
+            930
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 29691,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            96,
+            36,
+            271,
+            259
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "d9c0756cab20c28ab3d5e49195ef04811a2b3e7949e456ff89cf740d443215ce"
+        },
+        {
+          "stem": "magnifier",
+          "name": "放大镜",
+          "keywords": [
+            "搜索",
+            "放大镜"
+          ],
+          "row": 2,
+          "column": 1,
+          "sourceCell": [
+            314,
+            627,
+            627,
+            940
+          ],
+          "cropBox": [
+            323,
+            636,
+            617,
+            930
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 31818,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            61,
+            41,
+            282,
+            251
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "7e4a82c49077431357405053afdc1ec84cda9555837ba563789e34e061e4e4f6"
+        },
+        {
+          "stem": "minus",
+          "name": "减号",
+          "keywords": [
+            "符号",
+            "减号"
+          ],
+          "row": 2,
+          "column": 2,
+          "sourceCell": [
+            627,
+            627,
+            940,
+            940
+          ],
+          "cropBox": [
+            636,
+            636,
+            930,
+            930
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 19374,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            53,
+            104,
+            265,
+            192
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "317fa4afb88e01693ff27faadc5c53cf61199e5ccb9d0df8112cf14c8218a47f"
+        },
+        {
+          "stem": "plus",
+          "name": "加号",
+          "keywords": [
+            "符号",
+            "加号"
+          ],
+          "row": 2,
+          "column": 3,
+          "sourceCell": [
+            940,
+            627,
+            1254,
+            940
+          ],
+          "cropBox": [
+            950,
+            636,
+            1244,
+            930
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 30722,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            38,
+            40,
+            251,
+            252
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "83aadfcb0ce458f43767b4d56551bf65c47d93e744c20407bb48a51bb6649586"
+        },
+        {
+          "stem": "check_green",
+          "name": "绿色对勾",
+          "keywords": [
+            "标记",
+            "正确"
+          ],
+          "row": 3,
+          "column": 0,
+          "sourceCell": [
+            0,
+            940,
+            314,
+            1254
+          ],
+          "cropBox": [
+            9,
+            949,
+            304,
+            1244
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 22127,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            67,
+            34,
+            295,
+            225
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "8c1f3433867b27a43a2fcfaaa916bc62977116bc225aa9e428d5da3123eefa62"
+        },
+        {
+          "stem": "circle_green",
+          "name": "绿色圆点",
+          "keywords": [
+            "标记",
+            "绿色"
+          ],
+          "row": 3,
+          "column": 1,
+          "sourceCell": [
+            314,
+            940,
+            627,
+            1254
+          ],
+          "cropBox": [
+            323,
+            950,
+            617,
+            1244
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 27734,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            63,
+            20,
+            273,
+            230
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "e20cf73926ea41853fcb405f8c7c54bf24ca06f28c548f4811f80ba41bedc035"
+        },
+        {
+          "stem": "dot",
+          "name": "圆点",
+          "keywords": [
+            "标记",
+            "圆点"
+          ],
+          "row": 3,
+          "column": 2,
+          "sourceCell": [
+            627,
+            940,
+            940,
+            1254
+          ],
+          "cropBox": [
+            636,
+            950,
+            930,
+            1244
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 16038,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            91,
+            57,
+            229,
+            194
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "5642f1a2cc8b6fdb48fbea648affafd19a1956c7c775225c6b9f15363556b8cc"
+        },
+        {
+          "stem": "shield",
+          "name": "盾牌",
+          "keywords": [
+            "标记",
+            "盾牌"
+          ],
+          "row": 3,
+          "column": 3,
+          "sourceCell": [
+            940,
+            940,
+            1254,
+            1254
+          ],
+          "cropBox": [
+            949,
+            949,
+            1244,
+            1244
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 35754,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            48,
+            20,
+            251,
+            235
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "8c3f74b3e6f009f68f4e6c76a52d0d37fbfcf744494c9c8a61c85dc8eaaf1d04"
+        }
+      ]
+    },
+    {
+      "source": "docs/assets/basic-symbol-sticker-atlas-20260925.png",
+      "sourceSha256": "cad7244088163c8214c9f72847be0f8881823fa101f3621c638178bd1b1d791a",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "items": [
+        {
+          "stem": "bolt_orange",
+          "name": "橙色闪电",
+          "keywords": [
+            "闪电",
+            "速度"
+          ],
+          "row": 0,
+          "column": 0,
+          "sourceCell": [
+            0,
+            0,
+            314,
+            314
+          ],
+          "cropBox": [
+            9,
+            9,
+            304,
+            304
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 30802,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            71,
+            39,
+            262,
+            300
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "e3f4001034c312f1cff0be7a4af899a51c12d8249f9f5168b909968600fccc43"
+        },
+        {
+          "stem": "clock",
+          "name": "时钟",
+          "keywords": [
+            "时间",
+            "时钟"
+          ],
+          "row": 0,
+          "column": 1,
+          "sourceCell": [
+            314,
+            0,
+            627,
+            314
+          ],
+          "cropBox": [
+            323,
+            10,
+            617,
+            304
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 48516,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            39,
+            48,
+            280,
+            287
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "b98d1a9d7cd4ce1882478e812b4aaf7f16c2f3a9ec0a0eca8e086cbf75550851"
+        },
+        {
+          "stem": "exclaim_yellow",
+          "name": "黄色感叹号",
+          "keywords": [
+            "提示",
+            "感叹号"
+          ],
+          "row": 0,
+          "column": 2,
+          "sourceCell": [
+            627,
+            0,
+            940,
+            314
+          ],
+          "cropBox": [
+            636,
+            10,
+            930,
+            304
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 48882,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            20,
+            34,
+            291,
+            300
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "0905e0f7ec4dd1d8f6522e6c9563d9988c35e9d1b6315cc566340a58d7cfbb3e"
+        },
+        {
+          "stem": "flame",
+          "name": "火焰",
+          "keywords": [
+            "火焰",
+            "热度"
+          ],
+          "row": 0,
+          "column": 3,
+          "sourceCell": [
+            940,
+            0,
+            1254,
+            314
+          ],
+          "cropBox": [
+            949,
+            9,
+            1244,
+            304
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 42187,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            53,
+            36,
+            270,
+            300
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "9e0f2a17def4b5013caa8f3405472a134c1138f785b4717875b437566c675709"
+        },
+        {
+          "stem": "heart",
+          "name": "爱心",
+          "keywords": [
+            "爱心",
+            "情绪"
+          ],
+          "row": 1,
+          "column": 0,
+          "sourceCell": [
+            0,
+            314,
+            314,
+            627
+          ],
+          "cropBox": [
+            10,
+            323,
+            304,
+            617
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 46342,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            32,
+            44,
+            294,
+            271
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "d220149af5f63cc543188a4802e3eb8164dfeafaa233353d507fcb5e94e50988"
+        },
+        {
+          "stem": "moon",
+          "name": "月亮",
+          "keywords": [
+            "月亮",
+            "夜晚"
+          ],
+          "row": 1,
+          "column": 1,
+          "sourceCell": [
+            314,
+            314,
+            627,
+            627
+          ],
+          "cropBox": [
+            323,
+            323,
+            617,
+            617
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 34559,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            49,
+            28,
+            288,
+            281
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "5ae439b2d75ddd28dda63e4a4d5769a5ae521f881452b80df604af264b087f43"
+        },
+        {
+          "stem": "question",
+          "name": "问号",
+          "keywords": [
+            "提示",
+            "问号"
+          ],
+          "row": 1,
+          "column": 2,
+          "sourceCell": [
+            627,
+            314,
+            940,
+            627
+          ],
+          "cropBox": [
+            636,
+            323,
+            930,
+            617
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 30162,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            68,
+            27,
+            250,
+            280
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "d3d914db828ba6e2b1b673fcbe3430f07f2ee78f248648263a0e6f3551c4c09b"
+        },
+        {
+          "stem": "star",
+          "name": "星星",
+          "keywords": [
+            "星星",
+            "氛围"
+          ],
+          "row": 1,
+          "column": 3,
+          "sourceCell": [
+            940,
+            314,
+            1254,
+            627
+          ],
+          "cropBox": [
+            950,
+            323,
+            1244,
+            617
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 38700,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            33,
+            31,
+            285,
+            277
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "c41bb3a910b55458ce17cb5a8f0125fcd804b2f851bdbe4dbd7e469341d7ec51"
+        },
+        {
+          "stem": "star_burst",
+          "name": "爆闪星",
+          "keywords": [
+            "星星",
+            "闪光"
+          ],
+          "row": 2,
+          "column": 0,
+          "sourceCell": [
+            0,
+            627,
+            314,
+            940
+          ],
+          "cropBox": [
+            10,
+            636,
+            304,
+            930
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 33372,
+          "removedSmallComponents": 1,
+          "removedSmallComponentPixels": 75,
+          "alphaBounds": [
+            32,
+            20,
+            293,
+            299
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "14cd0b2ffbbe5cbd61a13645a748ffb854439219e0c205a6053d3520c672731d"
+        },
+        {
+          "stem": "sun",
+          "name": "太阳",
+          "keywords": [
+            "太阳",
+            "白天"
+          ],
+          "row": 2,
+          "column": 1,
+          "sourceCell": [
+            314,
+            627,
+            627,
+            940
+          ],
+          "cropBox": [
+            323,
+            636,
+            617,
+            930
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 41478,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            28,
+            20,
+            294,
+            274
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "d76d8b122cec896eab7da68131578221675cace50cf2fa666393037568c49564"
+        },
+        {
+          "stem": "timer",
+          "name": "计时器",
+          "keywords": [
+            "时间",
+            "计时"
+          ],
+          "row": 2,
+          "column": 2,
+          "sourceCell": [
+            627,
+            627,
+            940,
+            940
+          ],
+          "cropBox": [
+            636,
+            636,
+            930,
+            930
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 52337,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            42,
+            20,
+            287,
+            284
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "f5f5d1b3d26e4d78dbb5001cedf0c6fc634bb20cf49d7ac35808423b3ed9bdd6"
+        },
+        {
+          "stem": "warning",
+          "name": "警告标识",
+          "keywords": [
+            "提示",
+            "警告"
+          ],
+          "row": 2,
+          "column": 3,
+          "sourceCell": [
+            940,
+            627,
+            1254,
+            940
+          ],
+          "cropBox": [
+            950,
+            636,
+            1244,
+            930
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 37159,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            34,
+            25,
+            280,
+            244
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "24cc7bf486b20e55d45ee50a1aa620d41ac654d545e3e79efb179b8fd060a96a"
+        },
+        {
+          "stem": "gift",
+          "name": "礼物",
+          "keywords": [
+            "礼物",
+            "庆祝"
+          ],
+          "row": 3,
+          "column": 0,
+          "sourceCell": [
+            0,
+            940,
+            314,
+            1254
+          ],
+          "cropBox": [
+            9,
+            949,
+            304,
+            1244
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 59379,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            35,
+            20,
+            293,
+            269
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "26603434b25903f43a8490449a7858a5b93e71705c43d215f231bcea5aefd467"
+        },
+        {
+          "stem": "music_note",
+          "name": "音符",
+          "keywords": [
+            "音乐",
+            "音符"
+          ],
+          "row": 3,
+          "column": 1,
+          "sourceCell": [
+            314,
+            940,
+            627,
+            1254
+          ],
+          "cropBox": [
+            323,
+            950,
+            617,
+            1244
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 37876,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            40,
+            20,
+            267,
+            252
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "a4d18a5cffad1b2b88f91226bba31d2fdced8a29706b26bf8f5ac220ca255a55"
+        },
+        {
+          "stem": "number_bubble",
+          "name": "数字气泡",
+          "keywords": [
+            "数字",
+            "气泡"
+          ],
+          "row": 3,
+          "column": 2,
+          "sourceCell": [
+            627,
+            940,
+            940,
+            1254
+          ],
+          "cropBox": [
+            636,
+            950,
+            930,
+            1244
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 56106,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            20,
+            20,
+            294,
+            261
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "32d17d1e04469793f33cfcc1e8c4127c0f4a37b97b2e96d824918aaba380160c"
+        },
+        {
+          "stem": "rounded_blue",
+          "name": "蓝色圆角牌",
+          "keywords": [
+            "标记",
+            "蓝色"
+          ],
+          "row": 3,
+          "column": 3,
+          "sourceCell": [
+            940,
+            940,
+            1254,
+            1254
+          ],
+          "cropBox": [
+            949,
+            949,
+            1244,
+            1244
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 46994,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            20,
+            60,
+            300,
+            226
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "5628451fb6a5959ecbf0a9f7822d55d5e0f929080b0d739f6c009847ee3a1f17"
+        }
+      ]
+    },
+    {
+      "source": "docs/assets/basic-label-sticker-atlas-20260925.png",
+      "sourceSha256": "3dfc0f239757b2247cde0a6d00d7cf234f2ced928bbadd363cc16234523954ae",
+      "sourceSize": [
+        1254,
+        1254
+      ],
+      "items": [
+        {
+          "stem": "speech_bubble",
+          "name": "对话气泡",
+          "keywords": [
+            "气泡",
+            "对话"
+          ],
+          "row": 0,
+          "column": 0,
+          "sourceCell": [
+            0,
+            0,
+            314,
+            314
+          ],
+          "cropBox": [
+            9,
+            9,
+            304,
+            304
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 49558,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            50,
+            68,
+            300,
+            299
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "5cd3e0f4f76070323773270e0013990f0a387f77dbe9e14c46204de055943ce9"
+        },
+        {
+          "stem": "tag",
+          "name": "标签牌",
+          "keywords": [
+            "标记",
+            "标签"
+          ],
+          "row": 0,
+          "column": 1,
+          "sourceCell": [
+            314,
+            0,
+            627,
+            314
+          ],
+          "cropBox": [
+            323,
+            10,
+            617,
+            304
+          ],
+          "size": [
+            320,
+            320
+          ],
+          "visiblePixelsAfterSpeckRemoval": 38988,
+          "removedSmallComponents": 0,
+          "removedSmallComponentPixels": 0,
+          "alphaBounds": [
+            48,
+            68,
+            285,
+            300
+          ],
+          "alphaExtrema": [
+            0,
+            255
+          ],
+          "sha256": "89022a28cdd465eeccb1a28e7b1000be036c9f7f37b7b44fbc8efa6fe3eb1bf6"
+        }
+      ]
+    }
+  ],
+  "itemCount": 34
+}

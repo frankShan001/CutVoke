@@ -1,0 +1,30 @@
+{
+  "presetId": "cutvoke.preset.animation.comboBannerIn",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.comboBannerIn",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "easing": "ease-out",
+        "distance": 0.3,
+        "primary": "slideIn",
+        "secondary": "fadeIn",
+        "fromScale": 0.8
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 92.216,
+  "maxSampledMeanRgbDifference": 92.216,
+  "coverSha256": "696bb70a7cf61c50b046e8aa5ae6c869d07559f3ffb0b134391c829530e443d7",
+  "previewSha256": "aefdb686608c5804e3e8e9ba334fa4c126915e55d903fd848a8039f4c3840848",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

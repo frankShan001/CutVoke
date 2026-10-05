@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_oilslick_iridescent",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c5c3e97c5d6f5d3cc5b4865123b7b6ac55b070c4b6ff78171f1490854e789a6f",
+  "previewSha256": "04755f571b86db78998451dd949ee2dffc5180a4878b0fb67ed97828c4f43159",
+  "preview": "fxoverlay_refraction_oilslick_iridescent.mp4",
+  "bytes": 13395,
+  "visiblePixels": 12143,
+  "changedPixels": 0,
+  "motionVisible": false
+}

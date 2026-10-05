@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_amber_impact_cloud",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "琥珀尘爆由多层烟团和碎屑组成，深浅背景均有足够色彩层次。",
+  "sourceSha256": "f147741846f828461457ba7fcbcd4c60157f9cd56455dfbb8b6c083c059898fb",
+  "previewSha256": "0937149b854e715b4483fb4a4793ee4a34e1fc6ea59ec2ca8b6ff5d91e2af511",
+  "auditSha256": "838c26e9ecc1c4237ecadb4b9ab2806f05c321e709982d184b39ec25da4e4e03"
+}

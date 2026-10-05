@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_fireflies",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "59992634f5587a7761c2b3284b92e85e8e118b11ebf1d5c759be81021744ce43",
+  "previewSha256": "80093f6bc0ff5dadf50378fcd025864c5bfb0e69df35621636c4f21e081d5aee",
+  "preview": "weatherfx_fireflies.mp4",
+  "bytes": 6878,
+  "visiblePixels": 1471,
+  "changedPixels": 0,
+  "motionVisible": false
+}

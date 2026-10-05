@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_pixel_critical_hit",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "332d99a6ba7224977097e8f57e9af57a85c4c51d0d1936a3ee5686b3839f57af",
+  "previewSha256": "96018da9b267625e85b146e920bbd7e2c1c2efda95afc616107a4b0c96b6f894",
+  "preview": "fxoverlay_pixel_critical_hit.mp4",
+  "bytes": 13248,
+  "visiblePixels": 9417,
+  "changedPixels": 8,
+  "motionVisible": false
+}

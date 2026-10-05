@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.filmVignette",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.sepia",
+  "params": {
+    "strength": 1.0
+  },
+  "subcategory": "胶片",
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Sepia picture has visibly darkened corners around the bright center.",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "coverSha256": "0b26bb69c84bed66c91b8cf402af28ea466feaab2d277fd4b7310fbcf81a8733",
+  "motionPreviewSha256": "8d1cdcf0220963925567bcf36f8104da339d863360fa15c76463a0c2c96f43ae",
+  "auditSha256": "478b976688a4609dadfea2688dae1e3e49dc2d7d3effcbfcec88035067764fac"
+}

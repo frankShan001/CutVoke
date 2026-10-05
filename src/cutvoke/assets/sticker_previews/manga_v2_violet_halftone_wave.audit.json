@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_violet_halftone_wave",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "e89d7f72a952abf6fe46bbefb92d9443c02a973be5337a4a259d5b7c79297be3",
+  "previewSha256": "b70bcd6b1f630bf8b07d287fd0c210589b914c3b848cc80aad036861467e9d32",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4889,
+  "visiblePixels": 3521,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2487,
+    "steady_entry": 3525,
+    "steady_exit": 3524,
+    "exit": 2487
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2487,
+      "withoutFade": 3525
+    },
+    "steady_entry": {
+      "withFade": 3525,
+      "withoutFade": 3525
+    },
+    "steady_exit": {
+      "withFade": 3524,
+      "withoutFade": 3525
+    },
+    "exit": {
+      "withFade": 2487,
+      "withoutFade": 3525
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.198,
+    0.192
+  ],
+  "auditExport": "manga_v2_violet_halftone_wave.audit.mp4",
+  "auditExportSha256": "7275e89aa8e4f782ddde8f588bd9fb56f67720532b24d1a75c8cc3f853d273f3"
+}

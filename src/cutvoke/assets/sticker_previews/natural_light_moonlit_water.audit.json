@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.natural_light_moonlit_water",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "5c82ca2e388f0e2ba9ea647f1e1c93fd6720262edd7575e04dbd801fbb309da6",
+  "previewSha256": "2457a92e4bcf6a392d66676cb2b6c6e357048077c8f80533a3f622aba3fce51a",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 18469,
+  "visiblePixels": 22664,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 6921,
+    "steady_entry": 22701,
+    "steady_exit": 22702,
+    "exit": 6930
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 6921,
+      "withoutFade": 22714
+    },
+    "steady_entry": {
+      "withFade": 22701,
+      "withoutFade": 22703
+    },
+    "steady_exit": {
+      "withFade": 22702,
+      "withoutFade": 22714
+    },
+    "exit": {
+      "withFade": 6930,
+      "withoutFade": 22710
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.511,
+    0.519
+  ],
+  "auditExport": "natural_light_moonlit_water.audit.mp4",
+  "auditExportSha256": "5f08548c7b0fec3ea207033d47a0d4dcdfed365fceea8de361113001994d6c9e"
+}

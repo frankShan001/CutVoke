@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_scribble_ring",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "d22dcf0a9d486bbb11798861ee5a6ad55a5a70eaaf8a1cfd21793325e4ab58ee",
+  "previewSha256": "12968f17c1bdcd0f4f2a8511682f099dc6a77b9c8d167b96ec93bfb78ae6afc6",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3018,
+  "visiblePixels": 1891,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1468,
+    "steady_entry": 1890,
+    "steady_exit": 1891,
+    "exit": 1467
+  },
+  "previewExportMeanRgbDifferences": [
+    0.199,
+    0.185
+  ],
+  "auditExport": "decor_scribble_ring.audit.mp4",
+  "auditExportSha256": "6ed65e7474d1394570a6820f003b783f326059361a911aa1afd56e3fef73094d"
+}

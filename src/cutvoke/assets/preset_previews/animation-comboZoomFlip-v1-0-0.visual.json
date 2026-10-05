@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.comboZoomFlip",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.combo",
+  "params": {
+    "duration": 1.0,
+    "primary": "zoomIn",
+    "secondary": "flipIn",
+    "fromScale": 0.45,
+    "easing": "ease-out",
+    "distance": 0.3
+  },
+  "subcategory": "组合",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "缩放与窄条翻牌连续叠加，组合缩放只应用一次，末尾恢复原画幅没有突跳。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "79fb259f90bcdc0c7c207c07834099fc34ba711736c1ee295dbb3e80df8bdd23",
+  "motionPreviewSha256": "b9f6b9ed3f70487d7d5b9604b1f9f6cfb32514220f4222996e2874933267b6b4",
+  "auditSha256": "b7384c7747bfdbff92047924f9a39823a1506e0e72f8b35f71db4439d7eecd1d",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_comboZoomFlip.png",
+  "libraryReviewSheetSha256": "110747a70d917e0eb8e59186796acbe266b8b5674764bc131b50ff5f29b19a7e"
+}

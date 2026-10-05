@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_peach_watercolor",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "38cccbbfcbd7ba3fef92f805e9005f2835303c972922a8e8939afcbbc073a45b",
+  "previewSha256": "263947534dd6bf7c6256e9917857393b13036fa92582731062b65467719e7f32",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6003,
+  "visiblePixels": 6557,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3760,
+    "steady_entry": 6557,
+    "steady_exit": 6557,
+    "exit": 3760
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3760,
+      "withoutFade": 6557
+    },
+    "steady_entry": {
+      "withFade": 6557,
+      "withoutFade": 6557
+    },
+    "steady_exit": {
+      "withFade": 6557,
+      "withoutFade": 6557
+    },
+    "exit": {
+      "withFade": 3760,
+      "withoutFade": 6557
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.082,
+    0.083
+  ],
+  "auditExport": "texture_bg_peach_watercolor.audit.mp4",
+  "auditExportSha256": "49b1b95ef8f8a13649e1bc2b9f245bd79b735e2d2f0a56fe60f44082417aff3a"
+}

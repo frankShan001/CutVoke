@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_foil_flecks",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "77bc03eba565ae85480c71da5be55af517dd9bcab29a1303425ad9eb6a207b4d",
+  "previewSha256": "d42ec474b393bf30a991e5ec0d021600e437b89fe18d5c53ad4df6ae379ba54d",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1822,
+  "visiblePixels": 1139,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 632,
+    "steady_entry": 1140,
+    "steady_exit": 1140,
+    "exit": 637
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 632,
+      "withoutFade": 1139
+    },
+    "steady_entry": {
+      "withFade": 1140,
+      "withoutFade": 1140
+    },
+    "steady_exit": {
+      "withFade": 1140,
+      "withoutFade": 1140
+    },
+    "exit": {
+      "withFade": 637,
+      "withoutFade": 1140
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.033,
+    0.01
+  ],
+  "auditExport": "texture_atlas_foil_flecks.audit.mp4",
+  "auditExportSha256": "d52841018517ecaea6deb25840470099b54412eb53b78b5bf99f0f14c38cc906"
+}

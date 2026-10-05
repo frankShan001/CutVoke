@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_headphones",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7131127809e2bcde87ed99b02bedbac65168e63fe07c6421b286ba743601ea90",
+  "previewSha256": "de1295a710a33cac4c1330ef990c563335be0fb783f6544d10a904f5a3049650",
+  "preview": "reaction_headphones.mp4",
+  "bytes": 4336,
+  "visiblePixels": 2139,
+  "changedPixels": 0,
+  "motionVisible": false
+}

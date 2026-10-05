@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.comboRotateZoom",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.comboRotateZoom",
+  "params": {
+    "duration": 1.0,
+    "easing": "ease-out",
+    "distance": 0.3,
+    "primary": "rotateIn",
+    "secondary": "zoomIn",
+    "fromScale": 0.8
+  },
+  "subcategory": "组合",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "倾斜与缩放连续叠加回到正常画幅，圆门比例恢复且停止处不跳变。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "8254bb96fbf2995ae89ef60dffc7c1e2a1403e4fbfda6330e52423407ea1c59f",
+  "motionPreviewSha256": "e6f7424734c810014637c811131eb22ee94ce594ffeba97d09081bffb6e68f02",
+  "auditSha256": "ef00dace5b5398a37e9755ceabc843370068331b782d39b45cd7fca235bb0b4e",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_comboRotateZoom.png",
+  "libraryReviewSheetSha256": "fe48e79a0e6316f5b3b49d39893ace8ee7d97808488ad3625824c8702e581cfc"
+}

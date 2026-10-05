@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_mic_aura_magenta",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "5579ad8188dedd2521f461acc6582ef0ab9ce2fe6e0afb009fa20e5b6da656fe",
+  "previewSha256": "537c5b640e589fcd28e318310ba17d4ba0715aa9eaa7a504e1fa117c928e27ed",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3161,
+  "visiblePixels": 1976,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1654,
+    "steady_entry": 1976,
+    "steady_exit": 1978,
+    "exit": 1660
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1654,
+      "withoutFade": 1976
+    },
+    "steady_entry": {
+      "withFade": 1976,
+      "withoutFade": 1978
+    },
+    "steady_exit": {
+      "withFade": 1978,
+      "withoutFade": 1978
+    },
+    "exit": {
+      "withFade": 1660,
+      "withoutFade": 1975
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.171,
+    0.165
+  ],
+  "auditExport": "audiofx_mic_aura_magenta.audit.mp4",
+  "auditExportSha256": "610f7d93eff6237c0c2cb9c4c35e019b2b14941b3abe5865c183d20c30a35c3f"
+}

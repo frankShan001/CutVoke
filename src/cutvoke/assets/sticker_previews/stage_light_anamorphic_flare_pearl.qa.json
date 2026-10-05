@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_anamorphic_flare_pearl",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f2cd348c94f1872d144532c562d3b9fd2b0f6bd0bffa1312afbc050f6a7358f6",
+  "previewSha256": "b51723514c8c2a98f90411ba30a09c7c4dc7a11915546bcc960f36bcd39655dd",
+  "preview": "stage_light_anamorphic_flare_pearl.mp4",
+  "bytes": 7629,
+  "visiblePixels": 5816,
+  "changedPixels": 0,
+  "motionVisible": false
+}

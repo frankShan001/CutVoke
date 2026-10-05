@@ -22,9 +22,11 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Optional
 
 from .render import RenderService, RenderError
+from .builtin_stickers import load_builtin_stickers
 
 # 包内音频目录：src/cutvoke/assets/audio（本文件在 src/cutvoke/core/ 下）
 AUDIO_DIR = os.path.normpath(
@@ -38,6 +40,51 @@ BACKGROUND_DIR = os.path.normpath(
 
 _AUDIO_EXTS = (".wav", ".mp3", ".flac", ".m4a", ".aac", ".ogg")
 _IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp")
+
+_BUILTIN_BACKGROUND_NAMES: dict[str, str] = {
+    "bg_vignette": "暗角渐层",
+    "bg_solid_white": "纯白背景",
+    "bg_solid_black": "纯黑背景",
+    "bg_paper": "纸张纹理",
+    "bg_grid_dark": "深色网格",
+    "bg_gradient_teal": "青绿渐变",
+    "bg_gradient_sunset": "日落渐变",
+    "bg_gradient_blue": "蓝色渐变",
+    "bg_checker": "透明棋盘格",
+    "bg_bokeh": "柔焦光斑",
+    "bgfx_amber_film_burn": "琥珀胶片烧光",
+    "bgfx_cyan_scanline": "青色扫描线干扰",
+    "bgfx_magenta_chromatic": "洋红色差晕影",
+    "bgfx_violet_holographic": "紫色全息衍射",
+    "bgfx_gold_dust": "金色漂浮尘光",
+    "bgfx_blue_raindrops": "蓝调雨窗光斑",
+    "bgfx_snow_crystals": "雪晶飘落",
+    "bgfx_ember_sparks": "橙红余烬",
+    "bgfx_cream_paper": "奶油纸纤维",
+    "bgfx_graphite_scratches": "石墨刮痕",
+    "bgfx_vintage_halftone": "复古印刷网点",
+    "bgfx_linen_weave": "亚麻织纹",
+    "bgfx_iridescent_caustics": "虹彩水纹折射",
+    "bgfx_underwater_rays": "水下体积光束",
+    "bgfx_rose_prism_flare": "玫瑰金棱镜光",
+    "bgfx_blue_electric_arcs": "蓝白电弧纹理",
+    "bgmat_cotton_ivory": "米白棉纸",
+    "bgmat_watercolor_blue": "浅蓝水彩纸",
+    "bgmat_handmade_rose": "玫瑰手工纸",
+    "bgmat_linen_sage": "鼠尾草亚麻",
+    "bgmat_velvet_navy": "深蓝丝绒",
+    "bgmat_concrete_charcoal": "炭灰水泥",
+    "bgmat_marble_teal": "青绿云石",
+    "bgmat_wood_walnut": "胡桃木纹",
+    "bgmat_terrazzo_cream": "奶油水磨石",
+    "bgmat_vellum_lavender": "淡紫描图纸",
+    "bgmat_plaster_peach": "蜜桃灰泥",
+    "bgmat_frosted_mint": "薄荷磨砂玻璃",
+    "bgmat_denim_indigo": "靛蓝牛仔布",
+    "bgmat_canvas_sand": "沙色画布",
+    "bgmat_satin_emerald": "翡翠缎面",
+    "bgmat_slate_bluegray": "蓝灰板岩",
+}
 
 # 文件 stem -> (显示名前缀「内置·」+ 场景类别)，用于素材库可读展示。
 _BUILTIN_META: dict[str, tuple[str, str]] = {
@@ -87,7 +134,9 @@ def ensure_builtin_audio(store, render: Optional[RenderService] = None) -> list[
             continue
         stem = os.path.splitext(fname)[0]
         asset_id = f"builtin_audio_{stem}"
-        disp_name, _category = _BUILTIN_META.get(stem, (f"内置·{stem}", "音频"))
+        disp_name, category = _BUILTIN_META.get(stem, (f"内置·{stem}", "音频"))
+        audio_role = {"音效": "sound_effect", "垫乐": "music"}.get(
+            category, "unclassified")
 
         size = os.path.getsize(path)
         duration: Optional[float] = None
@@ -109,35 +158,61 @@ def ensure_builtin_audio(store, render: Optional[RenderService] = None) -> list[
             duration=duration,
             has_audio=has_audio,
             builtin=True,
+            audio_role=audio_role,
         )
         registered.append(asset)
     return registered
 
 
-def ensure_builtin_stickers(store) -> list[dict]:
+def ensure_builtin_stickers(store, immutable_root: Optional[Path] = None,
+                           package_root: Optional[Path] = None) -> list[dict]:
     """把包内贴纸目录的真实 PNG 登记进素材账本（J07 内容资产，kind=image）。
 
-    幂等设计同音频：确定性 asset_id（builtin_sticker_<stem>）ON CONFLICT
-    upsert；每次启动重 probe 刷新路径/尺寸。返回登记列表。
+    素材按资源包版本和 SHA-256 保存在不可变目录；工程引用因此不会因后续
+    资源包更新而指向新贴图。资源缺失或与清单不符时跳过登记，由目录 API 提示恢复。
     """
     if store is None:
         return []
-    if not os.path.isdir(STICKER_DIR):
-        return []
+    from .resource_pack import (
+        install_immutable_resource_file,
+        load_resource_pack_manifest,
+    )
+
+    manifest = load_resource_pack_manifest(package_root)
+    pack_id = manifest["packId"]
+    pack_version = manifest["version"]
+    files = {item["path"]: item for item in manifest["files"]
+             if isinstance(item, dict) and isinstance(item.get("path"), str)}
+    resources = {item["resourceId"]: item for item in manifest["resources"]
+                 if isinstance(item, dict) and isinstance(item.get("resourceId"), str)}
     registered: list[dict] = []
-    for fname in sorted(os.listdir(STICKER_DIR)):
-        lower = fname.lower()
-        if not lower.endswith(_IMAGE_EXTS):
+    for sticker in load_builtin_stickers(include_quality=False, package_root=package_root):
+        if sticker["kind"] != "static":
             continue
-        path = os.path.join(STICKER_DIR, fname)
-        if not os.path.isfile(path):
+        source = Path(sticker["path"]).resolve()
+        resource = resources.get(sticker["stickerId"])
+        relative_path = next((item for item in (resource or {}).get("mediaFiles", [])
+                              if item.startswith("assets/stickers/") and item.lower().endswith(".png")), None)
+        file_record = files.get(relative_path)
+        if (not source.is_file() or not isinstance(relative_path, str) or
+                not isinstance(file_record, dict) or
+                not isinstance(file_record.get("sha256"), str)):
             continue
-        stem = os.path.splitext(fname)[0]
-        asset_id = f"builtin_sticker_{stem}"
+        path = source
+        if immutable_root is not None:
+            try:
+                path = install_immutable_resource_file(
+                    source, immutable_root, pack_id=pack_id,
+                    pack_version=pack_version, relative_path=relative_path,
+                    expected_sha256=file_record["sha256"],
+                    expected_size=file_record.get("sizeBytes"),
+                )
+            except (OSError, ValueError):
+                continue
         asset = store.add_asset(
-            asset_id=asset_id,
-            name=f"内置·贴纸·{stem}",
-            path=path,
+            asset_id=sticker["assetId"],
+            name=f"内置·贴纸·{sticker['name']}",
+            path=str(path),
             size=os.path.getsize(path),
             kind="image",
             duration=None,
@@ -148,43 +223,87 @@ def ensure_builtin_stickers(store) -> list[dict]:
     return registered
 
 
-def ensure_builtin_backgrounds(store, render: Optional[RenderService] = None) -> list[dict]:
-    """把包内背景图目录的真实图片登记进素材账本（J07 内容资产扩展，kind=image）。
-
-    幂等设计同音频/贴纸：确定性 asset_id（builtin_background_<stem>）走 add_asset
-    的 ON CONFLICT upsert，重跑不产生重复行；每次启动重 probe 刷新路径/尺寸。
-    返回登记列表。store 为 None 时直接返回空列表。
-    """
+def ensure_builtin_backgrounds(
+    store,
+    render: Optional[RenderService] = None,
+    *,
+    immutable_root: Optional[Path] = None,
+    package_root: Optional[Path] = None,
+) -> list[dict]:
+    """Register built-in and active-pack composition backgrounds as image assets."""
     if store is None:
-        return []
-    if not os.path.isdir(BACKGROUND_DIR):
         return []
     if render is None:
         render = RenderService()
 
+    from .resource_pack import (
+        file_matches_sha256,
+        install_immutable_resource_file,
+        load_resource_pack_manifest,
+    )
+
+    builtin_root = Path(__file__).resolve().parent.parent
+    roots = list(dict.fromkeys((builtin_root, Path(package_root).resolve()
+                                if package_root is not None else builtin_root)))
+    resources_by_id: dict[str, tuple[Path, dict, dict]] = {}
+    for root in roots:
+        try:
+            manifest = load_resource_pack_manifest(root)
+        except (OSError, ValueError):
+            continue
+        files = {item["path"]: item for item in manifest.get("files", [])
+                 if isinstance(item, dict) and isinstance(item.get("path"), str)}
+        for resource in manifest.get("resources", []):
+            if not isinstance(resource, dict) or resource.get("kind") != "background":
+                continue
+            asset_id = resource.get("resourceId")
+            relative_path = next((path for path in resource.get("mediaFiles", [])
+                                  if isinstance(path, str)
+                                  and path.startswith("assets/backgrounds/")
+                                  and path.lower().endswith(_IMAGE_EXTS)), None)
+            record = files.get(relative_path)
+            if (not isinstance(asset_id, str) or not isinstance(resource.get("name"), str)
+                    or not isinstance(relative_path, str) or not isinstance(record, dict)
+                    or not isinstance(record.get("sha256"), str)):
+                continue
+            source = (root / relative_path).resolve()
+            if not source.is_relative_to(root.resolve()) or not file_matches_sha256(
+                    source, record["sha256"], record.get("sizeBytes")):
+                continue
+            resources_by_id[asset_id] = (root, resource, record)
+
     registered: list[dict] = []
-    for fname in sorted(os.listdir(BACKGROUND_DIR)):
-        lower = fname.lower()
-        if not lower.endswith(_IMAGE_EXTS):
-            continue
-        path = os.path.join(BACKGROUND_DIR, fname)
-        if not os.path.isfile(path):
-            continue
-        stem = os.path.splitext(fname)[0]
-        asset_id = f"builtin_background_{stem}"
+    for asset_id, (root, resource, record) in sorted(resources_by_id.items()):
+        relative_path = next(path for path in resource["mediaFiles"]
+                             if isinstance(path, str)
+                             and path.startswith("assets/backgrounds/")
+                             and path.lower().endswith(_IMAGE_EXTS))
+        source = (root / relative_path).resolve()
+        path = source
+        if immutable_root is not None:
+            try:
+                path = install_immutable_resource_file(
+                    source, immutable_root,
+                    pack_id=load_resource_pack_manifest(root)["packId"],
+                    pack_version=load_resource_pack_manifest(root)["version"],
+                    relative_path=relative_path,
+                    expected_sha256=record["sha256"],
+                    expected_size=record.get("sizeBytes"),
+                )
+            except (OSError, ValueError):
+                continue
         size = os.path.getsize(path)
         width = height = None
         try:
-            info = render.probe_media(path)
+            info = render.probe_media(str(path))
             width = info.get("width")
             height = info.get("height")
         except RenderError:
-            # 探测失败不阻断登记：尺寸交由 UI 补全
             pass
         asset = store.add_asset(
             asset_id=asset_id,
-            name=f"内置·背景·{stem}",
-            path=path,
+            name=resource["name"],
+            path=str(path),
             size=size,
             kind="image",
             duration=None,

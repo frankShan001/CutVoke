@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_holo_foil",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "observation": "青紫全息箔呈大块折叠面，青色与洋红高光分区清楚，可覆盖主体后方或画面边缘。",
+  "sourceSha256": "2ef3b72dcad9135302279d12f9c53530c4460a85b8ddee9eae8d8435a1ac5bfb",
+  "previewSha256": "fabc598f756d56cf392460f8bd385cde1922be5962b13cc559304a4eecde1085",
+  "auditSha256": "08715a84e493680ff1d0d96bb9a4c1c8e7d14906182020efe7a2bfbaebb9bc8d"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_flare_rose",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "玫瑰粉横向光斑带一个柔和副光点，细长轮廓适合宽画面镜头叠加。",
+  "sourceSha256": "299712a33f094ca02b448c842864fb9544ccb910f1ab00a53746290741ee15bd",
+  "previewSha256": "d5d86d054f7c9f5a91e4e0d3de3df6c79e134b28414aacdca8dcc0d893241031",
+  "auditSha256": "16a199bc6b3945cbe1b4904e2e3ed6f5c3b3ff1c332c37449c26a46302a97eb1"
+}

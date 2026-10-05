@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.gentleRock",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "amplitude",
+    "value": 0.0375
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "5f711f8cb31e2556ee2517b5d0e023217c209a5f319719e20d39d9a3ca27ad62",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "5f711f8cb31e2556ee2517b5d0e023217c209a5f319719e20d39d9a3ca27ad62",
+  "auditExport": "animation-gentleRock-v1-0-0.audit.mp4"
+}

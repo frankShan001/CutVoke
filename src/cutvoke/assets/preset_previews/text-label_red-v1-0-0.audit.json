@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.label_red",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 844,
+  "exportSha256": "3fba5e823665f5ee0ca5b1878a28b129718cb0acf86acc7433b7122d10aaf23d",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "3fba5e823665f5ee0ca5b1878a28b129718cb0acf86acc7433b7122d10aaf23d",
+  "auditExport": "text-label_red-v1-0-0.audit.mp4"
+}

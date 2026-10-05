@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_indigo_smoke",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T01:05:55+00:00",
+  "observation": "The indigo smoke swirl has a coherent S shape; its soft dark edge is strongest over lighter footage.",
+  "method": "Reviewed each extracted RGBA PNG on dark and light contact sheets, then checked the actual RenderService preview contact sheet. Examined distinct silhouettes, cell-edge clipping, alpha fringes, visibility on both tones, and usefulness as a compositing overlay.",
+  "sourceSha256": "a3f9483dce10cc97b3a9aec6c7ed4af56a0608c241bdbf004bef789e4aaa2100",
+  "previewSha256": "cdf18235bcbecb4e14873d88c67e21456393f0954886d211b8f6e15991ac2ffa",
+  "auditSha256": "fd9534d16af19066a0bfe09c6a170d3600746707db9c1cc94fdf69ad091fc94b"
+}

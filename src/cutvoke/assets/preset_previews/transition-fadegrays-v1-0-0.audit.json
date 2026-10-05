@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.fadegrays",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.085,
+  "exportSha256": "5334214bf81ebe70ad5e7efc46acc1f3d421376811e6d094e1c076a174b6b3a0",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "5334214bf81ebe70ad5e7efc46acc1f3d421376811e6d094e1c076a174b6b3a0",
+  "auditExport": "transition-fadegrays-v1-0-0.audit.mp4"
+}

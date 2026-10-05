@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_tracking_brackets",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6b1d5b3aae0bb6597eb2354caa4a7b2a83374b641c956a742f2617e65f1299b7",
+  "previewSha256": "76668a15640edf568657278410e037ca49c077f99ce9d4041149580870259c80",
+  "preview": "glitch_tracking_brackets.mp4",
+  "bytes": 7814,
+  "visiblePixels": 2873,
+  "changedPixels": 0,
+  "motionVisible": false
+}

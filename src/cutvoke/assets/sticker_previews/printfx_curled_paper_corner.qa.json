@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_curled_paper_corner",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "3723f110ce4c09c8e8d55ea704141db240097c2ac34efef6c1157286c4d6b4c7",
+  "previewSha256": "a1cb08352618adf79497e7f80769b691a0a6b51aa167406696cf0b9d1c3724d3",
+  "preview": "printfx_curled_paper_corner.mp4",
+  "bytes": 8663,
+  "visiblePixels": 7949,
+  "changedPixels": 0,
+  "motionVisible": false
+}

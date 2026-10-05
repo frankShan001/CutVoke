@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_equalizer_arc_gold",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c3c05fb12ce648235b834775461ee5605b38e2254fd40bf26d699fb6656922db",
+  "previewSha256": "5f5387c40066f82236d31c33a6d6740a1298ef958b8e2f80375e3ddfc9554b80",
+  "preview": "audiofx_equalizer_arc_gold.mp4",
+  "bytes": 8263,
+  "visiblePixels": 5131,
+  "changedPixels": 0,
+  "motionVisible": false
+}

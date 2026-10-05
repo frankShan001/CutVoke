@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_split_compare",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "99ae5238bed705442254e3ad9f29752ce916ee7a6c6732ea3eb4904e07d3d36d",
+  "previewSha256": "973e5d24097eb4079ae4aea5212fdf2159e506d39df77382a37dfbae9cbe5641",
+  "preview": "guide_split_compare.mp4",
+  "bytes": 3822,
+  "visiblePixels": 1170,
+  "changedPixels": 0,
+  "motionVisible": false
+}

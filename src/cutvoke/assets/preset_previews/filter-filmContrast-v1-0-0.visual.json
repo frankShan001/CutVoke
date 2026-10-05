@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.filmContrast",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.vintage",
+  "params": {
+    "strength": 1.0
+  },
+  "subcategory": "胶片",
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Warm faded colors retain deeper shadows than the plain vintage treatment.",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "coverSha256": "f07770f8138e8ef97d946486ae30a29ededef92316ae109fa20ea7ac3eb7832d",
+  "motionPreviewSha256": "1a28dafbc062da853c158f31277e69ed981b7371ab50df37d9eef4db6c752b26",
+  "auditSha256": "8a4ca8edc393f1e7500c5df48fd261092c21558f0263a5a499f09e6134c21661"
+}

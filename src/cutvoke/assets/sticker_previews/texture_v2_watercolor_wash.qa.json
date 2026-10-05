@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_watercolor_wash",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "aa6dd64299012ef3cc8b8f383e51b0930f396496ac99a0e14ca5b56da101d90f",
+  "previewSha256": "4ffd88e1226e7c3038326bcd8a5201e3526b43803aec1a2bc25555b5a6515e6b",
+  "preview": "texture_v2_watercolor_wash.mp4",
+  "bytes": 5796,
+  "visiblePixels": 3728,
+  "changedPixels": 0,
+  "motionVisible": false
+}

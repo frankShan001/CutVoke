@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.hrwind",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.hrwind",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "故障",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Fine horizontal streaks pull from the left toward the right, with the old and new shots interleaving at a moving rightward boundary.",
+  "method": "Manual comparison of five actual rendered frames per transition, neighboring presets, and complete MP4 decode",
+  "coverSha256": "b3e869b3d7bed7cfc6d32674b781f54c79710077803b4277523bc80faa73a23f",
+  "motionPreviewSha256": "c1584b208b91862cda8322a8597e3b37704d0d3f2ddd2671ff2a52b071f66104",
+  "auditSha256": "e58a63e94ea9c79f0a1e14cf41e0881705a8cab3e3ebca03548447aecad96dc8"
+}

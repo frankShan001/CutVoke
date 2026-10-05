@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_check",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Green scalloped badge with a large white check mark and strong contrast.",
+  "sourceSha256": "e737b76e84dc863c6432f51e736ab9af54dda47286f42153fbe10b47b7e7e83f",
+  "previewSha256": "c6c0aad249d87eb26a112f25ac75f695489f89989c80ef0d084bd10d17a67d9c",
+  "auditSha256": "fad1bf0857ccd085e3bc56666cfe84121734369d1a5f40048d9d85c17cc906a5"
+}

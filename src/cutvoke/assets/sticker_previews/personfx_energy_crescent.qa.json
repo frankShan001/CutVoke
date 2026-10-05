@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.personfx_energy_crescent",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a1f64adcbf42e5a02e5a197b31070df9637c26d554738d8e64282365abe46349",
+  "previewSha256": "39bc15a7246e4f65f8a6ef32a76fa336ae2c370175db9cb0cfea25b7f362bb8b",
+  "preview": "personfx_energy_crescent.mp4",
+  "bytes": 8648,
+  "visiblePixels": 2751,
+  "changedPixels": 0,
+  "motionVisible": false
+}

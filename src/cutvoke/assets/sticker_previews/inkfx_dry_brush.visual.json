@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_dry_brush",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "A broad diagonal charcoal stroke shows broken bristle texture and dry edges, unlike the curved calligraphic arc.",
+  "sourceSha256": "a72145b7b3cc58cc407221b22e9f690aa070664b96a93ae8d3dd38dff2d40c42",
+  "previewSha256": "f6e4f12c16891b7d5be45bc0bcd2ebc2647c78245602dd146469dcbcc4bae9ee",
+  "auditSha256": "bfc6a7c95c8290873e00fa9f03326a79484f59310eb1133685bfbf763a25c28f"
+}

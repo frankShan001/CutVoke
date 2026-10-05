@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.wipeup",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.wipeup",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "擦除",
+  "reviewer": "Codex manual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "A hard horizontal boundary moves upward.",
+  "method": "Compared five aligned frames at 0.55, 0.65, 0.75, 0.85 and 0.95 seconds for all eight 擦除 transitions; inspected contact covers and the rendered motion sequence. Distinct direction or geometry is visible for each candidate. Technical apply/edit/reload/undo/export reports were checked separately.",
+  "coverSha256": "98e0227510a4d3300356af8d5b402c1e3de39732ae655b179ff653edc78c3fc1",
+  "motionPreviewSha256": "e6f44ca0c8288afecf8ac3ded7adf2167aaa5de477fbf9d61ce887eba18a5001",
+  "auditSha256": "18b0fc75f795e438ce352a2fb2287d57e22248b6c8219296766969a2b818a58c"
+}

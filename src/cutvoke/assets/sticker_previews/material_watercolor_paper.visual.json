@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.material_watercolor_paper",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图与渲染器合成预览；只批准纹理特征清晰、边缘完整且缩略图可辨的素材。批准仅覆盖贴图本身的识别度，不代表复杂实拍成片验收。",
+  "observation": "蓝、粉、赭色水彩晕染边界清楚，纸面颗粒可见，和纯色卡片有明显区别。",
+  "sourceSha256": "bbf2829953d693c9a4053cab010bf16ea7d085e7ad79cf56c6584b4e6bea5a7b",
+  "previewSha256": "e25727908d027bc84fef886690e01e0a4dd5dd1aceef1406ee0ac6e8353f3ab8",
+  "auditSha256": "feb4ec41b2fce2402f2e1370c7f2384c8919e6cf5a7bbb95fe2c931a3f5b2b8a"
+}

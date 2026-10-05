@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.monoMatte",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.filmgrain",
+  "params": {
+    "strength": 100,
+    "temporal": false
+  },
+  "subcategory": "黑白",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Dense monochrome grain covers both flat and bright regions throughout the shot. This moving textured treatment is visibly unlike the smooth classic, hard contrast, soft bloom, negative, line-art, vignette and block-tone black-and-white entries.",
+  "method": "Inspected the five-frame black-and-white comparison sheet at 0.55, 0.65, 0.75, 0.85 and 0.95 seconds, the full-size cover, and the edit/export audit; compared against the other seven black-and-white presets.",
+  "coverSha256": "08d503d7e61a60b7fe2d94258f1e87a6a3ff807b7cecbdfbd674aa840edf052f",
+  "motionPreviewSha256": "9daf3cf7a58227c63c12d7ff506453a72fed589891da26db99999ce4b7a89abd",
+  "auditSha256": "c4373ac7023ed7b541e867c70fd79839c9ec7e7d876f2a2df38f609d64680801"
+}

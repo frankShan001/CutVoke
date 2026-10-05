@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_rice_paper",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "30376f9ed5ae8f4cf50318c75de6ac5915f0b1ab0c590fa5eb1d35a2f2572b7e",
+  "previewSha256": "a3210628b872fe6dfe92632ce606a77beae0767ebde7b5ab34e88fd8cbaf497e",
+  "preview": "material_rice_paper.mp4",
+  "bytes": 11548,
+  "visiblePixels": 11525,
+  "changedPixels": 0,
+  "motionVisible": false
+}

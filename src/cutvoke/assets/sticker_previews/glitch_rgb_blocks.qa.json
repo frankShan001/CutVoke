@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_rgb_blocks",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0adcc63cd8d9d1210270f53b77de0bc3039aa47ff881cc728bb16c42b68046da",
+  "previewSha256": "e7175382adc1bfd0ec6d0806f5e7d73194c02e2d9556bd9124ff4c738e0e7b97",
+  "preview": "glitch_rgb_blocks.mp4",
+  "bytes": 9791,
+  "visiblePixels": 6004,
+  "changedPixels": 0,
+  "motionVisible": false
+}

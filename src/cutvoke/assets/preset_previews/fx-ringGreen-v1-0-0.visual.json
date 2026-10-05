@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.ringGreen",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.shape",
+  "params": {
+    "shape": "ellipse",
+    "mode": "outline",
+    "x": 0.5,
+    "y": 0.5,
+    "w": 0.65,
+    "h": 0.8,
+    "strokeWidth": 15,
+    "color": "#34C759",
+    "opacity": 1
+  },
+  "subcategory": "构图",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "绿色椭圆聚焦圈围住画面中心物体，入段前无圈；编辑水平位置后圆圈明显移动，与矩形框的轮廓和颜色区分。",
+  "method": "Viewed the full-size composition cover contact sheet and aligned 0.10s/0.95s frames from each generated MP4; compared audited edited-X export frames to default frames and confirmed visible movement or boundary shift.",
+  "coverSha256": "5f843dfeb3f1b6c47a113fe931172b176bdb9712cefb3b84b4201c393378ca3d",
+  "motionPreviewSha256": "ad91382a6bc9eb7e9f27010f83baa26555ebbbb2133255595ac3fa1d8b1f11ec",
+  "auditSha256": "fce15b52275857231e9e9897f98cf13eb5e042f5a139e59a4f8be8068380b3b9"
+}

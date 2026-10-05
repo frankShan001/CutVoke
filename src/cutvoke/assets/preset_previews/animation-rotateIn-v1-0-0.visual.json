@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.rotateIn",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.rotateIn",
+  "params": {
+    "duration": 1.0,
+    "fromAngle": -18.0,
+    "easing": "ease-out"
+  },
+  "subcategory": "入场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "倾斜画幅与透明度连续回到正常状态，角落露出背景符合旋转动作；无异常画幅缩放。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "b6f7ca71e87ddd5428fb66d4fd2aef0ea1f160e2d3b944a96b253e17569ee14e",
+  "motionPreviewSha256": "cc410d544dd23104446abdbcf6572e1c47b146788a1ceaf6b7f5b176fb6e7cce",
+  "auditSha256": "ace5009004aac48af8c4f9d3a01691b2848d0d5e8b1000047cb41abcb73e69ca",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_rotateIn.png",
+  "libraryReviewSheetSha256": "4be5eecce1ffdb8d157e20230477b63579bd6c085fc51f62fd482c597cf6cfc8"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.party_cone_hat",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "304b4c58653175959c608a112d6db38752360a52d2dd100efd9be08a93f168e6",
+  "previewSha256": "0e66b384ed6f6a182d4224086467000131ced5ea80ba66d6303bf1182eb7ee71",
+  "preview": "party_cone_hat.mp4",
+  "bytes": 4440,
+  "visiblePixels": 1852,
+  "changedPixels": 0,
+  "motionVisible": false
+}

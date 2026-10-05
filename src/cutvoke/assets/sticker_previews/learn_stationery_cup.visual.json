@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_stationery_cup",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "铅笔、尺和剪刀收在杯内，剪刀环与杯口易辨；主体外没有残片。",
+  "sourceSha256": "5cecc39a3fbcb5ce9ff53b2ecd0b46bbf7240ee9fadc30346cb0fa4457e71025",
+  "previewSha256": "9fdb0b626a3fd44e22c1f02f8cbee0badea69c76bddea0a824e01f521da7a91c",
+  "auditSha256": "ef122c291cf0072e4f773ea5ac5a948cf2ae675a5130bed4a34a21ba4c5cadc0"
+}

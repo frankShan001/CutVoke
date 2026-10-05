@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_sparkles",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "cebca6e1ea8cfc07961a9002806fecfb2dfa3d12836b62980a84b4e9f23adc8a",
+  "previewSha256": "c9ca7396bcef7121a502136edb68933d41c37e45ff1f8f93d0049a9303448af5",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1871,
+  "visiblePixels": 1162,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 543,
+    "steady_entry": 1163,
+    "steady_exit": 1163,
+    "exit": 547
+  },
+  "previewExportMeanRgbDifferences": [
+    0.143,
+    0.142
+  ],
+  "auditExport": "decor_sparkles.audit.mp4",
+  "auditExportSha256": "f97cb220f26c4231de91177bdbb66af2723eae14de8ad6eff1e09552972f1765"
+}

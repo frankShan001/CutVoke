@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.glitch_rgb_blocks",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项检查4×4透明贴图裁切表和4×4真实画面合成表；确认Alpha通道、裁切边缘、深浅背景对比、缩略图可辨性与每项轮廓差异。",
+  "observation": "青蓝洋红离散色块集中在画面中部，方形像素轮廓清楚，四周保持透明。",
+  "sourceSha256": "0adcc63cd8d9d1210270f53b77de0bc3039aa47ff881cc728bb16c42b68046da",
+  "previewSha256": "e7175382adc1bfd0ec6d0806f5e7d73194c02e2d9556bd9124ff4c738e0e7b97",
+  "auditSha256": "260e54ac267008672e9f315368dff5e5c35eeee3fda405e74d8f422e6aec0a39"
+}

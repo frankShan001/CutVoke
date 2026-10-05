@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_watercolor_wash",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "aa6dd64299012ef3cc8b8f383e51b0930f396496ac99a0e14ca5b56da101d90f",
+  "previewSha256": "4ffd88e1226e7c3038326bcd8a5201e3526b43803aec1a2bc25555b5a6515e6b",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6526,
+  "visiblePixels": 5261,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 4918,
+    "steady_entry": 5261,
+    "steady_exit": 5261,
+    "exit": 4919
+  },
+  "previewExportMeanRgbDifferences": [
+    0.005,
+    0.005
+  ],
+  "auditExport": "texture_v2_watercolor_wash.audit.mp4",
+  "auditExportSha256": "66bf8e618c513a0815c04c490ad3956efa14e5a2fee61d8835c2a3aec4418e8b"
+}

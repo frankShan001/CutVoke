@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.marker_doodle_corner_brackets",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "66448947a41d33269d357da17607ae9b5c0240d9adcd5fcd1bf8dacc6c3047f8",
+  "previewSha256": "69f54bf5a174b416df658660e1b2f30f0c5ca78cc13d3eee82a0f1ed15242451",
+  "preview": "marker_doodle_corner_brackets.mp4",
+  "bytes": 3794,
+  "visiblePixels": 1234,
+  "changedPixels": 0,
+  "motionVisible": false
+}

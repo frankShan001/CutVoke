@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.transition.radial",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.transition.radial",
+      "version": "1.0.0",
+      "params": {
+        "duration": 0.5
+      }
+    }
+  ],
+  "durationSeconds": 1.066667,
+  "firstLastMeanRgbDifference": 97.76,
+  "maxSampledMeanRgbDifference": 97.76,
+  "coverSha256": "0ad813a1bca1a4fa63b1dc0128c3e1ce36276fdce615ec75eea6f09168b39bef",
+  "previewSha256": "70ed0bed36f33b28114159bf00398606619b1567cfcb231f3c41198d7b777466",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

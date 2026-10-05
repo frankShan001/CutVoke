@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.filmContrast",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "strength",
+    "value": 0.5
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.018,
+  "exportSha256": "963349099f9baaa58ec1bdb181b787c507b90eb6098404df175412d793afa176",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "963349099f9baaa58ec1bdb181b787c507b90eb6098404df175412d793afa176",
+  "auditExport": "filter-filmContrast-v1-0-0.audit.mp4"
+}

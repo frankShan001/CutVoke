@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_pearl_glints",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "ef2c43b38cf6aea87e3f0b146fb68282a1f11cf9da520b8b043404ad4b648bc8",
+  "previewSha256": "393b6db495b41b08bcf5528d46feb730f2ab831dca13690f5afb2be2fff1aae7",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 7274,
+  "visiblePixels": 6857,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 2350,
+    "steady_entry": 6864,
+    "steady_exit": 6854,
+    "exit": 2352
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2350,
+      "withoutFade": 6862
+    },
+    "steady_entry": {
+      "withFade": 6864,
+      "withoutFade": 6865
+    },
+    "steady_exit": {
+      "withFade": 6854,
+      "withoutFade": 6860
+    },
+    "exit": {
+      "withFade": 2352,
+      "withoutFade": 6855
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.294,
+    0.3
+  ],
+  "auditExport": "fxoverlay_fantasy_pearl_glints.audit.mp4",
+  "auditExportSha256": "6d37fcb3cd31ff75ae58dad46151eb409d5b8ef4f36f2e3b73ace2d7950d5422"
+}

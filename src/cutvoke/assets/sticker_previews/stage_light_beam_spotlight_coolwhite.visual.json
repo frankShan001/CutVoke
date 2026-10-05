@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.stage_light_beam_spotlight_coolwhite",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T00:05:43+00:00",
+  "observation": "The cool-white cone and haze remain visible against the darker canvas area.",
+  "method": "Reviewed each cropped transparent PNG on dark and light checkerboard contacts, then reviewed the corresponding RenderService preview on the editor's dark-to-light canvas. Checked distinct shapes, cell spill, clipping, alpha edges, contrast, and whether each item is useful as a stage-light overlay.",
+  "sourceSha256": "c7f09da143f25c8fb7b2c0a62eb5eb83114723d7b92ad80f0af4f3bbe67c13e6",
+  "previewSha256": "6f80547f23aa43deeecc8813659bf6366102a93a781953c157c6ed7196b89954",
+  "auditSha256": "802d60f6d53283585b1bd48b98dc343007dd8169270a0e3b5c240952f93fa0de"
+}

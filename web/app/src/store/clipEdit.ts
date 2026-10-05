@@ -8,7 +8,7 @@ import { ApiFailure } from "../lib/api";
 import { getLatestState, runCommand, type ActionResult } from "./actions";
 import { probeMedia } from "../lib/mediaApi";
 import { rationalToSecs, secsToRational } from "../lib/rational";
-import type { Rational, KeyframeInterpolation } from "../types/api";
+import type { Rational, KeyframeInterpolation, ResourceReference } from "../types/api";
 
 /** Dragging library media onto a clip means before/after the whole clip. */
 export function resolveInsertStart(state: EditorState, trackId: string, requestedSeconds: number): Rational {
@@ -39,11 +39,24 @@ function addRational(left: Rational, right: Rational): Rational {
   };
 }
 
+function videoAnchorAt(state: EditorState, seconds: number): string | undefined {
+  const selected = state.selection?.clipId;
+  const candidates = (state.project?.sequence.tracks || [])
+    .filter((track) => track.kind === "video" && track.role !== "sticker")
+    .flatMap((track) => track.clips)
+    .filter((clip) => rationalToSecs(clip.timelineStart) <= seconds + 1e-6
+      && seconds < rationalToSecs(clip.timelineEnd) - 1e-6);
+  return candidates.find((clip) => clip.id === selected)?.id || candidates[0]?.id;
+}
+
 /** 素材拖入时间线：探测真实时长（失败按 2s），始终在完整片段边界插入。 */
 export async function insertClipFromDrop(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { trackId: string; sourcePath: string; timelineStartSecs: number; createTrackKind?: "video" | "audio" },
+  input: { trackId: string; sourcePath: string; assetId?: string; timelineStartSecs: number;
+    createTrackKind?: "video" | "audio"; createTrackRole?: "sticker"; role?: "sticker";
+    stickerAnimation?: { effectId: string; params: Record<string, unknown> };
+    resourceRef?: ResourceReference; stickerScale?: number },
 ): Promise<ActionResult> {
   let dur = 2;
   const probe = await probeMedia(input.sourcePath);
@@ -65,6 +78,14 @@ export async function insertClipFromDrop(
     clipId,
     trackId: input.trackId,
     ...(input.createTrackKind ? { createTrackKind: input.createTrackKind } : {}),
+    ...(input.createTrackRole ? { createTrackRole: input.createTrackRole } : {}),
+    ...(input.role ? { role: input.role } : {}),
+    ...(input.role === "sticker" && videoAnchorAt(current, rationalToSecs(start))
+      ? { attachedToClipId: videoAnchorAt(current, rationalToSecs(start)) } : {}),
+    ...(input.stickerAnimation ? { stickerAnimation: input.stickerAnimation } : {}),
+    ...(input.resourceRef ? { resourceRef: input.resourceRef } : {}),
+    ...(input.stickerScale !== undefined ? { stickerScale: input.stickerScale } : {}),
+    ...(input.assetId ? { assetId: input.assetId } : {}),
     sourcePath: input.sourcePath,
     sourceStart: secsToRational(0),
     timelineStart: start,
@@ -91,14 +112,43 @@ export async function insertClipFromDrop(
 export async function insertClipAutoTrack(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { sourcePath: string; trackKind: "video" | "audio" },
+  input: { sourcePath: string; assetId?: string; trackKind: "video" | "audio";
+    trackRole?: "sticker"; timelineStartSecs?: number;
+    stickerAnimation?: { effectId: string; params: Record<string, unknown> };
+    resourceRef?: ResourceReference; stickerScale?: number },
 ): Promise<ActionResult> {
   const trackId = `track_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
   return insertClipFromDrop(dispatch, state, {
     trackId,
     sourcePath: input.sourcePath,
-    timelineStartSecs: 0,
+    assetId: input.assetId,
+    timelineStartSecs: input.timelineStartSecs ?? 0,
     createTrackKind: input.trackKind,
+    createTrackRole: input.trackRole,
+    role: input.trackRole,
+    stickerAnimation: input.stickerAnimation,
+    resourceRef: input.resourceRef,
+    stickerScale: input.stickerScale,
+  });
+}
+
+/** 文字标题使用独立 text 轨与 cutvoke.text 效果，原子插入且可一次撤销。 */
+export async function insertTitleAutoTrack(
+  dispatch: Dispatch<EditorAction>, state: EditorState,
+  input: { text: Record<string, unknown>; presetId?: string; timelineStartSecs: number; durationSecs?: number },
+): Promise<ActionResult> {
+  const current = getLatestState() || state;
+  const start = resolveInsertStart(current, "", input.timelineStartSecs);
+  const end = addRational(start, secsToRational(input.durationSecs ?? 3));
+  return runCommand(dispatch, current, "clip.insert", {
+    trackId: `title_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+    createTrackKind: "text",
+    text: input.text,
+    ...(input.presetId ? { textPresetId: input.presetId } : {}),
+    ...(videoAnchorAt(current, rationalToSecs(start))
+      ? { attachedToClipId: videoAnchorAt(current, rationalToSecs(start)) } : {}),
+    timelineStart: start,
+    timelineEnd: end,
   });
 }
 
@@ -115,6 +165,7 @@ export async function moveClip(
     mode?: "reorder";
     anchorClipId?: string;
     anchorPosition?: "before" | "after";
+    followAttachments?: boolean;
   },
 ): Promise<ActionResult> {
   const payload: Record<string, unknown> = { clipId: input.clipId };
@@ -123,14 +174,28 @@ export async function moveClip(
   if (input.mode) payload.mode = input.mode;
   if (input.anchorClipId) payload.anchorClipId = input.anchorClipId;
   if (input.anchorPosition) payload.anchorPosition = input.anchorPosition;
+  if (input.followAttachments !== undefined) payload.followAttachments = input.followAttachments;
   const res = await runCommand(dispatch, state, "clip.move", payload);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    if (input.mode === "reorder") {
-      dispatch({ type: "STATUS_SET", severity: "ok", text: "已调整片段顺序" });
-    } else {
-      dispatch({ type: "STATUS_SET", severity: "ok", text: "已移动片段" });
-    }
+    const attached = (res.command?.changedEntities || [])
+      .filter((item) => item.type === "clip" && item.reason === "attached").length;
+    dispatch({ type: "STATUS_SET", severity: "ok", text:
+      `${input.mode === "reorder" ? "已调整片段顺序" : "已移动片段"}${attached ? `，${attached} 个关联片段同步移动` : ""}` });
+  }
+  return res;
+}
+
+/** 关闭指定片段前的一处空隙；后续片段整体平移，保留其它空隙。 */
+export async function closeGapBeforeClip(
+  dispatch: Dispatch<EditorAction>,
+  state: EditorState,
+  input: { trackId: string; beforeClipId: string },
+): Promise<ActionResult> {
+  const res = await runCommand(dispatch, state, "clip.closeGap", input);
+  if (res.ok) {
+    dispatch({ type: "UNDO_SET", blocked: false });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: "已关闭此处空隙，后续片段随之左移" });
   }
   return res;
 }
@@ -210,8 +275,11 @@ export async function updateCaption(
     text?: string;
     start?: Rational;
     end?: Rational;
+    words?: { text: string; start: Rational; end: Rational }[];
     fontSize?: number;
+    fontFamily?: "Noto Sans SC" | "Noto Serif SC";
     color?: string;
+    wordHighlightColor?: string;
     strokeColor?: string;
     strokeWidth?: number;
     background?: string;
@@ -219,6 +287,9 @@ export async function updateCaption(
     bold?: boolean;
     animIn?: number;
     animOut?: number;
+    animInStyle?: "fade" | "scale" | "typewriter" | "none";
+    animLoopStyle?: "none" | "pulse" | "blink";
+    animLoopMs?: number;
     /** 画布几何（H01）：x 归一化 0~1。 */
     x?: number;
     /** 画布几何（H01）：y 归一化 0~1。 */
@@ -233,8 +304,11 @@ export async function updateCaption(
   if (input.text !== undefined) payload.text = input.text;
   if (input.start) payload.start = input.start;
   if (input.end) payload.end = input.end;
+  if (input.words !== undefined) payload.words = input.words;
   if (input.fontSize !== undefined) payload.fontSize = input.fontSize;
+  if (input.fontFamily !== undefined) payload.fontFamily = input.fontFamily;
   if (input.color !== undefined) payload.color = input.color;
+  if (input.wordHighlightColor !== undefined) payload.wordHighlightColor = input.wordHighlightColor;
   if (input.strokeColor !== undefined) payload.strokeColor = input.strokeColor;
   if (input.strokeWidth !== undefined) payload.strokeWidth = input.strokeWidth;
   if (input.background !== undefined) payload.background = input.background;
@@ -242,6 +316,9 @@ export async function updateCaption(
   if (input.bold !== undefined) payload.bold = input.bold;
   if (input.animIn !== undefined) payload.animIn = input.animIn;
   if (input.animOut !== undefined) payload.animOut = input.animOut;
+  if (input.animInStyle !== undefined) payload.animInStyle = input.animInStyle;
+  if (input.animLoopStyle !== undefined) payload.animLoopStyle = input.animLoopStyle;
+  if (input.animLoopMs !== undefined) payload.animLoopMs = input.animLoopMs;
   if (input.x !== undefined) payload.x = input.x;
   if (input.y !== undefined) payload.y = input.y;
   if (input.scale !== undefined) payload.scale = input.scale;
@@ -335,9 +412,14 @@ export async function duplicateClip(
 export async function setClipSpeed(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { clipId: string; speed: number | Rational },
+  input: { clipId: string; speed: number | Rational; preservePitch?: boolean;
+    frameInterpolation?: "none" | "motion" },
 ): Promise<ActionResult> {
-  const res = await runCommand(dispatch, state, "clip.speed", { clipId: input.clipId, speed: input.speed });
+  const res = await runCommand(dispatch, state, "clip.speed", {
+    clipId: input.clipId, speed: input.speed,
+    ...(input.preservePitch === undefined ? {} : { preservePitch: input.preservePitch }),
+    ...(input.frameInterpolation === undefined ? {} : { frameInterpolation: input.frameInterpolation }),
+  });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
     dispatch({ type: "STATUS_SET", severity: "ok", text: "已调整速度" });
@@ -513,12 +595,65 @@ export async function applyTransition(
   return result;
 }
 
-/** 应用动画（1.5-A / 1.5-B）：入场 / 出场 / 循环共 6 个内置动画。
-    换用新类型前先移除片段上所有旧动画（effect.add 是追加，避免叠加）。
-    后端 _find_animation 只取 clip.effects 里第一个 cutvoke.anim.*，因此前端
-    做成单一选择器（三选一）；这里 remove-then-add 天然保证只有一个生效。
-    animationId 为空串表示「无」——仅移除已有动画，不新增。
-    scale 用于 zoomIn(fromScale) / zoomOut(toScale)；amplitude + period 用于 breathe。 */
+/** Add or update several clip-local numeric keyframes in one undoable command. */
+export async function addKeyframes(
+  dispatch: Dispatch<EditorAction>,
+  state: EditorState,
+  input: {
+    clipId: string;
+    keyframes: { param: string; time: number | Rational; value: number; interpolation?: KeyframeInterpolation }[];
+  },
+): Promise<ActionResult> {
+  const res = await runCommand(dispatch, state, "clip.keyframe", {
+    clipId: input.clipId,
+    action: "batch",
+    keyframes: input.keyframes.map((keyframe) => ({
+      ...keyframe,
+      time: typeof keyframe.time === "number" ? secsToRational(keyframe.time) : keyframe.time,
+    })),
+  });
+  if (res.ok) {
+    dispatch({ type: "UNDO_SET", blocked: false });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: `已记录 ${input.keyframes.length} 个变换关键帧` });
+  }
+  return res;
+}
+
+/** A source-relative speed curve is one atomic edit and one undo point. */
+export async function setClipCurve(
+  dispatch: Dispatch<EditorAction>, state: EditorState,
+  input: { clipId: string; points: { at: number; speed: number }[];
+    frameInterpolation?: "none" | "motion" },
+): Promise<ActionResult> {
+  const res = await runCommand(dispatch, state, "clip.speed", {
+    clipId: input.clipId, curve: { points: input.points }, preservePitch: true,
+    ...(input.frameInterpolation === undefined ? {} : { frameInterpolation: input.frameInterpolation }),
+  });
+  if (res.ok) {
+    dispatch({ type: "UNDO_SET", blocked: false });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: "已应用速度曲线" });
+  }
+  return res;
+}
+
+/** Select how sub-frame motion is synthesized for slow-motion video clips. */
+export async function setClipFrameInterpolation(
+  dispatch: Dispatch<EditorAction>, state: EditorState,
+  input: { clipId: string; frameInterpolation: "none" | "motion" },
+): Promise<ActionResult> {
+  const res = await runCommand(dispatch, state, "clip.speed", {
+    clipId: input.clipId, frameInterpolation: input.frameInterpolation,
+  });
+  if (res.ok) {
+    dispatch({ type: "UNDO_SET", blocked: false });
+    dispatch({ type: "STATUS_SET", severity: "ok", text:
+      input.frameInterpolation === "motion" ? "已启用运动估算补帧" : "已关闭慢动作补帧" });
+  }
+  return res;
+}
+
+/** 应用动画：后端按入场、出场、循环、组合槽位原子替换。
+    animationId 为空串时清除指定槽位；params 使用注册表参数。 */
 export async function applyAnimation(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
@@ -532,6 +667,8 @@ export async function applyAnimation(
     /** 显式参数（J01 数据驱动）：提供时直接采用，覆盖下方按 id 推断的旧逻辑，
         以支持注册表里新增的动画（duration/easing/distance/fromAngle/overshoot/direction/amplitude/period）。 */
     params?: Record<string, unknown>;
+    slot?: "入场" | "出场" | "循环" | "组合";
+    keyframePolicy?: "combine" | "replace";
   },
 ): Promise<ActionResult> {
   const current = findClip(state, input.clipId);
@@ -560,12 +697,14 @@ export async function applyAnimation(
     params.amplitude = input.amplitude ?? 0.05;
     params.period = input.period ?? 2;
   }
-  if (existing.length === 1 && existing[0].effectId === id
-    && JSON.stringify(existing[0].params || {}) === JSON.stringify(params)) return { ok: true };
+  if (id && existing.some((effect) => effect.effectId === id
+    && JSON.stringify(effect.params || {}) === JSON.stringify(params))) return { ok: true };
   const result = await runCommand(dispatch, state, "effect.setAnimation", {
     clipId: input.clipId,
     effectId: id,
     params,
+    ...(input.slot ? { slot: input.slot } : {}),
+    ...(input.keyframePolicy ? { keyframePolicy: input.keyframePolicy } : {}),
   });
   if (result.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: id ? "已应用动画" : "已移除动画" });
   return result;

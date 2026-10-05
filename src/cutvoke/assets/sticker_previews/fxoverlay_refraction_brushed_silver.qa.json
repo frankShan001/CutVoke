@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_brushed_silver",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "1e9a11d5291cf74b65d10f1b52926afeb0dfca3ad830a0d13acd7f78709b9e8f",
+  "previewSha256": "e581e2104f8557bea60b1abe91302fb23e278588ff803f27073d4fd6deea939a",
+  "preview": "fxoverlay_refraction_brushed_silver.mp4",
+  "bytes": 13588,
+  "visiblePixels": 13584,
+  "changedPixels": 0,
+  "motionVisible": false
+}

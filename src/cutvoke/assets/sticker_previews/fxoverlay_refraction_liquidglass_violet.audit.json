@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_liquidglass_violet",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "318aac75f19ba8606625417594cb32caf4de0b331d3e0615831308f3ae63bc4e",
+  "previewSha256": "0e450f265c40a95d644d5a868955a83e21afef685743a1ce160fbb06be778427",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 14830,
+  "visiblePixels": 13399,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 8047,
+    "steady_entry": 13408,
+    "steady_exit": 13406,
+    "exit": 8045
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 8047,
+      "withoutFade": 13402
+    },
+    "steady_entry": {
+      "withFade": 13408,
+      "withoutFade": 13410
+    },
+    "steady_exit": {
+      "withFade": 13406,
+      "withoutFade": 13409
+    },
+    "exit": {
+      "withFade": 8045,
+      "withoutFade": 13410
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.458,
+    0.555
+  ],
+  "auditExport": "fxoverlay_refraction_liquidglass_violet.audit.mp4",
+  "auditExportSha256": "3e336b240c0f32040fc6b0c7c22d00e547ce2fdb7f7baf36812eaed20b24952e"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_orbit_magic",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-24",
+  "method": "Manually compared extracted transparent PNGs and real renderer composites on the light canvas, then checked each texture against dark and light backgrounds. The contact sheets and generated atlas were reviewed together.",
+  "observation": "A violet elliptical orbit with sparse gold star glints; the open center and varied orbit marks distinguish it from the portal ring.",
+  "sourceSha256": "b76104bf443f37be3d1791ed0b2b7750a6c34f944cbe9bc261cdb5d4c43d8573",
+  "previewSha256": "46f2e6c6e622b5c44963a9d74b28610f2c788c2f0f6e04a1db707bb48dc0e3d5",
+  "auditSha256": "0ec3c9591980912c3138a219922bb984ebb9a469eef2d843fd6b394c0e73a47b"
+}

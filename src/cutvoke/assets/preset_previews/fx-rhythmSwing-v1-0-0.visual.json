@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.rhythmSwing",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.swing",
+  "params": {
+    "degrees": 9.0,
+    "hz": 1.4
+  },
+  "subcategory": "动感",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Four sampled frames show clockwise and counterclockwise center rotation, with the scene covering every corner; this reads as a rhythmic camera swing distinct from horizontal handheld motion and color-split effects.",
+  "method": "Manual comparison of four frames per preset and full MP4 decode",
+  "coverSha256": "cedc07c42b77362eec593d66674e28848e999e2a2a51fa267cad0c32859d967a",
+  "motionPreviewSha256": "b361ed7ae9fc0ccfc9a2138525ab6967446aa66c1328141ab7db35765dc17480",
+  "auditSha256": "1a9ab9d3caf4fbda44756f12a6668b13f94b96bc72a1c3de64c61a220682ac82"
+}

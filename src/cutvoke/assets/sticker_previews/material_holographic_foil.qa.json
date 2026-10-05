@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.material_holographic_foil",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "41428648e740389d25719a28386cb325babad917f63f0579a969211844d232bf",
+  "previewSha256": "b1da77d9f29c172662c5420b58b47b870ed3cfa5f73c5c4cc8f00a23cb5118c8",
+  "preview": "material_holographic_foil.mp4",
+  "bytes": 4857,
+  "visiblePixels": 3456,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,33 @@
+{
+  "presetId": "cutvoke.preset.filter.monoInk",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.edge",
+      "version": "1.0.0",
+      "params": {
+        "mode": "canny",
+        "low": 0.03,
+        "high": 0.12
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.grayscale",
+      "version": "1.0.0",
+      "params": {
+        "strength": 1
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 111.963,
+  "maxSampledMeanRgbDifference": 111.963,
+  "coverSha256": "261727f205f9aefb03deccfaa2dbda3926ad6384f9fbf81e1efa217b7ec68dd6",
+  "previewSha256": "1548289aff0392bf6bcf47496d652add3e4e84617fa8340e09ab9d6d7e53b693",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

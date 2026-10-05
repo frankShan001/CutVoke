@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_chromatic_corners",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d3805c6d69e6e650e358ee886d3b79542924bc65ac88f811bd3c50a0eeb9ef87",
+  "previewSha256": "70e51d340d075fe876981479a86206de441be05fb33e1c411757091b26a71c44",
+  "preview": "texture_optical_chromatic_corners.mp4",
+  "bytes": 7433,
+  "visiblePixels": 4183,
+  "changedPixels": 0,
+  "motionVisible": false
+}

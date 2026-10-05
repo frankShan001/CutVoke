@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_bokeh_ice",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "2f4030e159e6f43ef9ddfbc25e22dea2dee8ef35e9d24204691459566876b659",
+  "previewSha256": "11e097263e8d9edd1c5e5d53fe981cee812fbb768ef1748e0f77b988eaab0cf3",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1515,
+  "visiblePixels": 1119,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "light-solid",
+  "animationVisibilityPixels": {
+    "entry": 0,
+    "steady_entry": 1125,
+    "steady_exit": 1121,
+    "exit": 0
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 0,
+      "withoutFade": 1114
+    },
+    "steady_entry": {
+      "withFade": 1125,
+      "withoutFade": 1123
+    },
+    "steady_exit": {
+      "withFade": 1121,
+      "withoutFade": 1121
+    },
+    "exit": {
+      "withFade": 0,
+      "withoutFade": 1119
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.033,
+    0.036
+  ],
+  "auditExport": "cinematic_optical_bokeh_ice.audit.mp4",
+  "auditExportSha256": "8cb8514019035eb9f270007d30f0c1ab6bff4900646bbc79c68a821e69034d24"
+}

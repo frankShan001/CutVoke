@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.party_gift_box",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual inspection of the transparent crop contact sheet and 0.75-second CutVoke RenderService-composited contact sheet. Reviewer is an AI assistant; this is not independent human acceptance.",
+  "observation": "礼物盒、盒盖与金色蝴蝶结完整，缩放预览未被画幅裁切。",
+  "sourceSha256": "ca776060840b0a23d3267e38cfa80a937f1ed62ec5b608f72c75a2c1dc96f8a0",
+  "previewSha256": "27b1a54f80e163d664cc1291509a54bbd517d7c71b5bbd4187c0b0777d2b564b",
+  "auditSha256": "7b8d628d6c44586fe99663268967586153d11ce5ec192df7d541986f55fb3869"
+}

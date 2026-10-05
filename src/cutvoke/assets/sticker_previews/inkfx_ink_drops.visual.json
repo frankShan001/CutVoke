@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_ink_drops",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "Glossy black droplets form a vertical suspended trail with little connecting ink, visibly different from the radial black splash.",
+  "sourceSha256": "921da815c7a7a8ae74f5019e053bd224d1b0849ee2cf586cafd675389e050cff",
+  "previewSha256": "0ee28d1714451e89c276cde9f93bf34a5b5ace1c1ab15977fbebd93d8ad9bb42",
+  "auditSha256": "5bf24262e90c7f612f003c3aac825dd1e41ed868114cd79414072bf0f9b0b242"
+}

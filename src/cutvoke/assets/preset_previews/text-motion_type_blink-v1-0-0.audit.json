@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.text.motion_type_blink",
+  "generator": "scripts/audit_title_presets.py",
+  "source": "generated solid-color picture and editable title clip",
+  "commands": [
+    "clip.insert",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "appliedRevision": "2",
+  "savedRevision": "7",
+  "contentAfterReload": "验收改字",
+  "exportDurationSeconds": 3.0,
+  "previewDurationSeconds": 2.0,
+  "previewExportMeanRgbDifference": 0.0,
+  "visibleTitlePixels": 1631,
+  "exportSha256": "ee4a53b67581ee4740060fa8a40f98a8eb6b1e65c54dca2ccda98d66decdecae",
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "auditExportSha256": "ee4a53b67581ee4740060fa8a40f98a8eb6b1e65c54dca2ccda98d66decdecae",
+  "auditExport": "text-motion_type_blink-v1-0-0.audit.mp4"
+}

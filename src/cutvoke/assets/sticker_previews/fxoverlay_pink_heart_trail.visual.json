@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_pink_heart_trail",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "Small pink outline hearts follow a curved rising path with clear spacing between motifs.",
+  "method": "Inspected the rendered transparent artwork on split dark and light neutral panels; machine workflow audit hashes are pinned.",
+  "sourceSha256": "9487605c29c201c52bbc69340f34722280703a089a2ab9213cb88d9fce56788c",
+  "previewSha256": "4e491e2b8ac90674ea5dfb3ab653b818a6ade894bf918a0b519627f767e834c6",
+  "auditSha256": "a1e3239a462f8ea8461b28059a58b4ee171a67721e33ca37a365cf1927e306ee"
+}

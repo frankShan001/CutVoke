@@ -1,0 +1,30 @@
+{
+  "presetId": "cutvoke.preset.fx.sharpMirror",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.sharpen",
+      "version": "1.0.0",
+      "params": {
+        "amount": 2.6
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.mirror",
+      "version": "1.0.0",
+      "params": {}
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 94.1,
+  "maxSampledMeanRgbDifference": 94.1,
+  "coverSha256": "fe455da1df3928e745b8e054867b9f3f84daf4539c5db1750e4b40a6a3f0b748",
+  "previewSha256": "338e77965067453f1ba31ea0268dc7e476510bec4a1d4b4cf8fe3dfa2543f520",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

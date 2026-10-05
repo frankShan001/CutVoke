@@ -1,0 +1,24 @@
+{
+  "presetId": "cutvoke.preset.filter.monochrome",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.grayscale",
+      "version": "1.0.0",
+      "params": {
+        "strength": 1.0
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 32.966,
+  "maxSampledMeanRgbDifference": 32.966,
+  "coverSha256": "28e451b310e5a1326b781d5f2038d8ef56db7113122377af4c32d5bfdb57f7ac",
+  "previewSha256": "8d5ee1b10bf45cbb4a18ceec1dd2e1367699aad43e984d752bb4cb318f40d0ec",
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

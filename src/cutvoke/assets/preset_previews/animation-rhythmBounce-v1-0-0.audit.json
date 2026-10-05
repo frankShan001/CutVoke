@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.rhythmBounce",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "amplitude",
+    "value": 0.0625
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "db7165e2c51d5a09132a83c4efb4102133d2f6cff985e37eb5954fd167fd7ee8",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "db7165e2c51d5a09132a83c4efb4102133d2f6cff985e37eb5954fd167fd7ee8",
+  "auditExport": "animation-rhythmBounce-v1-0-0.audit.mp4"
+}

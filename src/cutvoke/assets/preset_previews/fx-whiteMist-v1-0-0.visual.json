@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.fx.whiteMist",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.blur",
+  "params": {
+    "sigma": 5
+  },
+  "subcategory": "光影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "窗口线条明显柔化且太阳泛白溢光，形成无色白雾感；调节模糊量可改变轮廓清晰度，与暖光和冷光染色预设区分。",
+  "method": "Viewed the full-size fx-光影 cover contact sheet and aligned untreated/default/edited frames from every generated MP4; compared each visual to its category siblings and confirmed numeric editing changes the actual rendered frame.",
+  "coverSha256": "c1019dedc1b409da82d5c30373878f62386f302eef738597fe85a802b9bc76bb",
+  "motionPreviewSha256": "7e4cf804cdb3a013c03cc14feb4244482eb8d5684b3628678f52a4cb5ce68cf1",
+  "auditSha256": "c3195006376ae191713c57de347014a79ec1514c19f2f57223b995b5be1e3dbf"
+}

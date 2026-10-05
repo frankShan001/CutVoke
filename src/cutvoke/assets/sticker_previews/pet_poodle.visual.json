@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_poodle",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "卷毛质感与坐姿清楚；左侧有少量孤立色点，面积低于主体的0.1%，不影响正常显示。",
+  "sourceSha256": "e21de15668240850ede885731ce2aae685db416e3847f6d6155e14c73ca59fc3",
+  "previewSha256": "2fd2e73de40cb9c056672a82953944ca64c7933766caff42a79ffbc9ebe785a8",
+  "auditSha256": "5ac42a9f890d990bd3de7cf9a04837b65f0e55f90c2ac5e475e2e188b96c0a7b"
+}

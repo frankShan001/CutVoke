@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_low_fog",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "56850bfb6424b11bed43f84c7f95e5cfc4263661a6486b91dfc9894635b7bcdc",
+  "previewSha256": "07f4bf1fdd1b05b2b73658ddc619465281b78113e3a1a8b81619a3a899bbedf8",
+  "preview": "texture_atlas_low_fog.mp4",
+  "bytes": 7627,
+  "visiblePixels": 7585,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_atlas_rain_glass",
+  "version": "1.1.0",
+  "kind": "static",
+  "sourceSha256": "79972e389293b59595e46a968f50ab402861d04dd7c9cd20eb7499d0fe0f9069",
+  "previewSha256": "5cfaa859365acac81507d8574b3a5374f2c87dc0c9b374f7ff1379d5ebccce4f",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1964,
+  "visiblePixels": 1485,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 363,
+    "steady_entry": 1484,
+    "steady_exit": 1484,
+    "exit": 363
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 363,
+      "withoutFade": 1484
+    },
+    "steady_entry": {
+      "withFade": 1484,
+      "withoutFade": 1484
+    },
+    "steady_exit": {
+      "withFade": 1484,
+      "withoutFade": 1484
+    },
+    "exit": {
+      "withFade": 363,
+      "withoutFade": 1484
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_atlas_rain_glass.audit.mp4",
+  "auditExportSha256": "f09a691f83a4b5b9ac0b06d34a44ba87b2b4768d4d3aaf2657da0c53c01e7fcc"
+}

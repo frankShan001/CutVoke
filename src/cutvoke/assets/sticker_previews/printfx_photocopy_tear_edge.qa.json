@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_photocopy_tear_edge",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7f98681d3a9aa9b573cd93b8d8f1af9c14a3d909e16ec3bfd65ef6c78d7bd7ba",
+  "previewSha256": "371be0868e378976896ad70b478c6b81f93e8f3e65988d0ebf758fe61888a8dd",
+  "preview": "printfx_photocopy_tear_edge.mp4",
+  "bytes": 8904,
+  "visiblePixels": 8349,
+  "changedPixels": 0,
+  "motionVisible": false
+}

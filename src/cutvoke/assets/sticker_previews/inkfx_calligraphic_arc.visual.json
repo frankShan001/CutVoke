@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_calligraphic_arc",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "A single open charcoal crescent brush arc has a broken ink edge and no lettering or recognizable glyph.",
+  "sourceSha256": "dcc2cb38482d5b74a3d2f22d3fa72ed765e6770da331d392de9048b1fe0bf3c1",
+  "previewSha256": "fa72a489b31c4a24aa80bb8cde175a63d29124cf4ccae8aa70b13d7c2f60d724",
+  "auditSha256": "aa82823b136a118ba84b135a29236f23146f38dadd9254d7b0824fb580c58e42"
+}

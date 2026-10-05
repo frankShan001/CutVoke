@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_calculator",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d3593610bb108795a0bc9e3b3e9b6ad8681727154ff71c4c3632568415188a26",
+  "previewSha256": "e411122a06cebf46eb0c2dd465e6beb41a4f8b26c4df36c3efb9dcf915996e12",
+  "preview": "learn_calculator.mp4",
+  "bytes": 4219,
+  "visiblePixels": 2609,
+  "changedPixels": 0,
+  "motionVisible": false
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_croissant",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The crescent body and layered folds form a clean, recognizable silhouette without nearby-cell spill.",
+  "sourceSha256": "5ad37c5770ca60ff61e808be69e6c5794096e7e71f42b4403e8fc193e7860f92",
+  "previewSha256": "afa8b1f5d9eae91159c8725436fb0804aa9ca8ccce54363c23ba839cbfbb41e1",
+  "auditSha256": "bcc009cbdf9434cb78533837aae45d7f6f13661cde4ce15b5883e18e6a97b578"
+}

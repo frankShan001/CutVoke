@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.floatingFrame",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "amplitude",
+    "value": 0.0425
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "fc72d36717a23c77558f2f1911f685cd6d4b9171bf08536adfc56804141f6da8",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "fc72d36717a23c77558f2f1911f685cd6d4b9171bf08536adfc56804141f6da8",
+  "auditExport": "animation-floatingFrame-v1-0-0.audit.mp4"
+}

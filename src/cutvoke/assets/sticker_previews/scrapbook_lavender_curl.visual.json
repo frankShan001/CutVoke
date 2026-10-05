@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_lavender_curl",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "薰衣草色纸带形成连续 S 弯，边缘完整；浅色画面上对比偏弱。",
+  "sourceSha256": "4a6c8c0456a117fccca87633dbb2aa6b39e11054f66f8f0696cc7b5cb0a05fa1",
+  "previewSha256": "57d86c2fc102df5aca24a232f8ecb684d88851543351d38a6a05b73ea9b3fd0a",
+  "auditSha256": "7a1ee861c9e22c87b9adf561121f4eaea5f52bbdef7b27cf353f4f6df3876933"
+}

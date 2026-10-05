@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.glitch_prism_shard",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项检查4×4透明贴图裁切表和4×4真实画面合成表；确认Alpha通道、裁切边缘、深浅背景对比、缩略图可辨性与每项轮廓差异。",
+  "observation": "中心棱镜碎片呈放射星形，锐利色彩层次完整，明暗背景上均可见。",
+  "sourceSha256": "ad1c2103cee6276e8d73d0605d249093e809a74060a6146531823eaaf215f2ca",
+  "previewSha256": "e20bec11b5c447391150e2502ae01cf38242dfe51b5aef4246cc63d815894f20",
+  "auditSha256": "b6c9dd55e183ea94d106233f2ef6615ab9027bbf13dbfa7fe050c4e5a31d3e15"
+}

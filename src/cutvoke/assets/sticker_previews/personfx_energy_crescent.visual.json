@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_energy_crescent",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "Pearl crescent strokes have a clean silhouette and show strongly on the dark side of the composited preview.",
+  "sourceSha256": "a1f64adcbf42e5a02e5a197b31070df9637c26d554738d8e64282365abe46349",
+  "previewSha256": "39bc15a7246e4f65f8a6ef32a76fa336ae2c370175db9cb0cfea25b7f362bb8b",
+  "auditSha256": "fb21f400dbeae6c2a325c517ee3955565e5a9c1bac22f5bedc155e03ffbbc8c7"
+}

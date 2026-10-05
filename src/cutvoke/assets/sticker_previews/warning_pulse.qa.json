@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.warning_pulse",
+  "version": "1.1.0",
+  "kind": "dynamic",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "24cc7bf486b20e55d45ee50a1aa620d41ac654d545e3e79efb179b8fd060a96a",
+  "previewSha256": "3552c94ad54dfb0185a710cff53fae42ff0d2da7c301916cca1f12083f0a6f6b",
+  "preview": "warning_pulse.mp4",
+  "bytes": 13195,
+  "visiblePixels": 2260,
+  "changedPixels": 2926,
+  "motionVisible": true
+}

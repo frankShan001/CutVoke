@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.learn_idea_bulb",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed each transparent PNG on light and dark checkerboards and each actual rendered preview frame; checked grid-cell isolation, silhouette, small-size readability, and visible text/artifacts.",
+  "observation": "灯泡玻璃与螺纹灯座层次分明，外缘干净，没有飘散光点。",
+  "sourceSha256": "765e42a451c8fd34a756fd4cd23210bd6b3613d6975a8002023f904b723b5cc6",
+  "previewSha256": "e9ad1efdd737274bbfb1d473aa1e01ffa166fe4a70de9615b6fb7ca8c40da557",
+  "auditSha256": "a125054ba40c30e7e541648dda818729fadc93fdf704dd6c908a7ae93281b22e"
+}

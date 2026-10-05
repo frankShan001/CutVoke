@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.decor_three_dots",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed transparent 4x3 artwork contact sheet and actual composited frames for every sticker, compared silhouettes, palette, use and edge quality against the existing sticker library.",
+  "observation": "红蓝黄三枚带高光的立体圆点从左下向右上排列，材质和组合方式区别于现有单色圆点。",
+  "sourceSha256": "69d2501e62ca74409c7469a322fba3b849b774723482b3e7dd3f2f17ae405efe",
+  "previewSha256": "c85ee196d7ea074a4d4ba3e2ed485ab7cd4aef31676cd5d1198a87c83c98695c",
+  "auditSha256": "ff8efc979f9cd0cdfc1550e939d0b446f24c8948b05040827dbe6c625c2c5da5"
+}

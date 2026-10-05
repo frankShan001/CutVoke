@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_registration_marks",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a3d775440d59c2f6b8c2ba24a2c5b386acc55e454260241d4d73503937ed7d34",
+  "previewSha256": "bc8ccabbad6dc313e63a44de4af713caf110abbc6d9b1e9e8338334699d6ac58",
+  "preview": "printfx_registration_marks.mp4",
+  "bytes": 7706,
+  "visiblePixels": 1603,
+  "changedPixels": 0,
+  "motionVisible": false
+}

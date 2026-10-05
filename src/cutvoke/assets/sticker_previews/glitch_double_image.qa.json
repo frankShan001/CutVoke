@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_double_image",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "430860109114c5d02ec246c90deb2a4edb4d8c9497b8027d39ed9f1e057ace64",
+  "previewSha256": "be5216035a954d179476b576457d6fb44735b42f3891cdf17e8f8e5f7628e929",
+  "preview": "glitch_double_image.mp4",
+  "bytes": 10431,
+  "visiblePixels": 9199,
+  "changedPixels": 0,
+  "motionVisible": false
+}

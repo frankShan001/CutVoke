@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_aqua_caustic",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "e2988ab76367658b4d264cfa8a748835d324b6909ebfdd713e28abce301d7524",
+  "previewSha256": "f45871dbb426ce6614cbc2972b6e189609ff7ada1b168543a10ae5a28737fb5e",
+  "preview": "fxoverlay_fantasy_aqua_caustic.mp4",
+  "bytes": 16483,
+  "visiblePixels": 11770,
+  "changedPixels": 0,
+  "motionVisible": false
+}

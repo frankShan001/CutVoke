@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.natural_light_peach_haze",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex",
+  "reviewedAt": "2026-09-27",
+  "method": "Visual comparison of every transparent crop and its real editor RenderService export frame on dark and pale backgrounds; observations describe silhouette, alpha edge, contrast, and intended use. This is an internal visual review, not independent user acceptance on commercial footage.",
+  "observation": "Peach haze is deliberately subtle and soft; it is more visible on midtone footage than a bright background.",
+  "sourceSha256": "0b35ccfdb31e97994e32691733084846589615611c53dbda627aba628987972e",
+  "previewSha256": "b942d09bceb8873a43ce5effdeeb942891436891d6654a020bd0752dd1b2ff68",
+  "auditSha256": "8beb5ee941d8172601203a35fe1a7af90c6b6595a16e1a4ba53023106666cbc6"
+}

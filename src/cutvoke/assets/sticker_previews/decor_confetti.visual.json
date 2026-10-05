@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.decor_confetti",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed transparent 4x3 artwork contact sheet and actual composited frames for every sticker, compared silhouettes, palette, use and edge quality against the existing sticker library.",
+  "observation": "彩色纸片和圆珠分散成一组庆祝碎片，多个形状在合成预览中完整保留，未越过裁切边界。",
+  "sourceSha256": "a34f5addd1f969f4a7ca683981d5487d5e17ed0f38671fb96eea6fde711323b6",
+  "previewSha256": "0ddc4b8e7ef025015baa5f03a79da4283a2a348085a92288b980116945faf860",
+  "auditSha256": "9dd6dc54a0d6b953474d1f4ffb6bc2b5353f6b8753efffe336ef2290da015a19"
+}

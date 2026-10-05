@@ -1,0 +1,26 @@
+{
+  "presetId": "cutvoke.preset.animation.flipIn",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.flipIn",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "easing": "ease-out"
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 102.442,
+  "maxSampledMeanRgbDifference": 102.442,
+  "coverSha256": "a796602cf7b4926dc359ac111e05d95ef5d4032285ee56d9ee763b5bfb361864",
+  "previewSha256": "0e2b62640b975385036df6e1360528552ef946ac960762102e95e20f66066f46",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

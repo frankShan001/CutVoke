@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_sparkle_cluster",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Yellow, mint and blue sparkles differ in size and color, with crisp navy outlines on both backgrounds.",
+  "sourceSha256": "ae373921842c85eaa8f473377fe2ad325f24b98397493651625ee4b49265fc1e",
+  "previewSha256": "25ff7e8b12713ab8f4aeddb9505e97ab57acef9bfb2a1d49188d8e495bdf711c",
+  "auditSha256": "98b84ff83f56e1d08311b35d33b2e016bad8f688178fe82ae81c7b52f5e7c47b"
+}

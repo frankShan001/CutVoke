@@ -1,0 +1,606 @@
+{
+  "schemaVersion": 1,
+  "source": "annotation-doodle-sticker-sheet-20260925.png",
+  "sourceSha256": "f77b258de9cd32fe405373d75d56349babc958b4616997b2420fdf3de90ac71d",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4",
+  "extraction": "proportional transparent RGBA cell crops, 8px boundary safety gutter, normalized to 320px square PNGs",
+  "contactSheet": "annotation-doodle-sticker-contact-sheet-20260925.png",
+  "items": [
+    {
+      "index": 1,
+      "stem": "marker_doodle_circle",
+      "name": "手绘圈选",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "圈选",
+        "重点",
+        "手绘"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 17520,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        37,
+        44,
+        297,
+        296
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4fad25e17f2b359cf62db946b6b6f3a4007eb1336f76d09ec7c81b5321e0d0d3"
+    },
+    {
+      "index": 2,
+      "stem": "marker_doodle_underline",
+      "name": "弧线强调",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "下划线",
+        "重点",
+        "手绘"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 9936,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        16,
+        133,
+        304,
+        222
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "23d12587292d6335a779b62fcb14a3026f5c140826fc10ede085eaa4e8cde782"
+    },
+    {
+      "index": 3,
+      "stem": "marker_doodle_double_arrow",
+      "name": "双向箭头",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "方向",
+        "比较",
+        "手绘"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 13368,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        31,
+        121,
+        305,
+        222
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "e705fbbff664251376c5ad4c8c10ada59a771fa5ad5b639113185849b29df471"
+    },
+    {
+      "index": 4,
+      "stem": "marker_doodle_curl_arrow",
+      "name": "弯折箭头",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "方向",
+        "指向",
+        "手绘"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 16708,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        22,
+        99,
+        284,
+        245
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4c4a6ddcdb0fc4fc06814de2544460ec713af682e1f9d66208f954384db88c33"
+    },
+    {
+      "index": 5,
+      "stem": "marker_doodle_burst",
+      "name": "漫画强调爆炸",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "漫画",
+        "强调",
+        "手绘"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 21796,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        36,
+        44,
+        294,
+        280
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "233d33de105cec7c5b391991c1fdbd7c6256139cb960e6a7b13fc5c28043db34"
+    },
+    {
+      "index": 6,
+      "stem": "marker_doodle_sparkle_cluster",
+      "name": "星芒组合",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "星光",
+        "装饰",
+        "手绘"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 13069,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        45,
+        32,
+        263,
+        282
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "ae373921842c85eaa8f473377fe2ad325f24b98397493651625ee4b49265fc1e"
+    },
+    {
+      "index": 7,
+      "stem": "marker_doodle_dotted_orbit",
+      "name": "虚线环绕星芒",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "虚线",
+        "星光",
+        "手绘"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 7539,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        32,
+        44,
+        306,
+        254
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "50518527ba94fe1c94a28af5c5049659c0963aef211e15c937c75da5a7bafcdb"
+    },
+    {
+      "index": 8,
+      "stem": "marker_doodle_motion_rays",
+      "name": "动感短线",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "动感",
+        "强调",
+        "手绘"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 14701,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        88,
+        44,
+        279,
+        269
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "b6dd54e2f269cc0d61dd5d56dcfecb89951b0b457773f52fa2ef6e6231b465d1"
+    },
+    {
+      "index": 9,
+      "stem": "marker_doodle_corner_brackets",
+      "name": "四角取景框",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "取景框",
+        "定位",
+        "手绘"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 16192,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        46,
+        45,
+        283,
+        258
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "66448947a41d33269d357da17607ae9b5c0240d9adcd5fcd1bf8dacc6c3047f8"
+    },
+    {
+      "index": 10,
+      "stem": "marker_doodle_round_frame",
+      "name": "圆角重点框",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "边框",
+        "重点",
+        "手绘"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 18388,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        21,
+        51,
+        293,
+        254
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "82be943d868f3bde90f7a9d209267354900a60ac6adb210d9771072d96f63cde"
+    },
+    {
+      "index": 11,
+      "stem": "marker_doodle_dashed_oval",
+      "name": "虚线椭圆圈",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "圈选",
+        "虚线",
+        "手绘"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 13823,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        27,
+        72,
+        308,
+        241
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "3f019a24028e7e23bb767006508a16e737b2df599f81e06942aba0747967f5d8"
+    },
+    {
+      "index": 12,
+      "stem": "marker_doodle_zigzag",
+      "name": "折线强调",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "折线",
+        "重点",
+        "手绘"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 20243,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        23,
+        74,
+        296,
+        233
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "847586990d9605007050e1f7978c914422401c188294ce76648bb42397b7ea4d"
+    },
+    {
+      "index": 13,
+      "stem": "marker_doodle_location_pin",
+      "name": "空白定位图钉",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "位置",
+        "地图",
+        "手绘"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 22413,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        80,
+        31,
+        248,
+        249
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "f830a8cef869cd30ba8f99b6377112414e87b9c61ad7e2919531528d610aca0b"
+    },
+    {
+      "index": 14,
+      "stem": "marker_doodle_sunburst",
+      "name": "放射光芒",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "光芒",
+        "强调",
+        "手绘"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 18857,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        33,
+        13,
+        274,
+        271
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "45b6e34caecbab6fb2704dc0680b10c6dd07cb8b3f7468d0ebe1dacbe0078cfb"
+    },
+    {
+      "index": 15,
+      "stem": "marker_doodle_ribbon_flag",
+      "name": "空白飘带旗标",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "旗标",
+        "标签",
+        "手绘"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 25862,
+      "sourceBoundaryPixelsWithin8px": 0,
+      "visibleBounds": [
+        36,
+        75,
+        275,
+        205
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "06fae6c15b5eefed68533ff268fff1806c9c0e47e1bdf4c295e482428d606f20"
+    },
+    {
+      "index": 16,
+      "stem": "marker_doodle_confetti",
+      "name": "几何彩纸礼花",
+      "subcategory": "标记",
+      "keywords": [
+        "标注",
+        "彩纸",
+        "庆祝",
+        "手绘"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 18354,
+      "sourceBoundaryPixelsWithin8px": 7,
+      "visibleBounds": [
+        22,
+        8,
+        287,
+        258
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "c13f1e2adaa0accdfa044883ff461a8b91cbd9f8916bef3250103ce71085df51"
+    }
+  ]
+}

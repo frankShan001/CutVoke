@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.marker_doodle_corner_brackets",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual inspection",
+  "reviewedAt": "2026-09-25",
+  "method": "Side-by-side visual inspection of each transparent PNG and its composited preview on light #f4f5f7 and dark #172338 backgrounds.",
+  "observation": "Four mint corner marks have even weight and readable open centers on both backgrounds.",
+  "sourceSha256": "66448947a41d33269d357da17607ae9b5c0240d9adcd5fcd1bf8dacc6c3047f8",
+  "previewSha256": "69f54bf5a174b416df658660e1b2f30f0c5ca78cc13d3eee82a0f1ed15242451",
+  "auditSha256": "1ef9e10a48179d02be19b83fbb06d7537c678096c8d9105e17032e542d4fd26e"
+}

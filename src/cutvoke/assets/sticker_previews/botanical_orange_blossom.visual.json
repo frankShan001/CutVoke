@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_orange_blossom",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "橙色果实与白色花朵同时可辨，绿叶边缘干净，适合果园和生活方式画面。",
+  "sourceSha256": "94974435bc65f5884c57ef102917d119afee8b8fc5ae7ba711ec0e5253d48480",
+  "previewSha256": "0d9733ba37b397312da30ad80874900b39a26043d11ab5d99ac5d62abffc6eb8",
+  "auditSha256": "9a399610ca0b86a6f0aaefa9abd5a56701787fe47bacef3b8ed37c99f0fa2aa4"
+}

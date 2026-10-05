@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.slidedown",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.519,
+  "exportSha256": "ad521ce28d8df980e7ab9f933d7f62eaff26ac8d3937666d2a3f6eea59c48702",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "ad521ce28d8df980e7ab9f933d7f62eaff26ac8d3937666d2a3f6eea59c48702",
+  "auditExport": "transition-slidedown-v1-0-0.audit.mp4"
+}

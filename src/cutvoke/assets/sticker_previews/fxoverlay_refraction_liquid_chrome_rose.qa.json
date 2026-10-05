@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_liquid_chrome_rose",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "db03fe18bdc48763156133956b12cb276f525578273e130abcbb07275ee4db9e",
+  "previewSha256": "2932f88da92787487918181eb40084412ba048a44c8977ac86da7b7904ec8049",
+  "preview": "fxoverlay_refraction_liquid_chrome_rose.mp4",
+  "bytes": 15108,
+  "visiblePixels": 10622,
+  "changedPixels": 0,
+  "motionVisible": false
+}

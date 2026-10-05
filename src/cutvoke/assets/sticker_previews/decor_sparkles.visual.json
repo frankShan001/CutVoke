@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.decor_sparkles",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed transparent 4x3 artwork contact sheet and actual composited frames for every sticker, compared silhouettes, palette, use and edge quality against the existing sticker library.",
+  "observation": "一大两小虹彩星芒与分离小珠构成闪光组，色泽和形状区别于现有纯色星形。",
+  "sourceSha256": "cebca6e1ea8cfc07961a9002806fecfb2dfa3d12836b62980a84b4e9f23adc8a",
+  "previewSha256": "c9ca7396bcef7121a502136edb68933d41c37e45ff1f8f93d0049a9303448af5",
+  "auditSha256": "c1a83a0fdce5598cddfda222050d15d9524b84009ef6999a74d90cb45adfc7a2"
+}

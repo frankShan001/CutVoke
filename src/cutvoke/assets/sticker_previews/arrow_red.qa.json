@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.arrow_red",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "6bdce9417c5f83efb868b103ac5bdb2f3a531f894c7c0e45e473fdb42e7c60f3",
+  "previewSha256": "34fca1f798357fea8f2e9d00ac6bdd6db109b24d0cde1769fc31e8c6c88c165e",
+  "preview": "arrow_red.mp4",
+  "bytes": 3429,
+  "visiblePixels": 1474,
+  "changedPixels": 0,
+  "motionVisible": false
+}

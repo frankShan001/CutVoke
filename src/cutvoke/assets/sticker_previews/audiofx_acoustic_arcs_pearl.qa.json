@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.audiofx_acoustic_arcs_pearl",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d0f55b250ddb6dafce333826c9945ebc7fbd9132d6d533ba28332e220a6a8641",
+  "previewSha256": "b5daf768251cbfa0c2db02bdf374075ca7dcb308eafe86afca42bc033e7934c0",
+  "preview": "audiofx_acoustic_arcs_pearl.mp4",
+  "bytes": 8593,
+  "visiblePixels": 5771,
+  "changedPixels": 0,
+  "motionVisible": false
+}

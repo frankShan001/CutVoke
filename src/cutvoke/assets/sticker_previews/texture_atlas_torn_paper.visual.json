@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_atlas_torn_paper",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "白色纤维撕边围成开放中心，边缘有纸纤维细节且无填底。",
+  "sourceSha256": "eaf4433cef97db36a5c82ee68d5ed482e3655c79b5b31c31b14807561ca7ca73",
+  "previewSha256": "b44695b30d3b314737fe87f18cfcb104e6f7e0d323941031c12ddcaf2fb1316c",
+  "auditSha256": "7da72b09d8caf3b1417562d7b3940c50a82fa304b2379ff37aa649d5d3444742"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_rain_drops",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "observation": "Separate rounded droplets and narrow trails remain visible over the dark half without forming a solid panel.",
+  "sourceSha256": "da6dfd08b995b5ff46e3be9da050d8c31f1a13dc82d820c94b2f5459c7f58e8a",
+  "previewSha256": "1367a94c554d01f2eb264de2a3a50630fc1c931ef95b467942d0ef706f2c7520",
+  "auditSha256": "dd3cbb29380cd5bf8eb91b2dfabfb7db16763168acaf441d779aee8a3219d6c2"
+}

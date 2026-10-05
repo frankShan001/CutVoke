@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_sync_roll",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7ef77903b1e1a91705234079bd90dc9657f5fc97edcdee8da9ff227fc06a3f1a",
+  "previewSha256": "3eec691ff0e8f6114d614555ef6a558aea48fe1acb5266fea267cb69cfb45186",
+  "preview": "glitch_sync_roll.mp4",
+  "bytes": 9845,
+  "visiblePixels": 10260,
+  "changedPixels": 0,
+  "motionVisible": false
+}

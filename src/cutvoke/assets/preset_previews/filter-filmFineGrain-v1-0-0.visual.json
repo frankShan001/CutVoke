@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.filmFineGrain",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.filmgrain",
+  "params": {
+    "strength": 35,
+    "temporal": false
+  },
+  "subcategory": "胶片",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24T05:51:00+08:00",
+  "observation": "在复古暖色底上有可见且持续的细密颗粒纹理；既有复古褪色画面较平滑，纹理差异可辨。",
+  "method": "Manual comparison of 320x180 before-after covers and five aligned frames at 0.55, 0.65, 0.75, 0.85, 0.95 seconds; monoMatte excluded as too close to existing bloom/gray",
+  "coverSha256": "f8eb4a26f53c28d22f7f55b27cabb63b74b289ac1f64fda66b9f3e3cc35b0a37",
+  "motionPreviewSha256": "3dbf79a1eb61183c9a65a8e413a90e7c971c2ad75cd5843c53abc544cf511f5f",
+  "auditSha256": "e11e249ae7d75f3a0b757e97bbcbf78f340bcb2fcd2b8a4a45f264357be735a0"
+}

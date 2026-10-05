@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_halation_peach",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "中央蜜桃色柔光晕向四周平滑衰减，可作轻量高光扩散叠层。",
+  "sourceSha256": "6a99b083fe70d06a3de7f908538c58cef9024cbd74ffc97c2fba9e4a93df2fdf",
+  "previewSha256": "d244f3cc8dc0b157f0a200caf56dc0db53b685e5f4eb246df28ab50395c38ce5",
+  "auditSha256": "727fe94822e40430807b43dbd7bb73eb99fc69dc906b1ca84e0d8f8f874476ee"
+}

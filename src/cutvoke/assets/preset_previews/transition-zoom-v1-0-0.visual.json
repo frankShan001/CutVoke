@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.zoom",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.zoom",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "运镜",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "observation": "中段同时保留前镜头的太阳和窗口、后镜头的圆环与信息框；后镜头由局部放大逐帧回到完整构图。旧样片中段的单色紫色平面已经消失，运动方式也与平移和硬边滑动区分。",
+  "method": "Viewed aligned 0.55/0.65/0.75/0.85/0.95-second frames from the reworked MP4 against slide and smoothleft; independently checked preview/export midpoint color contributions using solid red and blue sources.",
+  "coverSha256": "c8b5502f3f71b45ad6ab7eedcec0fa06f56946ced640620c4ea58e3347f52bd0",
+  "motionPreviewSha256": "0228cb6123c408885613de3254f91757f2a7ba3ae49563c03c2d0f9e825c4e73",
+  "auditSha256": "72af13069729deba67ec80edddc79042e714f21f6583a3fcf38beaa4c606b925"
+}

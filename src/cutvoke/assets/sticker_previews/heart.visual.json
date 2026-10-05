@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.heart",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "红色爱心两侧对称，顶部高光克制，外缘平滑且未裁切。",
+  "sourceSha256": "d220149af5f63cc543188a4802e3eb8164dfeafaa233353d507fcb5e94e50988",
+  "previewSha256": "9eaba42a1e7e52264fcc80d352726bff89c4ba680b6b470ddab1ef29a98a03d7",
+  "auditSha256": "b03191c3cc1ae7c17f63b0e5126c8ae42304180e60e0f2c426de8c161b6c7dee"
+}

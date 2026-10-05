@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_energy_trail",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "949272c431b515cf70065fb81420264f611bb4ec299ea29d66154ab0575b9ad4",
+  "previewSha256": "aefd56b071734d23d4af876731932607722fb83544baaa1261c05ceba0000351",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3717,
+  "visiblePixels": 2322,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1930,
+    "steady_entry": 2322,
+    "steady_exit": 2321,
+    "exit": 1930
+  },
+  "previewExportMeanRgbDifferences": [
+    0.34,
+    0.327
+  ],
+  "auditExport": "manga_energy_trail.audit.mp4",
+  "auditExportSha256": "88841e36bd7b838308a95a154d6e89d12ae8084876b96f062e786709cd101764"
+}

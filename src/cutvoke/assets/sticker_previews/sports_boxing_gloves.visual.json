@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_boxing_gloves",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "一对红色拳击手套形状明确，黑色腕带细节完整，白描边干净且未碰到裁切边。",
+  "sourceSha256": "d2ead3415bd698d5b0c5fa9db213b55314ab3eed854c723519c0d6038462de2c",
+  "previewSha256": "e180f5b4b333b215dd2daf4fd6f24dbb9229c4a58e032c7bacda4f3ba6d390b3",
+  "auditSha256": "2db2ad746380e0c00cdfd075817b4393cf2cd57d03a17f320bd3801c683035ea"
+}

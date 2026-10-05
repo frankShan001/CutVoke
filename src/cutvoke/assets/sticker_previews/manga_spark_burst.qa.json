@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_spark_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "b0300f1d48788274cce66c50dfb51c8169ffab5c529bfa0c0d2843d8fce50527",
+  "previewSha256": "baf5d303fff891a67ad50b5856a46e47dac014d37a21ed472bd3365ee3330681",
+  "preview": "manga_spark_burst.mp4",
+  "bytes": 5335,
+  "visiblePixels": 1460,
+  "changedPixels": 0,
+  "motionVisible": false
+}

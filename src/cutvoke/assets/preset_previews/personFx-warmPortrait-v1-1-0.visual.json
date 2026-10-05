@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.warmPortrait",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.tint",
+  "params": {
+    "hue": 18,
+    "saturation": 0.85,
+    "intensity": 0.18,
+    "lightness": true
+  },
+  "subcategory": "人物色彩",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "The treated half has a clear warm amber skin and clothing cast against the unchanged source half.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "83ca5f08d155ed6241b237ea8b6755c15c153894223c5c70098cee4050fefdeb",
+  "motionPreviewSha256": "aaf4d286cc9440b5dbcb59fafdb1f7b19fdac882b6694648b822aa7556ce1126",
+  "auditSha256": "fd6595a0a32f24b14cb3152e464001b61c699cf982f365b8a7bf9682d0cd223b"
+}

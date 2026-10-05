@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_tabby_cat",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "橘色毛发边界清楚，尾巴与坐姿可辨；缩至资源预览仍能识别。",
+  "sourceSha256": "82b0f6ab1afba70f1a4a4cfbb72d241a9d48c9e778d2f33a90aec85f75315e16",
+  "previewSha256": "b6eadbd23b3ea1660fa14758fcf4d01c3bde07c28eaa9f16f9ae309581a641c4",
+  "auditSha256": "b1d1e7bafe9e76dc96c455fb36e41f2e2ed6aac6f0a921df1c566312c74699ac"
+}

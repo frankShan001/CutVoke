@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_spark_trail_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "7d5390004e578315b66be7888b6333a86c6ebed8b5f845e39eae8a85a78d669d",
+  "previewSha256": "530f5c66ab7bb8c7d33de49ed4ccc84dedb7f9d71929223bf2c30c75eae8481b",
+  "preview": "texture_spark_trail_amber.mp4",
+  "bytes": 4224,
+  "visiblePixels": 1429,
+  "changedPixels": 0,
+  "motionVisible": false
+}

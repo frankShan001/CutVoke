@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_whistle",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "银色裁判哨、吹口和红色挂绳层次清楚，挂绳完整，实际合成没有白底或黑边。",
+  "sourceSha256": "c83623e9c143c89048ed30e3c49450652b5ed385fa00f32634b5bf7e13e66b6a",
+  "previewSha256": "081b8fe5eae2ddf6456e65c21fbc2c4a94251d760b860c9473e5d3647abad41a",
+  "auditSha256": "c61b5e6b557ccbe0d538351440ef4b8e8192deae075bb988c153014a838d09eb"
+}

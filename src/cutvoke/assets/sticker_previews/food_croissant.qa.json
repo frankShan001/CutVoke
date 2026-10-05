@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_croissant",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5ad37c5770ca60ff61e808be69e6c5794096e7e71f42b4403e8fc193e7860f92",
+  "previewSha256": "afa8b1f5d9eae91159c8725436fb0804aa9ca8ccce54363c23ba839cbfbb41e1",
+  "preview": "food_croissant.mp4",
+  "bytes": 5211,
+  "visiblePixels": 2825,
+  "changedPixels": 0,
+  "motionVisible": false
+}

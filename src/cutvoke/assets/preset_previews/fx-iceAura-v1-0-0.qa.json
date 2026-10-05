@@ -1,0 +1,35 @@
+{
+  "presetId": "cutvoke.preset.fx.iceAura",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.glow",
+      "version": "1.0.0",
+      "params": {
+        "intensity": 1.5
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.colorize",
+      "version": "1.0.0",
+      "params": {
+        "hue": 204,
+        "saturation": 0.82,
+        "lightness": 0.53,
+        "mix": 0.48
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 94.53,
+  "maxSampledMeanRgbDifference": 94.53,
+  "coverSha256": "9e2acf9903692081c56d696127b2d81ab964c49f4ab7504c9a045ebe7555afc1",
+  "previewSha256": "ead074e3ad521edfe54af3665ea54a521fe9b3ba7636ebfc3c3664cf3ab109ab",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

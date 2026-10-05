@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_film_scratches",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "细直胶片划痕与零星尘点可辨，浅底对比更好；适合明亮或复古画面。",
+  "sourceSha256": "82cdecc1589b81db68c531030fe5bb717948f7df2b01a56162885d2128ed31d2",
+  "previewSha256": "fc71c8c09816706478cb8a1365749185f1992be9aea045b89bc48e78c71a1c9b",
+  "auditSha256": "480ad8cc2ff7689501774e93be307f10f45907f4d528f3417c5a23de11c99d89"
+}

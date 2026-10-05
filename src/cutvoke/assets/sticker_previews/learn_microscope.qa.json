@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_microscope",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "41c8481156972827c1c4f01893215a3717950e55020dd45a5200c3f09d546ac0",
+  "previewSha256": "35495be12dd7f8b23386e4b97b788f6bce951d368938b1fbaa45341e51877fbc",
+  "preview": "learn_microscope.mp4",
+  "bytes": 3763,
+  "visiblePixels": 1218,
+  "changedPixels": 0,
+  "motionVisible": false
+}

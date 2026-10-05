@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_fantasy_gold_pulse",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T01:05:55+00:00",
+  "observation": "The concentric gold pulse remains centered and its thin rings stay visible over dark footage.",
+  "method": "Reviewed each extracted RGBA PNG on dark and light contact sheets, then checked the actual RenderService preview contact sheet. Examined distinct silhouettes, cell-edge clipping, alpha fringes, visibility on both tones, and usefulness as a compositing overlay.",
+  "sourceSha256": "3f50c2f242219a1fee365c79640336dffdac84751829f0fd8a2589099c5406ef",
+  "previewSha256": "09a57c087183b2a9b9940bfc4433f92cf322af75b24cf3748d0dfd9245a3daef",
+  "auditSha256": "a5dc07d1f667dfeb8695f0746e0c949372e8b680e6dc99b082779eb24fe7b141"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.fxoverlay_refraction_glass_ripples",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-27",
+  "method": "Codex visual review of transparent crops, the dark/light composite contact sheet, and a 1.0-second frame from each local audit export; not an independent user study.",
+  "observation": "透明玻璃涟漪由数层同心水纹构成，边缘细线在深色与浅色背景上均可识别。",
+  "sourceSha256": "3bed47cce5977a885bd37876c0c1c5443ed0ee09dae2d43022d792e51c84305a",
+  "previewSha256": "84f309dc28c2ac71b688c263036019328aeddf9a4e1eeb5cea44316e68fd29db",
+  "auditSha256": "1960a2f0e9787f82fd2eeef6d8c7f033d83ed37854dab08bcc604ceca8b8388c"
+}

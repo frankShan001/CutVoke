@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.backIn",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.backIn",
+  "params": {
+    "duration": 1.0,
+    "overshoot": 0.14,
+    "easing": "ease-out"
+  },
+  "subcategory": "入场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "回弹缩放与淡入逐帧变化，轻微超调后稳定恢复正常画幅，未见阶梯停顿。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "3a7a6ecbf0f9731fbdb29620ebceefebd7bb2867ad0792b963e807112793cb93",
+  "motionPreviewSha256": "cf8ea0c4deaa835462d362e9b71428a3aa0113ae25ff11345a31af804a31991b",
+  "auditSha256": "1fa3a1533811ee64b9cc927f5e6e31d58446c123f17013782281ee82a15c809c",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_backIn.png",
+  "libraryReviewSheetSha256": "7d54b51a4bfe6f49492bd1d5cb6da53a956bfed74e4973558d9d8371a1d2afef"
+}

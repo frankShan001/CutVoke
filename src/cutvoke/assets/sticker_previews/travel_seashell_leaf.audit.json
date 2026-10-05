@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_seashell_leaf",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "3ecc9ec82b7d3f8fbefb68e59260ea6f3d1b63b25cae4561c9bdc0b2cdc5ab94",
+  "previewSha256": "b7042642aaf1594d905004fc6fdf871f5b1c3a572263393af74be03367d6b50b",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2915,
+  "visiblePixels": 2037,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1547,
+    "steady_entry": 2038,
+    "steady_exit": 2038,
+    "exit": 1547
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1547,
+      "withoutFade": 2038
+    },
+    "steady_entry": {
+      "withFade": 2038,
+      "withoutFade": 2038
+    },
+    "steady_exit": {
+      "withFade": 2038,
+      "withoutFade": 2038
+    },
+    "exit": {
+      "withFade": 1547,
+      "withoutFade": 2038
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.031,
+    0.031
+  ],
+  "auditExport": "travel_seashell_leaf.audit.mp4",
+  "auditExportSha256": "87f0a2bb782b572db61d8c571c3822d47ce2ccae481b79ed724d27aa6290a787"
+}

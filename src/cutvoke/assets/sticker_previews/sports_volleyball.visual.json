@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.sports_volleyball",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25T18:58:51+08:00",
+  "method": "Inspected the extracted numbered checkerboard atlas and each sticker composited in its rendered preview at output/acceptance/sports-stickers-20260925; compared silhouette, cell isolation, transparency, and legibility at thumbnail size.",
+  "observation": "蓝黄白排球色带完整且彼此区分，球体无扁平变形，缩略图边缘没有串格痕迹。",
+  "sourceSha256": "9a4e99893936bc21517973d423566e3bf6cebbb9a85268b73fc3b174da3aacd8",
+  "previewSha256": "acccc0ed4277721b0c0b6f482004a100d27792ee159b40468d5d3bc150206f4c",
+  "auditSha256": "88aef27c2f76b0eb6da354448c9ab33e8cac6ce7875c60036b9f5b189fea22a9"
+}

@@ -1,0 +1,606 @@
+{
+  "schemaVersion": 1,
+  "source": "pet-sticker-sheet-20260925.png",
+  "sourceSha256": "2357672f93ef702dfe59e02f1582549c8d16865e4622393253914c398d0726c1",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4",
+  "extraction": "proportional cell crops; remove 8px cell borders, fit artwork to 256px and center in 320px transparent PNGs",
+  "contactSheet": "pet-sticker-contact-sheet-20260925.png",
+  "items": [
+    {
+      "index": 1,
+      "stem": "pet_tabby_cat",
+      "name": "橘猫坐坐",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "橘猫",
+        "猫咪",
+        "萌宠"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "sourceBoundaryPixelsWithin8px": 632,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 46939,
+      "visibleBounds": [
+        57,
+        38,
+        250,
+        282
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "82b0f6ab1afba70f1a4a4cfbb72d241a9d48c9e778d2f33a90aec85f75315e16"
+    },
+    {
+      "index": 2,
+      "stem": "pet_tuxedo_wave",
+      "name": "挥爪奶牛猫",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "奶牛猫",
+        "猫咪",
+        "挥手"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "sourceBoundaryPixelsWithin8px": 86,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 43144,
+      "visibleBounds": [
+        86,
+        39,
+        252,
+        282
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "afe6fca11f3cc63ce5fe1e8f615d0a1dd21451fdb0186d88bf7e35413475ea79"
+    },
+    {
+      "index": 3,
+      "stem": "pet_shiba",
+      "name": "奶油柴犬",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "柴犬",
+        "狗狗",
+        "萌宠"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "sourceBoundaryPixelsWithin8px": 261,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 39780,
+      "visibleBounds": [
+        62,
+        42,
+        228,
+        282
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "fc8ebf8f896f6afea333ae4e49a76b91b14b862cbea63cbec13889c46de674af"
+    },
+    {
+      "index": 4,
+      "stem": "pet_corgi",
+      "name": "趴趴柯基",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "柯基",
+        "狗狗",
+        "萌宠"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "sourceBoundaryPixelsWithin8px": 0,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 40656,
+      "visibleBounds": [
+        43,
+        112,
+        272,
+        265
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "b66c16fbaf6f19a0a02a07294d7fd5045476148d2c49de7f8fddbe40731648f4"
+    },
+    {
+      "index": 5,
+      "stem": "pet_sleepy_kitten",
+      "name": "打盹小猫",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "小猫",
+        "睡觉",
+        "治愈"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "sourceBoundaryPixelsWithin8px": 428,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 45695,
+      "visibleBounds": [
+        48,
+        82,
+        282,
+        281
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "f6a61b4f16b35ccd8fbcee08891808af7181ce4f1b4d155eb22a6461cdfc1e05"
+    },
+    {
+      "index": 6,
+      "stem": "pet_poodle",
+      "name": "卷毛贵宾犬",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "贵宾犬",
+        "狗狗",
+        "卷毛"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "sourceBoundaryPixelsWithin8px": 190,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 43538,
+      "visibleBounds": [
+        38,
+        43,
+        246,
+        275
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "e21de15668240850ede885731ce2aae685db416e3847f6d6155e14c73ca59fc3"
+    },
+    {
+      "index": 7,
+      "stem": "pet_paw_trail",
+      "name": "爪印小路",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "爪印",
+        "脚印",
+        "装饰"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "sourceBoundaryPixelsWithin8px": 0,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 9071,
+      "visibleBounds": [
+        79,
+        58,
+        260,
+        269
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "36744b4e176dd80bd3c61869ba3670757c4b4059923e25224177bbfce694a7cb"
+    },
+    {
+      "index": 8,
+      "stem": "pet_heart_bowl",
+      "name": "爱心食盆",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "食盆",
+        "爱心",
+        "用品"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "sourceBoundaryPixelsWithin8px": 0,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 40093,
+      "visibleBounds": [
+        44,
+        93,
+        272,
+        237
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "ce239dd6028f24942cac746c134a48a27d411f45b44cfbacb4b8fb8844c66d59"
+    },
+    {
+      "index": 9,
+      "stem": "pet_mouse_toy",
+      "name": "逗猫小老鼠",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "逗猫棒",
+        "玩具",
+        "猫咪"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "sourceBoundaryPixelsWithin8px": 119,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 20573,
+      "visibleBounds": [
+        80,
+        38,
+        225,
+        274
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "ea97dcc94cd3296fdca8760f17ac9bb47b58a83efef38ecffe0c8c2c95d5d291"
+    },
+    {
+      "index": 10,
+      "stem": "pet_yarn_ball",
+      "name": "彩线毛线球",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "毛线球",
+        "玩具",
+        "猫咪"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "sourceBoundaryPixelsWithin8px": 502,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 43557,
+      "visibleBounds": [
+        44,
+        63,
+        278,
+        282
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "6acf3990ae9a619bfdb82fc9923d69406663ec85f4bcf6234b9e2f820669c130"
+    },
+    {
+      "index": 11,
+      "stem": "pet_fish_treat",
+      "name": "小鱼零食",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "鱼形零食",
+        "猫咪",
+        "用品"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "sourceBoundaryPixelsWithin8px": 0,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 28155,
+      "visibleBounds": [
+        54,
+        90,
+        271,
+        218
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "bc4e506c7907edbbf5ed07cfd69c2fb5b18cec36f850aa012af5f524a16b322a"
+    },
+    {
+      "index": 12,
+      "stem": "pet_paw_ball",
+      "name": "爪印网球",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "网球",
+        "狗狗",
+        "玩具"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "sourceBoundaryPixelsWithin8px": 279,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 47158,
+      "visibleBounds": [
+        58,
+        48,
+        259,
+        281
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "f4c98c0e0907094d11e7084dcf82d723718650a3a7a972b998dc0ef6e04a5adb"
+    },
+    {
+      "index": 13,
+      "stem": "pet_bell_collar",
+      "name": "铃铛项圈",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "项圈",
+        "铃铛",
+        "用品"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "sourceBoundaryPixelsWithin8px": 0,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 30591,
+      "visibleBounds": [
+        50,
+        61,
+        270,
+        236
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "8960dfba02feb53940582e807eeae106ec5929ba48e089e8ff755b292e951b59"
+    },
+    {
+      "index": 14,
+      "stem": "pet_carrier",
+      "name": "软垫航空箱",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "航空箱",
+        "出行",
+        "用品"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "sourceBoundaryPixelsWithin8px": 434,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 59892,
+      "visibleBounds": [
+        43,
+        38,
+        280,
+        247
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "1d4a8dabc21e660f088e3da8469dafaf03e041aa40f0ba23902d70afa93955fe"
+    },
+    {
+      "index": 15,
+      "stem": "pet_nose_greeting",
+      "name": "猫狗贴鼻问候",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "猫狗",
+        "伙伴",
+        "问候"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "sourceBoundaryPixelsWithin8px": 538,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 57227,
+      "visibleBounds": [
+        38,
+        38,
+        280,
+        249
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "720c6f731a587098c498933c4fc3a3f58fc2c53ac4cbda0b41efc0b5ab06af39"
+    },
+    {
+      "index": 16,
+      "stem": "pet_happy_dog",
+      "name": "吐舌开心狗",
+      "subcategory": "宠物日常",
+      "keywords": [
+        "宠物",
+        "狗狗",
+        "开心",
+        "爱心"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "sourceBoundaryPixelsWithin8px": 544,
+      "outputSize": [
+        320,
+        320
+      ],
+      "visiblePixelsInSourceCell": 59901,
+      "visibleBounds": [
+        44,
+        38,
+        273,
+        264
+      ],
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "aec8e1351c7529b4441b8e59dfb24310eb1f91a1b86f105bee8bbd7524830127"
+    }
+  ]
+}

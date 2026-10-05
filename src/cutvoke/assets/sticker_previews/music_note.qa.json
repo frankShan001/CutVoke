@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.music_note",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a4d18a5cffad1b2b88f91226bba31d2fdced8a29706b26bf8f5ac220ca255a55",
+  "previewSha256": "05ddf0ff9f2ce01958f2ace9b25da6107c354181f57d09adb6cbe64eed0ad4db",
+  "preview": "music_note.mp4",
+  "bytes": 4227,
+  "visiblePixels": 2214,
+  "changedPixels": 0,
+  "motionVisible": false
+}

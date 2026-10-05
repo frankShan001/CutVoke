@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.filter.noirContrast",
+  "version": "1.0.0",
+  "effectId": "cutvoke.fx.grayscale",
+  "params": {
+    "strength": 1.0
+  },
+  "subcategory": "黑白",
+  "reviewer": "Codex manual filter-cover review",
+  "reviewedAt": "2026-09-24",
+  "observation": "Strong monochrome curve deepens shadows and brightens highlights.",
+  "method": "Compared actual rendered before/after previews and category cover sheets; checked each preset's distinct shape, tonal or color treatment, updated edit/export audit, and a transparent overlay after RGB glow repair.",
+  "coverSha256": "fa08e7131414e51260a9db1ab82742047efd7ab49b54e6ef22b44cb532367592",
+  "motionPreviewSha256": "2422b2404113ba68c20f8422a9be8716f5f99618fc138d576e1d0341df7059e8",
+  "auditSha256": "783e3cd01b67b484007556ae9936b90b261237ea730162381ddf4b5ddaf029b1"
+}

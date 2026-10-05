@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.guide_pointer_arrow",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "aabbb8b259cef49b9b726e3f3d3cd0d573b671c463d389e1e53cf7f689ba0ad2",
+  "previewSha256": "79730162798bdf3aa436c3d0729069c1317b8d5b6f7af3ca0974086c90a45a76",
+  "preview": "guide_pointer_arrow.mp4",
+  "bytes": 3925,
+  "visiblePixels": 1028,
+  "changedPixels": 0,
+  "motionVisible": false
+}

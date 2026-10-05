@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_spiral",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "5337378b26bcc846bdfbed48ce68564aa97f7be005b64934e261e92ccb33ba45",
+  "previewSha256": "9072c018d1385e72fd0f401e8c35924f6f550a43a77ef6dbf37bbd7e0fcf2c10",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 3195,
+  "visiblePixels": 2196,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1779,
+    "steady_entry": 2196,
+    "steady_exit": 2196,
+    "exit": 1778
+  },
+  "previewExportMeanRgbDifferences": [
+    0.253,
+    0.252
+  ],
+  "auditExport": "decor_spiral.audit.mp4",
+  "auditExportSha256": "4ae9cdfc9f9a71b1dcb9da13731c35703694f3a3c5fb307123badbfaf329bd6c"
+}

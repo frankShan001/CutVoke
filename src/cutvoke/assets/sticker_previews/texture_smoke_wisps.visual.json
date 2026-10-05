@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_smoke_wisps",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25T07:36:33+08:00",
+  "method": "Compared transparent source artwork and composited 320x180 previews; static textures use a dark-to-light split, dynamic stickers were checked at seven time samples and by measured bounds/centroid.",
+  "observation": "A pale smoke ribbon rises in a distinct curl and keeps the underlying scene visible.",
+  "sourceSha256": "4885467c94b2ab59ac7238e32b5ca9f8a492b23effa3661da8d8d8be695a895c",
+  "previewSha256": "beba4fbd60f8bcfcab625ddbca6103998c8261731e5a754f3c3d81d9c75dce20",
+  "auditSha256": "a574d15c5207ea87dac1d34ed53f541749c2d3b74f541d6b32bfc22202d6f65a"
+}

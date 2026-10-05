@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.violetEdge",
+  "version": "1.4.0",
+  "effectId": "cutvoke.person.halo",
+  "params": {
+    "sigma": 14,
+    "hueShift": -78,
+    "saturation": 1.9,
+    "opacity": 0.98
+  },
+  "subcategory": "人物轮廓",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "A saturated magenta-violet outline remains legible through the sampled motion and reads as a narrow electric glow.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "fd742549f986282723451d5880a1395f51968d7a4195dbf82b498ba852d8ba86",
+  "motionPreviewSha256": "cc57046a41d34724538003155e14d5493f715752188da0a6a0133e8ee19f153d",
+  "auditSha256": "c868156137d4c69e69bb00ce3f0f613ca0d8fd2d76f2bbd5fc7b287f94fadc64"
+}

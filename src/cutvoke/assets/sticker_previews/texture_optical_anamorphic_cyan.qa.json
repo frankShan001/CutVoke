@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_optical_anamorphic_cyan",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "838d2a7559bbfd54dc6163d7aeb77c8188c40938a75ed4837e0af64d59be1e2b",
+  "previewSha256": "cc5c0db09ab83f456574872eec0cd8dc2ab5750fcd528c8737301d3405e8480d",
+  "preview": "texture_optical_anamorphic_cyan.mp4",
+  "bytes": 6495,
+  "visiblePixels": 2951,
+  "changedPixels": 0,
+  "motionVisible": false
+}

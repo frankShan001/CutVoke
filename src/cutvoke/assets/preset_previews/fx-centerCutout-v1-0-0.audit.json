@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.centerCutout",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "x",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "5f5b0bf87a906a95fddc2f472717af5b43a89e78468f9a483c70f9b39bf59a8c",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "5f5b0bf87a906a95fddc2f472717af5b43a89e78468f9a483c70f9b39bf59a8c",
+  "auditExport": "fx-centerCutout-v1-0-0.audit.mp4"
+}

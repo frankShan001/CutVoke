@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_shock_rings",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "3b11f7886c113157116463a3b061add02bb067d9f1cd9afca6b2abd569b0088a",
+  "previewSha256": "d13d6230707692f0f46b1b349a0f5016aa5d19b687db2a81ae1d359c05387ea4",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4518,
+  "visiblePixels": 3056,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2075,
+    "steady_entry": 3055,
+    "steady_exit": 3055,
+    "exit": 2075
+  },
+  "previewExportMeanRgbDifferences": [
+    0.635,
+    0.634
+  ],
+  "auditExport": "manga_shock_rings.audit.mp4",
+  "auditExportSha256": "a933f11a74de5c85ae9067b5ec8becc78e429947b0a5d8c9ae21bb57d6c87f53"
+}

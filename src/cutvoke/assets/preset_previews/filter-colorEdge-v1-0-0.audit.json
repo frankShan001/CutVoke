@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.filter.colorEdge",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "low",
+    "value": 0.0392
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "0ba837b993a1f6d5135e6bf579799001a2260dda743f5b09731d12bcd21e670c",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "0ba837b993a1f6d5135e6bf579799001a2260dda743f5b09731d12bcd21e670c",
+  "auditExport": "filter-colorEdge-v1-0-0.audit.mp4"
+}

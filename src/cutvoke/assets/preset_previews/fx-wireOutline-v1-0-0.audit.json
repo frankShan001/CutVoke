@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.wireOutline",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "amount",
+    "value": 1.3
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "aea00f4e825d57c463fa2d15f1faf3931fe6be3185b3c2eefd1a61df1cff2489",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "aea00f4e825d57c463fa2d15f1faf3931fe6be3185b3c2eefd1a61df1cff2489",
+  "auditExport": "fx-wireOutline-v1-0-0.audit.mp4"
+}

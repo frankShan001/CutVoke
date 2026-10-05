@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.texture_v2_ink_bloom",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed transparent artwork on pale and dark comparison fields plus actual renderer-produced composited preview frames on pale gray. Approval covers distinctness and legibility for the intended overlay role; complex live-action footage remains outside this review.",
+  "observation": "黑墨团块有羽化渗边和浓淡层次，浅色背景表现清楚，深色背景对比较弱。",
+  "sourceSha256": "22b907685bb88af3d4df2d127aafb5d899a9bf3876c77bc77bc6808b0756dbff",
+  "previewSha256": "5b0e658826c610cb5517cb9dc44d8e639f6b4187d6520098438550fe009eaac8",
+  "auditSha256": "589d369f925aa7f8ef24b071d098bd3b9842be5e4b0c825a6b80367fe3614388"
+}

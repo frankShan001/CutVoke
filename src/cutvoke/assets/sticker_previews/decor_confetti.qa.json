@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_confetti",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a34f5addd1f969f4a7ca683981d5487d5e17ed0f38671fb96eea6fde711323b6",
+  "previewSha256": "0ddc4b8e7ef025015baa5f03a79da4283a2a348085a92288b980116945faf860",
+  "preview": "decor_confetti.mp4",
+  "bytes": 4510,
+  "visiblePixels": 1176,
+  "changedPixels": 0,
+  "motionVisible": false
+}

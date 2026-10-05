@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.warning_pulse",
+  "version": "1.1.0",
+  "effectId": "cutvoke.anim.breathe",
+  "params": {
+    "amplitude": 0.16,
+    "period": 0.8
+  },
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-10-02T19:42:50+00:00",
+  "method": "Codex actually inspected all 30 chronological continuous frames (15fps, 2 seconds) from this regenerated library sample using view_image, checking motion, alpha edges, shape preservation and canvas containment. Preview QA and full apply/edit/saveReload/undo/export machine audits were rerun before binding.",
+  "observation": "黄色警告三角以默认0.8秒呼吸缩放形成提醒节奏，全部30帧中多轮脉冲可见；感叹号和三角外框完整、朝向不变、中心稳定，无异常消失或黑框。",
+  "sourceSha256": "24cc7bf486b20e55d45ee50a1aa620d41ac654d545e3e79efb179b8fd060a96a",
+  "previewSha256": "3552c94ad54dfb0185a710cff53fae42ff0d2da7c301916cca1f12083f0a6f6b",
+  "auditSha256": "b5980191a18ecc0cacf3c83414bd3490ed165f9aaf4165ca4fa098ddfe374420",
+  "rendererSha256": "019717a0438118bdb3a8a852d000a065e8eac7be52fecea1e33090128fcc318a",
+  "evidencePaths": [
+    "E:/myproject/opencut/output/acceptance/effects-visual-review-20261003/sticker-library/warning_pulse-continuous.png"
+  ]
+}

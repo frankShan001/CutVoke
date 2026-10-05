@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.promo_frame_brackets",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-27T03:50:58+00:00",
+  "method": "Inspected every extracted transparent PNG on the dark and light contact sheets, then inspected the corresponding actual RenderService preview contact sheet. Checked cell containment, shape completeness, alpha edges, contrast, thumbnail legibility, visual distinctness, and usefulness as a product-ad overlay.",
+  "observation": "Four champagne corner brackets remain separated and frame a clear center.",
+  "sourceSha256": "a6a1210a08504f69e9f5d498371a59e6780760c42141c176eccf654ec9cf98eb",
+  "previewSha256": "bebf7d81e8dc4cabd6a1d38afc701ae826caaa3c80d5f64c1b2a11d112a40ccb",
+  "auditSha256": "a61f3368a3e0fb1c5b8a751191cce8c2e2f1df79ee744bd5afdceb451557c670"
+}

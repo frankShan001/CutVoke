@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.cinematic_optical_leak_cyan",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet against checkerboard transparency and the actual 0.55s composited MP4 contact sheet on a dark-to-light gradient; checked category fit, shape/color distinction, crop boundaries and per-item visibility.",
+  "observation": "青蓝光从右缘向内渐隐，与左侧暖漏光方向和色温不同。",
+  "sourceSha256": "4dd61bfae7500cf6af960cfe2b73a5dfb19e855c11b77c3d20932829fb724904",
+  "previewSha256": "dd2dd4c52dc4311bf67aebe5f90e9ef98b3442e8bd69e2d224f3b89287e9c84e",
+  "auditSha256": "af3873442a03037dc7267924c3ad13a4b0c344c65c6500897b672af4b675b151"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_open_book",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d44b1bbc32db069a0c64984d224d677a4c48f7f7a8d1c653235a0f2125eeeccc",
+  "previewSha256": "010c4e00e739e40d601372266844285c9f4c41087df20d1ba5cc83750c3e06e4",
+  "preview": "learn_open_book.mp4",
+  "bytes": 3595,
+  "visiblePixels": 1370,
+  "changedPixels": 0,
+  "motionVisible": false
+}

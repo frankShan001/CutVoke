@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_headphones",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "7131127809e2bcde87ed99b02bedbac65168e63fe07c6421b286ba743601ea90",
+  "previewSha256": "de1295a710a33cac4c1330ef990c563335be0fb783f6544d10a904f5a3049650",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 4341,
+  "visiblePixels": 2999,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2839,
+    "steady_entry": 2999,
+    "steady_exit": 2999,
+    "exit": 2839
+  },
+  "previewExportMeanRgbDifferences": [
+    0.271,
+    0.271
+  ],
+  "auditExport": "reaction_headphones.audit.mp4",
+  "auditExportSha256": "4cb372d77202d18c1739862c0ece6d07e2de4f5ff5995ec0868b456eea234255"
+}

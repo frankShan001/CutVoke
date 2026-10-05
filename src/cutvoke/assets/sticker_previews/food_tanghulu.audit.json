@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_tanghulu",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "affc51782817fb4dd95af2fbdf38dfa667e9e02af756d258e6dfeeeb4b7d878a",
+  "previewSha256": "2f9c197f1fc8b0949ab0b39fef9c23efceca37c301a2c2d7de7330e8df43bf05",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5181,
+  "visiblePixels": 3316,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 2685,
+    "steady_entry": 3316,
+    "steady_exit": 3316,
+    "exit": 2685
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 2685,
+      "withoutFade": 3316
+    },
+    "steady_entry": {
+      "withFade": 3316,
+      "withoutFade": 3316
+    },
+    "steady_exit": {
+      "withFade": 3316,
+      "withoutFade": 3316
+    },
+    "exit": {
+      "withFade": 2685,
+      "withoutFade": 3316
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.144,
+    0.13
+  ],
+  "auditExport": "food_tanghulu.audit.mp4",
+  "auditExportSha256": "f40a2cb2c32bee3d8d2ad9aa781c764557af515f05ef36208ac22f35b4d019d4"
+}

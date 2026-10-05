@@ -3,7 +3,7 @@
     释放时一次提交 clip.move；类型/锁定错误在预览阶段拦截，重叠落点转为片段重排，
     后端校验仍作为最终安全网。 */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
 import { moveClip } from "../../store/clipEdit";
@@ -12,6 +12,7 @@ import { trackKindForMedia } from "../../lib/importMedia";
 import { clipStartSecs, clipEndSecs, frameDurationSecs, secsToFrameRatString, snapSecsToFrame, toPx } from "./util";
 import { SNAP_THRESHOLD_SECS, snapTo, collectSnapPoints } from "./snap";
 import type { Clip, Track } from "../../types/api";
+import { rationalToSecs } from "../../lib/rational";
 
 export type DragMode = "move" | "trim-l" | "trim-r";
 
@@ -42,6 +43,8 @@ export interface DropTarget {
   /** 重排锚点与方向；后端据此在源片段移除后重新计算准确槽位。 */
   anchorClipId?: string;
   anchorPosition?: "before" | "after";
+  /** 本次落点因主轨自动贴合转为插入顺序。 */
+  mainTrackAutoFit?: boolean;
   /** 前端已知的不可放置原因；拖动时反馈并阻止提交。 */
   invalidReason?: string;
 }
@@ -56,7 +59,7 @@ export interface TimelineDragApi {
 }
 
 export function useTimelineDrag(): TimelineDragApi {
-  const { state, dispatch } = useEditor();
+  const { state, dispatch } = useEditor({ subscribeToClock: false });
   const [active, setActive] = useState<ActiveDrag | null>(null);
   const [drop, setDrop] = useState<DropTarget | null>(null);
   const pointerIdRef = useRef<number | null>(null);
@@ -117,7 +120,10 @@ export function useTimelineDrag(): TimelineDragApi {
           allClips.push({ id: c.id, start: clipStartSecs(c), end: clipEndSecs(c) });
         }
       }
-      const pts = collectSnapPoints(allClips, drag.clipId, st.playhead);
+      const pts = collectSnapPoints(
+        allClips, drag.clipId, st.playhead,
+        (st.project.sequence.markers || []).map((marker) => rationalToSecs(marker.time)),
+      );
       // Keep magnetism easy to hit when zoomed out, but cap its visual radius
       // when zoomed in so a one-frame move is not pulled back to a clip edge.
       const snapThresholdSecs = Math.min(SNAP_THRESHOLD_SECS, 8 / pxPerSecRef.current);
@@ -143,9 +149,17 @@ export function useTimelineDrag(): TimelineDragApi {
     const ghostStartSecs = startSecs;
     const pointerSecs = Math.max(0, snapSecsToFrame(px / pxPerSecRef.current, frameRate));
     let reorderMode = false;
+    let mainTrackAutoFit = false;
     let anchorClipId: string | undefined;
     let anchorPosition: "before" | "after" | undefined;
-    if (!invalidReason && overlapsAt(ghostStartSecs) && targetTrack) {
+    const primaryVideoTrackId = st?.project?.sequence.tracks.find((track) => track.kind === "video")?.id;
+    const autoFitOnMainTrack = Boolean(
+      st?.mainTrackAutoFitEnabled
+      && drag.requiredTrackKind === "video"
+      && targetTrack?.id === primaryVideoTrackId,
+    );
+    const shouldInsert = overlapsAt(ghostStartSecs) || autoFitOnMainTrack;
+    if (!invalidReason && shouldInsert && targetTrack) {
       const candidates = targetTrack.clips
         .filter((clip) => clip.id !== drag.clipId)
         .sort((a, b) => clipStartSecs(a) - clipStartSecs(b));
@@ -163,6 +177,7 @@ export function useTimelineDrag(): TimelineDragApi {
         anchorPosition = pointerSecs < anchorMidpoint ? "before" : "after";
         startSecs = anchorPosition === "before" ? clipStartSecs(anchor) : clipEndSecs(anchor);
         reorderMode = true;
+        mainTrackAutoFit = autoFitOnMainTrack && !overlapsAt(ghostStartSecs);
         snapped = true;
       }
     }
@@ -189,6 +204,7 @@ export function useTimelineDrag(): TimelineDragApi {
       reorderMode,
       anchorClipId,
       anchorPosition,
+      mainTrackAutoFit,
       invalidReason,
     };
   }, []);
@@ -310,6 +326,7 @@ export function useTimelineDrag(): TimelineDragApi {
       const timelineStart = secsToFrameRatString(newStart, frameRate);
       void moveClip(dispatch, st, {
         clipId: drag.clipId,
+        followAttachments: !e.altKey,
         ...(targetChanged ? { trackId: d.trackId, timelineStart } : { timelineStart }),
         ...(d.reorderMode && d.anchorClipId && d.anchorPosition
           ? {
@@ -338,5 +355,5 @@ export function useTimelineDrag(): TimelineDragApi {
     if (state.editLock) cancel();
   }, [state.editLock, cancel]);
 
-  return { active, drop, begin, move, finish, cancel };
+  return useMemo(() => ({ active, drop, begin, move, finish, cancel }), [active, drop, begin, move, finish, cancel]);
 }

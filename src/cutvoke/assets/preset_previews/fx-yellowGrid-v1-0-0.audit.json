@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.fx.yellowGrid",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "cell",
+    "value": 65
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.866667,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "deb342b8ab2fa2efdbf2c4e99526dae527dbf8ba56d884530f924dac2e2fea41",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "deb342b8ab2fa2efdbf2c4e99526dae527dbf8ba56d884530f924dac2e2fea41",
+  "auditExport": "fx-yellowGrid-v1-0-0.audit.mp4"
+}

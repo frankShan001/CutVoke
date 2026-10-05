@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.stage_light_crossing_lasers",
+  "version": "1.1.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "a9e328ad507b5f3ef361afbc3964615c16f6079fffe24cdc339b3decfa47edf4",
+  "previewSha256": "c5ac6c78fdad9966ae56c072d92a70f1cf168c720cb66c787340825d2aa0afdd",
+  "preview": "stage_light_crossing_lasers.mp4",
+  "bytes": 10972,
+  "visiblePixels": 8488,
+  "changedPixels": 64,
+  "motionVisible": false
+}

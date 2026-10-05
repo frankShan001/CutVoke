@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.energy_stars_falling",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "c8384b8f15569b5673439cd421b400e522a43725b9a0d2d814ab7349f55ca6e2",
+  "previewSha256": "e7bc0f1847c2310fac2d817cea32e733837d745f3896e80e0029d267e14ab394",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 1053,
+  "visiblePixels": 827,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 281,
+    "steady_entry": 832,
+    "steady_exit": 832,
+    "exit": 282
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 281,
+      "withoutFade": 832
+    },
+    "steady_entry": {
+      "withFade": 832,
+      "withoutFade": 832
+    },
+    "steady_exit": {
+      "withFade": 832,
+      "withoutFade": 832
+    },
+    "exit": {
+      "withFade": 282,
+      "withoutFade": 832
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.016,
+    0.036
+  ],
+  "auditExport": "energy_stars_falling.audit.mp4",
+  "auditExportSha256": "e22e0b0c589d07f3180272324c668b12413ab11508da9ddce65259177b751393"
+}

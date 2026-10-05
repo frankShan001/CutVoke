@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_champagne_glass",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "7a5ed1df1e941f53e9fd982d4bdd157b3dba764cc628a6db9febd4139ff1499a",
+  "previewSha256": "8f176887a43486b0f9fb4e0c8f6ffa7fb66bc0eedfa1cd0a5b106c5be1bd3f27",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6467,
+  "visiblePixels": 6361,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 4402,
+    "steady_entry": 6361,
+    "steady_exit": 6361,
+    "exit": 4373
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 4402,
+      "withoutFade": 6361
+    },
+    "steady_entry": {
+      "withFade": 6361,
+      "withoutFade": 6361
+    },
+    "steady_exit": {
+      "withFade": 6361,
+      "withoutFade": 6361
+    },
+    "exit": {
+      "withFade": 4373,
+      "withoutFade": 6361
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.046,
+    0.046
+  ],
+  "auditExport": "texture_bg_champagne_glass.audit.mp4",
+  "auditExportSha256": "729558e11ba9898cdb5c3ae7e7bbe30a84d48ae43f4f8002e7954cf13a8c509f"
+}

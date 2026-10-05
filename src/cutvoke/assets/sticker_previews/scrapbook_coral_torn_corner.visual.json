@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.scrapbook_coral_torn_corner",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-27 UTC",
+  "method": "Manual review of the extracted transparent PNG on dark and light backgrounds and the 1.0-second frame from the actual edited/exported audit MP4. The default sticker scale was checked at 0.28; exact source, preview, and machine-audit hashes are bound below.",
+  "observation": "珊瑚色 L 形撕纸轮廓完整，适合放在画面角落作边缘装饰。",
+  "sourceSha256": "a64b60b4662f897a009c6c4d48ec2cb17a9246aae93d3b8b8045253275b6fd3c",
+  "previewSha256": "b20aef51128e8d15326eaf4bcf1522f76ccf533c001e2ecd2101c2cd4fea8729",
+  "auditSha256": "2bb9d8ffe3a30294ee39800301bfd154d0893160c03bb986a42d0d0fe5cfe658"
+}

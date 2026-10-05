@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.food_lemon_tea",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25",
+  "method": "Compared the extracted transparent crops with the 16 composited audit-preview frames; checked subject identity, silhouette, crop leakage and legibility at preview size.",
+  "observation": "The lemon wheels, iced tea, green-striped straw and mint remain distinct after top-edge cleanup.",
+  "sourceSha256": "da75ff5261f4bc3b2bd6d09da7a4dd4f8ee27d7a26c8e88ce5f89371ba6b41ec",
+  "previewSha256": "38d65e82f695551fe8820c9af2e462e2bc155cf673eb74c816ad954aba382e34",
+  "auditSha256": "30fec518a94b6ccd277c0304ce1459e46ec22ca69fa8827ddc44e71a75a27314"
+}

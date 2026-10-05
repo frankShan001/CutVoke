@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.reaction_joy",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f6d189896766a658ca25c42cb0ca7d44952e593ecc70e261aa068cf3164a46fe",
+  "previewSha256": "3858ad55a7202930e8988eb95e4ea400fc91d67f0b373040c4a1d95de0e8f178",
+  "preview": "reaction_joy.mp4",
+  "bytes": 4437,
+  "visiblePixels": 2282,
+  "changedPixels": 0,
+  "motionVisible": false
+}

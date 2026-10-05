@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.transition.pixelize",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "8",
+  "editableControl": {
+    "name": "duration",
+    "value": 0.25
+  },
+  "exportDurationSeconds": 4.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 2.226,
+  "exportSha256": "a9e9f7c928800a4c61087773560e57779b2b593bd88b302e5c083dd378a1e584",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "a9e9f7c928800a4c61087773560e57779b2b593bd88b302e5c083dd378a1e584",
+  "auditExport": "transition-pixelize-v1-0-0.audit.mp4"
+}

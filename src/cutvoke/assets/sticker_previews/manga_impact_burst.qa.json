@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_impact_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "f62cf66a68bc88eeac1d1aa24c988117ecde33430e81bcf5abd74939e4e253a8",
+  "previewSha256": "e0f9f8d1e62390e2cd7d75d1e9ee3e16028d016b3191ab4ca3d1735d95d5edac",
+  "preview": "manga_impact_burst.mp4",
+  "bytes": 5078,
+  "visiblePixels": 2108,
+  "changedPixels": 0,
+  "motionVisible": false
+}

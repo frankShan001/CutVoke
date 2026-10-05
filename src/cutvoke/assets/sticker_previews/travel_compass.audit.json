@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.travel_compass",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "9b6e059c8c20fd360646be86d6a829c62dd177859e326ca5c29601379319c200",
+  "previewSha256": "cbbced13afa10448865bb7b5d5c796f90fe20b363cb3cf2bdfe8dd0e407109dc",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 2805,
+  "visiblePixels": 1855,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 1163,
+    "steady_entry": 1855,
+    "steady_exit": 1855,
+    "exit": 1163
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 1163,
+      "withoutFade": 1855
+    },
+    "steady_entry": {
+      "withFade": 1855,
+      "withoutFade": 1855
+    },
+    "steady_exit": {
+      "withFade": 1855,
+      "withoutFade": 1855
+    },
+    "exit": {
+      "withFade": 1163,
+      "withoutFade": 1855
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.029,
+    0.029
+  ],
+  "auditExport": "travel_compass.audit.mp4",
+  "auditExportSha256": "947e11cc5427a4d91e7d302ab3313345b58cf69fbd323a335f1fed0051ca9574"
+}

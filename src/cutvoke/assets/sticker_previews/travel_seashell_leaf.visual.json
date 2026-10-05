@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.travel_seashell_leaf",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "逐项对照透明原图、浅底/深底联系表与实际合成预览，检查图案是否完整、类别是否易辨、轮廓对比和边缘留白；只审批贴纸素材本身，不代表复杂实拍成片验收。",
+  "observation": "贝壳、棕榈叶和海星彼此分开，轮廓干净、主题一致。",
+  "sourceSha256": "3ecc9ec82b7d3f8fbefb68e59260ea6f3d1b63b25cae4561c9bdc0b2cdc5ab94",
+  "previewSha256": "b7042642aaf1594d905004fc6fdf871f5b1c3a572263393af74be03367d6b50b",
+  "auditSha256": "89e5b9a93f5515f8784f80f1e9bbab571cf6218a535597c3f7318a89627ee1ac"
+}

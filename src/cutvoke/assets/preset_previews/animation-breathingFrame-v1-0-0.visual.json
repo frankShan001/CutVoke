@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.breathingFrame",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.breathe",
+  "params": {
+    "amplitude": 0.1,
+    "period": 1.6
+  },
+  "subcategory": "循环",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "圆门逐帧推近、回落再推近，缩放中心稳定，长宽比例正常，转向没有多帧阶梯停顿。 已实际复看重建库预览的12个时间点，图形运动清楚，画幅和边缘正常。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "4ab7cfd99e45765a796eebe34e7f75d692d783ab15b0d5f416c04348d63cd2fa",
+  "motionPreviewSha256": "6707b1b2b60fc62bd799bfc92de8f0a9f581a8b63edcd29b013f43f2ddb28c93",
+  "auditSha256": "89d8676483ae4384deade615580b89abab77270d7b730b981d33ea1ae5942d01",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_breathingFrame.png",
+  "libraryReviewSheetSha256": "a7d1381d578a4e649e425e65b62c88258a5363ef5c6ce1ff9eb4b77d478717d3"
+}

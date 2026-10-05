@@ -1,0 +1,28 @@
+{
+  "presetId": "cutvoke.preset.personFx.violetEdge",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.person.halo",
+      "version": "1.1.0",
+      "params": {
+        "sigma": 14,
+        "hueShift": -78,
+        "saturation": 1.9,
+        "opacity": 0.98
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 20.479,
+  "maxSampledMeanRgbDifference": 20.479,
+  "coverSha256": "fd742549f986282723451d5880a1395f51968d7a4195dbf82b498ba852d8ba86",
+  "previewSha256": "cc57046a41d34724538003155e14d5493f715752188da0a6a0133e8ee19f153d",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

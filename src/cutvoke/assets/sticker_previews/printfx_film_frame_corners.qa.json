@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.printfx_film_frame_corners",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c521aa8eca68f7e8a98470d40f31e2c7817ba4149d1e9c8542eedae08bf228cf",
+  "previewSha256": "a87bfbbc49521e0f2b426c7aeeae592b41dcf59f4926eb0cc2f89b5e466922fa",
+  "preview": "printfx_film_frame_corners.mp4",
+  "bytes": 7224,
+  "visiblePixels": 2611,
+  "changedPixels": 0,
+  "motionVisible": false
+}

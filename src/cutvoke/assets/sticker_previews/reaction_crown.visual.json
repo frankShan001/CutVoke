@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.reaction_crown",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex manual visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Reviewed the transparent-art contact sheet and actual composited previews at full contact-sheet scale; machine edit, save/reload, undo, and export audit was completed for each item.",
+  "observation": "Gold crown with colored jewels; upright silhouette remains distinct at small scale.",
+  "sourceSha256": "abef4daed6fad17dd8bc1422b293c23ac865ca36d064142061f0009eb5c2f477",
+  "previewSha256": "972d20a3fa0ba94b8209fcc6bceecb4e874959c5a8a5e7dbcc58ec5195916f43",
+  "auditSha256": "94bfd9ccc062d2d31f5b2de38d46bf0063cff2f580743048c0110d8f39f8ebd0"
+}

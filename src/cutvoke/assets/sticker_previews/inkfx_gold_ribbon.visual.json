@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.inkfx_gold_ribbon",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "Inspected the extracted RGBA contact sheet and rendered composites over a dark-to-light gradient; checked transparency, cell isolation, silhouette distinction, and legibility.",
+  "observation": "A long narrow gold-foil S ribbon with sparse flecks gives a clean directional sweep rather than a particle-only trail.",
+  "sourceSha256": "1718048eda3d8614d41690735e3fd48f5a60094c8e7688c64de5f200fb7205eb",
+  "previewSha256": "46045c5b0fa68aa8f2f09c6b555ccd08600f57636c82ff4804c08b501f6e15be",
+  "auditSha256": "1dba62d2f310bbf7ee0a826971062ce41f0fc1611a6321e316282d739cc3504a"
+}

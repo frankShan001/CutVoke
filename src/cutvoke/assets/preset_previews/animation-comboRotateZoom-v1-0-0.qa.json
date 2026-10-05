@@ -1,0 +1,30 @@
+{
+  "presetId": "cutvoke.preset.animation.comboRotateZoom",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.anim.comboRotateZoom",
+      "version": "1.0.0",
+      "params": {
+        "duration": 1.0,
+        "easing": "ease-out",
+        "distance": 0.3,
+        "primary": "rotateIn",
+        "secondary": "zoomIn",
+        "fromScale": 0.8
+      }
+    }
+  ],
+  "durationSeconds": 1.1,
+  "firstLastMeanRgbDifference": 60.122,
+  "maxSampledMeanRgbDifference": 60.122,
+  "coverSha256": "8254bb96fbf2995ae89ef60dffc7c1e2a1403e4fbfda6330e52423407ea1c59f",
+  "previewSha256": "e6f7424734c810014637c811131eb22ee94ce594ffeba97d09081bffb6e68f02",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

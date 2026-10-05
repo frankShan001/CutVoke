@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_leak_cyan",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4dd61bfae7500cf6af960cfe2b73a5dfb19e855c11b77c3d20932829fb724904",
+  "previewSha256": "dd2dd4c52dc4311bf67aebe5f90e9ef98b3442e8bd69e2d224f3b89287e9c84e",
+  "preview": "cinematic_optical_leak_cyan.mp4",
+  "bytes": 7731,
+  "visiblePixels": 7242,
+  "changedPixels": 0,
+  "motionVisible": false
+}

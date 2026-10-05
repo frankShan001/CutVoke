@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.transition.crossblur",
+  "version": "1.0.0",
+  "effectId": "cutvoke.transition.crossblur",
+  "params": {
+    "duration": 0.5
+  },
+  "subcategory": "模糊",
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-24T06:43:42Z",
+  "observation": "横向与纵向拖影同时展开，十字边缘比单轴模糊更宽，主体仍可辨。",
+  "method": "手工对照每项封面、五时间点动态表与真实导出帧表；分别核对模糊方向、焦点位置、画面明度和镜头顺序。动态表见 output/preset_review/transition-20260924-blur-fixed/transition-模糊-motion.png，真实导出帧见 output/preset_review/transition-20260924-blur-custom-export.png。另以透明导出样片确认 alpha 保留在 254–255。",
+  "coverSha256": "3fec7ccf132f473546e3bb5330ff9a13a6352ceb01fc8e423d7448e9bb212f8e",
+  "motionPreviewSha256": "ae88a6b103b46a724d0f2efbda59878163c75f562febed7241811ea0a666b95f",
+  "auditSha256": "df0ac225cffe27bd803ea010a45cd6208619f9e24eb48c05b3a4fba7f3195621"
+}

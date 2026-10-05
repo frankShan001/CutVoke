@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.weatherfx_autumn_leaves",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "354a5ab880261f6beea0ccd18b5619a675f344084eb20ea5a904db929d5aaf03",
+  "previewSha256": "4256a5dfcf0e30d627f8d6a5381faee04f8c9a79e8027494ad2b296e9db2df81",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 7335,
+  "visiblePixels": 4955,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "auditBackgroundMode": "dark-to-light-gradient",
+  "animationVisibilityPixels": {
+    "entry": 3975,
+    "steady_entry": 4954,
+    "steady_exit": 4956,
+    "exit": 3983
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3975,
+      "withoutFade": 4956
+    },
+    "steady_entry": {
+      "withFade": 4954,
+      "withoutFade": 4956
+    },
+    "steady_exit": {
+      "withFade": 4956,
+      "withoutFade": 4956
+    },
+    "exit": {
+      "withFade": 3983,
+      "withoutFade": 4956
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.202,
+    0.209
+  ],
+  "auditExport": "weatherfx_autumn_leaves.audit.mp4",
+  "auditExportSha256": "6265e54565a0c2add03c9ec0a6b409aef668401bbea769f4b63bcc1357e28f34"
+}

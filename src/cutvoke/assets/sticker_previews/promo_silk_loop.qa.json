@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.promo_silk_loop",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "ffeaad1c95f310f72739fcfd93afc31daa0bc51bf6a0ae9538c4de6497f93579",
+  "previewSha256": "d4b7bc319f26e6736dcbc9c448d3868f8f3a9432569dac03a9204a6c1ffa9407",
+  "preview": "promo_silk_loop.mp4",
+  "bytes": 7941,
+  "visiblePixels": 4397,
+  "changedPixels": 0,
+  "motionVisible": false
+}

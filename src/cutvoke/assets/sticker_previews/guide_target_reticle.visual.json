@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.guide_target_reticle",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex",
+  "reviewedAt": "2026-09-26T23:04:25+00:00",
+  "observation": "Coral reticle is symmetric, centered, and clearly marks a focal point.",
+  "method": "Reviewed each transparent PNG on light and dark contact-sheet backgrounds, then reviewed the actual editor-rendered MP4 contact sheet; checked silhouette, clipping, alpha edges, readability, and whether each item serves a clear guidance purpose.",
+  "sourceSha256": "5ab195d54592b6ceaab7ca6249a12caba28252c5be5f62cfc4727e5156752190",
+  "previewSha256": "ab9b321410ac12dcf6bda12e0b7146b030ddec3a39395cd3f8fff654f68b1e5a",
+  "auditSha256": "122bd332b8f4190566bb35e98b209e12f30f54a89c2fd12ccae8877269dfc062"
+}

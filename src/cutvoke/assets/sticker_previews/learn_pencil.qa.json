@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.learn_pencil",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c903282d9e431d0a8cec4b2bb479f36ca8010d96e779338cc267757b5462e25d",
+  "previewSha256": "692e043aa0a62c6164c80931ba7fb20b5c72174c90cddb6a231ce64d3dd34a55",
+  "preview": "learn_pencil.mp4",
+  "bytes": 3606,
+  "visiblePixels": 764,
+  "changedPixels": 0,
+  "motionVisible": false
+}

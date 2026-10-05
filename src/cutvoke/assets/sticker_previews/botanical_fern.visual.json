@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.botanical_fern",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex视觉复核（AI）",
+  "reviewedAt": "2026-09-24",
+  "method": "逐项检查生成原图、浅灰/深灰底透明贴图接触表和真实渲染器导出的320x180合成预览；记录造型辨识、透明边缘、单元串图与适用画面。",
+  "observation": "单片蕨叶轮廓完整，羽状小叶没有跨格或裁切损伤，浅底下识别度高。",
+  "sourceSha256": "141ca98ca1bad0b0e79a95c0f2110fb562486101c09a90c4929441db853a435d",
+  "previewSha256": "08664029e1375d32e27528fd87be2ff1a1ab012f216fce50c81c82728ab98eaa",
+  "auditSha256": "161e94753cd89d0543716ffb19a5550fc78d159d2bc284fecfcea0cb028424ae"
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_sunbeam_gold",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0cb5f787578c69d1fa90f67d208da2f04a2b49bd0c87801950b868df59f1ba53",
+  "previewSha256": "104e9c2f1cddea65448c168db7225868095edd0eff4e50d21b61494a553eb0f7",
+  "preview": "texture_sunbeam_gold.mp4",
+  "bytes": 4276,
+  "visiblePixels": 2877,
+  "changedPixels": 0,
+  "motionVisible": false
+}

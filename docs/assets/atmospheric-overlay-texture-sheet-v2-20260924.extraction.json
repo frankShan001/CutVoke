@@ -1,0 +1,466 @@
+{
+  "source": "atmospheric-overlay-texture-sheet-v2-20260924.png",
+  "sourceSha256": "66ac551c7b6af35050afbc72c3d0781892238a59f6ff952ce790e5b979871ef1",
+  "sourceSize": [
+    1269,
+    1240
+  ],
+  "normalizationCrop": [
+    14,
+    0,
+    324,
+    310
+  ],
+  "layout": "4x4",
+  "extraction": "proportional cell crops, centered square padding, alpha preserved",
+  "items": [
+    {
+      "stem": "texture_v2_rain_drops",
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        310,
+        310
+      ],
+      "visibleBounds": [
+        19,
+        27,
+        284,
+        310
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 29049,
+      "visiblePixelsWithin12pxBoundary": 286,
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "705777f155d72206c525c39a5b09c913053dc5291805e7ee5148d20b155ef04d"
+    },
+    {
+      "stem": "texture_v2_snow_flurries",
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        310,
+        0,
+        620,
+        310
+      ],
+      "visibleBounds": [
+        18,
+        32,
+        282,
+        307
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 24822,
+      "visiblePixelsWithin12pxBoundary": 276,
+      "alphaExtrema": [
+        0,
+        247
+      ],
+      "sha256": "193b0417b5f98c26a1ae3cad509a281e962ce48804c179f46a2081e74a649338"
+    },
+    {
+      "stem": "texture_v2_frost_edge",
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        620,
+        0,
+        930,
+        310
+      ],
+      "visibleBounds": [
+        14,
+        36,
+        306,
+        310
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 41212,
+      "visiblePixelsWithin12pxBoundary": 3661,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "731b75cc87684f85760b373888d1d0ac0398854a0f114a254d8d78fb0156efac"
+    },
+    {
+      "stem": "texture_v2_smoke_wisps",
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        930,
+        0,
+        1240,
+        310
+      ],
+      "visibleBounds": [
+        16,
+        18,
+        309,
+        310
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 59276,
+      "visiblePixelsWithin12pxBoundary": 3120,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "132fde06344a241e350cc880162e58e7d2b999d346e7d6ccdf9d580db4a97598"
+    },
+    {
+      "stem": "texture_v2_low_fog",
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        310,
+        310,
+        620
+      ],
+      "visibleBounds": [
+        8,
+        89,
+        307,
+        299
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 47740,
+      "visiblePixelsWithin12pxBoundary": 1791,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "8dddd924162557df875f529ae49bbc1e737ad4cb85f5e7b645a4b19940afedfc"
+    },
+    {
+      "stem": "texture_v2_dust_motes",
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        310,
+        310,
+        620,
+        620
+      ],
+      "visibleBounds": [
+        19,
+        17,
+        289,
+        294
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 41937,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "6be2cefe8fbdc7bcee4fd3050036e63318a4163ffc9504f257b9f00f66c29a39"
+    },
+    {
+      "stem": "texture_v2_film_scratches",
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        620,
+        310,
+        930,
+        620
+      ],
+      "visibleBounds": [
+        37,
+        0,
+        306,
+        301
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 5162,
+      "visiblePixelsWithin12pxBoundary": 1440,
+      "alphaExtrema": [
+        0,
+        248
+      ],
+      "sha256": "82cdecc1589b81db68c531030fe5bb717948f7df2b01a56162885d2128ed31d2"
+    },
+    {
+      "stem": "texture_v2_film_burn",
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        930,
+        310,
+        1240,
+        620
+      ],
+      "visibleBounds": [
+        37,
+        0,
+        307,
+        301
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 36007,
+      "visiblePixelsWithin12pxBoundary": 3898,
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "sha256": "da69bb858e8eacacda20fc1252eb42006c0353927ff231e054ecc220b98fd4a4"
+    },
+    {
+      "stem": "texture_v2_vhs_interference",
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        620,
+        310,
+        930
+      ],
+      "visibleBounds": [
+        9,
+        23,
+        295,
+        310
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 49071,
+      "visiblePixelsWithin12pxBoundary": 572,
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "d63eb611bc23a0f8a3ac7bf296704dc7ee3127dced40d871e8b4c049494a9767"
+    },
+    {
+      "stem": "texture_v2_glitch_shards",
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        310,
+        620,
+        620,
+        930
+      ],
+      "visibleBounds": [
+        12,
+        30,
+        299,
+        262
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 24909,
+      "visiblePixelsWithin12pxBoundary": 6,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "7498bb247155c4cd733d0d728c1ac342e8533b4170e7da4b719419b2020d0d6a"
+    },
+    {
+      "stem": "texture_v2_holographic_mesh",
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        620,
+        620,
+        930,
+        930
+      ],
+      "visibleBounds": [
+        16,
+        44,
+        307,
+        283
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 46984,
+      "visiblePixelsWithin12pxBoundary": 1357,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "04680f2501ccf26bad5af89bed08f77f443dc08f6246f7849c99c11d2947a1a4"
+    },
+    {
+      "stem": "texture_v2_heat_haze",
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        930,
+        620,
+        1240,
+        930
+      ],
+      "visibleBounds": [
+        22,
+        12,
+        305,
+        285
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 56760,
+      "visiblePixelsWithin12pxBoundary": 298,
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "8f27b2d2b88f4b71168c0f076b5eab8aedd68afd7a3afb71e8757c01bc61a06a"
+    },
+    {
+      "stem": "texture_v2_ink_bloom",
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        930,
+        310,
+        1240
+      ],
+      "visibleBounds": [
+        11,
+        0,
+        296,
+        270
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 47982,
+      "visiblePixelsWithin12pxBoundary": 829,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "22b907685bb88af3d4df2d127aafb5d899a9bf3876c77bc77bc6808b0756dbff"
+    },
+    {
+      "stem": "texture_v2_watercolor_wash",
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        310,
+        930,
+        620,
+        1240
+      ],
+      "visibleBounds": [
+        12,
+        11,
+        297,
+        274
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 51791,
+      "visiblePixelsWithin12pxBoundary": 6,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "aa6dd64299012ef3cc8b8f383e51b0930f396496ac99a0e14ca5b56da101d90f"
+    },
+    {
+      "stem": "texture_v2_paper_tear",
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        620,
+        930,
+        930,
+        1240
+      ],
+      "visibleBounds": [
+        14,
+        50,
+        310,
+        238
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 26931,
+      "visiblePixelsWithin12pxBoundary": 281,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "42968908bbbab172beada495d75eb3f8e901f37870c8bcfb67fb122bf53af795"
+    },
+    {
+      "stem": "texture_v2_prismatic_caustics",
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        930,
+        930,
+        1240,
+        1240
+      ],
+      "visibleBounds": [
+        14,
+        4,
+        309,
+        276
+      ],
+      "size": [
+        310,
+        310
+      ],
+      "visiblePixels": 62385,
+      "visiblePixelsWithin12pxBoundary": 1914,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "d01a3635b13af8b909c855f5ad72ae2f3c67130db5483c92acdc69e4cd35e9a2"
+    }
+  ]
+}

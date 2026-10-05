@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.food_taiyaki",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "a9620b226ce562bf97f82ed37be8e4d173c5772fb8a4307e3df11062942c736b",
+  "previewSha256": "5bef40b6a981cea03c7f150bae8be2ad4ace8b4ee9943cf833445a6d56523dc5",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 5224,
+  "visiblePixels": 4445,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 3859,
+    "steady_entry": 4445,
+    "steady_exit": 4445,
+    "exit": 3859
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 3859,
+      "withoutFade": 4445
+    },
+    "steady_entry": {
+      "withFade": 4445,
+      "withoutFade": 4445
+    },
+    "steady_exit": {
+      "withFade": 4445,
+      "withoutFade": 4445
+    },
+    "exit": {
+      "withFade": 3859,
+      "withoutFade": 4445
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.601,
+    0.602
+  ],
+  "auditExport": "food_taiyaki.audit.mp4",
+  "auditExportSha256": "8fc2c20543b8cdae4851f3857c38b32dc78f5ac7a97f89f95e2022d8f6a41b4e"
+}

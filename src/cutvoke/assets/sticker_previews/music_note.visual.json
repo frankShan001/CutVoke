@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.music_note",
+  "version": "1.1.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "OpenAI Codex visual review",
+  "reviewedAt": "2026-09-25 10:13:10 UTC",
+  "method": "Manual inspection of each extracted transparent asset and its rendered 0.55s sample over a dark-to-light gradient; dynamic variants compared at 0.20s, 0.55s, 0.90s and 1.30s. Contact sheets are retained in this acceptance directory. Artwork and rendered frames remained visually unchanged during the resource-version update; source and preview hashes were refreshed after rerunning all machine audits.",
+  "observation": "紫色音符符干与双音头连接完整，白色外缘在浅底上清楚。",
+  "sourceSha256": "a4d18a5cffad1b2b88f91226bba31d2fdced8a29706b26bf8f5ac220ca255a55",
+  "previewSha256": "05ddf0ff9f2ce01958f2ace9b25da6107c354181f57d09adb6cbe64eed0ad4db",
+  "auditSha256": "5fafd90b4be00351f0e0ca36d1403cabb48b7daf76aa548cf4a9f45721dea30d"
+}

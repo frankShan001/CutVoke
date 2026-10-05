@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_v2_film_scratches",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "82cdecc1589b81db68c531030fe5bb717948f7df2b01a56162885d2128ed31d2",
+  "previewSha256": "fc71c8c09816706478cb8a1365749185f1992be9aea045b89bc48e78c71a1c9b",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 776,
+  "visiblePixels": 520,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 55,
+    "steady_entry": 520,
+    "steady_exit": 520,
+    "exit": 55
+  },
+  "previewExportMeanRgbDifferences": [
+    0.0,
+    0.0
+  ],
+  "auditExport": "texture_v2_film_scratches.audit.mp4",
+  "auditExportSha256": "741bdfc7b360cff479f091be8d756aa62d6b74a9acfd2fc95f922619ed97b40f"
+}

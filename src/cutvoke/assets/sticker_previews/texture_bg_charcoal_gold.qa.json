@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_charcoal_gold",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "0e9ecfeb3564271f88c5629c7a5c1c92daffdc0c75a990ea617c97fdd303640d",
+  "previewSha256": "ccf09254f6252c810360ba4298e516cb414044be6bb6d270ebd74a48f1189f32",
+  "preview": "texture_bg_charcoal_gold.mp4",
+  "bytes": 19296,
+  "visiblePixels": 55967,
+  "changedPixels": 0,
+  "motionVisible": false
+}

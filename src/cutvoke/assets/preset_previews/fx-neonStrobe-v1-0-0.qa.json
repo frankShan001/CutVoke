@@ -1,0 +1,41 @@
+{
+  "presetId": "cutvoke.preset.fx.neonStrobe",
+  "generator": "scripts/generate_preset_previews.py",
+  "source": "generated geometric artwork; no external media",
+  "renderPath": "RenderService.render_preview_window",
+  "effects": [
+    {
+      "effectId": "cutvoke.fx.flicker",
+      "version": "1.0.0",
+      "params": {
+        "hz": 4.4
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.edge",
+      "version": "1.0.0",
+      "params": {
+        "mode": "wire",
+        "low": 0.06,
+        "high": 0.24
+      }
+    },
+    {
+      "effectId": "cutvoke.fx.glow",
+      "version": "1.0.0",
+      "params": {
+        "intensity": 2.4
+      }
+    }
+  ],
+  "durationSeconds": 1.266667,
+  "firstLastMeanRgbDifference": 105.12,
+  "maxSampledMeanRgbDifference": 105.12,
+  "coverSha256": "abb3d822449e0c50d6b52e94dfec7bba834b2a78e90ab5741786c5513129facb",
+  "previewSha256": "2b4f40389f551bf0c58c38be1031e7cc905daa0b2f52d76cf600f90fc0aa5547",
+  "coverCrop": null,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

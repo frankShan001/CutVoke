@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.cinematic_optical_flare_amber",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "c8555af15ed4b74cfad407e0ff1d76b3e5665757ab69c0d35fc70fab3224c0ae",
+  "previewSha256": "4a9ee248c6d65c339523118242f0a852680f1da073bf20db67fb8f25caaa10ba",
+  "preview": "cinematic_optical_flare_amber.mp4",
+  "bytes": 6614,
+  "visiblePixels": 3235,
+  "changedPixels": 0,
+  "motionVisible": false
+}

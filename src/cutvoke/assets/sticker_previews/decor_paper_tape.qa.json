@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.decor_paper_tape",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "72e49bf547c4de93ecec87cf3e7c5d62602884aca93a30a3f14c8f739fc89757",
+  "previewSha256": "dad76173a946679bcc8612e20b01946e6db64ce104fa67a1646a0d0637652eea",
+  "preview": "decor_paper_tape.mp4",
+  "bytes": 3871,
+  "visiblePixels": 1952,
+  "changedPixels": 0,
+  "motionVisible": false
+}

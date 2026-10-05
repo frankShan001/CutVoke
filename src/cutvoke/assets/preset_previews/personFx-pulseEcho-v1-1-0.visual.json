@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.personFx.pulseEcho",
+  "version": "1.1.0",
+  "effectId": "cutvoke.person.echo",
+  "params": {
+    "frames": 6,
+    "decay": 0.7
+  },
+  "subcategory": "人物残影",
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-26",
+  "observation": "The trailing silhouettes vary strongly in visibility, creating a distinct rhythmic echo treatment.",
+  "method": "Inspected each generated cover and timed motion contact sheet, with export audit and matching-media hashes. Person FX were reviewed on a generated alpha silhouette over a dark stage; this is not real-footage quality evidence.",
+  "coverSha256": "6972cc5444fe456ae1a3f2b60d649c85ea0e6e0574004c9320460f7b9da055bf",
+  "motionPreviewSha256": "a8d84ab85b780fa26f63b8ce641a866d70e5bfd29d1d32ef1c91c267eb5afd18",
+  "auditSha256": "0ccb9dfd249c51e51ce925dc36b695faf9c5523dc13cb70a970b55f95ba165b6"
+}

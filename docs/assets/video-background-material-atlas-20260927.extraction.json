@@ -1,0 +1,496 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "source": "video-background-material-atlas-20260927.png",
+  "sourceSha256": "952422c33d1720facc817500771b908d5fdeff84a0865751789f37dc1dba1ecd",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4 equal square cells",
+  "extraction": "centered cell crops with 12px inset to remove dark grid; resized to 1920x1080 by Lanczos fit",
+  "contactSheet": "video-background-material-atlas-20260927-contact.png",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "items": [
+    {
+      "index": 1,
+      "stem": "bgmat_cotton_ivory",
+      "name": "米白棉纸",
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "cropBox": [
+        12,
+        12,
+        302,
+        302
+      ],
+      "interiorSize": [
+        290,
+        290
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 272779,
+      "sha256": "c6a6a58de7a86da615b3907600993156318f11cb6a0add8d6e207f1343b863c9"
+    },
+    {
+      "index": 2,
+      "stem": "bgmat_watercolor_blue",
+      "name": "浅蓝水彩纸",
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "cropBox": [
+        326,
+        12,
+        615,
+        302
+      ],
+      "interiorSize": [
+        289,
+        290
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 262524,
+      "sha256": "30f4490a59e35937e614116264b87f0f1db8b62350e616de8476c4cb80645caf"
+    },
+    {
+      "index": 3,
+      "stem": "bgmat_handmade_rose",
+      "name": "玫瑰手工纸",
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "cropBox": [
+        639,
+        12,
+        928,
+        302
+      ],
+      "interiorSize": [
+        289,
+        290
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 365036,
+      "sha256": "87bc4383d4b1670b369f0e5ed0401fe9c444d2e23295bede7d8311d55f6f66a9"
+    },
+    {
+      "index": 4,
+      "stem": "bgmat_linen_sage",
+      "name": "鼠尾草亚麻",
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "cropBox": [
+        952,
+        12,
+        1242,
+        302
+      ],
+      "interiorSize": [
+        290,
+        290
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 391242,
+      "sha256": "333e5f2ae07ea05bfb80110cb7a4ae63d9ae1be1b0b29c612b69b777561bf63a"
+    },
+    {
+      "index": 5,
+      "stem": "bgmat_velvet_navy",
+      "name": "深蓝丝绒",
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "cropBox": [
+        12,
+        326,
+        302,
+        615
+      ],
+      "interiorSize": [
+        290,
+        289
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 321467,
+      "sha256": "d4bb008d77b4a934e15f21b9a1c835974cf40c6cede82bf481ace2056ad29789"
+    },
+    {
+      "index": 6,
+      "stem": "bgmat_concrete_charcoal",
+      "name": "炭灰水泥",
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "cropBox": [
+        326,
+        326,
+        615,
+        615
+      ],
+      "interiorSize": [
+        289,
+        289
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 306290,
+      "sha256": "38b90953d8aa976fd5ca34210008b38025c1a9e071d2271c3e61f8d85b3b291b"
+    },
+    {
+      "index": 7,
+      "stem": "bgmat_marble_teal",
+      "name": "青绿云石",
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "cropBox": [
+        639,
+        326,
+        928,
+        615
+      ],
+      "interiorSize": [
+        289,
+        289
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 294417,
+      "sha256": "2c5d728bc663be84fffa3b4d294fc25537950756261091a98fbfba8fff641157"
+    },
+    {
+      "index": 8,
+      "stem": "bgmat_wood_walnut",
+      "name": "胡桃木纹",
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "cropBox": [
+        952,
+        326,
+        1242,
+        615
+      ],
+      "interiorSize": [
+        290,
+        289
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 304533,
+      "sha256": "5f9aa141ec39911450ec5808d735adc8cbdd9dc720fdf3d81521f0c7dc709099"
+    },
+    {
+      "index": 9,
+      "stem": "bgmat_terrazzo_cream",
+      "name": "奶油水磨石",
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "cropBox": [
+        12,
+        639,
+        302,
+        928
+      ],
+      "interiorSize": [
+        290,
+        289
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 288271,
+      "sha256": "d9ab53ce9d49fa58e18c28449a7cbcb32346d00e7df49f70b88c56da489e0f30"
+    },
+    {
+      "index": 10,
+      "stem": "bgmat_vellum_lavender",
+      "name": "淡紫描图纸",
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "cropBox": [
+        326,
+        639,
+        615,
+        928
+      ],
+      "interiorSize": [
+        289,
+        289
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 260205,
+      "sha256": "7d768b9fe160ca01b5674dcda1f8c8ff257fb8337720538435bcb587a4f8126f"
+    },
+    {
+      "index": 11,
+      "stem": "bgmat_plaster_peach",
+      "name": "蜜桃灰泥",
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "cropBox": [
+        639,
+        639,
+        928,
+        928
+      ],
+      "interiorSize": [
+        289,
+        289
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 364431,
+      "sha256": "9c3f5dff08747fb4c2ee539c3eae889238085f4234a6c15aba02752a62657941"
+    },
+    {
+      "index": 12,
+      "stem": "bgmat_frosted_mint",
+      "name": "薄荷磨砂玻璃",
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "cropBox": [
+        952,
+        639,
+        1242,
+        928
+      ],
+      "interiorSize": [
+        290,
+        289
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 314621,
+      "sha256": "41771e448c02e0a78e462d1ccca0ff9efa11f377ef2b2a08ca22fcae7fb35aad"
+    },
+    {
+      "index": 13,
+      "stem": "bgmat_denim_indigo",
+      "name": "靛蓝牛仔布",
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "cropBox": [
+        12,
+        952,
+        302,
+        1242
+      ],
+      "interiorSize": [
+        290,
+        290
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 540372,
+      "sha256": "a0a8c644f355aa724ca5a788d5dcec21faa4f2f62f0abd652f3d48aab5e6aa83"
+    },
+    {
+      "index": 14,
+      "stem": "bgmat_canvas_sand",
+      "name": "沙色画布",
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "cropBox": [
+        326,
+        952,
+        615,
+        1242
+      ],
+      "interiorSize": [
+        289,
+        290
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 480539,
+      "sha256": "96ee993a1c7aa2f503ac50d0cc72fa92230da8f8beea49900300058056117e86"
+    },
+    {
+      "index": 15,
+      "stem": "bgmat_satin_emerald",
+      "name": "翡翠缎面",
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "cropBox": [
+        639,
+        952,
+        928,
+        1242
+      ],
+      "interiorSize": [
+        289,
+        290
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 280919,
+      "sha256": "0b7ea1a3e84c6671bf0df2b140cb7a510ca7da0b396c6273b1151c95d75e96c7"
+    },
+    {
+      "index": 16,
+      "stem": "bgmat_slate_bluegray",
+      "name": "蓝灰板岩",
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "cropBox": [
+        952,
+        952,
+        1242,
+        1242
+      ],
+      "interiorSize": [
+        290,
+        290
+      ],
+      "size": [
+        1920,
+        1080
+      ],
+      "format": "JPEG quality 94, 4:4:4 chroma",
+      "sizeBytes": 395216,
+      "sha256": "eff179abf9b3d3aef53b37ce8a287e82937c2977b0a0895ae84ac914e3aafd2b"
+    }
+  ]
+}

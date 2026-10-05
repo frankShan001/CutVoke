@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_emerald_velvet",
+  "version": "1.0.0",
+  "kind": "static",
+  "sourceSha256": "cced6d7fcac49ba878626b72a9edbb74b2a167daedbe36d814c09226fe1868c6",
+  "previewSha256": "dd4721c652006ebba941664d3746913e000ed90e9972a7f1f934e82f0311f118",
+  "generator": "scripts/audit_sticker_library.py",
+  "commands": [
+    "clip.insert",
+    "effect.update",
+    "effect.setAnimation",
+    "history.undo",
+    "history.redo"
+  ],
+  "checks": [
+    "apply",
+    "edit",
+    "saveReload",
+    "undo",
+    "export"
+  ],
+  "editedPixels": 6208,
+  "visiblePixels": 6557,
+  "animationIds": [
+    "cutvoke.anim.fadeIn",
+    "cutvoke.anim.fadeOut"
+  ],
+  "animationDurationSeconds": 0.4,
+  "animationVisibilityPixels": {
+    "entry": 6241,
+    "steady_entry": 6557,
+    "steady_exit": 6557,
+    "exit": 6241
+  },
+  "fadeVisibilityComparison": {
+    "entry": {
+      "withFade": 6241,
+      "withoutFade": 6557
+    },
+    "steady_entry": {
+      "withFade": 6557,
+      "withoutFade": 6557
+    },
+    "steady_exit": {
+      "withFade": 6557,
+      "withoutFade": 6557
+    },
+    "exit": {
+      "withFade": 6241,
+      "withoutFade": 6557
+    }
+  },
+  "previewExportMeanRgbDifferences": [
+    0.043,
+    0.043
+  ],
+  "auditExport": "texture_bg_emerald_velvet.audit.mp4",
+  "auditExportSha256": "423a7d91aa4eedb3b4b6816e539c1be78eee7a6095e42c9ced6b1d9b5cfe07e1"
+}

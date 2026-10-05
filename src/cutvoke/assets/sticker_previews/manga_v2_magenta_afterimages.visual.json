@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.manga_v2_magenta_afterimages",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex AI visual review",
+  "reviewedAt": "2026-09-26",
+  "method": "逐项检查透明裁切接触表和深浅渐变实帧合成接触表；比较轮廓区别、边缘、可见度与画面适配。机器编辑/保存/撤销/导出审计另由 sticker audit 报告记录。",
+  "observation": "洋红横向残影有清晰主形与水平拖尾，方向性明显且边缘不过格。",
+  "sourceSha256": "ec6bab2638bb70e951bed01fec2f36396ce106cbad7525efc48f7fd7dc6fc3a8",
+  "previewSha256": "7728dfe568e80eb18182d3e1652eeff3b47e8b65cdf27637e59232bf12b9c75b",
+  "auditSha256": "191c2dd20c5ed2e6dbdd06151dcb46cc5a8abfe53a48fc568040d7b56d443128"
+}

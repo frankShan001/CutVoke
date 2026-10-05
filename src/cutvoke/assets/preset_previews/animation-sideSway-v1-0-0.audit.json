@@ -1,0 +1,29 @@
+{
+  "presetId": "cutvoke.preset.animation.sideSway",
+  "generator": "scripts/audit_effect_presets.py",
+  "source": "generated geometric artwork; no external media",
+  "commands": [
+    "builtinPreset.apply",
+    "history.undo",
+    "history.redo",
+    "effect.update"
+  ],
+  "savedRevision": "7",
+  "editableControl": {
+    "name": "amplitude",
+    "value": 0.0525
+  },
+  "exportDurationSeconds": 2.0,
+  "previewDurationSeconds": 0.9,
+  "previewExportMeanRgbDifference": 0.0,
+  "exportSha256": "2bbea2d11179f41c601d25a73f0547de5af5ca76a3caf5809fe850867fc8559e",
+  "checks": [
+    "apply",
+    "saveReload",
+    "undo",
+    "export",
+    "edit"
+  ],
+  "auditExportSha256": "2bbea2d11179f41c601d25a73f0547de5af5ca76a3caf5809fe850867fc8559e",
+  "auditExport": "animation-sideSway-v1-0-0.audit.mp4"
+}

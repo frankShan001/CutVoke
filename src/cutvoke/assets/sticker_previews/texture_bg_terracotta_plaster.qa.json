@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.texture_bg_terracotta_plaster",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "5feb742b79f369e59e7f2d18d963ec0143fa48bc99d1aed2e608030266d8136d",
+  "previewSha256": "019b817405ce0ae6382a3ef42f8d4cb7589ca98db33266c6607765b9f4c228c9",
+  "preview": "texture_bg_terracotta_plaster.mp4",
+  "bytes": 24505,
+  "visiblePixels": 57600,
+  "changedPixels": 0,
+  "motionVisible": false
+}

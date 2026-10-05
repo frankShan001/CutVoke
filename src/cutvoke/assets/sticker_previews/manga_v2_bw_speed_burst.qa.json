@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.manga_v2_bw_speed_burst",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "d695d9b64a806517c18d0eae37c7c0c3dd293cbbe4e5169fce8024d0c83f24cf",
+  "previewSha256": "e67c04bb0c0c89eeda9a9d8acef2c0374d614514377315e73b74dad093d22659",
+  "preview": "manga_v2_bw_speed_burst.mp4",
+  "bytes": 11792,
+  "visiblePixels": 7581,
+  "changedPixels": 0,
+  "motionVisible": false
+}

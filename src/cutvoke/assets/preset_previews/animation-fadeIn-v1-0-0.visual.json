@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "presetId": "cutvoke.preset.animation.fadeIn",
+  "version": "1.0.0",
+  "effectId": "cutvoke.anim.fadeIn",
+  "params": {
+    "duration": 1.0,
+    "easing": "linear"
+  },
+  "subcategory": "入场",
+  "reviewer": "Codex actual image visual inspection",
+  "reviewedAt": "2026-10-03",
+  "observation": "从暗到亮逐帧渐入，画幅与位置稳定，进入完成后没有异常亮度跳变。",
+  "method": "Actual view_image review of chronological regenerated library frames and corresponding real-project default cases",
+  "coverSha256": "2979cae956d86748344bac6a601229c8c1fd663d4f6a7652704caddc265b1c05",
+  "motionPreviewSha256": "a1f6a720a34906bb6accefd7973d59d4b34a31e696dc3b190523fcf374398885",
+  "auditSha256": "67cda53317ea5a8cb5c8d859ba2e8e10f136be2f09f418d1ee12df5aff5245b2",
+  "realProjectReviewDirectory": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\reviews",
+  "libraryReviewSheet": "E:\\myproject\\opencut\\output\\acceptance\\effects-visual-review-20261003\\library-review\\cutvoke_preset_animation_fadeIn.png",
+  "libraryReviewSheetSha256": "b7b2422d4932e9e347534841b57cedc728018e27e383a66d860c70cb508be670"
+}

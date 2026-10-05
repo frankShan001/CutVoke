@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.pet_nose_greeting",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual QA",
+  "reviewedAt": "2026-09-25T13:01:34+08:00",
+  "method": "Inspected the source atlas, 320px transparent contact sheet and 320x180 composited MP4 previews at normal display size; checked uniqueness, silhouette, crop boundaries, alpha edges and readability.",
+  "observation": "猫狗贴鼻姿势表达清楚，头部轮廓各自独立，适合宠物日常片段。",
+  "sourceSha256": "720c6f731a587098c498933c4fc3a3f58fc2c53ac4cbda0b41efc0b5ab06af39",
+  "previewSha256": "303a0322e822c06d4624b9c6990f2e148204c65b8778c5b3959696faf362b99b",
+  "auditSha256": "8fe7bfd5cdf9c2dced361f839eeff653ffed96784c2e0e6d189e6dddf71910f2"
+}

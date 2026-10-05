@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stickerId": "cutvoke.sticker.glitch_pixel_dissolve",
+  "version": "1.0.0",
+  "kind": "static",
+  "generator": "scripts/generate_sticker_previews.py",
+  "sourceSha256": "4b040fde1e1168c43530d02fc00aed043ccd4ea6e8ac65a91af2c7fe39ec65ac",
+  "previewSha256": "4dea9a0b0e2b98e57f7e758ccf3eaf7d2334489f1f3e0b24cdafefd9814a8e16",
+  "preview": "glitch_pixel_dissolve.mp4",
+  "bytes": 9031,
+  "visiblePixels": 4629,
+  "changedPixels": 0,
+  "motionVisible": false
+}

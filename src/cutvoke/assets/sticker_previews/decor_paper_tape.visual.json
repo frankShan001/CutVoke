@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.decor_paper_tape",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-24",
+  "method": "Viewed transparent 4x3 artwork contact sheet and actual composited frames for every sticker, compared silhouettes, palette, use and edge quality against the existing sticker library.",
+  "observation": "青色半透明胶带有撕裂边缘和折痕，适合拼贴固定效果；在浅色合成画面上仍保留可见边界。",
+  "sourceSha256": "72e49bf547c4de93ecec87cf3e7c5d62602884aca93a30a3f14c8f739fc89757",
+  "previewSha256": "dad76173a946679bcc8612e20b01946e6db64ce104fa67a1646a0d0637652eea",
+  "auditSha256": "b3876c5920b9dee4c357945e51cf852684bce89841cbb3c6366cb7ff75dc8c5a"
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "decision": "approved",
+  "stickerId": "cutvoke.sticker.personfx_manga_rays",
+  "version": "1.0.0",
+  "effectId": "",
+  "params": {},
+  "reviewer": "Codex visual review",
+  "reviewedAt": "2026-09-25",
+  "method": "Reviewed the extracted transparent contact sheet on dark and light checkerboard backgrounds and the real composited preview contact sheet.",
+  "observation": "High-contrast manga rays are distinct from the luminous overlays and remain visible on the light preview half.",
+  "sourceSha256": "f25c1d7cb2f386684ac701a7ef0d0679dd2b59c5a41cd217e2d812f10a0475da",
+  "previewSha256": "d983a613f9ce2ba6db7f1df7cb78722dc19bdf31fd0461df2a4ba0ecb1bb5aad",
+  "auditSha256": "24e77c5d11df72b078c9384015f29fc1190721a22f1bdade58370f1f9b26ebc7"
+}
