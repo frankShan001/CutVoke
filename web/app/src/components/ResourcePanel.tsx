@@ -1246,7 +1246,7 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
       ) : null}
 
       {/* 列表 */}
-      {(pid && resourcesProject.current !== pid) || (loading && resources.length === 0) ? (
+      {!loadError && ((pid && resourcesProject.current !== pid) || (loading && resources.length === 0)) ? (
         <div className="cv-loading" role="status">
           <Loader2 size={13} className="cv-spin" /> 加载中…
         </div>
