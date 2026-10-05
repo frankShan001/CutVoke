@@ -24,7 +24,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7", "numpy>=1.24", "Pillow>=10"]
+dev = ["pytest>=7", "numpy>=1.24", "Pillow>=10", "opencv-python-headless>=4.11,<5", "faster-whisper==1.2.1", "OpenCC==1.4.2"]
 asr = ["faster-whisper==1.2.1", "OpenCC==1.4.2"]
 person = ["mediapipe==1.0.1"]
 

@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import os
+import copy
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from array import array
 import shutil
 import subprocess
@@ -12,7 +16,7 @@ import unittest
 from cutvoke.core.httpapi import HttpApi
 from cutvoke.core.model import AssetReference, Caption, Clip, Track
 from cutvoke.core.rational import Rational
-from cutvoke.core.render import RenderError, RenderService
+from cutvoke.core.render import RenderCancelled, RenderError, RenderService
 from cutvoke.core.service import EditService
 
 
@@ -48,6 +52,63 @@ class RecordingRenderer:
 
 
 class PreviewWindowTests(unittest.TestCase):
+    def test_late_obsolete_window_does_not_cancel_the_current_render(self) -> None:
+        class BlockingRenderer(RecordingRenderer):
+            def render(self, project, out_path, **kwargs):
+                started.set()
+                self_test.assertTrue(release.wait(3))
+                return super().render(project, out_path, **kwargs)
+
+        self_test = self
+        started, release = threading.Event(), threading.Event()
+        with tempfile.TemporaryDirectory() as media_dir:
+            service = EditService()
+            project = service.create_project("late-preview", width=160, height=90)
+            project.sequence.tracks = [Track("v1", "video", [Clip(
+                "clip", AssetReference("source", "fake.mp4"), r(0), r(4), r(0))])]
+            old = copy.deepcopy(project)
+            project.sequence.background_color = "#ffffff"
+            renderer = BlockingRenderer()
+            api = HttpApi(service, renderer, media_dir=media_dir)
+            try:
+                with ThreadPoolExecutor(1) as workers:
+                    current = workers.submit(api._preview_window_file, copy.deepcopy(project), 0)
+                    self.assertTrue(started.wait(2))
+                    with self.assertRaises(RenderCancelled):
+                        api._preview_window_file(old, 0)
+                    release.set()
+                    self.assertTrue(os.path.isfile(current.result(timeout=2)[0]))
+                self.assertEqual(len(renderer.projects), 1)
+            finally:
+                release.set()
+                api.close()
+
+    def test_queued_previews_discard_snapshots_superseded_by_an_edit(self) -> None:
+        with tempfile.TemporaryDirectory() as media_dir:
+            service = EditService()
+            project = service.create_project("queued-preview", width=160, height=90)
+            project.sequence.tracks = [Track("v1", "video", [Clip(
+                "clip", AssetReference("source", "fake.mp4"), r(0), r(4), r(0))])]
+            old = copy.deepcopy(project)
+            renderer = RecordingRenderer()
+            api = HttpApi(service, renderer, media_dir=media_dir)
+            try:
+                with ThreadPoolExecutor(2) as workers:
+                    with api._preview_scheduler.slot(threading.Event()):
+                        window = workers.submit(api._preview_window_file, old, 0)
+                        frame = workers.submit(api._preview_frame_file, old, 0, None)
+                        deadline = time.monotonic() + 2
+                        while len(api._preview_scheduler.queue) < 2 and time.monotonic() < deadline:
+                            time.sleep(.005)
+                        self.assertEqual(len(api._preview_scheduler.queue), 2)
+                        project.sequence.background_color = "#ffffff"
+                    for request in (window, frame):
+                        with self.assertRaises(RenderCancelled):
+                            request.result(timeout=2)
+                self.assertEqual(renderer.projects, [])
+            finally:
+                api.close()
+
     def test_missing_active_frame_source_reports_clip_and_path(self) -> None:
         with tempfile.TemporaryDirectory() as media_dir:
             missing = os.path.join(media_dir, "missing.png")
