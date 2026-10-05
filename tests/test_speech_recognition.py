@@ -120,9 +120,11 @@ class SpeechRecognitionTests(unittest.TestCase):
                 if device == "cuda":
                     raise RuntimeError("CUDA runtime is missing")
 
-        model, device, compute_type = _load_whisper_model(
-            CudaUnavailableModel, "base", None, "auto", None
-        )
+        # Exercise CUDA initialization failure even on CPU-only CI runners.
+        with patch("cutvoke.core.speech_recognition._cuda_device_count", return_value=1):
+            model, device, compute_type = _load_whisper_model(
+                CudaUnavailableModel, "base", None, "auto", None
+            )
         self.assertIsInstance(model, CudaUnavailableModel)
         self.assertEqual(calls, [("cuda", "float16"), ("cpu", "int8")])
         self.assertEqual((device, compute_type), ("cpu", "int8"))

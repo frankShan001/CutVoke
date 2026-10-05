@@ -101,7 +101,9 @@ class TransitionTimelineDurationTests(unittest.TestCase):
         graph = ";".join(parts)
         self.assertAlmostEqual(duration, 7.0, places=6)
         self.assertNotIn("xfade=", graph)
-        self.assertNotIn("tpad=stop_mode=clone", graph)
+        # A one-frame fps lookahead is bounded immediately; a transition hold
+        # would extend the old shot across the gap with stop_duration.
+        self.assertNotIn("tpad=stop_mode=clone:stop_duration", graph)
 
     def test_transition_keeps_absolute_timeline_duration(self) -> None:
         first = Clip(
