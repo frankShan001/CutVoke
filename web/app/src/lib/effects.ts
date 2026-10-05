@@ -277,7 +277,14 @@ export async function listPresets(projectId: string): Promise<Preset[]> {
 }
 
 /** 内置内容审核状态，与工程内个人 preset.save 分账。 */
-export async function listBuiltinPresets(): Promise<BuiltinPresetCatalog> {
+let builtinPresetsRequest: Promise<BuiltinPresetCatalog> | null = null;
+
+export function listBuiltinPresets(): Promise<BuiltinPresetCatalog> {
+  return builtinPresetsRequest ??= fetchBuiltinPresets()
+    .finally(() => { builtinPresetsRequest = null; });
+}
+
+async function fetchBuiltinPresets(): Promise<BuiltinPresetCatalog> {
   const data = await getJson<{ presets?: BuiltinPresetSummary[]; candidateCount?: number; qualifiedCount?: number;
     resourcePack?: BuiltinPresetCatalog["resourcePack"] }>("/presets");
   return {

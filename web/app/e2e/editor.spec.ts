@@ -980,6 +980,15 @@ test("resource category keeps target, filters, search, and scroll across panel c
 
 test("eight creative domains share keyboard navigation and preserve the selected edit target", async ({ page, request }) => {
   const { name } = await createProject(request);
+  let finishAudit!: () => void;
+  const auditGate = new Promise<void>((resolve) => { finishAudit = resolve; });
+  const auditRequests = { packs: 0, presets: 0 };
+  await page.route(/\/api\/v1\/(resource-packs|presets)$/, async (route) => {
+    const key = route.request().url().endsWith("/presets") ? "presets" : "packs";
+    auditRequests[key]++;
+    await auditGate;
+    await route.continue();
+  });
   await page.route("**/api/v1/assets", (route) => route.fulfill({
     status: 200,
     contentType: "application/json",
@@ -1018,6 +1027,10 @@ test("eight creative domains share keyboard navigation and preserve the selected
     await domain.verify();
     await expect(inspectorTab).toHaveAttribute("aria-selected", "true");
   }
+  // Domain switches must share pending audits rather than queueing one
+  // expensive scan per panel and starving unrelated catalog requests.
+  await expect.poll(() => auditRequests).toEqual({ packs: 1, presets: 1 });
+  finishAudit();
 
   await current.press("Home");
   current = creativeTabs.getByRole("tab", { name: "素材" });
@@ -1033,8 +1046,19 @@ test("eight creative domains share keyboard navigation and preserve the selected
   await leftScroll.evaluate((element) => { element.scrollTop = element.scrollHeight; });
   const effectScroll = await leftScroll.evaluate((element) => element.scrollTop);
   expect(effectScroll).toBeGreaterThan(0);
+  let finishRefresh!: () => void;
+  const refreshGate = new Promise<void>((resolve) => { finishRefresh = resolve; });
+  let refreshRequests = 0;
+  await page.route(/\/api\/v1\/projects\/[^/]+\/resources$/, async (route) => {
+    refreshRequests++;
+    await refreshGate;
+    await route.continue();
+  });
   await creativeTabs.getByRole("tab", { name: "转场" }).click();
   await creativeTabs.getByRole("tab", { name: "特效" }).click();
+  await expect.poll(() => refreshRequests).toBeGreaterThan(0);
+  await expect(page.locator(".resource-grid:visible:not(.resource-preset-grid) .resource-card").first()).toBeVisible();
+  finishRefresh();
   await expect(effectSearch).toHaveValue("cutvoke.fx");
   await expect.poll(() => leftScroll.evaluate((element) => element.scrollTop)).toBe(effectScroll);
   await expect(page.locator(".resource-context:visible")).toContainText("视频片段");

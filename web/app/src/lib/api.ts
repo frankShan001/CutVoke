@@ -710,8 +710,13 @@ export interface ResourceRegistryDownloadResult {
   catalogSignatureStatus: "verified" | "unknown_publisher";
 }
 
-export async function getResourcePackManagerStatus(): Promise<ResourcePackManagerStatus> {
-  return get<ResourcePackManagerStatus>("/resource-packs");
+let resourcePackStatusRequest: Promise<ResourcePackManagerStatus> | null = null;
+
+export function getResourcePackManagerStatus(): Promise<ResourcePackManagerStatus> {
+  // Creative domains share one audited pack. Coalesce concurrent refreshes;
+  // release the request on settlement so later mutations still refresh it.
+  return resourcePackStatusRequest ??= get<ResourcePackManagerStatus>("/resource-packs")
+    .finally(() => { resourcePackStatusRequest = null; });
 }
 
 export async function listResourceRegistries(): Promise<{ registries: ResourceRegistry[] }> {
