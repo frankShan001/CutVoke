@@ -98,11 +98,13 @@ class WindowContracts(unittest.TestCase):
             self.assertTrue(renderer.entered.wait(3))
             caption=copy.deepcopy(project); caption.revision="2"; caption.name="new name"
             caption.sequence.captions=[Caption("caption","text",r(0),r(1))]
+            project.name=caption.name; project.sequence.captions=caption.sequence.captions
             second=threading.Thread(target=call,args=(caption,)); second.start()
             # Identity computation completes before waiting on the cache lock.
             self.assertFalse(renderer.event.wait(.2))
             changed=copy.deepcopy(caption); changed.revision="3"
             changed.sequence.tracks[0].clips[0].effects=[{"effectId":"cutvoke.color","params":{"brightness":.1}}]
+            project.sequence.tracks=copy.deepcopy(changed.sequence.tracks)
             third=threading.Thread(target=call,args=(changed,)); third.start()
             self.assertTrue(renderer.event.wait(3))
             renderer.release.set()
