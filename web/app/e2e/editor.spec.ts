@@ -1028,7 +1028,7 @@ test("eight creative domains share keyboard navigation and preserve the selected
   await creativeTabs.getByRole("tab", { name: "特效" }).click();
   const effectSearch = page.getByRole("searchbox", { name: "搜索预设和效果" });
   await effectSearch.fill("cutvoke.fx");
-  await expect(page.locator(".resource-grid:not(.resource-preset-grid) .resource-card").first()).toBeVisible();
+  await expect(page.locator(".resource-grid:visible:not(.resource-preset-grid) .resource-card").first()).toBeVisible();
   const leftScroll = page.locator(".zone-left__scroll");
   await leftScroll.evaluate((element) => { element.scrollTop = element.scrollHeight; });
   const effectScroll = await leftScroll.evaluate((element) => element.scrollTop);
