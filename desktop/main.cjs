@@ -27,7 +27,7 @@ const root = path.resolve(__dirname, "..");
 const dataDir = path.resolve(process.env.CUTVOKE_DATA || path.join(app.getPath("home"), ".cutvoke", "data"));
 const dataPath = /\.sqlite$/i.test(dataDir) ? dataDir : path.join(dataDir, "projects.sqlite");
 const engine = app.isPackaged ? path.join(process.resourcesPath, "engine", "cutvoke-engine.exe")
-  : path.join(root, "build", "desktop-engine", "cutvoke-engine", "cutvoke-engine.exe");
+  : path.join(root, ".artifacts", "build", "desktop-engine", "cutvoke-engine", "cutvoke-engine.exe");
 const engineExists = fs.existsSync(engine);
 const executable = engineExists ? engine : path.join(root, ".venv", "Scripts", "python.exe");
 const prefix = engineExists ? [] : ["-m", "cutvoke"];

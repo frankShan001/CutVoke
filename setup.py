@@ -14,17 +14,17 @@ class BuildWithEditor(build_py):
         # Restrict cleanup to this repository's generated build directory.
         if not getattr(self, "editable_mode", False):
             build_root = Path(self.build_lib).resolve()
-            expected_root = Path(__file__).resolve().parent / "build"
+            expected_root = Path(__file__).resolve().parent / ".artifacts" / "build"
             if not build_root.is_relative_to(expected_root.resolve()):
                 raise RuntimeError(f"refusing to reset package staging outside {expected_root}")
             staged_package = build_root / "cutvoke"
             if staged_package.exists():
                 rmtree(staged_package)
         super().run()
-        # Editable installs resolve web/dist from the source checkout at runtime.
+        # Editable installs resolve .artifacts/web from the source checkout.
         if getattr(self, "editable_mode", False):
             return
-        source = Path(__file__).resolve().parent / "web" / "dist"
+        source = Path(__file__).resolve().parent / ".artifacts" / "web"
         if not (source / "index.html").is_file():
             raise RuntimeError(
                 "Web editor is missing: run `npm ci` and `npm run build` "
@@ -36,4 +36,5 @@ class BuildWithEditor(build_py):
         copytree(source, target)
 
 
-setup(cmdclass={"build_py": BuildWithEditor})
+setup(cmdclass={"build_py": BuildWithEditor},
+      options={"build": {"build_base": ".artifacts/build"}})

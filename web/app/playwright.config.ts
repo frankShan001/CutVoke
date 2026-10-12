@@ -5,6 +5,7 @@ const serverUrl = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
   testDir: "./e2e",
+  outputDir: "../../.artifacts/test-results",
   workers: 1,
   timeout: 45_000,
   expect: { timeout: 10_000 },

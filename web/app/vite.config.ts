@@ -2,8 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 // CutVoke 前端构建配置。
-// 产物输出到 ../dist（即 web/dist），由 Python stdlib http.server 精确映射：
-//   - web/dist/index.html 作为入口
+// 产物统一放在 .artifacts/web，由本机服务映射：
+//   - .artifacts/web/index.html 作为入口
 //   - /assets/*.js|.css 由后端扩展支持
 // 因此：
 //   - base 固定为 '/'（绝对路径根相对，不能带相对 ./assets）
@@ -13,7 +13,7 @@ export default defineConfig({
   base: "/",
   plugins: [react()],
   build: {
-    outDir: "../dist",
+    outDir: "../../.artifacts/web",
     emptyOutDir: true,
     assetsDir: "assets",
     sourcemap: false,

@@ -208,7 +208,7 @@ class ResourcePackRegistryTests(unittest.TestCase):
             encryption_algorithm=serialization.NoEncryption(),
         ))
         output_path = self.root / "catalog.json"
-        script = Path(__file__).resolve().parents[1] / "scripts" / "build_resource_pack_registry.py"
+        script = Path(__file__).resolve().parents[1] / 'scripts' / 'build' / 'build_resource_pack_registry.py'
         result = subprocess.run([
             sys.executable, str(script),
             "--registry-id", "test.registry",

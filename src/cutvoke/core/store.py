@@ -91,6 +91,18 @@ class ProjectStore:
         """数据库文件路径（诊断与 CLI 输出用）。"""
         return self._db_path
 
+    @_synchronized
+    def backup_to(self, path: str) -> None:
+        """Create a consistent SQLite backup including committed WAL contents."""
+        with sqlite3.connect(path) as backup:
+            self._conn.backup(backup)
+
+    @_synchronized
+    def relocate_paths(self, **kwargs) -> dict:
+        from .workspace_paths import relocate_connection
+        with self._transaction():
+            return relocate_connection(self._conn, **kwargs)
+
     # ------------------------------------------------------------------
     # 事务原语（原子性的唯一来源）
     # ------------------------------------------------------------------

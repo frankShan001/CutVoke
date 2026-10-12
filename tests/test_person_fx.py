@@ -9,7 +9,7 @@ from pathlib import Path
 
 from PIL import Image, ImageChops, ImageFilter, ImageStat
 
-from scripts.person_fx_preview_source import make_person_alpha_video
+from scripts.assets.person_fx_preview_source import make_person_alpha_video
 from cutvoke.core.effects import default_registry
 from cutvoke.core.model import AssetReference, Clip, Track
 from cutvoke.core.rational import Rational

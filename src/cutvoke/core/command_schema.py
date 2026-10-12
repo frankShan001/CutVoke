@@ -106,6 +106,14 @@ def payload_schema(command: str, params: list[dict], effects: dict | None = None
                     "required": ["at", "speed"]}}}, "required": ["points"]}
         elif name == "sources":
             field = {"type": "object", "additionalProperties": STRING}
+        elif name == "expectedProjects":
+            field = {"type": "object", "additionalProperties": STRING}
+        elif name == "moves":
+            field = {"type": "array", "minItems": 1, "maxItems": 10000, "items": {
+                "type": "object", "properties": {"from": STRING, "to": STRING,
+                    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "missing": BOOL},
+                "required": ["from", "to"], "additionalProperties": False,
+                "anyOf": [{"required": ["sha256"]}, {"properties": {"missing": {"enum": [True]}}, "required": ["missing"]}]}}
         elif name == "commands":
             field = {"type": "array", "minItems": 1, "maxItems": 32, "items": {
                 "type": "object", "properties": {"type": STRING, "payload": {"type": "object"}},

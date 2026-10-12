@@ -3,12 +3,13 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .eggs/
-build/
+/build/
 dist/
 .venv*/
 venv/
 
 # Tests / tools
+.artifacts/
 .pytest_cache/
 .coverage
 htmlcov/
@@ -40,3 +41,4 @@ web/app/playwright-report/
 web/app/node_modules/
 desktop/node_modules/
 web/app/dist/
+web/dist/

@@ -13,6 +13,7 @@ from cutvoke.core.rational import Rational
 from cutvoke.core.render import RenderService
 from cutvoke.core.service import EditService
 from cutvoke.core.store import ProjectStore
+from cutvoke.runtime import web_directory
 
 
 def seed_fixture(service: EditService, root: str) -> None:
@@ -52,8 +53,8 @@ def seed_fixture(service: EditService, root: str) -> None:
 
 
 def main() -> None:
-    web_dir = Path(__file__).resolve().parents[1] / "web" / "dist"
-    if not (web_dir / "index.html").is_file():
+    web_dir = web_directory()
+    if web_dir is None:
         raise RuntimeError("build the Web editor before starting e2e_server")
     port = int(os.environ.get("CUTVOKE_E2E_PORT", "8799"))
     with tempfile.TemporaryDirectory(prefix="cutvoke-e2e-") as root:

@@ -1,0 +1,17 @@
+# 脚本入口
+
+| 用途 | 入口 |
+| --- | --- |
+| 启动桌面客户端 | 根目录 `start-cutvoke.cmd` |
+| 启动浏览器编辑器 | 根目录 `start-cutvoke.cmd --web` |
+| 连接源码 MCP | `dev/start-cutvoke-mcp.cmd` |
+| 重启本机 Web 服务 | `dev/restart-cutvoke-web.cmd` |
+| 重启并检查旧 MCP 进程 | `dev/restart-cutvoke.cmd` |
+| 构建 Windows 安装包 | `build/build-cutvoke-desktop.cmd` |
+| 检查代码分层 | `verify/check_layering.py` |
+| 检查内置资源包 | `build/build_builtin_resource_pack.py --check` |
+| 迁移旧工程文件 | `maintenance/migrate_workspace_data.py` |
+
+Python 工具可直接执行，不依赖当前工作目录定位源码。生成文件统一放到 `.artifacts/`。`assets/` 中部分工具会改写资源目录和清单，执行前先查看其用途和参数；视觉审核与性能检查集中在 `verify/`。
+
+独立 wheel 交付时，将 `dev/start-cutvoke-wheel.cmd` **复制到 wheel 旁边**，保持文件名 `start-cutvoke-wheel.cmd`；它按所在目录寻找安装包，无需源码仓库。

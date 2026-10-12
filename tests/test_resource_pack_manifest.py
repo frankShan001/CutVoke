@@ -26,7 +26,7 @@ from cutvoke.core.resource_pack import (
     resource_pack_summary,
 )
 from cutvoke.core.service import EditService
-from scripts.build_builtin_resource_pack import build_manifest
+from scripts.build.build_builtin_resource_pack import build_manifest
 
 
 class ResourcePackManifestTests(unittest.TestCase):

@@ -30,7 +30,7 @@ cutvoke doctor --json
 
 ```bash
 python -m compileall -q src
-python scripts/check_layering.py
+python scripts/verify/check_layering.py
 python -m unittest discover -s tests -v
 ```
 
@@ -45,7 +45,7 @@ npm run test:e2e
 
 浏览器测试会启动临时工程库并生成小型测试素材，不会读写个人工程。Windows 本地使用已安装的 Chrome；CI 会安装 Chromium。只改后端且不影响编辑流程时，可以只运行后端检查。
 
-发布 Python wheel 前必须先运行 `npm run build`。打包脚本会把 `web/dist` 放入安装包；若找不到已构建的页面，打包会报错，避免发布只有接口、没有编辑器的安装包。
+发布 Python wheel 前必须先运行 `npm run build`。打包脚本会把 `.artifacts/web` 放入安装包；若找不到已构建的页面，打包会报错，避免发布只有接口、没有编辑器的安装包。
 
 如果改动涉及渲染，请使用真实媒体做一次最小验证，并在 PR 中写明输入、命令和结果。不要只用“命令成功退出”代替画面或音频检查。
 
@@ -60,7 +60,7 @@ CutVoke 有几条不能绕过的边界：
 5. 预览和导出应尽量复用同一套合成语义。新增效果时要同时考虑两条路径。
 6. Agent 批量修改应使用编辑租约；租约期间页面保持可观察，但人工操作只读。
 
-核心模块不能反向依赖 CLI、HTTP 或 MCP 接口层。`scripts/check_layering.py` 会检查这条规则。
+核心模块不能反向依赖 CLI、HTTP 或 MCP 接口层。`scripts/verify/check_layering.py` 会检查这条规则。
 
 ## 新增编辑命令
 
@@ -97,3 +97,7 @@ PR 请保持范围清楚，并包含：
 - 涉及界面或渲染时的截图、短视频或其他可检查结果。
 
 提交信息建议使用简短的 Conventional Commit 格式，例如 `fix: keep export jobs on their queued revision`。一条提交只描述一个可以独立理解的改动。
+
+## 文件存放
+
+遵守 [项目目录说明](docs/development/project-layout.md)。新增工具按用途放入 `scripts/` 的对应目录，临时渲染、日志和报告统一写入 `.artifacts/`。测试工程使用临时数据库；用户工程、原始素材与成片保存在源码仓库之外。

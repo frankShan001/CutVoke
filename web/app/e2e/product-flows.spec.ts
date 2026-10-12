@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 const image = fileURLToPath(new URL("../../../src/cutvoke/assets/stickers/decor_sparkles.png", import.meta.url));
 const audio = fileURLToPath(new URL("../../../src/cutvoke/assets/audio/tech_minimal.wav", import.meta.url));
-const evidence = resolve(process.cwd(), "../../output/acceptance/product-completion-20261003/web");
+const evidence = resolve(process.cwd(), "../../.artifacts/acceptance/product-completion-20261003/web");
 const api = (id: string) => `/api/v1/projects/${encodeURIComponent(id)}`;
 
 async function current(request: APIRequestContext, id: string) {

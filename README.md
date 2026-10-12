@@ -24,13 +24,13 @@ CutVoke 本身不提供聊天或内容生成能力。你可以继续使用熟悉
 
 ### Windows 安装版
 
-从源码构建后，运行 `dist/desktop/CutVoke-Setup-0.3.1-x64.exe` 安装，或双击根目录的 `start-cutvoke-desktop.cmd` 启动已构建的客户端。安装包内含 Python 引擎、FFmpeg、ffprobe、Web 编辑器和效果资源，基本编辑与导出无需另外安装这些运行环境。客户端单独管理本机编辑服务，退出时关闭自己启动的服务。
+从源码构建后，运行 `dist/desktop/CutVoke-Setup-0.3.1-x64.exe` 安装，或双击根目录的 `start-cutvoke.cmd` 启动客户端。安装包内含 Python 引擎、FFmpeg、ffprobe、Web 编辑器和效果资源，基本编辑与导出无需另外安装这些运行环境。客户端单独管理本机编辑服务，退出时关闭自己启动的服务。
 
 默认复用 `%USERPROFILE%\.cutvoke\data\projects.sqlite` 中的现有工程。缓存初始上限为 10 GiB，可在首页或编辑页的“缓存”中调整容量、选择目录、查看用量和清理空闲缓存。缓存按最近访问时间回收，保护正在使用和近期访问的内容；首次打开工程准备完整预览，再次打开或回拖会复用磁盘缓存。局部画面编辑只使相关片段缓存失效，字幕文字修改继续使用画面缓存。
 
 桌面客户端通过本机文件的 HTTP Range 请求读取已完成的连续预览，不把整片复制到浏览器 Blob 内存。智能体可以从“缓存 → 查看客户端 MCP 配置”取得指向内置引擎的配置；应用同时在 `%APPDATA%\CutVoke\mcp-config.json` 保存该配置。缓存诊断也支持 MCP 工具 `preview_cache_status`。
 
-从源码生成安装包：双击 `build-cutvoke-desktop.cmd`，需要 Node.js、uv、FFmpeg 和 ffprobe。构建脚本从官方发行地址下载 Electron/NSIS/7zip 并核对 SHA256，已下载文件可复用。
+从源码生成安装包：双击 `scripts/build/build-cutvoke-desktop.cmd`，需要 Node.js、uv、FFmpeg 和 ffprobe。构建脚本从官方发行地址下载 Electron/NSIS/7zip 并核对 SHA256，已下载文件可复用。
 
 当前安装包为本地测试版本，尚未配置发行签名。可选语音识别与人物抠像运行环境尚未随安装包交付；素材代理生成、GPU 实时效果合成也仍属于后续引擎工作。
 
@@ -54,9 +54,9 @@ brew install ffmpeg
 
 ## 从源码启动
 
-Windows 用户可以直接双击项目根目录的 `start-cutvoke.cmd`。它会检查环境，必要时构建 Web 编辑器，然后启动服务并打开浏览器。使用期间保留命令窗口；按 Ctrl+C 可停止服务。
+Windows 用户双击项目根目录的 `start-cutvoke.cmd`，默认打开桌面客户端。首次启动会检查 Python 环境并构建编辑器；桌面开发还需要 Node.js 和 Electron。希望在浏览器中使用时，运行 `start-cutvoke.cmd --web`；此模式需保留服务窗口，按 Ctrl+C 停止。
 
-启动器会核对服务启动时的程序指纹和工程库，防止更新源码后继续误用旧服务。MCP、独立 wheel 双击启动和版本诊断见 [本地启动与 MCP 接入](docs/LOCAL_DELIVERY_MCP.md)；本轮实际验证与质量范围见 [产品完善记录](docs/PRODUCT_COMPLETION_20261003.md)。
+启动器会核对服务启动时的程序指纹和工程库，防止更新源码后继续误用旧服务。MCP、独立 wheel 双击启动和版本诊断见 [本地启动与 MCP 接入](docs/user/LOCAL_DELIVERY_MCP.md)；本轮实际验证与质量范围见 [产品完善记录](docs/history/2026-10/PRODUCT_COMPLETION_20261003.md)。
 
 ```bash
 git clone https://github.com/frankShan001/CutVoke.git
@@ -103,7 +103,7 @@ cutvoke mcp
 }
 ```
 
-连接后，Agent 可以从 MCP 初始化说明及 `editor_help({})` 获取入门流程，无需用户额外安装 Skill 或讲解接口。具体操作先查询 `editor_help({"topic":"command","command":"clip.insert"})` 的参数 schema；范例与错误恢复也随服务提供。详见 [外部 Agent 剪辑接入](docs/external-agent-editing.md)。
+连接后，Agent 可以从 MCP 初始化说明及 `editor_help({})` 获取入门流程，无需用户额外安装 Skill 或讲解接口。具体操作先查询 `editor_help({"topic":"command","command":"clip.insert"})` 的参数 schema；范例与错误恢复也随服务提供。详见 [外部 Agent 剪辑接入](docs/user/external-agent-editing.md)。
 
 时间值使用有理数，例如 `{"num":"15","den":"2"}` 表示 7.5 秒。每次写入都带工程 revision；发生并发修改时，服务会明确返回冲突。持锁期间，命令带同一个 `editLeaseId`；任务较长时续租，结束后释放。
 
@@ -219,12 +219,19 @@ cutvoke <command> --help
 ## 代码结构
 
 ```text
-src/cutvoke/core/   工程模型、编辑服务、持久化、渲染和协议
-src/cutvoke/assets/ 内置模板、音频、贴纸、背景和 LUT
-web/app/            React Web 编辑器
-scripts/            仓库检查脚本
-.github/            CI、Issue 和 PR 模板
+src/cutvoke/        编辑引擎、CLI、MCP 与内置资源
+web/app/            React 编辑器与浏览器测试
+desktop/            Electron 客户端与打包配置
+tests/              后端回归测试
+scripts/            dev / build / verify / assets / maintenance
+docs/               user / development / assets / history
+examples/           小型可复现示例
+.artifacts/         构建中间件、测试报告与临时渲染（不提交）
+dist/               安装程序和 Python 发布包（不提交）
+start-cutvoke.cmd   Windows 统一启动入口
 ```
+
+目录规范和数据存放位置见 [项目目录说明](docs/development/project-layout.md)，脚本入口见 [脚本说明](scripts/README.md)。工程数据库、素材、预览缓存和成片默认放在 `%USERPROFILE%\.cutvoke`；示例工程只使用小型可复现素材。
 
 Web、MCP 和 CLI 都调用同一个编辑服务。接口层不保存自己的工程副本，SQLite 是跨进程的权威状态；预览和导出共用 FFmpeg 合成逻辑。
 
@@ -232,7 +239,7 @@ Web、MCP 和 CLI 都调用同一个编辑服务。接口层不保存自己的�
 
 ```bash
 python -m compileall -q src
-python scripts/check_layering.py
+python scripts/verify/check_layering.py
 
 cd web/app
 npm ci

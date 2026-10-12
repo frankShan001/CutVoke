@@ -349,7 +349,7 @@ test("resource thumbnails show session cache, retry preview errors, and cancel p
   const creativeTabs = page.getByRole("tablist", { name: "创作域" });
   await creativeTabs.getByRole("tab", { name: "特效" }).click();
   await expect(page.getByText(`资源包 v${await getBuiltinPackVersion(request)} · 离线可用`)).toBeVisible();
-  const packScreenshotPath = resolve(process.cwd(), "../../output/playwright/resource-pack-offline-status-20260924.png");
+  const packScreenshotPath = resolve(process.cwd(), "../../.artifacts/playwright/resource-pack-offline-status-20260924.png");
   mkdirSync(dirname(packScreenshotPath), { recursive: true });
   await page.screenshot({ path: packScreenshotPath, fullPage: false });
   const firstEffectCard = page.locator(".resource-grid:not(.resource-preset-grid) .resource-card").first();
@@ -366,7 +366,7 @@ test("resource thumbnails show session cache, retry preview errors, and cancel p
   await expect(page.locator(".resource-preview__failure")).toContainText("模拟预览失败");
   await page.getByRole("button", { name: "重试预览" }).click();
   await expect(page.locator(".resource-preview img")).toBeVisible();
-  const screenshotPath = resolve(process.cwd(), "../../output/playwright/resource-preview-cache-retry-20260924.png");
+  const screenshotPath = resolve(process.cwd(), "../../.artifacts/playwright/resource-preview-cache-retry-20260924.png");
   mkdirSync(dirname(screenshotPath), { recursive: true });
   await page.screenshot({ path: screenshotPath, fullPage: false });
 
@@ -735,7 +735,7 @@ test("six resource services can fail together and recover independently across d
   await expect(presetFailure).toContainText("模拟预设审核服务暂时不可用");
   await expect(presetFailure.getByRole("button", { name: "重试内置预设" })).toBeVisible();
   await expect(registry.getByText("尚未添加在线资源目录。")).toHaveCount(0);
-  const statusScreenshot = resolve(process.cwd(), "../../output/playwright/resource-recovery-states-20260926.png");
+  const statusScreenshot = resolve(process.cwd(), "../../.artifacts/playwright/resource-recovery-states-20260926.png");
   mkdirSync(dirname(statusScreenshot), { recursive: true });
   await page.screenshot({ path: statusScreenshot });
 
@@ -1447,7 +1447,7 @@ test("botanical sticker atlas category previews and inserts a saved overlay", as
   const card = page.locator(".sticker-card").filter({ hasText: "樱花枝" });
   await expect(card).toHaveCount(1);
   await expect(card.locator("small")).toContainText("合格");
-  const stickerScreenshot = resolve(process.cwd(), "../../output/playwright/botanical-sticker-library-20260924.png");
+  const stickerScreenshot = resolve(process.cwd(), "../../.artifacts/playwright/botanical-sticker-library-20260924.png");
   mkdirSync(dirname(stickerScreenshot), { recursive: true });
   await page.screenshot({ path: stickerScreenshot, fullPage: false });
   const preview = card.locator("video");
@@ -3307,7 +3307,7 @@ test("material texture atlas previews and adds a saved overlay sticker", async (
   await expect.poll(() => preview.evaluate((element) => (element as HTMLVideoElement).currentTime))
     .toBeGreaterThan(0.1);
 
-  const screenshot = resolve(process.cwd(), "../../output/playwright/material-texture-library-20260925.png");
+  const screenshot = resolve(process.cwd(), "../../.artifacts/playwright/material-texture-library-20260925.png");
   mkdirSync(dirname(screenshot), { recursive: true });
   await page.screenshot({ path: screenshot, fullPage: false });
   await card.getByRole("button", { name: "添加贴纸 虹彩镭射箔" }).click();
