@@ -8,8 +8,8 @@
   "main": "main.cjs",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win nsis --x64",
-    "unpacked": "electron-builder --win --x64 --dir"
+    "dist": "electron-builder --win nsis --x64 --config.directories.output=../.artifacts/desktop && node publish-build.cjs",
+    "unpacked": "electron-builder --win --x64 --dir --config.directories.output=../.artifacts/desktop"
   },
   "devDependencies": {
     "electron": "44.5.1",
@@ -31,7 +31,7 @@
     ],
     "extraResources": [
       {
-        "from": "../build/desktop-engine/cutvoke-engine",
+        "from": "../.artifacts/build/desktop-engine/cutvoke-engine",
         "to": "engine"
       }
     ],

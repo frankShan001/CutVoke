@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from scripts.effect_coverage import coverage
+from scripts.verify.effect_coverage import coverage
 from cutvoke.core.preset_catalog import FAMILIES
 
 

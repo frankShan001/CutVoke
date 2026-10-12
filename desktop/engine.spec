@@ -8,7 +8,7 @@ ffprobe = Path(shutil.which('ffprobe')).resolve()
 analysis = Analysis([str(root / 'desktop' / 'engine_entry.py')], pathex=[str(root / 'src')],
     binaries=[(str(ffmpeg), 'bin'), (str(ffprobe), 'bin')],
     datas=[(str(root / 'src' / 'cutvoke' / 'assets'), 'cutvoke/assets'),
-           (str(root / 'web' / 'dist'), 'cutvoke/web'),
+           (str(root / '.artifacts' / 'web'), 'cutvoke/web'),
            *[(str(p), 'cutvoke/core') for p in (root / 'src' / 'cutvoke' / 'core').glob('*.json')]],
     hiddenimports=collect_submodules('cutvoke'), excludes=['tkinter', 'pytest'],
     noarchive=False)

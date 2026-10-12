@@ -49,7 +49,7 @@ jobs:
           python -m pip install -e ".[dev]"
           python -m compileall -q src
           python -c "import cutvoke; from cutvoke.core import model, protocol, rational, render, service, store"
-          python scripts/check_layering.py
+          python scripts/verify/check_layering.py
           python -m unittest discover -s tests -v
 
       - name: Build Web editor
@@ -96,5 +96,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: browser-failure-diagnostics
-          path: web/app/test-results/
+          path: .artifacts/test-results/
           retention-days: 7

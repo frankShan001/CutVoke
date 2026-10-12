@@ -268,7 +268,7 @@ _NONMUTATING_COMMANDS = frozenset({"export.cover", "export.video",
                                     # 故不提 revision、不记 undo，走 _execute_nonmutating。
                                     "export.enqueue", "export.cancel", "export.jobs",
                                     # J12 模板清单：纯目录扫描，不依赖也不修改工程
-                                    "template.list", "project.preflight"})
+                                    "template.list", "project.preflight", "workspace.relocatePaths"})
 
 # edit.batch 只组合候选工程上的纯编辑 handler。分析、导出、历史、录音等
 # 会触及工程外状态的命令不能嵌入，否则预演或失败回滚会留下副作用。
@@ -342,6 +342,7 @@ class EditService:
         ] = {}
         # 命令处理器（绑定到实例）
         self._handlers: dict[str, Callable] = {
+            "workspace.relocatePaths": self._h_workspace_relocate_paths,
             "edit.batch": self._h_edit_batch,
             "track.add": self._h_track_add,
             "track.remove": self._h_track_remove,
@@ -555,6 +556,13 @@ class EditService:
     # 命令参数清单（声明式）：HTTP / CLI / MCP 共用，避免硬编码与 _handlers 漂移。
     # 不在本清单中的命令（但存在于 _handlers）仍会进入目录，描述回退为 "(未描述)"。
     COMMAND_PARAM_SPECS: dict[str, dict] = {
+        "workspace.relocatePaths": {
+            "description": "维护命令：校验素材身份后，原子迁移工程、撤销历史、素材库和导出记录中的文件路径；执行前完成复制并备份数据库，所有工程版本须匹配，不能有活动租约或导出。",
+            "params": [
+                {"name": "moves", "required": True, "description": "文件映射数组，每项含绝对 from/to 及 sha256；已缺失的历史引用用 missing=true，两个位置均须不存在。"},
+                {"name": "expectedProjects", "required": True, "description": "整个工程库的 projectId -> revision 映射，用于原子并发校验。"},
+            ],
+        },
         "edit.batch": {
             "description": "将 1–32 个安全的工程编辑按顺序原子执行：可 dryRun 预演，一次提交与一次撤销；任何一步失败都不落盘。不可嵌套或包含导出、分析、历史命令。",
             "params": [
@@ -1257,6 +1265,25 @@ class EditService:
                 catalog.append(entry)
         return catalog
 
+    def _h_workspace_relocate_paths(self, proj, payload, *, command=None):
+        """Maintenance writes use the shared command entry and an atomic store transaction."""
+        if command is None or self._store is None:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "workspace relocation requires a persistent store and command context")
+        try:
+            result = self._store.relocate_paths(
+                moves=payload.get("moves"), expected_projects=payload.get("expectedProjects"),
+                command_id=command.command_id, request_hash=self._request_hash(command),
+                actor={"kind": command.actor.kind, "id": command.actor.id} if command.actor else None)
+        except RevisionConflict as exc:
+            raise EditError(ErrorCode.REVISION_CONFLICT, str(exc), retryable=True) from exc
+        except (ValueError, KeyError, OSError) as exc:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(exc)) from exc
+        self._projects.clear()
+        self._idempotency.clear()
+        self._undo_stack.clear()
+        self._redo_stack.clear()
+        return result
+
     def _persist(self, project: Project) -> None:
         """若配置了 store，则在每次成功提交后持久化工程快照。"""
         if self._store is not None:
@@ -1916,6 +1943,8 @@ class EditService:
         不查工程版本、不提 revision、不记 undo；仅运行 handler 并返回结果。
         audio.analyze 不依赖工程（handler 的 proj 参数传 None）。
         """
+        if command.type == "workspace.relocatePaths":
+            return CommandResult.from_dict(self._h_workspace_relocate_paths(None, command.payload, command=command))
         if command.type == "export.enqueue":
             return self._execute_export_enqueue(command)
         handler = self._handlers.get(command.type)

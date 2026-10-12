@@ -169,7 +169,7 @@ test("person cutout panel submits, tracks, applies, and reports the undo point",
   await expect(page.getByText("已替换片段素材，撤销可恢复原片。")).toBeVisible();
   expect(pollCount).toBeGreaterThan(0);
 
-  const output = resolve(process.cwd(), "../../output/acceptance/jy-r20-person-20260925");
+  const output = resolve(process.cwd(), "../../.artifacts/acceptance/jy-r20-person-20260925");
   mkdirSync(output, { recursive: true });
   await page.screenshot({ path: resolve(output, "web-person-cutout-panel.png"), fullPage: true });
 });

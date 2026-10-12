@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from scripts.prepare_asr_models import main
+from scripts.dev.prepare_asr_models import main
 
 
 def test_prepare_asr_models_load_checks_requested_cache(monkeypatch, tmp_path: Path, capsys):

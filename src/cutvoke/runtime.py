@@ -16,7 +16,7 @@ import urllib.request
 
 def web_directory() -> Path | None:
     package = Path(__file__).resolve().parent
-    for candidate in (package / 'web', package.parent.parent / 'web' / 'dist'):
+    for candidate in (package / 'web', package.parent.parent / '.artifacts' / 'web'):
         if (candidate / 'index.html').is_file():
             return candidate
     return None

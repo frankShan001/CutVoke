@@ -156,7 +156,7 @@ class SixClipWorkflowTests(unittest.TestCase):
                         difference = ImageChops.difference(a.convert("RGB"), b.convert("RGB"))
                         mean_difference = max(ImageStat.Stat(difference).mean)
                         if mean_difference >= 18:
-                            evidence = Path.cwd() / "output" / "acceptance" / "six-clip-workflow-mismatch"
+                            evidence = Path.cwd() / ".artifacts" / "acceptance" / "six-clip-workflow-mismatch"
                             evidence.mkdir(parents=True, exist_ok=True)
                             shutil.copy2(exported, evidence / "export.mp4")
                             shutil.copy2(preview, evidence / "preview.mp4")

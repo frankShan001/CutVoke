@@ -46,7 +46,7 @@ type Project = {
 
 const apiPath = (id: string) => `/api/v1/projects/${encodeURIComponent(id)}`;
 const outputDir = resolve(process.cwd(), process.env.CUTVOKE_JY_R19_OUTPUT
-  ?? "../../output/acceptance/jy-r19-20260925");
+  ?? "../../.artifacts/acceptance/jy-r19-20260925");
 const cameraSourceNames = [
   "street-traffic.webm",
   "waves-of-the-sea.webm",
