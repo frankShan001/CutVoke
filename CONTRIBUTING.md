@@ -31,7 +31,7 @@ cutvoke doctor --json
 ```bash
 python -m compileall -q src
 python scripts/verify/check_layering.py
-python -m unittest discover -s tests -v
+python -m pytest -q
 ```
 
 前端改动至少运行：
@@ -44,6 +44,8 @@ npm run test:e2e
 ```
 
 浏览器测试会启动临时工程库并生成小型测试素材，不会读写个人工程。Windows 本地使用已安装的 Chrome；CI 会安装 Chromium。只改后端且不影响编辑流程时，可以只运行后端检查。
+
+桌面打包依赖变更后，在 `desktop/` 中运行 `npm run test:build-deps`，验证下载器的代理接入仍然可用。打包工具的传递依赖覆盖集中在 `desktop/package.json` 的 `overrides`；调整覆盖时同时核对调用接口和安全审计。
 
 发布 Python wheel 前必须先运行 `npm run build`。打包脚本会把 `.artifacts/web` 放入安装包；若找不到已构建的页面，打包会报错，避免发布只有接口、没有编辑器的安装包。
 

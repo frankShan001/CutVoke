@@ -27,6 +27,13 @@ def source_fingerprint() -> str:
     files = list(package.glob('*.py')) + list((package / 'core').glob('*.py'))
     files += list((package / 'core').glob('*.json'))
     digest = hashlib.sha256()
+    if getattr(sys, "frozen", False):
+        # PyInstaller stores compiled Python in the executable, not .py
+        # files. Include it so backend-only updates invalidate old services.
+        digest.update(b"frozen-executable\0")
+        with Path(sys.executable).open("rb") as executable:
+            while block := executable.read(1024 * 1024):
+                digest.update(block)
     for path in sorted(files):
         digest.update(path.relative_to(package).as_posix().encode('utf-8'))
         digest.update(b'\0')

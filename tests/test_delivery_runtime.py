@@ -88,3 +88,51 @@ def test_running_service_comparison_requires_source_and_same_store(tmp_path):
         assert runtime.check_running_service('127.0.0.1', 9999, store)['status'] == 'current'
         running['dataPath'] = str(tmp_path / 'other.sqlite')
         assert runtime.check_running_service('127.0.0.1', 9999, store)['status'] == 'different_data'
+
+
+def _frozen_runtime(tmp_path, monkeypatch):
+    package = tmp_path / 'cutvoke'
+    (package / 'core').mkdir(parents=True)
+    web = package / 'web'
+    web.mkdir()
+    index = web / 'index.html'
+    index.write_text('same editor', encoding='utf-8')
+    executable = tmp_path / 'cutvoke-engine.exe'
+    # Compiled application code can live beyond the bootloader/header.
+    executable.write_bytes(b'MZ' + b'\0' * (1024 * 1024) + b'backend-v1')
+    monkeypatch.setattr(runtime, '__file__', str(package / 'runtime.pyc'))
+    monkeypatch.setattr(runtime.sys, 'frozen', True, raising=False)
+    monkeypatch.setattr(runtime.sys, 'executable', str(executable))
+    return executable, index
+
+
+def test_frozen_backend_update_invalidates_running_service(tmp_path, monkeypatch):
+    executable, _index = _frozen_runtime(tmp_path, monkeypatch)
+    store = str(tmp_path / 'projects.sqlite')
+    running = runtime.runtime_identity(store)
+
+    def response(_request, **_kwargs):
+        return io.BytesIO(json.dumps(running).encode())
+
+    with patch('cutvoke.runtime.urllib.request.urlopen', side_effect=response):
+        assert runtime.check_running_service('127.0.0.1', 9999, store)['status'] == 'current'
+        # JSON and Web files are unchanged; only the compiled backend changes.
+        with executable.open('r+b') as binary:
+            binary.seek(-1, 2)
+            binary.write(b'2')
+        comparison = runtime.check_running_service('127.0.0.1', 9999, store)
+        assert comparison['status'] == 'outdated_service'
+        assert comparison['ok'] is False
+        assert comparison['expected']['sourceFingerprint'] != running['sourceFingerprint']
+
+
+def test_frozen_identity_survives_relocation_and_tracks_web_changes(tmp_path, monkeypatch):
+    executable, index = _frozen_runtime(tmp_path, monkeypatch)
+    original = runtime.source_fingerprint()
+    relocated = tmp_path / 'relocated' / executable.name
+    relocated.parent.mkdir()
+    relocated.write_bytes(executable.read_bytes())
+    monkeypatch.setattr(runtime.sys, 'executable', str(relocated))
+    assert runtime.source_fingerprint() == original
+    index.write_text('updated editor', encoding='utf-8')
+    assert runtime.source_fingerprint() != original
