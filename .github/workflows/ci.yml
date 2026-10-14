@@ -50,7 +50,7 @@ jobs:
           python -m compileall -q src
           python -c "import cutvoke; from cutvoke.core import model, protocol, rational, render, service, store"
           python scripts/verify/check_layering.py
-          python -m unittest discover -s tests -v
+          python -m pytest -q
 
       - name: Build Web editor
         working-directory: web/app
@@ -79,7 +79,14 @@ jobs:
         with:
           node-version: "24"
           cache: npm
-          cache-dependency-path: web/app/package-lock.json
+          cache-dependency-path: |
+            web/app/package-lock.json
+            desktop/package-lock.json
+      - name: Check desktop downloader dependencies
+        working-directory: desktop
+        run: |
+          npm ci --ignore-scripts
+          npm run test:build-deps
       - name: Install renderer and project package
         run: |
           sudo apt-get update

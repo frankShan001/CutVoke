@@ -9,7 +9,8 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --win nsis --x64 --config.directories.output=../.artifacts/desktop && node publish-build.cjs",
-    "unpacked": "electron-builder --win --x64 --dir --config.directories.output=../.artifacts/desktop"
+    "unpacked": "electron-builder --win --x64 --dir --config.directories.output=../.artifacts/desktop",
+    "test:build-deps": "node --test build-dependencies.test.cjs"
   },
   "devDependencies": {
     "electron": "44.5.1",
@@ -47,6 +48,11 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "deleteAppDataOnUninstall": false
+    }
+  },
+  "overrides": {
+    "@electron/get@^3.0.0": {
+      "global-agent": "4.1.3"
     }
   }
 }
