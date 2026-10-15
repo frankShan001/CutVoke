@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../i18n";
 /** 检查器：展示当前选中对象（轨道或片段）的详细属性。
  *  主区只留人能懂的（素材文件名/时长/轨道类型/速度/效果）；
  *  ID、内部轨道 id、源路径、rational 区间、Revision/Schema 全部收进默认收起的「高级信息」。
@@ -24,6 +25,7 @@ import { BUILTIN_TRANSFORM_ID, BUILTIN_COLOR_ID, BUILTIN_CROSSFADE_ID } from "..
 import type { Clip } from "../types/api";
 
 export function Inspector() {
+  useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   useSessionAssets();
   const { project, selection } = state;
@@ -40,8 +42,8 @@ export function Inspector() {
   if (!project) {
     return (
       <section className="inspector">
-        <h3 className="inspector__title" style={{ margin: 0 }}>属性</h3>
-        <p className="cv-empty">选择工程后可查看属性。</p>
+        <h3 className="inspector__title" style={{ margin: 0 }}>{tr("属性")}</h3>
+        <p className="cv-empty">{tr("选择工程后可查看属性。")}</p>
       </section>
     );
   }
@@ -85,47 +87,44 @@ export function Inspector() {
 
       return (
         <section className="inspector">
-          <h3 className="inspector__title" style={{ margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
-            片段
-            <Badge tone={track!.kind === "audio" ? "audio" : "video"}>
-              {isSticker ? "贴纸" : isText ? "文字" : track!.kind === "audio" ? "音频" : "视频"}
+          <h3 className="inspector__title" style={{ margin: 0, display: "flex", alignItems: "center", gap: 8 }}>{tr("片段")}<Badge tone={track!.kind === "audio" ? "audio" : "video"}>
+              {isSticker ? tr("贴纸") : isText ? tr("文字") : track!.kind === "audio" ? tr("音频") : tr("视频")}
             </Badge>
           </h3>
-          {!isText ? <Row k="素材" v={assetDisplayName(clip.assetRef)} /> : null}
-          <Row k="时长" v={`${dur.toFixed(2)} 秒`} />
-          {attachedCount ? <Row k="跟随片段" v={`${attachedCount} 个`} /> : null}
-          {!isSticker && !isText ? <Row k="速度" v={speed === "1/1" ? "正常（1x）" : `${speed}（变速）`} /> : null}
+          {!isText ? <Row k={tr("素材")} v={assetDisplayName(clip.assetRef)} /> : null}
+          <Row k={tr("时长")} v={tr("{0} 秒", dur.toFixed(2))} />
+          {attachedCount ? <Row k={tr("跟随片段")} v={tr("{0} 个", attachedCount)} /> : null}
+          {!isSticker && !isText ? <Row k={tr("速度")} v={speed === "1/1" ? tr("正常（1x）") : tr("{0}（变速）", speed)} /> : null}
 
           {clipReadOnly ? (
             <p className="cv-hint" role="status">
-              {state.editLock ? "Agent 正在编辑，片段属性暂时只读。" : "此轨道已锁定，解锁后才能修改片段属性。"}
+              {state.editLock ? tr("Agent 正在编辑，片段属性暂时只读。") : tr("此轨道已锁定，解锁后才能修改片段属性。")}
             </p>
           ) : null}
 
           <fieldset
             disabled={clipReadOnly}
             inert={clipReadOnly}
-            aria-label="片段编辑属性"
+            aria-label={tr("片段编辑属性")}
             style={{ border: 0, margin: 0, padding: 0, minWidth: 0, opacity: clipReadOnly ? 0.55 : 1, pointerEvents: clipReadOnly ? "none" : undefined }}
           >
             {(isText || isSticker || track?.kind === "audio") && anchorChoices.length ? <label className="inspector__subrow">
-              <span className="inspector__key">跟随视频</span>
-              <select className="cv-input" aria-label="跟随视频片段"
+              <span className="inspector__key">{tr("跟随视频")}</span>
+              <select className="cv-input" aria-label={tr("跟随视频片段")}
                 value={clip.attachedToClipId || ""}
                 onChange={(event) => {
                   const ctx = getLatestState() || state;
                   const attachedToClipId = event.target.value || null;
                   void runCommand(dispatch, ctx, "clip.attach", { clipId: clip.id, attachedToClipId });
                 }}>
-                <option value="">独立移动</option>
+                <option value="">{tr("独立移动")}</option>
                 {anchorChoices.map((candidate) => <option key={candidate.id} value={candidate.id}>
-                  {assetDisplayName(candidate.assetRef) || "视频片段"} · {rationalToSecs(candidate.timelineStart).toFixed(1)} 秒
-                </option>)}
+                  {assetDisplayName(candidate.assetRef) || tr("视频片段")} · {rationalToSecs(candidate.timelineStart).toFixed(1)}{tr(" 秒")}</option>)}
               </select>
             </label> : null}
-            {clip.attachedToClipId ? <p className="cv-hint">移动关联视频时此片段同步移动；按住 Alt 拖动视频可临时保持此片段原位。</p> : null}
+            {clip.attachedToClipId ? <p className="cv-hint">{tr("移动关联视频时此片段同步移动；按住 Alt 拖动视频可临时保持此片段原位。")}</p> : null}
             {!isSticker && !isText ? <div className="inspector__subrow">
-              <span className="inspector__key">调速</span>
+              <span className="inspector__key">{tr("调速")}</span>
               <input
                 type="number"
                 step="0.1"
@@ -133,11 +132,9 @@ export function Inspector() {
                 onChange={(e) => setSpeedInput(e.target.value)}
                 className="cv-input"
                 style={{ width: 80, height: 26 }}
-                aria-label="调速倍率"
+                aria-label={tr("调速倍率")}
               />
-              <button className="cv-btn cv-btn--sm cv-btn--secondary" onClick={applySpeed}>
-                应用
-              </button>
+              <button className="cv-btn cv-btn--sm cv-btn--secondary" onClick={applySpeed}>{tr("应用")}</button>
             </div> : null}
 
             {/* ---- 音频 / 关键帧 / 动画 / 画面特效 小节（J01 拆分）---- */}
@@ -155,34 +152,32 @@ export function Inspector() {
 
             {!isText && !isAudio ? <><div className="inspector__sep" />
             <div className="inspector__subrow">
-              <span className="inspector__key">效果 ({fxCount})</span>
+              <span className="inspector__key">{tr("效果 (")}{fxCount})</span>
               <div style={{ display: "flex", gap: 4 }}>
-                <EffChip label="调色" effectId={BUILTIN_COLOR_ID} clipId={clip.id} />
-                <EffChip label="叠化" effectId={BUILTIN_CROSSFADE_ID} clipId={clip.id} />
+                <EffChip label={tr("调色")} effectId={BUILTIN_COLOR_ID} clipId={clip.id} />
+                <EffChip label={tr("叠化")} effectId={BUILTIN_CROSSFADE_ID} clipId={clip.id} />
               </div>
             </div></> : null}
             <div className="inspector__subrow">
-              <span className="inspector__key">删除</span>
+              <span className="inspector__key">{tr("删除")}</span>
               <button
                 className="cv-btn cv-btn--sm cv-btn--danger"
                 onClick={() => {
                   const ctx = getLatestState() || state;
                   void removeClip(dispatch, ctx, clip.id);
                 }}
-              >
-                删除片段
-              </button>
+              >{tr("删除片段")}</button>
             </div>
           </fieldset>
 
           <details className="inspector__adv">
-            <summary>高级信息</summary>
-            <Row k="片段 ID" v={clip.id} mono />
-            <Row k="轨道 ID" v={track!.id} mono />
-            {!isText ? <Row k="源路径" v={sourcePathShort(clip.assetRef.sourcePath)} mono /> : null}
-            <Row k="时间线" v={`[${rationalText(clip.timelineStart)} → ${rationalText(clip.timelineEnd)})`} mono />
+            <summary>{tr("高级信息")}</summary>
+            <Row k={tr("片段 ID")} v={clip.id} mono />
+            <Row k={tr("轨道 ID")} v={track!.id} mono />
+            {!isText ? <Row k={tr("源路径")} v={sourcePathShort(clip.assetRef.sourcePath)} mono /> : null}
+            <Row k={tr("时间线")} v={`[${rationalText(clip.timelineStart)} → ${rationalText(clip.timelineEnd)})`} mono />
             {!isText ? <Row
-              k="源区间"
+              k={tr("源区间")}
               v={`[${rationalText(clip.sourceStart)} → ${rationalText({ num: String(Math.round(srcEnd * 1000)), den: "1000" })})`}
               mono
             /> : null}
@@ -198,19 +193,17 @@ export function Inspector() {
     if (track) {
       return (
         <section className="inspector">
-          <h3 className="inspector__title" style={{ margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
-            轨道
-            <Badge tone={track.kind === "audio" ? "audio" : "video"}>
-              {track.role === "sticker" ? "贴纸" : track.kind === "text" ? "文字" : track.kind === "audio" ? "音频" : "视频"}
+          <h3 className="inspector__title" style={{ margin: 0, display: "flex", alignItems: "center", gap: 8 }}>{tr("轨道")}<Badge tone={track.kind === "audio" ? "audio" : "video"}>
+              {track.role === "sticker" ? tr("贴纸") : track.kind === "text" ? tr("文字") : track.kind === "audio" ? tr("音频") : tr("视频")}
             </Badge>
           </h3>
-          <Row k="片段数" v={String(track.clips.length)} />
-          <Row k="锁定" v={track.locked ? "是" : "否"} />
-          <Row k="静音" v={track.muted ? "是" : "否"} />
-          <Row k="可见" v={track.visible ? "是" : "否"} />
+          <Row k={tr("片段数")} v={String(track.clips.length)} />
+          <Row k={tr("锁定")} v={track.locked ? tr("是") : tr("否")} />
+          <Row k={tr("静音")} v={track.muted ? tr("是") : tr("否")} />
+          <Row k={tr("可见")} v={track.visible ? tr("是") : tr("否")} />
           <details className="inspector__adv">
-            <summary>高级信息</summary>
-            <Row k="轨道 ID" v={track.id} mono />
+            <summary>{tr("高级信息")}</summary>
+            <Row k={tr("轨道 ID")} v={track.id} mono />
           </details>
         </section>
       );
@@ -221,25 +214,24 @@ export function Inspector() {
   const seq = project.sequence;
   return (
     <section className="inspector">
-      <h3 className="inspector__title" style={{ margin: 0 }}>工程属性</h3>
-      <Row k="画面" v={`${seq.width}×${seq.height}`} />
-      <Row k="帧率" v={rationalText(seq.fps)} />
-      <Row k="轨道数" v={String(seq.tracks.length)} />
-      <Row k="片段数" v={String(seq.tracks.reduce((n, t) => n + (t.clips?.length || 0), 0))} />
+      <h3 className="inspector__title" style={{ margin: 0 }}>{tr("工程属性")}</h3>
+      <Row k={tr("画面")} v={`${seq.width}×${seq.height}`} />
+      <Row k={tr("帧率")} v={rationalText(seq.fps)} />
+      <Row k={tr("轨道数")} v={String(seq.tracks.length)} />
+      <Row k={tr("片段数")} v={String(seq.tracks.reduce((n, t) => n + (t.clips?.length || 0), 0))} />
       <details className="inspector__adv">
-        <summary>高级信息</summary>
-        <Row k="工程 ID" v={project.projectId} mono />
+        <summary>{tr("高级信息")}</summary>
+        <Row k={tr("工程 ID")} v={project.projectId} mono />
         <Row k="Revision" v={project.revision} mono />
         <Row k="Schema" v={project.schemaVersion} mono />
       </details>
-      <p className="cv-hint" style={{ marginTop: 8 }}>
-        点击时间线中的轨道或片段查看详细属性；右键片段可分割/删除/调速/加效果。
-      </p>
+      <p className="cv-hint" style={{ marginTop: 8 }}>{tr("点击时间线中的轨道或片段查看详细属性；右键片段可分割/删除/调速/加效果。")}</p>
     </section>
   );
 }
 
 function Row({ k, v, mono }: { k: string; v: string; mono?: boolean }) {
+  useLocale();
   return (
     <div className="inspector__row">
       <span className="inspector__key">{k}</span>
@@ -251,6 +243,7 @@ function Row({ k, v, mono }: { k: string; v: string; mono?: boolean }) {
 }
 
 function StickerTransformSection({ clip }: { clip: Clip }) {
+  useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const existingTransform = clip.effects?.find((effect) => effect.effectId === BUILTIN_TRANSFORM_ID);
   const params = existingTransform?.params;
@@ -264,11 +257,11 @@ function StickerTransformSection({ clip }: { clip: Clip }) {
   useEffect(() => setValues(savedKey.split("|")), [clip.id, savedKey]);
 
   const fields = [
-    { label: "水平位置 X（像素）", step: "1" },
-    { label: "垂直位置 Y（像素）", step: "1" },
-    { label: "缩放倍率", step: "0.01" },
-    { label: "旋转角度", step: "1" },
-    { label: "不透明度", step: "0.01" },
+    { label: tr("水平位置 X（像素）"), step: "1" },
+    { label: tr("垂直位置 Y（像素）"), step: "1" },
+    { label: tr("缩放倍率"), step: "0.01" },
+    { label: tr("旋转角度"), step: "1" },
+    { label: tr("不透明度"), step: "0.01" },
   ];
   const numbers = values.map(Number);
   const valid = numbers.every(Number.isFinite) &&
@@ -276,12 +269,12 @@ function StickerTransformSection({ clip }: { clip: Clip }) {
     numbers[2] > 0 && numbers[4] >= 0 && numbers[4] <= 1;
   const validationMessage = valid
     ? ""
-    : "位置需为整数，缩放需大于 0，不透明度需在 0–1 范围内。";
+    : tr("位置需为整数，缩放需大于 0，不透明度需在 0–1 范围内。");
   const validationMessageId = validationMessage ? `sticker-transform-validation-${clip.id}` : undefined;
 
   return (
-    <section aria-label="贴纸变换" style={{ display: "grid", gap: 6 }}>
-      <strong>贴纸变换</strong>
+    <section aria-label={tr("贴纸变换")} style={{ display: "grid", gap: 6 }}>
+      <strong>{tr("贴纸变换")}</strong>
       {validationMessage ? <p id={validationMessageId} className="cv-hint" role="status">
         {validationMessage}
       </p> : null}
@@ -320,7 +313,7 @@ function StickerTransformSection({ clip }: { clip: Clip }) {
             setSaving(false);
           }
         }}
-      >{saving ? "应用中…" : "应用贴纸变换"}</button>
+      >{saving ? tr("应用中…") : tr("应用贴纸变换")}</button>
     </section>
   );
 }

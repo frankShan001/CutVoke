@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../../i18n";
 /** 片段音频小节（J01 拆分自 Inspector.tsx）：音量 / 淡入 / 淡出。
  *  拖动/输入只改本地态，提交时才发命令，避免命令风暴刷爆 revision。 */
 import { useEffect, useState } from "react";
@@ -16,6 +17,7 @@ function valueOrDefault(value: Rational | undefined, fallback: number): number {
 export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
   clip: Clip; canDetach?: boolean; detachedAudioClipId?: string;
 }) {
+  useLocale();
   const { state, dispatch } = useEditor();
   const [volPct, setVolPct] = useState(100);
   const [fadeInSec, setFadeInSec] = useState(0);
@@ -51,12 +53,12 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
   const audioControlsDisabled = canDetach && (Boolean(detachedAudioClipId) || hasEmbeddedAudio !== true);
   let audioUnavailableReason = "";
   if (canDetach) {
-    if (detachedAudioClipId) audioUnavailableReason = "原声已分离，请在关联音轨调整音量与淡入淡出。";
+    if (detachedAudioClipId) audioUnavailableReason = tr("原声已分离，请在关联音轨调整音量与淡入淡出。");
     else if (hasEmbeddedAudio === true) audioUnavailableReason = "";
-    else if (probeError) audioUnavailableReason = `无法检查素材原声（${probeError}），音频参数暂不可用。`;
-    else if (!clip.assetRef.sourcePath) audioUnavailableReason = "素材路径不可用，无法检查原声。";
-    else if (hasEmbeddedAudio === false) audioUnavailableReason = "素材不含原声，音量与淡入淡出不可用。";
-    else audioUnavailableReason = "正在检查素材原声，检查完成前音频参数不可用。";
+    else if (probeError) audioUnavailableReason = tr("无法检查素材原声（{0}），音频参数暂不可用。", probeError);
+    else if (!clip.assetRef.sourcePath) audioUnavailableReason = tr("素材路径不可用，无法检查原声。");
+    else if (hasEmbeddedAudio === false) audioUnavailableReason = tr("素材不含原声，音量与淡入淡出不可用。");
+    else audioUnavailableReason = tr("正在检查素材原声，检查完成前音频参数不可用。");
   }
   const audioStatusId = audioUnavailableReason ? `clip-audio-status-${clip.id}` : undefined;
 
@@ -89,7 +91,7 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
       const trackId = created.find((item) => item.type === "track" && item.change === "created")?.id;
       const clipId = created.find((item) => item.type === "clip" && item.change === "created")?.id;
       if (trackId && clipId) dispatch({ type: "SELECTION_SET", selection: { trackId, clipId } });
-      dispatch({ type: "STATUS_SET", severity: "ok", text: "原声已分离到独立音轨，可单独移动和调音量；一次撤销可恢复" });
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("原声已分离到独立音轨，可单独移动和调音量；一次撤销可恢复") });
     } finally {
       setDetaching(false);
     }
@@ -99,9 +101,7 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
     <div className="inspector__audio">
       <div className="inspector__subrow">
         <span className="inspector__key">
-          <Volume2 size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />
-          音频
-        </span>
+          <Volume2 size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />{tr("音频")}</span>
         <span className="inspector__val">{volPct}%</span>
       </div>
       {audioUnavailableReason ? <p id={audioStatusId} className="cv-hint" role="status" style={{ margin: "0 0 8px" }}>
@@ -111,7 +111,7 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
           type="button"
           style={{ marginLeft: 6 }}
           onClick={() => setProbeAttempt((attempt) => attempt + 1)}
-        >重试检查</button> : null}
+        >{tr("重试检查")}</button> : null}
       </p> : null}
       <div className="inspector__audiorow">
         <input
@@ -120,7 +120,7 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
           max={200}
           step={1}
           value={volPct}
-          aria-label="片段音量"
+          aria-label={tr("片段音量")}
           aria-disabled={audioControlsDisabled}
           aria-describedby={audioStatusId}
           className="cv-range"
@@ -137,23 +137,23 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
         />
       </div>
       {canDetach ? <div className="inspector__subrow">
-        <span className="inspector__key">原声</span>
-        {detachedAudioClipId ? <span className="cv-hint">已分离到关联音轨</span> : <>
+        <span className="inspector__key">{tr("原声")}</span>
+        {detachedAudioClipId ? <span className="cv-hint">{tr("已分离到关联音轨")}</span> : <>
           <button className="cv-btn cv-btn--sm cv-btn--secondary" type="button"
             aria-describedby={audioStatusId}
             disabled={hasEmbeddedAudio !== true || detaching} onClick={() => { void detachAudio(); }}>
-            {detaching ? "分离中…" : "分离原声"}
+            {detaching ? tr("分离中…") : tr("分离原声")}
           </button>
         </>}
       </div> : null}
       <div className="inspector__subrow">
-          <span className="inspector__key">淡入</span>
+          <span className="inspector__key">{tr("淡入")}</span>
           <input
           type="number"
           step="0.1"
           min="0"
           value={fadeInSec}
-            aria-label="淡入时长"
+            aria-label={tr("淡入时长")}
             aria-describedby={audioStatusId}
             disabled={audioControlsDisabled}
           className="cv-input"
@@ -165,14 +165,14 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
           }}
           onBlur={() => commitAudio(undefined, fadeInSec, undefined)}
         />
-        <span className="inspector__unit">秒</span>
-          <span className="inspector__key">淡出</span>
+        <span className="inspector__unit">{tr("秒")}</span>
+          <span className="inspector__key">{tr("淡出")}</span>
           <input
           type="number"
           step="0.1"
           min="0"
           value={fadeOutSec}
-            aria-label="淡出时长"
+            aria-label={tr("淡出时长")}
             aria-describedby={audioStatusId}
             disabled={audioControlsDisabled}
           className="cv-input"
@@ -184,7 +184,7 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
           }}
           onBlur={() => commitAudio(undefined, undefined, fadeOutSec)}
         />
-        <span className="inspector__unit">秒</span>
+        <span className="inspector__unit">{tr("秒")}</span>
       </div>
     </div>
   );

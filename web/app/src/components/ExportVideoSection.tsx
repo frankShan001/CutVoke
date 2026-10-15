@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../i18n";
 /** 导出成片区块（X02）：保存位置 + 画质 → 开始导出 → 任务状态（进行中/完成/失败）。
     后端无百分比进度字段，按 GET /exports 任务状态轮询；202 in_flight 时进入轮询。 */
 
@@ -8,11 +9,12 @@ import { useEditor, showError } from "../store/editor";
 import { doExport, getLatestState } from "../store/actions";
 import { listExportJobs, preflightProject, ApiFailure, type ExportQuality, type ExportJob, type ProjectPreflightIssue, type ProjectPreflightReport } from "../lib/api";
 import { assetDisplayName, useSessionAssets } from "../lib/assetStore";
-import { LOCATE_PREFLIGHT_ISSUE } from "../lib/preflight";
+import { LOCATE_PREFLIGHT_ISSUE, preflightSummary } from "../lib/preflight";
 import { rationalToSecs } from "../lib/rational";
 import type { ExportResult } from "../types/api";
 
 export function ExportVideoSection({ onClose }: { onClose: () => void }) {
+  useLocale();
   const { state, dispatch } = useEditor();
   useSessionAssets();
   const [outPath, setOutPath] = useState("");
@@ -70,14 +72,14 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       if (job.status === "succeeded") {
         setResult(job.result);
         setPhase("done");
-        dispatch({ type: "STATUS_SET", severity: "ok", text: "导出完成（见结果面板）" });
+        dispatch({ type: "STATUS_SET", severity: "ok", text: msg("导出完成（见结果面板）") });
         return;
       }
       if (["failed", "cancelled", "interrupted"].includes(job.status)) {
         const err = new ApiFailure({
           status: 500,
           code: job.error?.code || "EXPORT_FAILED",
-          message: job.error?.message || `导出任务${job.status === "cancelled" ? "已取消" : "失败"}`,
+          message: job.error?.message || tr("导出任务{0}", job.status === "cancelled" ? tr("已取消") : tr("失败")),
         });
         setJobError(err);
         setPhase("error");
@@ -86,7 +88,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       }
     }
     if (!aliveRef.current) return;
-    const to = new ApiFailure({ status: 0, code: "POLL_TIMEOUT", message: "轮询导出状态超时，可重新打开导出抽屉查看结果" });
+    const to = new ApiFailure({ status: 0, code: "POLL_TIMEOUT", message: tr("轮询导出状态超时，可重新打开导出抽屉查看结果") });
     setJobError(to);
     setPhase("error");
     showError(dispatch, to);
@@ -94,11 +96,11 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
 
   const handleExport = async () => {
     if (!state.currentId) {
-      showError(dispatch, { status: 400, code: "NO_PROJECT", message: "请先创建或选择一个工程" });
+      showError(dispatch, { status: 400, code: "NO_PROJECT", message: tr("请先创建或选择一个工程") });
       return;
     }
     if (!outPath.trim()) {
-      showError(dispatch, { status: 400, code: "INVALID_ARGUMENT", message: "请填写输出文件路径" });
+      showError(dispatch, { status: 400, code: "INVALID_ARGUMENT", message: tr("请填写输出文件路径") });
       return;
     }
     let range: { start: number; end: number } | undefined;
@@ -110,7 +112,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
         showError(dispatch, {
           status: 400,
           code: "INVALID_ARGUMENT",
-          message: `导出区间需满足 0 ≤ 开始时间 < 结束时间 ≤ ${projectDuration.toFixed(2)} 秒`,
+          message: tr("导出区间需满足 0 ≤ 开始时间 < 结束时间 ≤ {0} 秒", projectDuration.toFixed(2)),
         });
         return;
       }
@@ -130,7 +132,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       setPreflight(report);
       if (!report.readyToRender) {
         setPhase("blocked");
-        dispatch({ type: "STATUS_SET", severity: "warn", text: "导出前检查发现问题，请先修复素材或工程" });
+        dispatch({ type: "STATUS_SET", severity: "warn", text: msg("导出前检查发现问题，请先修复素材或工程") });
         return;
       }
       setPhase("running");
@@ -170,29 +172,29 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
   const copyPath = async (path: string) => {
     try {
       await navigator.clipboard.writeText(path);
-      dispatch({ type: "STATUS_SET", severity: "ok", text: "已复制输出路径" });
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已复制输出路径") });
     } catch {
-      showError(dispatch, new ApiFailure({ status: 0, code: "CLIPBOARD", message: "复制失败，请手动选择路径" }));
+      showError(dispatch, new ApiFailure({ status: 0, code: "CLIPBOARD", message: tr("复制失败，请手动选择路径") }));
     }
   };
 
-  const durStr = result && !isNaN(result.duration) ? `${result.duration.toFixed(2)} 秒` : "—";
+  const durStr = result && !isNaN(result.duration) ? tr("{0} 秒", result.duration.toFixed(2)) : "—";
 
   return (
     <>
-      <Field label="保存位置">
+      <Field label={tr("保存位置")}>
         <TextInput
           value={outPath}
           disabled={busy}
           onChange={(e) => setOutPath(e.target.value)}
-          placeholder="如：D:\视频\我的成片.mp4"
-          aria-label="输出文件路径"
+          placeholder={tr("如：D:\\视频\\我的成片.mp4")}
+          aria-label={tr("输出文件路径")}
         />
       </Field>
-      <Field label="画质">
-        <Select value={quality} disabled={busy} onChange={(e) => setQuality(e.target.value as ExportQuality)} aria-label="画质">
-          <option value="high">高（清晰，导出较慢）</option>
-          <option value="low">低（体积小，适合预览）</option>
+      <Field label={tr("画质")}>
+        <Select value={quality} disabled={busy} onChange={(e) => setQuality(e.target.value as ExportQuality)} aria-label={tr("画质")}>
+          <option value="high">{tr("高（清晰，导出较慢）")}</option>
+          <option value="low">{tr("低（体积小，适合预览）")}</option>
         </Select>
       </Field>
       <label className="export-dialog__range-toggle">
@@ -201,13 +203,11 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
           checked={useRange}
           disabled={busy}
           onChange={(event) => setUseRange(event.target.checked)}
-          aria-label="仅导出时间范围"
-        />
-        仅导出时间范围
-      </label>
+          aria-label={tr("仅导出时间范围")}
+        />{tr("仅导出时间范围")}</label>
       {useRange ? (
         <div className="export-dialog__range-fields">
-          <Field label="开始时间（秒）">
+          <Field label={tr("开始时间（秒）")}>
             <TextInput
               type="number"
               min="0"
@@ -217,10 +217,10 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
               disabled={busy}
               onChange={(event) => setRangeStart(event.target.value)}
               onBlur={() => setRangeStart((value) => snapToFrame(value))}
-              aria-label="导出开始时间"
+              aria-label={tr("导出开始时间")}
             />
           </Field>
-          <Field label={`结束时间（秒；时间线 ${projectDuration.toFixed(2)} 秒）`}>
+          <Field label={tr("结束时间（秒；时间线 {0} 秒）", projectDuration.toFixed(2))}>
             <TextInput
               type="number"
               min="0"
@@ -231,61 +231,58 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
               placeholder={projectDuration.toFixed(2)}
               onChange={(event) => setRangeEnd(event.target.value)}
               onBlur={() => setRangeEnd((value) => snapToFrame(value))}
-              aria-label="导出结束时间"
+              aria-label={tr("导出结束时间")}
             />
           </Field>
         </div>
       ) : null}
       {useRange ? (
-        <p className="cv-hint" style={{ marginTop: 6 }}>
-          时间会对齐到工程帧率，完成面板显示编码后的实际时长。
-        </p>
+        <p className="cv-hint" style={{ marginTop: 6 }}>{tr("时间会对齐到工程帧率，完成面板显示编码后的实际时长。")}</p>
       ) : null}
 
       <div className="export-dialog__actions">
-        <Button variant="secondary" onClick={onClose} disabled={busy}>
-          取消
-        </Button>
-        <Button variant="primary" onClick={handleExport} disabled={busy} aria-label="开始导出">
+        <Button variant="secondary" onClick={onClose} disabled={busy}>{tr("取消")}</Button>
+        <Button variant="primary" onClick={handleExport} disabled={busy} aria-label={tr("开始导出")}>
           <Upload size={14} />
-          {phase === "checking" ? "检查素材中…" : busy ? "导出中…" : phase === "blocked" ? "重新检查并导出" : "开始导出"}
+          {phase === "checking" ? tr("检查素材中…") : busy ? tr("导出中…") : phase === "blocked" ? tr("重新检查并导出") : tr("开始导出")}
         </Button>
       </div>
 
       {phase === "checking" ? (
         <div className="export-dialog__result" role="status" aria-live="polite">
-          <div className="export-dialog__result-head"><Loader2 size={14} className="cv-spin" /> 检查素材中</div>
-          <p className="cv-hint">正在检查输出范围的文件可用性与工程结构。</p>
+          <div className="export-dialog__result-head"><Loader2 size={14} className="cv-spin" />{tr(" 检查素材中")}</div>
+          <p className="cv-hint">{tr("正在检查输出范围的文件可用性与工程结构。")}</p>
         </div>
       ) : null}
 
       {phase === "blocked" ? (
         <div className="export-dialog__result export-dialog__result--error" role="alert">
-          <div className="export-dialog__result-head"><AlertTriangle size={14} /> 导出前检查未通过</div>
-          {checkError ? <p>{checkError}。请点击“重新检查并导出”重试。</p> : null}
+          <div className="export-dialog__result-head"><AlertTriangle size={14} />{tr(" 导出前检查未通过")}</div>
+          {checkError ? <p>{tr("导出前检查失败，请重新检查并导出。")}<br /><span dir="auto">{checkError}</span></p> : null}
           <ul className="export-preflight__issues">
             {preflight?.errors.map((issue, index) => (
               <li key={`${issue.code}-${issue.path || index}`}>
-                <strong>{issue.path ? assetDisplayName(issue.path) : issue.message}</strong>
-                {issue.path ? <p>{issue.message}</p> : null}
-                {issue.path ? <details><summary>文件路径</summary><code>{issue.path}</code></details> : null}
+                <strong>{issue.path ? assetDisplayName(issue.path) : preflightSummary(issue)}</strong>
+                {issue.path ? <p>{preflightSummary(issue)}</p> : null}
+                <details><summary>{tr("原始诊断")}</summary><span dir="auto">{issue.message}</span></details>
+                {issue.path ? <details><summary>{tr("文件路径")}</summary><code>{issue.path}</code></details> : null}
                 {issue.path || issue.clipIds?.length ? (
                   <Button variant="secondary" size="sm" onClick={() => locateIssue(issue)}>
-                    {issue.resourceKind === "media" ? "在素材库修复" : "定位问题片段"}
+                    {issue.resourceKind === "media" ? tr("在素材库修复") : tr("定位问题片段")}
                   </Button>
                 ) : null}
               </li>
             ))}
           </ul>
-          {!checkError ? <p className="cv-hint">重新链接丢失素材，或为选中的片段替换素材后，再次导出。</p> : null}
+          {!checkError ? <p className="cv-hint">{tr("重新链接丢失素材，或为选中的片段替换素材后，再次导出。")}</p> : null}
         </div>
       ) : null}
 
       {preflight && preflight.warnings.length > 0 ? (
         <div className="export-dialog__result" role="status">
-          <div className="export-dialog__result-head"><AlertTriangle size={14} /> 导出前提醒</div>
+          <div className="export-dialog__result-head"><AlertTriangle size={14} />{tr(" 导出前提醒")}</div>
           <ul className="export-preflight__issues">
-            {preflight.warnings.map((issue, index) => <li key={`${issue.code}-${index}`}>{issue.message}</li>)}
+            {preflight.warnings.map((issue, index) => <li key={`${issue.code}-${index}`}>{preflightSummary(issue)}<details><summary>{tr("原始诊断")}</summary><span dir="auto">{issue.message}</span></details></li>)}
           </ul>
         </div>
       ) : null}
@@ -293,15 +290,12 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       {phase === "running" ? (
         <div className="export-dialog__result">
           <div className="export-dialog__result-head">
-            <Loader2 size={14} className="cv-spin" /> 导出进行中
-            <Badge tone="info">进行中</Badge>
+            <Loader2 size={14} className="cv-spin" />{tr(" 导出进行中")}<Badge tone="info">{tr("进行中")}</Badge>
           </div>
-          <p className="cv-hint" style={{ marginTop: 6 }}>
-            导出任务在后台串行处理，按任务状态轮询；完成后自动更新结果。
-          </p>
+          <p className="cv-hint" style={{ marginTop: 6 }}>{tr("导出任务在后台串行处理，按任务状态轮询；完成后自动更新结果。")}</p>
           {jobId ? (
             <div className="inspector__row">
-              <span className="inspector__key">任务</span>
+              <span className="inspector__key">{tr("任务")}</span>
               <span className="inspector__val cv-mono">{jobId}</span>
             </div>
           ) : null}
@@ -311,8 +305,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       {phase === "error" && jobError ? (
         <div className="export-dialog__result export-dialog__result--error">
           <div className="export-dialog__result-head">
-            <AlertTriangle size={14} /> 导出失败
-            <Badge tone="err">失败</Badge>
+            <AlertTriangle size={14} />{tr(" 导出失败")}<Badge tone="err">{tr("失败")}</Badge>
           </div>
           <pre className="error-modal__detail" style={{ marginTop: 6 }}>
             [{jobError.code}] {jobError.message}
@@ -323,32 +316,30 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       {phase === "done" && result ? (
         <div className="export-dialog__result">
           <div className="export-dialog__result-head">
-            <CheckCircle2 size={14} /> 导出完成
-            <Badge tone="ok">已完成</Badge>
+            <CheckCircle2 size={14} />{tr(" 导出完成")}<Badge tone="ok">{tr("已完成")}</Badge>
           </div>
           <div className="inspector__row">
-            <span className="inspector__key">输出</span>
+            <span className="inspector__key">{tr("输出")}</span>
             <span className="inspector__val cv-mono">{result.output_path}</span>
           </div>
           <div className="export-dialog__actions" style={{ marginTop: 6 }}>
-            <Button variant="secondary" size="sm" onClick={() => copyPath(result.output_path)} aria-label="复制输出路径">
-              <Copy size={13} /> 复制路径
-            </Button>
+            <Button variant="secondary" size="sm" onClick={() => copyPath(result.output_path)} aria-label={tr("复制输出路径")}>
+              <Copy size={13} />{tr(" 复制路径")}</Button>
           </div>
           <div className="inspector__row" style={{ marginTop: 6 }}>
-            <span className="inspector__key">时长</span>
+            <span className="inspector__key">{tr("时长")}</span>
             <span className="inspector__val">{durStr}</span>
           </div>
           <div className="inspector__row">
-            <span className="inspector__key">尺寸</span>
+            <span className="inspector__key">{tr("尺寸")}</span>
             <span className="inspector__val">
               {result.width}×{result.height}
             </span>
           </div>
           {result.has_audio !== undefined && (
             <div className="inspector__row">
-              <span className="inspector__key">含音频</span>
-              <span className="inspector__val">{result.has_audio ? "是" : "否"}</span>
+              <span className="inspector__key">{tr("含音频")}</span>
+              <span className="inspector__val">{result.has_audio ? tr("是") : tr("否")}</span>
             </div>
           )}
           {result.warnings && result.warnings.length > 0 && (
@@ -356,9 +347,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
               {result.warnings.join("\n")}
             </pre>
           )}
-          <p className="cv-hint" style={{ marginTop: 6 }}>
-            Web 端暂无法直接打开资源管理器，已提供“复制路径”，可在文件管理器中粘贴定位。
-          </p>
+          <p className="cv-hint" style={{ marginTop: 6 }}>{tr("Web 端暂无法直接打开资源管理器，已提供“复制路径”，可在文件管理器中粘贴定位。")}</p>
         </div>
       ) : null}
     </>

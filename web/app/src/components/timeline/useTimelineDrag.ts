@@ -1,3 +1,4 @@
+import { msg, tr } from "../../i18n";
 /** 时间线跨轨拖拽系统（Timeline 持有，TrackRow 共享）。
     拖动中：全局跟踪指针 → 计算目标轨道 + 时间线位置 → 渲染幽灵条块。
     释放时一次提交 clip.move；类型/锁定错误在预览阶段拦截，重叠落点转为片段重排，
@@ -106,9 +107,9 @@ export function useTimelineDrag(): TimelineDragApi {
 
     let invalidReason: string | undefined;
     if (kind !== drag.requiredTrackKind) {
-      invalidReason = "素材类型与目标轨道不符";
+      invalidReason = tr("素材类型与目标轨道不符");
     } else if (targetTrack?.locked) {
-      invalidReason = "目标轨道已锁定，先解锁再移动片段";
+      invalidReason = tr("目标轨道已锁定，先解锁再移动片段");
     }
 
     // 磁吸：对 move 模式收集其它片段边缘 + 播放头
@@ -303,7 +304,7 @@ export function useTimelineDrag(): TimelineDragApi {
         dispatch({
           type: "STATUS_SET",
           severity: "warn",
-          text: "请在时间线轨道区域内放置片段；需要更多空间时可收起右侧属性面板",
+          text: msg("请在时间线轨道区域内放置片段；需要更多空间时可收起右侧属性面板"),
         });
         return;
       }
@@ -317,7 +318,7 @@ export function useTimelineDrag(): TimelineDragApi {
       }
       // Safety net for a stale target track while the pointer was captured.
       if (targetChanged && d.kind !== drag.requiredTrackKind) {
-        dispatch({ type: "STATUS_SET", severity: "warn", text: "素材类型与目标轨道不符" });
+        dispatch({ type: "STATUS_SET", severity: "warn", text: msg("素材类型与目标轨道不符") });
         return;
       }
       const newStart = d.startSecs;

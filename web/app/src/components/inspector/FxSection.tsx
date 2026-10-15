@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../../i18n";
 /** 片段特效小节：按素材适用类型筛选；调参一次原子更新。 */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
@@ -38,6 +39,7 @@ function preserveMaskBoundsOnShapeChange(
 }
 
 export function FxSection({ clip, trackKind }: { clip: Clip; trackKind: string }) {
+  const locale = useLocale();
   const { state, dispatch } = useEditor();
   const [specs, setSpecs] = useState<EffectSpec[]>([]);
   const [busy, setBusy] = useState(false);
@@ -59,7 +61,7 @@ export function FxSection({ clip, trackKind }: { clip: Clip; trackKind: string }
     return () => {
       cancelled = true;
     };
-  }, [dispatch]);
+  }, [dispatch, locale]);
 
   const isActive = (id: string) => clip.effects?.some((e) => e.effectId === id) ?? false;
   const applicableSpecs = specs.filter(
@@ -97,7 +99,7 @@ export function FxSection({ clip, trackKind }: { clip: Clip; trackKind: string }
 
   const Icon = iconForCategory("fx");
   const activeSpecs = applicableSpecs.filter((s) => isActive(s.effectId));
-  const sectionLabel = trackKind === "audio" ? "音频特效" : mediaKind === "image" ? "画面特效" : "片段特效";
+  const sectionLabel = trackKind === "audio" ? tr("音频特效") : mediaKind === "image" ? tr("画面特效") : tr("片段特效");
 
   return (
     <>
@@ -109,7 +111,7 @@ export function FxSection({ clip, trackKind }: { clip: Clip; trackKind: string }
             {sectionLabel}
           </span>
           <span className="cv-hint">
-            {applicableSpecs.length ? `${activeSpecs.length}/${applicableSpecs.length} 已启用` : "展开添加"}
+            {applicableSpecs.length ? tr("{0}/{1} 已启用", activeSpecs.length, applicableSpecs.length) : tr("展开添加")}
           </span>
         </summary>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
@@ -153,6 +155,7 @@ function FxParams({
   params: Record<string, unknown>;
   onCommit: (next: Record<string, unknown>) => Promise<boolean>;
 }) {
+  const locale = useLocale();
   const [local, setLocal] = useState<Record<string, unknown>>(params);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState("");
@@ -171,7 +174,7 @@ function FxParams({
     if (spec.effectId === "cutvoke.fx.mask" && local.shape !== "text" &&
         (control.name === "content" || control.name === "fontSize")) return false;
     return true;
-  }), [spec, local]);
+  }), [spec, local, locale]);
 
   const commitLocal = (next: Record<string, unknown>) => {
     if (JSON.stringify(next) === JSON.stringify(params)) return;
@@ -213,7 +216,7 @@ function FxParams({
         <>
           <ColorWheels params={local} onPreview={setLocal} onCommit={commitLocal} />
           <details className="inspector__adv color-wheels__numeric">
-            <summary>RGB 数值微调</summary>
+            <summary>{tr("RGB 数值微调")}</summary>
             {numericControls}
           </details>
         </>
@@ -221,7 +224,7 @@ function FxParams({
       {isLut ? (
         <div className="lut-import">
           <input ref={lutInput} type="file" accept=".cube" hidden
-            aria-label="导入 3D LUT 文件"
+            aria-label={tr("导入 3D LUT 文件")}
             onChange={(event) => {
               const file = event.target.files?.[0];
               event.target.value = "";
@@ -235,13 +238,13 @@ function FxParams({
                 }
                 const next = { ...local, file: result.data.path, name: result.data.name };
                 if (await onCommit(next)) setLocal(next);
-                else setImportError("LUT 已导入，但未能应用到片段；请重试");
+                else setImportError(tr("LUT 已导入，但未能应用到片段；请重试"));
               }).finally(() => setImporting(false));
             }} />
           <div className="lut-import__actions">
             <button type="button" className="cv-chip" disabled={importing}
               onClick={() => lutInput.current?.click()}>
-              {importing ? "正在导入…" : "导入 3D .cube LUT"}
+              {importing ? tr("正在导入…") : tr("导入 3D .cube LUT")}
             </button>
             {local.file ? (
               <button type="button" className="cv-chip" disabled={importing}
@@ -250,12 +253,12 @@ function FxParams({
                   void onCommit(next).then((ok) => {
                     if (ok) setLocal(next);
                   });
-                }}>恢复内置 LUT</button>
+                }}>{tr("恢复内置 LUT")}</button>
             ) : null}
           </div>
-          {local.file ? <p className="cv-hint">当前 LUT：{String(local.name || local.file).split(/[\\/]/).pop()}</p> : null}
+          {local.file ? <p className="cv-hint">{tr("当前 LUT：")}{String(local.name || local.file).split(/[\\/]/).pop()}</p> : null}
           {importError ? <p role="alert" className="cv-hint">{importError}</p> : null}
-          <p className="cv-hint">导入文件按 Rec.709/sRGB 画面解释；预览与导出共用同一 LUT 渲染链。</p>
+          <p className="cv-hint">{tr("导入文件按 Rec.709/sRGB 画面解释；预览与导出共用同一 LUT 渲染链。")}</p>
         </div>
       ) : null}
     </>

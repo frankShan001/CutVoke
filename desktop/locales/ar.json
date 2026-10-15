@@ -1,0 +1,20 @@
+{
+  "loadingTitle": "جارٍ تشغيل CutVoke",
+  "loadingService": "جارٍ تشغيل خدمة التحرير المحلية…",
+  "loadingPrivacy": "تبقى المشاريع وذاكرة التخزين المؤقت للمعاينة على جهازك",
+  "loadingProgress": "جارٍ التشغيل",
+  "startupTitle": "تعذر تشغيل CutVoke",
+  "startupSummary": "تعذر تشغيل خدمة التحرير المحلية. راجع معلومات التشخيص أدناه ثم أعد فتح CutVoke.",
+  "serviceTitle": "توقفت الخدمة المحلية",
+  "serviceSummary": "توقفت خدمة التحرير المحلية. أعد فتح CutVoke؛ تظهر معلومات التشخيص وموقع السجل أدناه.",
+  "requestFailure": "فشل الطلب إلى الخدمة المحلية (HTTP {0})",
+  "invalidClient": "طلب عميل غير صالح",
+  "startupExit": "تعذر بدء الخدمة المحلية (رمز الخروج {0})",
+  "startupTimeout": "انتهت مهلة بدء الخدمة المحلية",
+  "serviceExitCode": "رمز خروج الخدمة: {0}",
+  "logLocation": "موقع السجل: {0}",
+  "technicalDetails": "التشخيص التقني (النص الأصلي)",
+  "close": "إغلاق",
+  "chooseCache": "اختيار موقع ذاكرة التخزين المؤقت",
+  "chooseFolder": "اختيار مجلد"
+}

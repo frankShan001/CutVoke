@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../i18n";
 /** Direct manipulation for a selected clip's normalized crop rectangle. */
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { useEditor } from "../store/editor";
@@ -32,6 +33,7 @@ function geometry(params: Record<string, unknown>): Geometry {
 }
 
 export function CropCanvasOverlay() {
+  useLocale();
   const { state, dispatch } = useEditor();
   const project = state.project;
   const track = project?.sequence.tracks.find((item) => item.id === state.selection?.trackId);
@@ -172,23 +174,23 @@ export function CropCanvasOverlay() {
   const h = current.h * height;
   const radius = Math.max(6, Math.min(width, height) * 0.012);
   const handles: { corner: Corner; cx: number; cy: number; cursor: string; label: string }[] = [
-    { corner: "nw", cx: clamp(x, 1, width - 1), cy: clamp(y, 1, height - 1), cursor: "nwse-resize", label: "左上角" },
-    { corner: "ne", cx: clamp(x + w, 1, width - 1), cy: clamp(y, 1, height - 1), cursor: "nesw-resize", label: "右上角" },
-    { corner: "sw", cx: clamp(x, 1, width - 1), cy: clamp(y + h, 1, height - 1), cursor: "nesw-resize", label: "左下角" },
-    { corner: "se", cx: clamp(x + w, 1, width - 1), cy: clamp(y + h, 1, height - 1), cursor: "nwse-resize", label: "右下角" },
+    { corner: "nw", cx: clamp(x, 1, width - 1), cy: clamp(y, 1, height - 1), cursor: "nwse-resize", label: tr("左上角") },
+    { corner: "ne", cx: clamp(x + w, 1, width - 1), cy: clamp(y, 1, height - 1), cursor: "nesw-resize", label: tr("右上角") },
+    { corner: "sw", cx: clamp(x, 1, width - 1), cy: clamp(y + h, 1, height - 1), cursor: "nesw-resize", label: tr("左下角") },
+    { corner: "se", cx: clamp(x + w, 1, width - 1), cy: clamp(y + h, 1, height - 1), cursor: "nwse-resize", label: tr("右下角") },
   ];
 
   return (
     <svg ref={svgRef} className="player__crop-overlay"
       viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet"
-      aria-label="画布裁切控件" onPointerMove={move} onPointerUp={finish}
+      aria-label={tr("画布裁切控件")} onPointerMove={move} onPointerUp={finish}
       onPointerCancel={cancel}>
       <rect className="player__crop-shade" x="0" y="0" width={width} height={y} />
       <rect className="player__crop-shade" x="0" y={y + h} width={width} height={height - y - h} />
       <rect className="player__crop-shade" x="0" y={y} width={x} height={h} />
       <rect className="player__crop-shade" x={x + w} y={y} width={width - x - w} height={h} />
       <rect className="player__crop-outline" x={x} y={y} width={w} height={h}
-        tabIndex={editable ? 0 : -1} role="button" aria-label="移动裁切区域"
+        tabIndex={editable ? 0 : -1} role="button" aria-label={tr("移动裁切区域")}
         onPointerDown={(event) => begin(event, "move")}
         onKeyDown={(event) => keyboardAdjust(event, "move")} />
       <path className="player__crop-grid"
@@ -198,7 +200,7 @@ export function CropCanvasOverlay() {
         <circle key={handle.corner} className="player__crop-handle"
           cx={handle.cx} cy={handle.cy} r={radius} cursor={handle.cursor}
           tabIndex={editable ? 0 : -1} role="button"
-          aria-label={`调整裁切${handle.label}`}
+          aria-label={tr("调整裁切{0}", handle.label)}
           onPointerDown={(event) => begin(event, handle.corner)}
           onKeyDown={(event) => keyboardAdjust(event, handle.corner)} />
       ))}

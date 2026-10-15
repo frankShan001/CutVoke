@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 export interface CachedPreviewSegment { url: string; bytes: number }
 
 interface Entry {
@@ -86,12 +87,12 @@ export class PreviewSegmentCache {
           const response = await fetch(entry.source, { signal: entry.controller.signal });
           if (!response.ok) {
             retryable = response.status === 408 || response.status === 429 || response.status >= 500;
-            let message = `预览视频段失败（HTTP ${response.status}）`;
+            let message = tr("预览视频段失败（HTTP {0}）", response.status);
             try { const body = await response.json(); message = body.error?.message || message; } catch { /* keep status */ }
             throw new Error(message);
           }
           blob = await response.blob();
-          if (!blob.size) { retryable = false; throw new Error("预览视频段为空"); }
+          if (!blob.size) { retryable = false; throw new Error(tr("预览视频段为空")); }
         } catch (error) {
           if (entry.controller.signal.aborted || !retryable || attempt >= 2) throw error;
           await new Promise<void>((resolve, reject) => {

@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PreviewSegmentCache, type CachedPreviewSegment } from "../lib/previewSegmentCache";
 
@@ -22,7 +23,7 @@ export function usePreviewSegments(scope: string, source: string, enabled: boole
       if (alive) setResult({ cache, source, media });
     }, error => {
       if (alive && !(error instanceof DOMException && error.name === "AbortError")) {
-        setResult({ cache, source, error: error instanceof Error ? error.message : "预览视频段加载失败" });
+        setResult({ cache, source, error: error instanceof Error ? error.message : tr("预览视频段加载失败") });
       }
     });
     return () => { alive = false; lease.release(); };

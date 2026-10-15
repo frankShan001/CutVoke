@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 /** 花字（字幕标语）样式预设：纯前端预设，每个预设是一组 caption.update 的 style 字段。
  *  数据驱动——新增标语样式只需在此数组追加一项，FontStylePanel 自动渲染，无需改 UI。
  *  注意：preset.style 里的颜色是「字幕渲染用的领域数据」（发给后端 caption.update），
@@ -41,8 +42,8 @@ export const CLEAR_CAPTION_STYLE: CaptionStyle = {
 export const FONT_STYLE_PRESETS: FontStylePreset[] = [
   {
     id: "plain-white",
-    name: "简洁白",
-    description: "白字黑描边，通用清晰",
+    get name() { return tr("简洁白"); },
+    get description() { return tr("白字黑描边，通用清晰"); },
     style: {
       fontSize: 42,
       color: "#ffffff",
@@ -55,8 +56,8 @@ export const FONT_STYLE_PRESETS: FontStylePreset[] = [
   },
   {
     id: "title-gold",
-    name: "标题黄",
-    description: "金黄大字加粗，适合片头标题",
+    get name() { return tr("标题黄"); },
+    get description() { return tr("金黄大字加粗，适合片头标题"); },
     style: {
       fontSize: 64,
       color: "#FFD24A",
@@ -69,8 +70,8 @@ export const FONT_STYLE_PRESETS: FontStylePreset[] = [
   },
   {
     id: "bold-stroke",
-    name: "描边粗",
-    description: "白字粗黑描边，远处也醒目",
+    get name() { return tr("描边粗"); },
+    get description() { return tr("白字粗黑描边，远处也醒目"); },
     style: {
       fontSize: 48,
       color: "#ffffff",
@@ -83,8 +84,8 @@ export const FONT_STYLE_PRESETS: FontStylePreset[] = [
   },
   {
     id: "bubble-bg",
-    name: "气泡背景",
-    description: "半透明黑底气泡，弱光场景可读",
+    get name() { return tr("气泡背景"); },
+    get description() { return tr("半透明黑底气泡，弱光场景可读"); },
     style: {
       fontSize: 40,
       color: "#ffffff",
@@ -97,8 +98,8 @@ export const FONT_STYLE_PRESETS: FontStylePreset[] = [
   },
   {
     id: "neon",
-    name: "霓虹",
-    description: "青字品红描边，潮流卡点风",
+    get name() { return tr("霓虹"); },
+    get description() { return tr("青字品红描边，潮流卡点风"); },
     style: {
       fontSize: 46,
       color: "#00F0FF",
@@ -111,8 +112,8 @@ export const FONT_STYLE_PRESETS: FontStylePreset[] = [
   },
   {
     id: "info-bar",
-    name: "信息条",
-    description: "深色信息条底，正文解说字幕",
+    get name() { return tr("信息条"); },
+    get description() { return tr("深色信息条底，正文解说字幕"); },
     style: {
       fontSize: 34,
       color: "#ffffff",

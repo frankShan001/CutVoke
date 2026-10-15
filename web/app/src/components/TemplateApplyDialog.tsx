@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../i18n";
 /** J12 套用确认对话框：在 TemplateGallery 内弹层。
     明确展示 clearExisting 语义（追加 vs 清空重建，默认 false），套用中禁用按钮防重复提交。 */
 
@@ -26,11 +27,12 @@ export function TemplateApplyDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  useLocale();
   return (
-    <div className="tpl-confirm" role="dialog" aria-modal="true" aria-label="确认套用模板">
+    <div className="tpl-confirm" role="dialog" aria-modal="true" aria-label={tr("确认套用模板")}>
       <div className="tpl-confirm__backdrop" onClick={onCancel} />
       <div className="tpl-confirm__box">
-        <h3 className="tpl-confirm__title">套用模板《{template.name}》</h3>
+        <h3 className="tpl-confirm__title">{tr("套用模板《")}{template.name}》</h3>
         {inEditor ? (
           <label className="tpl-confirm__row">
             <input
@@ -38,12 +40,10 @@ export function TemplateApplyDialog({
               checked={clearExisting}
               onChange={(e) => onClearExistingChange(e.target.checked)}
             />
-            <span>先清空当前时间线再套用（默认关闭 = 在现有内容后追加，不破坏已有工程）</span>
+            <span>{tr("先清空当前时间线再套用（默认关闭 = 在现有内容后追加，不破坏已有工程）")}</span>
           </label>
         ) : (
-          <p className="tpl-confirm__note">
-            将从模板画幅新建工程《{template.name}》并套用，进入编辑器即可直接导出。
-          </p>
+          <p className="tpl-confirm__note">{tr("将从模板画幅新建工程《")}{template.name}{tr("》并套用，进入编辑器即可直接导出。")}</p>
         )}
         {applyErr && (
           <div className="tpl-confirm__err" role="alert">
@@ -51,31 +51,26 @@ export function TemplateApplyDialog({
           </div>
         )}
         <div className="tpl-confirm__actions">
-          <Button variant="ghost" size="sm" onClick={onCancel}>
-            取消
-          </Button>
+          <Button variant="ghost" size="sm" onClick={onCancel}>{tr("取消")}</Button>
           <Button
             variant="primary"
             size="sm"
             onClick={onConfirm}
             disabled={applying}
-            aria-label="确认套用模板"
+            aria-label={tr("确认套用模板")}
           >
             {applying ? (
               <>
-                <RefreshCw size={13} className="tpl-spin" /> 套用中…
-              </>
+                <RefreshCw size={13} className="tpl-spin" />{tr(" 套用中…")}</>
             ) : (
               <>
-                <ArrowRight size={13} /> 确认套用
-              </>
+                <ArrowRight size={13} />{tr(" 确认套用")}</>
             )}
           </Button>
         </div>
         {!applying && busyOther && (
           <div className="tpl-confirm__busy">
-            <CheckCircle2 size={13} /> 正在套用其他模板，请稍候
-          </div>
+            <CheckCircle2 size={13} />{tr(" 正在套用其他模板，请稍候")}</div>
         )}
       </div>
     </div>

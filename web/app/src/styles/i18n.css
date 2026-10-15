@@ -1,0 +1,25 @@
+.language-select { display:inline-flex; align-items:center; gap:5px; flex:none; max-width:155px; color:var(--text-dim); }
+.language-select select { color:var(--text); background:var(--bg-2); border:1px solid var(--border); border-radius:5px; min-height:30px; max-width:132px; font:inherit; padding:3px 5px; }
+.language-select select:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+:root[dir="rtl"] .zone-left { border-right:0; border-left:1px solid var(--border); }
+:root[dir="rtl"] .zone-right { border-left:0; border-right:1px solid var(--border); }
+:root[dir="rtl"] .cv-field, :root[dir="rtl"] .cv-panel { text-align:start; }
+.timeline, .player-controls, .cv-mono, .player__canvas-frame, input[type="number"], input[type="range"] { direction:ltr; unicode-bidi:isolate; }
+.timeline__head, .timeline__empty, .player-controls button, .tl-track__label { unicode-bidi:plaintext; }
+input[type="text"], input[type="search"], textarea { unicode-bidi:plaintext; }
+.inspector__val, .timeline__format { unicode-bidi:isolate; direction:ltr; }
+.cv-btn, .cv-field__label, .cv-panel__head, .home__create-row { min-width:0; }
+.cv-btn { overflow-wrap:anywhere; }
+.topbar__title { flex-shrink:0; }
+:root[dir="rtl"] .topbar__tag { direction:rtl; }
+@media (max-width:1400px) { .topbar__tag { display:none; } }
+.ctx-menu { max-width:calc(100vw - 16px); max-height:calc(100dvh - 16px); overflow:auto; }
+.ctx-menu__item { white-space:normal; text-align:start; }
+.topbar__tag { white-space:nowrap; }
+.topbar > .cv-btn, .topbar > .toolbar-tools { flex-shrink:0; }
+.media-domain-tab { min-width:0; white-space:normal; overflow-wrap:anywhere; line-height:1.3; min-height:30px; }
+:root:is([lang="en"], [lang="es"], [lang="fr"], [lang="de"], [lang="pt-BR"], [lang="ru"], [lang="ar"]) .media-domain-tabs { grid-template-columns:repeat(3,minmax(0,1fr)); }
+@media (max-width:1700px) { .topbar__tag, .topbar__sync-time { display:none; } }
+@media (max-width:1500px) { .topbar__sync-label { display:none; } }
+@media (max-width:650px) { .home__create-row { flex-wrap:wrap; } .home__create-row .cv-input { flex-basis:100%; } }

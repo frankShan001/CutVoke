@@ -2,9 +2,13 @@
 
 - [使用与 MCP 接入](user/LOCAL_DELIVERY_MCP.md)
 - [外部 Agent 编辑流程](user/external-agent-editing.md)
+- [AI 剪辑技能安装与使用](user/agent-skill.zh-CN.md) / [English](user/agent-skill.md)
+- [社区特效贡献](user/effect-contributing.zh-CN.md) / [English](../effects/README.md)
+- [真实演示截图与验证边界](assets/readme/README.md)
 - [本地语音识别](user/LOCAL_ASR.md)
 - [资源包发布](user/resource-pack-registry.md)
 - [项目目录和数据位置](development/project-layout.md)
+- [界面翻译贡献](development/translations.zh-CN.md) / [English](development/translations.md)
 - [外部验收材料包](development/acceptance-kit/README.md)
 - [脚本入口](../scripts/README.md)
 

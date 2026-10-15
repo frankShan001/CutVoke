@@ -39,6 +39,7 @@ python -m pytest -q
 ```bash
 cd web/app
 npm run typecheck
+npm run test:i18n
 npm run build
 npm run test:e2e
 ```
@@ -76,6 +77,8 @@ CutVoke 有几条不能绕过的边界：
 
 ## 新增效果
 
+社区效果的目录、清单、运行样例、验证材料和 PR 审核要求见 [特效贡献指南](effects/README.md)（[中文](docs/user/effect-contributing.zh-CN.md)）。当前样例复用已有渲染器，新增算法仍需实现和测试，不支持清单执行任意外部代码。
+
 优先扩展效果注册表和声明式参数，而不是在命令处理器中加入专用分支。提交时请说明：
 
 - 效果 ID、适用对象和参数范围；
@@ -86,6 +89,8 @@ CutVoke 有几条不能绕过的边界：
 CutVoke 调用系统 FFmpeg，并不意味着任何 FFmpeg 构建都可以随软件一起分发。若 PR 加入二进制或第三方素材，请提供准确的许可证和来源链接。
 
 ## 文档
+
+界面翻译的消息键、占位符、RTL、效果元数据与验证方法见 [翻译贡献说明](docs/development/translations.zh-CN.md)（[English](docs/development/translations.md)）。新增界面文案时同步维护所有语言；不要翻译工程内容或 API 标识。
 
 文档应描述当前代码能做什么，不写内部验收编号、阶段汇报、测试数量或尚未确认的路线图。尽量使用短句和可执行示例。功能变化后，同步更新 README、命令帮助或接口 schema 中真正受影响的部分。
 

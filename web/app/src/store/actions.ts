@@ -1,3 +1,4 @@
+import { msg, tr } from "../i18n";
 /** 领域动作：封装 API 调用 + 状态派发。组件只调用这些动作，不含业务逻辑。 */
 
 import type { Dispatch } from "react";
@@ -64,7 +65,7 @@ export async function refreshProject(
     if (latestState && latestState.currentId !== projectId) return false;
     dispatch({ type: "PROJECT_LOADED", project });
     dispatch({ type: "SVC_UP", up: true });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "就绪" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("就绪") });
     return true;
   } catch (err) {
     if (latestState && latestState.currentId !== projectId) return false;
@@ -100,7 +101,7 @@ export async function createProject(
   try {
     const res = await apiCreate(opts);
     const pid = res.projectId;
-    if (!pid) throw new ApiFailure({ status: 500, code: "CREATE_FAILED", message: "创建工程未返回 projectId" });
+    if (!pid) throw new ApiFailure({ status: 500, code: "CREATE_FAILED", message: tr("创建工程未返回 projectId") });
     // 显示名优先级：用户输入名 → 输入的 projectId → 后端分配 id。
     const displayName = opts.name?.trim() || opts.projectId?.trim() || pid;
     dispatch({ type: "PROJECT_SELECTED", projectId: pid, name: displayName });
@@ -133,7 +134,7 @@ export async function renameProject(
     const renamed = (await listProjects()).map((p) => (p.id === projectId ? { ...p, name: trimmed } : p));
     dispatch({ type: "PROJECTS_LOADED", projects: renamed });
     dispatch({ type: "SYNC_STATE_SET", syncState: "saved" });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: `已重命名为 ${trimmed}` });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已重命名为 {0}", trimmed) });
     return true;
   } catch (err) {
     dispatch({ type: "SYNC_STATE_SET", syncState: "error" });
@@ -190,7 +191,7 @@ export async function runCommand(
     const err = {
       status: 400,
       code: "NO_PROJECT",
-      message: "请先创建或选择一个工程",
+      message: tr("请先创建或选择一个工程"),
     };
     if (autoShow) showError(dispatch, err);
     return { ok: false, error: err as ApiFailure };
@@ -201,7 +202,7 @@ export async function runCommand(
     const err = new ApiFailure({
       status: 423,
       code: "EDIT_LOCKED",
-      message: "Agent " + state.editLock.owner + " 正在编辑，页面暂时只读",
+      message: "Agent " + state.editLock.owner + tr(" 正在编辑，页面暂时只读"),
       retryable: true,
     });
     if (autoShow) {
@@ -276,7 +277,7 @@ export async function addTrack(
   const res = await runCommand(dispatch, state, "track.add", { trackId, kind });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: `已添加 ${kind === "video" ? "视频" : "音频"}轨道` });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已添加 {0}轨道", kind === "video" ? msg("视频") : msg("音频")) });
   }
   return res;
 }
@@ -304,7 +305,7 @@ export async function insertClip(
   const res = await runCommand(dispatch, state, "clip.insert", payload);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: `已添加片段 ${clipId}` });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已添加片段 {0}", clipId) });
   }
   return res;
 }
@@ -314,11 +315,11 @@ export async function undo(dispatch: Dispatch<EditorAction>, state: EditorState)
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
     dispatch({ type: "REDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已撤销" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已撤销") });
   } else if (res.error?.code === "UNDO_CONFLICT") {
     dispatch({ type: "UNDO_SET", blocked: true });
-    dispatch({ type: "HISTORY_HINT", hint: "后端无待撤销的历史（UNDO_CONFLICT，非命令缺失）" });
-    dispatch({ type: "STATUS_SET", severity: "warn", text: "撤销：无可撤销内容" });
+    dispatch({ type: "HISTORY_HINT", hint: tr("后端无待撤销的历史（UNDO_CONFLICT，非命令缺失）") });
+    dispatch({ type: "STATUS_SET", severity: "warn", text: msg("撤销：无可撤销内容") });
   } else if (res.error) {
     showError(dispatch, res.error);
   }
@@ -330,10 +331,10 @@ export async function redo(dispatch: Dispatch<EditorAction>, state: EditorState)
   if (res.ok) {
     dispatch({ type: "REDO_SET", blocked: false });
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已重做" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已重做") });
   } else if (res.error?.code === "UNDO_CONFLICT") {
     dispatch({ type: "REDO_SET", blocked: true });
-    dispatch({ type: "STATUS_SET", severity: "warn", text: "重做：无可重做内容" });
+    dispatch({ type: "STATUS_SET", severity: "warn", text: msg("重做：无可重做内容") });
   } else if (res.error) {
     showError(dispatch, res.error);
   }
@@ -357,13 +358,13 @@ export async function doExport(
   range?: ExportRange,
 ): Promise<ExportOutcome> {
   if (!state.currentId) {
-    const err = new ApiFailure({ status: 400, code: "NO_PROJECT", message: "请先选择工程" });
+    const err = new ApiFailure({ status: 400, code: "NO_PROJECT", message: tr("请先选择工程") });
     showError(dispatch, err);
     return { ok: false, error: err };
   }
   try {
     const job = await apiEnqueueExport(state.currentId, outPath, quality, range);
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "导出任务已加入队列，正在等待成片…" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("导出任务已加入队列，正在等待成片…") });
     return { ok: true, inFlight: true, jobId: job.jobId };
   } catch (err) {
     const f = showError(dispatch, err);
@@ -394,7 +395,7 @@ export async function pollEvents(
         dispatch({
           type: "STATUS_SET",
           severity: "warn",
-          text: "检测到其他端已修改该工程，已刷新为最新",
+          text: msg("检测到其他端已修改该工程，已刷新为最新"),
         });
       } else {
         dispatch({ type: "SYNC" });

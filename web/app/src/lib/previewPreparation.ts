@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import type { Project } from "../types/api";
 import { ApiFailure } from "./api";
 
@@ -35,7 +36,7 @@ export async function previewRequest<T>(path: string, signal?: AbortSignal, body
   const result = await response.json();
   if (!response.ok) throw new ApiFailure({
     status: response.status, code: result.error?.code || "PREVIEW_FAILED",
-    message: result.error?.message || "预览准备失败", retryable: true,
+    message: result.error?.message || tr("预览准备失败"), retryable: true,
   });
   return result as T;
 }

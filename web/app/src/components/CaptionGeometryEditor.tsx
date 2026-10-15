@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../i18n";
 /** 字幕几何精确编辑（H01 画布的补充）：x/y 归一化 0~1、scale 0.1~5、rotation -180~180。
     数值输入提交到 caption.update；越界由后端拒绝（runCommand 反馈错误），不前端夹紧。 */
 
@@ -25,6 +26,7 @@ function toForm(c: Caption): Form {
 }
 
 export function CaptionGeometryEditor({ caption, disabled = false }: { caption: Caption; disabled?: boolean }) {
+  useLocale();
   const { state, dispatch } = useEditor();
   const [form, setForm] = useState<Form>(() => toForm(caption));
   const captionSnapshot = useRef<string | null>(null);
@@ -50,7 +52,7 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
     const scale = Number(form.scale);
     const rotation = Number(form.rotation);
     if ([x, y, scale, rotation].some((v) => Number.isNaN(v))) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: "几何值须为数字" });
+      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("几何值须为数字") });
       return;
     }
     const update: Parameters<typeof updateCaption>[2] = { captionId: caption.id };
@@ -74,8 +76,7 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
   return (
     <div className="cv-style-edit__geom">
       <div className="cv-style-edit__hint">
-        <Move size={13} /> 画布位置与变换（归一化坐标 = 像素 / 画布显示尺寸）
-      </div>
+        <Move size={13} />{tr(" 画布位置与变换（归一化坐标 = 像素 / 画布显示尺寸）")}</div>
       <div className="cv-geom-grid">
         <Field label="X (0~1)">
           <input
@@ -85,7 +86,7 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
             min="0"
             max="1"
             value={form.x}
-            aria-label="字幕X坐标"
+            aria-label={tr("字幕X坐标")}
             disabled={disabled}
             onChange={set("x")}
             onBlur={commit}
@@ -100,14 +101,14 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
             min="0"
             max="1"
             value={form.y}
-            aria-label="字幕Y坐标"
+            aria-label={tr("字幕Y坐标")}
             disabled={disabled}
             onChange={set("y")}
             onBlur={commit}
             onKeyDown={onEnter}
           />
         </Field>
-        <Field label={<><Maximize2 size={12} /> 缩放 (0.1~5)</>}>
+        <Field label={<><Maximize2 size={12} />{tr(" 缩放 (0.1~5)")}</>}>
           <input
             className="cv-input"
             type="number"
@@ -115,14 +116,14 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
             min="0.1"
             max="5"
             value={form.scale}
-            aria-label="字幕缩放"
+            aria-label={tr("字幕缩放")}
             disabled={disabled}
             onChange={set("scale")}
             onBlur={commit}
             onKeyDown={onEnter}
           />
         </Field>
-        <Field label={<><RotateCw size={12} /> 旋转 (±180)</>}>
+        <Field label={<><RotateCw size={12} />{tr(" 旋转 (±180)")}</>}>
           <input
             className="cv-input"
             type="number"
@@ -130,7 +131,7 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
             min="-180"
             max="180"
             value={form.rotation}
-            aria-label="字幕旋转"
+            aria-label={tr("字幕旋转")}
             disabled={disabled}
             onChange={set("rotation")}
             onBlur={commit}

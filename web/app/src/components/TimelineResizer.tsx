@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../i18n";
 /** 时间线高度拖拽分隔条（剪映式）：上下拖动改变底部时间线高度。
     用 CSS 变量 --timeline-h 控制，范围 120px ~ 70% 容器高。 */
 
@@ -10,6 +11,7 @@ function readTimelineHeight() {
 }
 
 export function TimelineResizer({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) {
+  useLocale();
   const [dragging, setDragging] = useState(false);
   const [height, setHeight] = useState(readTimelineHeight);
   const [containerHeight, setContainerHeight] = useState(() => containerRef.current?.clientHeight || 500);
@@ -102,13 +104,13 @@ export function TimelineResizer({ containerRef }: { containerRef: React.RefObjec
       onKeyDown={onKeyDown}
       role="separator"
       aria-orientation="horizontal"
-      aria-label="拖动调整时间线高度"
+      aria-label={tr("拖动调整时间线高度")}
       aria-valuemin={120}
       aria-valuemax={maxHeight}
       aria-valuenow={Math.round(height)}
-      aria-valuetext={`时间线高度 ${Math.round(height)} 像素`}
+      aria-valuetext={tr("时间线高度 {0} 像素", Math.round(height))}
       tabIndex={0}
-      title="拖动调整时间线高度；方向键微调，Page Up/Down 快速调整"
+      title={tr("拖动调整时间线高度；方向键微调，Page Up/Down 快速调整")}
     >
       <span className="tl-resizer__grip" />
     </div>

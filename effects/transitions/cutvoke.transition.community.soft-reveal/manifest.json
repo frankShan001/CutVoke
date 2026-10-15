@@ -1,0 +1,46 @@
+{
+  "id": "cutvoke.transition.community.soft-reveal",
+  "version": "1.0.0",
+  "name": {
+    "en": "Soft Reveal", "zh-CN": "柔和揭幕", "zh-TW": "柔和揭幕",
+    "ja": "ソフトリビール", "ko": "부드러운 전환", "es": "Revelado suave",
+    "fr": "Révélation douce", "de": "Sanftes Einblenden", "pt-BR": "Revelação suave",
+    "ru": "Мягкое появление", "ar": "ظهور ناعم"
+  },
+  "description": {
+    "en": "A restrained dissolve for calm travel, portfolio and product edits. A contribution example using FFmpeg's existing fade transition.",
+    "zh-CN": "适合旅行、作品集与产品短片的克制叠化。贡献示例，复用 FFmpeg 已有 fade 转场。",
+    "zh-TW": "適合旅行、作品集與產品短片的柔和疊化。貢獻範例，使用 FFmpeg 現有的 fade 轉場。",
+    "ja": "旅行、ポートフォリオ、製品動画向けの控えめなディゾルブ。FFmpeg の既存 fade トランジションを使った投稿例です。",
+    "ko": "여행, 포트폴리오, 제품 영상에 어울리는 은은한 디졸브입니다. FFmpeg의 기존 fade 전환을 사용한 기여 예제입니다.",
+    "es": "Un fundido discreto para vídeos de viajes, portafolios y productos. Ejemplo de contribución que usa la transición fade de FFmpeg.",
+    "fr": "Un fondu discret pour les vidéos de voyage, de portfolio et de produit. Exemple de contribution utilisant la transition fade de FFmpeg.",
+    "de": "Eine dezente Überblendung für Reise-, Portfolio- und Produktvideos. Beitragsbeispiel mit dem vorhandenen fade-Übergang von FFmpeg.",
+    "pt-BR": "Uma transição suave para vídeos de viagem, portfólio e produtos. Exemplo de contribuição que usa a transição fade do FFmpeg.",
+    "ru": "Сдержанное растворение для видео о путешествиях, портфолио и продуктах. Пример вклада с готовым переходом fade из FFmpeg.",
+    "ar": "انتقال تدريجي هادئ لفيديوهات السفر وملفات الأعمال والمنتجات. مثال للمساهمة يستخدم انتقال fade الموجود في FFmpeg."
+  },
+  "category": "transition",
+  "subcategory": "叠化",
+  "author": {"name": "CutVoke contributors"},
+  "license": "MIT",
+  "inputs": ["video:a", "video:b"],
+  "output": "video",
+  "appliesTo": ["image", "video"],
+  "keywords": ["soft", "reveal", "calm", "柔和", "叠化"],
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "duration": {"type": "number", "minimum": 0.1, "maximum": 1.5, "default": 0.6, "unit": "s"}
+    },
+    "additionalProperties": false
+  },
+  "implementation": {"engine": "ffmpeg-xfade", "filter": "xfade", "transition": "fade"},
+  "preview": "A short, even-opacity dissolve between adjacent landscape shots. See preview.png and run the isolated demo for motion.",
+  "x-cutvoke-min-core": "0.1.0",
+  "x-cutvoke-contribution": {
+    "previewFile": "preview.png",
+    "testedWith": {"python": "3.12", "ffmpeg": "9.0.1", "platform": "Windows 11"},
+    "notes": "Compatibility metadata documents tested bounds; the loader does not enforce a version negotiation or load this PNG into the preset gallery. No external code is executed."
+  }
+}

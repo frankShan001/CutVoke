@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../i18n";
 /** 效果条面板（J01）：当前选中片段的完整效果栈（含转场）+ 个人预设管理。
  *
  * 顺序即渲染合成顺序（靠前先应用）。每行：中文名（注册表查，查不到显示 effectId）、
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export function EffectStackPanel({ active }: Props) {
+  const locale = useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const pid = state.currentId;
   const selectedClipId = state.selection?.clipId ?? null;
@@ -61,7 +63,7 @@ export function EffectStackPanel({ active }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [dispatch]);
+  }, [dispatch, locale]);
 
   const loadPresets = useCallback(async () => {
     if (!pid) {
@@ -89,12 +91,12 @@ export function EffectStackPanel({ active }: Props) {
       if (c && Array.isArray(c.effects)) return c.effects;
     }
     return [];
-  }, [selectedClipId, state.project]);
+  }, [selectedClipId, state.project, locale]);
 
   const visualEffectIds = useMemo(() => new Set(
     catalog.filter((spec) => ["fx", "filter", "color"].includes(spec.browseCategory))
       .map((spec) => spec.effectId),
-  ), [catalog]);
+  ), [catalog, locale]);
   const visualEffectCount = clipEffects.filter((effect) => visualEffectIds.has(effect.effectId)).length;
   const targetClips = useMemo(() => (
     (state.project?.sequence.tracks ?? [])
@@ -102,10 +104,10 @@ export function EffectStackPanel({ active }: Props) {
       .flatMap((track) => track.clips.filter((clip) => clip.role !== "sticker").map((clip, index) => ({
         id: clip.id,
         locked: !!track.locked,
-        label: `${track.id} · 第 ${index + 1} 段 · ${clip.assetRef.sourcePath.split(/[\\/]/).pop() || clip.id}`,
+        label: tr("{0} · 第 {1} 段 · {2}", track.id, index + 1, clip.assetRef.sourcePath.split(/[\\/]/).pop() || clip.id),
       })))
       .filter((item) => item.id !== selectedClipId)
-  ), [state.project, selectedClipId]);
+  ), [state.project, selectedClipId, locale]);
   const availableTargetIds = targetClips.filter((item) => !item.locked).map((item) => item.id);
 
   const anyBusy = !!busyId;
@@ -119,7 +121,7 @@ export function EffectStackPanel({ active }: Props) {
   const handleSavePreset = async () => {
     const name = presetName.trim();
     if (!name) {
-      showError(dispatch, { status: 400, code: "INVALID_ARGUMENT", message: "请先输入预设名称" });
+      showError(dispatch, { status: 400, code: "INVALID_ARGUMENT", message: tr("请先输入预设名称") });
       return;
     }
     if (!selectedClipId) return;
@@ -127,7 +129,7 @@ export function EffectStackPanel({ active }: Props) {
       showError(dispatch, {
         status: 400,
         code: "INVALID_ARGUMENT",
-        message: "当前片段没有可保存的效果",
+        message: tr("当前片段没有可保存的效果"),
       });
       return;
     }
@@ -140,16 +142,16 @@ export function EffectStackPanel({ active }: Props) {
   };
 
   return (
-    <Panel title="效果条" subtitle="顺序即渲染合成顺序">
+    <Panel title={tr("效果条")} subtitle={tr("顺序即渲染合成顺序")}>
       {selectedClipId && readOnly ? (
         <p className="cv-hint" role="status">
-          {state.editLock ? "Agent 正在编辑，效果栈暂时只读。" : "所选片段所在轨道已锁定，解锁后可调整效果。"}
+          {state.editLock ? tr("Agent 正在编辑，效果栈暂时只读。") : tr("所选片段所在轨道已锁定，解锁后可调整效果。")}
         </p>
       ) : null}
       {!selectedClipId ? (
-        <p className="cv-empty">先在时间线选中一个片段，这里会列出它的完整效果栈。</p>
+        <p className="cv-empty">{tr("先在时间线选中一个片段，这里会列出它的完整效果栈。")}</p>
       ) : clipEffects.length === 0 ? (
-        <p className="cv-empty">该片段还没有效果。到左侧「特效」或「滤镜」选择并应用到当前片段。</p>
+        <p className="cv-empty">{tr("该片段还没有效果。到左侧「特效」或「滤镜」选择并应用到当前片段。")}</p>
       ) : (
         <div className="effect-stack">
           {clipEffects.map((e, i) => (
@@ -211,35 +213,33 @@ export function EffectStackPanel({ active }: Props) {
       />
 
       <details className="effect-copy">
-        <summary>复制画面效果、滤镜与调色</summary>
-        <p className="cv-hint">
-          从当前片段复制 {visualEffectCount} 项画面效果及微调参数到目标片段。一次操作可以整体撤销。
-        </p>
+        <summary>{tr("复制画面效果、滤镜与调色")}</summary>
+        <p className="cv-hint">{tr("从当前片段复制 ")}{visualEffectCount}{tr(" 项画面效果及微调参数到目标片段。一次操作可以整体撤销。")}</p>
         {targetClips.length ? (
           <>
             <div className="effect-copy__toolbar">
               <Button variant="secondary" size="sm" disabled={copyReadOnly || anyBusy || !availableTargetIds.length}
-                onClick={() => setCopyTargets(availableTargetIds)}>全选可编辑片段</Button>
+                onClick={() => setCopyTargets(availableTargetIds)}>{tr("全选可编辑片段")}</Button>
               <Button variant="secondary" size="sm" disabled={anyBusy || !copyTargets.length}
-                onClick={() => setCopyTargets([])}>清空</Button>
+                onClick={() => setCopyTargets([])}>{tr("清空")}</Button>
             </div>
-            <div className="effect-copy__targets" role="group" aria-label="复制画面效果的目标片段">
+            <div className="effect-copy__targets" role="group" aria-label={tr("复制画面效果的目标片段")}>
               {targetClips.map((target) => (
                 <label key={target.id} className="effect-copy__target" title={target.label}>
                   <input type="checkbox" checked={copyTargets.includes(target.id)}
                     disabled={copyReadOnly || anyBusy || target.locked}
                     onChange={(event) => setCopyTargets((current) => event.target.checked
                       ? [...current, target.id] : current.filter((id) => id !== target.id))} />
-                  <span>{target.label}{target.locked ? "（轨道已锁定）" : ""}</span>
+                  <span>{target.label}{target.locked ? tr("（轨道已锁定）") : ""}</span>
                 </label>
               ))}
             </div>
             <div className="effect-copy__toolbar">
-              <Select aria-label="复制方式" value={copyMode}
+              <Select aria-label={tr("复制方式")} value={copyMode}
                 onChange={(event) => setCopyMode(event.target.value as "replace" | "merge")}
                 disabled={copyReadOnly || anyBusy}>
-                <option value="replace">替换目标画面效果</option>
-                <option value="merge">保留其它画面效果</option>
+                <option value="replace">{tr("替换目标画面效果")}</option>
+                <option value="merge">{tr("保留其它画面效果")}</option>
               </Select>
               <Button variant="secondary" size="sm"
                 disabled={!selectedClipId || copyReadOnly || anyBusy || !visualEffectCount ||
@@ -254,28 +254,24 @@ export function EffectStackPanel({ active }: Props) {
                     if (result.ok) setCopyTargets([]);
                   });
                 }}>
-                {busyId === "copyVisual" ? <Loader2 size={12} className="cv-spin" /> : <Copy size={12} />}
-                复制到 {copyTargets.filter((id) => availableTargetIds.includes(id)).length} 段
-              </Button>
+                {busyId === "copyVisual" ? <Loader2 size={12} className="cv-spin" /> : <Copy size={12} />}{tr("复制到 ")}{copyTargets.filter((id) => availableTargetIds.includes(id)).length}{tr(" 段")}</Button>
             </div>
           </>
-        ) : <p className="cv-hint">工程中还没有其它视频或图片片段。</p>}
+        ) : <p className="cv-hint">{tr("工程中还没有其它视频或图片片段。")}</p>}
       </details>
 
       <div className="inspector__sep" />
 
       <div className="inspector__subrow" style={{ gap: 6, alignItems: "center" }}>
         <span className="inspector__key">
-          <Save size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />
-          存为预设
-        </span>
+          <Save size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />{tr("存为预设")}</span>
       </div>
       <div className="effect-preset-save">
         <TextInput
           value={presetName}
           onChange={(e) => setPresetName(e.target.value)}
-          placeholder="预设名称"
-          aria-label="预设名称"
+          placeholder={tr("预设名称")}
+          aria-label={tr("预设名称")}
           onKeyDown={(e) => {
             if (e.key === "Enter") void handleSavePreset();
           }}
@@ -285,24 +281,17 @@ export function EffectStackPanel({ active }: Props) {
           size="sm"
           disabled={!selectedClipId || clipEffects.length === 0 || busyId === "save"}
           onClick={() => void handleSavePreset()}
-          aria-label="保存当前效果栈为预设"
+          aria-label={tr("保存当前效果栈为预设")}
         >
-          {busyId === "save" ? <Loader2 size={12} className="cv-spin" /> : <Bookmark size={12} />}
-          保存
-        </Button>
+          {busyId === "save" ? <Loader2 size={12} className="cv-spin" /> : <Bookmark size={12} />}{tr("保存")}</Button>
       </div>
-      <p className="cv-hint" style={{ marginTop: 4 }}>
-        保存后可在任意片段上复用这组效果（含参数）。
-      </p>
+      <p className="cv-hint" style={{ marginTop: 4 }}>{tr("保存后可在任意片段上复用这组效果（含参数）。")}</p>
 
       <div className="inspector__subrow" style={{ gap: 6, marginTop: 6, alignItems: "center" }}>
         <span className="inspector__key">
-          <Copy size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />
-          个人预设
-        </span>
+          <Copy size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />{tr("个人预设")}</span>
         <span className="cv-mono" style={{ fontSize: 10.5, color: "var(--text-faint)" }}>
-          {presets.length} 个
-        </span>
+          {presets.length}{tr(" 个")}</span>
       </div>
       <PresetList
         presets={presets}
@@ -324,9 +313,7 @@ export function EffectStackPanel({ active }: Props) {
         }}
       />
 
-      <p className="cv-hint" style={{ marginTop: 8 }}>
-        效果栈从上到下依次叠加；旁路的效果仍保留但暂不参与渲染。
-      </p>
+      <p className="cv-hint" style={{ marginTop: 8 }}>{tr("效果栈从上到下依次叠加；旁路的效果仍保留但暂不参与渲染。")}</p>
     </Panel>
   );
 }

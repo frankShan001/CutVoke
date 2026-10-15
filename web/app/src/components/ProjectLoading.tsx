@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Film, LoaderCircle, TriangleAlert } from "lucide-react";
 import { useEditor } from "../store/editor";
@@ -57,7 +58,7 @@ export function useProjectPreparation() {
     const failedDecode = (event: Event) => {
       if ((event as CustomEvent).detail?.projectId === projectId) {
         clearTimeout(decodeTimer);
-        setError("连续预览无法解码，请重试加载。");
+        setError(tr("连续预览无法解码，请重试加载。"));
       }
     };
     window.addEventListener("cutvoke:prepared-preview-error", failedDecode);
@@ -69,7 +70,7 @@ export function useProjectPreparation() {
         if (signal.aborted) return;
         setJob(current); setPhase(current.phase); setProgress(Math.floor(current.progress * 0.9));
         if (current.state === "failed" || current.state === "cancelled") {
-          throw new Error(current.error || "预览准备已取消，请重试。");
+          throw new Error(current.error || tr("预览准备已取消，请重试。"));
         }
         if (current.state === "completed") break;
         await pause(signal);
@@ -82,15 +83,15 @@ export function useProjectPreparation() {
       const url = `/api/v1/preview-jobs/${jobId}/media`;
       setPhase("decoding"); setProgress(98);
       dispatch({ type: "PREPARED_PREVIEW_SET", preview: { projectId, contentKey, url } });
-      decodeTimer = window.setTimeout(() => setError("首帧解码超时，请重试加载。"), 15000);
+      decodeTimer = window.setTimeout(() => setError(tr("首帧解码超时，请重试加载。")), 15000);
     })().catch((failure: unknown) => {
       if (!signal.aborted && !jobId && failure instanceof ApiFailure && failure.status === 404) {
         dispatch({ type: "PROJECT_OPEN_READY", projectId });
         dispatch({ type: "STATUS_SET", severity: "warn",
-          text: "重启 CutVoke 服务后可启用完整预览加载，当前使用分段预览" });
+          text: msg("重启 CutVoke 服务后可启用完整预览加载，当前使用分段预览") });
         return;
       }
-      if (!signal.aborted) setError(failure instanceof Error ? failure.message : "预览准备失败");
+      if (!signal.aborted) setError(failure instanceof Error ? failure.message : tr("预览准备失败"));
     }).finally(() => {
       // Let submission return its ID even after navigation so cancellation owns the right job.
       if (signal.aborted && jobId) void previewRequest(`preview-jobs/${jobId}/cancel`, undefined, {}).catch(() => {});
@@ -120,16 +121,17 @@ export function useProjectPreparation() {
 }
 
 export function ProjectLoading({ preparation }: { preparation: ReturnType<typeof useProjectPreparation> }) {
+  useLocale();
   const { state } = useEditor({ subscribeToClock: false });
   const { progress, phase, job, error } = preparation;
   const missingSource = error?.match(/source file missing for clip .+?:\s*(.+)$/i);
   const readableError = missingSource
-    ? `素材文件不存在：${missingSource[1]}。恢复文件后可重试，或进入工程重新链接素材。` : error;
+    ? tr("素材文件不存在：{0}。恢复文件后可重试，或进入工程重新链接素材。", missingSource[1]) : error;
   const titles: Record<string, string> = {
-    reading: "正在读取工程", checking: "正在检查预览缓存", queued: "等待预览准备",
-    rendering: "正在准备完整预览", assembling: "正在合成连续预览",
-    verifying: "正在检查预览结果", ready: "预览准备完成",
-    loading: "正在加载连续预览", decoding: "正在显示首帧",
+    reading: tr("正在读取工程"), checking: tr("正在检查预览缓存"), queued: tr("等待预览准备"),
+    rendering: tr("正在准备完整预览"), assembling: tr("正在合成连续预览"),
+    verifying: tr("正在检查预览结果"), ready: tr("预览准备完成"),
+    loading: tr("正在加载连续预览"), decoding: tr("正在显示首帧"),
   };
   const stage = ["reading", "checking", "queued"].includes(phase) ? 0
     : ["loading", "decoding", "ready"].includes(phase) ? 2 : 1;
@@ -139,35 +141,35 @@ export function ProjectLoading({ preparation }: { preparation: ReturnType<typeof
         <div className={`project-loading__icon${error ? " project-loading__icon--error" : ""}`}>
           {error ? <TriangleAlert size={32} /> : <Film size={32} />}
         </div>
-        <span className="project-loading__eyebrow">CUTVOKE · 工程准备</span>
-        <h1 id="project-loading-title">{error ? "工程预览准备失败" : titles[phase] || "正在准备工程"}</h1>
+        <span className="project-loading__eyebrow">{tr("CUTVOKE · 工程准备")}</span>
+        <h1 id="project-loading-title">{error ? tr("工程预览准备失败") : titles[phase] || tr("正在准备工程")}</h1>
         <p className="project-loading__name">{state.projectName || state.currentId}</p>
         {error ? <p className="project-loading__error" role="alert">{readableError}</p> : (
           <>
-            <div className="project-loading__progress" role="progressbar" aria-label="工程加载进度"
+            <div className="project-loading__progress" role="progressbar" aria-label={tr("工程加载进度")}
               aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
               <div style={{ width: `${progress}%` }} />
             </div>
             <div className="project-loading__detail" role="status" aria-live="polite">
-              <span>{job?.cached ? "正在复用已准备的预览" : job && job.totalWindows > 0
-                ? `已准备 ${job.completedWindows} / ${job.totalWindows} 段` : "正在读取时间线与素材"}</span>
+              <span>{job?.cached ? tr("正在复用已准备的预览") : job && job.totalWindows > 0
+                ? tr("已准备 {0} / {1} 段", job.completedWindows, job.totalWindows) : tr("正在读取时间线与素材")}</span>
               <span className="cv-mono">{progress}%</span>
             </div>
             <ol className="project-loading__steps">
-              {["读取工程", "准备完整预览", "加载画面"].map((label, index) => (
+              {[tr("读取工程"), tr("准备完整预览"), tr("加载画面")].map((label, index) => (
                 <li key={label} data-active={index === stage} data-done={index < stage}>
                   {index < stage ? <Check size={15} /> : index === stage ? <LoaderCircle size={15} /> : <span />}
                   {label}
                 </li>
               ))}
             </ol>
-            <p className="project-loading__hint">首次打开需要生成完整预览，复杂工程准备时间会更长。完成后可直接播放，再次打开会复用缓存。</p>
+            <p className="project-loading__hint">{tr("首次打开需要生成完整预览，复杂工程准备时间会更长。完成后可直接播放，再次打开会复用缓存。")}</p>
           </>
         )}
         <div className="project-loading__actions">
-          <button className="tool-btn" autoFocus onClick={preparation.back}>返回工程列表</button>
-          {error && state.project ? <button className="tool-btn" onClick={preparation.repair}>进入工程修复</button> : null}
-          {error ? <button className="tool-btn tool-btn--primary" onClick={preparation.retry}>重试加载</button> : null}
+          <button className="tool-btn" autoFocus onClick={preparation.back}>{tr("返回工程列表")}</button>
+          {error && state.project ? <button className="tool-btn" onClick={preparation.repair}>{tr("进入工程修复")}</button> : null}
+          {error ? <button className="tool-btn tool-btn--primary" onClick={preparation.retry}>{tr("重试加载")}</button> : null}
         </div>
       </div>
     </section>

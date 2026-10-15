@@ -1,0 +1,20 @@
+{
+  "loadingTitle": "CutVoke を起動中",
+  "loadingService": "ローカル編集サービスを起動しています…",
+  "loadingPrivacy": "プロジェクトとプレビューキャッシュはこのコンピューターに保存されます",
+  "loadingProgress": "起動中",
+  "startupTitle": "CutVoke を起動できません",
+  "startupSummary": "ローカル編集サービスを起動できませんでした。以下の診断情報を確認し、CutVoke を再起動してください。",
+  "serviceTitle": "ローカルサービスが停止しました",
+  "serviceSummary": "ローカル編集サービスが停止しました。CutVoke を再起動してください。診断情報とログの場所は以下のとおりです。",
+  "requestFailure": "ローカルサービスへのリクエストに失敗しました（HTTP {0}）",
+  "invalidClient": "無効なクライアントリクエスト",
+  "startupExit": "ローカルサービスを起動できませんでした（終了コード {0}）",
+  "startupTimeout": "ローカルサービスの起動がタイムアウトしました",
+  "serviceExitCode": "サービス終了コード：{0}",
+  "logLocation": "ログの場所：{0}",
+  "technicalDetails": "技術診断（原文）",
+  "close": "閉じる",
+  "chooseCache": "キャッシュの保存先を選択",
+  "chooseFolder": "フォルダーを選択"
+}

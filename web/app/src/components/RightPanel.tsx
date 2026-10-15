@@ -1,3 +1,5 @@
+import { tr, useLocale } from "../i18n";
+import { readingOrderKey } from "../i18n/navigation";
 /** 右侧上下文面板：选中片段 → 片段属性 + 转场 + 变速；选中轨道 → 轨道属性；
  *  无选中 → 工程信息 + 字幕。用 tab 切换。J01 新增「资源库」「效果条」。 */
 
@@ -20,6 +22,7 @@ import { LOCATE_PREFLIGHT_ISSUE, type LocatePreflightIssueEvent } from "../lib/p
 type Tab = "inspect" | "transition" | "speed" | "stack" | "audio";
 
 export function RightPanel() {
+  const locale = useLocale();
   const { state } = useEditor({ subscribeToClock: false });
   const [tab, setTab] = useState<Tab>("inspect");
   const panelScroll = useRef<HTMLDivElement>(null);
@@ -51,16 +54,17 @@ export function RightPanel() {
   const hasTrack = !!state.selection?.trackId && !state.selection?.clipId;
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode; always?: boolean }[] = [
-    { id: "inspect", label: hasClip ? "片段属性" : hasTrack ? "轨道属性" : "工程信息", icon: <SlidersHorizontal size={13} /> },
-    { id: "speed", label: "变速", icon: <Gauge size={13} /> },
-    { id: "transition", label: "转场", icon: <ArrowRightLeft size={13} /> },
-    { id: "stack", label: "效果条", icon: <ListOrdered size={13} />, always: true },
-    { id: "audio", label: "音频分析", icon: <AudioLines size={13} />, always: true },
+    { id: "inspect", label: hasClip ? tr("片段属性") : hasTrack ? tr("轨道属性") : tr("工程信息"), icon: <SlidersHorizontal size={13} /> },
+    { id: "speed", label: tr("变速"), icon: <Gauge size={13} /> },
+    { id: "transition", label: tr("转场"), icon: <ArrowRightLeft size={13} /> },
+    { id: "stack", label: tr("效果条"), icon: <ListOrdered size={13} />, always: true },
+    { id: "audio", label: tr("音频分析"), icon: <AudioLines size={13} />, always: true },
   ];
   const onTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const key = readingOrderKey(event.key, locale);
     let nextIndex: number | null = null;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") nextIndex = (index + 1) % tabs.length;
-    else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+    if (key === "ArrowRight" || key === "ArrowDown") nextIndex = (index + 1) % tabs.length;
+    else if (key === "ArrowLeft" || key === "ArrowUp") {
       nextIndex = (index - 1 + tabs.length) % tabs.length;
     } else if (event.key === "Home") nextIndex = 0;
     else if (event.key === "End") nextIndex = tabs.length - 1;
@@ -73,7 +77,7 @@ export function RightPanel() {
 
   return (
     <div className="zone-right__inner">
-      <div className="right-tabs" role="tablist" aria-label="工程编辑面板">
+      <div className="right-tabs" role="tablist" aria-label={tr("工程编辑面板")}>
         {tabs.map((t, index) => (
           <button
             key={t.id}

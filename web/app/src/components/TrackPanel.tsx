@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../i18n";
 /** 轨道控制面板：轨道列表（可删）+ 添加轨道 + 片段插入（智能时长探测）。 */
 
 import { useState } from "react";
@@ -11,6 +12,7 @@ import { ApiFailure } from "../lib/api";
 import { probeMedia } from "../lib/mediaApi";
 
 export function TrackPanel() {
+  useLocale();
   const { state, dispatch } = useEditor();
   const tracks = state.project?.sequence.tracks || [];
   const [kind, setKind] = useState<"video" | "audio">("video");
@@ -36,7 +38,7 @@ export function TrackPanel() {
         dispatch({
           type: "STATUS_SET",
           severity: "warn",
-          text: `轨道 ${trackId} 非空：请先删除其片段再删轨道`,
+          text: msg("轨道 {0} 非空：请先删除其片段再删轨道", trackId),
         });
       }
     });
@@ -44,23 +46,23 @@ export function TrackPanel() {
 
   const handleInsert = async () => {
     if (!trackSel) {
-      showError(dispatch, invalid("请先选择目标轨道"));
+      showError(dispatch, invalid(tr("请先选择目标轨道")));
       return;
     }
     if (!srcPath.trim()) {
-      showError(dispatch, invalid("请填写源路径 sourcePath"));
+      showError(dispatch, invalid(tr("请填写源路径 sourcePath")));
       return;
     }
     const timelineStart = trySecsToRational(tlStart);
     if (!timelineStart) {
-      showError(dispatch, invalid("时间线起点无效：须为秒数字"));
+      showError(dispatch, invalid(tr("时间线起点无效：须为秒数字")));
       return;
     }
 
     let timelineEnd = trySecsToRational(tlEnd);
     let sourceStart = trySecsToRational(srcStart);
     if (!timelineEnd) {
-      showError(dispatch, invalid("时间线终点无效：须为秒数字"));
+      showError(dispatch, invalid(tr("时间线终点无效：须为秒数字")));
       return;
     }
 
@@ -73,23 +75,23 @@ export function TrackPanel() {
           const startSecs = Number(timelineStart.num) / Number(timelineStart.den);
           timelineEnd = trySecsToRational(startSecs + dur);
           sourceStart = trySecsToRational(0);
-          dispatch({ type: "STATUS_SET", severity: "ok", text: `已探测时长 ${dur.toFixed(3)}s，片段到 ${(startSecs + dur).toFixed(3)}s` });
+          dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已探测时长 {0}s，片段到 {1}s", dur.toFixed(3), (startSecs + dur).toFixed(3)) });
         }
       } else {
         dispatch({
           type: "STATUS_SET",
           severity: "warn",
-          text: `未能探测时长（${probe.message}），按 10s 导入`,
+          text: msg("未能探测时长（{0}），按 10s 导入", probe.message),
         });
       }
     }
 
     if (!timelineEnd || !sourceStart) {
-      showError(dispatch, invalid("时间输入无效"));
+      showError(dispatch, invalid(tr("时间输入无效")));
       return;
     }
     if (rationalSecs(timelineEnd) <= rationalSecs(timelineStart)) {
-      showError(dispatch, invalid("时间线终点必须大于起点"));
+      showError(dispatch, invalid(tr("时间线终点必须大于起点")));
       return;
     }
 
@@ -110,22 +112,20 @@ export function TrackPanel() {
 
   return (
     <>
-      <Panel title="轨道" subtitle="track.add / track.remove">
+      <Panel title={tr("轨道")} subtitle="track.add / track.remove">
         <div className="cv-row" style={{ alignItems: "flex-end" }}>
-          <Field label="轨道类型">
+          <Field label={tr("轨道类型")}>
             <Select value={kind} onChange={(e) => setKind(e.target.value as "video" | "audio")}>
-              <option value="video">视频轨道</option>
-              <option value="audio">音频轨道</option>
+              <option value="video">{tr("视频轨道")}</option>
+              <option value="audio">{tr("音频轨道")}</option>
             </Select>
           </Field>
           <Button variant="primary" onClick={handleAddTrack} style={{ height: 30 }}>
-            <Plus size={14} />
-            添加
-          </Button>
+            <Plus size={14} />{tr("添加")}</Button>
         </div>
         <div className="cv-tracks" style={{ marginTop: 8 }}>
           {tracks.length === 0 ? (
-            <span className="cv-empty cv-empty--tight">暂无轨道</span>
+            <span className="cv-empty cv-empty--tight">{tr("暂无轨道")}</span>
           ) : (
             tracks.map((t) => (
               <div key={t.id} className="cv-track-row">
@@ -134,12 +134,12 @@ export function TrackPanel() {
                 <span className={`cv-badge ${t.kind === "audio" ? "cv-badge--audio" : "cv-badge--video"}`}>
                   {t.kind}
                 </span>
-                <span className="cv-mono cv-track-row__count">{t.clips.length > 0 ? `${t.clips.length} 片段` : "空"}</span>
+                <span className="cv-mono cv-track-row__count">{t.clips.length > 0 ? tr("{0} 片段", t.clips.length) : tr("空")}</span>
                 <button
                   className="cv-btn cv-btn--sm cv-btn--ghost cv-track-row__del"
                   onClick={() => handleRemoveTrack(t.id)}
-                  title="删除轨道（仅空轨）"
-                  aria-label={`删除轨道 ${t.id}`}
+                  title={tr("删除轨道（仅空轨）")}
+                  aria-label={tr("删除轨道 {0}", t.id)}
                 >
                   <Trash2 size={13} />
                 </button>
@@ -147,14 +147,14 @@ export function TrackPanel() {
             ))
           )}
         </div>
-        <p className="cv-hint">仅可删除空轨；非空轨道需先删除其上片段。</p>
+        <p className="cv-hint">{tr("仅可删除空轨；非空轨道需先删除其上片段。")}</p>
       </Panel>
 
-      <Panel title="插入片段" subtitle="clip.insert · 智能时长">
-        <Field label="目标轨道">
+      <Panel title={tr("插入片段")} subtitle={tr("clip.insert · 智能时长")}>
+        <Field label={tr("目标轨道")}>
           <Select value={trackSel} onChange={(e) => setTrackSel(e.target.value)}>
             <option value="">
-              {trackOptions.length ? "选择轨道…" : "（先添加轨道）"}
+              {trackOptions.length ? tr("选择轨道…") : tr("（先添加轨道）")}
             </option>
             {trackOptions.map((t) => (
               <option key={t.id} value={t.id}>
@@ -163,30 +163,28 @@ export function TrackPanel() {
             ))}
           </Select>
         </Field>
-        <Field label="源路径 sourcePath">
+        <Field label={tr("源路径 sourcePath")}>
           <TextInput
             value={srcPath}
             onChange={(e) => setSrcPath(e.target.value)}
-            placeholder="本地媒体绝对路径"
+            placeholder={tr("本地媒体绝对路径")}
           />
         </Field>
         <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 6 }}>
           <button
             className={`cv-chip ${autoProbe ? "cv-chip--on" : ""}`}
             onClick={() => setAutoProbe((v) => !v)}
-            title="探测素材真实时长，替代默认 10s"
+            title={tr("探测素材真实时长，替代默认 10s")}
           >
-            <Crosshair size={11} />
-            探测时长（auto）
-          </button>
-          <span className="cv-hint" style={{ margin: 0 }}>{autoProbe ? "用真实时长" : "用手动时间"}</span>
+            <Crosshair size={11} />{tr("探测时长（auto）")}</button>
+          <span className="cv-hint" style={{ margin: 0 }}>{autoProbe ? tr("用真实时长") : tr("用手动时间")}</span>
         </div>
         <div style={{ marginTop: 8 }}>
           <Row>
-            <Field label="时间线起点 (s)">
+            <Field label={tr("时间线起点 (s)")}>
               <TextInput type="number" step="any" value={tlStart} onChange={(e) => setTlStart(e.target.value)} />
             </Field>
-            <Field label="时间线终点 (s)">
+            <Field label={tr("时间线终点 (s)")}>
               <TextInput type="number" step="any" value={tlEnd} onChange={(e) => setTlEnd(e.target.value)} />
             </Field>
           </Row>
@@ -194,16 +192,16 @@ export function TrackPanel() {
         <div style={{ marginTop: 4, display: "flex", justifyContent: "space-between" }}>
           <span className="cv-hint" style={{ marginTop: 0 }}>
             {tlStartPreview
-              ? `起点 ${tlStartPreview.num}/${tlStartPreview.den}${tlEndPreview ? ` · 终点 ${tlEndPreview.num}/${tlEndPreview.den}` : ""}`
-              : "起点/终点需为秒数字"}
+              ? tr("起点 {0}/{1}{2}", tlStartPreview.num, tlStartPreview.den, tlEndPreview ? tr(" · 终点 {0}/{1}", tlEndPreview.num, tlEndPreview.den) : "")
+              : tr("起点/终点需为秒数字")}
           </span>
         </div>
         <div style={{ marginTop: 4 }}>
           <Row>
-            <Field label="源起点 (s)">
+            <Field label={tr("源起点 (s)")}>
               <TextInput type="number" step="any" value={srcStart} onChange={(e) => setSrcStart(e.target.value)} />
             </Field>
-            <Field label="源">
+            <Field label={tr("源")}>
               <div
                 className="cv-mono"
                 style={{
@@ -217,19 +215,15 @@ export function TrackPanel() {
                   color: srcPreview ? "var(--text-dim)" : "var(--err)",
                 }}
               >
-                {srcPreview ? `${srcPreview.num}/${srcPreview.den}` : "无效"}
+                {srcPreview ? `${srcPreview.num}/${srcPreview.den}` : tr("无效")}
               </div>
             </Field>
           </Row>
         </div>
 
         <Button variant="primary" full onClick={handleInsert} style={{ marginTop: 10 }}>
-          <AudioLines size={14} />
-          插入片段
-        </Button>
-        <p className="cv-hint">
-          秒输入提交前自动转有理数 num/den（已约分）；探测失败时按 10s 导入。
-        </p>
+          <AudioLines size={14} />{tr("插入片段")}</Button>
+        <p className="cv-hint">{tr("秒输入提交前自动转有理数 num/den（已约分）；探测失败时按 10s 导入。")}</p>
       </Panel>
     </>
   );

@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../i18n";
 /** Agent 活动抽屉（D10）：拉取事件 outbox，展示 Agent / 人工操作历史，
     支持点击改动对象跳转，以及按批次「撤销到此」。纯前端 UI，事件走 listEvents，
     撤销走现有 undo()（store/actions.ts），不触碰后端。 */
@@ -22,22 +23,22 @@ import type { ChangedEntity, Project, ProjectEvent } from "../types/api";
 const AGENT_KINDS = new Set(["agent", "http", "mcp", "cli"]);
 
 const ENTITY_LABEL: Record<string, string> = {
-  clip: "片段",
-  track: "轨道",
-  caption: "字幕",
-  marker: "标记",
-  project: "工程",
-  asset: "素材",
-  effect: "效果",
-  transition: "转场",
+  get clip() { return tr("片段"); },
+  get track() { return tr("轨道"); },
+  get caption() { return tr("字幕"); },
+  get marker() { return tr("标记"); },
+  get project() { return tr("工程"); },
+  get asset() { return tr("素材"); },
+  get effect() { return tr("效果"); },
+  get transition() { return tr("转场"); },
 };
 
 const CHANGE_VERB: Record<string, string> = {
-  added: "添加",
-  removed: "删除",
-  updated: "更新",
-  inserted: "插入",
-  created: "创建",
+  get added() { return tr("添加"); },
+  get removed() { return tr("删除"); },
+  get updated() { return tr("更新"); },
+  get inserted() { return tr("插入"); },
+  get created() { return tr("创建"); },
 };
 
 const MAX_UNDO_STEPS = 20;
@@ -50,7 +51,7 @@ function isAgentActor(actor?: { kind: string; id: string }): boolean {
 /** 把一条 changedEntity 转成人类可读摘要，如「添加片段 clip_xxx」。 */
 function entitySummary(e: ChangedEntity): string {
   const label = ENTITY_LABEL[e.type] || e.type;
-  const verb = CHANGE_VERB[e.change] || e.change || "变更";
+  const verb = CHANGE_VERB[e.change] || e.change || tr("变更");
   return `${verb}${label} ${e.id}`;
 }
 
@@ -63,6 +64,7 @@ function findClipTrack(project: Project | null, clipId: string): string | null {
 }
 
 export function AgentActivityPanel() {
+  const locale = useLocale();
   const { state, dispatch } = useEditor();
   const open = state.agentPanelOpen;
 
@@ -89,7 +91,7 @@ export function AgentActivityPanel() {
       setError(null);
       setLastSync(Date.now());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "事件加载失败");
+      setError(err instanceof Error ? err.message : tr("事件加载失败"));
     } finally {
       setLoading(false);
     }
@@ -111,23 +113,23 @@ export function AgentActivityPanel() {
       const trackId = findClipTrack(state.project, entity.id);
       if (trackId) {
         dispatch({ type: "SELECTION_SET", selection: { trackId, clipId: entity.id } });
-        dispatch({ type: "STATUS_SET", severity: "ok", text: `已跳转到片段 ${entity.id}` });
+        dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已跳转到片段 {0}", entity.id) });
       } else {
         dispatch({
           type: "STATUS_SET",
           severity: "warn",
-          text: `未找到片段 ${entity.id}（可能已被删除）`,
+          text: msg("未找到片段 {0}（可能已被删除）", entity.id),
         });
       }
     } else if (entity.type === "track") {
       dispatch({ type: "SELECTION_SET", selection: { trackId: entity.id } });
-      dispatch({ type: "STATUS_SET", severity: "ok", text: `已选中轨道 ${entity.id}` });
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已选中轨道 {0}", entity.id) });
     } else {
       const label = ENTITY_LABEL[entity.type] || entity.type;
       dispatch({
         type: "STATUS_SET",
         severity: "ok",
-        text: `已定位到${label} ${entity.id}（见对应面板）`,
+        text: msg("已定位到{0} {1}（见对应面板）", label, entity.id),
       });
     }
   };
@@ -150,7 +152,7 @@ export function AgentActivityPanel() {
             dispatch({
               type: "STATUS_SET",
               severity: "warn",
-              text: "已无可撤销内容，停止批量撤销",
+              text: msg("已无可撤销内容，停止批量撤销"),
             });
           }
           break;
@@ -161,13 +163,13 @@ export function AgentActivityPanel() {
         dispatch({
           type: "STATUS_SET",
           severity: "warn",
-          text: "已达最大撤销步数（20），停止",
+          text: msg("已达最大撤销步数（20），停止"),
         });
       } else {
         dispatch({
           type: "STATUS_SET",
           severity: "ok",
-          text: `已批量撤销 ${steps} 步至 revision ${target}`,
+          text: msg("已批量撤销 {0} 步至 revision {1}", steps, target),
         });
       }
     } finally {
@@ -184,13 +186,13 @@ export function AgentActivityPanel() {
   return (
     <>
       <div className="agent-overlay" onClick={close} aria-hidden="true" />
-      <aside className="agent-panel" aria-label="Agent 活动">
+      <aside className="agent-panel" aria-label={tr("Agent 活动")}>
         <header className="agent-panel__head">
           <div className="agent-panel__title">
             <Activity size={15} />
-            <span>Agent 活动</span>
+            <span>{tr("Agent 活动")}</span>
             <span className="agent-panel__count">
-              {events.length} 条 · Agent {agentCount}
+              {events.length}{tr(" 条 · Agent ")}{agentCount}
             </span>
           </div>
           <div className="agent-panel__actions">
@@ -199,8 +201,8 @@ export function AgentActivityPanel() {
               size="sm"
               onClick={() => void load()}
               disabled={loading}
-              aria-label="刷新Agent活动"
-              title="刷新"
+              aria-label={tr("刷新Agent活动")}
+              title={tr("刷新")}
             >
               <RefreshCw size={14} className={loading ? "agent-spin" : ""} />
             </Button>
@@ -208,8 +210,8 @@ export function AgentActivityPanel() {
               variant="ghost"
               size="sm"
               onClick={close}
-              aria-label="关闭Agent活动"
-              title="关闭"
+              aria-label={tr("关闭Agent活动")}
+              title={tr("关闭")}
             >
               <X size={15} />
             </Button>
@@ -218,13 +220,13 @@ export function AgentActivityPanel() {
 
         <div className="agent-panel__body">
           {!state.currentId ? (
-            <span className="agent-empty">请先选择一个工程</span>
+            <span className="agent-empty">{tr("请先选择一个工程")}</span>
           ) : error ? (
             <span className="agent-empty agent-empty--err">{error}</span>
           ) : loading && events.length === 0 ? (
-            <span className="agent-loading">加载活动…</span>
+            <span className="agent-loading">{tr("加载活动…")}</span>
           ) : events.length === 0 ? (
-            <span className="agent-empty">暂无活动记录</span>
+            <span className="agent-empty">{tr("暂无活动记录")}</span>
           ) : (
             <ul className="agent-event-list">
               {events.map((ev) => {
@@ -238,7 +240,7 @@ export function AgentActivityPanel() {
                         }`}
                       >
                         {agent ? <Bot size={12} /> : <User size={12} />}
-                        {agent ? "Agent" : "人工"}
+                        {agent ? "Agent" : tr("人工")}
                       </span>
                       <span className="agent-event__rev cv-mono">R{Number(ev.revision)}</span>
                       <span className="agent-event__type cv-mono">{ev.type}</span>
@@ -256,8 +258,8 @@ export function AgentActivityPanel() {
                             type="button"
                             className="agent-entity"
                             onClick={() => handleNavigate(ce)}
-                            aria-label={`跳转到${entitySummary(ce)}`}
-                            title="点击定位到该对象"
+                            aria-label={tr("跳转到{0}", entitySummary(ce))}
+                            title={tr("点击定位到该对象")}
                           >
                             <ArrowRightLeft size={12} />
                             <span>{entitySummary(ce)}</span>
@@ -272,12 +274,10 @@ export function AgentActivityPanel() {
                         size="sm"
                         onClick={() => void handleUndoTo(ev)}
                         disabled={busyRev === ev.eventId}
-                        aria-label={`撤销到此_R${Number(ev.revision)}`}
-                        title={`连续撤销回到 revision ${ev.previousRevision}`}
+                        aria-label={tr("撤销到此_R{0}", Number(ev.revision))}
+                        title={tr("连续撤销回到 revision {0}", ev.previousRevision)}
                       >
-                        <Undo2 size={13} />
-                        撤销到此
-                      </Button>
+                        <Undo2 size={13} />{tr("撤销到此")}</Button>
                     </div>
                   </li>
                 );
@@ -288,15 +288,13 @@ export function AgentActivityPanel() {
 
         <footer className="agent-panel__foot">
           {lastSync ? (
-            <span className="agent-panel__sync">
-              更新于 {new Date(lastSync).toLocaleTimeString("zh-CN", { hour12: false })}
+            <span className="agent-panel__sync">{tr("更新于 ")}{new Date(lastSync).toLocaleTimeString(locale, { hour12: false })}
             </span>
           ) : (
-            <span className="agent-panel__sync">尚未加载</span>
+            <span className="agent-panel__sync">{tr("尚未加载")}</span>
           )}
           <span className="agent-panel__hint">
-            <Cpu size={11} /> 事件 outbox · 撤销走 history.undo
-          </span>
+            <Cpu size={11} />{tr(" 事件 outbox · 撤销走 history.undo")}</span>
         </footer>
       </aside>
     </>

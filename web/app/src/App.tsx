@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "./i18n";
 /** CutVoke 编辑器 应用装配层。
     顶层按 store.view 切换两个视图（不用 history 路由，vite.config.ts:10）：
       home   → 工程首页（最近工程 / 新建 / 重命名）
@@ -42,6 +43,7 @@ const SHORTCUT_IGNORE_SELECTOR = [
 ].join(", ");
 
 function AppShell() {
+  useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const preparation = useProjectPreparation();
   const shortcutStateRef = useRef(state);
@@ -157,7 +159,7 @@ function AppShell() {
         const track = latest.project?.sequence.tracks.find((item) => item.id === selection.trackId);
         event.preventDefault();
         if (track?.locked) {
-          dispatch({ type: "STATUS_SET", severity: "warn", text: "轨道已锁定，解锁后才能删除" });
+          dispatch({ type: "STATUS_SET", severity: "warn", text: msg("轨道已锁定，解锁后才能删除") });
           return;
         }
         const current = getLatestState() || latest;
@@ -214,7 +216,7 @@ function AppShell() {
         })}
       />
       <WorkspaceBoundary onFailure={preparation.repair}>
-        <Suspense fallback={<div className="workspace" role="status">编辑器加载中…</div>}>
+        <Suspense fallback={<div className="workspace" role="status">{tr("编辑器加载中…")}</div>}>
           <Workspace leftPanelOpen={leftPanelOpen} rightPanelOpen={rightPanelOpen} />
         </Suspense>
       </WorkspaceBoundary>
@@ -226,9 +228,9 @@ function AppShell() {
       {state.editLock ? (
         <div className="agent-edit-lock" role="status" aria-live="polite">
           <div className="agent-edit-lock__card">
-            <strong>Agent 正在编辑</strong>
-            <span>{state.editLock.owner} · 页面暂时只读</span>
-            <small>工程内容会继续更新，Agent 完成后页面将自动恢复编辑。</small>
+            <strong>{tr("Agent 正在编辑")}</strong>
+            <span>{state.editLock.owner}{tr(" · 页面暂时只读")}</span>
+            <small>{tr("工程内容会继续更新，Agent 完成后页面将自动恢复编辑。")}</small>
           </div>
         </div>
       ) : null}
@@ -239,6 +241,7 @@ function AppShell() {
 }
 
 export default function App() {
+  useLocale();
   return (
     <EditorProvider>
       <EditorBridge />

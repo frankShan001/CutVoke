@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../i18n";
 /** Drag, resize, or rotate the selected sticker in the preview canvas.
  *  The gesture is local until release, so one gesture is one undo step.
  */
@@ -21,6 +22,7 @@ const clamp = (value: number, low: number, high: number) => Math.min(high, Math.
 const roundAngle = (value: number) => Math.round(value * 10) / 10;
 
 export function StickerCanvasOverlay() {
+  useLocale();
   const { state, dispatch } = useEditor();
   const project = state.project;
   const track = project?.sequence.tracks.find((item) => item.id === state.selection?.trackId);
@@ -168,19 +170,19 @@ export function StickerCanvasOverlay() {
   return (
     <svg ref={svgRef} className="player__sticker-overlay"
       viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet"
-      aria-label="画布贴纸控件" onPointerMove={move} onPointerUp={finish}
+      aria-label={tr("画布贴纸控件")} onPointerMove={move} onPointerUp={finish}
       onPointerCancel={cancel}>
       <rect className="player__sticker-outline" x={current.x} y={current.y}
         width={current.size} height={current.size}
         pointerEvents={editable ? "all" : "none"}
-        tabIndex={editable ? 0 : -1} role="button" aria-label="移动贴纸"
+        tabIndex={editable ? 0 : -1} role="button" aria-label={tr("移动贴纸")}
         onPointerDown={(event) => begin(event, "move")}
         onKeyDown={(event) => keyMove(event, "move")} />
       <circle className="player__sticker-handle"
         cx={current.x + current.size} cy={current.y + current.size}
         r={Math.max(7, unit * 0.012)}
         pointerEvents={editable ? "all" : "none"}
-        tabIndex={editable ? 0 : -1} role="button" aria-label="调整贴纸大小"
+        tabIndex={editable ? 0 : -1} role="button" aria-label={tr("调整贴纸大小")}
         onPointerDown={(event) => begin(event, "resize")}
         onKeyDown={(event) => keyMove(event, "resize")} />
       <line className="player__sticker-rotation-guide"
@@ -188,11 +190,11 @@ export function StickerCanvasOverlay() {
       <circle className="player__sticker-rotation-handle"
         cx={rotationX} cy={rotationY} r={Math.max(7, unit * 0.012)}
         pointerEvents={editable ? "all" : "none"}
-        tabIndex={editable ? 0 : -1} role="button" aria-label="旋转贴纸"
-        aria-valuetext={`${roundAngle(current.rotation)} 度`}
+        tabIndex={editable ? 0 : -1} role="button" aria-label={tr("旋转贴纸")}
+        aria-valuetext={tr("{0} 度", roundAngle(current.rotation))}
         onPointerDown={(event) => begin(event, "rotate")}
         onKeyDown={(event) => keyMove(event, "rotate")}>
-        <title>拖动旋转；按住 Shift 以 15° 吸附</title>
+        <title>{tr("拖动旋转；按住 Shift 以 15° 吸附")}</title>
       </circle>
     </svg>
   );

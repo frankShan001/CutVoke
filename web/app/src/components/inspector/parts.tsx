@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../../i18n";
 /** 检查器复用小组件（J01 拆分自 Inspector.tsx，保持行为与 aria 契约不变）。 */
 import { useState } from "react";
 import { Plus } from "lucide-react";
@@ -16,6 +17,7 @@ export function EffChip({
   effectId: string;
   clipId: string;
 }) {
+  useLocale();
   const { state, dispatch } = useEditor();
   const [busy, setBusy] = useState(false);
   const onAdd = () => {
@@ -27,7 +29,7 @@ export function EffChip({
     );
   };
   return (
-    <button className="cv-chip" onClick={onAdd} title={`添加${label}`}>
+    <button className="cv-chip" onClick={onAdd} title={tr("添加{0}", label)}>
       <Plus size={10} /> {label}
     </button>
   );

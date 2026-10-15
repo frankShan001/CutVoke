@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 /** Import a 3D .cube LUT into CutVoke's managed local media directory. */
 
 export interface ImportedLut {
@@ -14,10 +15,10 @@ export async function uploadLut(file: File): Promise<
   { kind: "ok"; data: ImportedLut } | { kind: "error"; message: string }
 > {
   if (!file.name.toLowerCase().endsWith(".cube")) {
-    return { kind: "error", message: "请选择 3D .cube LUT 文件" };
+    return { kind: "error", message: tr("请选择 3D .cube LUT 文件") };
   }
   if (!file.size || file.size > 16 * 1024 * 1024) {
-    return { kind: "error", message: "LUT 文件须在 1 字节到 16 MiB 之间" };
+    return { kind: "error", message: tr("LUT 文件须在 1 字节到 16 MiB 之间") };
   }
   try {
     const query = new URLSearchParams({ name: file.name });
@@ -29,10 +30,10 @@ export async function uploadLut(file: File): Promise<
     const result = await response.json() as ImportedLut | { error?: { message?: string } };
     if (!response.ok) {
       return { kind: "error", message: (result as { error?: { message?: string } }).error?.message
-        || `导入失败（HTTP ${response.status}）` };
+        || tr("导入失败（HTTP {0}）", response.status) };
     }
     return { kind: "ok", data: result as ImportedLut };
   } catch (error) {
-    return { kind: "error", message: error instanceof Error ? error.message : "LUT 上传失败" };
+    return { kind: "error", message: error instanceof Error ? error.message : tr("LUT 上传失败") };
   }
 }

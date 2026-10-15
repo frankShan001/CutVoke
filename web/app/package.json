@@ -9,6 +9,9 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
+    "i18n:extract": "node scripts/check-i18n.mjs --extract",
+    "i18n:check": "node scripts/check-i18n.mjs",
+    "test:i18n": "node --test scripts/i18n.test.mjs",
     "test:e2e": "npm run build && playwright test"
   },
   "dependencies": {

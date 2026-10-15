@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../i18n";
 /** 当前工程面板（左区）：显示/重命名当前工程 + 返回工程首页。
     工程的创建、列表、打开已移到首页（HomeView）；此处不再直显 projectId。 */
 
@@ -8,6 +9,7 @@ import { useEditor } from "../store/editor";
 import { renameProject } from "../store/actions";
 
 export function ProjectPanel() {
+  useLocale();
   const { state, dispatch } = useEditor();
   const [name, setName] = useState(state.projectName);
 
@@ -29,7 +31,7 @@ export function ProjectPanel() {
       dispatch({
         type: "STATUS_SET",
         severity: "warn",
-        text: `Agent ${state.editLock.owner} 正在编辑，页面暂时只读`,
+        text: msg("Agent {0} 正在编辑，页面暂时只读", state.editLock.owner),
       });
       return;
     }
@@ -37,8 +39,8 @@ export function ProjectPanel() {
   };
 
   return (
-    <Panel title="当前工程">
-      <Field label="工程名称">
+    <Panel title={tr("当前工程")}>
+      <Field label={tr("工程名称")}>
         <TextInput
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -47,9 +49,9 @@ export function ProjectPanel() {
             if (e.key === "Escape") setName(state.projectName || "");
           }}
           onBlur={commit}
-          placeholder="给这个工程起个名字"
+          placeholder={tr("给这个工程起个名字")}
           disabled={!state.currentId || Boolean(state.editLock)}
-          aria-label="当前工程名称"
+          aria-label={tr("当前工程名称")}
         />
       </Field>
       <div style={{ marginTop: 8 }}>
@@ -58,22 +60,18 @@ export function ProjectPanel() {
           full
           onClick={commit}
           disabled={!state.currentId || !dirty || Boolean(state.editLock)}
-          aria-label="保存工程名称"
+          aria-label={tr("保存工程名称")}
         >
-          <Pencil size={14} />
-          保存名称
-        </Button>
+          <Pencil size={14} />{tr("保存名称")}</Button>
       </div>
       <div style={{ marginTop: 8 }}>
         <Button
           variant="ghost"
           full
           onClick={() => dispatch({ type: "VIEW_SET", view: "home" })}
-          aria-label="返回工程列表"
+          aria-label={tr("返回工程列表")}
         >
-          <ArrowLeft size={14} />
-          返回工程列表
-        </Button>
+          <ArrowLeft size={14} />{tr("返回工程列表")}</Button>
       </div>
     </Panel>
   );

@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 /** 单帧降级：一次只渲染一帧，队列只保留最新位置；短暂失败自动重试。 */
 
 import { useCallback, useEffect, useRef, useState, type Dispatch, type RefObject } from "react";
@@ -119,7 +120,7 @@ export function usePreviewFrame(opts: {
         cancelQueued();
         clearFrame();
         setFrameState("error");
-        setFrameError("尚未选择工程");
+        setFrameError(tr("尚未选择工程"));
         return;
       }
       const request = inFlightRef.current;

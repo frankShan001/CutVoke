@@ -1,6 +1,7 @@
+import { tr, useLocale } from "../i18n";
 /** 片段右键菜单：split / remove / speed / effect.add。受控弹层。 */
 
-import type { Dispatch } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type Dispatch } from "react";
 import { Scissors, Trash2, Gauge, Wand2, Copy } from "lucide-react";
 import type { Clip } from "../types/api";
 import { getLatestState } from "../store/actions";
@@ -29,6 +30,20 @@ export function ClipContextMenu({
   onClose: () => void;
   dispatch: Dispatch<EditorAction>;
 }) {
+  const locale = useLocale();
+  const menu = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ x: target.x, y: target.y });
+  useLayoutEffect(() => {
+    const rect = menu.current?.getBoundingClientRect();
+    if (!rect) return;
+    setPosition({ x: Math.max(8, Math.min(target.x, innerWidth - rect.width - 8)),
+      y: Math.max(8, Math.min(target.y, innerHeight - rect.height - 8)) });
+  }, [target.x, target.y, locale]);
+  useEffect(() => {
+    const keydown = (event: KeyboardEvent) => { if (event.key === "Escape") { event.preventDefault(); onClose(); } };
+    window.addEventListener("keydown", keydown, true);
+    return () => window.removeEventListener("keydown", keydown, true);
+  }, [onClose]);
   useSessionAssets();
   const st = getLatestState();
   if (!st || !st.currentId) return null;
@@ -90,37 +105,32 @@ export function ClipContextMenu({
           onClose();
         }}
       />
-      <div className="ctx-menu" style={{ left: target.x, top: target.y }}>
+      <div ref={menu} className="ctx-menu" dir={locale === "ar" ? "rtl" : "ltr"}
+        style={{ left: position.x, top: position.y }}>
         <div className="ctx-menu__label">
-          {clip ? assetDisplayName(clip.assetRef) : "片段"}
+          {clip ? assetDisplayName(clip.assetRef) : tr("片段")}
         </div>
         <button className="ctx-menu__item" onClick={handleSplit}>
-          <Scissors size={14} /> 在播放头分割
-        </button>
+          <Scissors size={14} />{tr(" 在播放头分割")}</button>
         <button className="ctx-menu__item" onClick={handleDuplicate}>
-          <Copy size={14} /> 复制片段
-        </button>
+          <Copy size={14} />{tr(" 复制片段")}</button>
         <button className="ctx-menu__item ctx-menu__item--danger" onClick={handleRemove}>
-          <Trash2 size={14} /> 删除片段
-        </button>
+          <Trash2 size={14} />{tr(" 删除片段")}</button>
         <div className="ctx-menu__sep" />
-        <div className="ctx-menu__label">速度</div>
+        <div className="ctx-menu__label">{tr("速度")}</div>
         <button className="ctx-menu__item" onClick={() => handleSpeed(0.5)}><Gauge size={14} /> 0.5x</button>
         <button className="ctx-menu__item" onClick={() => handleSpeed(1)}><Gauge size={14} /> 1.0x</button>
         <button className="ctx-menu__item" onClick={() => handleSpeed(1.5)}><Gauge size={14} /> 1.5x</button>
         <button className="ctx-menu__item" onClick={() => handleSpeed(2)}><Gauge size={14} /> 2.0x</button>
-        <button className="ctx-menu__item" onClick={() => handleSpeed(-1)}><Gauge size={14} /> 倒放 (-1x)</button>
+        <button className="ctx-menu__item" onClick={() => handleSpeed(-1)}><Gauge size={14} />{tr(" 倒放 (-1x)")}</button>
         <div className="ctx-menu__sep" />
-        <div className="ctx-menu__label">效果</div>
+        <div className="ctx-menu__label">{tr("效果")}</div>
         <button className="ctx-menu__item" onClick={() => handleEffect(BUILTIN_TRANSFORM_ID)}>
-          <Wand2 size={14} /> 画面变换
-        </button>
+          <Wand2 size={14} />{tr(" 画面变换")}</button>
         <button className="ctx-menu__item" onClick={() => handleEffect(BUILTIN_COLOR_ID)}>
-          <Wand2 size={14} /> 基础调色
-        </button>
+          <Wand2 size={14} />{tr(" 基础调色")}</button>
         <button className="ctx-menu__item" onClick={() => handleEffect(BUILTIN_CROSSFADE_ID)}>
-          <Wand2 size={14} /> 叠化转场
-        </button>
+          <Wand2 size={14} />{tr(" 叠化转场")}</button>
       </div>
     </>
   );

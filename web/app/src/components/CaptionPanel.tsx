@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../i18n";
 /** 字幕面板：添加（文本 + 起止秒→rational）、列出当前字幕、删除、样式编辑、SRT 导入/导出。
     数据来源：project.sequence.captions（caption.add/update/remove）。
     SRT 走专用 HTTP 端点：GET /projects/{id}/captions.srt、POST /projects/{id}/captions/import。 */
@@ -34,6 +35,7 @@ interface CaptionDraft {
 }
 
 export function CaptionPanel() {
+  useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const captions = state.project?.sequence.captions || [];
   const readOnly = Boolean(state.editLock);
@@ -179,7 +181,7 @@ export function CaptionPanel() {
       dispatch({
         type: "STATUS_SET",
         severity: "warn",
-        text: "当前字幕有未保存的文字或时间修改，请先保存",
+        text: msg("当前字幕有未保存的文字或时间修改，请先保存"),
       });
       return;
     }
@@ -218,7 +220,7 @@ export function CaptionPanel() {
       dispatch({
         type: "STATUS_SET",
         severity: "warn",
-        text: "当前字幕有未保存的修改，请先保存或放弃后再新建",
+        text: msg("当前字幕有未保存的修改，请先保存或放弃后再新建"),
       });
       return;
     }
@@ -229,21 +231,21 @@ export function CaptionPanel() {
 
   const handleAdd = () => {
     if (!state.currentId) {
-      showError(dispatch, invalid("请先选择工程"));
+      showError(dispatch, invalid(tr("请先选择工程")));
       return;
     }
     if (!text.trim()) {
-      showError(dispatch, invalid("字幕文本不能为空"));
+      showError(dispatch, invalid(tr("字幕文本不能为空")));
       return;
     }
     const s = trySecsToRational(start);
     const e = trySecsToRational(end);
     if (!s || !e) {
-      showError(dispatch, invalid("起止时间须为秒数字，如 1.5 / 3"));
+      showError(dispatch, invalid(tr("起止时间须为秒数字，如 1.5 / 3")));
       return;
     }
     if (rationalToSecs(e) <= rationalToSecs(s)) {
-      showError(dispatch, invalid("结束时间必须大于开始时间"));
+      showError(dispatch, invalid(tr("结束时间必须大于开始时间")));
       return;
     }
     void addCaption(dispatch, state, { text: text.trim(), start: s, end: e }).then((res) => {
@@ -318,17 +320,17 @@ export function CaptionPanel() {
     if (!selected) return;
     const nextText = captionDraft.text.trim();
     if (!nextText) {
-      showError(dispatch, invalid("字幕文本不能为空"));
+      showError(dispatch, invalid(tr("字幕文本不能为空")));
       return;
     }
     const nextStart = trySecsToRational(captionDraft.start);
     const nextEnd = trySecsToRational(captionDraft.end);
     if (!nextStart || !nextEnd) {
-      showError(dispatch, invalid("起止时间须为秒数字，如 1.5 / 3"));
+      showError(dispatch, invalid(tr("起止时间须为秒数字，如 1.5 / 3")));
       return;
     }
     if (rationalToSecs(nextEnd) <= rationalToSecs(nextStart)) {
-      showError(dispatch, invalid("结束时间必须大于开始时间"));
+      showError(dispatch, invalid(tr("结束时间必须大于开始时间")));
       return;
     }
 
@@ -350,7 +352,7 @@ export function CaptionPanel() {
       });
       captionDraftPreviewRef.current = null;
       dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-      dispatch({ type: "STATUS_SET", severity: "ok", text: "字幕没有改动" });
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("字幕没有改动") });
       return;
     }
     void updateCaption(dispatch, state, update).then((res) => {
@@ -375,7 +377,7 @@ export function CaptionPanel() {
       start: String(rationalToSecs(selected.start)),
       end: String(rationalToSecs(selected.end)),
     });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已放弃未保存的字幕修改" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已放弃未保存的字幕修改") });
   };
 
   // ---- SRT 导入/导出 ----
@@ -384,7 +386,7 @@ export function CaptionPanel() {
     dispatch({
       type: "STATUS_SET",
       severity: "warn",
-      text: `Agent ${state.editLock.owner} 正在编辑，页面暂时只读`,
+      text: msg("Agent {0} 正在编辑，页面暂时只读", state.editLock.owner),
     });
     return true;
   };
@@ -402,7 +404,7 @@ export function CaptionPanel() {
     // 避免这个非 command 入口给人一种“仍可改工程”的错觉。
     if (rejectWhileAgentEditing()) return;
     if (!state.currentId) {
-      showError(dispatch, invalid("请先选择工程"));
+      showError(dispatch, invalid(tr("请先选择工程")));
       return;
     }
     try {
@@ -424,7 +426,7 @@ export function CaptionPanel() {
           new ApiFailure({
             status: res.status,
             code: "IMPORT_FAILED",
-            message: data?.error?.message || "SRT 导入失败",
+            message: data?.error?.message || tr("SRT 导入失败"),
           }),
         );
         return;
@@ -434,7 +436,7 @@ export function CaptionPanel() {
       dispatch({
         type: "STATUS_SET",
         severity: "ok",
-        text: `已导入 ${data.imported ?? 0} 条字幕`,
+        text: msg("已导入 {0} 条字幕", data.imported ?? 0),
       });
     } catch (err) {
       showError(dispatch, err);
@@ -443,7 +445,7 @@ export function CaptionPanel() {
 
   const handleExport = async () => {
     if (!state.currentId) {
-      showError(dispatch, invalid("请先选择工程"));
+      showError(dispatch, invalid(tr("请先选择工程")));
       return;
     }
     try {
@@ -454,7 +456,7 @@ export function CaptionPanel() {
       if (!res.ok) {
         showError(
           dispatch,
-          new ApiFailure({ status: res.status, code: "EXPORT_FAILED", message: "SRT 导出失败" }),
+          new ApiFailure({ status: res.status, code: "EXPORT_FAILED", message: tr("SRT 导出失败") }),
         );
         return;
       }
@@ -468,7 +470,7 @@ export function CaptionPanel() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      dispatch({ type: "STATUS_SET", severity: "ok", text: "已导出 SRT" });
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已导出 SRT") });
     } catch (err) {
       showError(dispatch, err);
     }
@@ -494,23 +496,19 @@ export function CaptionPanel() {
     setBatchBusy(false);
     if (result.ok) {
       dispatch({ type: "STATUS_SET", severity: "ok",
-        text: `已将当前字幕样式应用到 ${batchTargets.length} 条字幕，可一次撤销` });
+        text: msg("已将当前字幕样式应用到 {0} 条字幕，可一次撤销", batchTargets.length) });
     } else if (result.error) showError(dispatch, result.error);
   };
 
   return (
-    <Panel title="字幕" subtitle="识别、导入与逐条编辑">
+    <Panel title={tr("字幕")} subtitle={tr("识别、导入与逐条编辑")}>
       <SpeechRecognitionPanel />
       <div className="cv-srt-row">
         <Row>
-          <Button variant="secondary" size="sm" onClick={handleImportClick} aria-label="导入SRT" disabled={readOnly}>
-            <Upload size={14} />
-            导入 SRT
-          </Button>
-          <Button variant="secondary" size="sm" onClick={handleExport} aria-label="导出SRT">
-            <Download size={14} />
-            导出 SRT
-          </Button>
+          <Button variant="secondary" size="sm" onClick={handleImportClick} aria-label={tr("导入SRT")} disabled={readOnly}>
+            <Upload size={14} />{tr("导入 SRT")}</Button>
+          <Button variant="secondary" size="sm" onClick={handleExport} aria-label={tr("导出SRT")}>
+            <Download size={14} />{tr("导出 SRT")}</Button>
         </Row>
         <input
           ref={fileInputRef}
@@ -530,20 +528,18 @@ export function CaptionPanel() {
           disabled={readOnly}
           style={{ marginTop: 8 }}
         >
-          <Plus size={14} />
-          新建字幕
-        </Button>
+          <Plus size={14} />{tr("新建字幕")}</Button>
       ) : (
         <>
-          <Field label="字幕文本">
-            <TextInput value={text} onChange={(e) => setText(e.target.value)} placeholder="如：开场字幕" disabled={readOnly} />
+          <Field label={tr("字幕文本")}>
+            <TextInput value={text} onChange={(e) => setText(e.target.value)} placeholder={tr("如：开场字幕")} disabled={readOnly} />
           </Field>
           <div style={{ marginTop: 8 }}>
             <Row>
-              <Field label="开始 (s)">
+              <Field label={tr("开始 (s)")}>
                 <TextInput type="number" step="any" value={start} onChange={(e) => setStart(e.target.value)} disabled={readOnly} />
               </Field>
-              <Field label="结束 (s)">
+              <Field label={tr("结束 (s)")}>
                 <TextInput type="number" step="any" value={end} onChange={(e) => setEnd(e.target.value)} disabled={readOnly} />
               </Field>
             </Row>
@@ -552,26 +548,24 @@ export function CaptionPanel() {
             <span className="cv-hint" style={{ marginTop: 0 }}>
               {startPreview && endPreview
                 ? `[${startPreview.num}/${startPreview.den} → ${endPreview.num}/${endPreview.den})`
-                : "起止需为秒数字"}
+                : tr("起止需为秒数字")}
             </span>
           </div>
           <Button variant="primary" full onClick={handleAdd} style={{ marginTop: 8 }} disabled={readOnly}>
-            <Plus size={14} />
-            添加字幕
-          </Button>
+            <Plus size={14} />{tr("添加字幕")}</Button>
         </>
       )}
 
       {captions.length > 8 ? (
-        <input className="cv-input" aria-label="搜索工程字幕" placeholder="搜索字幕文字"
+        <input className="cv-input" aria-label={tr("搜索工程字幕")} placeholder={tr("搜索字幕文字")}
           value={captionSearch} onChange={(event) => setCaptionSearch(event.target.value)}
           style={{ width: "100%", marginTop: 10 }} />
       ) : null}
       <div className="cv-tracks" style={{ marginTop: 10 }}>
         {captions.length === 0 ? (
-          <span className="cv-empty cv-empty--tight">暂无字幕</span>
+          <span className="cv-empty cv-empty--tight">{tr("暂无字幕")}</span>
         ) : visibleCaptions.length === 0 ? (
-          <span className="cv-empty cv-empty--tight">没有匹配的字幕</span>
+          <span className="cv-empty cv-empty--tight">{tr("没有匹配的字幕")}</span>
         ) : (
           visibleCaptions.map((c) => (
             <div
@@ -580,7 +574,7 @@ export function CaptionPanel() {
               onClick={() => selectCaption(c.id)}
               role="button"
               tabIndex={0}
-              aria-label={`选择字幕 ${c.id}`}
+              aria-label={tr("选择字幕 {0}", c.id)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -602,8 +596,8 @@ export function CaptionPanel() {
                   handleRemove(c.id);
                 }}
                 disabled={readOnly}
-                title="删除字幕"
-                aria-label={`删除字幕 ${c.id}`}
+                title={tr("删除字幕")}
+                aria-label={tr("删除字幕 {0}", c.id)}
               >
                 <Trash2 size={13} />
               </button>
@@ -614,15 +608,14 @@ export function CaptionPanel() {
 
       {selected ? (
         <div className="cv-style-edit">
-          <div className="cv-style-edit__hint">
-            编辑字幕：{selected.text.slice(0, 16) || "（空文本）"}
+          <div className="cv-style-edit__hint">{tr("编辑字幕：")}{selected.text.slice(0, 16) || tr("（空文本）")}
           </div>
-          <Field label="字幕文字">
+          <Field label={tr("字幕文字")}>
             <textarea
               className="cv-input"
               rows={3}
               value={captionDraft.text}
-              aria-label="编辑字幕文字"
+              aria-label={tr("编辑字幕文字")}
               disabled={readOnly}
               onChange={(e) => updateCaptionDraft({ ...captionDraft, text: e.target.value })}
               onKeyDown={(e) => {
@@ -634,49 +627,45 @@ export function CaptionPanel() {
             />
           </Field>
           <Row>
-            <Field label="开始 (s)">
+            <Field label={tr("开始 (s)")}>
               <TextInput
                 type="number"
                 step="any"
                 value={captionDraft.start}
-                aria-label="编辑字幕开始时间"
+                aria-label={tr("编辑字幕开始时间")}
                 disabled={readOnly}
                 onChange={(e) => updateCaptionDraft({ ...captionDraft, start: e.target.value })}
               />
             </Field>
-            <Field label="结束 (s)">
+            <Field label={tr("结束 (s)")}>
               <TextInput
                 type="number"
                 step="any"
                 value={captionDraft.end}
-                aria-label="编辑字幕结束时间"
+                aria-label={tr("编辑字幕结束时间")}
                 disabled={readOnly}
                 onChange={(e) => updateCaptionDraft({ ...captionDraft, end: e.target.value })}
               />
             </Field>
           </Row>
-          <Button variant="primary" size="sm" full onClick={commitCaptionDraft} disabled={readOnly}>
-            保存字幕文字与时间
-          </Button>
+          <Button variant="primary" size="sm" full onClick={commitCaptionDraft} disabled={readOnly}>{tr("保存字幕文字与时间")}</Button>
           {captionDraftChanged ? (
-            <Button variant="secondary" size="sm" full onClick={discardCaptionDraft}>
-              放弃未保存修改
-            </Button>
+            <Button variant="secondary" size="sm" full onClick={discardCaptionDraft}>{tr("放弃未保存修改")}</Button>
           ) : null}
           <span className="cv-hint">
             {readOnly && captionDraftChanged
-              ? "Agent 编辑中，画布显示工程版本；未保存草稿已保留，解锁后继续预览。"
+              ? tr("Agent 编辑中，画布显示工程版本；未保存草稿已保留，解锁后继续预览。")
               : captionDraftChanged
-                ? "画布正在预览未保存草稿；保存后写入工程。"
-                : "可一次改文字和时码；文字框按 Ctrl/⌘ + Enter 也可保存。"}
+                ? tr("画布正在预览未保存草稿；保存后写入工程。")
+                : tr("可一次改文字和时码；文字框按 Ctrl/⌘ + Enter 也可保存。")}
           </span>
           <CaptionGeometryEditor caption={selected} disabled={readOnly} />
-          <Field label="字体">
-            <select className="cv-select" aria-label="字幕字体" value={form.fontFamily}
+          <Field label={tr("字体")}>
+            <select className="cv-select" aria-label={tr("字幕字体")} value={form.fontFamily}
               disabled={readOnly}
               onChange={(event) => commitStyle({ fontFamily: event.target.value as StyleForm["fontFamily"] })}>
-              <option value="Noto Sans SC">思源黑体 · Noto Sans SC</option>
-              <option value="Noto Serif SC">思源宋体 · Noto Serif SC</option>
+              <option value="Noto Sans SC">{tr("思源黑体 · Noto Sans SC")}</option>
+              <option value="Noto Serif SC">{tr("思源宋体 · Noto Serif SC")}</option>
             </select>
           </Field>
           <FontStylePanel captionId={selectedId} disabled={readOnly} />
@@ -684,15 +673,13 @@ export function CaptionPanel() {
             <Button
               variant={selected.wordHighlightColor ? "primary" : "ghost"}
               size="sm"
-              aria-label="逐词高亮"
+              aria-label={tr("逐词高亮")}
               aria-pressed={Boolean(selected.wordHighlightColor)}
               disabled={readOnly || !selected.words?.length}
               onClick={() => commitStyle({ wordHighlightColor: selected.wordHighlightColor
                 ? "" : (form.wordHighlightColor || "#FFD54A") })}
-            >
-              逐词高亮
-            </Button>
-            <input type="color" className="cv-input" aria-label="逐词高亮颜色"
+            >{tr("逐词高亮")}</Button>
+            <input type="color" className="cv-input" aria-label={tr("逐词高亮颜色")}
               value={form.wordHighlightColor || "#FFD54A"}
               disabled={readOnly || !selected.words?.length || !selected.wordHighlightColor}
               onChange={(event) => setStyleField({ wordHighlightColor: event.target.value })}
@@ -700,43 +687,39 @@ export function CaptionPanel() {
             />
             <span className="cv-hint">
               {selected.words?.length
-                ? `${selected.words.length} 个词级时间点；可与逐字入场同时使用。更改字幕文字后需重新识别时间。`
-                : "此字幕没有词级时间点。可从本地语音识别结果中创建带词时间的字幕。"}
+                ? tr("{0} 个词级时间点；可与逐字入场同时使用。更改字幕文字后需重新识别时间。", selected.words.length)
+                : tr("此字幕没有词级时间点。可从本地语音识别结果中创建带词时间的字幕。")}
             </span>
           </div>
           {batchTargets.length > 0 ? (
             <div className="cv-caption-batch">
-              <span className="cv-hint">将这条字幕已保存的文字样式复制到
-                {captionSearch.trim() ? `搜索结果中的其它 ${batchTargets.length} 条` : `其它全部 ${batchTargets.length} 条`}；
-                不修改文字、时码、位置或动画。</span>
+              <span className="cv-hint">{tr("将这条字幕已保存的文字样式复制到")}{captionSearch.trim() ? tr("搜索结果中的其它 {0} 条", batchTargets.length) : tr("其它全部 {0} 条", batchTargets.length)}{tr("； 不修改文字、时码、位置或动画。")}</span>
               <Button variant="secondary" size="sm" full
-                onClick={() => void applyStyleToVisible()} disabled={readOnly || batchBusy}>
-                批量应用文字样式
-              </Button>
+                onClick={() => void applyStyleToVisible()} disabled={readOnly || batchBusy}>{tr("批量应用文字样式")}</Button>
             </div>
           ) : null}
           <CaptionAnimationSection caption={selected} disabled={readOnly} />
           <Row>
-            <Field label="字号">
+            <Field label={tr("字号")}>
               <TextInput
                 type="number"
                 step="1"
                 min="1"
                 value={form.fontSize}
-                aria-label="字幕字号"
+                aria-label={tr("字幕字号")}
                 disabled={readOnly}
                 onChange={(e) => setStyleField({ fontSize: e.target.value })}
                 onBlur={() => commitStyle({ fontSize: form.fontSize })}
                 onKeyDown={commitStyleOnEnter}
               />
             </Field>
-            <Field label="描边宽度">
+            <Field label={tr("描边宽度")}>
               <TextInput
                 type="number"
                 step="1"
                 min="0"
                 value={form.strokeWidth}
-                aria-label="描边宽度"
+                aria-label={tr("描边宽度")}
                 disabled={readOnly}
                 onChange={(e) => setStyleField({ strokeWidth: e.target.value })}
                 onBlur={() => commitStyle({ strokeWidth: form.strokeWidth })}
@@ -744,22 +727,22 @@ export function CaptionPanel() {
               />
             </Field>
           </Row>
-          <Field label="文字颜色">
+          <Field label={tr("文字颜色")}>
             <input
               type="color"
               className="cv-input"
               value={form.color}
-              aria-label="字幕颜色"
+              aria-label={tr("字幕颜色")}
               disabled={readOnly}
               onChange={(e) => commitStyle({ color: e.target.value })}
             />
           </Field>
-          <Field label="对齐">
-            <div role="group" aria-label="字幕对齐" className="cv-row cv-style-edit__align">
+          <Field label={tr("对齐")}>
+            <div role="group" aria-label={tr("字幕对齐")} className="cv-row cv-style-edit__align">
               <Button
                 variant={form.align === "left" ? "primary" : "ghost"}
                 size="sm"
-                aria-label="左对齐"
+                aria-label={tr("左对齐")}
                 disabled={readOnly}
                 onClick={() => commitStyle({ align: "left" })}
               >
@@ -768,7 +751,7 @@ export function CaptionPanel() {
               <Button
                 variant={form.align === "center" ? "primary" : "ghost"}
                 size="sm"
-                aria-label="居中"
+                aria-label={tr("居中")}
                 disabled={readOnly}
                 onClick={() => commitStyle({ align: "center" })}
               >
@@ -777,7 +760,7 @@ export function CaptionPanel() {
               <Button
                 variant={form.align === "right" ? "primary" : "ghost"}
                 size="sm"
-                aria-label="右对齐"
+                aria-label={tr("右对齐")}
                 disabled={readOnly}
                 onClick={() => commitStyle({ align: "right" })}
               >
@@ -788,14 +771,12 @@ export function CaptionPanel() {
           <Button
             variant={form.bold ? "primary" : "ghost"}
             size="sm"
-            aria-label="字幕加粗"
+            aria-label={tr("字幕加粗")}
             aria-pressed={form.bold}
             disabled={readOnly}
             onClick={() => commitStyle({ bold: !form.bold })}
           >
-            <Bold size={14} />
-            加粗
-          </Button>
+            <Bold size={14} />{tr("加粗")}</Button>
         </div>
       ) : null}
     </Panel>

@@ -1,12 +1,13 @@
+import { tr, useLocale } from "../../i18n";
 /** Three color-balance wheels backed by the existing nine RGB parameters. */
 import { useRef } from "react";
 
 type Tone = "shadows" | "midtones" | "highlights";
 
 const TONES: { id: Tone; label: string }[] = [
-  { id: "shadows", label: "阴影" },
-  { id: "midtones", label: "中间调" },
-  { id: "highlights", label: "高光" },
+  { id: "shadows", get label() { return tr("阴影"); } },
+  { id: "midtones", get label() { return tr("中间调"); } },
+  { id: "highlights", get label() { return tr("高光"); } },
 ];
 const ROOT3 = Math.sqrt(3);
 
@@ -53,6 +54,7 @@ function Wheel({ tone, label, params, onPreview, onCommit }: {
   onPreview: (next: Record<string, unknown>) => void;
   onCommit: (next: Record<string, unknown>) => void;
 }) {
+  useLocale();
   const startRef = useRef<Record<string, unknown> | null>(null);
   const draftRef = useRef<Record<string, unknown>>(params);
   const [x, y] = position(params, tone);
@@ -75,10 +77,10 @@ function Wheel({ tone, label, params, onPreview, onCommit }: {
     <div className="color-wheel-group">
       <span className="color-wheel-group__name">{label}</span>
       <div className="color-wheel" role="slider" tabIndex={0}
-        aria-label={`${label}色轮`} aria-valuemin={0} aria-valuemax={100}
+        aria-label={tr("{0}色轮", label)} aria-valuemin={0} aria-valuemax={100}
         aria-valuenow={Math.round(Math.hypot(x, y) * 100)}
-        aria-valuetext={`红 ${r.toFixed(2)}，绿 ${g.toFixed(2)}，蓝 ${b.toFixed(2)}`}
-        title="拖动色点调整色偏；方向键微调，Home 归零"
+        aria-valuetext={tr("红 {0}，绿 {1}，蓝 {2}", r.toFixed(2), g.toFixed(2), b.toFixed(2))}
+        title={tr("拖动色点调整色偏；方向键微调，Home 归零")}
         onPointerDown={(event) => {
           event.preventDefault();
           event.currentTarget.setPointerCapture(event.pointerId);
@@ -121,7 +123,7 @@ function Wheel({ tone, label, params, onPreview, onCommit }: {
           const next = { ...params, [`${tone}R`]: 0, [`${tone}G`]: 0, [`${tone}B`]: 0 };
           onPreview(next);
           onCommit(next);
-        }}>归零</button>
+        }}>{tr("归零")}</button>
     </div>
   );
 }
@@ -131,13 +133,14 @@ export function ColorWheels({ params, onPreview, onCommit }: {
   onPreview: (next: Record<string, unknown>) => void;
   onCommit: (next: Record<string, unknown>) => void;
 }) {
+  useLocale();
   return (
     <div className="color-wheels">
       <div className="color-wheels__grid">
         {TONES.map((tone) => <Wheel key={tone.id} tone={tone.id} label={tone.label}
           params={params} onPreview={onPreview} onCommit={onCommit} />)}
       </div>
-      <p className="cv-hint">中心为中性；拖动色点并松手应用。亮度可在数值微调中继续调整。</p>
+      <p className="cv-hint">{tr("中心为中性；拖动色点并松手应用。亮度可在数值微调中继续调整。")}</p>
     </div>
   );
 }

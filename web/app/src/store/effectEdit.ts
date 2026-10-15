@@ -1,3 +1,4 @@
+import { msg } from "../i18n";
 /** 效果栈 / 资源 / 预设 命令封装（J01）。
  *
  * 与 clipEdit.ts 同风格：统一走 runCommand（自动 REVISION_CONFLICT 重试 + 结构化错误）。
@@ -48,7 +49,7 @@ export async function bypassEffect(
     dispatch({
       type: "STATUS_SET",
       severity: "ok",
-      text: input.enabled ? "已恢复该效果" : "已旁路该效果（保留在栈中）",
+      text: input.enabled ? msg("已恢复该效果") : msg("已旁路该效果（保留在栈中）"),
     });
   }
   return res;
@@ -65,7 +66,7 @@ export async function reorderEffect(
     effectId: input.effectId,
     toIndex: input.toIndex,
   });
-  if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: "已调整效果顺序" });
+  if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已调整效果顺序") });
   return res;
 }
 
@@ -91,7 +92,7 @@ export async function updateEffect(
   if (input.params && Object.keys(input.params).length) payload.params = input.params;
   if (input.range) payload.range = input.range;
   const res = await runCommand(dispatch, state, "effect.update", payload);
-  if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: "已更新效果" });
+  if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已更新效果") });
   return res;
 }
 
@@ -106,7 +107,7 @@ export async function copyVisualEffects(
     dispatch({
       type: "STATUS_SET",
       severity: "ok",
-      text: `已把画面效果复制到 ${input.targetClipIds.length} 个片段（一次撤销）`,
+      text: msg("已把画面效果复制到 {0} 个片段（一次撤销）", input.targetClipIds.length),
     });
   }
   return res;
@@ -128,7 +129,7 @@ export async function setFavorite(
     dispatch({
       type: "STATUS_SET",
       severity: "ok",
-      text: input.favorite ? "已加入收藏" : "已取消收藏",
+      text: input.favorite ? msg("已加入收藏") : msg("已取消收藏"),
     });
   }
   return res;
@@ -144,7 +145,7 @@ export async function savePreset(
   if (input.effects && input.effects.length) payload.effects = input.effects;
   else if (input.clipId) payload.clipId = input.clipId;
   const res = await runCommand(dispatch, state, "preset.save", payload);
-  if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: `已保存预设「${input.name}」` });
+  if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已保存预设「{0}」", input.name) });
   return res;
 }
 
@@ -163,7 +164,7 @@ export async function applyPreset(
     dispatch({
       type: "STATUS_SET",
       severity: "ok",
-      text: input.mode === "replace" ? "已应用预设（替换同类）" : "已应用预设（合并）",
+      text: input.mode === "replace" ? msg("已应用预设（替换同类）") : msg("已应用预设（合并）"),
     });
   }
   return res;
@@ -176,6 +177,6 @@ export async function deletePreset(
   input: { presetId: string },
 ): Promise<ActionResult> {
   const res = await runCommand(dispatch, state, "preset.delete", { presetId: input.presetId });
-  if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: "已删除预设" });
+  if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已删除预设") });
   return res;
 }

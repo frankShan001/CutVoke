@@ -1,3 +1,4 @@
+import { msg, tr } from "../i18n";
 /** 片段级编辑动作：move / trim / split / remove / speed / effect.add / 拖放导入。
     统一走 runCommand（自动 REVISION_CONFLICT 重试 + 结构化错误）。 */
 
@@ -62,9 +63,9 @@ export async function insertClipFromDrop(
   const probe = await probeMedia(input.sourcePath);
   if (probe.kind === "ok" && probe.data.duration > 0) {
     dur = probe.data.duration;
-    dispatch({ type: "STATUS_SET", severity: "ok", text: `已探测素材 ${dur.toFixed(1)}s` });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已探测素材 {0}s", dur.toFixed(1)) });
   } else {
-    dispatch({ type: "STATUS_SET", severity: "warn", text: "未能探测素材时长，按 2s 导入（可稍后 trim）" });
+    dispatch({ type: "STATUS_SET", severity: "warn", text: msg("未能探测素材时长，按 2s 导入（可稍后 trim）") });
   }
   const current = getLatestState() || state;
   const start = resolveInsertStart(current, input.trackId, input.timelineStartSecs);
@@ -96,13 +97,11 @@ export async function insertClipFromDrop(
   if (result.ok) {
     const changes = result.command?.changedEntities || [];
     const moved = changes.filter((change) => change.type === "clip" && change.change === "moved").length;
-    const details = [
-      moved ? `${moved} 个后续片段已后移` : "",
-    ].filter(Boolean);
+    const details = moved ? msg("{0} 个后续片段已后移", moved) : null;
     dispatch({
       type: "STATUS_SET",
       severity: "ok",
-      text: details.length ? `已插入素材，${details.join("，")}` : "已插入素材",
+      text: details ? msg("已插入素材，{0}", details) : msg("已插入素材"),
     });
   }
   return result;
@@ -181,7 +180,7 @@ export async function moveClip(
     const attached = (res.command?.changedEntities || [])
       .filter((item) => item.type === "clip" && item.reason === "attached").length;
     dispatch({ type: "STATUS_SET", severity: "ok", text:
-      `${input.mode === "reorder" ? "已调整片段顺序" : "已移动片段"}${attached ? `，${attached} 个关联片段同步移动` : ""}` });
+      msg("{0}{1}", input.mode === "reorder" ? msg("已调整片段顺序") : msg("已移动片段"), attached ? msg("，{0} 个关联片段同步移动", attached) : "") });
   }
   return res;
 }
@@ -195,7 +194,7 @@ export async function closeGapBeforeClip(
   const res = await runCommand(dispatch, state, "clip.closeGap", input);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已关闭此处空隙，后续片段随之左移" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已关闭此处空隙，后续片段随之左移") });
   }
   return res;
 }
@@ -209,7 +208,7 @@ export async function removeTrack(
   const res = await runCommand(dispatch, state, "track.remove", { trackId });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: `已删除轨道 ${trackId}` });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已删除轨道 {0}", trackId) });
   }
   return res;
 }
@@ -246,7 +245,7 @@ export async function addCaption(
   const res = await runCommand(dispatch, state, "caption.add", payload);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已添加字幕" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已添加字幕") });
   }
   return res;
 }
@@ -260,7 +259,7 @@ export async function removeCaption(
   const res = await runCommand(dispatch, state, "caption.remove", { captionId });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已删除字幕" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已删除字幕") });
   }
   return res;
 }
@@ -333,10 +332,10 @@ export async function updateCaption(
       type: "STATUS_SET",
       severity: "ok",
       text: changedContent
-        ? "已更新字幕文字与时间"
+        ? msg("已更新字幕文字与时间")
         : changedGeometry
-          ? "已更新字幕位置与变换"
-          : "已更新字幕样式",
+          ? msg("已更新字幕位置与变换")
+          : msg("已更新字幕样式"),
     });
   }
   return res;
@@ -354,7 +353,7 @@ export async function trimClip(
   const res = await runCommand(dispatch, state, "clip.trim", payload);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已裁剪片段" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已裁剪片段") });
   }
   return res;
 }
@@ -368,7 +367,7 @@ export async function splitClip(
   const res = await runCommand(dispatch, state, "clip.split", { clipId: input.clipId, at: input.time });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已在游标处分割片段" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已在游标处分割片段") });
   }
   return res;
 }
@@ -382,7 +381,7 @@ export async function removeClip(
   const res = await runCommand(dispatch, state, "clip.remove", { clipId });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已删除片段" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已删除片段") });
   }
   return res;
 }
@@ -422,7 +421,7 @@ export async function setClipSpeed(
   });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已调整速度" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已调整速度") });
   }
   return res;
 }
@@ -441,7 +440,7 @@ export async function setClipAudio(
   const res = await runCommand(dispatch, state, "clip.audio", payload);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已更新片段音频" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已更新片段音频") });
   }
   return res;
 }
@@ -470,7 +469,7 @@ export async function addKeyframe(
   const res = await runCommand(dispatch, state, "clip.keyframe", payload);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: `已添加关键帧 ${input.param}` });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已添加关键帧 {0}", input.param) });
   }
   return res;
 }
@@ -489,7 +488,7 @@ export async function removeKeyframe(
   });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: `已删除关键帧 ${input.param}` });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已删除关键帧 {0}", input.param) });
   }
   return res;
 }
@@ -517,7 +516,7 @@ export async function swapClipAsset(
     const err = {
       status: 400,
       code: "NO_TARGET_CLIP",
-      message: "请先在时间线选中一个片段，或指定整轨",
+      message: tr("请先在时间线选中一个片段，或指定整轨"),
     };
     showError(dispatch, err);
     return { ok: false, error: err as ApiFailure };
@@ -536,7 +535,7 @@ export async function swapClipAsset(
         if (trackId) dispatch({ type: "SELECTION_SET", selection: { trackId, clipId: first } });
       }
     }
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已换图套版：保留时长/动画/效果，仅替换素材" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已换图套版：保留时长/动画/效果，仅替换素材") });
   }
   return res;
 }
@@ -554,7 +553,7 @@ export async function addEffect(
   });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: `已添加效果 ${input.effectId}` });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已添加效果 {0}", input.effectId) });
   }
   return res;
 }
@@ -571,7 +570,7 @@ export async function removeEffect(
   });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: `已移除效果 ${input.effectId}` });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已移除效果 {0}", input.effectId) });
   }
   return res;
 }
@@ -591,7 +590,7 @@ export async function applyTransition(
     effectId: input.effectId,
     params: { duration: input.duration },
   });
-  if (result.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: "已应用转场" });
+  if (result.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已应用转场") });
   return result;
 }
 
@@ -614,7 +613,7 @@ export async function addKeyframes(
   });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: `已记录 ${input.keyframes.length} 个变换关键帧` });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已记录 {0} 个变换关键帧", input.keyframes.length) });
   }
   return res;
 }
@@ -631,7 +630,7 @@ export async function setClipCurve(
   });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已应用速度曲线" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已应用速度曲线") });
   }
   return res;
 }
@@ -647,7 +646,7 @@ export async function setClipFrameInterpolation(
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
     dispatch({ type: "STATUS_SET", severity: "ok", text:
-      input.frameInterpolation === "motion" ? "已启用运动估算补帧" : "已关闭慢动作补帧" });
+      input.frameInterpolation === "motion" ? msg("已启用运动估算补帧") : msg("已关闭慢动作补帧") });
   }
   return res;
 }
@@ -706,7 +705,7 @@ export async function applyAnimation(
     ...(input.slot ? { slot: input.slot } : {}),
     ...(input.keyframePolicy ? { keyframePolicy: input.keyframePolicy } : {}),
   });
-  if (result.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: id ? "已应用动画" : "已移除动画" });
+  if (result.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: id ? msg("已应用动画") : msg("已移除动画") });
   return result;
 }
 

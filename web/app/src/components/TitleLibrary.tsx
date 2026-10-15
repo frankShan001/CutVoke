@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../i18n";
 /** Real rendered title presets; subtitle objects remain a separate workspace. */
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -8,6 +9,7 @@ import { builtinPresetMediaUrl, listBuiltinPresets, type BuiltinPresetSummary } 
 import { rationalToSecs } from "../lib/rational";
 
 export function TitleLibrary({ query }: { query: string }) {
+  const locale = useLocale();
   const { state, dispatch } = useEditor();
   const [content, setContent] = useState("在这里输入标题");
   const [category, setCategory] = useState("");
@@ -29,7 +31,7 @@ export function TitleLibrary({ query }: { query: string }) {
       setPresets(catalog.presets.filter((item) => item.family === "text" && item.status !== "retired"));
       setLoadError("");
     }).catch((error: unknown) => {
-      if (live) setLoadError(error instanceof Error ? error.message : "文字预设目录读取失败");
+      if (live) setLoadError(error instanceof Error ? error.message : tr("文字预设目录读取失败"));
     }).finally(() => { if (live) setLoading(false); });
     return () => { live = false; };
   }, [loadAttempt]);
@@ -60,7 +62,7 @@ export function TitleLibrary({ query }: { query: string }) {
     const track = state.project?.sequence.tracks.find((item) =>
       item.kind === "text" && item.clips.some((clip) => clip.id === selectedId));
     return track && !track.locked ? selectedId : null;
-  }, [state.project, state.selection?.clipId]);
+  }, [state.project, state.selection?.clipId, locale]);
   const categories = [...new Set(presets.map((item) => item.subcategory))];
   const needle = query.trim().toLocaleLowerCase();
   const visible = presets.filter((preset) =>
@@ -84,7 +86,7 @@ export function TitleLibrary({ query }: { query: string }) {
         const trackId = changes.find((item) => item.type === "track" && item.change === "created")?.id;
         const clipId = changes.find((item) => item.type === "clip" && item.change === "created")?.id;
         if (trackId && clipId) dispatch({ type: "SELECTION_SET", selection: { trackId, clipId } });
-        dispatch({ type: "STATUS_SET", severity: "ok", text: `已添加可编辑标题「${preset.name}」` });
+        dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已添加可编辑标题「{0}」", preset.name) });
       }
     } finally { setAdding(null); }
   };
@@ -97,28 +99,27 @@ export function TitleLibrary({ query }: { query: string }) {
       const result = await runCommand(dispatch, latest, "builtinPreset.apply", {
         clipId: selectedTitle, presetId: preset.presetId,
       });
-      if (result.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: `已更换标题样式「${preset.name}」` });
+      if (result.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已更换标题样式「{0}」", preset.name) });
     } finally { setAdding(null); }
   };
 
-  return <section className="title-library" aria-label="文字标题库">
-    <strong>普通文字、花字与文字动画 · 真实样片</strong>
-    <p className="cv-hint">标题是独立文字轨片段，可继续修改内容与样式；字幕在右侧字幕工作台编辑。</p>
-    <label className="title-library__input">标题内容
-      <textarea className="cv-input" value={content} onChange={(event) => setContent(event.target.value)}
-        rows={2} maxLength={180} aria-label="标题内容" />
+  return <section className="title-library" aria-label={tr("文字标题库")}>
+    <strong>{tr("普通文字、花字与文字动画 · 真实样片")}</strong>
+    <p className="cv-hint">{tr("标题是独立文字轨片段，可继续修改内容与样式；字幕在右侧字幕工作台编辑。")}</p>
+    <label className="title-library__input">{tr("标题内容")}<textarea className="cv-input" value={content} onChange={(event) => setContent(event.target.value)}
+        rows={2} maxLength={180} aria-label={tr("标题内容")} />
     </label>
-    <div className="media-filter__kinds" role="group" aria-label="文字类型">
+    <div className="media-filter__kinds" role="group" aria-label={tr("文字类型")}>
       {["", ...categories].map((item) => <button key={item || "all"} type="button"
         className={`media-filter__kind ${category === item ? "media-filter__kind--active" : ""}`}
-        aria-pressed={category === item} onClick={() => setCategory(item)}>{item || "全部"}</button>)}
+        aria-pressed={category === item} onClick={() => setCategory(item)}>{item || tr("全部")}</button>)}
     </div>
-    {!canAdd ? <p className="cv-hint" role="status">先添加视频或背景，并将播放头放在画面范围内；标题内容不能留空。</p> : null}
-    {loading ? <p className="cv-hint" role="status">正在读取文字预设…</p> : null}
+    {!canAdd ? <p className="cv-hint" role="status">{tr("先添加视频或背景，并将播放头放在画面范围内；标题内容不能留空。")}</p> : null}
+    {loading ? <p className="cv-hint" role="status">{tr("正在读取文字预设…")}</p> : null}
     {loadError ? <p className="resource-pack-manager__error" role="alert">
-      <span>文字预设目录读取失败：{loadError}</span>
+      <span>{tr("文字预设目录读取失败：")}{loadError}</span>
       <button type="button" className="cv-button cv-button--small" disabled={loading}
-        onClick={() => setLoadAttempt((attempt) => attempt + 1)}>重试文字预设</button>
+        onClick={() => setLoadAttempt((attempt) => attempt + 1)}>{tr("重试文字预设")}</button>
     </p> : null}
     <div className="title-library__grid">
       {visible.map((preset) => {
@@ -126,21 +127,21 @@ export function TitleLibrary({ query }: { query: string }) {
         return <article key={preset.presetId} className="title-library__card">
           <button type="button" className="title-library__preview" disabled={!mediaReady}
             onClick={(event) => { previewOpener.current = event.currentTarget; setPreview(preset); }}
-            aria-label={`播放${preset.name}文字样片`}>
-            {mediaReady ? <img loading="lazy" alt="" src={builtinPresetMediaUrl(preset.presetId, "cover")} /> : "样片不可用"}
+            aria-label={tr("播放{0}文字样片", preset.name)}>
+            {mediaReady ? <img loading="lazy" alt="" src={builtinPresetMediaUrl(preset.presetId, "cover")} /> : tr("样片不可用")}
           </button>
           <strong>{preset.name}</strong>
-          <small>{preset.subcategory} · {preset.qualified ? "已验收" : "待完整验收"}</small>
+          <small>{preset.subcategory} · {preset.qualified ? tr("已验收") : tr("待完整验收")}</small>
           <div className="title-library__actions">
             <button type="button" disabled={!canAdd || !!adding || !mediaReady}
-              onClick={() => void add(preset)} aria-label={`添加标题 ${preset.name}`}>添加</button>
+              onClick={() => void add(preset)} aria-label={tr("添加标题 {0}", preset.name)}>{tr("添加")}</button>
             <button type="button" disabled={!selectedTitle || !!state.editLock || !!adding || !mediaReady}
-              onClick={() => void replace(preset)} aria-label={`替换所选标题为 ${preset.name}`}>替换</button>
+              onClick={() => void replace(preset)} aria-label={tr("替换所选标题为 {0}", preset.name)}>{tr("替换")}</button>
           </div>
         </article>;
       })}
     </div>
-    {!loading && !loadError && visible.length === 0 ? <p className="cv-empty">没有匹配的标题样式。</p> : null}
+    {!loading && !loadError && visible.length === 0 ? <p className="cv-empty">{tr("没有匹配的标题样式。")}</p> : null}
     {preview ? <div className="resource-sample-overlay" onMouseDown={(event) => {
       if (event.target === event.currentTarget) {
         setPreview(null);
@@ -148,7 +149,7 @@ export function TitleLibrary({ query }: { query: string }) {
       }
     }}>
       <section className="resource-sample-dialog" role="dialog" aria-modal="true"
-        aria-label={`${preview.name}文字样片`} onKeyDown={(event) => {
+        aria-label={tr("{0}文字样片", preview.name)} onKeyDown={(event) => {
           if (event.key !== "Tab") return;
           const video = event.currentTarget.querySelector("video");
           if (event.shiftKey && document.activeElement === previewClose.current) {
@@ -160,7 +161,7 @@ export function TitleLibrary({ query }: { query: string }) {
         <div className="resource-sample-dialog__head"><strong>{preview.name}</strong>
           <button ref={previewClose} type="button" onClick={() => {
             setPreview(null); requestAnimationFrame(() => previewOpener.current?.focus());
-          }} aria-label="关闭文字样片">关闭</button></div>
+          }} aria-label={tr("关闭文字样片")}>{tr("关闭")}</button></div>
         <video controls autoPlay muted loop playsInline tabIndex={0} preload="metadata"
           poster={builtinPresetMediaUrl(preview.presetId, "cover")}
           src={builtinPresetMediaUrl(preview.presetId, "preview")} />
