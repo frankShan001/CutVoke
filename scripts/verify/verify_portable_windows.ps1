@@ -4,6 +4,7 @@ $taskFolder = Join-Path (Split-Path $App) 'CutVoke Data'
 $taskDatabase = Join-Path $taskFolder 'data/projects.sqlite'
 $taskHash = (Get-FileHash -LiteralPath $taskDatabase -Algorithm SHA256).Hash
 $taskSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+$taskAclFolders = @($taskFolder, (Join-Path $taskFolder 'profile'), (Join-Path $taskFolder 'data'))
 $taskProcess = $null
 $taskResult = @{ passed = $false; beforeSHA256 = $taskHash; scope = 'Actual Windows ACL write denial and native error dialog; dialog text inspected via Win32.' }
 Add-Type @'
@@ -56,13 +57,20 @@ if ($Normal) {
     exit 0
 }
 try {
-    & icacls.exe $taskFolder /deny "*${taskSid}:(OI)(CI)(W)" /t | Out-Null
-    if ($LASTEXITCODE -ne 0) { throw 'Could not apply isolated test ACL.' }
+    foreach ($taskAclFolder in $taskAclFolders) {
+        # Deny only mutation rights, preserving read/control/synchronize. Avoid
+        # legacy icacls /T traversal of the resource cache's long media paths.
+        & icacls.exe $taskAclFolder /deny "*${taskSid}:(OI)(CI)(WD,AD,WEA,WA)" | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "Could not apply isolated test ACL: $taskAclFolder" }
+    }
     # Explicit denies on existing children take priority over a child's explicit
     # Chromium ACL. Prove the profile really is unwritable before testing it.
     $taskWriteDenied = $false
     try { [IO.File]::WriteAllText((Join-Path $taskFolder 'profile/write-must-fail'), 'test') }
-    catch [UnauthorizedAccessException] { $taskWriteDenied = $true }
+    catch {
+        if ($_.Exception.GetBaseException() -is [UnauthorizedAccessException]) { $taskWriteDenied = $true }
+        else { throw }
+    }
     $taskResult.profileWriteDenied = $taskWriteDenied
     if (!$taskWriteDenied) { throw 'The isolated profile did not reject writes.' }
     Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
@@ -113,7 +121,7 @@ try {
     $taskResult.error = $_.ToString()
     throw
 } finally {
-    & icacls.exe $taskFolder /remove:d "*$taskSid" /t | Out-Null
+    foreach ($taskAclFolder in $taskAclFolders) { & icacls.exe $taskAclFolder /remove:d "*$taskSid" | Out-Null }
     if ($taskProcess -and !$taskProcess.HasExited) { Stop-Process -Id $taskProcess.Id -Force }
     [IO.File]::WriteAllText((Join-Path $Output 'readonly-result.json'), ($taskResult | ConvertTo-Json -Depth 6), [Text.UTF8Encoding]::new($false))
 }
