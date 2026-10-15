@@ -1,4 +1,4 @@
-English / 简体中文均可。贡献指南：[English](../CONTRIBUTING.md) · [简体中文](../CONTRIBUTING.zh-CN.md)。安全问题先读 [SECURITY.md](../SECURITY.md)。
+English / 简体中文均可。贡献指南：[English](https://github.com/frankShan001/CutVoke/blob/main/CONTRIBUTING.md) · [简体中文](https://github.com/frankShan001/CutVoke/blob/main/CONTRIBUTING.zh-CN.md)。安全问题先读 [SECURITY.md](https://github.com/frankShan001/CutVoke/blob/main/SECURITY.md)。
 
 ## What changed / 改动内容
 
