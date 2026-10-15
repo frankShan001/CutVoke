@@ -11,6 +11,7 @@ on:
       - scripts/build/**
       - scripts/verify/verify_portable_windows.*
       - .github/workflows/windows-portable.yml
+      - .gitattributes
 
 permissions:
   contents: read

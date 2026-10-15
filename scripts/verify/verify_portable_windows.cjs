@@ -243,4 +243,14 @@ async function main() {
   fs.copyFileSync(path.join(out, "verification.json"), path.join(root, "dist/portable/windows-verification.json"));
   console.log(JSON.stringify(report.checks, null, 2));
 }
-main().catch(error => { report.error = error.stack; save(); console.error(error); process.exitCode = 1; });
+main().catch(error => {
+  report.error = error.stack; save(); console.error(error);
+  // Keep remote failures diagnosable even when artifact downloads are unavailable.
+  for (const name of fs.readdirSync(out, { recursive: true })) {
+    if (name.endsWith("engine.log") || name.endsWith("renderer-errors.log")) {
+      const file = path.join(out, name);
+      if (fs.statSync(file).isFile()) console.error(`${name}\n${fs.readFileSync(file, "utf8").slice(-12000)}`);
+    }
+  }
+  process.exitCode = 1;
+});
