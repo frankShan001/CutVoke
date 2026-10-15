@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 import { Component, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "./ui";
@@ -19,11 +20,10 @@ export class WorkspaceBoundary extends Component<{ children: ReactNode; onFailur
     return (
       <main className="workspace workspace-recovery" role="alert">
         <AlertTriangle size={28} />
-        <h2>编辑器加载失败</h2>
-        <p>连接中断或页面更新可能导致加载失败。重新加载后，可从工程列表继续编辑已保存的工程。</p>
+        <h2>{tr("编辑器加载失败")}</h2>
+        <p>{tr("连接中断或页面更新可能导致加载失败。重新加载后，可从工程列表继续编辑已保存的工程。")}</p>
         <Button variant="primary" onClick={() => window.location.reload()}>
-          <RefreshCw size={14} /> 重新加载编辑器
-        </Button>
+          <RefreshCw size={14} />{tr(" 重新加载编辑器")}</Button>
       </main>
     );
   }

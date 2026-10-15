@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 /** 有理数时间工具链。
     CutVoke 权威时间一律 {num,den} 十进制字符串；禁止浮点秒参与提交。
     秒输入仅用于 UI 表单，提交前经 secsToRational 精确转换。 */
@@ -18,9 +19,9 @@ function gcd(a: number, b: number): number {
 /** 验证并转换秒输入（字符串/数字）为约分后的有理数。抛错带友好消息。 */
 export function secsToRational(input: string | number): Rational {
   const s = String(input).trim();
-  if (s === "") throw new Error("时间不能为空");
+  if (s === "") throw new Error(tr("时间不能为空"));
   if (!/^-?\d+(\.\d+)?$/.test(s)) {
-    throw new Error(`时间必须为数字（秒），例如 3.5 / 10 / 0.0333333`);
+    throw new Error(tr("时间必须为数字（秒），例如 3.5 / 10 / 0.0333333"));
   }
   if (!s.includes(".")) {
     return { num: s, den: "1" };
@@ -84,6 +85,6 @@ export function fmtSecs(v: number): string {
 /** 秒输入值转有理数后回写表单（展示预览文本用）。 */
 export function secsPreview(input: string | number): string {
   const rt = trySecsToRational(input);
-  if (!rt) return "无效";
+  if (!rt) return tr("无效");
   return `${rt.num}/${rt.den} · ${rationalApprox(rt)}`;
 }

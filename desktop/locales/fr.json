@@ -1,0 +1,20 @@
+{
+  "loadingTitle": "Démarrage de CutVoke",
+  "loadingService": "Démarrage du service de montage local…",
+  "loadingPrivacy": "Les projets et le cache d’aperçu restent sur votre ordinateur",
+  "loadingProgress": "Démarrage",
+  "startupTitle": "Impossible de démarrer CutVoke",
+  "startupSummary": "Le service de montage local n’a pas pu démarrer. Consultez le diagnostic ci-dessous, puis relancez CutVoke.",
+  "serviceTitle": "Le service local s’est arrêté",
+  "serviceSummary": "Le service de montage local s’est arrêté. Relancez CutVoke ; le diagnostic et l’emplacement des journaux figurent ci-dessous.",
+  "requestFailure": "Échec de la requête au service local (HTTP {0})",
+  "invalidClient": "Requête client non valide",
+  "startupExit": "Le service local n’a pas démarré (code de sortie {0})",
+  "startupTimeout": "Le démarrage du service local a expiré",
+  "serviceExitCode": "Code de sortie du service : {0}",
+  "logLocation": "Emplacement des journaux : {0}",
+  "technicalDetails": "Diagnostic technique (texte original)",
+  "close": "Fermer",
+  "chooseCache": "Choisir l’emplacement du cache",
+  "chooseFolder": "Choisir un dossier"
+}

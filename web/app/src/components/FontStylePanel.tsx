@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../i18n";
 /** 花字样式库（J04）：在字幕面板内一键套用「标语样式」预设，替代逐项手调。
  *  数据来自 lib/fontStyles.ts 的预设数组；点击预设 → caption.update 套用整组 style；
  *  「清除样式」→ 显式传 CLEAR_CAPTION_STYLE（后端缺省字段不变，故清除即置默认）。 */
@@ -13,6 +14,7 @@ import {
 } from "../lib/fontStyles";
 
 export function FontStylePanel({ captionId, disabled = false }: { captionId: string | null; disabled?: boolean }) {
+  useLocale();
   const { state, dispatch } = useEditor();
 
   const applyPreset = (preset: FontStylePreset) => {
@@ -28,17 +30,16 @@ export function FontStylePanel({ captionId, disabled = false }: { captionId: str
   if (!captionId) {
     return (
       <div className="cv-style-edit" aria-live="polite">
-        <div className="cv-style-edit__hint">选择一条字幕后，可一键套用花字样式</div>
+        <div className="cv-style-edit__hint">{tr("选择一条字幕后，可一键套用花字样式")}</div>
       </div>
     );
   }
 
   return (
-    <div className="cv-style-edit" aria-label="花字样式库">
+    <div className="cv-style-edit" aria-label={tr("花字样式库")}>
       <div className="cv-style-edit__hint">
-        <Sparkles size={13} /> 一键套用标语样式
-      </div>
-      <div className="font-style-grid" role="group" aria-label="花字预设">
+        <Sparkles size={13} />{tr(" 一键套用标语样式")}</div>
+      <div className="font-style-grid" role="group" aria-label={tr("花字预设")}>
         {FONT_STYLE_PRESETS.map((p) => (
           <button
             key={p.id}
@@ -46,7 +47,7 @@ export function FontStylePanel({ captionId, disabled = false }: { captionId: str
             className="font-style-card"
             onClick={() => applyPreset(p)}
             title={p.description}
-            aria-label={`套用花字样式 ${p.name}`}
+            aria-label={tr("套用花字样式 {0}", p.name)}
             disabled={disabled}
           >
             <span
@@ -58,9 +59,7 @@ export function FontStylePanel({ captionId, disabled = false }: { captionId: str
                 fontWeight: p.style.bold ? 700 : 400,
                 fontStyle: "normal",
               }}
-            >
-              字幕
-            </span>
+            >{tr("字幕")}</span>
             <span className="font-style-card__name">{p.name}</span>
           </button>
         ))}
@@ -71,12 +70,10 @@ export function FontStylePanel({ captionId, disabled = false }: { captionId: str
           size="sm"
           full
           onClick={clearStyle}
-          aria-label="清除字幕样式"
+          aria-label={tr("清除字幕样式")}
           disabled={disabled}
         >
-          <Eraser size={13} />
-          清除样式
-        </Button>
+          <Eraser size={13} />{tr("清除样式")}</Button>
       </Row>
     </div>
   );

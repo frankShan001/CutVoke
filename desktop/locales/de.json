@@ -1,0 +1,20 @@
+{
+  "loadingTitle": "CutVoke wird gestartet",
+  "loadingService": "Der lokale Bearbeitungsdienst wird gestartet…",
+  "loadingPrivacy": "Projekte und Vorschau-Cache bleiben auf deinem Computer",
+  "loadingProgress": "Startvorgang",
+  "startupTitle": "CutVoke konnte nicht gestartet werden",
+  "startupSummary": "Der lokale Bearbeitungsdienst konnte nicht gestartet werden. Prüfe die Diagnose unten und öffne CutVoke erneut.",
+  "serviceTitle": "Lokaler Dienst wurde beendet",
+  "serviceSummary": "Der lokale Bearbeitungsdienst wurde beendet. Öffne CutVoke erneut. Diagnose und Protokollpfad stehen unten.",
+  "requestFailure": "Anfrage an den lokalen Dienst fehlgeschlagen (HTTP {0})",
+  "invalidClient": "Ungültige Clientanfrage",
+  "startupExit": "Lokaler Dienst konnte nicht starten (Exitcode {0})",
+  "startupTimeout": "Zeitüberschreitung beim Start des lokalen Dienstes",
+  "serviceExitCode": "Exitcode des Dienstes: {0}",
+  "logLocation": "Protokollpfad: {0}",
+  "technicalDetails": "Technische Diagnose (Originaltext)",
+  "close": "Schließen",
+  "chooseCache": "Speicherort für den Cache wählen",
+  "chooseFolder": "Ordner wählen"
+}

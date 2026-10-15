@@ -1,0 +1,20 @@
+{
+  "loadingTitle": "正在启动 CutVoke",
+  "loadingService": "正在启动本地编辑服务…",
+  "loadingPrivacy": "工程和预览缓存保存在你的电脑上",
+  "loadingProgress": "启动中",
+  "startupTitle": "CutVoke 无法启动",
+  "startupSummary": "无法启动本地编辑服务。请检查下方诊断信息后重新打开 CutVoke。",
+  "serviceTitle": "本地服务已退出",
+  "serviceSummary": "本地编辑服务已退出。请重新打开 CutVoke；诊断信息和日志位置如下。",
+  "requestFailure": "本地服务请求失败（HTTP {0}）",
+  "invalidClient": "无效的客户端请求",
+  "startupExit": "本地服务启动失败（退出码 {0}）",
+  "startupTimeout": "本地服务启动超时",
+  "serviceExitCode": "服务退出码：{0}",
+  "logLocation": "日志位置：{0}",
+  "technicalDetails": "技术诊断（原文）",
+  "close": "关闭",
+  "chooseCache": "选择缓存保存位置",
+  "chooseFolder": "选择文件夹"
+}

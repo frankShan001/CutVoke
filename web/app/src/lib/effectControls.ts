@@ -1,3 +1,5 @@
+import { tr } from "../i18n";
+import { getLocale } from "../i18n/locale";
 /** 效果参数 → 可渲染控件描述（J01，自 lib/effects.ts 拆出保持 ≤300 行）。 */
 
 import type { EffectSpec } from "./effects";
@@ -18,46 +20,47 @@ export interface ParamControl {
 }
 
 const PARAM_LABELS: Record<string, string> = {
-  duration: "时长",
-  easing: "缓动",
-  sigma: "强度",
-  angle: "角度",
-  distance: "位移",
-  fromScale: "起始缩放",
-  toScale: "结束缩放",
-  fromAngle: "起始角度",
-  overshoot: "过冲",
-  direction: "方向",
-  amplitude: "幅度",
-  period: "周期",
-  intensity: "强度",
-  strength: "强度",
-  low: "低阈值",
-  high: "高阈值",
-  offset: "偏移",
-  amount: "强度",
-  levels: "色阶",
-  mode: "模式",
-  axis: "翻转轴向",
-  brightness: "亮度",
-  contrast: "对比度",
-  saturation: "饱和度",
-  opacity: "不透明度",
-  scale: "缩放",
-  rotation: "旋转",
-  content: "蒙版文字",
-  fontSize: "文字大小",
+  get duration() { return tr("时长"); },
+  get easing() { return tr("缓动"); },
+  get sigma() { return tr("强度"); },
+  get angle() { return tr("角度"); },
+  get distance() { return tr("位移"); },
+  get fromScale() { return tr("起始缩放"); },
+  get toScale() { return tr("结束缩放"); },
+  get fromAngle() { return tr("起始角度"); },
+  get overshoot() { return tr("过冲"); },
+  get direction() { return tr("方向"); },
+  get amplitude() { return tr("幅度"); },
+  get period() { return tr("周期"); },
+  get intensity() { return tr("强度"); },
+  get strength() { return tr("强度"); },
+  get low() { return tr("低阈值"); },
+  get high() { return tr("高阈值"); },
+  get offset() { return tr("偏移"); },
+  get amount() { return tr("强度"); },
+  get levels() { return tr("色阶"); },
+  get mode() { return tr("模式"); },
+  get axis() { return tr("翻转轴向"); },
+  get brightness() { return tr("亮度"); },
+  get contrast() { return tr("对比度"); },
+  get saturation() { return tr("饱和度"); },
+  get opacity() { return tr("不透明度"); },
+  get scale() { return tr("缩放"); },
+  get rotation() { return tr("旋转"); },
+  get content() { return tr("蒙版文字"); },
+  get fontSize() { return tr("文字大小"); },
 };
 
 const PARAM_ENUM_LABELS: Record<string, Record<string, string>> = {
-  axis: { horizontal: "水平", vertical: "垂直", both: "水平 + 垂直" },
+  axis: { get horizontal() { return tr("水平"); }, get vertical() { return tr("垂直"); }, get both() { return tr("水平 + 垂直"); } },
 };
 
 function localizedDescriptor(v: unknown): string {
   if (typeof v === "string") return v;
   if (v && typeof v === "object") {
     const o = v as Record<string, unknown>;
-    const hit = o["zh-CN"] ?? o["zh"] ?? o["en"];
+    const language = getLocale();
+    const hit = o[language] ?? o[language.split("-")[0]] ?? o.en ?? o["zh-CN"];
     if (typeof hit === "string") return hit;
     const first = Object.values(o).find((x) => typeof x === "string");
     if (typeof first === "string") return first;
@@ -131,7 +134,7 @@ export function paramControls(
 
 function formatValue(v: unknown): string {
   if (typeof v === "number") return Number.isInteger(v) ? String(v) : v.toFixed(2);
-  if (typeof v === "boolean") return v ? "开" : "关";
+  if (typeof v === "boolean") return v ? tr("开") : tr("关");
   return String(v ?? "");
 }
 

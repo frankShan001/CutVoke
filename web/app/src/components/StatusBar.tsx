@@ -1,3 +1,6 @@
+import { tr, useLocale } from "../i18n";
+import { formatMessage } from "../i18n/messages";
+import { getLocale } from "../i18n/locale";
 /** 底部状态栏：当前工程名 / 保存状态 / 提示消息 / 轨道片段统计。
     raw projectId 与 revision 收进默认收起的「详情」，主区只留人能懂的。 */
 
@@ -6,43 +9,42 @@ import { useEditor, type SyncState } from "../store/editor";
 function saveLabel(syncState: SyncState, lastSync: number): string {
   switch (syncState) {
     case "saving":
-      return "保存中…";
+      return tr("保存中…");
     case "error":
-      return "保存失败";
+      return tr("保存失败");
     case "saved":
       return lastSync
-        ? `已保存 ${new Date(lastSync).toLocaleTimeString("zh-CN", { hour12: false })}`
-        : "已保存";
+        ? tr("已保存 {0}", new Date(lastSync).toLocaleTimeString(getLocale(), { hour12: false }))
+        : tr("已保存");
     default:
-      return "尚未加载工程";
+      return tr("尚未加载工程");
   }
 }
 
 export function StatusBar() {
+  const locale = useLocale();
   const { state } = useEditor();
   const tracks = state.project?.sequence.tracks || [];
   const clipCount = tracks.reduce((n, t) => n + (t.clips?.length || 0), 0);
-  const name = state.projectName || state.currentId || "未选择工程";
+  const name = state.projectName || state.currentId || tr("未选择工程");
 
   return (
     <footer className="statusbar">
-      <span className="statusbar__rev statusbar__project" title={`当前工程：${name}`}>
-        <span className="statusbar__project-label">当前工程 </span><b>{name}</b>
+      <span className="statusbar__rev statusbar__project" title={tr("当前工程：{0}", name)}>
+        <span className="statusbar__project-label">{tr("当前工程 ")}</span><b>{name}</b>
       </span>
       <span className={`statusbar__save statusbar__save--${state.syncState}`}>
         {saveLabel(state.syncState, state.lastSync)}
       </span>
-      <span className="statusbar__rev">
-        轨道 <b>{tracks.length}</b> · 片段 <b>{clipCount}</b>
+      <span className="statusbar__rev">{tr("轨道 ")}<b>{tracks.length}</b>{tr(" · 片段 ")}<b>{clipCount}</b>
       </span>
-      <span className={`statusbar__msg statusbar__msg--${state.status.severity}`} title={state.status.text}>
-        {state.status.text}
+      <span className={`statusbar__msg statusbar__msg--${state.status.severity}`} title={formatMessage(state.status.text, locale)}>
+        {formatMessage(state.status.text, locale)}
       </span>
       <details className="statusbar__details">
-        <summary>详情</summary>
+        <summary>{tr("详情")}</summary>
         <div className="statusbar__details-body">
-          <span>
-            工程 ID：<code className="cv-mono">{state.currentId || "—"}</code>
+          <span>{tr("工程 ID：")}<code className="cv-mono">{state.currentId || "—"}</code>
           </span>
           <span>
             Revision：<code className="cv-mono">{state.revision || "—"}</code>

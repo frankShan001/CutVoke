@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../i18n";
 /** Direct manipulation for geometry, text and freehand alpha masks. */
 
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
@@ -145,7 +146,7 @@ function geometry(params: Record<string, unknown>, width: number, height: number
       pathMode: params.pathMode === "smooth" || params.pathMode === "bezier" ? params.pathMode : "linear",
       points, content: "", fontSize: 0.16 };
   }
-  const content = String(params.content ?? "文字");
+  const content = String(params.content ?? tr("文字"));
   const fontSize = clamp(Number(params.fontSize ?? 0.16), 0.02, 0.5);
   if (shape === "text") {
     const lines = Math.max(1, content.split("\n").length);
@@ -238,6 +239,7 @@ function adjust(start: Geometry, mode: Gesture["mode"], dx: number, dy: number,
 }
 
 export function MaskCanvasOverlay() {
+  useLocale();
   const { state, dispatch } = useEditor();
   const project = state.project;
   const track = project?.sequence.tracks.find((item) => item.id === state.selection?.trackId);
@@ -434,7 +436,7 @@ export function MaskCanvasOverlay() {
         <div className="player__mask-tools">
           <button type="button" className="player__mask-tool" disabled={!editable || drawing}
             aria-pressed={current.pathMode !== "linear"}
-            title="依次切换折线、平滑和贝塞尔模式"
+            title={tr("依次切换折线、平滑和贝塞尔模式")}
             onClick={() => {
               const pathMode: PathMode = current.pathMode === "linear" ? "smooth"
                 : current.pathMode === "smooth" ? "bezier" : "linear";
@@ -442,28 +444,27 @@ export function MaskCanvasOverlay() {
                 points: pathMode === "bezier" ? bezierHandles(current.points) : current.points });
               setSelectedAnchor(null);
             }}>
-            {current.pathMode === "linear" ? "路径：折线"
-              : current.pathMode === "smooth" ? "路径：平滑" : "路径：贝塞尔"}
+            {current.pathMode === "linear" ? tr("路径：折线")
+              : current.pathMode === "smooth" ? tr("路径：平滑") : tr("路径：贝塞尔")}
           </button>
           <button type="button" className="player__mask-tool"
             disabled={!editable || drawing || current.points.length < 3}
             aria-pressed={editAnchors}
             onClick={() => { setManualDraw(false); setSelectedAnchor(null);
               setEditAnchors((value) => !value); }}>
-            {editAnchors ? "完成编辑" : "编辑路径点"}
+            {editAnchors ? tr("完成编辑") : tr("编辑路径点")}
           </button>
           <button type="button" className="player__mask-tool" disabled={!editable}
             onClick={() => { setEditAnchors(false); setManualDraw((value) => !value);
               setSelectedAnchor(null);
               setDraftPoints([]); draftRef.current = []; }}>
-            {drawing ? "取消绘制" : "重画钢笔蒙版"}
+            {drawing ? tr("取消绘制") : tr("重画钢笔蒙版")}
           </button>
-          {drawing ? <span role="status">在预览画布按住拖动，绘制闭合蒙版</span> : null}
+          {drawing ? <span role="status">{tr("在预览画布按住拖动，绘制闭合蒙版")}</span> : null}
           {!drawing && editAnchors && current.pathMode === "bezier" &&
             selectedAnchor !== null && current.points[selectedAnchor] ? (
               <button type="button" className="player__mask-tool" disabled={!editable}
-                aria-label={`贝塞尔切线 ${selectedAnchor + 1}：${
-                  current.points[selectedAnchor].handlesLinked === false ? "独立" : "联动"}`}
+                aria-label={tr("贝塞尔切线 {0}：{1}", selectedAnchor + 1, current.points[selectedAnchor].handlesLinked === false ? tr("独立") : tr("联动"))}
                 aria-pressed={current.points[selectedAnchor].handlesLinked === false}
                 onClick={() => {
                   const points = bezierHandles(current.points).map((item, index) => index === selectedAnchor
@@ -471,7 +472,7 @@ export function MaskCanvasOverlay() {
                     : item);
                   void commit({ ...current, points });
                 }}>
-                {current.points[selectedAnchor].handlesLinked === false ? "切线：独立" : "切线：联动"}
+                {current.points[selectedAnchor].handlesLinked === false ? tr("切线：独立") : tr("切线：联动")}
               </button>
             ) : null}
         </div>
@@ -479,7 +480,7 @@ export function MaskCanvasOverlay() {
       <svg ref={svgRef}
         className={`player__mask-overlay${drawing ? " player__mask-overlay--drawing" : ""}`}
         viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet"
-        aria-label="画布蒙版控件"
+        aria-label={tr("画布蒙版控件")}
         onPointerDown={beginDraw}
         onPointerMove={drawing ? moveDraw : move}
         onPointerUp={drawing ? finishDraw : finish}
@@ -489,7 +490,7 @@ export function MaskCanvasOverlay() {
         ) : current.shape === "circle" ? (
           <ellipse className="player__mask-outline" cx={current.x * width} cy={current.y * height}
             rx={current.w * width / 2} ry={current.h * height / 2}
-            tabIndex={editable ? 0 : -1} role="button" aria-label="移动椭圆蒙版"
+            tabIndex={editable ? 0 : -1} role="button" aria-label={tr("移动椭圆蒙版")}
             onPointerDown={(event) => begin(event, "move")}
             onKeyDown={(event) => keyMove(event, "move")} />
         ) : current.shape === "freehand" && current.points.length >= 3 ? (
@@ -497,14 +498,14 @@ export function MaskCanvasOverlay() {
             points={(current.pathMode === "smooth" ? smoothClosedPath(current.points)
               : current.pathMode === "bezier" ? bezierClosedPath(current.points) : current.points)
               .map((item) => `${item.x * width},${item.y * height}`).join(" ")}
-            tabIndex={editable ? 0 : -1} role="button" aria-label="移动钢笔蒙版"
+            tabIndex={editable ? 0 : -1} role="button" aria-label={tr("移动钢笔蒙版")}
             onPointerDown={(event) => begin(event, "move")}
             onKeyDown={(event) => keyMove(event, "move")} />
         ) : current.shape === "text" ? (
           <>
             <rect className="player__mask-outline" x={box.x * width} y={box.y * height}
               width={box.w * width} height={box.h * height}
-              tabIndex={editable ? 0 : -1} role="button" aria-label="移动文字蒙版"
+              tabIndex={editable ? 0 : -1} role="button" aria-label={tr("移动文字蒙版")}
               onPointerDown={(event) => begin(event, "move")}
               onKeyDown={(event) => keyMove(event, "move")} />
             <text className="player__mask-text" x={current.x * width} y={current.y * height}
@@ -520,14 +521,14 @@ export function MaskCanvasOverlay() {
         ) : (
           <rect className="player__mask-outline" x={box.x * width} y={box.y * height}
             width={box.w * width} height={box.h * height}
-            tabIndex={editable ? 0 : -1} role="button" aria-label="移动矩形蒙版"
+            tabIndex={editable ? 0 : -1} role="button" aria-label={tr("移动矩形蒙版")}
             onPointerDown={(event) => begin(event, "move")}
             onKeyDown={(event) => keyMove(event, "move")} />
         )}
         {!drawing ? (
           <circle className="player__mask-handle" cx={handleX} cy={handleY} r={handleRadius}
             tabIndex={editable ? 0 : -1} role="button"
-            aria-label={current.shape === "text" ? "调整文字蒙版字号" : "调整蒙版大小"}
+            aria-label={current.shape === "text" ? tr("调整文字蒙版字号") : tr("调整蒙版大小")}
             onPointerDown={(event) => begin(event, "resize")}
             onKeyDown={(event) => keyMove(event, "resize")} />
         ) : null}
@@ -535,7 +536,7 @@ export function MaskCanvasOverlay() {
           <circle key={`anchor-${index}`} className="player__mask-anchor"
             cx={item.x * width} cy={item.y * height} r={Math.max(5, handleRadius * 0.7)}
             tabIndex={editable ? 0 : -1} role="button"
-            aria-label={`编辑钢笔路径点 ${index + 1}`}
+            aria-label={tr("编辑钢笔路径点 {0}", index + 1)}
             aria-pressed={selectedAnchor === index}
             onFocus={() => setSelectedAnchor(index)}
             onPointerDown={(event) => { setSelectedAnchor(index); begin(event, "point", index); }}
@@ -549,7 +550,7 @@ export function MaskCanvasOverlay() {
             const outHandle = anchor.outHandle!;
             const radius = Math.max(7, handleRadius * 0.72);
             return (
-              <g key={`tangent-${index}`} aria-label={`钢笔路径点 ${index + 1} 的贝塞尔切线`}>
+              <g key={`tangent-${index}`} aria-label={tr("钢笔路径点 {0} 的贝塞尔切线", index + 1)}>
                 <line className="player__mask-tangent" x1={inHandle.x * width} y1={inHandle.y * height}
                   x2={anchor.x * width} y2={anchor.y * height} />
                 <line className="player__mask-tangent" x1={anchor.x * width} y1={anchor.y * height}
@@ -557,13 +558,13 @@ export function MaskCanvasOverlay() {
                 <circle className="player__mask-tangent-handle"
                   cx={inHandle.x * width} cy={inHandle.y * height} r={radius}
                   tabIndex={editable ? 0 : -1} role="button"
-                  aria-label={`编辑贝塞尔手柄 ${index + 1} 入柄`}
+                  aria-label={tr("编辑贝塞尔手柄 {0} 入柄", index + 1)}
                   onPointerDown={(event) => begin(event, "handle", index, "inHandle")}
                   onKeyDown={(event) => keyMove(event, "handle", index, "inHandle")} />
                 <circle className="player__mask-tangent-handle"
                   cx={outHandle.x * width} cy={outHandle.y * height} r={radius}
                   tabIndex={editable ? 0 : -1} role="button"
-                  aria-label={`编辑贝塞尔手柄 ${index + 1} 出柄`}
+                  aria-label={tr("编辑贝塞尔手柄 {0} 出柄", index + 1)}
                   onPointerDown={(event) => begin(event, "handle", index, "outHandle")}
                   onKeyDown={(event) => keyMove(event, "handle", index, "outHandle")} />
               </g>
@@ -571,8 +572,8 @@ export function MaskCanvasOverlay() {
           })() : null}
         {dragging ? <text className="player__mask-size" x={box.x * width}
           y={Math.max(18, box.y * height - 8)}>
-          {current.shape === "text" ? `字号 ${Math.round(current.fontSize * 100)}%`
-            : current.shape === "freehand" ? `${current.points.length} 个路径点`
+          {current.shape === "text" ? tr("字号 {0}%", Math.round(current.fontSize * 100))
+            : current.shape === "freehand" ? tr("{0} 个路径点", current.points.length)
             : `${Math.round(current.w * 100)}% × ${Math.round(current.h * 100)}%`}
         </text> : null}
       </svg>

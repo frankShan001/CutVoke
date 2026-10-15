@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../../i18n";
 /** 时间线标尺：秒刻度 + 主/次刻度分级。 */
 
 import { useEffect, useRef } from "react";
@@ -16,6 +17,7 @@ export function Ruler({
   maxSeekSecs: number;
   pxPerSec: number;
 }) {
+  useLocale();
   const { state, dispatch } = useEditor();
   const pointerId = useRef<number | null>(null);
   useEffect(() => () => {
@@ -82,12 +84,12 @@ export function Ruler({
     <div
       className="timeline-ruler"
       role="slider"
-      aria-label="时间线播放头"
+      aria-label={tr("时间线播放头")}
       aria-valuemin={0}
       aria-valuemax={maxSeekSecs}
       aria-valuenow={currentTime}
       aria-valuetext={`${fmtTime(currentTime)} / ${fmtTime(maxSeekSecs)}`}
-      title="单击或拖动定位；方向键逐帧；End 到内容末尾（标尺尾部空白不可播放）"
+      title={tr("单击或拖动定位；方向键逐帧；End 到内容末尾（标尺尾部空白不可播放）")}
       aria-keyshortcuts="ArrowLeft ArrowDown ArrowRight ArrowUp PageUp PageDown Home End"
       tabIndex={0}
       onPointerDown={onPointerDown}
@@ -105,7 +107,7 @@ export function Ruler({
           key={marker.id}
           className="timeline-ruler__marker"
           style={{ left: toPx(rationalToSecs(marker.time), pxPerSec) }}
-          title={`${marker.name || "标记"} · ${fmtTime(rationalToSecs(marker.time))}`}
+          title={tr("{0} · {1}", marker.name || "标记", fmtTime(rationalToSecs(marker.time)))}
           aria-hidden="true"
         />
       ))}
@@ -114,6 +116,7 @@ export function Ruler({
 }
 
 function TickView({ tick, pxPerSec }: { tick: Tick; pxPerSec: number }) {
+  useLocale();
   const left = toPx(tick.secs, pxPerSec);
   return (
     <div className="timeline-ruler__tick" style={{ left }}>

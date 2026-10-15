@@ -1,0 +1,20 @@
+{
+  "loadingTitle": "Iniciando CutVoke",
+  "loadingService": "Iniciando el servicio de edición local…",
+  "loadingPrivacy": "Los proyectos y la caché de vista previa se guardan en tu equipo",
+  "loadingProgress": "Iniciando",
+  "startupTitle": "No se pudo iniciar CutVoke",
+  "startupSummary": "No se pudo iniciar el servicio de edición local. Revisa el diagnóstico y vuelve a abrir CutVoke.",
+  "serviceTitle": "El servicio local se detuvo",
+  "serviceSummary": "El servicio de edición local se detuvo. Vuelve a abrir CutVoke; el diagnóstico y la ubicación del registro aparecen abajo.",
+  "requestFailure": "La solicitud al servicio local falló (HTTP {0})",
+  "invalidClient": "Solicitud de cliente no válida",
+  "startupExit": "El servicio local no se inició (código de salida {0})",
+  "startupTimeout": "Se agotó el tiempo de inicio del servicio local",
+  "serviceExitCode": "Código de salida del servicio: {0}",
+  "logLocation": "Ubicación del registro: {0}",
+  "technicalDetails": "Diagnóstico técnico (texto original)",
+  "close": "Cerrar",
+  "chooseCache": "Elegir ubicación de caché",
+  "chooseFolder": "Elegir carpeta"
+}

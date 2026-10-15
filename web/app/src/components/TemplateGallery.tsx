@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../i18n";
 /** J12 模板库抽屉：浏览模板（按画幅/分类筛选）+ 一键套用到当前工程。
     落点双入口：编辑器顶栏「模板库」与工程首页「模板库」均打开本抽屉。
       - 编辑器内（currentId 存在）：套用到当前工程，clearExisting 默认 false（追加）。
@@ -39,9 +40,10 @@ const ASPECT_DIM: Record<TemplateAspect, [number, number]> = {
 
 const ASPECT_OPTIONS: Array<TemplateAspect | "all"> = ["all", "16:9", "9:16", "1:1"];
 
-const fmtSec = (s: number) => `${(Number.isInteger(s) ? s : s.toFixed(1))}秒`;
+const fmtSec = (s: number) => tr("{0}秒", (Number.isInteger(s) ? s : s.toFixed(1)));
 
 export function TemplateGallery() {
+  const locale = useLocale();
   const { state, dispatch } = useEditor();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [skipped, setSkipped] = useState<{ id?: string; name?: string; error?: string }[]>([]);
@@ -91,7 +93,7 @@ export function TemplateGallery() {
 
   const categories = useMemo(
     () => Array.from(new Set(templates.map((t) => t.category))),
-    [templates],
+    [templates, locale],
   );
 
   const visible = useMemo(
@@ -101,7 +103,7 @@ export function TemplateGallery() {
           (aspect === "all" || t.aspect === aspect) &&
           (category === "all" || t.category === category),
       ),
-    [templates, aspect, category],
+    [templates, aspect, category, locale],
   );
   const handleApply = async (tpl: Template) => {
     if (applyingId) return;
@@ -135,15 +137,15 @@ export function TemplateGallery() {
       if (ev) {
         const ph =
           ev.placeholderCount > 0
-            ? `，${ev.placeholderCount} 个槽位使用内置占位素材`
-            : "，素材已齐备";
+            ? tr("，{0} 个槽位使用内置占位素材", ev.placeholderCount)
+            : tr("，素材已齐备");
         dispatch({
           type: "STATUS_SET",
           severity: "ok",
-          text: `已套用模板《${ev.name}》：时长 ${fmtSec(ev.durationSec)}${ph}`,
+          text: msg("已套用模板《{0}》：时长 {1}{2}", ev.name, fmtSec(ev.durationSec), ph),
         });
       } else {
-        dispatch({ type: "STATUS_SET", severity: "ok", text: `已套用模板 ${tpl.name}` });
+        dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已套用模板 {0}", tpl.name) });
       }
       if (createdHere) {
         dispatch({ type: "PROJECT_NAME_SET", name: tpl.name });
@@ -159,15 +161,14 @@ export function TemplateGallery() {
   };
 
   return (
-    <div className="tpl-dialog" role="dialog" aria-modal="true" aria-label="模板库">
+    <div className="tpl-dialog" role="dialog" aria-modal="true" aria-label={tr("模板库")}>
       <div className="tpl-dialog__backdrop" onClick={close} />
       <section className="tpl-dialog__panel">
         <header className="tpl-dialog__head">
           <h2 className="tpl-dialog__title">
-            <LayoutTemplate size={16} /> 模板库
-          </h2>
-          <span className="tpl-dialog__hint">浏览工程模板，一键套用为完整时间线</span>
-          <button className="tpl-dialog__close" onClick={close} aria-label="关闭模板库">
+            <LayoutTemplate size={16} />{tr(" 模板库")}</h2>
+          <span className="tpl-dialog__hint">{tr("浏览工程模板，一键套用为完整时间线")}</span>
+          <button className="tpl-dialog__close" onClick={close} aria-label={tr("关闭模板库")}>
             <X size={16} />
           </button>
         </header>
@@ -176,15 +177,14 @@ export function TemplateGallery() {
           <div className="tpl-skip" role="alert">
             <AlertTriangle size={14} />
             <span>
-              {skipped.length} 个模板加载失败（已跳过）：
-              {skipped.map((s) => s.name || s.id || "未知").join("、")}
+              {skipped.length}{tr(" 个模板加载失败（已跳过）：")}{skipped.map((s) => s.name || s.id || tr("未知")).join("、")}
             </span>
           </div>
         )}
 
         <div className="tpl-filters">
           <div className="tpl-filters__group">
-            <span className="tpl-filters__label">画幅</span>
+            <span className="tpl-filters__label">{tr("画幅")}</span>
             {ASPECT_OPTIONS.map((a) => (
               <button
                 key={a}
@@ -192,19 +192,17 @@ export function TemplateGallery() {
                 onClick={() => setAspect(a)}
                 aria-pressed={aspect === a}
               >
-                {a === "all" ? "全部" : a}
+                {a === "all" ? tr("全部") : a}
               </button>
             ))}
           </div>
           <div className="tpl-filters__group">
-            <span className="tpl-filters__label">分类</span>
+            <span className="tpl-filters__label">{tr("分类")}</span>
             <button
               className={`tpl-chip ${category === "all" ? "tpl-chip--on" : ""}`}
               onClick={() => setCategory("all")}
               aria-pressed={category === "all"}
-            >
-              全部
-            </button>
+            >{tr("全部")}</button>
             {categories.map((c) => (
               <button
                 key={c}
@@ -222,20 +220,19 @@ export function TemplateGallery() {
           {loading ? (
             <div className="tpl-state">
               <RefreshCw size={18} className="tpl-spin" />
-              <p>正在加载模板…</p>
+              <p>{tr("正在加载模板…")}</p>
             </div>
           ) : loadErr ? (
             <div className="tpl-state tpl-state--err">
               <AlertTriangle size={18} />
-              <p>模板加载失败：{loadErr}</p>
+              <p>{tr("模板加载失败：")}{loadErr}</p>
               <Button variant="secondary" size="sm" onClick={() => void load()}>
-                <RefreshCw size={13} /> 重试
-              </Button>
+                <RefreshCw size={13} />{tr(" 重试")}</Button>
             </div>
           ) : visible.length === 0 ? (
             <div className="tpl-state">
               <Layers size={18} />
-              <p>没有匹配的模板。换个画幅或分类筛选试试。</p>
+              <p>{tr("没有匹配的模板。换个画幅或分类筛选试试。")}</p>
             </div>
           ) : (
             <ul className="tpl-grid">
@@ -248,21 +245,19 @@ export function TemplateGallery() {
                   <p className="tpl-card__desc">{t.description}</p>
                   <div className="tpl-card__meta">
                     <span>
-                      <Layers size={12} /> {t.slotCount} 槽位
-                    </span>
+                      <Layers size={12} /> {t.slotCount}{tr(" 槽位")}</span>
                     <span>
                       <Clock size={12} /> {fmtSec(t.estimatedSeconds)}
                     </span>
                     <span>
-                      <Captions size={12} /> {t.captionCount} 字幕
-                    </span>
+                      <Captions size={12} /> {t.captionCount}{tr(" 字幕")}</span>
                   </div>
                   <div className="tpl-card__tags">
                     <Badge tone={t.hasBgm ? "ok" : "neutral"}>
-                      <Music size={11} /> {t.hasBgm ? "含背景音乐" : "无背景音乐"}
+                      <Music size={11} /> {t.hasBgm ? tr("含背景音乐") : tr("无背景音乐")}
                     </Badge>
                     <Badge tone={t.transition ? "video" : "neutral"}>
-                      <Scissors size={11} /> {t.transition ? `转场 ${t.transition}` : "无转场"}
+                      <Scissors size={11} /> {t.transition ? tr("转场 {0}", t.transition) : tr("无转场")}
                     </Badge>
                   </div>
                   <button
@@ -271,10 +266,8 @@ export function TemplateGallery() {
                       setConfirming(t);
                       setApplyErr(null);
                     }}
-                    aria-label={`套用模板 ${t.name}`}
-                  >
-                    套用
-                  </button>
+                    aria-label={tr("套用模板 {0}", t.name)}
+                  >{tr("套用")}</button>
                 </li>
               ))}
             </ul>

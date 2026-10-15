@@ -1,3 +1,5 @@
+import { msg, tr, useLocale } from "../../i18n";
+import { backendMessage } from "../../i18n/backendMessages";
 import { useEffect, useState } from "react";
 import { Check, Loader2, Scissors, X } from "lucide-react";
 import {
@@ -28,6 +30,7 @@ export function PersonCutoutSection({
   clipId: string | null;
   readOnly: boolean;
 }) {
+  useLocale();
   const { state, dispatch } = useEditor();
   const [availability, setAvailability] = useState<PersonCutoutStatus | null>(null);
   const [job, setJob] = useState<PersonCutoutJob | null>(null);
@@ -155,14 +158,14 @@ export function PersonCutoutSection({
     const frames = [...promptFrames];
     if (trackingMode === "sam2" && selectionPoints.length > 0) {
       if (!promptTimeValid) {
-        setStatusError("提示帧时间必须位于所选片段的源素材范围内。");
+        setStatusError(tr("提示帧时间必须位于所选片段的源素材范围内。"));
         return;
       }
       const atSeconds = Number(promptTime.toFixed(3));
       const existing = frames.find((frame) => Math.abs(frame.atSeconds - atSeconds) < 0.001);
       const points = existing ? [...existing.points, ...selectionPoints] : selectionPoints;
       if (points.length > 8) {
-        setStatusError("同一帧最多保存 8 个正向或排除点。");
+        setStatusError(tr("同一帧最多保存 8 个正向或排除点。"));
         return;
       }
       if (existing) {
@@ -176,11 +179,11 @@ export function PersonCutoutSection({
     frames.sort((a, b) => a.atSeconds - b.atSeconds);
     if (selectionMode === "selected" &&
         (!frames.length || !frames.some((frame) => frame.points.some((point) => point.label === 1)))) {
-      setStatusError("至少在一个提示帧上点选目标人物。");
+      setStatusError(tr("至少在一个提示帧上点选目标人物。"));
       return;
     }
     if (frames.length > 16) {
-      setStatusError("SAM2 最多支持 16 个提示帧。");
+      setStatusError(tr("SAM2 最多支持 16 个提示帧。"));
       return;
     }
     const primaryPromptPoints = frames[0]?.points ?? selectionPoints;
@@ -234,7 +237,7 @@ export function PersonCutoutSection({
       await refreshProject(dispatch, projectId);
       dispatch({ type: "UNDO_SET", blocked: false });
       saveJob(applied.job);
-      dispatch({ type: "STATUS_SET", severity: "ok", text: "人物抠像已应用；可撤销恢复原片" });
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("人物抠像已应用；可撤销恢复原片") });
     } catch (error) {
       showError(dispatch, error);
       try {
@@ -252,15 +255,15 @@ export function PersonCutoutSection({
       <div className="person-cutout__heading">
         <span className="person-cutout__icon"><Scissors size={14} /></span>
         <div>
-          <h3 id="person-cutout-title">人物抠像</h3>
-          <p>本机生成透明视频，可叠加到其他画面</p>
+          <h3 id="person-cutout-title">{tr("人物抠像")}</h3>
+          <p>{tr("本机生成透明视频，可叠加到其他画面")}</p>
         </div>
       </div>
 
-      {statusError ? <p className="person-cutout__message person-cutout__message--error" role="alert">{statusError}</p> : null}
+      {statusError ? <p className="person-cutout__message person-cutout__message--error" role="alert"><strong>{tr("人物处理未完成，请检查下面的提示。")}</strong><br /><span dir="auto">{statusError}</span></p> : null}
       {!availability?.ready ? (
         <div className="person-cutout__setup" role="status">
-          <p>{availability?.message || "正在检查本机抠像组件…"}</p>
+          <p>{availability?.message || tr("正在检查本机抠像组件…")}</p>
           {availability && !availability.installed ? <code>pip install "cutvoke[person]"</code> : null}
           {availability?.installed && !availability.modelReady
             ? <code>uv run cutvoke-person-model</code> : null}
@@ -270,23 +273,21 @@ export function PersonCutoutSection({
       ) : (
         <>
           <p className="person-cutout__message person-cutout__message--success">
-            {availability.message}
+            {backendMessage(availability.message)}
           </p>
           <label className="person-cutout__softness">
-            <span>边缘柔化 <strong>{edgeSoftness.toFixed(1)} px</strong></span>
-            <input aria-label="人物抠像边缘柔化" type="range" min="0" max="8" step="0.2"
+            <span>{tr("边缘柔化 ")}<strong>{edgeSoftness.toFixed(1)} px</strong></span>
+            <input aria-label={tr("人物抠像边缘柔化")} type="range" min="0" max="8" step="0.2"
               value={edgeSoftness} disabled={!!busy || jobCanCancel}
               onChange={(event) => setEdgeSoftness(Number(event.target.value))} />
           </label>
           <fieldset className="person-cutout__selection" disabled={!!busy || jobCanCancel || readOnly}>
-            <legend>人物范围</legend>
+            <legend>{tr("人物范围")}</legend>
             <label>
               <input type="radio" name="person-cutout-selection" value="all"
                 checked={selectionMode === "all"}
                 disabled={!availability?.modelReady}
-                onChange={() => { setSelectionMode("all"); setTrackingMode("semantic"); setSelectionPoints([]); setPromptFrames([]); }} />
-              保留所有可见人物
-            </label>
+                onChange={() => { setSelectionMode("all"); setTrackingMode("semantic"); setSelectionPoints([]); setPromptFrames([]); }} />{tr("保留所有可见人物")}</label>
             <label>
               <input type="radio" name="person-cutout-selection" value="selected"
                 checked={selectionMode === "selected"}
@@ -297,39 +298,35 @@ export function PersonCutoutSection({
                   setPromptFrames([]);
                   setTrackingMode(availability?.sam2Ready && !availability.modelReady ? "sam2" : "semantic");
                   setPreviewFailed(false);
-                }} />
-              只保留我点选的人物
-            </label>
+                }} />{tr("只保留我点选的人物")}</label>
           </fieldset>
           {selectionMode === "selected" && projectId && clipId ? (
             <div className="person-cutout__picker">
-              <p>点选人物添加提示点；SAM2 模式支持在后续帧追加纠正点，按住 Shift 点其他人可添加排除点。</p>
+              <p>{tr("点选人物添加提示点；SAM2 模式支持在后续帧追加纠正点，按住 Shift 点其他人可添加排除点。")}</p>
               <label className="person-cutout__tracking">
-                <span>跟踪方式</span>
-                <select aria-label="人物抠像跟踪方式" value={trackingMode}
+                <span>{tr("跟踪方式")}</span>
+                <select aria-label={tr("人物抠像跟踪方式")} value={trackingMode}
                   disabled={!!busy || jobCanCancel || readOnly}
                   onChange={(event) => {
                     setTrackingMode(event.target.value as "semantic" | "magic_touch" | "sam2");
                     setPromptFrames([]);
                     setSelectionPoints([]);
                   }}>
-                  <option value="semantic" disabled={!availability?.modelReady}>轮廓连续跟踪</option>
-                  <option value="magic_touch" disabled={!availability?.interactiveModelReady}>
-                    MagicTouch 点提示逐帧重分割
-                  </option>
-                  <option value="sam2" disabled={!availability?.sam2Ready}>SAM2 视频身份跟踪</option>
+                  <option value="semantic" disabled={!availability?.modelReady}>{tr("轮廓连续跟踪")}</option>
+                  <option value="magic_touch" disabled={!availability?.interactiveModelReady}>{tr("MagicTouch 点提示逐帧重分割")}</option>
+                  <option value="sam2" disabled={!availability?.sam2Ready}>{tr("SAM2 视频身份跟踪")}</option>
                 </select>
               </label>
               {!availability?.interactiveModelReady
-                ? <p className="person-cutout__message">准备可选模型：<code>uv run cutvoke-person-model --interactive</code></p>
+                ? <p className="person-cutout__message">{tr("准备可选模型：")}<code>uv run cutvoke-person-model --interactive</code></p>
                 : null}
               {!availability?.sam2Ready
-                ? <p className="person-cutout__message">安装更强的视频身份跟踪：<code>uv run cutvoke-person-model --sam2</code></p>
+                ? <p className="person-cutout__message">{tr("安装更强的视频身份跟踪：")}<code>uv run cutvoke-person-model --sam2</code></p>
                 : null}
               {trackingMode === "sam2" ? (
                 <label className="person-cutout__prompt-time">
-                  <span>预览源素材时间（秒）</span>
-                  <input aria-label="SAM2 提示帧源素材时间" type="number" min={sourceStartSeconds}
+                  <span>{tr("预览源素材时间（秒）")}</span>
+                  <input aria-label={tr("SAM2 提示帧源素材时间")} type="number" min={sourceStartSeconds}
                     max={Math.max(sourceStartSeconds, sourceEndSeconds - 0.001)} step="0.1"
                     value={promptAtSeconds} disabled={!!busy || jobCanCancel || readOnly}
                     onChange={(event) => {
@@ -339,12 +336,10 @@ export function PersonCutoutSection({
                 </label>
               ) : null}
               {previewFailed ? (
-                <p className="person-cutout__message person-cutout__message--error" role="alert">
-                  无法提取当前源素材时间的预览帧，请检查原视频或先重新链接素材。
-                </p>
+                <p className="person-cutout__message person-cutout__message--error" role="alert">{tr("无法提取当前源素材时间的预览帧，请检查原视频或先重新链接素材。")}</p>
               ) : (
                 <button className="person-cutout__frame" type="button"
-                  aria-label="点选要保留的人物"
+                  aria-label={tr("点选要保留的人物")}
                   onClick={(event) => {
                     const image = event.currentTarget.querySelector("img");
                     if (!image?.naturalWidth || !image.naturalHeight) return;
@@ -364,7 +359,7 @@ export function PersonCutoutSection({
                   }}>
                   <img src={personCutoutPreviewUrl(projectId, clipId,
                     trackingMode === "sam2" && promptTimeValid ? promptTime : sourceStartSeconds)}
-                    alt={trackingMode === "sam2" ? `源素材 ${promptAtSeconds} 秒画面` : "片段源入点画面"}
+                    alt={trackingMode === "sam2" ? tr("源素材 {0} 秒画面", promptAtSeconds) : tr("片段源入点画面")}
                     onError={() => setPreviewFailed(true)} />
                   {selectionPoints.map((point, index) => <span
                     key={`${index}-${point.x.toFixed(3)}-${point.y.toFixed(3)}`}
@@ -374,10 +369,9 @@ export function PersonCutoutSection({
               )}
               {selectionPoints.length > 0 ? <div className="person-cutout__prompt-actions">
                 <p className="person-cutout__message">
-                  {selectionPoints.filter((point) => point.label === 1).length} 个人物点 · {selectionPoints.filter((point) => point.label === 0).length} 个排除点
-                </p>
+                  {selectionPoints.filter((point) => point.label === 1).length}{tr(" 个人物点 · ")}{selectionPoints.filter((point) => point.label === 0).length}{tr(" 个排除点")}</p>
                 <button type="button" className="person-cutout__clear-points"
-                  onClick={() => setSelectionPoints([])}>清除点位</button>
+                  onClick={() => setSelectionPoints([])}>{tr("清除点位")}</button>
               </div> : null}
               {trackingMode === "sam2" ? (
                 <>
@@ -389,11 +383,11 @@ export function PersonCutoutSection({
                       const existing = promptFrames.find((frame) =>
                         Math.abs(frame.atSeconds - atSeconds) < 0.001);
                       if (existing && existing.points.length + selectionPoints.length > 8) {
-                        setStatusError("同一帧最多保存 8 个正向或排除点。");
+                        setStatusError(tr("同一帧最多保存 8 个正向或排除点。"));
                         return;
                       }
                       if (!existing && promptFrames.length >= 16) {
-                        setStatusError("SAM2 最多支持 16 个提示帧。");
+                        setStatusError(tr("SAM2 最多支持 16 个提示帧。"));
                         return;
                       }
                       setPromptFrames((current) => {
@@ -407,26 +401,24 @@ export function PersonCutoutSection({
                       });
                       setSelectionPoints([]);
                       setStatusError("");
-                    }}>
-                    保存此帧提示
-                  </button>
+                    }}>{tr("保存此帧提示")}</button>
                   {promptFrames.length > 0 ? (
-                    <div className="person-cutout__saved-prompts" aria-label="已保存的 SAM2 提示帧">
+                    <div className="person-cutout__saved-prompts" aria-label={tr("已保存的 SAM2 提示帧")}>
                       {promptFrames.map((frame) => (
                         <div className="person-cutout__saved-prompt" key={frame.atSeconds}>
-                          <span>{frame.atSeconds.toFixed(2)} 秒 · {frame.points.length} 点</span>
-                          <button type="button" aria-label={`编辑 ${frame.atSeconds.toFixed(2)} 秒提示帧`}
+                          <span>{frame.atSeconds.toFixed(2)}{tr(" 秒 · ")}{frame.points.length}{tr(" 点")}</span>
+                          <button type="button" aria-label={tr("编辑 {0} 秒提示帧", frame.atSeconds.toFixed(2))}
                             disabled={!!busy || jobCanCancel || readOnly}
                             onClick={() => {
                               setPromptAtSeconds(String(frame.atSeconds));
                               setSelectionPoints([...frame.points]);
                               setPromptFrames((current) => current.filter((item) => item !== frame));
                               setPreviewFailed(false);
-                            }}>编辑</button>
-                          <button type="button" aria-label={`移除 ${frame.atSeconds.toFixed(2)} 秒提示帧`}
+                            }}>{tr("编辑")}</button>
+                          <button type="button" aria-label={tr("移除 {0} 秒提示帧", frame.atSeconds.toFixed(2))}
                             disabled={!!busy || jobCanCancel || readOnly}
                             onClick={() => setPromptFrames((current) =>
-                              current.filter((item) => item !== frame))}>移除</button>
+                              current.filter((item) => item !== frame))}>{tr("移除")}</button>
                         </div>
                       ))}
                     </div>
@@ -435,59 +427,52 @@ export function PersonCutoutSection({
               ) : null}
               {hasSelectionPrompt ? <p className="person-cutout__message">
                 {trackingMode === "sam2"
-                  ? "SAM2 会从提示帧向前、向后跟踪人物；遮挡后可调整时间并保存纠正提示帧。"
+                  ? tr("SAM2 会从提示帧向前、向后跟踪人物；遮挡后可调整时间并保存纠正提示帧。")
                   : trackingMode === "magic_touch"
-                  ? "已选中提示点；MagicTouch 每帧重新分割可见区域，完全遮挡或人物接触时仍可能丢失或合并。"
-                  : "已选中画面目标；轮廓交叠或接触时可能丢失或合并。"}
-              </p> : <p className="person-cutout__message">请先在画面人物躯干上点一个正向提示点。</p>}
+                  ? tr("已选中提示点；MagicTouch 每帧重新分割可见区域，完全遮挡或人物接触时仍可能丢失或合并。")
+                  : tr("已选中画面目标；轮廓交叠或接触时可能丢失或合并。")}
+              </p> : <p className="person-cutout__message">{tr("请先在画面人物躯干上点一个正向提示点。")}</p>}
             </div>
           ) : null}
           {job ? (
             <div className="person-cutout__job" role="status" aria-live="polite">
               <div className="person-cutout__phase">
-                <span>{job.phase}</span>
+                <span>{backendMessage(job.phase)}</span>
                 <span>{job.status === "completed" || job.status === "applied" ? <Check size={13} /> : `${job.progress}%`}</span>
               </div>
-              <div className="person-cutout__progress" aria-label={`抠像进度 ${job.progress}%`}>
+              <div className="person-cutout__progress" aria-label={tr("抠像进度 {0}%", job.progress)}>
                 <span style={{ width: `${Math.max(0, Math.min(100, job.progress))}%` }} />
               </div>
-              {job.error ? <p className="person-cutout__message person-cutout__message--error">{job.error}</p> : null}
+              {job.error ? <p className="person-cutout__message person-cutout__message--error"><strong>{tr("人物处理未完成，请检查下面的提示。")}</strong><br /><span dir="auto">{job.error}</span></p> : null}
               {job.result ? <>
                 <p className="person-cutout__meta">
-                  {job.result.frameCount} 帧 · {job.result.durationSeconds.toFixed(1)} 秒
-                  {job.result.audioPreserved ? " · 已保留原音频" : " · 无源音频"}
+                  {job.result.frameCount}{tr(" 帧 · ")}{job.result.durationSeconds.toFixed(1)}{tr(" 秒")}{job.result.audioPreserved ? tr(" · 已保留原音频") : tr(" · 无源音频")}
                   {job.selectionMode === "selected_person"
                     ? <>
-                      {job.trackingMode === "sam2" ? " · SAM2 视频身份跟踪" :
-                        job.trackingMode === "magic_touch" ? " · MagicTouch 点提示跟踪" : " · 单人轮廓跟踪"}
+                      {job.trackingMode === "sam2" ? tr(" · SAM2 视频身份跟踪") :
+                        job.trackingMode === "magic_touch" ? tr(" · MagicTouch 点提示跟踪") : tr(" · 单人轮廓跟踪")}
                       {typeof job.result.selectedFrames === "number"
-                        ? ` · 跟踪 ${job.result.selectedFrames}/${job.result.frameCount} 帧 · 丢失 ${job.result.lostFrames ?? 0} 帧`
+                        ? tr(" · 跟踪 {0}/{1} 帧 · 丢失 {2} 帧", job.result.selectedFrames, job.result.frameCount, job.result.lostFrames ?? 0)
                         : ""}
                     </>
-                    : " · 全人物"}
+                    : tr(" · 全人物")}
                 </p>
                 {job.selectionMode === "selected_person" && (job.result.lostFrames ?? 0) > 0 ? (
-                  <p className="person-cutout__message person-cutout__message--warning" role="alert">
-                    跟踪丢失 {job.result.lostFrames} 帧，输出对应区间可能透明断开；建议先检查结果画面，再应用到片段。
-                  </p>
+                  <p className="person-cutout__message person-cutout__message--warning" role="alert">{tr("跟踪丢失 ")}{job.result.lostFrames}{tr(" 帧，输出对应区间可能透明断开；建议先检查结果画面，再应用到片段。")}</p>
                 ) : null}
               </> : null}
               {job.status === "completed" && !jobMatchesSelection
-                ? <p className="person-cutout__message">选择原片段后即可应用生成结果。</p> : null}
+                ? <p className="person-cutout__message">{tr("选择原片段后即可应用生成结果。")}</p> : null}
               {job.status === "applied"
-                ? <p className="person-cutout__message person-cutout__message--success">已替换片段素材，撤销可恢复原片。</p> : null}
+                ? <p className="person-cutout__message person-cutout__message--success">{tr("已替换片段素材，撤销可恢复原片。")}</p> : null}
               <div className="person-cutout__actions">
                 {jobCanCancel ? (
                   <Button variant="secondary" size="sm" disabled={!!busy} onClick={() => void handleCancel()}>
-                    {busy === "cancel" ? <Loader2 size={12} className="cv-spin" /> : <X size={12} />}
-                    取消
-                  </Button>
+                    {busy === "cancel" ? <Loader2 size={12} className="cv-spin" /> : <X size={12} />}{tr("取消")}</Button>
                 ) : null}
                 {jobCanApply ? (
                   <Button variant="primary" size="sm" disabled={!!busy} onClick={() => void handleApply()}>
-                    {busy === "apply" ? <Loader2 size={12} className="cv-spin" /> : <Check size={12} />}
-                    应用到片段
-                  </Button>
+                    {busy === "apply" ? <Loader2 size={12} className="cv-spin" /> : <Check size={12} />}{tr("应用到片段")}</Button>
                 ) : null}
               </div>
             </div>
@@ -497,11 +482,11 @@ export function PersonCutoutSection({
               (selectionMode === "selected" && !hasSelectionPrompt)}
             onClick={() => void handleStart()}>
             {busy === "start" ? <Loader2 size={12} className="cv-spin" /> : <Scissors size={12} />}
-            {job?.status === "failed" || job?.status === "cancelled" ? "重新抠像" :
-              selectionMode === "selected" ? "跟踪并抠出所选人物" : "开始抠像"}
+            {job?.status === "failed" || job?.status === "cancelled" ? tr("重新抠像") :
+              selectionMode === "selected" ? tr("跟踪并抠出所选人物") : tr("开始抠像")}
           </Button>
-          {!selectedIsVideo ? <p className="person-cutout__message">先选中普通视频轨道上的一个片段。</p> : null}
-          {readOnly && selectedIsVideo ? <p className="person-cutout__message">当前片段不可编辑，解锁后可应用抠像结果。</p> : null}
+          {!selectedIsVideo ? <p className="person-cutout__message">{tr("先选中普通视频轨道上的一个片段。")}</p> : null}
+          {readOnly && selectedIsVideo ? <p className="person-cutout__message">{tr("当前片段不可编辑，解锁后可应用抠像结果。")}</p> : null}
         </>
       )}
     </section>

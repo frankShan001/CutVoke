@@ -386,7 +386,7 @@ test("resource catalog load failures show the cause and can be retried", async (
   await openProject(page, name);
 
   let failNextRequest = true;
-  await page.route("**/resources", async (route) => {
+  await page.route("**/resources?*", async (route) => {
     if (failNextRequest) {
       failNextRequest = false;
       await route.fulfill({
@@ -417,7 +417,7 @@ test("resource catalog load failures show the cause and can be retried", async (
   const applyPreset = samplePreset.getByRole("button", { name: "应用" });
   await expect(applyPreset).toBeDisabled();
   await expect(applyPreset).toHaveAttribute("title", "请先选中片段；样片仍可播放");
-  await page.unroute("**/resources");
+  await page.unroute("**/resources?*");
 });
 
 test("text title preset failures show an in-domain retry", async ({ page, request }) => {
@@ -675,7 +675,7 @@ test("six resource services can fail together and recover independently across d
     await route.fulfill({ status: 503, contentType: "application/json",
       body: JSON.stringify({ error: { message: "模拟贴纸服务暂时不可用" } }) });
   });
-  await page.route("**/api/v1/projects/*/resources", async (route) => {
+  await page.route("**/api/v1/projects/*/resources?*", async (route) => {
     await effectFailureGate;
     if (effectsAvailable) return route.continue();
     await route.fulfill({ status: 503, contentType: "application/json",
@@ -787,14 +787,14 @@ test("six resource services can fail together and recover independently across d
   await expect(registry.getByRole("alert")).toHaveCount(0);
   await page.unroute("**/api/v1/assets");
   await page.unroute("**/api/v1/stickers");
-  await page.unroute("**/api/v1/projects/*/resources");
+  await page.unroute("**/api/v1/projects/*/resources?*");
   await page.unroute("**/api/v1/presets");
 });
 
 const isolatedResourceFailures = [
   { id: "assets", label: "素材", route: "**/api/v1/assets", message: "模拟素材单域故障" },
   { id: "stickers", label: "贴纸", route: "**/api/v1/stickers", message: "模拟贴纸单域故障" },
-  { id: "effects", label: "效果目录", route: "**/api/v1/projects/*/resources", message: "模拟效果目录单域故障" },
+  { id: "effects", label: "效果目录", route: "**/api/v1/projects/*/resources?*", message: "模拟效果目录单域故障" },
   { id: "packs", label: "资源包状态", route: "**/api/v1/resource-packs", message: "模拟资源包状态单域故障" },
   { id: "registries", label: "在线资源目录", route: "**/api/v1/resource-packs/registries", message: "模拟在线目录单域故障" },
   { id: "presets", label: "内置预设", route: "**/api/v1/presets", message: "模拟内置预设单域故障" },
@@ -1050,7 +1050,7 @@ test("eight creative domains share keyboard navigation and preserve the selected
   let finishRefresh!: () => void;
   const refreshGate = new Promise<void>((resolve) => { finishRefresh = resolve; });
   let refreshRequests = 0;
-  await page.route(/\/api\/v1\/projects\/[^/]+\/resources$/, async (route) => {
+  await page.route(/\/api\/v1\/projects\/[^/]+\/resources(?:\?.*)?$/, async (route) => {
     refreshRequests++;
     await refreshGate;
     const response = await route.fetch();
@@ -1069,9 +1069,9 @@ test("eight creative domains share keyboard navigation and preserve the selected
   finishRefresh();
   await expect(page.locator(".resource-grid:visible:not(.resource-preset-grid)")
     .getByText("Fresh catalog proof", { exact: true })).toBeVisible();
-  await page.unroute(/\/api\/v1\/projects\/[^/]+\/resources$/);
+  await page.unroute(/\/api\/v1\/projects\/[^/]+\/resources(?:\?.*)?$/);
   const pending: Array<{ release: () => void; done: Promise<void> }> = [];
-  await page.route(/\/api\/v1\/projects\/[^/]+\/resources$/, async (route) => {
+  await page.route(/\/api\/v1\/projects\/[^/]+\/resources(?:\?.*)?$/, async (route) => {
     const response = await route.fetch();
     const catalog = await response.json();
     const index = pending.length;

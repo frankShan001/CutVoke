@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../../i18n";
 /** 轨道泳道（配合共享拖拽系统）。
     - 片段整体拖动 → Timeline 全局拖拽（同轨 / 跨轨 = clip.move）。
     - 左/右缘拖拽 = clip.trim（本地 overlay + 释放提交，只改一端）。
@@ -89,6 +90,7 @@ export const TrackRow = memo(function TrackRow({
   effectSpecs: EffectSpec[];
   viewport: TimelineViewport;
 }) {
+  const locale = useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   useSessionAssets();
   const isAudio = track.kind === "audio";
@@ -122,19 +124,19 @@ export const TrackRow = memo(function TrackRow({
 
   const laneFocused = state.selection?.trackId === track.id && !state.selection?.clipId;
   const isPrimaryVideo = !isAudio && state.project?.sequence.tracks.find((item) => item.kind === "video" && item.role !== "sticker")?.id === track.id;
-  const orderedClips = useMemo(() => [...track.clips].sort((a, b) => clipStartSecs(a) - clipStartSecs(b)), [track.clips]);
+  const orderedClips = useMemo(() => [...track.clips].sort((a, b) => clipStartSecs(a) - clipStartSecs(b)), [track.clips, locale]);
   const visibleClips = useMemo(() => track.clips.filter((clip) =>
     track.clips.length <= 100 || (clipEndSecs(clip) >= viewport.start && clipStartSecs(clip) <= viewport.end) ||
     clip.id === state.selection?.clipId || clip.id === dragApi.active?.clipId || clip.id === trim?.clipId || clip.id === menuTarget?.clipId),
-  [track.clips, viewport, state.selection?.clipId, dragApi.active?.clipId, trim?.clipId, menuTarget?.clipId]);
+  [track.clips, viewport, state.selection?.clipId, dragApi.active?.clipId, trim?.clipId, menuTarget?.clipId, locale]);
   const attachments = useMemo(() => {
     const counts = new Map<string, number>();
     for (const other of state.project?.sequence.tracks || []) for (const clip of other.clips) {
       if (clip.attachedToClipId) counts.set(clip.attachedToClipId, (counts.get(clip.attachedToClipId) || 0) + 1);
     }
     return counts;
-  }, [state.project]);
-  const previousClips = useMemo(() => new Map(orderedClips.map((clip, index) => [clip.id, orderedClips[index - 1]])), [orderedClips]);
+  }, [state.project, locale]);
+  const previousClips = useMemo(() => new Map(orderedClips.map((clip, index) => [clip.id, orderedClips[index - 1]])), [orderedClips, locale]);
   const visibleGaps = useMemo(() => isPrimaryVideo ? orderedClips.flatMap((clip, index) => {
     const start = index > 0 ? clipEndSecs(orderedClips[index - 1]) : 0;
     const end = clipStartSecs(clip);
@@ -142,8 +144,8 @@ export const TrackRow = memo(function TrackRow({
     const covered = state.project?.sequence.tracks.some((other) =>
       other.id !== track.id && other.kind === "video" && other.visible !== false &&
       other.clips.some((item) => clipStartSecs(item) < end && clipEndSecs(item) > start));
-    return [{ clipId: clip.id, start, end, label: covered ? "主轨空隙" : "黑场空隙" }];
-  }) : [], [isPrimaryVideo, orderedClips, frameDuration, viewport, state.project, track.id]);
+    return [{ clipId: clip.id, start, end, label: covered ? tr("主轨空隙") : tr("黑场空隙") }];
+  }) : [], [isPrimaryVideo, orderedClips, frameDuration, viewport, state.project, track.id, locale]);
 
   // Source metadata is only needed for a selected clip's trim handles. Library
   // durations already exist; probing every clip here starved preview requests.
@@ -172,7 +174,7 @@ export const TrackRow = memo(function TrackRow({
       e.preventDefault();
       e.stopPropagation();
       if (locked) {
-        dispatch({ type: "STATUS_SET", severity: "warn", text: "此轨道已锁定，解锁后才能切割片段" });
+        dispatch({ type: "STATUS_SET", severity: "warn", text: msg("此轨道已锁定，解锁后才能切割片段") });
         return;
       }
       const cs = rationalToSecs(clip.timelineStart);
@@ -181,7 +183,7 @@ export const TrackRow = memo(function TrackRow({
       if (st.playhead > cs + frameDuration / 2 && st.playhead < ce - frameDuration / 2) {
         void splitClip(dispatch, st, { clipId: clip.id, time: secsToFrameRatString(st.playhead, frameRate) });
       } else {
-        dispatch({ type: "STATUS_SET", severity: "warn", text: "播放头需在片段内部才能分割" });
+        dispatch({ type: "STATUS_SET", severity: "warn", text: msg("播放头需在片段内部才能分割") });
       }
     } else {
       dispatch({ type: "SELECTION_SET", selection: { trackId: track.id, clipId: clip.id } });
@@ -217,20 +219,20 @@ export const TrackRow = memo(function TrackRow({
     event.stopPropagation();
     setTransitionDropAt(null);
     if (locked || agentLocked) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: "轨道已锁定或 Agent 正在编辑，不能应用转场" });
+      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("轨道已锁定或 Agent 正在编辑，不能应用转场") });
       return;
     }
     if (!previous || Math.abs(clipStartSecs(clip) - clipEndSecs(previous)) > 0.001) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: "两段之间有空隙，先贴合片段再应用转场" });
+      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("两段之间有空隙，先贴合片段再应用转场") });
       return;
     }
     try {
       const payload = JSON.parse(event.dataTransfer.getData(TRANSITION_DND_TYPE)) as { effectId?: string; duration?: number };
-      if (!payload.effectId || !isTransitionEffectId(payload.effectId)) throw new Error("无效转场资源");
+      if (!payload.effectId || !isTransitionEffectId(payload.effectId)) throw new Error(tr("无效转场资源"));
       const maxDuration = Math.min(5,
         (clipEndSecs(previous) - clipStartSecs(previous)) / 2,
         (clipEndSecs(clip) - clipStartSecs(clip)) / 2);
-      if (maxDuration < 0.1) throw new Error("相邻片段过短，无法形成转场");
+      if (maxDuration < 0.1) throw new Error(tr("相邻片段过短，无法形成转场"));
       const requested = typeof payload.duration === "number" && Number.isFinite(payload.duration)
         ? payload.duration : 1;
       const duration = Math.round(Math.min(maxDuration, Math.max(0.1, requested)) * 1000) / 1000;
@@ -244,7 +246,7 @@ export const TrackRow = memo(function TrackRow({
           window.dispatchEvent(new Event("cutvoke:open-transition"));
         });
     } catch (error) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: error instanceof Error ? error.message : "无效转场资源" });
+      dispatch({ type: "STATUS_SET", severity: "warn", text: error instanceof Error ? error.message : msg("无效转场资源") });
     }
   };
 
@@ -299,7 +301,7 @@ export const TrackRow = memo(function TrackRow({
     const index = ordered.findIndex((item) => item.id === clip.id);
     const neighbor = ordered[index + direction];
     if (!neighbor) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: "已经是该轨道的首段或末段" });
+      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("已经是该轨道的首段或末段") });
       return;
     }
     void moveClip(dispatch, latest, {
@@ -324,7 +326,7 @@ export const TrackRow = memo(function TrackRow({
     e.preventDefault();
     e.stopPropagation();
     if (locked) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: "此轨道已锁定，解锁后才能添加素材" });
+      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("此轨道已锁定，解锁后才能添加素材") });
       return;
     }
     // 计算 drop 时间线位置（px→sec）
@@ -343,8 +345,8 @@ export const TrackRow = memo(function TrackRow({
               type: "STATUS_SET",
               severity: "warn",
               text: media.kind === "audio"
-                ? "音频素材不能放到视频轨；拖到下方空白处会自动创建音频轨"
-                : "此素材不是音频，不能放到音频轨",
+                ? msg("音频素材不能放到视频轨；拖到下方空白处会自动创建音频轨")
+                : msg("此素材不是音频，不能放到音频轨"),
             });
             return;
           }
@@ -357,7 +359,7 @@ export const TrackRow = memo(function TrackRow({
             timelineStartSecs: at,
           });
         },
-        (name, message) => dispatch({ type: "STATUS_SET", severity: "warn", text: `导入 ${name} 失败：${message}` }),
+        (name, message) => dispatch({ type: "STATUS_SET", severity: "warn", text: msg("导入 {0} 失败：{1}", name, message) }),
       );
       return;
     }
@@ -386,8 +388,8 @@ export const TrackRow = memo(function TrackRow({
         type: "STATUS_SET",
         severity: "warn",
         text: mediaKind === "audio"
-          ? "音频素材不能放到视频轨；拖到下方空白处会自动创建音频轨"
-          : "此素材不是音频，不能放到音频轨",
+          ? msg("音频素材不能放到视频轨；拖到下方空白处会自动创建音频轨")
+          : msg("此素材不是音频，不能放到音频轨"),
       });
       return;
     }
@@ -518,7 +520,7 @@ export const TrackRow = memo(function TrackRow({
         void trimClip(dispatch, ctx, { clipId: t.clipId, newEnd: secsToFrameRatString(ne, commitFrameRate) });
       }
       if (t.sourceDuration != null && ne < requested - minDuration / 2) {
-        dispatch({ type: "STATUS_SET", severity: "warn", text: "已到源素材末尾，不能继续延长" });
+        dispatch({ type: "STATUS_SET", severity: "warn", text: msg("已到源素材末尾，不能继续延长") });
       }
     }
     setTrim(null);
@@ -555,9 +557,9 @@ export const TrackRow = memo(function TrackRow({
               e.stopPropagation();
               handleToggle("locked", !locked);
             }}
-            aria-label={locked ? `解锁轨道 ${track.id}` : `锁定轨道 ${track.id}`}
+            aria-label={locked ? tr("解锁轨道 {0}", track.id) : tr("锁定轨道 {0}", track.id)}
             aria-pressed={locked}
-            title={locked ? "解锁轨道" : "锁定轨道"}
+            title={locked ? tr("解锁轨道") : tr("锁定轨道")}
           >
             {locked ? <Lock size={13} /> : <Unlock size={13} />}
           </button>
@@ -567,9 +569,9 @@ export const TrackRow = memo(function TrackRow({
               e.stopPropagation();
               handleToggle("muted", !muted);
             }}
-            aria-label={muted ? `取消静音 ${track.id}` : `静音轨道 ${track.id}`}
+            aria-label={muted ? tr("取消静音 {0}", track.id) : tr("静音轨道 {0}", track.id)}
             aria-pressed={muted}
-            title={muted ? "取消静音" : "静音轨道"}
+            title={muted ? tr("取消静音") : tr("静音轨道")}
           >
             {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
           </button>
@@ -579,9 +581,9 @@ export const TrackRow = memo(function TrackRow({
               e.stopPropagation();
               handleToggle("visible", !hidden);
             }}
-            aria-label={hidden ? `显示轨道 ${track.id}` : `隐藏轨道 ${track.id}`}
+            aria-label={hidden ? tr("显示轨道 {0}", track.id) : tr("隐藏轨道 {0}", track.id)}
             aria-pressed={hidden}
-            title={hidden ? "显示轨道" : "隐藏轨道"}
+            title={hidden ? tr("显示轨道") : tr("隐藏轨道")}
           >
             {hidden ? <EyeOff size={13} /> : <Eye size={13} />}
           </button>
@@ -592,7 +594,7 @@ export const TrackRow = memo(function TrackRow({
         data-track-id={track.id}
         data-track-kind={track.kind}
         data-track-locked={locked ? "true" : "false"}
-        title={locked ? "此轨道已锁定；解锁后可编辑或添加素材" : undefined}
+        title={locked ? tr("此轨道已锁定；解锁后可编辑或添加素材") : undefined}
         onClick={() => {
           if (state.selection?.trackId === track.id) dispatch({ type: "SELECTION_SET", selection: null });
           else dispatch({ type: "SELECTION_SET", selection: { trackId: track.id } });
@@ -618,12 +620,12 @@ export const TrackRow = memo(function TrackRow({
             className="timeline-track__insert-target"
             style={{ left: toPx(dropAt, pxPerSec) }}
             role="status"
-            aria-label={`在 ${dropAt.toFixed(2)} 秒的片段边界插入素材`}
+            aria-label={tr("在 {0} 秒的片段边界插入素材", dropAt.toFixed(2))}
           >
-            <span>插入</span>
+            <span>{tr("插入")}</span>
           </div>
         ) : null}
-        {track.clips.length === 0 ? <span className="timeline-track__lane-empty">空轨道</span> : null}
+        {track.clips.length === 0 ? <span className="timeline-track__lane-empty">{tr("空轨道")}</span> : null}
         {visibleGaps.map((gap) => (
           <button
             key={`gap-${gap.clipId}`}
@@ -631,8 +633,8 @@ export const TrackRow = memo(function TrackRow({
             className="timeline-track__gap"
             style={{ left: toPx(gap.start, pxPerSec), width: Math.max(6, toPx(gap.end - gap.start, pxPerSec)) }}
             disabled={locked || agentLocked}
-            aria-label={`${gap.label} ${gap.start.toFixed(2)} 到 ${gap.end.toFixed(2)} 秒，时长 ${(gap.end - gap.start).toFixed(2)} 秒；关闭此空隙`}
-            title={`${gap.label} ${gap.start.toFixed(2)}–${gap.end.toFixed(2)}s · 点击关闭此处空隙，后续片段左移`}
+            aria-label={tr("{0} {1} 到 {2} 秒，时长 {3} 秒；关闭此空隙", gap.label, gap.start.toFixed(2), gap.end.toFixed(2), (gap.end - gap.start).toFixed(2))}
+            title={tr("{0} {1}–{2}s · 点击关闭此处空隙，后续片段左移", gap.label, gap.start.toFixed(2), gap.end.toFixed(2))}
             onPointerDown={(event) => event.stopPropagation()}
             onClick={(event) => {
               event.stopPropagation();
@@ -641,7 +643,7 @@ export const TrackRow = memo(function TrackRow({
             }}
           >
             <span>{gap.label} {(gap.end - gap.start).toFixed(2)}s</span>
-            <span className="timeline-track__gap-close">合拢</span>
+            <span className="timeline-track__gap-close">{tr("合拢")}</span>
           </button>
         ))}
         {visibleClips.map((clip) => (
@@ -665,7 +667,7 @@ export const TrackRow = memo(function TrackRow({
               if (locked) {
                 e.preventDefault();
                 e.stopPropagation();
-                dispatch({ type: "STATUS_SET", severity: "warn", text: "此轨道已锁定，解锁后才能编辑片段" });
+                dispatch({ type: "STATUS_SET", severity: "warn", text: msg("此轨道已锁定，解锁后才能编辑片段") });
                 return;
               }
               e.preventDefault();
@@ -689,8 +691,8 @@ export const TrackRow = memo(function TrackRow({
                     type="button"
                     className={`transition-seam${transitionDropAt === clip.id ? " transition-seam--drop" : ""}`}
                     style={{ left: toPx(cutAt, pxPerSec) }}
-                    aria-label={`在 ${cutAt.toFixed(2)} 秒的片段接缝添加转场`}
-                    title="点击打开转场面板，或从资源库拖入转场"
+                    aria-label={tr("在 {0} 秒的片段接缝添加转场", cutAt.toFixed(2))}
+                    title={tr("点击打开转场面板，或从资源库拖入转场")}
                     onPointerDown={(event) => event.stopPropagation()}
                     onDragOver={(event) => onTransitionDragOver(event, clip.id)}
                     onDragLeave={() => setTransitionDropAt(null)}
@@ -737,8 +739,8 @@ export const TrackRow = memo(function TrackRow({
                       className={`transition-marker${selected ? " transition-marker--selected" : ""}${connected ? "" : " transition-marker--inactive"}${transitionDropAt === clip.id ? " transition-marker--drop" : ""}`}
                       style={{ left: toPx(cutAt, pxPerSec) - width / 2, width }}
                       title={connected
-                        ? `${label} · 实际 ${liveDuration.toFixed(2)}s · 拖右侧手柄调整时长`
-                        : `${label} · 接缝已断开，暂不生效 · 单击查看或删除`}
+                        ? tr("{0} · 实际 {1}s · 拖右侧手柄调整时长", label, liveDuration.toFixed(2))
+                        : tr("{0} · 接缝已断开，暂不生效 · 单击查看或删除", label)}
                       onPointerDown={(event) => event.stopPropagation()}
                       onDragOver={(event) => onTransitionDragOver(event, clip.id)}
                       onDragLeave={() => setTransitionDropAt(null)}
@@ -748,7 +750,7 @@ export const TrackRow = memo(function TrackRow({
                         className="transition-marker__select"
                         type="button"
                         aria-pressed={selected}
-                        aria-label={`${label} 转场，位于 ${cutAt.toFixed(2)} 秒${connected ? "" : "，接缝已断开，暂不生效"}`}
+                        aria-label={tr("{0} 转场，位于 {1} 秒{2}", label, cutAt.toFixed(2), connected ? "" : tr("，接缝已断开，暂不生效"))}
                         onClick={(event) => {
                           event.stopPropagation();
                           dispatch({
@@ -766,8 +768,8 @@ export const TrackRow = memo(function TrackRow({
                         className="transition-marker__delete"
                         type="button"
                         disabled={locked || agentLocked}
-                        aria-label={`删除转场 ${label}`}
-                        title={locked || agentLocked ? "轨道已锁定" : "删除转场"}
+                        aria-label={tr("删除转场 {0}", label)}
+                        title={locked || agentLocked ? tr("轨道已锁定") : tr("删除转场")}
                         onClick={(event) => {
                           event.stopPropagation();
                           const latest = getLatestState() || state;
@@ -782,8 +784,8 @@ export const TrackRow = memo(function TrackRow({
                         type="button"
                         className="transition-marker__resize"
                         disabled={locked || agentLocked || !connected || maxDuration < 0.1}
-                        aria-label={`调整转场 ${label} 时长，当前 ${liveDuration.toFixed(2)} 秒`}
-                        title={`拖动调整转场时长，最长 ${maxDuration.toFixed(2)} 秒`}
+                        aria-label={tr("调整转场 {0} 时长，当前 {1} 秒", label, liveDuration.toFixed(2))}
+                        title={tr("拖动调整转场时长，最长 {0} 秒", maxDuration.toFixed(2))}
                         onPointerDown={(event) => startTransitionResize(event, clip, effectId, actualDuration, maxDuration)}
                         onPointerMove={moveTransitionResize}
                         onPointerUp={(event) => finishTransitionResize(event)}
@@ -810,7 +812,7 @@ export const TrackRow = memo(function TrackRow({
               data-edge-frame={edgeFrame}
               data-duration-frames={durationFrames}
             >
-              {mode === "trim-l" ? "起点" : "终点"} {fmtTimePrecise(edgeSecs)} · {edgeFrame} 帧 · 片段 {durationFrames} 帧 / {durationSecs.toFixed(3)}s
+              {mode === "trim-l" ? tr("起点") : tr("终点")} {fmtTimePrecise(edgeSecs)} · {edgeFrame}{tr(" 帧 · 片段 ")}{durationFrames}{tr(" 帧 / ")}{durationSecs.toFixed(3)}s
             </div>
           );
         })() : null}
@@ -849,13 +851,14 @@ function ClipBlock({
   onCutClick: (e: React.MouseEvent | React.KeyboardEvent) => void;
   onNudge: (direction: -1 | 1) => void;
 }) {
+  useLocale();
   const baseLeft = toPx(clipStartSecs(clip), pxPerSec);
   const durSecs = clipEndSecs(clip) - clipStartSecs(clip);
   const baseWidth = toPx(durSecs, pxPerSec);
   const left = trimOverlay?.left ?? baseLeft;
   const width = trimOverlay ? Math.max(trimOverlay.width, 8) : Math.max(baseWidth, 8);
   const titleContent = clip.effects?.find((effect) => effect.effectId === "cutvoke.text")?.params?.content;
-  const name = isText ? String(titleContent || "未命名标题") : assetDisplayName(clip.assetRef);
+  const name = isText ? String(titleContent || tr("未命名标题")) : assetDisplayName(clip.assetRef);
 
   return (
     <div
@@ -863,7 +866,7 @@ function ClipBlock({
       role="button"
       tabIndex={0}
       aria-pressed={selected}
-      aria-label={`${name}，${durSecs.toFixed(1)} 秒，开始于 ${clipStartSecs(clip).toFixed(3)} 秒${clip.attachedToClipId ? "，跟随视频移动" : ""}${attachedCount ? `，有 ${attachedCount} 个关联片段` : ""}${selected ? "，已选中" : ""}；Alt 加左右方向键可与相邻片段交换顺序`}
+      aria-label={tr("{0}，{1} 秒，开始于 {2} 秒{3}{4}{5}；Alt 加左右方向键可与相邻片段交换顺序", name, durSecs.toFixed(1), clipStartSecs(clip).toFixed(3), clip.attachedToClipId ? tr("，跟随视频移动") : "", attachedCount ? tr("，有 {0} 个关联片段", attachedCount) : "", selected ? tr("，已选中") : "")}
       style={{ left, width }}
       onClick={(e) => {
         e.stopPropagation();
@@ -885,7 +888,7 @@ function ClipBlock({
       onPointerDown={(e) => {
         if (!locked) onDragStart(e, "move");
       }}
-      title={`${name} · ${durSecs.toFixed(1)}s${clip.attachedToClipId ? " · 跟随视频" : ""}${attachedCount ? ` · ${attachedCount} 个片段跟随` : ""} · Alt+←/→ 调整顺序`}
+      title={tr("{0} · {1}s{2}{3} · Alt+←/→ 调整顺序", name, durSecs.toFixed(1), clip.attachedToClipId ? tr(" · 跟随视频") : "", attachedCount ? tr(" · {0} 个片段跟随", attachedCount) : "")}
     >
       <div className="clip-block__name">{name}</div>
       {clip.attachedToClipId || attachedCount ? <span className="clip-block__meta" aria-hidden="true"><Link2 size={11} />{attachedCount || ""}</span> : null}

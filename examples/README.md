@@ -1,5 +1,14 @@
 # 最小示例
 
+需要直接跑出一条可编辑短片时，使用 [cutvoke-editor 演示脚本](../skills/cutvoke-editor/scripts/demo.py)：
+
+```bash
+python skills/cutvoke-editor/scripts/demo.py --output .artifacts/example-edit
+cutvoke serve --data .artifacts/example-edit/data
+```
+
+从仓库中已激活的 Python 环境运行，依赖 CutVoke、FFmpeg/ffprobe 和已构建的 Web 编辑器。脚本自行绘制插画与合成音乐，经本机上传及 MCP 剪辑，留下 12 秒 MP4、可编辑数据库、工程包和检查证据；每次使用新输出目录。详见 [技能使用](../docs/user/agent-skill.zh-CN.md) 与 [特效贡献示例](../effects/README.md)。
+
 以下命令创建独立示例工程，不需要下载素材：
 
 ```bash

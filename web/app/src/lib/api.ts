@@ -1,3 +1,5 @@
+import { tr } from "../i18n";
+import { getLocale } from "../i18n/locale";
 /** HTTP API 封装（与 src/cutvoke/core/httpapi.py 对齐）。
     与后端同源 fetch（相对路径 /api/v1/...），不写死 localhost 端口。 */
 
@@ -63,7 +65,7 @@ function normalizeError(data: unknown, status: number, path: string): ApiFailure
   return new ApiFailure({
     status,
     code: err?.code || `HTTP_${status}`,
-    message: err?.message || `请求失败（HTTP ${status}）`,
+    message: err?.message || tr("请求失败（HTTP {0}）", status),
     details: err?.details,
     retryable: err?.retryable,
     committed: err?.committed,
@@ -292,7 +294,7 @@ export async function preflightProject(
   if (!report || typeof report.readyToRender !== "boolean" ||
       !Array.isArray(report.errors) || !Array.isArray(report.warnings)) {
     throw new ApiFailure({
-      status: 0, code: "PREFLIGHT_RESPONSE", message: "素材检查结果不完整，请重试检查", retryable: true,
+      status: 0, code: "PREFLIGHT_RESPONSE", message: tr("素材检查结果不完整，请重试检查"), retryable: true,
     });
   }
   return report;
@@ -562,7 +564,7 @@ export interface EffectSpec {
 }
 
 export async function listEffects(): Promise<EffectSpec[]> {
-  const data = await get<{ effects: EffectSpec[] }>("/effects");
+  const data = await get<{ effects: EffectSpec[] }>(`/effects?lang=${encodeURIComponent(getLocale())}`);
   return data.effects || [];
 }
 

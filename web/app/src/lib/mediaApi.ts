@@ -1,3 +1,4 @@
+import { tr } from "../i18n";
 /** 媒体相关 API：单帧预览 / 素材探测 / 文件导入资产。
     全部走同源相对路径，与后端 httpapi.py 对齐。 */
 
@@ -31,12 +32,12 @@ export async function probeMedia(path: string): Promise<ProbeOutcome> {
       const err = (data as { error?: ApiErrorBody } | undefined)?.error;
       return {
         kind: "error",
-        message: err?.message || `探测失败（HTTP ${res.status}）`,
+        message: err?.message || tr("探测失败（HTTP {0}）", res.status),
       };
     }
     return { kind: "ok", data: data as ProbeResult };
   } catch (err) {
-    return { kind: "error", message: err instanceof Error ? err.message : "探测网络错误" };
+    return { kind: "error", message: err instanceof Error ? err.message : tr("探测网络错误") };
   }
 }
 
@@ -100,7 +101,7 @@ export function stickerPreviewUrl(stickerId: string): string {
 export async function listBuiltinStickers(): Promise<BuiltinSticker[]> {
   const response = await fetch("/api/v1/stickers", { headers: { Accept: "application/json" } });
   const data = await readJson(response) as { stickers?: BuiltinSticker[]; error?: ApiErrorBody } | undefined;
-  if (!response.ok) throw new Error(data?.error?.message || `读取贴纸库失败（HTTP ${response.status}）`);
+  if (!response.ok) throw new Error(data?.error?.message || tr("读取贴纸库失败（HTTP {0}）", response.status));
   return data?.stickers || [];
 }
 
@@ -120,13 +121,13 @@ export async function listAssets(): Promise<ListAssetsOutcome> {
       const err = (data as { error?: ApiErrorBody } | undefined)?.error;
       return {
         kind: "error",
-        message: err?.message || `读取素材库失败（HTTP ${res.status}）`,
+        message: err?.message || tr("读取素材库失败（HTTP {0}）", res.status),
       };
     }
     const items = (data as { assets?: ServerAsset[] } | undefined)?.assets || [];
     return { kind: "ok", data: items };
   } catch (err) {
-    return { kind: "error", message: err instanceof Error ? err.message : "素材库网络错误" };
+    return { kind: "error", message: err instanceof Error ? err.message : tr("素材库网络错误") };
   }
 }
 
@@ -149,18 +150,18 @@ export function assetWaveformUrl(assetId: string, w = 640): string {
 export async function relinkAsset(assetId: string, file: File): Promise<
   { kind: "ok"; data: ServerAsset } | { kind: "error"; message: string }
 > {
-  if (file.size === 0) return { kind: "error", message: "文件为空，请检查后重新选择" };
+  if (file.size === 0) return { kind: "error", message: tr("文件为空，请检查后重新选择") };
   const url = `/api/v1/assets/${encodeURIComponent(assetId)}/relink?${new URLSearchParams({ name: file.name })}`;
   try {
     const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: file });
     const payload = await readJson(response);
     if (!response.ok) {
       const error = (payload as { error?: ApiErrorBody } | undefined)?.error;
-      return { kind: "error", message: error?.message || `重新链接失败（HTTP ${response.status}）` };
+      return { kind: "error", message: error?.message || tr("重新链接失败（HTTP {0}）", response.status) };
     }
     return { kind: "ok", data: payload as ServerAsset };
   } catch (error) {
-    return { kind: "error", message: error instanceof Error ? error.message : "重新链接网络错误" };
+    return { kind: "error", message: error instanceof Error ? error.message : tr("重新链接网络错误") };
   }
 }
 
@@ -176,11 +177,11 @@ export async function updateAssetAudioRole(assetId: string, audioRole: AudioRole
     const data = await readJson(response) as ServerAsset | { error?: ApiErrorBody } | undefined;
     if (!response.ok) {
       const error = (data as { error?: ApiErrorBody } | undefined)?.error;
-      return { kind: "error", message: error?.message || `更新音频分类失败（HTTP ${response.status}）` };
+      return { kind: "error", message: error?.message || tr("更新音频分类失败（HTTP {0}）", response.status) };
     }
     return { kind: "ok", data: data as ServerAsset };
   } catch (error) {
-    return { kind: "error", message: error instanceof Error ? error.message : "更新音频分类时网络错误" };
+    return { kind: "error", message: error instanceof Error ? error.message : tr("更新音频分类时网络错误") };
   }
 }
 
@@ -190,7 +191,7 @@ export async function updateAssetAudioRole(assetId: string, audioRole: AudioRole
  * path 为服务端落盘绝对路径（前端不持久化绝对路径，仅会话内引用 assetId/path）。
  */
 export async function uploadAsset(file: File): Promise<ImportOutcome> {
-  if (file.size === 0) return { kind: "error", message: "文件为空，请检查后重新选择" };
+  if (file.size === 0) return { kind: "error", message: tr("文件为空，请检查后重新选择") };
   const q = new URLSearchParams({ name: file.name });
   try {
     const res = await fetch(`/api/v1/assets?${q.toString()}`, {
@@ -203,12 +204,12 @@ export async function uploadAsset(file: File): Promise<ImportOutcome> {
       const err = (data as { error?: ApiErrorBody } | undefined)?.error;
       return {
         kind: "error",
-        message: err?.message || `导入失败（HTTP ${res.status}）`,
+        message: err?.message || tr("导入失败（HTTP {0}）", res.status),
       };
     }
     return { kind: "ok", data: data as ImportedAsset };
   } catch (err) {
-    return { kind: "error", message: err instanceof Error ? err.message : "导入网络错误" };
+    return { kind: "error", message: err instanceof Error ? err.message : tr("导入网络错误") };
   }
 }
 
@@ -241,7 +242,7 @@ export async function fetchPreviewFrame(spec: PreviewFrameSpec): Promise<Preview
     const res = await fetch(url, { method: "GET", headers: { Accept: "image/png" }, signal: spec.signal });
     if (res.status === 204) return { kind: "empty" };
     if (!res.ok) {
-      let message = `预览帧失败（HTTP ${res.status}）`;
+      let message = tr("预览帧失败（HTTP {0}）", res.status);
       try {
         const data = (await res.json()) as { error?: ApiErrorBody };
         if (data.error?.message) message = data.error.message;
@@ -258,7 +259,7 @@ export async function fetchPreviewFrame(spec: PreviewFrameSpec): Promise<Preview
     if (spec.signal?.aborted || (err instanceof DOMException && err.name === "AbortError")) {
       return { kind: "cancelled" };
     }
-    return { kind: "error", message: "暂时无法连接预览服务，请稍后重试。", retryable: true };
+    return { kind: "error", message: tr("暂时无法连接预览服务，请稍后重试。"), retryable: true };
   }
 }
 

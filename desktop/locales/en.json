@@ -1,0 +1,20 @@
+{
+  "loadingTitle": "Starting CutVoke",
+  "loadingService": "Starting the local editing service…",
+  "loadingPrivacy": "Projects and preview cache stay on your computer",
+  "loadingProgress": "Starting",
+  "startupTitle": "CutVoke could not start",
+  "startupSummary": "The local editing service could not start. Check the diagnostics below, then reopen CutVoke.",
+  "serviceTitle": "Local service stopped",
+  "serviceSummary": "The local editing service stopped. Reopen CutVoke; diagnostics and the log location are shown below.",
+  "requestFailure": "Local service request failed (HTTP {0})",
+  "invalidClient": "Invalid client request",
+  "startupExit": "Local service failed to start (exit code {0})",
+  "startupTimeout": "Local service startup timed out",
+  "serviceExitCode": "Service exit code: {0}",
+  "logLocation": "Log location: {0}",
+  "technicalDetails": "Technical diagnostics (original text)",
+  "close": "Close",
+  "chooseCache": "Choose cache location",
+  "chooseFolder": "Choose folder"
+}

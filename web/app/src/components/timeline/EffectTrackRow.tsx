@@ -1,3 +1,4 @@
+import { tr } from "../../i18n";
 import { memo, useRef, useState } from "react";
 import { Sparkles, Trash2 } from "lucide-react";
 import type { EffectInstance, Track } from "../../types/api";
@@ -170,7 +171,7 @@ export const EffectTrackRow = memo(function EffectTrackRow({
 
   return (
     <div className={`timeline-track timeline-track--effects${locked ? " timeline-track--locked" : ""}`}>
-      <div className="timeline-track__label timeline-track__label--effects" title={`${displayName}（跟随上方视频轨）`}>
+      <div className="timeline-track__label timeline-track__label--effects" title={tr("{0}（跟随上方视频轨）", displayName)}>
         <span className="timeline-track__kind timeline-track__kind--effect"><Sparkles size={11} /></span>
         <span className="timeline-track__name">{displayName}</span>
       </div>
@@ -178,7 +179,7 @@ export const EffectTrackRow = memo(function EffectTrackRow({
         className="timeline-track__lane timeline-track__lane--effects"
         onClick={() => dispatch({ type: "SELECTION_SET", selection: { trackId: track.id } })}
       >
-        {segments.length === 0 ? <span className="timeline-track__lane-empty">暂无效果</span> : null}
+        {segments.length === 0 ? <span className="timeline-track__lane-empty">{tr("暂无效果")}</span> : null}
         {[...grouped.entries()].filter(([clipId, items]) => track.clips.length <= 100 || clipId === state.selection?.clipId || rangeDraft?.key.startsWith(`${clipId}:`) ||
           (items[0].clipStart + items[0].clipDuration >= viewport.start && items[0].clipStart <= viewport.end)).map(([clipId, items]) => {
           const clipStart = items[0].clipStart;
@@ -220,10 +221,10 @@ export const EffectTrackRow = memo(function EffectTrackRow({
                       zIndex: segment.index + 1,
                     }}
                     title={segment.editableRange
-                      ? `${label} · 拖动调整区间，拖动两侧手柄缩放区间`
-                      : `${label} · 单击选中，Delete 删除`}
+                      ? tr("{0} · 拖动调整区间，拖动两侧手柄缩放区间", label)
+                      : tr("{0} · 单击选中，Delete 删除", label)}
                     role="group"
-                    aria-label={`${label}，位于 ${absoluteStart.toFixed(2)} 到 ${absoluteEnd.toFixed(2)} 秒`}
+                    aria-label={tr("{0}，位于 {1} 到 {2} 秒", label, absoluteStart.toFixed(2), absoluteEnd.toFixed(2))}
                     onClick={(event) => {
                       event.stopPropagation();
                       selectEffect(segment);
@@ -233,12 +234,12 @@ export const EffectTrackRow = memo(function EffectTrackRow({
                     onPointerUp={(event) => void finishRangeDrag(event)}
                     onPointerCancel={(event) => void finishRangeDrag(event)}
                   >
-                    {segment.editableRange ? <span className="effect-segment__resize effect-segment__resize--start" data-range-resize="start" aria-label={`调整${label}起点`} /> : null}
+                    {segment.editableRange ? <span className="effect-segment__resize effect-segment__resize--start" data-range-resize="start" aria-label={tr("调整{0}起点", label)} /> : null}
                     <button
                       className="effect-segment__select"
                       type="button"
                       aria-pressed={selected}
-                      aria-label={`${label}，位于 ${absoluteStart.toFixed(2)} 到 ${absoluteEnd.toFixed(2)} 秒`}
+                      aria-label={tr("{0}，位于 {1} 到 {2} 秒", label, absoluteStart.toFixed(2), absoluteEnd.toFixed(2))}
                       onClick={(event) => {
                         event.stopPropagation();
                         selectEffect(segment);
@@ -250,8 +251,8 @@ export const EffectTrackRow = memo(function EffectTrackRow({
                       className="effect-segment__delete"
                       type="button"
                       disabled={locked}
-                      aria-label={`删除效果 ${label}`}
-                      title={locked ? "轨道已锁定" : "删除效果"}
+                      aria-label={tr("删除效果 {0}", label)}
+                      title={locked ? tr("轨道已锁定") : tr("删除效果")}
                       onPointerDown={(event) => event.stopPropagation()}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -260,7 +261,7 @@ export const EffectTrackRow = memo(function EffectTrackRow({
                     >
                       <Trash2 size={10} />
                     </button>
-                    {segment.editableRange ? <span className="effect-segment__resize effect-segment__resize--end" data-range-resize="end" aria-label={`调整${label}终点`} /> : null}
+                    {segment.editableRange ? <span className="effect-segment__resize effect-segment__resize--end" data-range-resize="end" aria-label={tr("调整{0}终点", label)} /> : null}
                   </div>
                 );
               })}

@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../i18n";
 /** 播放器/预览面板（中区）：按需播放短时间窗 + 图片轮询降级。
     主路径：<video src=/api/v1/projects/{id}/preview-window>（含音频、空白、效果）。
     播放/暂停/停止操作 video；播放头拖动 → seek；时间码读 video.currentTime。
@@ -41,22 +42,23 @@ function contentToken(value: string): string {
 }
 
 function formatPreviewError(message: string | null): string {
-  if (!message) return "连续预览和单帧预览都无法使用。请检查素材文件和效果依赖后重试。";
+  if (!message) return tr("连续预览和单帧预览都无法使用。请检查素材文件和效果依赖后重试。");
   const missingSource = message.match(/source file missing for clip .+?:\s*(.+)$/i);
   if (missingSource) {
-    return `素材文件不存在：${missingSource[1]}。请在素材库重新链接该文件后重试。`;
+    return tr("素材文件不存在：{0}。请在素材库重新链接该文件后重试。", missingSource[1]);
   }
   const missingLut = message.match(/imported LUT missing:\s*(.+)$/i);
   if (missingLut) {
-    return `找不到已导入的 LUT 文件：${missingLut[1]}。请重新导入 LUT，或关闭对应效果后重试。`;
+    return tr("找不到已导入的 LUT 文件：{0}。请重新导入 LUT，或关闭对应效果后重试。", missingLut[1]);
   }
   if (/minterpolate|frame interpolation/i.test(message)) {
-    return "当前 FFmpeg 不支持运动估算慢动作补帧。请关闭该片段的补帧选项后重试。";
+    return tr("当前 FFmpeg 不支持运动估算慢动作补帧。请关闭该片段的补帧选项后重试。");
   }
-  return `预览渲染失败：${message}`;
+  return tr("预览渲染失败：{0}", message);
 }
 
 export function Player() {
+  const locale = useLocale();
   const { state, dispatch } = useEditor();
   const { project, currentId, playhead } = state;
   const [mode, setMode] = useState<PlayMode>("video");
@@ -92,7 +94,7 @@ export function Player() {
   playheadRef.current = playhead;
   const dispatchRef = useRef(dispatch);
   dispatchRef.current = dispatch;
-  const pauseStatusRef = useRef("已暂停");
+  const pauseStatusRef = useRef(tr("已暂停"));
   const suppressSeek = useRef(false);
   const reportedVideoTimeRef = useRef(0);
   const loopRef = useRef({ enabled: false, in: null as number | null, out: null as number | null });
@@ -100,13 +102,13 @@ export function Player() {
 
   const tracks = project?.sequence.tracks || [];
   const selectedTrackLocked = !!tracks.find((track) => track.id === state.selection?.trackId)?.locked;
-  const mediaEndSecs = useMemo(() => playbackEndSecs(tracks), [tracks]);
+  const mediaEndSecs = useMemo(() => playbackEndSecs(tracks), [tracks, locale]);
   // 基础预览视频不包含字幕：字幕修改只更新 Canvas 叠层，不能因 revision
   // 改变而重新挂载 <video>、打断当前播放。画面/音频轨道变化才换 key 重载视频。
   const previewContentKey = useMemo(() => {
     return projectPreviewKey(project);
-  }, [project]);
-  const previewTimelineToken = useMemo(() => contentToken(previewContentKey), [previewContentKey]);
+  }, [project, locale]);
+  const previewTimelineToken = useMemo(() => contentToken(previewContentKey), [previewContentKey, locale]);
   const prepared = state.preparedPreview;
   const usePrepared = !!prepared && prepared.projectId === currentId &&
     prepared.contentKey === previewContentKey && sourceRestoreRevision === 0;
@@ -145,7 +147,7 @@ export function Player() {
   const mediaUrl = usePrepared ? videoUrl : segments.media?.url || "";
   const videoReady = readyVideoUrl === videoUrl;
   const preparing = !!videoUrl && mode === "video" && !videoReady;
-  const noticeToken = useMemo(() => ({}), [videoUrl, preparing, buffering]);
+  const noticeToken = useMemo(() => ({}), [videoUrl, preparing, buffering, locale]);
   const [loadingNotice, setLoadingNotice] = useState<object | null>(null);
   useEffect(() => {
     if (!preparing && !buffering) { setLoadingNotice(null); return; }
@@ -214,15 +216,15 @@ export function Player() {
       playingRef.current = false;
       setPlaying(false);
       dispatchRef.current({ type: "STATUS_SET", severity: "warn",
-        text: "浏览器尚未开始播放，请再点击播放" });
+        text: msg("浏览器尚未开始播放，请再点击播放") });
     });
   }, []);
   const endPlay = useCallback(() => {
     playingRef.current = false;
     setPlaying(false);
     setBuffering(false);
-    pauseStatusRef.current = "播放结束";
-    dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: "播放结束" });
+    pauseStatusRef.current = tr("播放结束");
+    dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: msg("播放结束") });
   }, []);
 
   const { frameUrl, frameState, frameError, scheduleFrame, reset: resetFrames } = usePreviewFrame({
@@ -241,7 +243,7 @@ export function Player() {
     if (!segments.error || mode !== "video") return;
     setMode("image");
     dispatchRef.current({ type: "STATUS_SET", severity: "warn",
-      text: "连续预览失败，已切换到单帧预览" });
+      text: msg("连续预览失败，已切换到单帧预览") });
   }, [segments.error, mode]);
 
   useEffect(() => {
@@ -259,7 +261,7 @@ export function Player() {
       setSourceRestoreRevision((value) => value + 1);
       dispatchRef.current({ type: "PREPARED_PREVIEW_SET", preview: null });
       dispatchRef.current({ type: "STATUS_SET", severity: "ok",
-        text: "素材已恢复，正在重新加载预览" });
+        text: msg("素材已恢复，正在重新加载预览") });
     };
     window.addEventListener("cutvoke:asset-restored", onAssetRestored);
     return () => window.removeEventListener("cutvoke:asset-restored", onAssetRestored);
@@ -339,7 +341,7 @@ export function Player() {
     }
     setMode("image");
     dispatchRef.current({ type: "STATUS_SET", severity: "warn",
-      text: "连续预览失败，已切换到单帧预览" });
+      text: msg("连续预览失败，已切换到单帧预览") });
     scheduleFrame(playheadRef.current);
   }, [scheduleFrame, state.opening, usePrepared, currentId, videoUrl]);
   const onVideoEnded = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
@@ -383,7 +385,7 @@ export function Player() {
       }
       setVideoTime(mediaEndSecs);
       dispatchRef.current({ type: "PLAYHEAD_SET", t: mediaEndSecs });
-      pauseStatusRef.current = "播放结束";
+      pauseStatusRef.current = tr("播放结束");
       v.pause();
       endPlay();
       return;
@@ -401,19 +403,19 @@ export function Player() {
   const onPlay = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current) return;
     setShowColorBefore(false);
-    pauseStatusRef.current = "已暂停";
+    pauseStatusRef.current = tr("已暂停");
     setPlaying(true);
     playingRef.current = true;
     if (event.currentTarget.readyState < 3) {
       setBuffering(true);
-      dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: "正在准备播放，请稍等…" });
+      dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: msg("正在准备播放，请稍等…") });
     }
   }, []);
   const onPlaying = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current) return;
     setBuffering(false);
     confirmFrame(event.currentTarget);
-    dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: "播放中" });
+    dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: msg("播放中") });
   }, [confirmFrame]);
   const onPause = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current) return;
@@ -426,7 +428,7 @@ export function Player() {
     setPlaying(false);
     playingRef.current = false;
     dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: pauseStatusRef.current });
-    pauseStatusRef.current = "已暂停";
+    pauseStatusRef.current = tr("已暂停");
   }, [windowEnd, mediaEndSecs]);
   const onWaiting = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current) return;
@@ -434,7 +436,7 @@ export function Player() {
     if (!playingRef.current || event.currentTarget.ended) { setBuffering(false); return; }
     setBuffering(true);
     dispatchRef.current({ type: "STATUS_SET", severity: "ok",
-      text: event.currentTarget.readyState < 2 ? "正在准备播放，请稍等…" : "正在缓冲，请稍等…" });
+      text: event.currentTarget.readyState < 2 ? msg("正在准备播放，请稍等…") : msg("正在缓冲，请稍等…") });
   }, []);
   const onCanPlay = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current) return;
@@ -575,7 +577,7 @@ export function Player() {
       dispatch({
         type: "STATUS_SET",
         severity: "warn",
-        text: "请先将视频、图片或音频素材放入可见轨道",
+        text: msg("请先将视频、图片或音频素材放入可见轨道"),
       });
       return;
     }
@@ -597,20 +599,20 @@ export function Player() {
         setPlaying(true);
         requestVideoPlay(v);
       } else {
-        pauseStatusRef.current = "已暂停";
+        pauseStatusRef.current = tr("已暂停");
         v.pause();
       }
       return;
     }
     if (playing) {
       setPlaying(false);
-      dispatch({ type: "STATUS_SET", severity: "ok", text: "已暂停" });
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已暂停") });
     }
     else {
       if (mediaEndSecs <= 0) return;
       if (playhead >= mediaEndSecs - 0.01) dispatch({ type: "PLAYHEAD_SET", t: 0 });
       setPlaying(true);
-      dispatch({ type: "STATUS_SET", severity: "ok", text: "播放中" });
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("播放中") });
     }
   };
   togglePlayRef.current = togglePlay;
@@ -621,12 +623,12 @@ export function Player() {
     reportedVideoTimeRef.current = 0;
     const v = videoRef.current;
     if (mode === "video" && v) {
-      if (!v.paused) pauseStatusRef.current = "已回到开头";
+      if (!v.paused) pauseStatusRef.current = tr("已回到开头");
       v.pause();
       v.currentTime = 0;
     }
     dispatch({ type: "PLAYHEAD_SET", t: 0 });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "已回到开头" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已回到开头") });
   };
 
   const stepFrame = (dir: -1 | 1) => {
@@ -638,7 +640,7 @@ export function Player() {
     dispatch({ type: "PLAYHEAD_SET", t: next });
     const v = videoRef.current;
     if (mode === "video" && v) {
-      if (!v.paused) pauseStatusRef.current = "单帧预览";
+      if (!v.paused) pauseStatusRef.current = tr("单帧预览");
       v.pause();
       setVideoTime(next);
       if (next >= windowStart && next < windowEnd) {
@@ -649,18 +651,18 @@ export function Player() {
         }
       }
     }
-    dispatch({ type: "STATUS_SET", severity: "ok", text: "单帧预览" });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("单帧预览") });
   };
 
   const handleSplit = () => {
     if (state.editLock) return;
     const clipId = state.selection?.clipId;
     if (!currentId || !clipId) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: "请先选中要分割的片段" });
+      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("请先选中要分割的片段") });
       return;
     }
     if (selectedTrackLocked) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: "所选片段所在轨道已锁定，解锁后才能分割" });
+      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("所选片段所在轨道已锁定，解锁后才能分割") });
       return;
     }
     const clip = findClipById(state, clipId);
@@ -671,7 +673,7 @@ export function Player() {
     if (at > cs + 0.01 && at < ce - 0.01) {
       void splitClip(dispatch, state, { clipId, time: secsToRational(at) });
     } else {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: "播放头需在片段内部才能分割" });
+      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("播放头需在片段内部才能分割") });
     }
   };
 
@@ -695,11 +697,11 @@ export function Player() {
   const canvasHeight = project?.sequence.height || 1080;
   const canvasBackground = project?.sequence.backgroundColor || "#000000";
   const backgroundSwatches = [
-    { name: "黑色", color: "#000000" },
-    { name: "白色", color: "#FFFFFF" },
-    { name: "深蓝灰", color: "#29364A" },
-    { name: "暖米白", color: "#EFE7D8" },
-    { name: "浅粉", color: "#F1DDE3" },
+    { name: tr("黑色"), color: "#000000" },
+    { name: tr("白色"), color: "#FFFFFF" },
+    { name: tr("深蓝灰"), color: "#29364A" },
+    { name: tr("暖米白"), color: "#EFE7D8" },
+    { name: tr("浅粉"), color: "#F1DDE3" },
   ];
 
   const saveCanvasBackground = async () => {
@@ -719,10 +721,10 @@ export function Player() {
   return (
     <section className="player">
       <div className="player__stage" ref={stageRef}>
-        <div className="player__canvas-frame" style={{ ...frameStyle, backgroundColor: canvasBackground }} aria-label="预览画面" aria-busy={preparing || buffering}>
+        <div className="player__canvas-frame" style={{ ...frameStyle, backgroundColor: canvasBackground }} aria-label={tr("预览画面")} aria-busy={preparing || buffering}>
           <canvas ref={handoffCanvasRef} className="player__continuity-frame" aria-hidden="true" />
           {!videoUrl ? (
-            <div className="player__placeholder">暂无可播放片段：导入素材并拖到时间线后此处显示预览</div>
+            <div className="player__placeholder">{tr("暂无可播放片段：导入素材并拖到时间线后此处显示预览")}</div>
           ) : mode === "video" ? (
             <>
               <PreviewVideoPool key={cacheScope} source={videoUrl} src={mediaUrl}
@@ -733,69 +735,67 @@ export function Player() {
                   onWaiting, onCanPlay, onSeeked: onVideoLoaded,
                   onError: event => onVideoError(event.currentTarget) }} />
               {preparing && posterUrl ? (
-                <img className="player__poster" src={posterUrl} alt="预览首帧" draggable={false} />
+                <img className="player__poster" src={posterUrl} alt={tr("预览首帧")} draggable={false} />
               ) : null}
-              {!hasVideoMedia ? <div className="player__placeholder">仅音频工程 · 画面为空</div> : null}
+              {!hasVideoMedia ? <div className="player__placeholder">{tr("仅音频工程 · 画面为空")}</div> : null}
               {showLoadingNotice ? (
                 <div className="player__loading-notice" role="status" aria-live="polite" aria-atomic="true">
                   <LoaderCircle className="player__loading-spinner" size={18} aria-hidden="true" />
                   <div className="player__loading-copy">
-                    <strong>{preparing ? "正在准备预览…" : "播放缓冲中…"}</strong>
+                    <strong>{preparing ? tr("正在准备预览…") : tr("播放缓冲中…")}</strong>
                     <span>{preparing
-                      ? `${holding ? "已保留当前画面，正在加载目标位置。" : posterUrl ? "首帧已显示，正在准备连续预览。" : "正在加载当前位置的画面，请稍等。"}${playing ? "准备完成后自动播放。" : "准备完成后即可播放。"}`
-                      : "正在加载后续画面，请稍等。"}</span>
+                      ? tr("{0}{1}", holding ? tr("已保留当前画面，正在加载目标位置。") : posterUrl ? tr("首帧已显示，正在准备连续预览。") : tr("正在加载当前位置的画面，请稍等。"), playing ? tr("准备完成后自动播放。") : tr("准备完成后即可播放。"))
+                      : tr("正在加载后续画面，请稍等。")}</span>
                   </div>
                   {preparing && playing ? (
-                    <button type="button" className="tool-btn player__loading-cancel" aria-label="取消等待播放"
+                    <button type="button" className="tool-btn player__loading-cancel" aria-label={tr("取消等待播放")}
                       onClick={() => {
                         playingRef.current = false;
                         setPlaying(false);
                         videoRef.current?.pause();
-                        dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: "已取消自动播放" });
-                      }}>取消</button>
+                        dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: msg("已取消自动播放") });
+                      }}>{tr("取消")}</button>
                   ) : null}
                 </div>
               ) : null}
             </>
           ) : frameUrl && frameState !== "empty" ? (
             <>
-              <img src={frameUrl} alt="时间线预览帧" draggable={false} />
+              <img src={frameUrl} alt={tr("时间线预览帧")} draggable={false} />
               {frameState === "error" ? (
                 <div className="player__loading-notice" role="alert">
                   <span>{formatPreviewError(frameError)}</span>
                   <button type="button" className="tool-btn" onClick={() => {
                     resetFrames(); scheduleFrame(playheadRef.current);
-                  }}>重试预览</button>
+                  }}>{tr("重试预览")}</button>
                 </div>
               ) : null}
             </>
           ) : frameState === "empty" ? (
-            <div className="player__placeholder">该时刻无片段（黑帧）</div>
+            <div className="player__placeholder">{tr("该时刻无片段（黑帧）")}</div>
           ) : frameState === "loading" ? (
-            <div className="cv-loading">加载预览…</div>
+            <div className="cv-loading">{tr("加载预览…")}</div>
           ) : (
             <div className="player__preview-error" role="alert">
-              <strong>预览不可用</strong>
+              <strong>{tr("预览不可用")}</strong>
               <span>{formatPreviewError(frameError)}</span>
               <button type="button" className="tool-btn"
                 onClick={() => {
                   resetFrames();
                   scheduleFrame(playheadRef.current);
-                }}>
-                重试预览
-              </button>
+                }}>{tr("重试预览")}</button>
             </div>
           )}
-          {videoUrl && mode !== "video" ? <span className="player__mode-badge">预览降级：图片</span> : null}
+          {videoUrl && mode !== "video" ? <span className="player__mode-badge">{tr("预览降级：图片")}</span> : null}
           {showColorBefore && colorBeforeState === "ok" && colorBeforeUrl ? (
             <>
               <img className="player__compare-frame" src={colorBeforeUrl}
-                alt="所选片段调色前画面" draggable={false} />
-              <span className="player__compare-label">调色前</span>
+                alt={tr("所选片段调色前画面")} draggable={false} />
+              <span className="player__compare-label">{tr("调色前")}</span>
             </>
           ) : null}
           {showColorBefore && colorBeforeState === "loading" ? (
-            <span className="player__compare-label">正在生成调色前画面…</span>
+            <span className="player__compare-label">{tr("正在生成调色前画面…")}</span>
           ) : null}
           <TransformCanvasOverlay />
           <MaskCanvasOverlay />
@@ -805,7 +805,7 @@ export function Player() {
           {showTitleSafeArea && currentId ? (
             <svg className="player__title-safe-area" viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
               preserveAspectRatio="xMidYMid meet" role="img"
-              aria-label="标题安全区四边各留百分之十，动作安全区四边各留百分之五">
+              aria-label={tr("标题安全区四边各留百分之十，动作安全区四边各留百分之五")}>
               <rect className="player__safe-guide player__safe-guide--title" data-guide="title-safe"
                 x={canvasWidth * 0.1} y={canvasHeight * 0.1}
                 width={canvasWidth * 0.8} height={canvasHeight * 0.8} />
@@ -818,9 +818,9 @@ export function Player() {
       </div>
 
       {backgroundPickerOpen && currentId ? (
-        <div className="player__background-popover" role="dialog" aria-label="画布背景设置">
-          <div className="player__background-heading">画布背景</div>
-          <div className="player__background-swatches" aria-label="预设底色">
+        <div className="player__background-popover" role="dialog" aria-label={tr("画布背景设置")}>
+          <div className="player__background-heading">{tr("画布背景")}</div>
+          <div className="player__background-swatches" aria-label={tr("预设底色")}>
             {backgroundSwatches.map((swatch) => (
               <button key={swatch.color} type="button"
                 className={`player__background-swatch${backgroundDraft.toUpperCase() === swatch.color ? " player__background-swatch--selected" : ""}`}
@@ -830,70 +830,65 @@ export function Player() {
                 onClick={() => setBackgroundDraft(swatch.color)} />
             ))}
           </div>
-          <label className="player__background-custom">
-            自定义颜色
-            <input type="color" aria-label="自定义画布背景颜色" value={backgroundDraft}
+          <label className="player__background-custom">{tr("自定义颜色")}<input type="color" aria-label={tr("自定义画布背景颜色")} value={backgroundDraft}
               onChange={(event) => setBackgroundDraft(event.currentTarget.value.toUpperCase())} />
           </label>
           <div className="player__background-actions">
-            <button type="button" className="tool-btn" onClick={() => setBackgroundPickerOpen(false)}>
-              取消
-            </button>
+            <button type="button" className="tool-btn" onClick={() => setBackgroundPickerOpen(false)}>{tr("取消")}</button>
             <button type="button" className="tool-btn tool-btn--primary"
               onClick={() => void saveCanvasBackground()}
               disabled={backgroundSaving || !!state.editLock}>
-              {backgroundSaving ? "保存中…" : "应用"}
+              {backgroundSaving ? tr("保存中…") : tr("应用")}
             </button>
           </div>
         </div>
       ) : null}
 
       <div className="player-controls">
-        <button className="player__iconbtn" onClick={stop} title="回到开头" aria-label="回到开头">
+        <button className="player__iconbtn" onClick={stop} title={tr("回到开头")} aria-label={tr("回到开头")}>
           <SkipBack size={16} />
         </button>
-        <button className="player__play" onClick={togglePlay} disabled={!currentId} aria-label={playing ? "暂停" : "播放"} aria-pressed={playing} aria-keyshortcuts="Space" title={playing ? "暂停（空格）" : "播放（空格）"}>
+        <button className="player__play" onClick={togglePlay} disabled={!currentId} aria-label={playing ? tr("暂停") : tr("播放")} aria-pressed={playing} aria-keyshortcuts="Space" title={playing ? tr("暂停（空格）") : tr("播放（空格）")}>
           {playing ? <Pause size={16} /> : <Play size={16} />}
         </button>
-        <button className="player__iconbtn" onClick={stop} disabled={!currentId} title="停止（归零）" aria-label="停止">
+        <button className="player__iconbtn" onClick={stop} disabled={!currentId} title={tr("停止（归零）")} aria-label={tr("停止")}>
           <Square size={15} />
         </button>
-        <button className="player__iconbtn" onClick={() => stepFrame(-1)} disabled={!currentId} title="上一帧" aria-label="上一帧">
+        <button className="player__iconbtn" onClick={() => stepFrame(-1)} disabled={!currentId} title={tr("上一帧")} aria-label={tr("上一帧")}>
           <ChevronLeft size={15} />
         </button>
         <span className="player-controls__time cv-mono">
           {fmtTimePrecise(shownTime)} / {fmtTime(totalDisplay)}
         </span>
-        <button className="player__iconbtn" onClick={() => stepFrame(1)} disabled={!currentId} title="下一帧" aria-label="下一帧">
+        <button className="player__iconbtn" onClick={() => stepFrame(1)} disabled={!currentId} title={tr("下一帧")} aria-label={tr("下一帧")}>
           <ChevronRight size={15} />
         </button>
         <button
           className={`player__iconbtn player-controls__loop ${loopEnabled ? "player__iconbtn--on" : ""}`}
           onClick={() => setLoopEnabled((v) => !v)}
           disabled={!currentId}
-          title="循环播放区间"
-          aria-label="循环播放区间"
+          title={tr("循环播放区间")}
+          aria-label={tr("循环播放区间")}
           aria-pressed={loopEnabled}
         >
           <Repeat size={14} />
         </button>
-        <button className="player__iconbtn player-controls__loop" onClick={() => setLoopIn(shownTime)} disabled={!currentId} title="设循环入点" aria-label="设循环入点">
+        <button className="player__iconbtn player-controls__loop" onClick={() => setLoopIn(shownTime)} disabled={!currentId} title={tr("设循环入点")} aria-label={tr("设循环入点")}>
           <Flag size={14} />
         </button>
-        <button className="player__iconbtn player-controls__loop" onClick={() => setLoopOut(shownTime)} disabled={!currentId} title="设循环出点" aria-label="设循环出点">
+        <button className="player__iconbtn player-controls__loop" onClick={() => setLoopOut(shownTime)} disabled={!currentId} title={tr("设循环出点")} aria-label={tr("设循环出点")}>
           <Flag size={14} className="player__icon-flag-out" />
         </button>
         {loopIn != null && loopOut != null ? (
-          <span className="cv-mono player-controls__loop" style={{ fontSize: 11, color: "var(--text-dim)" }}>
-            循环 {fmtTime(loopIn)}–{fmtTime(loopOut)}
+          <span className="cv-mono player-controls__loop" style={{ fontSize: 11, color: "var(--text-dim)" }}>{tr("循环 ")}{fmtTime(loopIn)}–{fmtTime(loopOut)}
           </span>
         ) : null}
         <button
           className="player__iconbtn"
           onClick={handleSplit}
           disabled={!currentId || !state.selection?.clipId || selectedTrackLocked || !!state.editLock}
-          title={selectedTrackLocked ? "所选片段所在轨道已锁定，解锁后才能分割" : "分割选中片段"}
-          aria-label="分割选中片段"
+          title={selectedTrackLocked ? tr("所选片段所在轨道已锁定，解锁后才能分割") : tr("分割选中片段")}
+          aria-label={tr("分割选中片段")}
         >
           <Scissors size={15} />
         </button>
@@ -906,15 +901,15 @@ export function Player() {
             setShowColorBefore((value) => !value);
           }}
           disabled={!currentId || !colorCompareAvailable}
-          aria-label="切换调色前后对比" aria-pressed={showColorBefore}
-          title={colorCompareAvailable ? "显示所选片段在当前时间点的调色前画面；再次点击返回成片画面"
-            : "先选中有滤镜或调色效果的片段，并把播放头移到该片段内"}>
-          {showColorBefore ? "调色前" : "前后对比"}
+          aria-label={tr("切换调色前后对比")} aria-pressed={showColorBefore}
+          title={colorCompareAvailable ? tr("显示所选片段在当前时间点的调色前画面；再次点击返回成片画面")
+            : tr("先选中有滤镜或调色效果的片段，并把播放头移到该片段内")}>
+          {showColorBefore ? tr("调色前") : tr("前后对比")}
         </button>
         {showColorBefore && colorBeforeState === "error" ? (
-          <span className="player__compare-error" role="alert">调色前预览失败</span>
+          <span className="player__compare-error" role="alert">{tr("调色前预览失败")}</span>
         ) : null}
-        <button className="player__iconbtn player-controls__view" onClick={cycleRatio} title="画布比例（仅预览显示）" aria-label="切换画布比例">
+        <button className="player__iconbtn player-controls__view" onClick={cycleRatio} title={tr("画布比例（仅预览显示）")} aria-label={tr("切换画布比例")}>
           <RatioIcon r={ratio} />
           <span className="player__zoom-val player__ratio-val">{ratioLabel}</span>
         </button>
@@ -924,20 +919,19 @@ export function Player() {
             setBackgroundPickerOpen((open) => !open);
           }}
           disabled={!currentId || !!state.editLock}
-          aria-label="设置画布背景" aria-expanded={backgroundPickerOpen}
-          title="设置透出区域与空白区域的画布底色">
-          <span className="player__background-chip" style={{ backgroundColor: canvasBackground }} />背景
-        </button>
+          aria-label={tr("设置画布背景")} aria-expanded={backgroundPickerOpen}
+          title={tr("设置透出区域与空白区域的画布底色")}>
+          <span className="player__background-chip" style={{ backgroundColor: canvasBackground }} />{tr("背景")}</button>
         <button type="button" className={`player__safe-toggle ${showTitleSafeArea ? "player__safe-toggle--on" : ""}`}
           onClick={() => setShowTitleSafeArea((value) => !value)} disabled={!currentId}
-          aria-label="切换标题安全区" aria-pressed={showTitleSafeArea}
-          title="显示或隐藏标题安全区（10%）与动作安全区（5%）；仅用于预览参考">安全区</button>
+          aria-label={tr("切换标题安全区")} aria-pressed={showTitleSafeArea}
+          title={tr("显示或隐藏标题安全区（10%）与动作安全区（5%）；仅用于预览参考")}>{tr("安全区")}</button>
         <span className="player__zoom-bar player-controls__view">
-          <button className="player__iconbtn" onClick={() => setZoom((z) => (z === FIT ? 0.5 : z === 0.5 ? 1.0 : z === 1.0 ? 1.5 : 0.5))} title="缩小" aria-label="缩小">
+          <button className="player__iconbtn" onClick={() => setZoom((z) => (z === FIT ? 0.5 : z === 0.5 ? 1.0 : z === 1.0 ? 1.5 : 0.5))} title={tr("缩小")} aria-label={tr("缩小")}>
             <ZoomOut size={14} />
           </button>
-          <span className="player__zoom-val">{zoom === FIT ? "适应" : `${Math.round(zoom * 100)}%`}</span>
-          <button className="player__iconbtn" onClick={() => setZoom((z) => (z === FIT ? 0.5 : z === 0.5 ? 1.0 : z === 1.0 ? 1.5 : FIT))} title="放大" aria-label="放大">
+          <span className="player__zoom-val">{zoom === FIT ? tr("适应") : `${Math.round(zoom * 100)}%`}</span>
+          <button className="player__iconbtn" onClick={() => setZoom((z) => (z === FIT ? 0.5 : z === 0.5 ? 1.0 : z === 1.0 ? 1.5 : FIT))} title={tr("放大")} aria-label={tr("放大")}>
             <ZoomIn size={14} />
           </button>
         </span>

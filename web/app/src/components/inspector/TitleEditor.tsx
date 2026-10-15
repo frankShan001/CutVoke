@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../../i18n";
 /** 独立标题片段的内容、排版与动画参数，写回同一 cutvoke.text 效果。 */
 
 import { useEffect, useState } from "react";
@@ -50,6 +51,7 @@ function fromParams(params: Record<string, unknown>): Form {
 }
 
 export function TitleEditor({ clip }: { clip: Clip }) {
+  useLocale();
   const { state, dispatch } = useEditor();
   const params = clip.effects?.find((effect) => effect.effectId === "cutvoke.text")?.params || {};
   const paramsKey = JSON.stringify(params);
@@ -80,19 +82,19 @@ export function TitleEditor({ clip }: { clip: Clip }) {
     Number.isInteger(number("animLoopMs")) && number("animLoopMs") >= 300 && number("animLoopMs") <= 3000;
 
   const numericFields: { key: keyof Form; label: string; min: number; max: number; step: number }[] = [
-    { key: "fontSize", label: "字号", min: 8, max: 200, step: 1 },
-    { key: "lineSpacing", label: "多行行距", min: 0.5, max: 2.5, step: 0.05 },
-    { key: "strokeWidth", label: "描边宽度", min: 0, max: 8, step: 0.5 },
-    { key: "panelWidth", label: "背景条宽度 %", min: 0, max: 100, step: 1 },
-    { key: "panelHeight", label: "背景条高度 %", min: 0, max: 100, step: 1 },
-    { key: "x", label: "水平位置 %", min: 0, max: 100, step: 1 },
-    { key: "y", label: "垂直位置 %", min: 0, max: 100, step: 1 },
-    { key: "scale", label: "缩放", min: 0.1, max: 5, step: 0.05 },
-    { key: "rotation", label: "旋转角度", min: -180, max: 180, step: 1 },
-    { key: "shadow", label: "阴影宽度", min: 0, max: 12, step: 1 },
-    { key: "animIn", label: "淡入毫秒", min: 0, max: 3000, step: 50 },
-    { key: "animOut", label: "淡出毫秒", min: 0, max: 3000, step: 50 },
-    { key: "animLoopMs", label: "循环周期毫秒", min: 300, max: 3000, step: 50 },
+    { key: "fontSize", label: tr("字号"), min: 8, max: 200, step: 1 },
+    { key: "lineSpacing", label: tr("多行行距"), min: 0.5, max: 2.5, step: 0.05 },
+    { key: "strokeWidth", label: tr("描边宽度"), min: 0, max: 8, step: 0.5 },
+    { key: "panelWidth", label: tr("背景条宽度 %"), min: 0, max: 100, step: 1 },
+    { key: "panelHeight", label: tr("背景条高度 %"), min: 0, max: 100, step: 1 },
+    { key: "x", label: tr("水平位置 %"), min: 0, max: 100, step: 1 },
+    { key: "y", label: tr("垂直位置 %"), min: 0, max: 100, step: 1 },
+    { key: "scale", label: tr("缩放"), min: 0.1, max: 5, step: 0.05 },
+    { key: "rotation", label: tr("旋转角度"), min: -180, max: 180, step: 1 },
+    { key: "shadow", label: tr("阴影宽度"), min: 0, max: 12, step: 1 },
+    { key: "animIn", label: tr("淡入毫秒"), min: 0, max: 3000, step: 50 },
+    { key: "animOut", label: tr("淡出毫秒"), min: 0, max: 3000, step: 50 },
+    { key: "animLoopMs", label: tr("循环周期毫秒"), min: 300, max: 3000, step: 50 },
   ];
   const integerFields = new Set<keyof Form>(["shadow", "animIn", "animOut", "animLoopMs"]);
   const invalidNumericField = numericFields.find((field) => {
@@ -101,17 +103,17 @@ export function TitleEditor({ clip }: { clip: Clip }) {
       (integerFields.has(field.key) && !Number.isInteger(value));
   });
   const validationMessage = !form.content.trim()
-    ? "请先填写标题内容。"
+    ? tr("请先填写标题内容。")
     : form.content.length > 180
-      ? "标题内容最多 180 个字符。"
+      ? tr("标题内容最多 180 个字符。")
       : invalidNumericField
         ? !Number.isFinite(number(invalidNumericField.key))
-          ? `${invalidNumericField.label}请输入有效数字。`
+          ? tr("{0}请输入有效数字。", invalidNumericField.label)
           : integerFields.has(invalidNumericField.key) && !Number.isInteger(number(invalidNumericField.key))
-            ? `${invalidNumericField.label}必须是整数。`
-            : `${invalidNumericField.label}需在 ${invalidNumericField.min}–${invalidNumericField.max} 范围内。`
+            ? tr("{0}必须是整数。", invalidNumericField.label)
+            : tr("{0}需在 {1}–{2} 范围内。", invalidNumericField.label, invalidNumericField.min, invalidNumericField.max)
         : !valid
-          ? "标题样式参数无效，请检查输入后再应用。"
+          ? tr("标题样式参数无效，请检查输入后再应用。")
           : "";
   const validationMessageId = validationMessage ? `title-validation-${clip.id}` : undefined;
 
@@ -141,67 +143,61 @@ export function TitleEditor({ clip }: { clip: Clip }) {
   };
 
   return (
-    <section className="title-editor" aria-label="文字标题属性">
-      <strong>文字标题</strong>
-      <label>内容
-        <textarea className="cv-input" rows={3} maxLength={180} aria-label="编辑标题内容"
+    <section className="title-editor" aria-label={tr("文字标题属性")}>
+      <strong>{tr("文字标题")}</strong>
+      <label>{tr("内容")}<textarea className="cv-input" rows={3} maxLength={180} aria-label={tr("编辑标题内容")}
           value={form.content} onChange={(event) => set("content", event.target.value)} />
       </label>
-      <label>字体
-        <select className="cv-input" aria-label="标题字体" value={form.fontFamily}
+      <label>{tr("字体")}<select className="cv-input" aria-label={tr("标题字体")} value={form.fontFamily}
           onChange={(event) => set("fontFamily", event.target.value)}>
-          <option value="Noto Sans SC">思源黑体风格 · Noto Sans SC</option>
-          <option value="Noto Serif SC">思源宋体风格 · Noto Serif SC</option>
+          <option value="Noto Sans SC">{tr("思源黑体风格 · Noto Sans SC")}</option>
+          <option value="Noto Serif SC">{tr("思源宋体风格 · Noto Serif SC")}</option>
         </select>
       </label>
       <div className="title-editor__two">
-        <label>文字颜色<input className="cv-input" type="color" aria-label="标题文字颜色"
+        <label>{tr("文字颜色")}<input className="cv-input" type="color" aria-label={tr("标题文字颜色")}
           value={form.color} onChange={(event) => set("color", event.target.value)} /></label>
-        <label>描边颜色<input className="cv-input" type="color" aria-label="标题描边颜色"
+        <label>{tr("描边颜色")}<input className="cv-input" type="color" aria-label={tr("标题描边颜色")}
           value={form.strokeColor} onChange={(event) => set("strokeColor", event.target.value)} /></label>
       </div>
-      <label>背景色（留空为透明）
-        <input className="cv-input" type="text" aria-label="标题背景色" placeholder="#1e1e2e"
+      <label>{tr("背景色（留空为透明）")}<input className="cv-input" type="text" aria-label={tr("标题背景色")} placeholder="#1e1e2e"
           value={form.background} onChange={(event) => set("background", event.target.value)} />
       </label>
-      <p className="cv-hint">背景条宽度和高度均大于 0 时绘制独立色块；任一为 0 时背景只包住文字。</p>
+      <p className="cv-hint">{tr("背景条宽度和高度均大于 0 时绘制独立色块；任一为 0 时背景只包住文字。")}</p>
       <div className="title-editor__two">
-        <label>对齐<select className="cv-input" aria-label="标题对齐" value={form.align}
+        <label>{tr("对齐")}<select className="cv-input" aria-label={tr("标题对齐")} value={form.align}
           onChange={(event) => set("align", event.target.value)}>
-          <option value="left">左</option><option value="center">中</option><option value="right">右</option>
+          <option value="left">{tr("左")}</option><option value="center">{tr("中")}</option><option value="right">{tr("右")}</option>
         </select></label>
         <label className="title-editor__check"><input type="checkbox" checked={form.bold}
-          onChange={(event) => set("bold", event.target.checked)} />加粗</label>
+          onChange={(event) => set("bold", event.target.checked)} />{tr("加粗")}</label>
       </div>
       <div className="title-editor__two">
         {numericFields.map((field) => (
           <label key={field.key}>{field.label}
-            <input className="cv-input" type="number" aria-label={`标题${field.label}`}
+            <input className="cv-input" type="number" aria-label={tr("标题{0}", field.label)}
               min={field.min} max={field.max} step={field.step} value={String(form[field.key])}
               onChange={(event) => set(field.key, event.target.value)} />
           </label>
         ))}
       </div>
       <div className="title-editor__two">
-        <label>入场方式
-          <select className="cv-input" aria-label="标题入场方式" value={form.animInStyle}
+        <label>{tr("入场方式")}<select className="cv-input" aria-label={tr("标题入场方式")} value={form.animInStyle}
             onChange={(event) => set("animInStyle", event.target.value)}>
-            <option value="none">无</option><option value="fade">淡入</option>
-            <option value="scale">缩放出现</option><option value="typewriter">逐字出现</option>
+            <option value="none">{tr("无")}</option><option value="fade">{tr("淡入")}</option>
+            <option value="scale">{tr("缩放出现")}</option><option value="typewriter">{tr("逐字出现")}</option>
           </select>
         </label>
-        <label>出场方式
-          <select className="cv-input" aria-label="标题出场方式" value={form.animOutStyle}
+        <label>{tr("出场方式")}<select className="cv-input" aria-label={tr("标题出场方式")} value={form.animOutStyle}
             onChange={(event) => set("animOutStyle", event.target.value)}>
-            <option value="none">无</option><option value="fade">淡出</option>
-            <option value="scale">缩小消失</option>
+            <option value="none">{tr("无")}</option><option value="fade">{tr("淡出")}</option>
+            <option value="scale">{tr("缩小消失")}</option>
           </select>
         </label>
-        <label>循环方式
-          <select className="cv-input" aria-label="标题循环方式" value={form.animLoopStyle}
+        <label>{tr("循环方式")}<select className="cv-input" aria-label={tr("标题循环方式")} value={form.animLoopStyle}
             onChange={(event) => set("animLoopStyle", event.target.value)}>
-            <option value="none">无</option><option value="pulse">呼吸放大</option>
-            <option value="blink">闪烁</option>
+            <option value="none">{tr("无")}</option><option value="pulse">{tr("呼吸放大")}</option>
+            <option value="blink">{tr("闪烁")}</option>
           </select>
         </label>
       </div>
@@ -210,15 +206,15 @@ export function TitleEditor({ clip }: { clip: Clip }) {
       </p> : null}
       <div className="title-editor__actions">
         <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary"
-          onClick={() => setForm({ ...defaults, content: form.content })}>复位样式</button>
+          onClick={() => setForm({ ...defaults, content: form.content })}>{tr("复位样式")}</button>
         <button type="button" className="cv-btn cv-btn--sm" disabled={!valid || saving}
           aria-describedby={validationMessageId}
-          onClick={() => void apply()}>{saving ? "保存中…" : "应用标题属性"}</button>
+          onClick={() => void apply()}>{saving ? tr("保存中…") : tr("应用标题属性")}</button>
       </div>
       {anchorOutsideSafeArea ? (
-        <p className="cv-hint" role="status">标题锚点超出四边 10% 参考安全区；预览栏可打开“安全区”检查完整文字。</p>
+        <p className="cv-hint" role="status">{tr("标题锚点超出四边 10% 参考安全区；预览栏可打开“安全区”检查完整文字。")}</p>
       ) : null}
-      <p className="cv-hint">数值写入工程后可撤销；画面以连续预览和导出结果为准。</p>
+      <p className="cv-hint">{tr("数值写入工程后可撤销；画面以连续预览和导出结果为准。")}</p>
     </section>
   );
 }

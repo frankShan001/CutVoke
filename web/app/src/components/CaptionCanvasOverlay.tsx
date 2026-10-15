@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../i18n";
 /** 画布字幕叠层（H01）：在预览画面（player__canvas-frame 内）上渲染当前播放头可见的字幕，
     支持直接拖拽改 x/y、角柄缩放、顶柄旋转。拖动中只做本地预览，松手才提交 caption.update。
     归一化坐标换算：normalized = 像素 / 画布显示尺寸（画布随缩放/比例缩放，故用叠层自身 rect）。
@@ -89,6 +90,7 @@ const norm = (c: Caption): Geom => ({
 });
 
 export function CaptionCanvasOverlay() {
+  useLocale();
   const { state, dispatch } = useEditor();
   const project = state.project;
   const draft = !state.editLock && state.captionDraftPreview?.projectId === project?.projectId
@@ -276,7 +278,7 @@ export function CaptionCanvasOverlay() {
             className={`caption-overlay__box${c.id === state.selectedCaptionId ? " caption-overlay__box--active" : ""}`}
             role="button"
             tabIndex={0}
-            aria-label={`选择字幕：${c.text.slice(0, 48)}`}
+            aria-label={tr("选择字幕：{0}", c.text.slice(0, 48))}
             aria-pressed={c.id === state.selectedCaptionId}
             style={{
               left: `${g.x * 100}%`,
@@ -324,12 +326,12 @@ export function CaptionCanvasOverlay() {
               <>
                 <span
                   className="caption-overlay__handle caption-overlay__handle--scale"
-                  aria-label="缩放字幕"
+                  aria-label={tr("缩放字幕")}
                   onPointerDown={(e) => beginScale(e, c)}
                 />
                 <span
                   className="caption-overlay__handle caption-overlay__handle--rotate"
-                  aria-label="旋转字幕"
+                  aria-label={tr("旋转字幕")}
                   onPointerDown={(e) => beginRotate(e, c)}
                 />
               </>

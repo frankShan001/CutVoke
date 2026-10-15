@@ -1,3 +1,4 @@
+import { msg, tr, useLocale } from "../i18n";
 /** 音频分析面板（J09）：对音频文件分析响度/BPM，辅助卡点剪辑。
  *  输入音频路径（或从素材库/工程音频片段选择）→ 调 POST /api/v1/audio/analyze →
  *  展示时长 / 响度 LUFS / BPM。BPM 未检出显示「未检出」。
@@ -16,6 +17,7 @@ import { secsToFrameRatString } from "./timeline/util";
 import type { AudioAnalysis } from "../lib/api";
 
 export function AudioAnalyzePanel() {
+  const locale = useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const sessionAssets = useSessionAssets();
   const [path, setPath] = useState("");
@@ -37,18 +39,18 @@ export function AudioAnalyzePanel() {
       }
     }
     return [...map.entries()].map(([p, name]) => ({ path: p, name }));
-  }, [state.project, sessionAssets]);
+  }, [state.project, sessionAssets, locale]);
 
   const handleAnalyze = async () => {
     if (!path.trim()) {
-      showError(dispatch, { status: 400, code: "INVALID_ARGUMENT", message: "请填写或选择音频路径" });
+      showError(dispatch, { status: 400, code: "INVALID_ARGUMENT", message: tr("请填写或选择音频路径") });
       return;
     }
     setBusy(true);
     try {
       const res = await analyzeAudio({ path: path.trim() });
       setResult(res);
-      dispatch({ type: "STATUS_SET", severity: "ok", text: "音频分析完成" });
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("音频分析完成") });
     } catch (err) {
       showError(dispatch, err);
     } finally {
@@ -59,7 +61,7 @@ export function AudioAnalyzePanel() {
   const bpmText =
     result && result.bpm !== null && result.bpm !== undefined
       ? `${result.bpm} BPM`
-      : "未检出";
+      : tr("未检出");
 
   const clipMatches = (state.project?.sequence.tracks || [])
     .filter((track) => track.kind === "audio")
@@ -97,77 +99,75 @@ export function AudioAnalyzePanel() {
       name: `节拍 ${selectedBeat.index + 1} · ${assetDisplayName(path)}`,
       time: secsToFrameRatString(selectedBeat.timeline, state.project.sequence.fps),
     });
-    if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: "已在时间线标记节拍；拖动片段边缘可吸附" });
+    if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已在时间线标记节拍；拖动片段边缘可吸附") });
   };
 
   return (
-    <Panel title="音频分析" subtitle="响度与 BPM">
-      <Field label="音频源">
-        <Select value={path} disabled={busy} onChange={(e) => { setPath(e.target.value); setResult(null); setBeatIndex(0); }} aria-label="选择音频源">
-          <option value="">{audioSources.length ? "选择已导入音频…" : "（素材库暂无音频）"}</option>
+    <Panel title={tr("音频分析")} subtitle={tr("响度与 BPM")}>
+      <Field label={tr("音频源")}>
+        <Select value={path} disabled={busy} onChange={(e) => { setPath(e.target.value); setResult(null); setBeatIndex(0); }} aria-label={tr("选择音频源")}>
+          <option value="">{audioSources.length ? tr("选择已导入音频…") : tr("（素材库暂无音频）")}</option>
           {audioSources.map((s) => (
             <option key={s.path} value={s.path}>{s.name}</option>
           ))}
         </Select>
       </Field>
-      <Field label="音频路径">
+      <Field label={tr("音频路径")}>
         <TextInput
           value={path}
           onChange={(e) => { setPath(e.target.value); setResult(null); setBeatIndex(0); }}
           disabled={busy}
-          placeholder="如：D:\音频\bgm.mp3"
-          aria-label="音频路径"
+          placeholder={tr("如：D:\\音频\\bgm.mp3")}
+          aria-label={tr("音频路径")}
         />
       </Field>
-      <Button variant="primary" full onClick={handleAnalyze} disabled={busy} style={{ marginTop: 6 }} aria-label="分析音频">
+      <Button variant="primary" full onClick={handleAnalyze} disabled={busy} style={{ marginTop: 6 }} aria-label={tr("分析音频")}>
         <Activity size={14} />
-        {busy ? "分析中…" : "分析"}
+        {busy ? tr("分析中…") : tr("分析")}
       </Button>
 
       {result ? (
-        <div className="audio-analyze__result" role="region" aria-label="音频分析结果" style={{ marginTop: 10 }}>
+        <div className="audio-analyze__result" role="region" aria-label={tr("音频分析结果")} style={{ marginTop: 10 }}>
           <div className="audio-analyze__row">
             <AudioLines size={13} />
-            <span className="audio-analyze__key">时长</span>
-            <span className="audio-analyze__val">{result.duration.toFixed(2)} 秒</span>
+            <span className="audio-analyze__key">{tr("时长")}</span>
+            <span className="audio-analyze__val">{result.duration.toFixed(2)}{tr(" 秒")}</span>
           </div>
           <div className="audio-analyze__row">
-            <span className="audio-analyze__key">响度</span>
-            <span className="audio-analyze__val">{result.loudnessI === null ? "未检出" : result.loudnessI.toFixed(1) + " LUFS"}</span>
+            <span className="audio-analyze__key">{tr("响度")}</span>
+            <span className="audio-analyze__val">{result.loudnessI === null ? tr("未检出") : result.loudnessI.toFixed(1) + " LUFS"}</span>
           </div>
           <div className="audio-analyze__row">
             <span className="audio-analyze__key">BPM</span>
             <span className="audio-analyze__val">{bpmText}</span>
           </div>
           <div className="audio-analyze__row">
-            <span className="audio-analyze__key">起拍点</span>
-            <span className="audio-analyze__val">{result.beats?.length || 0} 个候选</span>
+            <span className="audio-analyze__key">{tr("起拍点")}</span>
+            <span className="audio-analyze__val">{result.beats?.length || 0}{tr(" 个候选")}</span>
           </div>
           {beatsInClip.length ? (
             <div className="audio-analyze__beats">
-              <Field label="选择节拍">
-                <Select value={Math.min(beatIndex, beatsInClip.length - 1)} onChange={(e) => setBeatIndex(Number(e.target.value))} aria-label="选择节拍">
+              <Field label={tr("选择节拍")}>
+                <Select value={Math.min(beatIndex, beatsInClip.length - 1)} onChange={(e) => setBeatIndex(Number(e.target.value))} aria-label={tr("选择节拍")}>
                   {beatsInClip.map((beat, index) => (
-                    <option key={beat.id} value={index}>第 {beat.index + 1} 拍 · 时间线 {beat.timeline.toFixed(3)} 秒</option>
+                    <option key={beat.id} value={index}>{tr("第 ")}{beat.index + 1}{tr(" 拍 · 时间线 ")}{beat.timeline.toFixed(3)}{tr(" 秒")}</option>
                   ))}
                 </Select>
               </Field>
               <div className="audio-analyze__beat-actions">
-                <Button onClick={() => selectedBeat && dispatch({ type: "PLAYHEAD_SET", t: selectedBeat.timeline })} aria-label="定位到所选节拍">定位</Button>
-                <Button variant="primary" onClick={() => void markSelectedBeat()} disabled={alreadyMarked || !!state.editLock} aria-label="标记所选节拍">
-                  {alreadyMarked ? "已标记" : "标记到时间线"}
+                <Button onClick={() => selectedBeat && dispatch({ type: "PLAYHEAD_SET", t: selectedBeat.timeline })} aria-label={tr("定位到所选节拍")}>{tr("定位")}</Button>
+                <Button variant="primary" onClick={() => void markSelectedBeat()} disabled={alreadyMarked || !!state.editLock} aria-label={tr("标记所选节拍")}>
+                  {alreadyMarked ? tr("已标记") : tr("标记到时间线")}
                 </Button>
               </div>
             </div>
           ) : result.beats?.length ? (
-            <p className="cv-hint">选择工程中的音频片段后，可将其源素材起拍点映射成时间线标记。</p>
+            <p className="cv-hint">{tr("选择工程中的音频片段后，可将其源素材起拍点映射成时间线标记。")}</p>
           ) : null}
         </div>
       ) : null}
 
-      <p className="cv-hint" style={{ marginTop: 8 }}>
-        起拍点是能量检测候选，标记前请试听复核；时间线标记可用于片段拖动吸附。
-      </p>
+      <p className="cv-hint" style={{ marginTop: 8 }}>{tr("起拍点是能量检测候选，标记前请试听复核；时间线标记可用于片段拖动吸附。")}</p>
     </Panel>
   );
 }

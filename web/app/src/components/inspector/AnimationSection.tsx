@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../../i18n";
 /** Four independent animation lanes share the registry, project and renderer. */
 import { useEffect, useMemo, useState } from "react";
 import { Sparkles } from "lucide-react";
@@ -13,6 +14,7 @@ import { paramControls } from "../../lib/effectControls";
 import { ParamControls } from "./ParamControls";
 import type { Clip } from "../../types/api";
 import { inferKind } from "../../lib/assetStore";
+import { subcategoryLabel } from "../../i18n/resourceLabels";
 
 const ANIM_PREFIX = "cutvoke.anim.";
 const SLOTS = ["入场", "出场", "循环", "组合"] as const;
@@ -32,6 +34,7 @@ function animationAffectsOpacity(id: string, params: Record<string, unknown>): b
 }
 
 export function AnimationSection({ clip }: { clip: Clip }) {
+  const locale = useLocale();
   const { state, dispatch } = useEditor();
   const isImage = inferKind(clip.assetRef.sourcePath, false, false) === "image";
   const visibleSlots = isImage ? SLOTS.filter((slot) => slot !== "组合") : SLOTS;
@@ -54,11 +57,12 @@ export function AnimationSection({ clip }: { clip: Clip }) {
     return () => {
       cancelled = true;
     };
-  }, [dispatch]);
+  }, [dispatch, locale]);
 
   const specsBySlot = useMemo(() => Object.fromEntries(
     SLOTS.map((slot) => [slot, specs.filter((spec) => spec.subcategory === slot)]),
   ) as Record<Slot, EffectSpec[]>, [specs]);
+  const specIds = specs.map(spec => spec.effectId).join("\u0000");
 
   useEffect(() => {
     const next = {} as Record<Slot, Draft>;
@@ -72,7 +76,7 @@ export function AnimationSection({ clip }: { clip: Clip }) {
     }
     setDrafts(next);
     setBusy(false);
-  }, [clip.id, clip.effects, specsBySlot]);
+  }, [clip.id, clip.effects, specIds]);
 
   const apply = async (
     slot: Slot,
@@ -126,7 +130,7 @@ export function AnimationSection({ clip }: { clip: Clip }) {
       <div className="inspector__subrow">
         <span className="inspector__key">
           <Sparkles size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />
-          {isImage ? "图片动画" : "视频动画"}
+          {isImage ? tr("图片动画") : tr("视频动画")}
         </span>
       </div>
       {visibleSlots.map((slot) => {
@@ -135,17 +139,17 @@ export function AnimationSection({ clip }: { clip: Clip }) {
         const controls = spec ? paramControls(spec, draft.params) : [];
         return (
           <div key={slot} className="inspector__animation-lane">
-            <label className="inspector__key" htmlFor={`animation-${slot}`}>{slot}</label>
+            <label className="inspector__key" htmlFor={`animation-${slot}`}>{subcategoryLabel(slot)}</label>
             <select
               id={`animation-${slot}`}
               value={draft.id}
-              aria-label={`${slot}动画`}
+              aria-label={tr("{0}动画", subcategoryLabel(slot))}
               className="cv-input"
               style={{ height: 28, width: "100%" }}
               disabled={busy}
               onChange={(event) => pick(slot, event.target.value)}
             >
-              <option value="">无</option>
+              <option value="">{tr("无")}</option>
               {specsBySlot[slot].map((item) => (
                 <option key={item.effectId} value={item.effectId}>{item.name}</option>
               ))}
@@ -172,7 +176,7 @@ export function AnimationSection({ clip }: { clip: Clip }) {
       {pendingConflict ? (
         <div
           role="alertdialog"
-          aria-label="动画与关键帧冲突选择"
+          aria-label={tr("动画与关键帧冲突选择")}
           className="inspector__animation-conflict"
           style={{
             display: "grid", gap: 8, marginTop: 8, padding: 10,
@@ -180,8 +184,8 @@ export function AnimationSection({ clip }: { clip: Clip }) {
             background: "var(--bg-2)",
           }}
         >
-          <strong>该动画会改变透明度，片段已有手动透明度关键帧。</strong>
-          <span className="cv-hint">保留关键帧会与动画叠加；移除会清除该片段全部透明度关键帧。</span>
+          <strong>{tr("该动画会改变透明度，片段已有手动透明度关键帧。")}</strong>
+          <span className="cv-hint">{tr("保留关键帧会与动画叠加；移除会清除该片段全部透明度关键帧。")}</span>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             <button
               type="button"
@@ -192,7 +196,7 @@ export function AnimationSection({ clip }: { clip: Clip }) {
                 setPendingConflict(null);
                 void apply(pending.slot, pending.id, pending.params, "combine");
               }}
-            >保留关键帧并叠加</button>
+            >{tr("保留关键帧并叠加")}</button>
             <button
               type="button"
               className="cv-btn cv-btn--sm cv-btn--danger"
@@ -202,20 +206,20 @@ export function AnimationSection({ clip }: { clip: Clip }) {
                 setPendingConflict(null);
                 void apply(pending.slot, pending.id, pending.params, "replace");
               }}
-            >移除关键帧后应用</button>
+            >{tr("移除关键帧后应用")}</button>
             <button
               type="button"
               className="cv-btn cv-btn--sm cv-btn--ghost"
               disabled={busy}
               onClick={() => setPendingConflict(null)}
-            >取消</button>
+            >{tr("取消")}</button>
           </div>
         </div>
       ) : null}
       <p className="cv-hint" style={{ marginTop: 4 }}>
         {isImage
-          ? "图片可分别设置入场、出场和循环动画。"
-          : "视频可分别设置入场、出场、循环和组合动画；每类切换只替换同类动画。"}
+          ? tr("图片可分别设置入场、出场和循环动画。")
+          : tr("视频可分别设置入场、出场、循环和组合动画；每类切换只替换同类动画。")}
       </p>
     </>
   );

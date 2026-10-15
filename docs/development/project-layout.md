@@ -18,6 +18,8 @@
 | `docs/assets/` | 资源来源和审核材料 |
 | `docs/history/` | 按日期归档的开发记录 |
 | `examples/` | 小型可复现示例 |
+| `skills/cutvoke-editor/` | 可复制的外部 AI 剪辑工作流、按需参考和隔离演示脚本 |
+| `effects/<类型>/<效果 ID>/` | 社区贡献清单、来源/许可证、真实预览；不搬移已有内置资源 |
 
 根目录保留说明、许可证、依赖配置与 `start-cutvoke.cmd`。默认打开桌面客户端，`--web` 打开浏览器编辑器，`--mcp` 提供 stdio MCP。
 

@@ -1,0 +1,20 @@
+{
+  "loadingTitle": "正在啟動 CutVoke",
+  "loadingService": "正在啟動本機編輯服務…",
+  "loadingPrivacy": "專案和預覽快取儲存在你的電腦上",
+  "loadingProgress": "啟動中",
+  "startupTitle": "CutVoke 無法啟動",
+  "startupSummary": "無法啟動本機編輯服務。請檢查下方診斷資訊後重新開啟 CutVoke。",
+  "serviceTitle": "本機服務已結束",
+  "serviceSummary": "本機編輯服務已結束。請重新開啟 CutVoke；診斷資訊和記錄位置如下。",
+  "requestFailure": "本機服務請求失敗（HTTP {0}）",
+  "invalidClient": "無效的用戶端請求",
+  "startupExit": "本機服務啟動失敗（結束代碼 {0}）",
+  "startupTimeout": "本機服務啟動逾時",
+  "serviceExitCode": "服務結束代碼：{0}",
+  "logLocation": "記錄位置：{0}",
+  "technicalDetails": "技術診斷（原文）",
+  "close": "關閉",
+  "chooseCache": "選擇快取儲存位置",
+  "chooseFolder": "選擇資料夾"
+}

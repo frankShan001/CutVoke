@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../i18n";
 /** 普通视频/图片的画布变换框；指针手势只在结束时提交一次命令。 */
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { useEditor } from "../store/editor";
@@ -15,6 +16,7 @@ const clamp = (value: number, low: number, high: number) => Math.min(high, Math.
 const angle = (value: number) => Math.round(value * 10) / 10;
 
 export function TransformCanvasOverlay() {
+  useLocale();
   const { state, dispatch } = useEditor();
   const project = state.project;
   const track = project?.sequence.tracks.find((item) => item.id === state.selection?.trackId);
@@ -165,29 +167,29 @@ export function TransformCanvasOverlay() {
 
   return (
     <svg ref={svgRef} className="player__transform-overlay" viewBox={`0 0 ${width} ${height}`}
-      preserveAspectRatio="xMidYMid meet" aria-label="画布变换控件" onPointerMove={move}
+      preserveAspectRatio="xMidYMid meet" aria-label={tr("画布变换控件")} onPointerMove={move}
       onPointerUp={finish} onPointerCancel={cancel}>
       <rect className="player__transform-outline" x={centerX - halfW} y={centerY - halfH}
         width={halfW * 2} height={halfH * 2} transform={`rotate(${current.rotation} ${centerX} ${centerY})`}
-        pointerEvents={editable ? "stroke" : "none"} tabIndex={editable ? 0 : -1} role="button" aria-label="移动画面"
+        pointerEvents={editable ? "stroke" : "none"} tabIndex={editable ? 0 : -1} role="button" aria-label={tr("移动画面")}
         onPointerDown={(event) => begin(event, "move")} onKeyDown={(event) => keyMove(event, "move")} />
       <circle className="player__transform-center-handle" cx={centerX} cy={centerY}
         r={Math.max(6, Math.min(width, height) * 0.018)} pointerEvents={editable ? "all" : "none"}
-        tabIndex={editable ? 0 : -1} role="button" aria-label="拖动画面位置"
+        tabIndex={editable ? 0 : -1} role="button" aria-label={tr("拖动画面位置")}
         onPointerDown={(event) => begin(event, "move")} onKeyDown={(event) => keyMove(event, "move")}>
-        <title>拖动调整画面位置</title>
+        <title>{tr("拖动调整画面位置")}</title>
       </circle>
       <circle className="player__transform-handle" cx={resizeHandle.x} cy={resizeHandle.y}
         r={Math.max(7, Math.min(width, height) * 0.012)} pointerEvents={editable ? "all" : "none"}
-        tabIndex={editable ? 0 : -1} role="button" aria-label="调整画面大小"
+        tabIndex={editable ? 0 : -1} role="button" aria-label={tr("调整画面大小")}
         onPointerDown={(event) => begin(event, "resize")} onKeyDown={(event) => keyMove(event, "resize")} />
       <line className="player__transform-guide" x1={centerX} y1={centerY} x2={rotateHandle.x} y2={rotateHandle.y} />
       <circle className="player__transform-handle player__transform-handle--rotate"
         cx={rotateHandle.x} cy={rotateHandle.y} r={Math.max(7, Math.min(width, height) * 0.012)}
         pointerEvents={editable ? "all" : "none"} tabIndex={editable ? 0 : -1} role="button"
-        aria-label="旋转画面" aria-valuetext={`${angle(current.rotation)} 度`}
+        aria-label={tr("旋转画面")} aria-valuetext={tr("{0} 度", angle(current.rotation))}
         onPointerDown={(event) => begin(event, "rotate")} onKeyDown={(event) => keyMove(event, "rotate")}>
-        <title>拖动旋转；按住 Shift 以 15° 吸附</title>
+        <title>{tr("拖动旋转；按住 Shift 以 15° 吸附")}</title>
       </circle>
     </svg>
   );

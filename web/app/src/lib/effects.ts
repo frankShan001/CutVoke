@@ -1,3 +1,5 @@
+import { tr } from "../i18n";
+import { getLocale } from "../i18n/locale";
 /** 统一资源客户端（J01）：效果注册表 / 工程资源 / 个人预设。
  * 前端不持有第二份效果清单——分类、名称、参数 schema 一律从后端拉取。
  * 后端字段是 effectId（非 id），name/description 按 lang 本地化；本模块归一化。 */
@@ -141,7 +143,7 @@ async function getJson<T>(path: string, params?: Record<string, string | undefin
     throw new ApiFailure({
       status: 0,
       code: "NETWORK",
-      message: err instanceof Error ? err.message : "无法连接后端服务",
+      message: err instanceof Error ? err.message : tr("无法连接后端服务"),
       retryable: true,
       path: url,
     });
@@ -153,7 +155,7 @@ async function getJson<T>(path: string, params?: Record<string, string | undefin
     throw new ApiFailure({
       status: res.status,
       code: e?.code || `HTTP_${res.status}`,
-      message: e?.message || `请求失败（HTTP ${res.status}）`,
+      message: e?.message || tr("请求失败（HTTP {0}）", res.status),
       details: e?.details,
       retryable: e?.retryable,
       path: url,
@@ -170,7 +172,8 @@ function localized(v: unknown): string {
   if (typeof v === "string") return v;
   if (v && typeof v === "object") {
     const o = v as Record<string, unknown>;
-    const hit = o["zh-CN"] ?? o["zh"] ?? o["en"];
+    const language = getLocale();
+    const hit = o[language] ?? o[language.split("-")[0]] ?? o.en ?? o["zh-CN"];
     if (typeof hit === "string") return hit;
     const first = Object.values(o).find((x) => typeof x === "string");
     if (typeof first === "string") return first;
@@ -189,7 +192,7 @@ function normalizeEffect(raw: unknown): EffectSpec {
     throw new ApiFailure({
       status: 500,
       code: "BAD_EFFECT_PAYLOAD",
-      message: "后端返回的效果缺少 effectId",
+      message: tr("后端返回的效果缺少 effectId"),
     });
   }
   return {
@@ -235,6 +238,7 @@ function normalizePreset(raw: unknown): Preset {
 // ---------------------------------------------------------------------------
 export async function listEffects(opts: ResourceQuery = {}): Promise<EffectSpec[]> {
   const data = await getJson<{ effects?: unknown[] }>("/effects", {
+    lang: getLocale(),
     q: opts.q,
     category: opts.category,
     subcategory: opts.subcategory,
@@ -250,6 +254,7 @@ export async function listProjectResources(
   const data = await getJson<{ effects?: unknown[]; favorites?: unknown; recent?: unknown }>(
     `/projects/${encodeURIComponent(projectId)}/resources`,
     {
+      lang: getLocale(),
       q: opts.q,
       category: opts.category,
       subcategory: opts.subcategory,
@@ -311,12 +316,12 @@ export async function fetchResourcePreview(
     if (res.status === 204) return { kind: "empty" };
     if (!res.ok) {
       const body = await res.json().catch(() => ({})) as { error?: { message?: string } };
-      return { kind: "error", message: body.error?.message || `预览失败（HTTP ${res.status}）` };
+      return { kind: "error", message: body.error?.message || tr("预览失败（HTTP {0}）", res.status) };
     }
     return { kind: "frame", url: URL.createObjectURL(await res.blob()) };
   } catch (error) {
     if (signal?.aborted) return { kind: "empty" };
-    return { kind: "error", message: error instanceof Error ? error.message : "预览网络错误" };
+    return { kind: "error", message: error instanceof Error ? error.message : tr("预览网络错误") };
   }
 }
 
@@ -336,19 +341,20 @@ export const CATEGORY_ORDER: EffectCategory[] = [
 ];
 
 const CATEGORY_LABELS: Record<string, string> = {
-  transition: "转场",
-  animation: "动画",
-  fx: "画面特效",
-  personFx: "人物特效",
-  filter: "滤镜",
-  audio: "音频效果",
-  color: "调节",
-  transform: "基础",
-  text: "文字",
+  get transition() { return tr("转场"); },
+  get animation() { return tr("动画"); },
+  get fx() { return tr("画面特效"); },
+  get personFx() { return tr("人物特效"); },
+  get filter() { return tr("滤镜"); },
+  get audio() { return tr("音频效果"); },
+  get color() { return tr("调节"); },
+  get transform() { return tr("基础"); },
+  get text() { return tr("文字"); },
 };
 
 export function categoryLabelOf(category: string): string {
-  return CATEGORY_LABELS[category] ?? category;
+  const label = CATEGORY_LABELS[category];
+  return label ?? category;
 }
 
 export function iconForCategory(category: string): LucideIcon {
@@ -385,13 +391,16 @@ export function sortCategories(cats: Iterable<string>): string[] {
 // ---------------------------------------------------------------------------
 // 注册表缓存 / 查询
 // ---------------------------------------------------------------------------
-let _catalog: EffectSpec[] | null = null;
+const catalogs = new Map<string, EffectSpec[]>();
 
 /** 拉取（并缓存）全量效果注册表；force=true 强制刷新。 */
 export async function getEffectCatalog(force = false): Promise<EffectSpec[]> {
-  if (_catalog && !force) return _catalog;
-  _catalog = await listEffects();
-  return _catalog;
+  const language = getLocale();
+  const cached = catalogs.get(language);
+  if (cached && !force) return cached;
+  const catalog = await listEffects();
+  catalogs.set(language, catalog);
+  return catalog;
 }
 
 export function effectMap(specs: EffectSpec[]): Map<string, EffectSpec> {

@@ -1,3 +1,5 @@
+import { msg, tr, useLocale } from "../i18n";
+import { readingOrderKey } from "../i18n/navigation";
 /** 素材库面板（左区）：文件导入 + 素材列表（会话资产 + 工程内源文件），可拖到时间线。
     导入：POST /api/v1/assets?name= → {assetId, path} → probe 时长 → 入素材库（独立资产库）。
     拖放协议：dataTransfer text/cutvoke-media = JSON {sourcePath, assetId?, kind}。 */
@@ -31,24 +33,25 @@ type SourceFilter = "mine" | "builtin";
 type UsageFilter = "all" | "used" | "unused";
 type CreativeDomain = "media" | "music" | "text" | "sticker" | "effects" | "transition" | "caption" | "filter";
 const CREATIVE_DOMAINS: { id: CreativeDomain; label: string }[] = [
-  { id: "media", label: "素材" },
-  { id: "music", label: "音乐" },
-  { id: "text", label: "文字" },
-  { id: "sticker", label: "贴纸" },
-  { id: "effects", label: "特效" },
-  { id: "transition", label: "转场" },
-  { id: "caption", label: "字幕" },
-  { id: "filter", label: "滤镜" },
+  { id: "media", get label() { return tr("素材"); } },
+  { id: "music", get label() { return tr("音乐"); } },
+  { id: "text", get label() { return tr("文字"); } },
+  { id: "sticker", get label() { return tr("贴纸"); } },
+  { id: "effects", get label() { return tr("特效"); } },
+  { id: "transition", get label() { return tr("转场"); } },
+  { id: "caption", get label() { return tr("字幕"); } },
+  { id: "filter", get label() { return tr("滤镜"); } },
 ];
 const SOURCE_FILTER_ORDER: SourceFilter[] = ["mine", "builtin"];
 const KIND_FILTERS: { value: KindFilter; label: string }[] = [
-  { value: "all", label: "全部" },
-  { value: "video", label: "视频" },
-  { value: "audio", label: "音频" },
-  { value: "image", label: "图片" },
+  { value: "all", get label() { return tr("全部"); } },
+  { value: "video", get label() { return tr("视频"); } },
+  { value: "audio", get label() { return tr("音频"); } },
+  { value: "image", get label() { return tr("图片"); } },
 ];
 
 export function MediaPanel() {
+  const locale = useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const editLocked = Boolean(state.editLock);
   const [domain, setDomain] = useState<CreativeDomain>("media");
@@ -138,13 +141,13 @@ export function MediaPanel() {
       dispatch({
         type: "STATUS_SET", severity: "warn",
         text: asset
-          ? `请为「${asset.name}」重新链接素材文件`
-          : "请导入替代素材，再替换当前选中的片段",
+          ? msg("请为「{0}」重新链接素材文件", asset.name)
+          : msg("请导入替代素材，再替换当前选中的片段"),
       });
       requestAnimationFrame(() => {
         const scroll = domainTabRefs.current.get("media")?.closest(".zone-left__scroll");
         if (scroll instanceof HTMLElement) scroll.scrollTop = 0;
-        document.querySelector<HTMLInputElement>('[aria-label="搜索素材"]')?.focus();
+        document.querySelector<HTMLInputElement>('[data-testid="media-search"]')?.focus();
       });
     };
     window.addEventListener(LOCATE_PREFLIGHT_ISSUE, locate);
@@ -221,9 +224,10 @@ export function MediaPanel() {
   };
 
   const onDomainTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const key = readingOrderKey(event.key, locale);
     let nextIndex: number | null = null;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") nextIndex = (index + 1) % CREATIVE_DOMAINS.length;
-    else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+    if (key === "ArrowRight" || key === "ArrowDown") nextIndex = (index + 1) % CREATIVE_DOMAINS.length;
+    else if (key === "ArrowLeft" || key === "ArrowUp") {
       nextIndex = (index - 1 + CREATIVE_DOMAINS.length) % CREATIVE_DOMAINS.length;
     } else if (event.key === "Home") nextIndex = 0;
     else if (event.key === "End") nextIndex = CREATIVE_DOMAINS.length - 1;
@@ -235,9 +239,10 @@ export function MediaPanel() {
   };
 
   const onSourceTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const key = readingOrderKey(event.key, locale);
     let nextIndex: number | null = null;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") nextIndex = (index + 1) % SOURCE_FILTER_ORDER.length;
-    else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+    if (key === "ArrowRight" || key === "ArrowDown") nextIndex = (index + 1) % SOURCE_FILTER_ORDER.length;
+    else if (key === "ArrowLeft" || key === "ArrowUp") {
       nextIndex = (index - 1 + SOURCE_FILTER_ORDER.length) % SOURCE_FILTER_ORDER.length;
     } else if (event.key === "Home") nextIndex = 0;
     else if (event.key === "End") nextIndex = SOURCE_FILTER_ORDER.length - 1;
@@ -263,7 +268,7 @@ export function MediaPanel() {
       }
     }
     return [...map.values()];
-  }, [state.project]);
+  }, [state.project, locale]);
 
   const sessionAssets = getSessionAssets();
   const assets: { path: string; name: string; kind: ClipAsset["kind"]; duration: number | null; assetId?: string; builtIn: boolean; available?: boolean; audioRole?: AudioRole }[] = useMemo(() => {
@@ -292,7 +297,7 @@ export function MediaPanel() {
       })),
       ...extra,
     ];
-  }, [sessionAssets, clipAssets]);
+  }, [sessionAssets, clipAssets, locale]);
   const sourceAssetsForDomain = assets.filter((asset) =>
     domain === "music" ? asset.kind === "audio" : asset.kind !== "audio",
   );
@@ -321,7 +326,7 @@ export function MediaPanel() {
       }
     }
     return { paths, ids };
-  }, [state.project]);
+  }, [state.project, locale]);
 
   // 客户端即时过滤：按 name 子串（不区分大小写）+ kind 类型过滤（D02）。
   const filtered = useMemo(() => {
@@ -342,19 +347,19 @@ export function MediaPanel() {
         if (usageFilter === "unused" && a.used) return false;
         return true;
       });
-  }, [assets, query, kindFilter, sourceFilter, usageFilter, usedRefs, domain, audioRoleFilter]);
+  }, [assets, query, kindFilter, sourceFilter, usageFilter, usedRefs, domain, audioRoleFilter, locale]);
 
   const domainAssets = useMemo(
     () => filtered.filter((asset) => domain === "music" ? asset.kind === "audio" : asset.kind !== "audio"),
-    [filtered, domain],
+    [filtered, domain, locale],
   );
-  const domainLabel = CREATIVE_DOMAINS.find((item) => item.id === domain)?.label || "素材";
+  const domainLabel = CREATIVE_DOMAINS.find((item) => item.id === domain)?.label || tr("素材");
   const mediaRows = useVirtualMediaRows(domainAssets.length, domain === "media" || domain === "music");
 
   const handleFiles = async (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
     if (editLocked) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: "Agent 正在编辑，素材导入已暂停" });
+      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("Agent 正在编辑，素材导入已暂停") });
       if (fileRef.current) fileRef.current.value = "";
       return;
     }
@@ -367,22 +372,22 @@ export function MediaPanel() {
         () => {},
         (name, message) => {
           setImportFailures((failures) => [...failures, { name, message }]);
-          dispatch({ type: "STATUS_SET", severity: "warn", text: `导入 ${name} 失败：${message}` });
+          dispatch({ type: "STATUS_SET", severity: "warn", text: msg("导入 {0} 失败：{1}", name, message) });
         },
         (progress) => setImportProgress({ ...progress, done: false }),
       );
       setImportProgress((progress) => progress ? { ...progress, done: true } : null);
-      if (ok > 0) dispatch({ type: "STATUS_SET", severity: "ok", text: `已导入 ${ok} 个素材` });
+      if (ok > 0) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已导入 {0} 个素材", ok) });
     } catch (error) {
       setImportProgress((progress) => progress ? { ...progress, done: true, failed: progress.failed + 1 } : null);
       setImportFailures((failures) => [...failures, {
-        name: "批量导入",
+        name: tr("批量导入"),
         message: error instanceof Error ? error.message : String(error),
       }]);
       dispatch({
         type: "STATUS_SET",
         severity: "err",
-        text: `素材导入失败：${error instanceof Error ? error.message : String(error)}`,
+        text: msg("素材导入失败：{0}", error instanceof Error ? error.message : String(error)),
       });
     } finally {
       setImporting(false);
@@ -431,7 +436,7 @@ export function MediaPanel() {
         const trackId = changes.find((item) => item.type === "track" && item.change === "created")?.id;
         const clipId = changes.find((item) => item.type === "clip" && item.change === "created")?.id;
         if (trackId && clipId) dispatch({ type: "SELECTION_SET", selection: { trackId, clipId } });
-        dispatch({ type: "STATUS_SET", severity: "ok", text: `已添加贴纸「${sticker.name}」到独立叠加轨` });
+        dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已添加贴纸「{0}」到独立叠加轨", sticker.name) });
       }
     } finally {
       setAddingSticker(null);
@@ -458,14 +463,14 @@ export function MediaPanel() {
   const selectedTrackLocked = Boolean(selectedTrack?.locked);
 
   const swapDisabledReason = (kind: ClipAsset["kind"], available = true): string | null => {
-    if (editLocked) return "Agent 正在编辑，暂不可替换素材";
-    if (!available) return "素材文件丢失，请先重新链接";
-    if (!selectedClipId || !selectedTrack) return "请先在时间线选中片段";
-    if (selectedTrackLocked) return "所选轨道已锁定，解锁后才能替换素材";
+    if (editLocked) return tr("Agent 正在编辑，暂不可替换素材");
+    if (!available) return tr("素材文件丢失，请先重新链接");
+    if (!selectedClipId || !selectedTrack) return tr("请先在时间线选中片段");
+    if (selectedTrackLocked) return tr("所选轨道已锁定，解锁后才能替换素材");
     if (!mediaFitsTrack(kind, selectedTrack.kind)) {
       return selectedTrack.kind === "audio"
-        ? "音频轨只能替换为音频素材"
-        : "视频轨不能替换为音频素材";
+        ? tr("音频轨只能替换为音频素材")
+        : tr("视频轨不能替换为音频素材");
     }
     return null;
   };
@@ -494,7 +499,7 @@ export function MediaPanel() {
     try {
       const result = await relinkAsset(target.assetId, file);
       if (result.kind === "error") {
-        dispatch({ type: "STATUS_SET", severity: "err", text: `重新链接 ${target.name} 失败：${result.message}` });
+        dispatch({ type: "STATUS_SET", severity: "err", text: msg("重新链接 {0} 失败：{1}", target.name, result.message) });
         return;
       }
       hydrateAssets([{ assetId: result.data.assetId, path: result.data.path,
@@ -509,7 +514,7 @@ export function MediaPanel() {
       window.dispatchEvent(new CustomEvent("cutvoke:asset-restored", {
         detail: { assetId: result.data.assetId, path: result.data.path },
       }));
-      dispatch({ type: "STATUS_SET", severity: "ok", text: `已重新链接 ${result.data.name}` });
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已重新链接 {0}", result.data.name) });
     } finally {
       setRelinkingId(null);
       setRelinkTarget(null);
@@ -522,17 +527,17 @@ export function MediaPanel() {
     setSavingAudioRole(assetId);
     const result = await updateAssetAudioRole(assetId, audioRole);
     if (result.kind === "error") {
-      dispatch({ type: "STATUS_SET", severity: "err", text: `音频分类保存失败：${result.message}` });
+      dispatch({ type: "STATUS_SET", severity: "err", text: msg("音频分类保存失败：{0}", result.message) });
     } else {
       updateSessionAssetAudioRole(assetId, result.data.audioRole);
-      dispatch({ type: "STATUS_SET", severity: "ok", text: "音频分类已保存" });
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("音频分类已保存") });
     }
     setSavingAudioRole(null);
   };
 
   return (
-    <Panel title="创作资源" subtitle={`当前领域：${domainLabel}`}>
-      <div className="media-domain-tabs" role="tablist" aria-label="创作域">
+    <Panel title={tr("创作资源")} subtitle={tr("当前领域：{0}", domainLabel)}>
+      <div className="media-domain-tabs" role="tablist" aria-label={tr("创作域")}>
         {CREATIVE_DOMAINS.map((item, index) => (
           <button key={item.id} type="button" role="tab"
             id={`creative-domain-${item.id}`} aria-controls="creative-domain-content"
@@ -557,10 +562,10 @@ export function MediaPanel() {
           onClick={openImport}
           disabled={importing || editLocked}
           style={{ height: 30 }}
-          aria-label="导入素材"
+          aria-label={tr("导入素材")}
         >
           {importing ? <Loader2 size={14} className="cv-spin" /> : <Upload size={14} />}
-          {importing ? "导入中…" : "导入文件"}
+          {importing ? tr("导入中…") : tr("导入文件")}
         </Button>
       </div> : null}
         <input
@@ -576,15 +581,15 @@ export function MediaPanel() {
           type="file"
           accept="video/*,audio/*,image/*"
           style={{ display: "none" }}
-          aria-label="选择重新链接文件"
+          aria-label={tr("选择重新链接文件")}
           onChange={(e) => handleRelink(e.target.files)}
         />
       {(domain === "media" || domain === "music") && importProgress ? (
         <div className="media-import-progress" role="status">
           <span>
             {importProgress.done
-              ? `导入结束：成功 ${importProgress.succeeded}，失败 ${importProgress.failed}`
-              : `导入 ${importProgress.completed}/${importProgress.total}${importProgress.name ? ` · ${importProgress.name}` : ""}`}
+              ? tr("导入结束：成功 {0}，失败 {1}", importProgress.succeeded, importProgress.failed)
+              : tr("导入 {0}/{1}{2}", importProgress.completed, importProgress.total, importProgress.name ? tr(" · {0}", importProgress.name) : "")}
           </span>
           <progress value={importProgress.completed} max={importProgress.total} />
           {importFailures.length ? (
@@ -596,7 +601,7 @@ export function MediaPanel() {
           ) : null}
         </div>
       ) : null}
-      {(domain === "media" || domain === "music") ? <div className="media-sources" role="tablist" aria-label="素材来源">
+      {(domain === "media" || domain === "music") ? <div className="media-sources" role="tablist" aria-label={tr("素材来源")}>
         <button
           type="button"
           role="tab"
@@ -611,8 +616,7 @@ export function MediaPanel() {
           className={sourceFilter === "mine" ? "media-source--active" : ""}
           onClick={() => setSourceFilter("mine")}
           onKeyDown={(event) => onSourceTabKeyDown(event, 0)}
-        >
-          我的素材 <span>{mineCount}</span>
+        >{tr("我的素材 ")}<span>{mineCount}</span>
         </button>
         <button
           type="button"
@@ -628,36 +632,36 @@ export function MediaPanel() {
           className={sourceFilter === "builtin" ? "media-source--active" : ""}
           onClick={() => setSourceFilter("builtin")}
           onKeyDown={(event) => onSourceTabKeyDown(event, 1)}
-        >
-          内置资源 <span>{builtInCount}</span>
+        >{tr("内置资源 ")}<span>{builtInCount}</span>
         </button>
       </div> : null}
       {(domain === "media" || domain === "music") && assetLoadError ? (
         <div className="resource-preview__failure" role="alert">
-          <p>素材库读取失败：{assetLoadError}</p>
+          <p>{tr("素材库读取失败：")}{assetLoadError}</p>
           <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary"
             disabled={assetLoading} onClick={() => setAssetLoadAttempt((attempt) => attempt + 1)}>
-            {assetLoading ? "正在重试…" : "重试素材库"}
+            {assetLoading ? tr("正在重试…") : tr("重试素材库")}
           </button>
         </div>
       ) : null}
       {(domain === "media" || domain === "music") && assetLoading ? (
-        <p className="cv-loading" role="status">正在读取素材库…</p>
+        <p className="cv-loading" role="status">{tr("正在读取素材库…")}</p>
       ) : null}
       {(domain === "media" || domain === "music" || domain === "text" || domain === "sticker") ? <div className="media-filter">
         <label className="media-filter__search">
           <Search size={14} aria-hidden="true" />
           <input
             type="search"
+            data-testid="media-search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={domain === "sticker" ? "搜索贴纸、用途…" : domain === "text" ? "搜索标题样式…" : domain === "music" ? "搜索音乐与音效…" : "搜索素材名…"}
-            aria-label={domain === "sticker" ? "搜索贴纸" : domain === "text" ? "搜索标题样式" : domain === "music" ? "搜索音乐与音效" : "搜索素材"}
+            placeholder={domain === "sticker" ? tr("搜索贴纸、用途…") : domain === "text" ? tr("搜索标题样式…") : domain === "music" ? tr("搜索音乐与音效…") : tr("搜索素材名…")}
+            aria-label={domain === "sticker" ? tr("搜索贴纸") : domain === "text" ? tr("搜索标题样式") : domain === "music" ? tr("搜索音乐与音效") : tr("搜索素材")}
           />
         </label>
         {(domain === "media" || domain === "music") ? <>
         {domain === "media" ? <>
-        <div className="media-filter__kinds" role="group" aria-label="素材类型过滤">
+        <div className="media-filter__kinds" role="group" aria-label={tr("素材类型过滤")}>
           {KIND_FILTERS.filter((option) => option.value !== "audio").map((opt) => (
             <button
               key={opt.value}
@@ -671,7 +675,7 @@ export function MediaPanel() {
           ))}
           </div>
         </> : null}
-        <div className="media-filter__kinds" role="group" aria-label="使用状态过滤">
+        <div className="media-filter__kinds" role="group" aria-label={tr("使用状态过滤")}>
           {(["all", "used", "unused"] as const).map((value) => (
             <button
               key={value}
@@ -680,15 +684,15 @@ export function MediaPanel() {
               aria-pressed={usageFilter === value}
               onClick={() => setUsageFilter(value)}
             >
-              {{ all: "全部", used: "已用", unused: "未用" }[value]}
+              {{ all: tr("全部"), used: tr("已用"), unused: tr("未用") }[value]}
             </button>
           ))}
         </div>
         {domain === "music" ? (
-          <div className="media-filter__kinds" role="group" aria-label="音频用途过滤">
+          <div className="media-filter__kinds" role="group" aria-label={tr("音频用途过滤")}>
             {([
-              ["all", "全部用途"], ["music", "背景音乐"],
-              ["sound_effect", "音效"], ["unclassified", "未分类"],
+              ["all", tr("全部用途")], ["music", tr("背景音乐")],
+              ["sound_effect", tr("音效")], ["unclassified", tr("未分类")],
             ] as const).map(([value, label]) => (
               <button key={value} type="button"
                 className={`media-filter__kind ${audioRoleFilter === value ? "media-filter__kind--active" : ""}`}
@@ -702,18 +706,18 @@ export function MediaPanel() {
         </> : null}
       </div> : null}
       {domain === "text" ? <TitleLibrary query={query} /> : domain === "sticker" ? (
-        <section className="sticker-library" aria-label="贴纸库">
+        <section className="sticker-library" aria-label={tr("贴纸库")}>
           <div className="sticker-library__head">
-            <strong>静态与动态贴纸</strong>
+            <strong>{tr("静态与动态贴纸")}</strong>
             <span>{visibleStickers.length} / {stickerCatalog.length}</span>
           </div>
-          <p className="cv-hint">透明 PNG 与真实动画样片 · 添加到独立叠加轨，可调位置、缩放、旋转、时长与动画。</p>
+          <p className="cv-hint">{tr("透明 PNG 与真实动画样片 · 添加到独立叠加轨，可调位置、缩放、旋转、时长与动画。")}</p>
           <div className="sticker-library__filters">
             <label className="sticker-library__category">
-              <span>分类</span>
-              <select aria-label="贴纸分类" value={stickerCategory}
+              <span>{tr("分类")}</span>
+              <select aria-label={tr("贴纸分类")} value={stickerCategory}
                 onChange={(event) => setStickerCategory(event.currentTarget.value)}>
-                <option value="">全部 · {stickerCatalog.length}</option>
+                <option value="">{tr("全部 · ")}{stickerCatalog.length}</option>
                 {stickerCategories.map((category) => (
                   <option key={category} value={category}>
                     {category} · {stickerCatalog.filter((item) => item.subcategory === category).length}
@@ -722,17 +726,15 @@ export function MediaPanel() {
               </select>
             </label>
             <button type="button" className={`sticker-library__favorite${stickerFavoritesOnly ? " sticker-library__favorite--active" : ""}`}
-              aria-pressed={stickerFavoritesOnly} onClick={() => setStickerFavoritesOnly((value) => !value)}>
-              仅看收藏
-            </button>
+              aria-pressed={stickerFavoritesOnly} onClick={() => setStickerFavoritesOnly((value) => !value)}>{tr("仅看收藏")}</button>
           </div>
-          {stickerLoading ? <p className="cv-loading" role="status">贴纸库加载中…</p> : null}
+          {stickerLoading ? <p className="cv-loading" role="status">{tr("贴纸库加载中…")}</p> : null}
           {stickerError ? (
             <div className="resource-preview__failure" role="alert">
-              <p>贴纸库读取失败：{stickerError}</p>
+              <p>{tr("贴纸库读取失败：")}{stickerError}</p>
               <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary"
                 disabled={stickerLoading} onClick={() => setStickerLoadAttempt((attempt) => attempt + 1)}>
-                {stickerLoading ? "正在重试…" : "重试贴纸库"}
+                {stickerLoading ? tr("正在重试…") : tr("重试贴纸库")}
               </button>
             </div>
           ) : null}
@@ -756,11 +758,11 @@ export function MediaPanel() {
                           muted loop playsInline preload="none"
                           onMouseEnter={(event) => { void event.currentTarget.play().catch(() => {}); }}
                           onMouseLeave={(event) => { event.currentTarget.pause(); event.currentTarget.currentTime = 0; }}
-                          aria-label={`${sticker.name} 成片预览，悬停播放`} />
+                          aria-label={tr("{0} 成片预览，悬停播放", sticker.name)} />
                       : available ? <img src={assetMediaUrl(sticker.assetId)} alt="" loading="lazy" />
-                        : <span>{sticker.availabilityMessage || "资源不可用，可恢复资源包或选择其他贴纸。"}</span>}
+                        : <span>{sticker.availabilityMessage || tr("资源不可用，可恢复资源包或选择其他贴纸。")}</span>}
                     <button type="button" className="sticker-card__favorite"
-                      aria-label={`${state.project?.favorites?.includes(sticker.stickerId) ? "取消收藏" : "收藏"}贴纸 ${sticker.name}`}
+                      aria-label={tr("{0}贴纸 {1}", state.project?.favorites?.includes(sticker.stickerId) ? tr("取消收藏") : tr("收藏"), sticker.name)}
                       aria-pressed={Boolean(state.project?.favorites?.includes(sticker.stickerId))}
                       disabled={editLocked || !state.currentId || savingStickerFavorite === sticker.stickerId}
                       onClick={(event) => { event.stopPropagation(); void toggleStickerFavorite(sticker); }}>
@@ -768,40 +770,40 @@ export function MediaPanel() {
                     </button>
                   </div>
                   <strong>{sticker.name}</strong>
-                  <small>{sticker.kind === "dynamic" ? "动态" : "静态"} · 悬停预览 · {sticker.subcategory} · {sticker.qualified ? "合格" : "候选"} · 资源包 v{sticker.resourceRef?.packVersion || "未知"} · {sticker.license}</small>
+                  <small>{sticker.kind === "dynamic" ? tr("动态") : tr("静态")}{tr(" · 悬停预览 · ")}{sticker.subcategory} · {sticker.qualified ? tr("合格") : tr("候选")}{tr(" · 资源包 v")}{sticker.resourceRef?.packVersion || tr("未知")} · {sticker.license}</small>
                   <details className="sticker-card__provenance">
-                    <summary>{sticker.source ? "来源信息" : "来源待补"}</summary>
-                    <p>{sticker.source || "此贴纸没有可复核的来源记录。"}</p>
+                    <summary>{sticker.source ? tr("来源信息") : tr("来源待补")}</summary>
+                    <p>{sticker.source || tr("此贴纸没有可复核的来源记录。")}</p>
                   </details>
                   <button type="button" onClick={() => void addSticker(sticker)}
                     disabled={!available || editLocked || !state.currentId || !!addingSticker}
-                    aria-label={`添加贴纸 ${sticker.name}`}>
-                    {addingSticker === sticker.stickerId ? "添加中…" : "添加"}
+                    aria-label={tr("添加贴纸 {0}", sticker.name)}>
+                    {addingSticker === sticker.stickerId ? tr("添加中…") : tr("添加")}
                   </button>
                 </article>
               );
             })}
           </div>
-          {!stickerError && !stickerLoading && visibleStickers.length === 0 ? <p className="cv-empty">没有匹配的贴纸。</p> : null}
+          {!stickerError && !stickerLoading && visibleStickers.length === 0 ? <p className="cv-empty">{tr("没有匹配的贴纸。")}</p> : null}
         </section>
       ) : (domain === "media" || domain === "music") ? (
         selectedSourceCount === 0 && (assetLoading || assetLoadError) ? null : selectedSourceCount === 0 ? (
         <div className="media-empty">
           <p className="cv-empty">
             {sourceFilter === "mine"
-              ? domain === "music" ? "还没有导入音乐或音效。" : "还没有导入自己的视频或图片。"
-              : domain === "music" ? "当前没有内置音乐或音效。" : "当前没有内置视频或图片。"}
+              ? domain === "music" ? tr("还没有导入音乐或音效。") : tr("还没有导入自己的视频或图片。")
+              : domain === "music" ? tr("当前没有内置音乐或音效。") : tr("当前没有内置视频或图片。")}
             {domain === "music" && sourceFilter === "mine"
-              ? " 点击上方「导入文件」添加音频。"
-              : sourceFilter === "mine" ? " 点击上方「导入文件」添加素材。" : ""}
+              ? tr(" 点击上方「导入文件」添加音频。")
+              : sourceFilter === "mine" ? tr(" 点击上方「导入文件」添加素材。") : ""}
           </p>
         </div>
         ) : domainAssets.length === 0 ? (
         <div className="media-empty">
           <p className="cv-empty">
             {domain === "music"
-              ? "没有匹配的音乐或音效。试试调整搜索词或使用状态筛选。"
-              : "没有匹配的视频或图片。试试调整搜索词、类型或使用状态筛选。"}
+              ? tr("没有匹配的音乐或音效。试试调整搜索词或使用状态筛选。")
+              : tr("没有匹配的视频或图片。试试调整搜索词、类型或使用状态筛选。")}
           </p>
         </div>
         ) : (
@@ -841,31 +843,29 @@ export function MediaPanel() {
               <div className="media-item__details">
                 <span className="media-item__name">{a.name}</span>
                 <span className="media-item__meta">
-                  {a.available === false ? "文件丢失" : a.duration ? `${a.duration.toFixed(1)}s` : assetKindLabel(a.kind)}
+                  {a.available === false ? tr("文件丢失") : a.duration ? `${a.duration.toFixed(1)}s` : assetKindLabel(a.kind)}
                 </span>
                 {domain === "music" && a.kind === "audio" && a.builtIn ? (
                   <span className="media-item__provenance"
-                    aria-label="来源：CutVoke 内置 FFmpeg lavfi 合成脚本；授权：MIT"
-                    title="来源：CutVoke 内置 FFmpeg lavfi 合成脚本；授权：MIT（仓库 LICENSE）">
-                    来源 CutVoke 合成 · MIT
-                  </span>
+                    aria-label={tr("来源：CutVoke 内置 FFmpeg lavfi 合成脚本；授权：MIT")}
+                    title={tr("来源：CutVoke 内置 FFmpeg lavfi 合成脚本；授权：MIT（仓库 LICENSE）")}>{tr("来源 CutVoke 合成 · MIT")}</span>
                 ) : null}
               </div>
-              {a.used ? <span className="media-badge" aria-label="已用">已用</span> : null}
-              {a.available === false ? <span className="media-badge media-badge--missing">丢失</span> : null}
+              {a.used ? <span className="media-badge" aria-label={tr("已用")}>{tr("已用")}</span> : null}
+              {a.available === false ? <span className="media-badge media-badge--missing">{tr("丢失")}</span> : null}
               {domain === "music" && a.assetId ? (
                 <select
                   className="media-item__audio-role"
-                  aria-label={`音频用途 ${a.name}`}
-                  title={a.builtIn ? "内置音频分类由资源清单维护" : "设置为背景音乐、音效或未分类"}
+                  aria-label={tr("音频用途 {0}", a.name)}
+                  title={a.builtIn ? tr("内置音频分类由资源清单维护") : tr("设置为背景音乐、音效或未分类")}
                   value={a.audioRole || "unclassified"}
                   disabled={a.builtIn || editLocked || savingAudioRole !== null}
                   onMouseDown={(event) => event.stopPropagation()}
                   onClick={(event) => event.stopPropagation()}
                   onChange={(event) => void handleAudioRoleChange(a.assetId!, event.currentTarget.value as AudioRole)}>
-                  <option value="music">背景音乐</option>
-                  <option value="sound_effect">音效</option>
-                  <option value="unclassified">未分类</option>
+                  <option value="music">{tr("背景音乐")}</option>
+                  <option value="sound_effect">{tr("音效")}</option>
+                  <option value="unclassified">{tr("未分类")}</option>
                 </select>
               ) : null}
               {a.available === false && a.assetId && !a.builtIn ? (
@@ -873,8 +873,8 @@ export function MediaPanel() {
                   type="button"
                   className="media-item__relink"
                   disabled={editLocked || relinkingId === a.assetId}
-                  aria-label={`重新链接 ${a.name}`}
-                  title="选择同类型文件恢复原素材引用"
+                  aria-label={tr("重新链接 {0}", a.name)}
+                  title={tr("选择同类型文件恢复原素材引用")}
                   onMouseDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -889,8 +889,8 @@ export function MediaPanel() {
                 <button
                   type="button"
                   className="media-item__audition"
-                  aria-label={`${audition?.assetId === a.assetId ? "停止试听" : "试听"} ${a.name}`}
-                  title="试听音频并查看波形"
+                  aria-label={tr("{0} {1}", audition?.assetId === a.assetId ? tr("停止试听") : tr("试听"), a.name)}
+                  title={tr("试听音频并查看波形")}
                   onMouseDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -904,8 +904,8 @@ export function MediaPanel() {
                 type="button"
                 className={`media-item__swap ${disabledReason ? "media-item__swap--disabled" : ""}`}
                 disabled={Boolean(disabledReason) || swappingPath === a.path}
-                aria-label={disabledReason || "替换选中片段"}
-                title={disabledReason || "替换素材，保留片段的时长与效果"}
+                aria-label={disabledReason || tr("替换选中片段")}
+                title={disabledReason || tr("替换素材，保留片段的时长与效果")}
                 onMouseDown={(e) => e.stopPropagation()}
                 onClick={() => handleSwap(a)}
               >
@@ -935,19 +935,19 @@ export function MediaPanel() {
         <CaptionPanel />
       </div>
       {audition && domain === "music" ? (
-        <section className="media-audition" aria-label={`试听 ${audition.name}`}>
+        <section className="media-audition" aria-label={tr("试听 {0}", audition.name)}>
           <div className="media-audition__header">
             <Music size={14} aria-hidden="true" />
             <strong>{audition.name}</strong>
-            <button type="button" onClick={() => setAudition(null)} aria-label="关闭试听">关闭</button>
+            <button type="button" onClick={() => setAudition(null)} aria-label={tr("关闭试听")}>{tr("关闭")}</button>
           </div>
           {waveformError ? (
-            <p className="media-audition__error">波形暂不可用，可继续使用下方播放器试听。</p>
+            <p className="media-audition__error">{tr("波形暂不可用，可继续使用下方播放器试听。")}</p>
           ) : (
             <button
               type="button"
               className="media-audition__waveform"
-              aria-label="在波形上定位播放位置"
+              aria-label={tr("在波形上定位播放位置")}
               onClick={(e) => {
                 const audio = audioRef.current;
                 if (!audio || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
@@ -963,23 +963,21 @@ export function MediaPanel() {
             controls
             preload="metadata"
             src={assetMediaUrl(audition.assetId)}
-            onError={() => setAuditionError("音频无法播放，请检查素材是否仍可访问或浏览器是否支持此格式。")}
+            onError={() => setAuditionError(tr("音频无法播放，请检查素材是否仍可访问或浏览器是否支持此格式。"))}
           />
           {auditionError ? (
             <div className="media-audition__error" role="alert">
               <p>{auditionError}</p>
               <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary"
-                onClick={() => setAuditionAttempt((attempt) => attempt + 1)}>
-                重试试听
-              </button>
+                onClick={() => setAuditionAttempt((attempt) => attempt + 1)}>{tr("重试试听")}</button>
             </div>
           ) : null}
         </section>
       ) : null}
       {(domain === "media" || domain === "music") ? <p className="cv-hint" style={{ marginTop: 8 }}>
         {domain === "music"
-          ? "可将导入音频分类为背景音乐或音效；先试听并查看波形，再拖到独立音轨。"
-          : "拖到轨道上即可插入，后续片段会顺延（时长识别失败按 2 秒）；拖到下方空白可自动建轨。"}
+          ? tr("可将导入音频分类为背景音乐或音效；先试听并查看波形，再拖到独立音轨。")
+          : tr("拖到轨道上即可插入，后续片段会顺延（时长识别失败按 2 秒）；拖到下方空白可自动建轨。")}
       </p> : null}
       </div>
     </Panel>
@@ -1000,8 +998,8 @@ function isBuiltInAsset(name: string, path: string): boolean {
 }
 
 function assetKindLabel(kind: string): string {
-  if (kind === "image") return "图片";
-  if (kind === "audio") return "音频";
-  if (kind === "video") return "视频";
-  return "未知类型";
+  if (kind === "image") return tr("图片");
+  if (kind === "audio") return tr("音频");
+  if (kind === "video") return tr("视频");
+  return tr("未知类型");
 }

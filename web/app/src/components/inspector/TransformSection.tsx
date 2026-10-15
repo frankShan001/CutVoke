@@ -1,3 +1,4 @@
+import { tr, useLocale } from "../../i18n";
 /** 数值变换：与画布拖动共用 cutvoke.transform 参数。 */
 import { useEffect, useState } from "react";
 import { useEditor } from "../../store/editor";
@@ -14,7 +15,7 @@ const DEFAULTS: TransformValues = { x: 0, y: 0, scale: 1, rotation: 0, opacity: 
 const TRANSFORM_KEYFRAME_PARAMS = ["x", "y", "scale", "rotation"] as const;
 type TransformKeyframeParam = typeof TRANSFORM_KEYFRAME_PARAMS[number];
 const TRANSFORM_LABELS: Record<TransformKeyframeParam, string> = {
-  x: "水平位置 X", y: "垂直位置 Y", scale: "缩放", rotation: "旋转",
+  get x() { return tr("水平位置 X"); }, get y() { return tr("垂直位置 Y"); }, get scale() { return tr("缩放"); }, get rotation() { return tr("旋转"); },
 };
 
 function readTransform(clip: Clip, localTime: number): TransformValues {
@@ -37,6 +38,7 @@ function readTransform(clip: Clip, localTime: number): TransformValues {
 }
 
 export function TransformSection({ clip }: { clip: Clip }) {
+  useLocale();
   const { state, dispatch } = useEditor();
   const clipStart = rationalToSecs(clip.timelineStart);
   const clipEnd = rationalToSecs(clip.timelineEnd);
@@ -56,9 +58,9 @@ export function TransformSection({ clip }: { clip: Clip }) {
     candidate.opacity >= 0 && candidate.opacity <= 1;
   const valid = isValid(values);
   const keyframeDisabledReason = !valid
-    ? "变换数值超出可用范围，修正后才能应用或记录关键帧。"
+    ? tr("变换数值超出可用范围，修正后才能应用或记录关键帧。")
     : !playheadInsideClip
-      ? `播放头位于片段外；移到 ${clipStart.toFixed(2)}–${clipEnd.toFixed(2)} 秒范围内即可记录关键帧。`
+      ? tr("播放头位于片段外；移到 {0}–{1} 秒范围内即可记录关键帧。", clipStart.toFixed(2), clipEnd.toFixed(2))
       : "";
   const keyframeDisabledReasonId = keyframeDisabledReason
     ? `transform-keyframe-disabled-${clip.id}` : undefined;
@@ -113,17 +115,17 @@ export function TransformSection({ clip }: { clip: Clip }) {
   };
 
   const fields: { key: keyof TransformValues; label: string; step: number; min?: number; max?: number; unit: string }[] = [
-    { key: "x", label: "水平位置 X", step: 1, unit: "像素" },
-    { key: "y", label: "垂直位置 Y", step: 1, unit: "像素" },
-    { key: "scale", label: "缩放", step: 0.01, min: 0.05, max: 5, unit: "×" },
-    { key: "rotation", label: "旋转", step: 1, min: -180, max: 180, unit: "°" },
-    { key: "opacity", label: "不透明度", step: 0.01, min: 0, max: 1, unit: "%" },
+    { key: "x", label: tr("水平位置 X"), step: 1, unit: tr("像素") },
+    { key: "y", label: tr("垂直位置 Y"), step: 1, unit: tr("像素") },
+    { key: "scale", label: tr("缩放"), step: 0.01, min: 0.05, max: 5, unit: "×" },
+    { key: "rotation", label: tr("旋转"), step: 1, min: -180, max: 180, unit: "°" },
+    { key: "opacity", label: tr("不透明度"), step: 0.01, min: 0, max: 1, unit: "%" },
   ];
 
   return (
-    <section className="inspector__transform" aria-label="画面变换">
-      <div className="inspector__subrow"><strong>画面变换</strong>
-        <span className="cv-hint">{exists ? "画布拖动与数值同步" : "应用后可在画布拖动"}</span>
+    <section className="inspector__transform" aria-label={tr("画面变换")}>
+      <div className="inspector__subrow"><strong>{tr("画面变换")}</strong>
+        <span className="cv-hint">{exists ? tr("画布拖动与数值同步") : tr("应用后可在画布拖动")}</span>
       </div>
       {keyframeDisabledReason ? <p id={keyframeDisabledReasonId} className="cv-hint" role="status">
         {keyframeDisabledReason}
@@ -141,9 +143,9 @@ export function TransformSection({ clip }: { clip: Clip }) {
           <span className="inspector__unit">{field.key === "opacity" ? `${Math.round(values.opacity * 100)}%` : field.unit}</span>
           {field.key !== "opacity" && (
             <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary"
-              aria-label={`记录${field.label}关键帧`}
+              aria-label={tr("记录{0}关键帧", field.label)}
               aria-describedby={keyframeDisabledReasonId}
-              title={keyframeDisabledReason || `在播放头记录${field.label}关键帧`}
+              title={keyframeDisabledReason || tr("在播放头记录{0}关键帧", field.label)}
               disabled={saving || !valid || !playheadInsideClip}
               onClick={() => void recordTransformKeyframe(field.key as TransformKeyframeParam)}
               style={{ width: 28, minWidth: 28, padding: 0 }}>
@@ -152,28 +154,25 @@ export function TransformSection({ clip }: { clip: Clip }) {
           )}
         </label>
       ))}
-      <div className="inspector__subrow" aria-label="画面变换关键帧状态">
-        <span className="inspector__key">关键帧状态</span>
-        <span className="cv-hint" aria-live="polite">
-          不透明度 {opacityKeyframeCount} 个 · {TRANSFORM_KEYFRAME_PARAMS.map((param) =>
-            `${param.toUpperCase()} ${clip.keyframes?.[param]?.length ?? 0} 个`).join(" · ")}
+      <div className="inspector__subrow" aria-label={tr("画面变换关键帧状态")}>
+        <span className="inspector__key">{tr("关键帧状态")}</span>
+        <span className="cv-hint" aria-live="polite">{tr("不透明度 ")}{opacityKeyframeCount}{tr(" 个 · ")}{TRANSFORM_KEYFRAME_PARAMS.map((param) =>
+            tr("{0} {1} 个", param.toUpperCase(), clip.keyframes?.[param]?.length ?? 0)).join(" · ")}
         </span>
         <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary"
-          aria-label="编辑不透明度关键帧"
+          aria-label={tr("编辑不透明度关键帧")}
           onClick={() => {
             const editor = document.getElementById("clip-opacity-keyframes");
             editor?.scrollIntoView({ behavior: "smooth", block: "nearest" });
             editor?.focus({ preventScroll: true });
-          }}>
-          编辑
-        </button>
+          }}>{tr("编辑")}</button>
       </div>
       {TRANSFORM_KEYFRAME_PARAMS.map((param) => {
         const keyframes = [...(clip.keyframes?.[param] ?? [])]
           .sort((left, right) => rationalToSecs(left.time) - rationalToSecs(right.time));
         if (keyframes.length === 0) return null;
         return (
-          <div key={param} aria-label={`${TRANSFORM_LABELS[param]}关键帧`}>
+          <div key={param} aria-label={tr("{0}关键帧", TRANSFORM_LABELS[param])}>
             {keyframes.map((keyframe) => {
               const time = rationalToSecs(keyframe.time);
               const numericValue = Number(keyframe.value);
@@ -185,32 +184,28 @@ export function TransformSection({ clip }: { clip: Clip }) {
                   <span className="cv-mono">t={time.toFixed(2)}s</span>
                   <span className="inspector__val">{value}{param === "scale" ? "×" : param === "rotation" ? "°" : "px"}</span>
                   <button type="button" className="cv-btn cv-btn--sm cv-btn--danger"
-                    aria-label={`删除${TRANSFORM_LABELS[param]}关键帧 t=${time.toFixed(2)}s`}
+                    aria-label={tr("删除{0}关键帧 t={1}s", TRANSFORM_LABELS[param], time.toFixed(2))}
                     disabled={saving}
                     onClick={() => void deleteTransformKeyframe(param, keyframe.id)}
-                    style={{ marginLeft: "auto" }}>
-                    删除
-                  </button>
+                    style={{ marginLeft: "auto" }}>{tr("删除")}</button>
                 </div>
               );
             })}
           </div>
         );
       })}
-      <p className="cv-hint">在播放头记录 X/Y、缩放或旋转值；片段内按关键帧曲线插值，未设置关键帧时全片使用当前变换值。</p>
+      <p className="cv-hint">{tr("在播放头记录 X/Y、缩放或旋转值；片段内按关键帧曲线插值，未设置关键帧时全片使用当前变换值。")}</p>
       <div className="inspector__subrow">
         <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary"
           disabled={saving || JSON.stringify(values) === JSON.stringify(DEFAULTS)}
-          onClick={() => { setValues(DEFAULTS); void commit(DEFAULTS); }}>
-          复位
-        </button>
+          onClick={() => { setValues(DEFAULTS); void commit(DEFAULTS); }}>{tr("复位")}</button>
         <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary"
           disabled={saving || !valid || JSON.stringify(values) === JSON.stringify(saved)}
           onClick={() => void commit(values)}>
-          {saving ? "应用中…" : "应用变换"}
+          {saving ? tr("应用中…") : tr("应用变换")}
         </button>
       </div>
-      <p className="cv-hint">位置以画布中心为原点；缩放和基础不透明度作用于整个片段。每次应用可撤销。</p>
+      <p className="cv-hint">{tr("位置以画布中心为原点；缩放和基础不透明度作用于整个片段。每次应用可撤销。")}</p>
     </section>
   );
 }

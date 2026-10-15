@@ -1,3 +1,5 @@
+import { tr, useLocale } from "../i18n";
+import { msg, type UiMessage } from "../i18n/messages";
 /** 编辑器全局状态（Context + useReducer）。UI 组件只消费状态与动作。 */
 
 import {
@@ -67,7 +69,7 @@ export interface EditorState {
   redoBlocked: boolean;
   historyHint: string;
   error: ApiFailure | null;
-  status: { severity: Severity; text: string };
+  status: { severity: Severity; text: string | UiMessage };
   selection: Selection | null;
   /** 当前由字幕列表或预览画布选中的字幕；纯 UI 状态，不写入工程。 */
   selectedCaptionId: string | null;
@@ -113,7 +115,7 @@ export type EditorAction =
   | { type: "REDO_SET"; blocked: boolean }
   | { type: "HISTORY_HINT"; hint: string }
   | { type: "ERROR_SET"; error: ApiFailure | null }
-  | { type: "STATUS_SET"; severity: Severity; text: string }
+  | { type: "STATUS_SET"; severity: Severity; text: string | UiMessage }
   | { type: "SELECTION_SET"; selection: Selection | null }
   | { type: "SYNC" }
   | { type: "RESET_SELECTION_FOR"; trackId: string | null }
@@ -144,7 +146,7 @@ const initialState: EditorState = {
   redoBlocked: true,
   historyHint: "",
   error: null,
-  status: { severity: "idle", text: "启动中…" },
+  status: { severity: "idle", get text() { return tr("启动中…"); } },
   selection: null,
   selectedCaptionId: null,
   lastSync: 0,
@@ -290,7 +292,7 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
           && action.captionId !== state.selectedCaptionId) {
         return {
           ...state,
-          status: { severity: "warn", text: "当前字幕有未保存的文字或时间修改，请先保存或放弃" },
+          status: { severity: "warn", text: msg("当前字幕有未保存的文字或时间修改，请先保存或放弃") },
         };
       }
       return { ...state, selectedCaptionId: action.captionId };
@@ -317,6 +319,7 @@ const EditorContext = createContext<EditorContextValue | null>(null);
 const EditingContext = createContext<EditorContextValue | null>(null);
 
 export function EditorProvider({ children }: { children: ReactNode }) {
+  const locale = useLocale();
   const [state, dispatch] = useReducer(reducer, initialState);
   useEffect(() => {
     const url = state.preparedPreview?.url;
@@ -330,7 +333,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     key !== "playhead" && key !== "lastSync" && state[key] !== editingState.current[key])) {
     editingState.current = state;
   }
-  const editingValue = useMemo(() => ({ state: editingState.current, dispatch }), [editingState.current, dispatch]);
+  const editingValue = useMemo(() => ({ state: editingState.current, dispatch }), [editingState.current, dispatch, locale]);
   return (
     <EditorContext.Provider value={{ state, dispatch }}>
       <EditingContext.Provider value={editingValue}>{children}</EditingContext.Provider>
@@ -353,7 +356,7 @@ function fail(err: unknown): ApiFailure {
   return err instanceof ApiFailure ? err : new ApiFailure({
     status: 0,
     code: "NETWORK",
-    message: err instanceof Error ? err.message : "网络错误",
+    message: err instanceof Error ? err.message : tr("网络错误"),
     retryable: true,
   });
 }
@@ -383,7 +386,7 @@ export function parseRationalOrThrow(input: string | number): Rational {
     throw new ApiFailure({
       status: 400,
       code: "INVALID_ARGUMENT",
-      message: e instanceof Error ? e.message : "时间格式错误",
+      message: e instanceof Error ? e.message : tr("时间格式错误"),
     });
   }
 }
