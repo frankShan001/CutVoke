@@ -13,6 +13,12 @@ test("stdio MCP imports stay visible when a human edits, previews and exports", 
   const id = `mcp-handoff-${Date.now()}`;
   const name = `Agent 接手 ${id}`;
   const image = fileURLToPath(new URL("../../../src/cutvoke/assets/stickers/decor_sparkles.png", import.meta.url));
+  // A shared library can already contain an upload with the same filename.
+  // Locate the actual MCP asset by identity, never by name alone.
+  const duplicate = await request.post("/api/v1/assets?name=decor_sparkles.png", {
+    headers: { "Content-Type": "application/octet-stream" }, data: readFileSync(image),
+  });
+  expect(duplicate.ok()).toBeTruthy();
   const python = process.env.CUTVOKE_TEST_PYTHON || "python";
   const child = spawn(python, ["-m", "cutvoke", "mcp", "--data", runtime.dataDirectory], {
     stdio: ["pipe", "pipe", "pipe"], env: { ...process.env, PYTHONIOENCODING: "utf-8" },
@@ -62,6 +68,7 @@ test("stdio MCP imports stay visible when a human edits, previews and exports", 
     expect(await closed, diagnostics).toBe(0);
   }
   const entries = (await (await request.get("/api/v1/assets")).json()).assets;
+  expect(entries.filter((a: { name: string }) => a.name === asset.name).length).toBeGreaterThanOrEqual(2);
   expect(entries.find((a: { assetId: string }) => a.assetId === asset.assetId).available).toBe(true);
   const media = await request.get(`/api/v1/assets/${asset.assetId}/media`);
   expect(media.status()).toBe(200);
@@ -72,8 +79,9 @@ test("stdio MCP imports stay visible when a human edits, previews and exports", 
   await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible({ timeout: 45_000 });
   await page.getByRole("tab", { name: /我的素材/ }).click();
   await page.getByLabel("搜索素材").fill(asset.name);
-  const card = page.locator(".media-item").filter({ hasText: asset.name });
+  const card = page.locator(".media-item").filter({ has: page.locator(`img[src*="${asset.assetId}"]`) });
   await expect(card).toHaveCount(1);
+  await expect(card).toContainText(asset.name);
   await expect(card).not.toContainText("文件丢失");
   await expect(card.locator("img")).toBeVisible();
   await expect.poll(() => card.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
