@@ -1,4 +1,4 @@
-param([Parameter(Mandatory)][string]$App, [Parameter(Mandatory)][string]$Output)
+param([Parameter(Mandatory)][string]$App, [Parameter(Mandatory)][string]$Output, [switch]$Normal)
 $ErrorActionPreference = 'Stop'
 $taskFolder = Join-Path (Split-Path $App) 'CutVoke Data'
 $taskDatabase = Join-Path $taskFolder 'data/projects.sqlite'
@@ -20,6 +20,41 @@ public class CutVokeWindows {
   [DllImport("user32.dll")] public static extern IntPtr PostMessage(IntPtr handle, uint msg, IntPtr w, IntPtr l);
 }
 '@
+if ($Normal) {
+    $taskNormal = @{ passed = $false; scope = 'Normal executable startup without QA/debug flags; native window, frozen backend health and window-close cleanup.' }
+    $taskBackend = $null
+    try {
+        Remove-Item Env:CUTVOKE_DATA, Env:CUTVOKE_PORTABLE_HOME, Env:CUTVOKE_DESKTOP_QA -ErrorAction SilentlyContinue
+        $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+        $env:__COMPAT_LAYER = 'RunAsInvoker'
+        $taskProcess = Start-Process -FilePath $App -WorkingDirectory $Output -PassThru
+        $taskDeadline = [DateTime]::UtcNow.AddSeconds(90)
+        do {
+            $taskBackend = Get-CimInstance Win32_Process -Filter "ParentProcessId = $($taskProcess.Id)" |
+                Where-Object { $_.Name -eq 'cutvoke-engine.exe' } | Select-Object -First 1
+            if ($taskBackend -and $taskBackend.CommandLine -match '--port\s+(\d+)') {
+                $taskOrigin = "http://127.0.0.1:$($Matches[1])"
+                try { $taskRuntime = Invoke-RestMethod -Uri "$taskOrigin/api/v1/runtime" -TimeoutSec 2 } catch { $taskRuntime = $null }
+                if ($taskRuntime.processId -eq $taskBackend.ProcessId) { break }
+            }
+            Start-Sleep -Milliseconds 250
+        } while ([DateTime]::UtcNow -lt $taskDeadline -and !$taskProcess.HasExited)
+        if (!$taskRuntime -or $taskRuntime.processId -ne $taskBackend.ProcessId) { throw 'Normal startup did not reach its own healthy frozen backend.' }
+        $taskProcess.Refresh()
+        if ($taskProcess.MainWindowHandle -eq [IntPtr]::Zero -or ![CutVokeWindows]::IsWindowVisible($taskProcess.MainWindowHandle)) { throw 'Normal startup did not open a visible native window.' }
+        $taskNormal.runtime = $taskRuntime
+        $taskNormal.nativeWindowHandle = $taskProcess.MainWindowHandle.ToInt64()
+        $taskNormal.windowTitle = $taskProcess.MainWindowTitle
+        if (!$taskProcess.CloseMainWindow() -or !$taskProcess.WaitForExit(20000)) { throw 'Normal window close did not exit cleanly.' }
+        if (Get-Process -Id $taskBackend.ProcessId -ErrorAction SilentlyContinue) { throw 'Normal close left its owned backend running.' }
+        $taskNormal.passed = $true
+    } finally {
+        if ($taskProcess -and !$taskProcess.HasExited) { Stop-Process -Id $taskProcess.Id -Force }
+        if ($taskBackend -and (Get-Process -Id $taskBackend.ProcessId -ErrorAction SilentlyContinue)) { Stop-Process -Id $taskBackend.ProcessId -Force }
+        $taskNormal | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $Output 'normal-startup-result.json') -Encoding utf8
+    }
+    exit 0
+}
 try {
     & icacls.exe $taskFolder /deny "*${taskSid}:(OI)(CI)(W)" | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Could not apply isolated test ACL.' }

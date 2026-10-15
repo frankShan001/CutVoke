@@ -40,7 +40,9 @@ may be required). A failed acceptance does not upload a user download.
 `portable.json` next to the executable enables a sibling `CutVoke Data` root.
 The project database, uploaded media, preview cache and diagnostics live under
 `data/`; language preferences, Chromium profile and MCP configuration live under
-`profile/`. `CUTVOKE_PORTABLE_HOME` explicitly overrides the whole data root;
+`profile/`. Generated caption fonts are cached in `data/font-cache/`, and the
+generated MCP config points its engine at that same cache.
+`CUTVOKE_PORTABLE_HOME` explicitly overrides the whole data root;
 `CUTVOKE_DATA` explicitly overrides the database. A write failure displays a
 bilingual native dialog and exits; there is no automatic empty-library fallback.
 The launcher never copies a test database over an existing project library.

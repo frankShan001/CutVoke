@@ -7,9 +7,11 @@ import os
 import platform
 import shutil
 import struct
+import ssl
 import subprocess
 import sys
 import zipfile
+from cryptography.hazmat.backends.openssl.backend import backend as openssl_backend
 
 root = Path(__file__).resolve().parents[2]
 version = json.loads((root / 'desktop/package.json').read_text())['version']
@@ -26,6 +28,10 @@ shutil.copyfile(root / 'LICENSE', staging / 'LICENSE.txt')
 shutil.copyfile(root / 'desktop/PORTABLE-README.txt', staging / 'START-HERE.txt')
 licenses = staging / 'licenses'
 licenses.mkdir()
+notice_root = root / 'desktop/licenses'
+for notice in json.loads((notice_root / 'provenance.json').read_text('utf-8')):
+    assert hashlib.sha256((notice_root / notice['name']).read_bytes()).hexdigest() == notice['sha256'], notice['name']
+shutil.copytree(notice_root, licenses / 'runtime-components')
 shutil.copytree(root / '.artifacts/portable-ffmpeg/licenses', licenses / 'ffmpeg')
 shutil.copyfile(root / '.artifacts/portable-ffmpeg/Corresponding-Source.zip', licenses / 'ffmpeg/Corresponding-Source.zip')
 shutil.copyfile(root / 'desktop/ffmpeg-sources.json', licenses / 'ffmpeg-sources.json')
@@ -66,6 +72,7 @@ info = {'version': version, 'commit': commit, 'platform': 'windows-x64', 'signat
         'python': platform.python_version(), 'electron': json.loads((root / 'desktop/package-lock.json').read_text())['packages']['node_modules/electron']['version'],
         'ffmpeg': '7.1.5 (own reproducible GPLv3 build; corresponding source included)',
         'dependencies': dependencies,
+        'openssl': {'python': ssl.OPENSSL_VERSION, 'cryptography': openssl_backend.openssl_version_text()},
         'runUrl': f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'frankShan001/CutVoke')}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"}
 (staging / 'build-info.json').write_text(json.dumps(info, indent=2) + '\n', 'utf-8')
 # Check that the packaged binaries are real Windows x64 PE executables.
