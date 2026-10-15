@@ -36,7 +36,7 @@ Use a new output directory for each demo. Open `http://127.0.0.1:8787` and selec
 | Earlier Windows source workflow | Previously exercised source/desktop development path; the current cloud run is not a new Windows installer acceptance result |
 | macOS, other FFmpeg/platform builds | Not verified by this cloud run; record an actual machine/build before claiming support |
 
-FFmpeg 6.1 remains part of the existing Ubuntu regression path. FFmpeg 7.1's `setpts` clears frame-rate metadata: the renderer restores CFR after retiming and uses the explicit sequence rate when assembling animation frames. Upgrading FFmpeg to hide an invalid graph is not required. A distribution's version number alone does not guarantee the required codecs or filters.
+FFmpeg 6.1 remains part of the existing Ubuntu regression path. FFmpeg 7.1's `setpts` clears frame-rate metadata: the renderer restores CFR after retiming and uses the explicit sequence rate when assembling animation frames. A cached behavior probe enables the extra xfade normalization only when needed, preserving the last alpha frame and short source handles on builds such as 6.1. Upgrading FFmpeg to hide an invalid graph is not required. A distribution's version number alone does not guarantee the required codecs or filters.
 
 The project version is aligned at **0.3.1** in Python, MCP and desktop metadata. This does not mean a public 0.3.1 binary Release exists. Wheel/source candidates are built locally; see [candidate packaging](../development/prerelease.md) for checksums and validation before any publication.
 

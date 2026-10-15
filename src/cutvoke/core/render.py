@@ -1128,6 +1128,30 @@ class RenderError(Exception):
     """渲染失败（工程不合法、ffmpeg 非零、ffprobe 验证不通过等）。"""
 
 
+@lru_cache(maxsize=8)
+def _setpts_clears_frame_rate(ffmpeg_path: str) -> bool:
+    """Probe link metadata rather than guessing from a distributor's version.
+
+    FFmpeg 7 clears CFR metadata in setpts; FFmpeg 6 preserves it. Adding fps
+    unnecessarily on 6 discards short handles and the final alpha frame because
+    that version forwards overlay EOF at the last picture's timestamp.
+    """
+    try:
+        result = subprocess.run(
+            [ffmpeg_path, "-hide_banner", "-nostdin", "-filter_threads", "1",
+             "-f", "lavfi", "-i", "color=s=16x16:r=30:d=0.1",
+             "-vf", "setpts=N,showinfo", "-frames:v", "1", "-f", "null", "-"],
+            stdin=subprocess.DEVNULL, capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=10)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise RenderError(f"cannot inspect FFmpeg setpts frame clock: {error}") from error
+    for line in result.stderr.splitlines():
+        if result.returncode == 0 and "config in time_base:" in line and "frame_rate:" in line:
+            rate = line.split("frame_rate:", 1)[1].split(",", 1)[0].strip()
+            return rate in {"1/0", "0/0", "0/1"}
+    raise RenderError("FFmpeg did not report its setpts frame clock: " + result.stderr[-400:])
+
+
 class RenderCancelled(RenderError):
     """渲染被取消（cancel_event 触发），不留下误导性的成功成片。"""
 
@@ -1490,6 +1514,8 @@ class RenderService:
             # identity setpts would strip rate/duration metadata on FFmpeg 7
             # and make its encoder drop/retime frames across chunk boundaries.
             graph = f"[0:v]fps={frame_rate.numerator}/{frame_rate.denominator}[outv]"
+            if not _setpts_clears_frame_rate(self.ffmpeg):
+                graph = graph.replace("[outv]", ",setpts=N/FRAME_RATE/TB[outv]")
             if has_audio:
                 graph += (f";[0:a]aresample={seq.audio_sample_rate}:async=1:first_pts=0,"
                           f"atrim=duration={duration:.9f},asetpts=PTS-STARTPTS[outa]")
@@ -2482,7 +2508,8 @@ class RenderService:
             # The canvas already starts at local PTS 0. An identity setpts
             # would clear CFR metadata/frame duration on FFmpeg 7 and lose the
             # last picture of a bounded preview or window intermediate.
-            parts.append(f"[outv]trim=end={local_end:.9f}[outv]")
+            clock = "" if _setpts_clears_frame_rate(self.ffmpeg) else ",setpts=PTS-STARTPTS"
+            parts.append(f"[outv]trim=end={local_end:.9f}{clock}[outv]")
             if has_audio:
                 parts.append(f"[outa]apad=whole_dur={local_end:.9f},"
                              f"atrim=end={local_end:.9f},asetpts=PTS-STARTPTS[outa]")
@@ -2696,9 +2723,10 @@ class RenderService:
             current = bed
             for i, (label, offset) in enumerate(zip(clip_labels, offsets)):
                 shifted = f"tlclip{n}_{i}"
+                clock = f",fps={fps_expr}" if _setpts_clears_frame_rate(self.ffmpeg) else ""
                 parts.append(
                     f"[{label}]trim=duration={clip_durs[i]:.6f},"
-                    f"setpts=PTS-STARTPTS+{offset:.6f}/TB,fps={fps_expr}[{shifted}]")
+                    f"setpts=PTS-STARTPTS+{offset:.6f}/TB{clock}[{shifted}]")
                 out = f"tlmix{n}_{i}"
                 parts.append(
                     f"[{current}][{shifted}]overlay=shortest=0:eof_action=pass:"
@@ -2819,9 +2847,12 @@ class RenderService:
                     _build_squeeze_transition(transition_outgoing, incoming, out,
                                               str(squeeze_axis), d, offset, parts)
                 else:
+                    clock = f"settb=expr={fps.denominator}/{fps.numerator},setpts=N"
+                    if _setpts_clears_frame_rate(self.ffmpeg):
+                        clock = f"fps={fps_expr},{clock},fps={fps_expr}"
                     parts.append(
-                        f"[{transition_outgoing}]{xfade_format}fps={fps_expr},settb=expr={fps.denominator}/{fps.numerator},setpts=N,fps={fps_expr}[inA];"
-                        f"[{incoming}]{xfade_format}fps={fps_expr},settb=expr={fps.denominator}/{fps.numerator},setpts=N,fps={fps_expr}[inB];"
+                        f"[{transition_outgoing}]{xfade_format}{clock}[inA];"
+                        f"[{incoming}]{xfade_format}{clock}[inB];"
                         f"[inA][inB]"
                         f"xfade=transition={xname}:offset={offset:.6f}:"
                         f"duration={d:.6f}{expr_option}[{out}]")
@@ -2863,8 +2894,10 @@ class RenderService:
         # FFmpeg 6.1 forwards overlay EOF at the last frame's timestamp. fps
         # would discard that frame (and every one-frame animation segment).
         # Supply one lookahead frame, then bound the lane to its actual duration.
+        clock = ("" if _setpts_clears_frame_rate(self.ffmpeg) else
+                 f",settb=expr={fps.denominator}/{fps.numerator},setpts=N")
         parts.append(f"[{current}]tpad=stop_mode=clone:stop=1,fps={fps_expr},"
-                     f"trim=duration={film:.9f}[{out_label}]")
+                     f"trim=duration={film:.9f}{clock}[{out_label}]")
         return out_label, film
 
     def _pad_last_frame(self, label: str, pad_secs: float, parts: list[str],
@@ -2875,11 +2908,14 @@ class RenderService:
         out = f"hold{len(parts)}"
         frame_rate = Fraction(fps_expr)
         lookahead = float(1 / frame_rate)
+        clears_rate = _setpts_clears_frame_rate(self.ffmpeg)
+        before = f"fps={fps_expr}," if clears_rate else ""
+        after = "" if clears_rate else ",setpts=PTS-STARTPTS"
         parts.append(
             # tpad computes its clone count from link.frame_rate too; repair
             # concat/setpts metadata before it, not only on its output.
-            f"[{label}]fps={fps_expr},tpad=stop_mode=clone:stop_duration={pad_secs + lookahead:.9f}"
-            f",fps={fps_expr},trim=duration={total_duration:.9f}[{out}]")
+            f"[{label}]{before}tpad=stop_mode=clone:stop_duration={pad_secs + lookahead:.9f}"
+            f",fps={fps_expr},trim=duration={total_duration:.9f}{after}[{out}]")
         return out
 
     def _pad_black(self, label: str, pad_secs: float, parts: list[str],
@@ -2901,6 +2937,8 @@ class RenderService:
             return label
         out = f"tpad{len(parts)}"
         pad_color = ":color=black@0.0" if transparent else ""
+        clears_rate = _setpts_clears_frame_rate(self.ffmpeg)
+        before = f"fps={fps_expr}," if clears_rate else ""
         if at_start and canvas_size is not None:
             prefix = f"padstart{len(parts)}"
             width, height = canvas_size
@@ -2908,14 +2946,15 @@ class RenderService:
             color = "black@0.0" if transparent else "black"
             parts.append(f"color=c={color}:s={width}x{height}:r={fps_expr}:"
                          f"d={pad_secs:.9f}{fmt}[{prefix}]")
-            parts.append(f"[{prefix}][{label}]concat=n=2:v=1:a=0,fps={fps_expr}[{out}]")
+            clock = "" if clears_rate else ",setpts=N/FRAME_RATE/TB"
+            parts.append(f"[{prefix}][{label}]concat=n=2:v=1:a=0,fps={fps_expr}{clock}[{out}]")
         elif at_start:
             parts.append(
-                f"[{label}]fps={fps_expr},tpad=start_mode=add:start_duration={pad_secs:.6f}{pad_color}"
+                f"[{label}]{before}tpad=start_mode=add:start_duration={pad_secs:.6f}{pad_color}"
                 f",fps={fps_expr},setpts=PTS-STARTPTS[{out}]")
         else:
             parts.append(
-                f"[{label}]fps={fps_expr},tpad=stop_mode=add:stop_duration={pad_secs:.6f}{pad_color}"
+                f"[{label}]{before}tpad=stop_mode=add:stop_duration={pad_secs:.6f}{pad_color}"
                 f",fps={fps_expr},setpts=PTS-STARTPTS[{out}]")
         return out
 
