@@ -151,13 +151,19 @@ async function main() {
     await page.getByLabel("新工程名称", { exact: true }).fill(projectId);
     await page.getByRole("button", { name: "创建工程", exact: true }).click();
     await page.getByRole("heading", { name: "时间线", exact: true }).waitFor();
-    const [chooser] = await Promise.all([page.waitForEvent("filechooser"), page.getByRole("button", { name: "导入素材", exact: true }).click()]);
-    await chooser.setFiles(media);
+    await expect(page.getByRole("button", { name: "导入素材", exact: true })).toBeEnabled();
+    // Electron owns the native OS picker; CDP's browser filechooser interception
+    // is not reliable there. Drive the same file input and real upload handler.
+    await page.locator('input[type="file"][accept="video/*,audio/*,image/*"][multiple]').setInputFiles(media);
     let asset;
     await expect.poll(async () => {
       asset = (await api("assets")).assets.find(x => x.name === path.basename(media));
       return Boolean(asset?.available);
     }, { timeout: 30_000 }).toBe(true);
+    assert.ok(asset.path.startsWith(path.join(data, "data")));
+    const uploaded = await fetch(origin + `/api/v1/assets/${asset.assetId}/media`);
+    assert.ok(uploaded.ok);
+    assert.deepEqual(Buffer.from(await uploaded.arrayBuffer()), fs.readFileSync(media));
     const desktopInfo = await page.evaluate(() => window.cutvokeDesktop.info());
     assert.equal(desktopInfo.storage.portable, true);
     assert.equal(path.normalize(desktopInfo.storage.fontCache), path.join(data, "data/font-cache"));
