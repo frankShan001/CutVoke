@@ -70,6 +70,12 @@ shutil.copytree(root / 'src/cutvoke/assets/fonts', licenses / 'fonts', ignore=sh
 for font, expected in [('NotoSansSC-VF.ttf', 'd68bafcb48a2707749396aa12bbbd833cb70401f3a9a689fd2902c7e0d295964'),
                        ('NotoSerifSC-VF.ttf', '5326cfb097e3ab26fcb39329752b5c0a439bf8d5c4649520e4b492939c352a09')]:
     assert hashlib.sha256((root / 'src/cutvoke/assets/fonts' / font).read_bytes()).hexdigest() == expected, font
+frozen_package = staging / 'resources/engine/_internal/cutvoke'
+resource_manifest = json.loads((frozen_package / 'core/builtin_resource_pack.json').read_text('utf-8'))
+for resource in resource_manifest['files']:
+    path = frozen_package / resource['path']
+    assert path.is_file(), f"Missing required resource: {resource['path']}"
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == resource['sha256'], resource['path']
 commit = os.environ.get('GITHUB_SHA') or subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
 info = {'version': version, 'commit': commit, 'platform': 'windows-x64', 'signature': 'unsigned',
         'python': platform.python_version(), 'electron': json.loads((root / 'desktop/package-lock.json').read_text())['packages']['node_modules/electron']['version'],
