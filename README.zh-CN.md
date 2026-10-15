@@ -8,9 +8,9 @@
 
 [开始体验](#开始体验) · [给你的-ai-一套剪辑工作流](#给你的-ai-一套剪辑工作流) · [一起打造特效](#一起打造特效)
 
-![CutVoke 真实编辑器：素材库、风景短片预览和多轨可编辑时间线](docs/assets/readme/editor-overview.png)
+![CutVoke 简体中文界面：素材库、风景短片预览和多轨可编辑时间线](docs/assets/readme/zh-CN/editor-overview.png)
 
-*真实本机编辑器中的 Trail Notes 演示：三张原创插画、音乐、标题、字幕、缩放关键帧和转场。由仓库示例通过真实接口创建；没有生成视频服务。截图使用简体中文，界面语言可以切换。*
+*真实本机编辑器中的「山野手记」演示：三张原创插画、音乐、标题、字幕、缩放关键帧和转场。由仓库示例通过真实接口创建；没有生成视频服务。界面、演示标题与字幕均使用简体中文。*
 
 ## 为什么值得试
 
@@ -56,9 +56,9 @@ flowchart LR
 
 时间线支持多轨素材、文字与字幕、片段调整、音量与淡入淡出、关键帧及现有转场/效果。编辑可预演、撤销/重做；Agent 成组修改时通过租约避免与人工写入冲突。连续预览按时间窗准备并复用缓存，导出绑定提交时的工程版本。
 
-![CutVoke 字幕编辑：选中字幕后修改文字与起止时间，并在画面中检查](docs/assets/readme/caption-editing.png)
+![CutVoke 简体中文字幕编辑：选中文字与 0–4 秒起止时间，并在真实预览中检查](docs/assets/readme/zh-CN/caption-editing.png)
 
-*字幕是可定位、可修改的工程对象。改变文字后检查真实画面，继续精修同一工程。*
+*简体中文界面中的字幕编辑：选中「暂别喧嚣。」，查看 0–4 秒区间及可编辑画面叠层，继续精修同一工程。*
 
 ## 开始体验
 
@@ -138,9 +138,9 @@ MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错�
 
 欢迎贡献有用的转场、滤镜、声音处理、文字动画和可复用资源。以 **GitHub PR** 为入口，把想法变成可预览、可复验的作品。
 
-![CutVoke 社区转场样例：时间线上的柔和揭幕转场及可调时长](docs/assets/readme/community-transition.png)
+![CutVoke 简体中文转场面板：4 秒切点上的柔和揭幕转场与实际生效的 0.60 秒时长](docs/assets/readme/zh-CN/community-transition.png)
 
-*真实编辑器中的 Soft Reveal：按现有注册表加载贡献清单，并通过现有 FFmpeg 叠化算法预览与导出。*
+*简体中文界面中的「柔和揭幕」（Soft Reveal）：按现有注册表加载贡献清单，并通过现有 FFmpeg 叠化算法预览与导出。*
 
 从 [中文贡献指南](docs/user/effect-contributing.zh-CN.md) 和 [可运行样例](effects/transitions/cutvoke.transition.community.soft-reveal/README.md) 开始。新贡献按 `effects/<类型>/<效果ID>/` 保存清单、说明、许可证和真实预览；既有资源保持原路径。
 
