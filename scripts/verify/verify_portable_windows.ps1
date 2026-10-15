@@ -99,7 +99,7 @@ try {
             }
             return $true
         }, [IntPtr]::Zero) | Out-Null
-        if ($taskWindows.Count) { break }
+        if ($taskWindows.Count -and ($taskTexts -join ' ') -like '*cannot write*') { break }
         Start-Sleep -Milliseconds 250
     } while ([DateTime]::UtcNow -lt $taskDeadline -and !$taskProcess.HasExited)
     $taskResult.dialogText = @($taskTexts.ToArray())
