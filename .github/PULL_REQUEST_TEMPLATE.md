@@ -1,8 +1,10 @@
-## What changed
+English / 简体中文均可。贡献指南：[English](../CONTRIBUTING.md) · [简体中文](../CONTRIBUTING.zh-CN.md)。安全问题先读 [SECURITY.md](../SECURITY.md)。
+
+## What changed / 改动内容
 
 Describe the problem and the change in a few sentences.
 
-## Verification
+## Verification / 验证
 
 List the commands you ran and any manual checks you performed.
 
@@ -11,12 +13,12 @@ command
 result
 ```
 
-## Compatibility
+## Compatibility / 兼容性
 
 - Does this change the project format, command schema, HTTP API, MCP tools, or exported media?
 - Does it add a third-party asset, font, filter, or binary? If so, include its source and license.
 
-## Checklist
+## Checklist / 检查项
 
 - [ ] The change is limited to the problem described above.
 - [ ] Backend changes pass `python -m compileall -q src` and `python scripts/verify/check_layering.py`.

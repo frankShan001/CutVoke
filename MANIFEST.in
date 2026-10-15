@@ -1,3 +1,18 @@
 recursive-include .artifacts/web *
+include README.zh-CN.md CONTRIBUTING.md CONTRIBUTING.zh-CN.md SECURITY.md CHANGELOG.md
+recursive-include docs *.md *.json *.png
+recursive-include skills *.md *.py
+recursive-include effects *.md *.json *.png
+recursive-include examples *.md *.py *.json
+recursive-include scripts *.py *.mjs *.cmd *.ps1
+recursive-include web/app *.json *.ts *.tsx *.css *.html *.mjs
+prune web/app/node_modules
+prune web/app/test-results
+prune web/app/playwright-report
+include desktop/*.cjs desktop/*.js desktop/*.html desktop/*.spec desktop/*.py desktop/*.json
+recursive-include desktop/locales *.json
+include .github/workflows/*.yml .github/ISSUE_TEMPLATE/*.yml .github/PULL_REQUEST_TEMPLATE.md
+include start-cutvoke.cmd
+include .gitattributes .gitignore uv.lock
 global-exclude *.py[cod]
 global-exclude __pycache__

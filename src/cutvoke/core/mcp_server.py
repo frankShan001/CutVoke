@@ -21,32 +21,42 @@ from .protocol import Actor, Command, CommandResult, ErrorCode
 from .rational import Rational
 from .render import RenderService, RenderError
 from .editor_guide import EditorGuide, INSTRUCTIONS, recovery
+from .. import __version__
 
 PROTOCOL_VERSION = "2024-11-05"
 SERVER_NAME = "cutvoke"
-SERVER_VERSION = "0.3.1"
+SERVER_VERSION = __version__
 
 
 class MCPServer:
     """MCP 服务端（stdio）。"""
 
     def __init__(self, service: Optional[EditService] = None,
-                 render: Optional[RenderService] = None) -> None:
+                 render: Optional[RenderService] = None,
+                 *, media_dir: Optional[str] = None) -> None:
         self.service = service or EditService()
         self.render = render or RenderService()
         from ..runtime import runtime_identity
         store_path = str(getattr(self.service.store, "path", "")) if self.service.store else None
         self.runtime_info = runtime_identity(store_path)
         self._agent_api = None
+        self._media_dir = media_dir
+
+    def _media_directory(self):
+        from pathlib import Path
+        if self._media_dir is not None:
+            return Path(self._media_dir)
+        store_path = getattr(self.service.store, "path", None)
+        if store_path and store_path != ":memory:" and "mode=memory" not in store_path:
+            return Path(store_path).resolve().parent / "media"
+        return Path.home() / ".cutvoke" / "data" / "media"
 
     def _agent_tools(self):
         if self._agent_api is None:
-            from pathlib import Path
             from .httpapi import HttpApi
             from .agent_tools import AgentTools
-            store_path = getattr(self.service.store, "path", None)
-            media = Path(store_path).resolve().parent / "media" if store_path and store_path != ":memory:" else Path.home() / ".cutvoke" / "data" / "media"
-            self._agent_api = AgentTools(HttpApi(self.service, self.render, media_dir=str(media)))
+            self._agent_api = AgentTools(HttpApi(
+                self.service, self.render, media_dir=str(self._media_directory())))
         return self._agent_api
 
     def close(self):
@@ -316,11 +326,8 @@ class MCPServer:
             if name == "runtime":
                 return {"ok": True, **self.runtime_info}
             if name == "preview_cache_status":
-                from pathlib import Path
                 from .preview_cache import PreviewDiskCache
-                store_path = getattr(self.service.store, "path", None)
-                media = Path(store_path).resolve().parent / "media" if store_path and store_path != ":memory:" else Path.home() / ".cutvoke" / "data" / "media"
-                cache = PreviewDiskCache(str(media))
+                cache = PreviewDiskCache(str(self._media_directory()))
                 try:
                     return {"ok": True, **cache.status()}
                 finally:

@@ -1,8 +1,12 @@
 name: Feature request
-description: Suggest a change to the editing workflow or public interfaces
+description: Suggest a workflow or API change / 建议编辑流程或接口改进
 title: "[Feature] "
 labels: ["enhancement"]
 body:
+  - type: markdown
+    attributes:
+      value: English / 简体中文均可。Please check existing issues and CONTRIBUTING.md / 请先查重并阅读贡献指南。
+
   - type: textarea
     id: problem
     attributes:

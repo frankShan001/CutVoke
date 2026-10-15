@@ -69,7 +69,10 @@ class ExportRangeTests(unittest.TestCase):
         service, project = self.make_project("range-http")
         self.addCleanup(service.close)
         renderer = CaptureRenderer()
-        api = HttpApi(service, render=renderer)
+        media = tempfile.TemporaryDirectory(prefix="cutvoke-export-api-")
+        self.addCleanup(media.cleanup)
+        api = HttpApi(service, render=renderer, media_dir=media.name)
+        self.addCleanup(api.close)
         with tempfile.TemporaryDirectory() as output_dir:
             sync_status, _ = api._dispatch(
                 "POST", f"/api/v1/projects/{project.project_id}/export",

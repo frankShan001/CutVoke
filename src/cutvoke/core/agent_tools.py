@@ -129,7 +129,7 @@ class AgentTools:
         store = self.service.store
         if not store:
             raise ValueError("persistent storage is required for media_import")
-        root = Path(self.api.media_dir) / "imports"
+        root = Path(self.api.media_dir).resolve()
         root.mkdir(parents=True, exist_ok=True)
         assets = []
         for value in a["paths"]:
@@ -149,13 +149,18 @@ class AgentTools:
                     raise ValueError(f"media changed during import: {source}")
                 asset_id = "asset_" + digest.hexdigest()
                 existing = store.get_asset(asset_id)
-                if existing and Path(existing["path"]).is_file():
+                managed = self.api._imported_media_path(existing) if existing else None
+                if managed and managed.is_file():
                     assets.append(existing)
                     continue
                 info = self.render.probe_media(temporary)
                 if not info.get("has_video") and not info.get("has_audio"):
                     raise ValueError(f"no decodable media streams: {source}")
-                target = root / (digest.hexdigest() + source.suffix.lower())
+                # New imports use the same ledger layout as Web uploads. Keep
+                # a missing legacy import's path when restoring its bytes so
+                # existing project/history references become usable again too.
+                target = managed or root / (asset_id + source.suffix.lower())
+                target.parent.mkdir(parents=True, exist_ok=True)
                 os.replace(temporary, target)
                 assets.append(store.add_asset(
                     asset_id=asset_id, name=source.name, path=str(target), size=after.st_size,
@@ -194,7 +199,8 @@ class AgentTools:
             is_used = item["assetId"] in used or item["path"] in used
             if "used" in a and a["used"] != is_used:
                 continue
-            filtered.append({**item, "used": is_used, "available": Path(item["path"]).is_file()})
+            filtered.append({**item, "used": is_used,
+                             "available": self.api._asset_media_path(item) is not None})
         return {"revision": revision, **self._page(filtered, a, "assets")}
 
     def _source(self, a):
