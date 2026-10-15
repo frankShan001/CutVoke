@@ -13,7 +13,7 @@ const storage = storagePlan({ packaged: app.isPackaged, executable: process.exec
   appData: app.getPath("appData"), home: app.getPath("home") });
 let storageFailure;
 try {
-  prepareStorage(storage);
+  prepareStorage(storage, { profileOnly: true });
   app.setPath("userData", storage.profile);
   app.setPath("sessionData", path.join(storage.profile, "browser"));
   app.setAppLogsPath(path.join(storage.profile, "logs"));
@@ -37,6 +37,7 @@ const language = createLanguageController(path.join(app.getPath("userData"), "ui
 const shutdownKey = crypto.randomBytes(32).toString("hex");
 const root = path.resolve(__dirname, "..");
 const dataPath = storage.dataPath;
+const fontCache = path.resolve(process.env.CUTVOKE_FONT_CACHE || path.join(path.dirname(dataPath), "font-cache"));
 const engine = app.isPackaged ? path.join(process.resourcesPath, "engine", "cutvoke-engine.exe")
   : path.join(root, ".artifacts", "build", "desktop-engine", "cutvoke-engine", "cutvoke-engine.exe");
 const engineExists = fs.existsSync(engine) && !(process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_PYTHON === "1");
@@ -47,7 +48,7 @@ const prefix = engineExists ? [] : ["-m", "cutvoke"];
 
 function mcpConfig() {
   return { mcpServers: { cutvoke: { command: executable, args: [...prefix, "mcp", "--data", dataPath],
-    env: { CUTVOKE_HOME: storage.base || path.dirname(dataPath),
+    env: { CUTVOKE_HOME: storage.base || path.dirname(dataPath), CUTVOKE_FONT_CACHE: fontCache,
       ...(engineExists ? {} : { PYTHONPATH: path.join(root, "src") }) } } } };
 }
 function vacantPort() {
@@ -77,12 +78,14 @@ function showShellError(kind, detail) {
   dialog.showMessageBoxSync(window, errorDialogOptions(language, kind, detail));
 }
 async function start() {
+  prepareStorage(storage);
   const port = await vacantPort(); origin = `http://127.0.0.1:${port}`;
   fs.mkdirSync(path.dirname(dataPath), { recursive: true });
   const logDir = path.join(app.getPath("userData"), "logs"); fs.mkdirSync(logDir, { recursive: true });
   const log = fs.createWriteStream(path.join(logDir, "engine.log"), { flags: "a" });
   const env = { ...process.env, CUTVOKE_DESKTOP_KEY: shutdownKey,
-    CUTVOKE_HOME: storage.base || path.dirname(dataPath), PYTHONIOENCODING: "utf-8", PYTHONUTF8: "1" };
+    CUTVOKE_HOME: storage.base || path.dirname(dataPath), CUTVOKE_FONT_CACHE: fontCache,
+    PYTHONIOENCODING: "utf-8", PYTHONUTF8: "1" };
   if (!engineExists) env.PYTHONPATH = [path.join(root, "src"), ...(qaPython ? [path.join(root, ".venv", "Lib", "site-packages")] : [])].join(path.delimiter);
   // Packaged FFmpeg is selected by the engine entry point, independent of PATH.
   child = spawn(executable, [...prefix, "serve", "--host", "127.0.0.1", "--port", String(port), "--data", dataPath],
@@ -168,7 +171,7 @@ else {
       const error = await shell.openPath(status.directory); if (error) throw new Error(error);
     });
     ipcMain.handle("cutvoke:info", event => { verifySender(event); return { version: app.getVersion(), mcp: mcpConfig(),
-      storage: { portable: storage.portable, dataPath, profile: storage.profile } }; });
+      storage: { portable: storage.portable, dataPath, profile: storage.profile, fontCache } }; });
     if (process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_SCRIPT) {
       qaHook = require(path.resolve(process.env.CUTVOKE_DESKTOP_QA_SCRIPT));
     }

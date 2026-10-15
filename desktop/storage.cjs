@@ -11,10 +11,10 @@ function storagePlan({ packaged, executable, appData, home, env = process.env })
   return { portable, base, profile, dataPath: /\.sqlite$/i.test(data) ? data : path.join(data, "projects.sqlite") };
 }
 
-function prepareStorage(plan) {
+function prepareStorage(plan, { profileOnly = false } = {}) {
   // Never switch to an empty database when the user's portable folder cannot
   // be written. Opening a newer build must preserve every existing project.
-  for (const directory of new Set([plan.profile, path.dirname(plan.dataPath)])) {
+  for (const directory of new Set(profileOnly ? [plan.profile] : [plan.profile, path.dirname(plan.dataPath)])) {
     fs.mkdirSync(directory, { recursive: true });
     const probe = path.join(directory, `.write-check-${crypto.randomUUID()}`);
     fs.writeFileSync(probe, "", { flag: "wx" });

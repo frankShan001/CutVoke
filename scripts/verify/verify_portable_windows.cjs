@@ -160,6 +160,7 @@ async function main() {
     }, { timeout: 30_000 }).toBe(true);
     const desktopInfo = await page.evaluate(() => window.cutvokeDesktop.info());
     assert.equal(desktopInfo.storage.portable, true);
+    assert.equal(path.normalize(desktopInfo.storage.fontCache), path.join(data, "data/font-cache"));
     const config = JSON.parse(fs.readFileSync(path.join(profile, "mcp-config.json"))).mcpServers.cutvoke;
     const client = await mcp(config, env);
     try {
@@ -200,6 +201,7 @@ async function main() {
     assert.ok(probe.streams.some(x => x.codec_name === "aac"));
     assert.ok(Number(probe.format.duration) >= 2.9);
     run(ffmpeg, ["-v", "error", "-nostdin", "-i", exported, "-f", "null", "-"], env);
+    run(ffmpeg, ["-v", "error", "-nostdin", "-ss", "1", "-i", exported, "-frames:v", "1", "-update", "1", "-y", path.join(out, "04-decoded-export-frame.png")], env);
     report.exportProbe = probe;
     report.checks.guiExportAndFullVideoAudioDecode = true;
     const before = await api(`projects/${projectId}`);
@@ -221,6 +223,10 @@ async function main() {
     await close();
     report.checks.windowCloseStopsOwnedBackend = true;
     report.storage = { database: path.join(data, "data/projects.sqlite"), profile, cache: cache.directory };
+    run("pwsh.exe", ["-NoProfile", "-File", path.join(root, "scripts/verify/verify_portable_windows.ps1"), "-App", executable, "-Output", out, "-Normal"]);
+    const normal = JSON.parse(fs.readFileSync(path.join(out, "normal-startup-result.json")));
+    assert.equal(normal.passed, true);
+    report.checks.normalLaunchWithoutQaOrDebugFlags = true;
     // Actual Windows ACL denial + native error dialog, preserving the same DB.
     run("pwsh.exe", ["-NoProfile", "-File", path.join(root, "scripts/verify/verify_portable_windows.ps1"), "-App", executable, "-Output", out]);
     const readonly = JSON.parse(fs.readFileSync(path.join(out, "readonly-result.json")));

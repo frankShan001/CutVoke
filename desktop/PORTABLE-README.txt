@@ -15,6 +15,7 @@ Your files / 文件位置（相对于 CutVoke.exe）
   CutVoke Data/data/projects.sqlite       projects / 工程数据库
   CutVoke Data/data/media/                imported media / 导入素材
   CutVoke Data/data/media/.preview-cache-v2/   disposable preview cache / 可清理预览缓存
+  CutVoke Data/data/font-cache/            generated font cache / 生成字体缓存
   CutVoke Data/data/logs/serve.jsonl       backend diagnostics / 后端诊断
   CutVoke Data/profile/                   language, browser cache / 语言与浏览器缓存
   CutVoke Data/profile/logs/engine.log    startup diagnostics / 启动日志
@@ -29,6 +30,7 @@ For a read-only location, move the whole app to a writable folder, keeping your
 data. Advanced: CUTVOKE_PORTABLE_HOME sets an explicit writable data root;
 CUTVOKE_DATA sets an explicit project database/directory. No silent fallback.
 Preview-cache settings can choose another drive and limit its disk budget.
+Short-lived renderer work files can also use the Windows temporary directory.
 
 更新/备份前先关闭程序，保留 CutVoke Data；请将新版解压到独立文件夹，
 再带上原数据，不要用任何测试库覆盖工程。原源码版/安装版工程库不会被覆盖。
@@ -36,6 +38,7 @@ Preview-cache settings can choose another drive and limit its disk budget.
 目录只读时请连同数据移动到可写位置；高级用法可设置 CUTVOKE_PORTABLE_HOME
 指定数据根目录，或 CUTVOKE_DATA 指定工程库。程序不会悄悄切换到空工程库。
 预览缓存设置可选择其他磁盘并限制占用，导出路径由你选择。
+短期渲染工作文件也可能使用 Windows 临时目录。
 
 Basic local import, editing, preview and MP4 export work without an AI account.
 Select interface language in the top bar (11 choices, including English/简体中文).
