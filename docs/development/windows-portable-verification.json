@@ -1,0 +1,120 @@
+{
+  "verifiedAt": "2026-10-15",
+  "version": "0.3.1",
+  "commit": "1fd2f1fcb48c2c9af54555c558e40354812fc786",
+  "platform": "windows-x64",
+  "signature": "unsigned",
+  "python": "3.13.16",
+  "electron": "44.5.1",
+  "ffmpeg": "7.1.5 (own reproducible GPLv3 build; corresponding source included)",
+  "dependencies": [
+    {
+      "name": "cryptography",
+      "version": "50.0.2",
+      "role": "Python runtime dependency"
+    },
+    {
+      "name": "fonttools",
+      "version": "4.66.1",
+      "role": "Python runtime dependency"
+    },
+    {
+      "name": "cffi",
+      "version": "2.0.0",
+      "role": "Python runtime dependency"
+    },
+    {
+      "name": "pycparser",
+      "version": "3.0",
+      "role": "Python runtime dependency"
+    },
+    {
+      "name": "pyinstaller",
+      "version": "6.22.3",
+      "role": "embedded bootloader"
+    },
+    {
+      "name": "lucide-react",
+      "version": "0.454.0",
+      "license": "ISC"
+    },
+    {
+      "name": "react",
+      "version": "19.3.0",
+      "license": "MIT"
+    },
+    {
+      "name": "react-dom",
+      "version": "19.3.0",
+      "license": "MIT"
+    },
+    {
+      "name": "scheduler",
+      "version": "0.28.0",
+      "license": "MIT"
+    }
+  ],
+  "openssl": {
+    "python": "OpenSSL 3.5.9 29 Sep 2026",
+    "cryptography": "OpenSSL 4.0.3 29 Sep 2026"
+  },
+  "runUrl": "https://github.com/frankShan001/CutVoke/actions/runs/38788916823",
+  "filename": "CutVoke-0.3.1-windows-x64-portable.zip",
+  "bytes": 380755991,
+  "sha256": "13410b6a6c1aedff581f5a42143f22c7f35f6526bf2ee3ab461a4594c7680b73",
+  "files": 5007,
+  "runId": 38788916823,
+  "runConclusion": "success",
+  "runner": "Windows Server 2022 x64 (windows-2022)",
+  "downloadArtifact": {
+    "id": 11999831137,
+    "url": "https://github.com/frankShan001/CutVoke/actions/runs/38788916823/artifacts/11999831137",
+    "outerArtifactBytes": 380770286,
+    "outerArtifactSHA256": "afc5974b83e768a7048ff7cb5234bca0969a2662cf9070302513213c5a309d37",
+    "retainedUntil": "2027-01-13"
+  },
+  "evidenceArtifact": {
+    "id": 11999596346,
+    "url": "https://github.com/frankShan001/CutVoke/actions/runs/38788916823/artifacts/11999596346"
+  },
+  "checks": {
+    "extractedZipIntegrity": true,
+    "noSystemPythonNodeOrFFmpegRequired": true,
+    "visibleGUIAndHealthyFrozenBackend": true,
+    "builtinResourcesQualifiedAndOffline": true,
+    "elevenInterfaceLanguages": [
+      "zh-CN",
+      "zh-TW",
+      "en",
+      "ja",
+      "ko",
+      "es",
+      "fr",
+      "de",
+      "pt-BR",
+      "ru",
+      "ar"
+    ],
+    "guiMediaImportAndSharedStdioMCP": true,
+    "actualPreviewPlayback": true,
+    "guiExportAndFullVideoAudioDecode": true,
+    "duplicateLaunchAndOccupiedDefaultPort": true,
+    "restartPreservesProjectAndLanguage": true,
+    "windowCloseStopsOwnedBackend": true,
+    "normalLaunchWithoutQaOrDebugFlags": true,
+    "readonlyFolderShowsNativeErrorAndPreservesDatabase": true
+  },
+  "coldCheckoutResourceTests": {
+    "testsPassed": 30,
+    "subtestsPassed": 4,
+    "originalPinnedJSONHashesMatched": 2405,
+    "approvalConclusionsChanged": false
+  },
+  "limits": [
+    "Automated actual Windows Server 2022 run; not manual acceptance of Windows 10/11 user hardware.",
+    "Native picker/drag ergonomics, device audio/GPU and SmartScreen require device-specific manual checks.",
+    "CutVoke is unsigned; no formal Release/tag created.",
+    "Optional AI clients, cloud services and speech/person models are separate from base offline editing.",
+    "Absolute media references may require project packaging/relink after moving paths or computers."
+  ]
+}
