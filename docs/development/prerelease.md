@@ -46,11 +46,24 @@ python -m pip wheel --no-deps /absolute/path/to/candidate/cutvoke-0.3.1.tar.gz -
 
 The **Package candidate** manual Actions workflow performs these source/wheel checks and retains artifacts for review. It requests only read access to repository contents. It does not publish a Release. The normal CI still runs the supported Python matrix and browser workflow before an approved candidate is selected.
 
-## Windows desktop boundary
+## Windows portable candidate
+
+The Windows x64 **folder ZIP** is now a separately verified deliverable; see
+[the user download guide](../user/installation.md#windows-portable-x64) and
+[its originating build/evidence](windows-portable-verification.json). The
+workflow builds fixed dependencies, retains third-party notices/corresponding
+FFmpeg source, extracts the shipped ZIP and actually starts `CutVoke.exe` on
+Windows. It validates GUI/health, offline resource integrity, stdio MCP,
+import/preview/export/full decode, persistence, cleanup and read-only data
+protection. It does not run an installer or modify global PATH/registry.
+The unsigned Actions candidate is not a formal Release/tag. Human device,
+native picker, GPU/audio and SmartScreen checks remain separate.
+
+## Legacy Windows installer boundary
 
 The existing `scripts/build/build-cutvoke-desktop.cmd` builds a Windows x64 Electron/NSIS installer using a PyInstaller engine. It bundles the discovered FFmpeg/ffprobe binaries. Its config currently disables executable signing; a generated `.exe` must be described as unsigned until a verified signing process exists.
 
-Before offering a Windows candidate, use an actual Windows host to build, install under a normal user, start, import through MCP, hand off to the GUI, preview/edit/export, restart, uninstall and verify project preservation. Record the installer SHA, Windows version/architecture, FFmpeg build, signature status and actual results. A Linux wheel or cross-compiled installer does not satisfy this acceptance.
+Before offering that installer target, use an actual Windows host to build, install under a normal user, start, import through MCP, hand off to the GUI, preview/edit/export, restart, uninstall and verify project preservation. Record the installer SHA, Windows version/architecture, FFmpeg build, signature status and actual results. Portable ZIP evidence does not claim installer/uninstaller acceptance.
 
 Inspect the exact FFmpeg build's license and enabled libraries before redistribution. Record upstream source/build attribution and required license/notices/source obligations for FFmpeg, Electron and any bundled assets. CutVoke's MIT license does not relicense third-party binaries. The source/wheel candidate above does not bundle FFmpeg; this avoids asserting that a particular FFmpeg binary is cleared for redistribution.
 
@@ -62,4 +75,4 @@ Return the exact filenames and hashes, originating SHA/CI, tested platforms, out
 
 先生成候选源码包/wheel、校验清单与版本说明草案，在干净环境安装并从源码包重建。候选包不是正式发行；`dirty:true` 的产物只供本地审查，公开前需从获准的干净提交重新构建。
 
-当前云 Linux 能验证源码/wheel 和真实剪辑流程；不能替代 Windows 安装、签名或 macOS 实机验收。Windows 打包入口会捆绑 FFmpeg，需先核实准确构建的许可、来源与再分发义务。正式 Release/公开二进制应单独确认实际文件、平台、签名与许可范围。
+Windows 便携 ZIP 已在实际 Windows runner 上自动验收，下载、准确哈希、提交和证据见上方专门入口；基础使用无需安装或配置 Python/Node/系统 FFmpeg。该候选带完整许可与对应 FFmpeg 源码，未签名，也未创建正式 Release/标签。传统安装包、macOS 和用户设备的人工体验仍需各自验收；正式 Release 需在核对具体成品后另行确认。

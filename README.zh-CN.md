@@ -62,7 +62,21 @@ flowchart LR
 
 ## 开始体验
 
-### 从源码运行
+### Windows 免安装便携版（x64 候选）
+
+[下载已验证的 Windows 便携包](https://github.com/frankShan001/CutVoke/actions/runs/38788916823/artifacts/11999831137) — **0.3.1**，**363.1 MiB**。可能需要登录 GitHub；本次 Actions 下载保留至 **2027-01-13**。
+
+1. 解压 Actions 下载文件，找到 `CutVoke-0.3.1-windows-x64-portable.zip` 和 `SHA256SUMS.txt`。
+2. 将这个便携 ZIP **完整解压到可写文件夹**。
+3. 双击 **`CutVoke.exe`**；保留旁边的所有文件。
+
+没有安装向导，**无需管理员，也不用配置 Python、Node.js 或系统 FFmpeg**。包内已带构建后的编辑器、冻结后端、FFmpeg/ffprobe、字体和许可证。基础本地导入、剪辑、预览与 MP4 导出不需要 AI 账号；外部 AI 客户端、云服务及可选语音/人物模型另有要求。
+
+工程、导入素材、设置和缓存默认放在 **exe 旁的 `CutVoke Data`**。更新时保留该目录；换路径/换电脑移动素材时请使用工程打包或重新关联。数据位置只读时会解释原因并退出。本候选版**未签名**，Windows 可能显示 SmartScreen；尚未创建正式二进制 Release 或标签。
+
+已在 Windows Server 2022 x64 runner 上自动验收解压后的真实程序：GUI、MCP、导入 → 预览 → 导出/解码、重启、重复启动、关闭清理和只读保护。准确哈希、存储位置及边界见[安装说明](docs/user/installation.md#windows-portable-x64)与[Windows 验证记录](docs/development/windows-portable-verification.json)。Windows 10/11 设备、音频/GPU 和 SmartScreen 的人工体验仍需分别检查。
+
+### 从源码运行（开发者）
 
 需要 **Python 3.10+、Node.js 20+、FFmpeg 与 ffprobe**。FFmpeg 构建需要支持 H.264/AAC、叠加、文字和字幕渲染；`doctor` 会实际检查必要依赖。
 
@@ -108,7 +122,7 @@ cutvoke serve --data .artifacts/first-edit/data
 
 源码流程已在云 Linux（含 FFmpeg 7.1.5）实测，之前也检查过 Windows 源码路径。准确范围见[安装、已测版本与排障](docs/user/installation.md)；当前 Windows 安装包与 macOS 仍需对应实机验收。Windows 也可以用 `start-cutvoke.cmd --web` 启动浏览器编辑器，默认使用个人工程库。想运行桌面客户端或构建安装包，见 [本地使用说明](docs/user/LOCAL_DELIVERY_MCP.md) 与 [构建入口](scripts/build/build-cutvoke-desktop.cmd)。
 
-默认服务只监听本机回环地址。普通使用的数据库和素材放在用户目录 `.cutvoke`；上面的示例使用独立 `.artifacts/first-edit/data`，不会打开默认个人工程库。
+默认服务只监听本机回环地址。源码/CLI 版的默认数据库和素材放在用户目录 `.cutvoke`；上面的示例使用独立 `.artifacts/first-edit/data`，不会打开默认个人工程库。便携版则使用 exe 旁的 `CutVoke Data`。
 
 ### 选择界面语言
 
@@ -117,6 +131,8 @@ cutvoke serve --data .artifacts/first-edit/data
 切换影响界面标签、自有进度消息和操作提示，不翻译工程名称、字幕、素材文件名或保存的剪辑数据。技术诊断保留原文，并配本地化摘要；资源元数据使用作者提供的语言项及注册表回退。文件对话框中的系统控件跟随操作系统语言。翻译包含机器辅助初稿，**尚未经母语使用者审校**；欢迎按 [翻译贡献说明](docs/development/translations.zh-CN.md) 修正。
 
 ## 给你的 AI 一套剪辑工作流
+
+**便携版**：首次启动后，将 `CutVoke Data/profile/mcp-config.json` 的内容配置到 Agent 客户端。它使用内置后端与同一工程库，不需要系统 Python。
 
 先按 [MCP 接入说明](docs/user/external-agent-editing.md) 配置客户端，并让它与编辑器使用同一 `--data` 目录：
 

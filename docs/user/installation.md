@@ -2,7 +2,42 @@
 
 [English README](../../README.md) · [中文 README](../../README.zh-CN.md) · [Contributing](../../CONTRIBUTING.md)
 
-## Install from source
+## Windows portable (x64)
+
+**[Download 0.3.1 portable](https://github.com/frankShan001/CutVoke/actions/runs/38788916823/artifacts/11999831137)** · [successful Windows run](https://github.com/frankShan001/CutVoke/actions/runs/38788916823) · [screenshots and test evidence](https://github.com/frankShan001/CutVoke/actions/runs/38788916823/artifacts/11999596346)
+
+The Actions download contains `CutVoke-0.3.1-windows-x64-portable.zip`, `SHA256SUMS.txt`, `download-info.json` and `windows-verification.json`. Extract the portable ZIP completely to a writable folder and double-click **CutVoke.exe**. No installer, administrator permission, Python, Node.js or system FFmpeg configuration is needed. GitHub login may be required to download; this artifact expires on **2027-01-13**.
+
+| Portable ZIP | Value |
+| --- | --- |
+| Filename | `CutVoke-0.3.1-windows-x64-portable.zip` |
+| Size | **380,755,991 bytes / 363.1 MiB** |
+| SHA256 of this inner portable ZIP | `13410b6a6c1aedff581f5a42143f22c7f35f6526bf2ee3ab461a4594c7680b73` |
+| Build commit | `1fd2f1fcb48c2c9af54555c558e40354812fc786` |
+| Actions run | `38788916823` |
+| Signature | Unsigned CutVoke candidate; Windows may display SmartScreen |
+
+The checksum above is for the named **portable ZIP**, not GitHub's outer artifact download. It can be checked in PowerShell with `Get-FileHash -Algorithm SHA256 .\CutVoke-0.3.1-windows-x64-portable.zip`. `build-info.json` and `file-manifest.json` inside the app record component versions and file hashes. There is no formal binary Release/tag yet.
+
+| Relative to CutVoke.exe | Purpose |
+| --- | --- |
+| `CutVoke Data/data/projects.sqlite` | Project database |
+| `CutVoke Data/data/media/` | Imported media |
+| `CutVoke Data/data/media/.preview-cache-v2/` | Disposable preview cache; location/budget can be changed in settings |
+| `CutVoke Data/data/font-cache/` | Generated caption fonts |
+| `CutVoke Data/profile/` | Language, browser cache and settings |
+| `CutVoke Data/profile/mcp-config.json` | Agent configuration using the bundled engine and this database |
+| `CutVoke Data/profile/logs/engine.log` and `data/logs/serve.jsonl` | Startup and backend diagnostics |
+
+Close the app before backup/update and keep `CutVoke Data`. Extract a newer build separately and preserve your existing data; the package contains no replacement project database. Source/installed libraries remain separate. Media references may be absolute: use project packaging or relink when changing paths/computers. A read-only location displays an explanation and exits without switching to an empty project library. Advanced overrides are `CUTVOKE_PORTABLE_HOME` (whole data root) and `CUTVOKE_DATA` (database/directory). Short-lived rendering work can use Windows' temporary directory.
+
+The package contains the built Web editor, Electron 44.5.1, Python 3.13.16 frozen backend, an FFmpeg 7.1.5/ffprobe build, Noto fonts and notices. `licenses/ffmpeg/Corresponding-Source.zip` includes the exact FFmpeg/libx264/libass and supporting-library sources, hashes and build recipe; these standalone tools use GPLv3. Other components retain their own licenses, including font OFL and the bootloader exception. [Build/provenance details](../development/windows-portable.md).
+
+Basic local import, editing, preview and MP4 export work without an AI account. Optional external AI services/clients need their own configuration/account/network/key; optional speech/person models and dependencies are not bundled or claimed as part of basic offline operation.
+
+**中文启动说明：** 下载 Actions 文件后，取出上述便携 ZIP，完整解压到可写目录，再双击 `CutVoke.exe`。无需安装或配置开发环境。工程、素材和缓存位置如上表；更新先关闭程序，保留 `CutVoke Data`，不要用测试库覆盖工程。包未签名，可能有 SmartScreen 提示。基础剪辑可本机离线完成，可选 AI/语音/人物功能另行配置。Windows runner 的自动验收已完成，人工设备体验边界见下表。
+
+## Install from source (developers)
 
 Use Python **3.10+**, Node.js **20+**, and `ffmpeg` plus `ffprobe` on PATH. FFmpeg must include `libx264`, AAC, overlay, drawtext and subtitles/libass. Optional ASR/person features need their own dependencies and model preparation; they are not required for the basic editor/demo.
 
@@ -33,18 +68,20 @@ Use a new output directory for each demo. Open `http://127.0.0.1:8787` and selec
 | --- | --- |
 | Linux cloud, Python 3.12.14, Node 24.19.0, Chromium 154.0.8037.57, Debian FFmpeg 7.1.5 | Real stdio MCP import, Web availability/thumbnails, manual caption editing, playback, GUI MP4 export and full decode; the 12-second community-transition demo also completes preview/export/package and audio measurements |
 | Ubuntu 24.04 CI, Python 3.10 / 3.12 / 3.13, Node 24, apt FFmpeg | The [CI workflow](../../.github/workflows/ci.yml) runs backend regressions, browser editing and installed-wheel checks; use the status for the exact commit being installed |
-| Earlier Windows source workflow | Previously exercised source/desktop development path; the current cloud run is not a new Windows installer acceptance result |
+| Windows Server 2022 x64, packaged 0.3.1 portable, Python 3.13.16, Electron 44.5.1, bundled FFmpeg 7.1.5 | [Run 38788916823](https://github.com/frankShan001/CutVoke/actions/runs/38788916823): shipped ZIP extraction in Chinese/space paths, visible GUI and frozen health, eleven languages, real media upload + stdio MCP, playback, GUI export/full H.264/AAC decode, restart, duplicate/port conflict, shutdown and real ACL failure dialog with unchanged DB. Native normal startup has no QA/debug flags; PE manifests use asInvoker. |
+| Windows 10/11 devices, manual picker/drag behavior, device audio/GPU and SmartScreen | Not manually accepted on the user's computer by this workflow; automated server evidence is not a substitute for those device-specific checks |
 | macOS, other FFmpeg/platform builds | Not verified by this cloud run; record an actual machine/build before claiming support |
 
 FFmpeg 6.1 remains part of the existing Ubuntu regression path. FFmpeg 7.1's `setpts` clears frame-rate metadata: the renderer restores CFR after retiming and uses the explicit sequence rate when assembling animation frames. A cached behavior probe enables the extra xfade normalization only when needed, preserving the last alpha frame and short source handles on builds such as 6.1. Upgrading FFmpeg to hide an invalid graph is not required. A distribution's version number alone does not guarantee the required codecs or filters.
 
-The project version is aligned at **0.3.1** in Python, MCP and desktop metadata. This does not mean a public 0.3.1 binary Release exists. Wheel/source candidates are built locally; see [candidate packaging](../development/prerelease.md) for checksums and validation before any publication.
+The project version is aligned at **0.3.1** in Python, MCP and desktop metadata. The portable candidate above is an Actions artifact, not a formal binary Release. Wheel/source candidates are developer distributions that still need Python and FFmpeg; they are not substitutes for the self-contained portable ZIP. See [candidate packaging](../development/prerelease.md).
 
 ## Troubleshooting
 
 | Symptom | Check and action |
 | --- | --- |
-| `ffmpeg` or `ffprobe` missing; codec/filter failures | Run `cutvoke doctor --json`, `ffmpeg -version` and `ffprobe -version` in the activated terminal. Install a suitable build, confirm PATH, then restart the editor's own service. Preserve the exact error if a filter is absent. |
+| Portable app cannot start | Fully extract the whole portable ZIP, keep its neighboring runtime files and use a writable folder. Preserve `CutVoke Data`; check `profile/logs/engine.log`. Do not install Python/Node/FFmpeg to repair a partial extraction. |
+| Source install: `ffmpeg` or `ffprobe` missing; codec/filter failures | Run `cutvoke doctor --json`, `ffmpeg -version` and `ffprobe -version` in the activated terminal. Install a suitable build, confirm PATH, then restart the editor's own service. Preserve the exact error if a filter is absent. |
 | Permission error under `~/.cutvoke` | Use `cutvoke serve --data .artifacts/my-edit/data` and `cutvoke mcp --data .artifacts/my-edit/data`. Keep this directory writable and identical across interfaces. For tests, pass a temporary `media_dir`; do not change HOME or weaken permissions. |
 | Agent-imported media missing in Web | Update the code and restart both processes on the same database. New imports use `media/<assetId>.<ext>`; exact legacy `media/imports/<sha256>.<ext>` entries remain accessible without moving files. Truly missing media still needs relinking to the intended source. |
 | `xfade` says `1/0` is invalid | Restart the updated service, then reproduce with the same project and identify the FFmpeg build. The known `setpts`/CFR issue is fixed in the renderer. Report a small reproducer if the updated graph still fails; do not swap binaries without recording that difference. |
@@ -58,4 +95,4 @@ The project version is aligned at **0.3.1** in Python, MCP and desktop metadata.
 
 源码安装需 Python 3.10+、Node.js 20+ 和具备所需编解码器/滤镜的 FFmpeg、ffprobe。先激活虚拟环境，再安装 Python 包、运行 Web 的 `npm ci` 和构建，最后执行 `cutvoke doctor --json`。
 
-云端已实际检查 Linux 上的 MCP 导入、人工接手、预览和导出；没有用 Linux 代替 Windows 安装包或 macOS 实机验收。默认个人数据目录只读时，给 Web 和 MCP 指定同一个可写 `--data` 即可，不要伪造 HOME 或扩大权限。上表分别列明已修问题、环境问题与仍需实机检查的边界。
+云端已分别完成 Linux 源码流程和 Windows Server 2022 便携成品自动验收；没有用 Linux 检查代替 Windows 运行证据。Windows 安装包、macOS 和用户设备的人工体验仍需各自验收。源码版默认个人数据目录只读时，给 Web 和 MCP 指定同一个可写 `--data`；便携版默认使用 exe 旁的数据目录。上表列明准确范围。

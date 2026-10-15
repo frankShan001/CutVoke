@@ -8,6 +8,7 @@
 | 重启本机 Web 服务 | `dev/restart-cutvoke-web.cmd` |
 | 重启并检查旧 MCP 进程 | `dev/restart-cutvoke.cmd` |
 | 构建 Windows 安装包 | `build/build-cutvoke-desktop.cmd` |
+| 构建及验收 Windows 免安装便携 ZIP | [Windows portable Actions](../.github/workflows/windows-portable.yml)；[固定依赖与验收说明](../docs/development/windows-portable.md) |
 | 检查代码分层 | `verify/check_layering.py` |
 | 检查社区效果清单与贡献材料 | `verify/validate_effect_contributions.py` |
 | 检查内置资源包 | `build/build_builtin_resource_pack.py --check` |

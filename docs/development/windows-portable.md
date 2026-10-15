@@ -1,5 +1,7 @@
 # Windows x64 portable build
 
+The [0.3.1 candidate download](https://github.com/frankShan001/CutVoke/actions/runs/38788916823/artifacts/11999831137) is available from successful Windows run **38788916823**, built from **1fd2f1fcb48c2c9af54555c558e40354812fc786**. See the [durable verification record](windows-portable-verification.json) and [user download/storage guide](../user/installation.md#windows-portable-x64). This is an unsigned Actions candidate, not a formal Release/tag.
+
 The `Windows portable` workflow produces a folder ZIP containing `CutVoke.exe`,
 Electron, a PyInstaller backend, the built Web editor, product assets, Noto fonts,
 FFmpeg and ffprobe. It does not create an installer or publish a Release/tag.
@@ -27,8 +29,10 @@ may be required). A failed acceptance does not upload a user download.
   Python/frontend notices, Electron/Chromium notices and Noto OFL/provenance
   are retained. Read `START-HERE.txt` and the component licenses before further
   redistribution. The aggregate is not described as entirely MIT.
-- Product resources exclude audit media, QA reports, retired title previews,
-  development environments, user projects and private media. The assembler
+- Product resources retain the sidecars and audited exports pinned by the
+  runtime resource manifest: the existing qualification gate needs them.
+  Unreferenced development evidence, retired title previews, development
+  environments, user projects and private media are excluded. The assembler
   checks x64 PE headers and emits a per-file SHA256 manifest, build commit,
   dependency versions and outer ZIP SHA256/size.
 - No signing keys are generated or added. The candidate is **unsigned** and
@@ -54,12 +58,17 @@ The Windows job extracts **the shipped ZIP** to a path containing Chinese and
 spaces. It removes development runtimes from the application's PATH, runs the
 bundled doctor, and drives the actual visible `CutVoke.exe` using Playwright's
 Electron support. It verifies the frozen service identity, eleven language
-selections, GUI media upload, real stdio MCP on the same database, actual video
+selections, all 189 preset/612 sticker qualifications and the offline resource
+manifest, GUI media upload, real stdio MCP on the same database, actual video
 preview playback, GUI MP4 export and full H.264/AAC decode. It also occupies the
 default port, starts a duplicate instance, restarts and checks persisted state,
 closes the window and checks owned-backend cleanup, and applies an isolated
 Windows deny-write ACL to inspect the real native storage failure dialog and
 prove the existing database is unchanged.
+
+Hashed JSON resources retain their original CRLF bytes using scoped Git
+attributes. Cold-checkout tests verify the existing media/review hashes and
+manifest without regenerating approvals or relaxing the qualification gate.
 
 Screenshots, exported test MP4, FFmpeg version and JSON evidence are retained.
 The synthetic source footage is generated on the runner with the shipped

@@ -62,7 +62,21 @@ The timeline supports multiple media tracks, text and captions, clip adjustments
 
 ## Get started
 
-### Run from source
+### Windows portable (x64 candidate)
+
+[Download the verified Windows portable artifact](https://github.com/frankShan001/CutVoke/actions/runs/38788916823/artifacts/11999831137) — version **0.3.1**, **363.1 MiB**. GitHub sign-in may be required; this Actions download is retained until **2027-01-13**.
+
+1. Extract the Actions download to find `CutVoke-0.3.1-windows-x64-portable.zip` and its `SHA256SUMS.txt`.
+2. Fully extract that portable ZIP into a writable folder.
+3. Double-click **`CutVoke.exe`**. Keep the other files beside it.
+
+There is no installer, and you do not need administrator permission, Python, Node.js or a system FFmpeg. The ZIP contains the built editor, frozen backend, FFmpeg/ffprobe, fonts and licenses. Basic local import, editing, preview and MP4 export work without an AI account. Optional AI clients, cloud services and speech/person models have separate requirements.
+
+Projects, imported media, settings and caches use **`CutVoke Data` beside the executable**. Keep it when updating; use project packaging/relink when moving media to another path or computer. A read-only data location produces an explanation and exits. This is an **unsigned candidate**; Windows may display SmartScreen. No formal binary Release/tag has been published.
+
+The extracted executable passed automated Windows Server 2022 x64 GUI, MCP, import → preview → export/decode, restart, single-instance, shutdown and read-only preservation checks. See [download hashes, storage and exact limits](docs/user/installation.md#windows-portable-x64) and [Windows evidence](docs/development/windows-portable-verification.json). Human Windows 10/11 device, audio/GPU and SmartScreen checks remain separate.
+
+### Run from source (developers)
 
 You need **Python 3.10+, Node.js 20+, FFmpeg and ffprobe**. The FFmpeg build must support H.264/AAC, overlays, text and subtitle rendering; `doctor` checks the required dependencies.
 
@@ -108,7 +122,7 @@ The example imports, edits and exports over real stdio MCP, then verifies that t
 
 The source workflow has been checked in the Linux cloud environment, including FFmpeg 7.1.5, and earlier on Windows. See [installation, tested versions and troubleshooting](docs/user/installation.md) for exact scope; current Windows installer and macOS acceptance still require their respective machines. On Windows, `start-cutvoke.cmd --web` also starts the browser editor using the default personal project library. For the desktop client and building an installer, see [local setup](docs/user/LOCAL_DELIVERY_MCP.md) and [the build entry point](scripts/build/build-cutvoke-desktop.cmd).
 
-The service binds to local loopback by default. Normal project data and media live under the user's `.cutvoke` directory. The example above uses its own `.artifacts/first-edit/data` and does not open the default personal project library.
+The service binds to local loopback by default. Source/CLI installs put default project data and media under the user's `.cutvoke` directory. The example above uses its own `.artifacts/first-edit/data` and does not open the default personal project library. The portable edition uses its sibling `CutVoke Data` folder instead.
 
 ### Choose your interface language
 
@@ -117,6 +131,8 @@ Use the language selector on the home screen or editor toolbar. The interface su
 Language changes affect interface labels, owned progress messages and operation prompts, not project names, captions, media filenames or saved editing data. Technical diagnostics retain their original text beneath localized summaries; resource metadata uses the author's language entries and registry fallback. Operating-system file-dialog controls follow the OS language. Translations include machine-assisted drafts and have **not been reviewed by native speakers**; corrections are welcome through the [translation guide](docs/development/translations.md).
 
 ## Give your AI an editing workflow
+
+**Portable edition:** after first launch, use the generated `CutVoke Data/profile/mcp-config.json` in your agent client. It points to the bundled engine and the same project database; a system Python is not required.
 
 Configure the client using [the MCP connection guide](docs/user/external-agent-editing.md), and point MCP and the editor at the same `--data` directory:
 
