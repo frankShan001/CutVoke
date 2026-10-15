@@ -6,9 +6,20 @@ const net = require("node:net");
 const crypto = require("node:crypto");
 const { fileURLToPath } = require("node:url");
 const { createLanguageController, cacheDialogOptions, errorDialogOptions } = require("./i18n.cjs");
+const { storagePlan, prepareStorage } = require("./storage.cjs");
 
 app.setName("CutVoke");
-app.setPath("userData", path.join(app.getPath("appData"), "CutVoke"));
+const storage = storagePlan({ packaged: app.isPackaged, executable: process.execPath,
+  appData: app.getPath("appData"), home: app.getPath("home") });
+let storageFailure;
+try {
+  prepareStorage(storage);
+  app.setPath("userData", storage.profile);
+  app.setPath("sessionData", path.join(storage.profile, "browser"));
+  app.setAppLogsPath(path.join(storage.profile, "logs"));
+  // Crash reports and browser caches belong to this portable profile too.
+  app.setPath("crashDumps", path.join(storage.profile, "crashes"));
+} catch (error) { storageFailure = error; }
 
 // On Windows, the DirectComposition path dropped ~7% of preview frames even
 // in an isolated video window. The alternative GPU surface retained hardware
@@ -18,10 +29,6 @@ if (process.platform === "win32" && process.env.CUTVOKE_DIRECT_COMPOSITION !== "
   app.commandLine.appendSwitch("disable-direct-composition");
 }
 
-if (process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_HOME) {
-  fs.mkdirSync(process.env.CUTVOKE_DESKTOP_QA_HOME, { recursive: true });
-  app.setPath("userData", path.resolve(process.env.CUTVOKE_DESKTOP_QA_HOME));
-}
 if (process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_OFFSCREEN === "1") app.disableHardwareAcceleration();
 
 let child, window, origin, qaHook, closing = false, ready = false;
@@ -29,8 +36,7 @@ const language = createLanguageController(path.join(app.getPath("userData"), "ui
   () => app.getPreferredSystemLanguages());
 const shutdownKey = crypto.randomBytes(32).toString("hex");
 const root = path.resolve(__dirname, "..");
-const dataDir = path.resolve(process.env.CUTVOKE_DATA || path.join(app.getPath("home"), ".cutvoke", "data"));
-const dataPath = /\.sqlite$/i.test(dataDir) ? dataDir : path.join(dataDir, "projects.sqlite");
+const dataPath = storage.dataPath;
 const engine = app.isPackaged ? path.join(process.resourcesPath, "engine", "cutvoke-engine.exe")
   : path.join(root, ".artifacts", "build", "desktop-engine", "cutvoke-engine", "cutvoke-engine.exe");
 const engineExists = fs.existsSync(engine) && !(process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_PYTHON === "1");
@@ -41,7 +47,8 @@ const prefix = engineExists ? [] : ["-m", "cutvoke"];
 
 function mcpConfig() {
   return { mcpServers: { cutvoke: { command: executable, args: [...prefix, "mcp", "--data", dataPath],
-    ...(engineExists ? {} : { env: { PYTHONPATH: path.join(root, "src") } }) } } };
+    env: { CUTVOKE_HOME: storage.base || path.dirname(dataPath),
+      ...(engineExists ? {} : { PYTHONPATH: path.join(root, "src") }) } } } };
 }
 function vacantPort() {
   return new Promise((resolve, reject) => {
@@ -74,7 +81,8 @@ async function start() {
   fs.mkdirSync(path.dirname(dataPath), { recursive: true });
   const logDir = path.join(app.getPath("userData"), "logs"); fs.mkdirSync(logDir, { recursive: true });
   const log = fs.createWriteStream(path.join(logDir, "engine.log"), { flags: "a" });
-  const env = { ...process.env, CUTVOKE_DESKTOP_KEY: shutdownKey };
+  const env = { ...process.env, CUTVOKE_DESKTOP_KEY: shutdownKey,
+    CUTVOKE_HOME: storage.base || path.dirname(dataPath), PYTHONIOENCODING: "utf-8", PYTHONUTF8: "1" };
   if (!engineExists) env.PYTHONPATH = [path.join(root, "src"), ...(qaPython ? [path.join(root, ".venv", "Lib", "site-packages")] : [])].join(path.delimiter);
   // Packaged FFmpeg is selected by the engine entry point, independent of PATH.
   child = spawn(executable, [...prefix, "serve", "--host", "127.0.0.1", "--port", String(port), "--data", dataPath],
@@ -122,13 +130,21 @@ async function stop() {
   if (child.exitCode === null) child.kill(); // Only the process this client owns.
 }
 
-if (!app.requestSingleInstanceLock()) app.quit();
+if (storageFailure) {
+  app.whenReady().then(() => {
+    dialog.showMessageBoxSync({ type: "error", title: "CutVoke — Storage / 存储位置",
+      message: "CutVoke cannot write to its data folder. / 无法写入数据文件夹。",
+      detail: "Extract the entire CutVoke folder to a writable location, such as Documents, then reopen CutVoke.exe. Keep your existing CutVoke Data folder. No projects were replaced.\n请将整个 CutVoke 文件夹解压到可写位置（如文档），保留原有 CutVoke Data 文件夹后重新打开。工程未被替换。\n\n" + storageFailure.message,
+      buttons: ["Close / 关闭"] });
+    app.quit();
+  });
+} else if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on("second-instance", () => { if (window) { if (window.isMinimized()) window.restore(); window.focus(); } });
   app.whenReady().then(async () => {
     Menu.setApplicationMenu(null);
     session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
-    window = new BrowserWindow({ show: process.env.CUTVOKE_DESKTOP_QA !== "1", width: 1500, height: 950, minWidth: 900, minHeight: 640, backgroundColor: "#101318", title: "CutVoke",
+    window = new BrowserWindow({ show: process.env.CUTVOKE_DESKTOP_QA !== "1" || process.env.CUTVOKE_DESKTOP_QA_SHOW === "1", width: 1500, height: 950, minWidth: 900, minHeight: 640, backgroundColor: "#101318", title: "CutVoke",
       webPreferences: { preload: path.join(__dirname, "preload.cjs"), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false,
         offscreen: process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_OFFSCREEN === "1" } });
     window.removeMenu();
@@ -151,7 +167,8 @@ else {
       verifySender(event); const status = await request("preview-cache");
       const error = await shell.openPath(status.directory); if (error) throw new Error(error);
     });
-    ipcMain.handle("cutvoke:info", event => { verifySender(event); return { version: app.getVersion(), mcp: mcpConfig() }; });
+    ipcMain.handle("cutvoke:info", event => { verifySender(event); return { version: app.getVersion(), mcp: mcpConfig(),
+      storage: { portable: storage.portable, dataPath, profile: storage.profile } }; });
     if (process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_SCRIPT) {
       qaHook = require(path.resolve(process.env.CUTVOKE_DESKTOP_QA_SCRIPT));
     }

@@ -1,3 +1,4 @@
+param([switch]$Portable)
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $taskDownloads = Join-Path $taskRoot '.artifacts/build/desktop-downloads'
@@ -43,6 +44,10 @@ if (!(Test-Path -LiteralPath (Join-Path $electronDist 'electron.exe'))) {
     Expand-Archive -LiteralPath $electronZip -DestinationPath $electronDist -Force
 }
 [System.IO.File]::WriteAllText((Join-Path $electronFolder 'path.txt'), 'electron.exe')
+if ($Portable) {
+    Write-Host 'Electron verified; the folder portable build does not use NSIS or a downloaded archiver.'
+    exit 0
+}
 
 $extractor = Join-Path $taskRoot 'desktop/node_modules/electron-winstaller/vendor/7z.exe'
 if (!(Test-Path -LiteralPath $extractor)) { throw 'Install desktop npm dependencies first.' }
