@@ -62,7 +62,7 @@ async function main() {
   assert.equal(crypto.createHash("sha256").update(fs.readFileSync(zip)).digest("hex"), download.sha256);
   const extracted = path.join(out, "中文 空格路径");
   fs.mkdirSync(extracted, { recursive: true });
-  run("powershell.exe", ["-NoProfile", "-Command", "Expand-Archive -LiteralPath $env:CUTVOKE_VERIFY_ZIP -DestinationPath $env:CUTVOKE_VERIFY_DEST -Force"],
+  run("pwsh.exe", ["-NoProfile", "-Command", "Expand-Archive -LiteralPath $env:CUTVOKE_VERIFY_ZIP -DestinationPath $env:CUTVOKE_VERIFY_DEST -Force"],
     { ...process.env, CUTVOKE_VERIFY_ZIP: zip, CUTVOKE_VERIFY_DEST: extracted });
   const folder = path.join(extracted, path.basename(download.filename, ".zip"));
   const executable = path.join(folder, "CutVoke.exe");
@@ -83,7 +83,7 @@ async function main() {
   assert.ok(doctor.ffmpeg.startsWith(bin));
   report.doctor = doctor;
   fs.writeFileSync(path.join(out, "ffmpeg-version.txt"), run(ffmpeg, ["-version"], env));
-  const imports = run("powershell.exe", ["-NoProfile", "-Command", "Get-AuthenticodeSignature -LiteralPath $env:CUTVOKE_VERIFY_EXE | Select-Object Status,StatusMessage | ConvertTo-Json"], { ...process.env, CUTVOKE_VERIFY_EXE: executable });
+  const imports = run("pwsh.exe", ["-NoProfile", "-Command", "Get-AuthenticodeSignature -LiteralPath $env:CUTVOKE_VERIFY_EXE | Select-Object Status,StatusMessage | ConvertTo-Json"], { ...process.env, CUTVOKE_VERIFY_EXE: executable });
   report.signature = JSON.parse(imports);
   // A signature on the unmodified upstream Electron runtime, if present,
   // is not a publisher signature authenticating CutVoke's packaged app.asar.
