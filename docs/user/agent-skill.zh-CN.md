@@ -51,6 +51,6 @@ cutvoke serve --data .artifacts/skill-demo/data
 
 产物包含 `trail-notes.mp4`、`trail-notes.cvkpkg`、`data/projects.sqlite`、持久素材、六张真实预览帧、`result.json`、`calls.json` 和 MCP 诊断日志。保留整个目录即可继续编辑。默认使用内置叠化；[特效贡献指南](../../effects/README.md) 演示如何改用本地社区清单。
 
-脚本通过现有本机 Web 上传接口导入素材，再调用真实 stdio MCP，读取运行时 schema，执行预检、准备连续预览、导出 H.264/AAC，检查尺寸、帧率、时长及全片解码，测量音频峰值和首尾淡入淡出，并检查相同命令重试不会增加编辑版本。它只启停自己创建的临时上传服务，并检查素材在浏览器中的可用性。详见 [演示截图及验证边界](../assets/readme/README.md)，其中记录了当前 MCP 导入与 Web 可用性判断的差异。`--import-mode mcp` 仅用于引擎导入冒烟验证，不能解决这个浏览器限制。
+脚本默认通过真实 stdio MCP 导入、编辑，读取运行时 schema，执行预检、准备连续预览、导出 H.264/AAC，检查尺寸、帧率、时长及全片解码，测量音频峰值和首尾淡入淡出，并检查相同命令重试不会增加编辑版本。它只启停自己创建的临时 Web 服务，核对 MCP 导入的同一批素材在人工编辑器中可用。新导入使用统一路径，旧 MCP 导入按严格规则保持可用。详见 [演示截图及验证边界](../assets/readme/README.md)；`--import-mode upload` 可单独检查本机 HTTP 上传路径。
 
 这个示例验证原创插画素材的接入流程，不能证明语音转写、自动选镜、主观声音质量、任意特效、每种 AI 客户端或大型工程性能。最终创作判断仍由创作者和审片 AI 完成。

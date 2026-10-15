@@ -156,6 +156,8 @@ MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错�
 | 可选本地转写与模型准备 | [本地语音识别](docs/user/LOCAL_ASR.md) |
 | 特效贡献与现有资源包机制 | [贡献指南](docs/user/effect-contributing.zh-CN.md) · [资源包](docs/user/resource-pack-registry.md) |
 | 源码、目录规范与提交检查 | [中文贡献指南](CONTRIBUTING.zh-CN.md) · [English](CONTRIBUTING.md) · [可认领任务](docs/development/community-tasks.md) · [目录说明](docs/development/project-layout.md) |
+| 安装与候选包 | [安装排障](docs/user/installation.md) · [预发布流程](docs/development/prerelease.md) |
+| 安全报告 | [安全报告说明](SECURITY.md) |
 | 截图来源与演示验证边界 | [截图与演示记录](docs/assets/readme/README.md) |
 
 目前应将 CutVoke 视为早期项目：工程格式和接口可能调整，首次复杂预览需要等待 FFmpeg，可选语音识别与人物处理另需依赖/模型。示例不能代表长工程性能、所有效果或所有 AI 客户端兼容性。请先在小型副本中试用，再用于重要项目。
