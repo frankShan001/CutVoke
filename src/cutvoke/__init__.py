@@ -13,7 +13,7 @@
   - service   统一编辑服务（任务书 8，幂等 + 版本校验 + 事件）
 """
 
-__version__ = "0.1.0"
+__version__ = "0.3.1"
 
 from .core.model import Project, Sequence, Track, Clip, AssetReference, EffectInstance, Caption, Marker
 from .core.rational import Rational

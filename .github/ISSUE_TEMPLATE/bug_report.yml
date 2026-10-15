@@ -1,11 +1,11 @@
 name: Bug report
-description: Report a reproducible problem in CutVoke
+description: Report a reproducible problem / 报告可复现的问题
 title: "[Bug] "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
-      value: Please search existing issues before opening a new report. Remove private paths, tokens, and media from logs.
+      value: English / 简体中文均可。Please search existing issues and remove private paths, tokens and media. 请先查重并脱敏；安全问题请按 SECURITY.md 私密报告。
 
   - type: dropdown
     id: area

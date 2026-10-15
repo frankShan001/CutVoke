@@ -1,8 +1,12 @@
 name: Effect proposal
-description: Propose a video, audio, transition, or color effect
+description: Propose an effect / 提议视频、音频、转场或调色效果
 title: "[Effect] "
 labels: ["effect"]
 body:
+  - type: markdown
+    attributes:
+      value: English / 简体中文均可。Please check existing issues and CONTRIBUTING.md / 请先查重并阅读贡献指南。
+
   - type: input
     id: name
     attributes:

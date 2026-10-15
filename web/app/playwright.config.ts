@@ -15,6 +15,7 @@ export default defineConfig({
     channel: process.platform === "win32" ? "chrome" : undefined,
     viewport: { width: 1600, height: 960 },
     locale: "zh-CN",
+    launchOptions: { executablePath: process.env.CUTVOKE_E2E_BROWSER },
     trace: "retain-on-failure",
   },
   webServer: {

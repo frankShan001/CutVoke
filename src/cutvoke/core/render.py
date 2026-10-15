@@ -1486,7 +1486,10 @@ class RenderService:
                 escaped = path.as_posix().replace("'", "'\\''")
                 lines.extend((f"file '{escaped}'", f"duration {chunk_duration:.9f}"))
             manifest.write_text("\n".join(lines) + "\n", encoding="utf-8")
-            graph = f"[0:v]fps={frame_rate.numerator}/{frame_rate.denominator},setpts=N/FRAME_RATE/TB[outv]"
+            # fps already produces zero-based, exact frame ticks. A following
+            # identity setpts would strip rate/duration metadata on FFmpeg 7
+            # and make its encoder drop/retime frames across chunk boundaries.
+            graph = f"[0:v]fps={frame_rate.numerator}/{frame_rate.denominator}[outv]"
             if has_audio:
                 graph += (f";[0:a]aresample={seq.audio_sample_rate}:async=1:first_pts=0,"
                           f"atrim=duration={duration:.9f},asetpts=PTS-STARTPTS[outa]")
@@ -2475,7 +2478,10 @@ class RenderService:
             # terminate the final streams at the window end; output-side seek
             # below still selects the absolute requested start.
             local_end = render_window[1] - origin
-            parts.append(f"[outv]trim=end={local_end:.9f},setpts=PTS-STARTPTS[outv]")
+            # The canvas already starts at local PTS 0. An identity setpts
+            # would clear CFR metadata/frame duration on FFmpeg 7 and lose the
+            # last picture of a bounded preview or window intermediate.
+            parts.append(f"[outv]trim=end={local_end:.9f}[outv]")
             if has_audio:
                 parts.append(f"[outa]apad=whole_dur={local_end:.9f},"
                              f"atrim=end={local_end:.9f},asetpts=PTS-STARTPTS[outa]")
@@ -2691,7 +2697,7 @@ class RenderService:
                 shifted = f"tlclip{n}_{i}"
                 parts.append(
                     f"[{label}]trim=duration={clip_durs[i]:.6f},"
-                    f"setpts=PTS-STARTPTS+{offset:.6f}/TB[{shifted}]")
+                    f"setpts=PTS-STARTPTS+{offset:.6f}/TB,fps={fps_expr}[{shifted}]")
                 out = f"tlmix{n}_{i}"
                 parts.append(
                     f"[{current}][{shifted}]overlay=shortest=0:eof_action=pass:"
@@ -2794,6 +2800,10 @@ class RenderService:
                         f"{incoming_zoom - 1.0:.4f}*on/{zoom_frames})':"
                         f"d=1:s={seq.width}x{seq.height}:fps={fps_expr},"
                         f"setpts=PTS-STARTPTS[{incoming}]")
+                # Concat may report VFR, and FFmpeg 7 setpts unconditionally
+                # marks its output rate as 1/0. Normalize frame spacing, rebuild
+                # the clocks, then restore CFR metadata AFTER the last setpts.
+                # xfade requires matching, valid rates on both input links.
                 # Concat uses a microsecond time base. Rebuild both clocks on
                 # the exact sequence frame lattice before xfade; rounding a
                 # 1/30 frame to microseconds otherwise changes the transition
@@ -2809,8 +2819,8 @@ class RenderService:
                                               str(squeeze_axis), d, offset, parts)
                 else:
                     parts.append(
-                        f"[{transition_outgoing}]{xfade_format}settb=expr={fps.denominator}/{fps.numerator},setpts=N[inA];"
-                        f"[{incoming}]{xfade_format}settb=expr={fps.denominator}/{fps.numerator},setpts=N[inB];"
+                        f"[{transition_outgoing}]{xfade_format}fps={fps_expr},settb=expr={fps.denominator}/{fps.numerator},setpts=N,fps={fps_expr}[inA];"
+                        f"[{incoming}]{xfade_format}fps={fps_expr},settb=expr={fps.denominator}/{fps.numerator},setpts=N,fps={fps_expr}[inB];"
                         f"[inA][inB]"
                         f"xfade=transition={xname}:offset={offset:.6f}:"
                         f"duration={d:.6f}{expr_option}[{out}]")
@@ -2853,8 +2863,7 @@ class RenderService:
         # would discard that frame (and every one-frame animation segment).
         # Supply one lookahead frame, then bound the lane to its actual duration.
         parts.append(f"[{current}]tpad=stop_mode=clone:stop=1,fps={fps_expr},"
-                     f"trim=duration={film:.9f},settb=expr={fps.denominator}/{fps.numerator},"
-                     f"setpts=N[{out_label}]")
+                     f"trim=duration={film:.9f}[{out_label}]")
         return out_label, film
 
     def _pad_last_frame(self, label: str, pad_secs: float, parts: list[str],
@@ -2866,9 +2875,10 @@ class RenderService:
         frame_rate = Fraction(fps_expr)
         lookahead = float(1 / frame_rate)
         parts.append(
-            f"[{label}]tpad=stop_mode=clone:stop_duration={pad_secs + lookahead:.9f}"
-            f",fps={fps_expr},trim=duration={total_duration:.9f},"
-            f"setpts=PTS-STARTPTS[{out}]")
+            # tpad computes its clone count from link.frame_rate too; repair
+            # concat/setpts metadata before it, not only on its output.
+            f"[{label}]fps={fps_expr},tpad=stop_mode=clone:stop_duration={pad_secs + lookahead:.9f}"
+            f",fps={fps_expr},trim=duration={total_duration:.9f}[{out}]")
         return out
 
     def _pad_black(self, label: str, pad_secs: float, parts: list[str],
@@ -2897,15 +2907,14 @@ class RenderService:
             color = "black@0.0" if transparent else "black"
             parts.append(f"color=c={color}:s={width}x{height}:r={fps_expr}:"
                          f"d={pad_secs:.9f}{fmt}[{prefix}]")
-            parts.append(f"[{prefix}][{label}]concat=n=2:v=1:a=0,fps={fps_expr},"
-                         f"setpts=N/FRAME_RATE/TB[{out}]")
+            parts.append(f"[{prefix}][{label}]concat=n=2:v=1:a=0,fps={fps_expr}[{out}]")
         elif at_start:
             parts.append(
-                f"[{label}]tpad=start_mode=add:start_duration={pad_secs:.6f}{pad_color}"
+                f"[{label}]fps={fps_expr},tpad=start_mode=add:start_duration={pad_secs:.6f}{pad_color}"
                 f",fps={fps_expr},setpts=PTS-STARTPTS[{out}]")
         else:
             parts.append(
-                f"[{label}]tpad=stop_mode=add:stop_duration={pad_secs:.6f}{pad_color}"
+                f"[{label}]fps={fps_expr},tpad=stop_mode=add:stop_duration={pad_secs:.6f}{pad_color}"
                 f",fps={fps_expr},setpts=PTS-STARTPTS[{out}]")
         return out
 
@@ -2958,7 +2967,7 @@ class RenderService:
             speed_expr = f"setpts=PTS/{speed_f}"
         else:
             abs_f = float(_abs_rat(speed).to_fraction())
-            speed_expr = (f"reverse,setpts=N/FRAME_RATE/TB,"
+            speed_expr = (f"reverse,setpts=PTS-STARTPTS,"
                           f"setpts=PTS/{abs_f}")
         chain = (f"[{vi}:v]trim=start={ss}:duration={src_dur},"
                  f"setpts=PTS-STARTPTS,{speed_expr}")
@@ -3452,7 +3461,7 @@ class RenderService:
             speed_expr = f"setpts=PTS/{speed_f}"
         else:
             abs_f = float(_abs_rat(speed).to_fraction())
-            speed_expr = f"reverse,setpts=N/FRAME_RATE/TB,setpts=PTS/{abs_f}"
+            speed_expr = f"reverse,setpts=PTS-STARTPTS,setpts=PTS/{abs_f}"
         chain = (f"[{get_input(clip.asset_ref.source_path)}:v]"
                  f"trim=start={ss:.6f}:duration={src_dur:.6f},"
                  f"setpts=PTS-STARTPTS,{speed_expr}")
@@ -3468,11 +3477,11 @@ class RenderService:
         full = f"animsrc{vseg[0]}"; vseg[0] += 1
         parts.append(f"{chain},fps={fps_expr},"
                      f"tpad=stop_mode=clone:stop_duration={dur_f:.6f},"
-                     f"trim=end_frame={total_frames},setpts=N/FRAME_RATE/TB[{full}]")
+                     f"trim=end_frame={total_frames},setpts=N/({fps_expr})/TB[{full}]")
         if self._has_fx(clip):
             full = self._apply_fx(clip, full, parts, vseg)
         streaming = self._build_streaming_loop(
-            clip, animations, full, W, H, frame_dur, total_frames, parts, vseg)
+            clip, animations, full, W, H, frame_dur, total_frames, parts, vseg, fps_expr)
         if streaming is not None:
             return streaming
         if len(boundaries) > 64:
@@ -3555,7 +3564,8 @@ class RenderService:
             # for every segment, including adjacent animation lane boundaries.
             exact = f"cfix{vseg[0]}"; vseg[0] += 1
             frame_count = int(round(sub_local / frame_dur))
-            timestamps = "(N+1)/FRAME_RATE/TB" if frame_count == 1 else "N/FRAME_RATE/TB"
+            timestamps = (f"(N+1)/({fps_expr})/TB" if frame_count == 1
+                          else f"N/({fps_expr})/TB")
             parts.append(
                 f"[{canvas}]tpad=stop_mode=clone:stop_duration={sub_local:.6f},"
                 f"trim=end_frame={frame_count},"
@@ -3571,7 +3581,7 @@ class RenderService:
         parts.append(f"{ins}concat=n={len(sub_labels)}:v=1:a=0,"
                      f"tpad=stop_mode=clone:stop_duration={frame_dur:.9f},"
                      f"trim=end_frame={total_frames},"
-                     f"setpts=N/FRAME_RATE/TB[{out}]")
+                     f"setpts=N/({fps_expr})/TB[{out}]")
         return out
 
     @staticmethod
@@ -3684,13 +3694,13 @@ class RenderService:
             cur = nxt
         out = f"astout{vseg[0]}"; vseg[0] += 1
         parts.append(f"[{cur}]trim=end_frame={total_frames},"
-                     f"setpts=N/FRAME_RATE/TB[{out}]")
+                     f"setpts=N/({fps_expr})/TB[{out}]")
         return out
 
     def _build_streaming_loop(self, clip: Clip, animations: list[dict],
                               source: str, W: int, H: int, frame_dur: float,
                               total_frames: int, parts: list[str],
-                              vseg: list[int]) -> Optional[str]:
+                              vseg: list[int], fps_expr: str) -> Optional[str]:
         """Use one fixed-size affine filter for an ordinary opaque loop.
 
         Dynamic scale dimensions followed by rotate/overlay crash some FFmpeg
@@ -3770,7 +3780,7 @@ class RenderService:
             f"[{source}]scale={W}:{H},setsar=1,perspective="
             + ":".join(coordinates)
             + f":sense=source:eval=frame:interpolation=linear,"
-              f"trim=end_frame={total_frames},setpts=N/FRAME_RATE/TB[{output}]")
+              f"trim=end_frame={total_frames},setpts=N/({fps_expr})/TB[{output}]")
         return output
 
     def _trim_speed_color(self, clip: Clip, get_input, parts: list[str],
@@ -3789,7 +3799,7 @@ class RenderService:
             speed_expr = f"setpts=PTS/{speed_f}"
         else:
             abs_f = float(_abs_rat(speed).to_fraction())
-            speed_expr = (f"reverse,setpts=N/FRAME_RATE/TB,"
+            speed_expr = (f"reverse,setpts=PTS-STARTPTS,"
                           f"setpts=PTS/{abs_f}")
         chain = (f"[{vi}:v]trim=start={ss}:duration={src_dur},"
                  f"setpts=PTS-STARTPTS,{speed_expr}")
@@ -4176,7 +4186,7 @@ class RenderService:
                     speed_expr = f"setpts=PTS/{speed_f}"
                 else:
                     abs_f = float(_abs_rat(speed).to_fraction())
-                    speed_expr = (f"reverse,setpts=N/FRAME_RATE/TB,"
+                    speed_expr = (f"reverse,setpts=PTS-STARTPTS,"
                                   f"setpts=PTS/{abs_f}")
             # 子段常数透明度 = 中点求值
             mid = a_t + (b_t - a_t) * Rational.of(1, 2)

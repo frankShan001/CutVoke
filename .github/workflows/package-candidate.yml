@@ -1,0 +1,53 @@
+name: Package candidate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-wheel:
+    name: Inspect source and installed wheel
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/app/package-lock.json
+      - name: Install build requirements
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install build
+      - name: Build browser editor
+        working-directory: web/app
+        run: |
+          npm ci
+          npm run typecheck
+          npm run build
+      - name: Prepare candidate and inspect archives
+        run: |
+          python scripts/build/prepare_candidate.py --output dist/candidate
+          cd dist/candidate
+          sha256sum -c SHA256SUMS
+      - name: Rebuild wheel from source archive
+        run: python -m pip wheel --no-deps dist/candidate/*.tar.gz --wheel-dir "$RUNNER_TEMP/source-rebuilt-wheel"
+      - name: Install candidate outside source checkout
+        run: |
+          python -m venv "$RUNNER_TEMP/candidate-venv"
+          "$RUNNER_TEMP/candidate-venv/bin/python" -m pip install dist/candidate/*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/candidate-venv/bin/cutvoke" doctor --json
+          "$RUNNER_TEMP/candidate-venv/bin/python" "$GITHUB_WORKSPACE/skills/cutvoke-editor/scripts/demo.py" --output "$RUNNER_TEMP/candidate-demo"
+      - name: Retain local candidate for review
+        uses: actions/upload-artifact@v7
+        with:
+          name: source-wheel-candidate
+          path: dist/candidate/
+          retention-days: 7

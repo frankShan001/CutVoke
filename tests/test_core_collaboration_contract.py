@@ -66,6 +66,11 @@ class CountingRenderer:
 
 
 class CollaborationContractTests(unittest.TestCase):
+    def setUp(self) -> None:
+        directory = tempfile.TemporaryDirectory(prefix="cutvoke-contract-")
+        self.addCleanup(directory.cleanup)
+        self.media_dir = os.path.join(directory.name, "media")
+
     def test_clip_insert_can_create_track_atomically_for_preview_and_undo(self) -> None:
         service = EditService()
         project = service.create_project("atomic-auto-track")
@@ -600,7 +605,7 @@ class CollaborationContractTests(unittest.TestCase):
         service = EditService()
         project_id = "中文项目 / 100%"
         service.create_project(project_id)
-        api = HttpApi(service)
+        api = HttpApi(service, media_dir=self.media_dir)
         self.addCleanup(api.close)
 
         encoded_path = f"/api/v1/projects/{quote(project_id, safe='')}"
@@ -612,7 +617,7 @@ class CollaborationContractTests(unittest.TestCase):
     def test_project_summary_exposes_a_compact_agent_timeline_index(self) -> None:
         service = EditService()
         project = service.create_project("summary-http", name_hint="summary-http")
-        api = HttpApi(service)
+        api = HttpApi(service, media_dir=self.media_dir)
         self.addCleanup(api.close)
         service.execute(command(
             "track.add", {"trackId": "v1", "kind": "video"},
@@ -628,7 +633,7 @@ class CollaborationContractTests(unittest.TestCase):
         self.assertEqual(payload["duration"], {"num": "0", "den": "1"})
 
     def test_http_rejects_a_non_object_json_body(self) -> None:
-        api = HttpApi(EditService())
+        api = HttpApi(EditService(), media_dir=self.media_dir)
         self.addCleanup(api.close)
 
         status, payload = api.handle("POST", "/api/v1/projects", [])  # type: ignore[arg-type]
@@ -639,7 +644,7 @@ class CollaborationContractTests(unittest.TestCase):
     def test_http_lock_endpoint_exposes_agent_changes_without_accepting_human_writes(self) -> None:
         service = EditService()
         service.create_project("http-project")
-        api = HttpApi(service)
+        api = HttpApi(service, media_dir=self.media_dir)
         self.addCleanup(api.close)
 
         status, acquired = api.handle(
@@ -745,7 +750,7 @@ class CollaborationContractTests(unittest.TestCase):
     def test_srt_import_keeps_the_web_editor_actor_identity(self) -> None:
         service = EditService()
         service.create_project("srt-project")
-        api = HttpApi(service)
+        api = HttpApi(service, media_dir=self.media_dir)
         self.addCleanup(api.close)
 
         status, imported = api.handle(

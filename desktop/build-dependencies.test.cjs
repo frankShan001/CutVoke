@@ -32,7 +32,9 @@ test("electron-builder's downloader preserves proxy support", { timeout: 10_000 
   const { initializeProxy } = builderRequire("@electron/get");
   process.env.GLOBAL_AGENT_ENVIRONMENT_VARIABLE_NAMESPACE = "GLOBAL_AGENT_";
   process.env.GLOBAL_AGENT_HTTP_PROXY = `http://127.0.0.1:${proxy.address().port}`;
-  process.env.GLOBAL_AGENT_NO_PROXY = "";
+  // @electron/get falls back to inherited NO_PROXY when this is empty.
+  // A host's loopback bypass must not disable the disposable test proxy.
+  process.env.GLOBAL_AGENT_NO_PROXY = "cutvoke-proxy-test.invalid";
   initializeProxy();
 
   const url = `http://127.0.0.1:${target.address().port}/electron-artifact.zip`;

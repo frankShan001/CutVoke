@@ -187,11 +187,7 @@ class MCP:
 
 
 class WebUploads:
-    """Use the existing browser upload API so assets have browser-visible ledger paths.
-
-    The current MCP media_import layout differs from the HTTP media allowlist.
-    Do not weaken that allowlist; use its supported upload endpoint for this demo.
-    """
+    """Exercise the optional loopback Web upload route with owned demo media."""
     def __init__(self, command, database, output, effects):
         with socket.socket() as reservation:
             reservation.bind(("127.0.0.1", 0))
@@ -270,8 +266,8 @@ def main():
     parser.add_argument("--engine", type=Path, help="optional packaged cutvoke-engine executable; otherwise use this Python")
     parser.add_argument("--effects-dir", type=Path, help="one category directory containing effect folders")
     parser.add_argument("--effect-id", default="cutvoke.transition.crossfade")
-    parser.add_argument("--import-mode", choices=("upload", "mcp"), default="upload",
-                        help="upload: existing loopback Web API for browser-visible assets; mcp: engine-only smoke check")
+    parser.add_argument("--import-mode", choices=("upload", "mcp"), default="mcp",
+                        help="mcp: persistent import shared with the editor; upload: loopback Web upload API")
     args = parser.parse_args()
     if args.engine and not args.engine.is_file():
         parser.error("--engine must name an existing trusted CutVoke executable")
@@ -305,11 +301,15 @@ def main():
             mcp.call("editor_help", topic="command", command=name)
         mcp.call("editor_help", topic="command", command="effect.setTransition", effectId=args.effect_id)
         paths = [media / name for name in ("dawn.png", "lake.png", "dusk.png", "quiet-score.wav")]
+        uploads = WebUploads(command, output / "data" / "projects.sqlite", output, args.effects_dir)
         if args.import_mode == "upload":
-            uploads = WebUploads(command, output / "data" / "projects.sqlite", output, args.effects_dir)
             imported = uploads.import_files(paths)
         else:
             imported = mcp.call("media_import", paths=[str(path) for path in paths])["assets"]
+        browser_assets = {a["assetId"]: a for a in uploads.request("/api/v1/assets")["assets"]}
+        browser_available = all(browser_assets.get(a["assetId"], {}).get("available") for a in imported)
+        if not browser_available:
+            raise RuntimeError("Imported demo media is unavailable to the human editor")
         for asset in imported:
             mcp.call("media_inspect", assetId=asset["assetId"])
         created = mcp.call("create_project", projectId=project, name="Trail Notes · editable demo", width=WIDTH, height=HEIGHT, fps=30)
@@ -382,7 +382,7 @@ def main():
         evidence = {"projectId": project, "revision": revision, "duration": DURATION, "size": [WIDTH, HEIGHT],
                     "fps": "30/1", "codecs": ["h264", "aac"], "toolCount": len(tools), "effectId": args.effect_id,
                     "preflightReady": report["readyToRender"], "idempotentReplay": True, "fullDecode": True,
-                    "importMode": args.import_mode, "browserAssetsAvailable": all(a.get("available") for a in imported) if uploads else None,
+                    "importMode": args.import_mode, "browserAssetsAvailable": browser_available,
                     "sha256": hashlib.sha256(video.read_bytes()).hexdigest(), "audio": audio,
                     "visualReview": "Inspect frames/frame-*.png and play trail-notes.mp4 before accepting artistic quality.",
                     "sources": "Original procedural illustrations and synthesized chords; no user data or external service.",

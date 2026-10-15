@@ -39,6 +39,7 @@ import copy
 import hashlib
 import json
 import os
+import re
 import threading
 import zipfile
 from pathlib import Path
@@ -74,7 +75,7 @@ from .luts import CubeInvalid, MAX_CUBE_BYTES, validate_cube
 
 # Bump when preview rendering changes so neither disk cache nor browser ETag can
 # treat media produced by an older renderer as current for the same project data.
-PREVIEW_RENDER_CACHE_VERSION = 17
+PREVIEW_RENDER_CACHE_VERSION = 18
 PREVIEW_WINDOW_SECONDS = 8
 ASSET_MEDIA_TYPES = {
     ".mp3": "audio/mpeg", ".wav": "audio/wav", ".flac": "audio/flac",
@@ -94,8 +95,11 @@ class HttpApi:
                  session: Optional[SessionToken] = None,
         media_dir: Optional[str] = None) -> None:
         self.service = service
-        self.media_dir = media_dir or os.path.join(
-            os.path.expanduser("~"), ".cutvoke", "media")
+        store_path = getattr(service.store, "path", None)
+        self.media_dir = media_dir or (
+            str(Path(store_path).resolve().parent / "media")
+            if store_path and store_path != ":memory:" and "mode=memory" not in store_path
+            else os.path.join(os.path.expanduser("~"), ".cutvoke", "media"))
         if service.store is not None:
             self._ensure_active_stickers()
         self.render = render or RenderService()
@@ -726,6 +730,27 @@ class HttpApi:
         os.replace(tmp, dest)
         return dest
 
+    def _imported_media_path(self, asset: dict) -> Optional[Path]:
+        """Accept only ledger-owned upload paths, including pre-fix MCP imports.
+
+        Legacy files stay in place: saved projects and undo/export snapshots
+        already reference them. This is an exact layout/ID check, not a general
+        media-subdirectory allowlist. Return missing paths for safe relinking.
+        """
+        source = asset.get("path")
+        if not isinstance(source, str) or not source:
+            return None
+        path = Path(source).resolve()
+        root = Path(self.media_dir).resolve()
+        asset_id = asset.get("assetId")
+        if path.parent == root and path.stem == asset_id:
+            return path
+        if (path.parent == root / "imports" and
+                re.fullmatch(r"[a-f0-9]{64}", path.stem) and
+                asset_id == "asset_" + path.stem):
+            return path
+        return None
+
     def _asset_media_path(self, asset: dict) -> Optional[Path]:
         """Resolve an asset ledger entry without exposing arbitrary local files."""
         source = asset.get("path")
@@ -735,8 +760,7 @@ class HttpApi:
         media_root = Path(self.media_dir).resolve()
         builtin_root = Path(__file__).resolve().parent.parent / "assets"
         immutable_root = media_root / ".builtin-resources"
-        imported = (path.parent == media_root and
-                    path.stem == asset.get("assetId"))
+        imported = self._imported_media_path(asset) is not None
         bundled = bool(asset.get("builtin") and
                        (path.is_relative_to(builtin_root) or path.is_relative_to(immutable_root)))
         if not imported and not bundled:
@@ -749,10 +773,9 @@ class HttpApi:
         asset = store.get_asset(asset_id) if store is not None else None
         if not asset:
             return 404, {"error": {"code": "NOT_FOUND", "message": "素材不存在"}}
-        source = Path(str(asset.get("path", ""))).resolve()
+        source = self._imported_media_path(asset)
         media_root = Path(self.media_dir).resolve()
-        if (asset.get("builtin") or source.parent != media_root or
-                source.stem != asset_id):
+        if asset.get("builtin") or source is None:
             return 409, {"error": {"code": "ASSET_NOT_RELINKABLE",
                                    "message": "此素材不是可重新链接的用户导入文件"}}
         if source.exists():

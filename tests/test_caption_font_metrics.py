@@ -28,7 +28,9 @@ def metric_font(path: Path, ascent: int, descent: int) -> None:
 
 class CaptionFontMetricsTests(unittest.TestCase):
     def test_font_endpoint_whitelists_only_export_font_files(self):
-        api = HttpApi(EditService(), RenderService())
+        directory = tempfile.TemporaryDirectory(prefix="cutvoke-font-api-")
+        self.addCleanup(directory.cleanup)
+        api = HttpApi(EditService(), RenderService(), media_dir=directory.name)
         try:
             for name in ("NotoSansSC-VF.ttf", "NotoSerifSC-VF.ttf"):
                 status, payload = api.handle("GET", f"/api/v1/fonts/{name}", {})

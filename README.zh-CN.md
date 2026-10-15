@@ -104,9 +104,9 @@ cutvoke serve --data .artifacts/first-edit/data
 
 打开 **http://127.0.0.1:8787**，选择 **Trail Notes · editable demo**。成功标志：你可以播放 12 秒短片，看到三段画面、音乐、标题和字幕；目录中已有 `trail-notes.mp4`、`trail-notes.cvkpkg` 和可编辑数据库。每次复验用新的输出目录；退出服务时按 Ctrl+C。若端口占用，用 `serve --port 8798` 并打开对应地址。
 
-示例默认通过现有本机 Web 上传接口导入自制素材，再由 stdio MCP 编辑与导出。当前 MCP `media_import` 的存储格式与 Web 素材可用性判断存在差异；示例采用受支持的上传流程，详见 [演示与已知边界](docs/assets/readme/README.md)。
+示例默认通过真实 stdio MCP 导入、编辑与导出，再从人工编辑器接口检查同一批素材可用。新导入与 Web 上传共用标准存储路径，旧 MCP 导入也按严格路径规则保持可用，详见 [演示与验证边界](docs/assets/readme/README.md)。
 
-以上是在 Windows 上实测的源码流程；其他系统的安装和 FFmpeg 构建需要在实际环境验证。Windows 也可以用 `start-cutvoke.cmd --web` 启动浏览器编辑器，默认使用个人工程库。想运行桌面客户端或构建安装包，见 [本地使用说明](docs/user/LOCAL_DELIVERY_MCP.md) 与 [构建入口](scripts/build/build-cutvoke-desktop.cmd)。
+源码流程已在云 Linux（含 FFmpeg 7.1.5）实测，之前也检查过 Windows 源码路径。准确范围见[安装、已测版本与排障](docs/user/installation.md)；当前 Windows 安装包与 macOS 仍需对应实机验收。Windows 也可以用 `start-cutvoke.cmd --web` 启动浏览器编辑器，默认使用个人工程库。想运行桌面客户端或构建安装包，见 [本地使用说明](docs/user/LOCAL_DELIVERY_MCP.md) 与 [构建入口](scripts/build/build-cutvoke-desktop.cmd)。
 
 默认服务只监听本机回环地址。普通使用的数据库和素材放在用户目录 `.cutvoke`；上面的示例使用独立 `.artifacts/first-edit/data`，不会打开默认个人工程库。
 
@@ -155,7 +155,7 @@ MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错�
 | 技能复制、任务输入及可运行示例 | [技能使用](docs/user/agent-skill.zh-CN.md) |
 | 可选本地转写与模型准备 | [本地语音识别](docs/user/LOCAL_ASR.md) |
 | 特效贡献与现有资源包机制 | [贡献指南](docs/user/effect-contributing.zh-CN.md) · [资源包](docs/user/resource-pack-registry.md) |
-| 源码、目录规范与提交检查 | [CONTRIBUTING](CONTRIBUTING.md) · [目录说明](docs/development/project-layout.md) |
+| 源码、目录规范与提交检查 | [中文贡献指南](CONTRIBUTING.zh-CN.md) · [English](CONTRIBUTING.md) · [可认领任务](docs/development/community-tasks.md) · [目录说明](docs/development/project-layout.md) |
 | 截图来源与演示验证边界 | [截图与演示记录](docs/assets/readme/README.md) |
 
 目前应将 CutVoke 视为早期项目：工程格式和接口可能调整，首次复杂预览需要等待 FFmpeg，可选语音识别与人物处理另需依赖/模型。示例不能代表长工程性能、所有效果或所有 AI 客户端兼容性。请先在小型副本中试用，再用于重要项目。

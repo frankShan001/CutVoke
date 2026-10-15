@@ -62,6 +62,21 @@ class AgentWorkflowTests(unittest.TestCase):
     def test_real_external_editor_round_trip(self):
         self.call("create_project", projectId="original", name="外部 Agent 流程", width=320, height=180, fps=15)
         imported = self.call("media_import", paths=[str(self.image)])["assets"][0]
+        self.assertEqual(Path(imported["path"]).parent, self.root / "media")
+        self.assertEqual(Path(imported["path"]).stem, imported["assetId"])
+        # A separate human API opens the same database/media without a special
+        # path override, just as the CLI does when an Agent hands off its work.
+        human_store = ProjectStore(str(self.root / "projects.sqlite"))
+        human_api = HttpApi(EditService(human_store))
+        self.addCleanup(human_store.close)
+        self.addCleanup(human_api.close)
+        status, listing = human_api.handle("GET", "/api/v1/assets", {})
+        self.assertEqual(status, 200)
+        visible = next(a for a in listing["assets"] if a["assetId"] == imported["assetId"])
+        self.assertTrue(visible["available"])
+        status, media = human_api.handle("GET", f"/api/v1/assets/{imported['assetId']}/media", {})
+        self.assertEqual(status, 200, media)
+        self.assertEqual(Path(media["__media_path__"]).read_bytes(), self.image.read_bytes())
         self.assertEqual(self.call("media_import", paths=[str(self.image)])["assets"][0]["assetId"], imported["assetId"])
         self.assertEqual(self.call("media_inspect", assetId=imported["assetId"])["width"], 320)
         info = self.call("commands_list", type="clip.insert")["commands"][0]

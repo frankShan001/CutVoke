@@ -28,7 +28,7 @@ First call `editor_help({})`, then `runtime` and `project_list`. Request `editor
 
 Restart/reconnect the MCP host process after an engine or effect-manifest update. Existing processes cache their loaded code and effect registry; there is no supported general hot reload.
 
-Known current boundary: MCP `media_import` stores files under `media/imports/<hash>.*`, while the Web asset-availability/media routes accept the existing upload layout `media/<assetId>.*`. MCP-imported files can render yet appear missing in the browser media library. For a browser-visible handoff, use the editor's upload workflow (`POST /api/v1/assets?name=<filename>` with raw bytes and `application/octet-stream`), then use the returned `assetId` over MCP. Do not move files behind the ledger or weaken the media allowlist. The included demo uses this supported upload route by default; `--import-mode mcp` is an engine-only smoke check of the alternate import route.
+`media_import` copies local files into the persistent library shared with Web (`media/<assetId>.<extension>`). Exact legacy `media/imports/<sha256>.<extension>` ledger entries remain usable in place. Use the same database for MCP and the human editor, verify `available:true`, and relink truly missing files through the supported interface. The demo defaults to MCP imports and checks availability with its own local Web service; `--import-mode upload` separately exercises the Web upload API.
 
 ## HTTP fallback
 

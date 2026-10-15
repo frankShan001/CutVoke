@@ -104,9 +104,9 @@ cutvoke serve --data .artifacts/first-edit/data
 
 Open **http://127.0.0.1:8787** and select **Trail Notes · editable demo**. Success looks like a playable 12-second project with three shots, music, titles and captions, plus `trail-notes.mp4`, `trail-notes.cvkpkg` and its editable database in the output directory. Use a new output directory for each run. Stop the server with Ctrl+C. If the port is occupied, use `serve --port 8798` and open that address.
 
-The example imports its original media through the existing local Web upload API, then edits and exports over stdio MCP. The current MCP `media_import` layout and the Web media-availability check differ; the example uses the supported upload route. See [the demonstration and known boundaries](docs/assets/readme/README.md).
+The example imports, edits and exports over real stdio MCP, then verifies that those same assets are available through the human editor API. New imports share the Web upload layout, and exact legacy MCP imports remain accessible. See [the demonstration and verification boundaries](docs/assets/readme/README.md).
 
-This source workflow was exercised on Windows; installation and FFmpeg builds on other systems need environment-specific verification. On Windows, `start-cutvoke.cmd --web` also starts the browser editor using the default personal project library. For the desktop client and building an installer, see [local setup](docs/user/LOCAL_DELIVERY_MCP.md) and [the build entry point](scripts/build/build-cutvoke-desktop.cmd).
+The source workflow has been checked in the Linux cloud environment, including FFmpeg 7.1.5, and earlier on Windows. See [installation, tested versions and troubleshooting](docs/user/installation.md) for exact scope; current Windows installer and macOS acceptance still require their respective machines. On Windows, `start-cutvoke.cmd --web` also starts the browser editor using the default personal project library. For the desktop client and building an installer, see [local setup](docs/user/LOCAL_DELIVERY_MCP.md) and [the build entry point](scripts/build/build-cutvoke-desktop.cmd).
 
 The service binds to local loopback by default. Normal project data and media live under the user's `.cutvoke` directory. The example above uses its own `.artifacts/first-edit/data` and does not open the default personal project library.
 
@@ -155,7 +155,9 @@ Declarative transitions can reuse supported FFmpeg mappings. Other families depe
 | Skill installation, task inputs and runnable example | [Skill usage](docs/user/agent-skill.md) |
 | Optional local transcription and model preparation | [Local speech recognition](docs/user/LOCAL_ASR.md) |
 | Effect contributions and existing resource packs | [Contribution guide](effects/README.md) · [Resource packs](docs/user/resource-pack-registry.md) |
-| Source conventions, layout and checks | [CONTRIBUTING](CONTRIBUTING.md) · [Project layout](docs/development/project-layout.md) |
+| Source conventions, layout and checks | [English](CONTRIBUTING.md) · [中文](CONTRIBUTING.zh-CN.md) · [Community tasks](docs/development/community-tasks.md) · [Project layout](docs/development/project-layout.md) |
+| Installation and candidate packages | [Install / troubleshoot](docs/user/installation.md) · [Candidate packaging](docs/development/prerelease.md) |
+| Security reports | [Security policy](SECURITY.md) |
 | Screenshot provenance and demonstration limits | [Capture and demo notes](docs/assets/readme/README.md) |
 
 Treat CutVoke as an early-stage project: project formats and interfaces can change, complex first previews wait for FFmpeg, and optional speech/person processing needs additional dependencies/models. The sample does not establish large-project performance, every effect or every AI client's compatibility. Try a small copy before using it for important work.
