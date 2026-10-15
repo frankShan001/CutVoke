@@ -8,9 +8,9 @@ Make a first cut from your media, ask your preferred AI to refine a shot, title 
 
 [Get started](#get-started) · [Give your AI an editing workflow](#give-your-ai-an-editing-workflow) · [Build effects together](#build-effects-together)
 
-![Real CutVoke editor with a media library, landscape montage preview and editable multitrack timeline](docs/assets/readme/editor-overview.png)
+![CutVoke English interface: media library, landscape preview and editable multitrack timeline](docs/assets/readme/en/editor-overview.png)
 
-*Trail Notes in the actual local editor: three original illustrations, music, titles, captions, scale keyframes and transitions. The repository example creates it through real interfaces, with no video generation service. This capture uses Simplified Chinese; the interface language is selectable.*
+*Trail Notes in the actual local editor: three original illustrations, music, titles, captions, scale keyframes and transitions. The repository example creates it through real interfaces, with no video generation service. Captured with the interface set to English, with English demo titles and captions.*
 
 ## Why try it?
 
@@ -56,9 +56,9 @@ flowchart LR
 
 The timeline supports multiple media tracks, text and captions, clip adjustments, volume and fades, keyframes, and existing transitions/effects. Edits can be previewed and undone/redone; an editing lease keeps grouped agent changes from colliding with manual writes. Continuous preview prepares time windows and reuses cached work. Exports use the project version captured when queued.
 
-![CutVoke caption editing with selected text, start and end times, and the actual preview](docs/assets/readme/caption-editing.png)
+![CutVoke English caption editor with selected text, start and end times, and the actual preview](docs/assets/readme/en/caption-editing.png)
 
-*Captions are individual project objects. Change their words, check the actual picture, and keep refining the same edit.*
+*English caption editing: the selected line, its 0–4 second interval and its editable preview overlay. Captions remain individual project objects you can refine.*
 
 ## Get started
 
@@ -138,9 +138,9 @@ The skill is creative guidance. It does not install a model or guarantee a polis
 
 Contribute useful transitions, filters, sound treatments, text animation and reusable resources. Start with a **GitHub PR** and an edit that others can preview and reproduce.
 
-![Real CutVoke community transition example showing Soft Reveal on the timeline and its editable duration](docs/assets/readme/community-transition.png)
+![CutVoke English transition panel showing Soft Reveal at the 4-second cut and its effective 0.60-second duration](docs/assets/readme/en/community-transition.png)
 
-*Soft Reveal in the actual editor: a contribution manifest loaded by the existing registry, previewed and exported through the existing FFmpeg dissolve algorithm.*
+*Soft Reveal in the English interface: a contribution manifest loaded by the existing registry, previewed and exported through the existing FFmpeg dissolve algorithm.*
 
 Start with [the contribution guide](effects/README.md) and [the runnable sample](effects/transitions/cutvoke.transition.community.soft-reveal/README.md). Store new contributions under `effects/<family>/<effect-id>/` with a manifest, description, license and actual preview. Existing assets retain their paths.
 
