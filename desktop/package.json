@@ -10,6 +10,8 @@
     "start": "electron .",
     "dist": "electron-builder --win nsis --x64 --config.directories.output=../.artifacts/desktop && node publish-build.cjs",
     "unpacked": "electron-builder --win --x64 --dir --config.directories.output=../.artifacts/desktop",
+    "portable": "electron-builder --config portable-builder.cjs --win --x64 --dir --config.directories.output=../.artifacts/desktop",
+    "test:storage": "node --test storage.test.cjs",
     "test:build-deps": "node --test build-dependencies.test.cjs",
     "test:i18n": "node --test i18n.test.cjs",
     "test:i18n:electron": "node --test i18n.electron.test.cjs"
@@ -30,6 +32,7 @@
       "main.cjs",
       "preload.cjs",
       "i18n.cjs",
+      "storage.cjs",
       "locales/*.json",
       "loading.html",
       "loading.js",

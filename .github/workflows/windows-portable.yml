@@ -1,0 +1,130 @@
+name: Windows portable
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - desktop/**
+      - src/**
+      - web/app/**
+      - scripts/build/**
+      - scripts/verify/verify_portable_windows.*
+      - .github/workflows/windows-portable.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-portable-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ffmpeg:
+    name: Build redistributable FFmpeg x64
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - name: Restore verified FFmpeg build
+        id: ffmpeg-cache
+        uses: actions/cache@v5
+        with:
+          path: .artifacts/portable-ffmpeg
+          key: ffmpeg-win64-${{ runner.os }}-${{ hashFiles('desktop/ffmpeg-sources.json', 'scripts/build/build_ffmpeg_windows.sh', 'scripts/build/prepare_ffmpeg_sources.py') }}
+      - name: Install cross compiler and build tools
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 nasm ninja-build pkg-config
+          python3 -m pip install meson==1.10.0
+      - name: Build exact upstream sources and retain corresponding source
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        run: bash scripts/build/build_ffmpeg_windows.sh
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ffmpeg-win64-build
+          path: .artifacts/portable-ffmpeg/
+          compression-level: 0
+          retention-days: 14
+
+  portable:
+    name: Package and run Windows x64 portable
+    needs: ffmpeg
+    runs-on: windows-2022
+    timeout-minutes: 40
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13.16'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.15.0'
+          cache: npm
+          cache-dependency-path: |
+            desktop/package-lock.json
+            web/app/package-lock.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: ffmpeg-win64-build
+          path: .artifacts/portable-ffmpeg
+      - name: Verify FFmpeg artifact integrity
+        shell: python
+        run: |
+          from pathlib import Path
+          import hashlib,json
+          root=Path('.artifacts/portable-ffmpeg')
+          for name,expected in json.loads((root/'SHA256.json').read_text()).items():
+              assert hashlib.sha256((root/name).read_bytes()).hexdigest()==expected, name
+      - name: Prepare isolated frozen-backend environment
+        run: |
+          python -m venv .artifacts/venv-portable
+          .artifacts/venv-portable/Scripts/python.exe -m pip install --require-hashes --only-binary=:all: -r desktop/requirements-build.lock
+      - name: Build Web editor
+        working-directory: web/app
+        run: |
+          npm ci
+          npm run typecheck
+          npm run build
+      - name: Freeze backend with bundled FFmpeg and product assets
+        run: |
+          $env:CUTVOKE_FFMPEG_DIR = (Resolve-Path .artifacts/portable-ffmpeg/bin).Path
+          .artifacts/venv-portable/Scripts/python.exe -m PyInstaller --noconfirm --distpath .artifacts/build/desktop-engine --workpath .artifacts/build/desktop-work desktop/engine.spec
+      - name: Prepare verified Electron and build portable folder
+        run: |
+          Push-Location desktop
+          npm ci
+          npm run test:build-deps
+          npm run test:i18n
+          npm run test:storage
+          Pop-Location
+          ./scripts/build/prepare_desktop_tools.ps1 -Portable
+          Push-Location desktop
+          npm run portable
+          Pop-Location
+      - name: Assemble portable ZIP, licenses and file hashes
+        run: .artifacts/venv-portable/Scripts/python.exe scripts/build/assemble_portable.py
+      - name: Extract shipped ZIP and test real packaged application
+        run: node scripts/verify/verify_portable_windows.cjs
+      - name: Upload verified portable download
+        uses: actions/upload-artifact@v7
+        with:
+          name: CutVoke-windows-x64-portable
+          path: dist/portable/*
+          compression-level: 0
+          retention-days: 90
+          if-no-files-found: error
+      - name: Preserve Windows run evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-portable-evidence
+          path: |
+            .artifacts/acceptance/windows-portable/*
+            !.artifacts/acceptance/windows-portable/中文 空格路径/**
+          retention-days: 90
+          if-no-files-found: warn
