@@ -1583,7 +1583,7 @@ class RenderService:
             raise RenderError(f"output exists (overwrite=False): {out_path}")
         tmp_path = out_path + ".tmp.m4a"
 
-        cmd: list[str] = [self.ffmpeg, "-y"]
+        cmd: list[str] = [self.ffmpeg, "-y", "-nostdin"]
         for src in input_paths:
             if _is_image_src(src):
                 fps_rat = seq.fps.to_fraction()
@@ -1599,7 +1599,8 @@ class RenderService:
                 "-c:a", "aac", "-b:a", "192k",
                 "-movflags", "+faststart",
                 tmp_path]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL,
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                 cwd=caption_cwd if caption_cwd else None)
         _, err = proc.communicate()
         if caption_cwd and os.path.isdir(caption_cwd):
@@ -4310,7 +4311,7 @@ class RenderService:
         if not _os.path.isfile(src):
             raise RenderError(f"thumbnail: source file not found: {src!r}")
         cmd = [
-            self.ffmpeg, "-y",
+            self.ffmpeg, "-y", "-nostdin",
             "-ss", f"{time:.4f}",
             "-i", src,
             "-frames:v", "1",
@@ -4318,7 +4319,7 @@ class RenderService:
             "-f", "image2", out_png,
         ]
         try:
-            r = subprocess.run(cmd, capture_output=True, text=True,
+            r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
                                encoding="utf-8", errors="replace",
                                timeout=timeout)
         except subprocess.TimeoutExpired as e:
@@ -4333,13 +4334,13 @@ class RenderService:
         if not os.path.isfile(src):
             raise RenderError(f"waveform: source file not found: {src!r}")
         width = max(160, min(960, int(width)))
-        cmd = [self.ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
+        cmd = [self.ffmpeg, "-hide_banner", "-loglevel", "error", "-y", "-nostdin",
                "-i", src, "-filter_complex",
                f"[0:a:0]aformat=channel_layouts=mono,"
                f"showwavespic=s={width}x48:colors=0x58dcc7[wave]",
                "-map", "[wave]", "-frames:v", "1", out_png]
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True,
+            result = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
                                     encoding="utf-8", errors="replace",
                                     timeout=timeout)
         except subprocess.TimeoutExpired as error:

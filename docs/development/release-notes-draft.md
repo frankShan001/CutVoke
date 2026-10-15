@@ -5,6 +5,7 @@
 - Agent `media_import` and Web uploads share the canonical media-library layout. Exact legacy MCP imports remain visible and relinkable without rewriting saved project paths. MCP and Web agree on availability.
 - Normalize xfade inputs after timestamp changes for FFmpeg 7.1, which otherwise exposes an invalid `1/0` rate. Animation frame assembly uses the explicit sequence clock; reverse playback retains source timestamps without relying on cleared frame-rate metadata.
 - Isolate API test media/cache directories and allow an explicit MCP media directory. File-backed HTTP embedding defaults to the database's sibling media directory.
+- Disconnect background preview assembly, thumbnails, waveforms and audio export from protocol stdin so FFmpeg cannot consume MCP polling requests.
 - Use official npm registry download URLs with the existing dependency versions/integrity hashes; keep the desktop proxy regression independent of a host's loopback NO_PROXY.
 - Align Python runtime/package metadata with the existing 0.3.1 desktop/MCP version. Include source workflow files and the built Web editor in the source candidate.
 
