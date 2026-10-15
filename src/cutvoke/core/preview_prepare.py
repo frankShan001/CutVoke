@@ -178,7 +178,10 @@ class PreviewPreparation:
     def _command(self, args: list[str], event: threading.Event, work: Path):
         # Own only this subprocess; cancellation never terminates the Web service.
         with tempfile.TemporaryFile() as log:
-            process = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=log,
+            # MCP owns fd 0. FFmpeg's interactive reader must never consume a
+            # polling request while this background worker joins preview parts.
+            process = subprocess.Popen(args, stdin=subprocess.DEVNULL,
+                                       stdout=subprocess.DEVNULL, stderr=log,
                                        cwd=work, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
             try:
                 while process.poll() is None:
