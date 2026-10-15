@@ -234,7 +234,10 @@ async function main() {
     assert.equal(normal.passed, true);
     report.checks.normalLaunchWithoutQaOrDebugFlags = true;
     // Actual Windows ACL denial + native error dialog, preserving the same DB.
-    run("pwsh.exe", ["-NoProfile", "-File", path.join(root, "scripts/verify/verify_portable_windows.ps1"), "-App", executable, "-Output", out]);
+    // Windows' UI Automation framework is a .NET Framework component. Isolate
+    // Windows PowerShell's modules from the runner's PowerShell 7 module path.
+    run("powershell.exe", ["-NoProfile", "-File", path.join(root, "scripts/verify/verify_portable_windows.ps1"), "-App", executable, "-Output", out],
+      { ...process.env, PSModulePath: path.join(process.env.SystemRoot, "System32/WindowsPowerShell/v1.0/Modules") });
     const readonly = JSON.parse(fs.readFileSync(path.join(out, "readonly-result.json")));
     assert.equal(readonly.passed, true);
     report.checks.readonlyFolderShowsNativeErrorAndPreservesDatabase = true;
@@ -253,7 +256,7 @@ main().catch(error => {
   report.error = error.stack; save(); console.error(error);
   // Keep remote failures diagnosable even when artifact downloads are unavailable.
   for (const name of fs.readdirSync(out, { recursive: true })) {
-    if (name.endsWith("engine.log") || name.endsWith("renderer-errors.log")) {
+    if (name.endsWith("engine.log") || name.endsWith("renderer-errors.log") || name.endsWith("-result.json")) {
       const file = path.join(out, name);
       if (fs.statSync(file).isFile()) console.error(`${name}\n${fs.readFileSync(file, "utf8").slice(-12000)}`);
     }
