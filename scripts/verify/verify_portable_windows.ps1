@@ -26,7 +26,7 @@ if ($Normal) {
     try {
         Remove-Item Env:CUTVOKE_DATA, Env:CUTVOKE_PORTABLE_HOME, Env:CUTVOKE_DESKTOP_QA -ErrorAction SilentlyContinue
         $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
-        $env:__COMPAT_LAYER = 'RunAsInvoker'
+        Remove-Item Env:__COMPAT_LAYER -ErrorAction SilentlyContinue
         $taskProcess = Start-Process -FilePath $App -WorkingDirectory $Output -PassThru
         $taskDeadline = [DateTime]::UtcNow.AddSeconds(90)
         do {

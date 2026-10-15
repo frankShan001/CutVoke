@@ -17,9 +17,8 @@ const save = () => fs.writeFileSync(path.join(out, "verification.json"), JSON.st
 function run(exe, args, env) { return execFileSync(exe, args, { env, encoding: "utf8", windowsHide: true, timeout: 120_000, maxBuffer: 10 * 1024 * 1024 }); }
 function cleanEnvironment() {
   const env = { ...process.env };
-  for (const key of Object.keys(env)) if (/^(CUTVOKE_|PYTHON|VIRTUAL_ENV$|ELECTRON_RUN_AS_NODE$)/i.test(key)) delete env[key];
+  for (const key of Object.keys(env)) if (/^(CUTVOKE_|PYTHON|VIRTUAL_ENV$|ELECTRON_RUN_AS_NODE$|__COMPAT_LAYER$)/i.test(key)) delete env[key];
   env.PATH = `${process.env.SystemRoot}\\System32;${process.env.SystemRoot}`;
-  env.__COMPAT_LAYER = "RunAsInvoker";
   return env;
 }
 function exited(child, timeout = 30_000) {

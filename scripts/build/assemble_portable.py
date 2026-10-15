@@ -11,6 +11,8 @@ import ssl
 import subprocess
 import sys
 import zipfile
+import xml.etree.ElementTree as ET
+import pefile
 from cryptography.hazmat.backends.openssl.backend import backend as openssl_backend
 
 root = Path(__file__).resolve().parents[2]
@@ -84,6 +86,18 @@ for relative in ('CutVoke.exe', 'resources/engine/cutvoke-engine.exe', 'resource
         offset = struct.unpack('<I', binary.read(4))[0]
         binary.seek(offset)
         assert binary.read(6) == b'PE\0\0\x64\x86', relative
+    if relative in ('CutVoke.exe', 'resources/engine/cutvoke-engine.exe'):
+        levels = []
+        with pefile.PE(staging / relative) as pe:
+            for resource in pe.DIRECTORY_ENTRY_RESOURCE.entries:
+                if resource.id == 24:  # RT_MANIFEST
+                    for entry in resource.directory.entries:
+                        for language in entry.directory.entries:
+                            data = language.data.struct
+                            manifest = ET.fromstring(pe.get_data(data.OffsetToData, data.Size))
+                            levels += [element.attrib.get('level') for element in manifest.iter()
+                                       if element.tag.endswith('requestedExecutionLevel')]
+        assert levels and all(level == 'asInvoker' for level in levels), (relative, levels)
 files = {}
 for file in sorted(staging.rglob('*')):
     if file.is_file():
