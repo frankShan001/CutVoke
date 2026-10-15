@@ -38,7 +38,7 @@ shutil.copyfile(root / 'desktop/ffmpeg-sources.json', licenses / 'ffmpeg-sources
 python_license = Path(sys.base_prefix) / 'LICENSE.txt'
 shutil.copyfile(python_license, licenses / 'Python-LICENSE.txt')
 dependencies = []
-for name_ in ('cryptography', 'fonttools', 'cffi', 'pycparser'):
+for name_ in ('cryptography', 'fonttools', 'cffi', 'pycparser', 'pyinstaller'):
     dist = metadata.distribution(name_)
     destination = licenses / 'python' / name_
     destination.mkdir(parents=True)
@@ -49,7 +49,8 @@ for name_ in ('cryptography', 'fonttools', 'cffi', 'pycparser'):
             count += 1
     if not count:
         raise RuntimeError(f'Missing runtime dependency license: {name_}')
-    dependencies.append({'name': name_, 'version': dist.version})
+    dependencies.append({'name': name_, 'version': dist.version,
+                         'role': 'embedded bootloader' if name_ == 'pyinstaller' else 'Python runtime dependency'})
 lock = json.loads((root / 'web/app/package-lock.json').read_text())
 for package, item in lock['packages'].items():
     if not package or item.get('dev'):

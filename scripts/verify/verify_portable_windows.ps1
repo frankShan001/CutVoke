@@ -56,8 +56,16 @@ if ($Normal) {
     exit 0
 }
 try {
-    & icacls.exe $taskFolder /deny "*${taskSid}:(OI)(CI)(W)" | Out-Null
+    & icacls.exe $taskFolder /deny "*${taskSid}:(OI)(CI)(W)" /t | Out-Null
     if ($LASTEXITCODE -ne 0) { throw 'Could not apply isolated test ACL.' }
+    # Explicit denies on existing children take priority over a child's explicit
+    # Chromium ACL. Prove the profile really is unwritable before testing it.
+    $taskWriteDenied = $false
+    try { [IO.File]::WriteAllText((Join-Path $taskFolder 'profile/write-must-fail'), 'test') }
+    catch [UnauthorizedAccessException] { $taskWriteDenied = $true }
+    $taskResult.profileWriteDenied = $taskWriteDenied
+    if (!$taskWriteDenied) { throw 'The isolated profile did not reject writes.' }
+    Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
     # No debug/QA switches: normal double-click-equivalent startup.
     Remove-Item Env:CUTVOKE_DATA, Env:CUTVOKE_PORTABLE_HOME, Env:CUTVOKE_DESKTOP_QA -ErrorAction SilentlyContinue
     $taskProcess = Start-Process -FilePath $App -WorkingDirectory $Output -PassThru
@@ -79,6 +87,14 @@ try {
                         [CutVokeWindows]::GetWindowText($child, $taskChildText, 4096) | Out-Null
                         $taskTexts.Add($taskChildText.ToString()); return $true
                     }, [IntPtr]::Zero) | Out-Null
+                    # Modern task dialogs draw controls whose text is not
+                    # exposed by cross-process GetWindowText. Use real Windows
+                    # accessibility providers for their displayed content.
+                    $taskElement = [Windows.Automation.AutomationElement]::FromHandle($handle)
+                    $taskElements = $taskElement.FindAll([Windows.Automation.TreeScope]::Descendants, [Windows.Automation.Condition]::TrueCondition)
+                    foreach ($taskChild in $taskElements) {
+                        if ($taskChild.Current.Name) { $taskTexts.Add($taskChild.Current.Name) }
+                    }
                 }
             }
             return $true
@@ -97,7 +113,7 @@ try {
     $taskResult.error = $_.ToString()
     throw
 } finally {
-    & icacls.exe $taskFolder /remove:d "*$taskSid" | Out-Null
+    & icacls.exe $taskFolder /remove:d "*$taskSid" /t | Out-Null
     if ($taskProcess -and !$taskProcess.HasExited) { Stop-Process -Id $taskProcess.Id -Force }
-    $taskResult | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $Output 'readonly-result.json') -Encoding utf8
+    [IO.File]::WriteAllText((Join-Path $Output 'readonly-result.json'), ($taskResult | ConvertTo-Json -Depth 6), [Text.UTF8Encoding]::new($false))
 }
