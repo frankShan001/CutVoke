@@ -172,6 +172,8 @@ async function main() {
     await page.getByLabel("新工程名称", { exact: true }).fill(projectId);
     await page.getByRole("button", { name: "创建工程", exact: true }).click();
     await page.getByRole("heading", { name: "时间线", exact: true }).waitFor();
+    const showMedia = page.getByRole("button", { name: "显示素材面板", exact: true });
+    if (await showMedia.isVisible()) await showMedia.click();
     await expect(page.locator("#creative-domain-content").getByRole("button", { name: "导入素材", exact: true })).toBeEnabled();
     // Electron owns the native OS picker; CDP's browser filechooser interception
     // is not reliable there. Drive the same file input and real upload handler.
