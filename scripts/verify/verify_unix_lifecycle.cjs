@@ -69,16 +69,24 @@ async function verifyReadonlyStorage({ executable, env, out, data, profile, repo
       if (child.launchError) throw child.launchError;
       assert.equal(child.exitCode, null, "Storage error must remain visible until acknowledged");
       if (process.platform === "darwin") {
-        const text = execFileSync("/usr/bin/osascript", ["-e", 'tell application "System Events" to tell process "CutVoke" to get value of every static text of every window'], { encoding: "utf8" });
-        fs.writeFileSync(path.join(out, "readonly-dialog.txt"), text);
-        return text.includes("cannot write") || text.includes("无法写入");
+        try {
+          const text = execFileSync("/usr/bin/osascript", ["-e", 'tell application "System Events" to tell process "CutVoke" to get value of every static text of every window'], { encoding: "utf8", timeout: 10_000 });
+          fs.writeFileSync(path.join(out, "readonly-dialog.txt"), text);
+          return text.includes("cannot write") || text.includes("无法写入");
+        } catch (error) {
+          // The native process/dialog can appear after the first observation.
+          fs.writeFileSync(path.join(out, "readonly-dialog-query-error.txt"), error.message);
+          return false;
+        }
       }
       const tree = execFileSync("/usr/bin/python3", [path.join(__dirname, "verify_linux_dialog.py"), String(child.pid)], { encoding: "utf8" });
       fs.writeFileSync(path.join(out, "readonly-dialog.txt"), tree);
       return tree.includes("cannot write") || tree.includes("无法写入");
     });
     assert.equal(children(child.pid).filter(p => p.command.includes("cutvoke-engine")).length, 0);
-    closeWindow(child);
+    if (process.platform === "darwin") {
+      execFileSync("/usr/bin/osascript", ["-e", 'tell application "System Events" to tell process "CutVoke" to click button 1 of window 1'], { timeout: 10_000 });
+    } else closeWindow(child);
     await waitFor(() => child.exitCode !== null, 30_000);
     assert.deepEqual(fs.readFileSync(database), original);
     report.checks.readonlyDataShowsNativeErrorAndPreservesDatabase = true;
