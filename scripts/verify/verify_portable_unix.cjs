@@ -271,7 +271,16 @@ async function main() {
     if (fs.existsSync(log)) fs.copyFileSync(log, path.join(out, "engine.log"));
     save();
   }
-  fs.copyFileSync(path.join(out, "verification.json"), path.join(root, "dist/portable/windows-verification.json"));
+  fs.copyFileSync(path.join(out, "verification.json"), path.join(root, "dist/portable", `${target}-verification.json`));
+  const summary = { passed: report.passed, platform: target, checks: report.checks,
+    download: report.download, nativeWindow: report.nativeWindow, builtinResources: report.builtinResources,
+    platformDefaultStorage: report.platformDefaultStorage, storage: report.storage,
+    nativeAudit: { architecture: report.nativeRuntime.architecture, os: report.nativeRuntime.os,
+      images: report.nativeRuntime.images.length, links: report.nativeRuntime.links,
+      signature: report.nativeRuntime.signature, signatureVerification: report.nativeRuntime.signatureVerification,
+      gatekeeper: report.nativeRuntime.gatekeeperAssessment, hostSdkDiagnostic: report.nativeRuntime.hostSdkDiagnostic },
+    export: { streams: report.exportProbe.streams.map(s => ({ codec: s.codec_name, type: s.codec_type })), duration: report.exportProbe.format.duration } };
+  console.log("CUTVOKE_ACCEPTANCE_SUMMARY=" + JSON.stringify(summary));
   console.log(JSON.stringify(report.checks, null, 2));
 }
 const { verifyNormalLaunch, verifyReadonlyStorage, verifyPlatformStorage, verifyCloseDuringStartup, terminateOwnedApplication } = require("./verify_unix_lifecycle.cjs");
