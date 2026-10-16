@@ -47,6 +47,16 @@ notice_root = root / 'desktop/licenses'
 for notice in json.loads((notice_root / 'provenance.json').read_text('utf-8')):
     assert hashlib.sha256((notice_root / notice['name']).read_bytes()).hexdigest() == notice['sha256'], notice['name']
 shutil.copytree(notice_root, licenses / 'runtime-components')
+if system == 'linux':
+    native_notices = licenses / 'linux-runtime'
+    native_notices.mkdir()
+    packages = []
+    for package in ('libssl3', 'libffi8', 'zlib1g', 'libbz2-1.0', 'liblzma5', 'libexpat1', 'libgcc-s1', 'libstdc++6', 'libuuid1'):
+        notice = Path('/usr/share/doc') / package / 'copyright'
+        if notice.is_file():
+            shutil.copyfile(notice, native_notices / f'{package}-copyright.txt')
+            packages.append(subprocess.check_output(['dpkg-query', '-W', '-f', '${Package}\t${Version}\n', package], text=True))
+    (native_notices / 'distribution-packages.txt').write_text(''.join(packages))
 shutil.copytree(root / '.artifacts/portable-ffmpeg/licenses', licenses / 'ffmpeg')
 shutil.copyfile(root / '.artifacts/portable-ffmpeg/Corresponding-Source.zip', licenses / 'ffmpeg/Corresponding-Source.zip')
 intel_crypto = root / '.artifacts/intel-crypto'
