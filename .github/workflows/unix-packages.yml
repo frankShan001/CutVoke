@@ -20,7 +20,7 @@ permissions:
 
 concurrency:
   group: unix-packages-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   native:
@@ -54,7 +54,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y nasm ninja-build pkg-config libgtk-3-0 libnss3 libasound2 libgbm1 libatk-bridge2.0-0 libxss1 libdrm2 libxkbcommon0 xvfb xdotool openbox dbus-x11 at-spi2-core python3-pyatspi
+          sudo apt-get install -y nasm ninja-build pkg-config libgtk-3-0 libnss3 libasound2 libgbm1 libatk-bridge2.0-0 libxss1 libdrm2 libxkbcommon0 xvfb xdotool openbox dbus-x11 scrot tesseract-ocr
       - name: Install macOS build tools
         if: runner.os == 'macOS'
         run: brew install nasm ninja pkg-config
@@ -140,8 +140,6 @@ jobs:
         timeout-minutes: 12
         run: |
           export CUTVOKE_VERIFY_PYTHON="$GITHUB_WORKSPACE/.artifacts/venv-portable/bin/python"
-          export GTK_MODULES=gail:atk-bridge
-          export NO_AT_BRIDGE=0
           dbus-run-session -- xvfb-run -a bash -e -c '
             openbox > /tmp/cutvoke-openbox.log 2>&1 &
             node scripts/verify/verify_portable_unix.cjs

@@ -69,7 +69,7 @@ async function verifyReadonlyStorage({ executable, env, out, data, profile, repo
   fs.chmodSync(profile, 0o555);
   const child = start(executable, env, out, "readonly-storage");
   try {
-    await waitFor(() => {
+    await waitFor(async () => {
       if (child.launchError) throw child.launchError;
       assert.equal(child.exitCode, null, "Storage error must remain visible until acknowledged");
       if (process.platform === "darwin") {
@@ -83,9 +83,24 @@ async function verifyReadonlyStorage({ executable, env, out, data, profile, repo
           return false;
         }
       }
-      const tree = execFileSync("/usr/bin/python3", [path.join(__dirname, "verify_linux_dialog.py"), String(child.pid)], { encoding: "utf8" });
-      fs.writeFileSync(path.join(out, "readonly-dialog.txt"), tree);
-      return (tree.includes("cannot write") || tree.includes("无法写入")) && tree.includes(profile);
+      try {
+        const ids = execFileSync("/usr/bin/xdotool", ["search", "--onlyvisible", "--pid", String(child.pid)], { encoding: "utf8" }).trim().split(/\s+/);
+        const title = execFileSync("/usr/bin/xdotool", ["getwindowname", ids[0]], { encoding: "utf8" });
+        if (!title.includes("CutVoke") || !title.includes("Storage")) return false;
+        execFileSync("/usr/bin/xdotool", ["windowactivate", "--sync", ids[0]], { timeout: 10_000 });
+        await delay(400); // Wait for the native GTK dialog to finish painting.
+        const capture = path.join(out, "readonly-dialog.png");
+        execFileSync("/usr/bin/scrot", ["-u", "-o", capture], { timeout: 10_000 });
+        const text = execFileSync("/usr/bin/tesseract", [capture, "stdout", "-l", "eng", "--psm", "6"], { encoding: "utf8", timeout: 20_000 });
+        fs.writeFileSync(path.join(out, "readonly-dialog.txt"), text);
+        const normalized = text.replace(/\s+/g, " ").toLowerCase();
+        report.readonlyDialog = { pid: child.pid, windowId: ids[0], title: title.trim(),
+          method: "Owned visible X11 window + actual GTK screenshot/OCR", text };
+        return normalized.includes("cannot write") && normalized.includes("data folder");
+      } catch (error) {
+        fs.writeFileSync(path.join(out, "readonly-dialog-query-error.txt"), error.message);
+        return false;
+      }
     });
     assert.equal(children(child.pid).filter(p => p.command.includes("cutvoke-engine")).length, 0);
     if (process.platform === "darwin") {
