@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tarfile
 import urllib.request
+import zipfile
 
 assert sys.platform == 'darwin' and platform.machine() == 'x86_64'
 root = Path(__file__).resolve().parents[2]
@@ -73,7 +74,13 @@ if not (output / 'SHA256.json').exists():
         shutil.copyfile(crypto / name, sources / name)
     toolchain = '\n'.join(subprocess.check_output(command, text=True) for command in (['rustc', '--version'], ['cargo', '--version'], ['cc', '--version']))
     (sources / 'toolchain.txt').write_text(toolchain)
-    shutil.make_archive(str(output / 'Corresponding-Source'), 'zip', sources)
+    # Cargo normalizes some unmodified registry-source mtimes to Unix epoch.
+    # ZIP metadata starts in 1980; clamp metadata without changing source bytes.
+    with zipfile.ZipFile(output / 'Corresponding-Source.zip', 'w', compression=zipfile.ZIP_DEFLATED,
+                         strict_timestamps=False) as archive:
+        for file in sorted(sources.rglob('*')):
+            if file.is_file():
+                archive.write(file, file.relative_to(sources))
     info = {'cryptography': '50.0.2', 'openssl': '4.0.3', 'architecture': 'x64',
             'deploymentTarget': '13.0', 'inputs': inputs, 'staticOpenSSL': True, 'toolchain': toolchain}
     (output / 'build-info.json').write_text(json.dumps(info, indent=2) + '\n')
