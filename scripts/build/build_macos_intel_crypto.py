@@ -45,7 +45,7 @@ if not (output / 'SHA256.json').exists():
            'PATH': str(Path(sys.executable).parent) + os.pathsep + os.environ.get('PATH', '')}
     openssl = work / 'openssl-4.0.3'
     prefix = work / 'openssl-static'
-    subprocess.run(['./Configure', 'darwin64-x86_64-cc', 'no-shared', 'no-tests', '-fPIC',
+    subprocess.run(['./Configure', 'darwin64-x86_64-cc', 'no-shared', 'no-module', 'no-tests', '-fPIC',
                     '-mmacosx-version-min=13.0', f'--prefix={prefix}', '--libdir=lib'], cwd=openssl, env=env, check=True)
     subprocess.run(['make', f'-j{os.cpu_count() or 2}', 'build_libs'], cwd=openssl, env=env, check=True)
     subprocess.run(['make', 'install_dev'], cwd=openssl, env=env, check=True)
@@ -82,7 +82,7 @@ if not (output / 'SHA256.json').exists():
             if file.is_file():
                 archive.write(file, file.relative_to(sources))
     info = {'cryptography': '50.0.2', 'openssl': '4.0.3', 'architecture': 'x64',
-            'deploymentTarget': '13.0', 'inputs': inputs, 'staticOpenSSL': True, 'toolchain': toolchain}
+            'deploymentTarget': '13.0', 'inputs': inputs, 'staticOpenSSL': True, 'staticProviders': True, 'toolchain': toolchain}
     (output / 'build-info.json').write_text(json.dumps(info, indent=2) + '\n')
     hashes = {p.relative_to(output).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
               for p in output.rglob('*') if p.is_file()}
@@ -100,7 +100,9 @@ print(json.dumps({'wheel': wheel.name, 'sha256': digest, 'source': 'pinned nativ
 subprocess.run([sys.executable, '-c',
     'from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey; '
     'from cryptography.hazmat.backends.openssl.backend import backend; '
+    'from cryptography.hazmat.bindings._rust import openssl; '
     'key=Ed25519PrivateKey.generate(); message=b"CutVoke Intel native package"; '
     'key.public_key().verify(key.sign(message),message); '
     'assert backend.openssl_version_text().startswith("OpenSSL 4.0.3"), backend.openssl_version_text(); '
+    'assert openssl._legacy_provider_loaded, "Static OpenSSL providers must load without external modules"; '
     'print(backend.openssl_version_text())'], check=True)
