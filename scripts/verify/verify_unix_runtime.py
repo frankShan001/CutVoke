@@ -49,10 +49,16 @@ try:
         elif not mac and magic == b'\x7fELF':
             header = run('/usr/bin/readelf', '-h', str(file))
             assert 'Advanced Micro Devices X86-64' in header, relative
-            dependencies = subprocess.run(['/usr/bin/ldd', str(file)], capture_output=True, text=True)
+            isolated = {key: value for key, value in os.environ.items() if not key.startswith(('LD_', 'DYLD_'))}
+            engine_root = folder / 'resources/engine'
+            if file.is_relative_to(engine_root):
+                isolated['LD_LIBRARY_PATH'] = str(engine_root / '_internal')
+            dependencies = subprocess.run(['/usr/bin/ldd', str(file)], capture_output=True, text=True, env=isolated)
             dependency_text = dependencies.stdout + dependencies.stderr
             assert 'not found' not in dependency_text, (relative, dependency_text)
             assert dependencies.returncode == 0 or 'not a dynamic executable' in dependency_text or 'statically linked' in dependency_text, (relative, dependency_text)
+            for resolved in re.findall(r'=> (/.*?) \(0x', dependency_text):
+                assert Path(resolved).is_relative_to(folder) or resolved.startswith(('/lib/', '/lib64/', '/usr/lib/', '/usr/lib64/')), (relative, resolved)
             symbols = run('/usr/bin/readelf', '--version-info', str(file))
             versions = sorted({tuple(map(int, value.split('.'))) for value in re.findall(r'\bGLIBC_(\d+(?:\.\d+)+)', symbols)})
             assert all(value <= (2, 35) for value in versions), (relative, versions)

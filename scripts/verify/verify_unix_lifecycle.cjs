@@ -1,6 +1,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const os = require("node:os");
 const { spawn, execFileSync } = require("node:child_process");
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function waitFor(check, timeout = 90_000) {
@@ -95,4 +96,50 @@ async function verifyReadonlyStorage({ executable, env, out, data, profile, repo
     fs.chmodSync(profile, mode);
   }
 }
-module.exports = { verifyNormalLaunch, verifyReadonlyStorage };
+async function verifyPlatformStorage({ executable, env, out, folder, report }) {
+  const nativeEnv = { ...env };
+  delete nativeEnv.CUTVOKE_HOME;
+  delete nativeEnv.CUTVOKE_DATA;
+  if (process.platform === "linux") nativeEnv.XDG_DATA_HOME = path.join(out, "XDG 系统 数据");
+  const data = process.platform === "darwin" ? path.join(os.homedir(), "Library/Application Support/CutVoke")
+    : path.join(nativeEnv.XDG_DATA_HOME, "CutVoke");
+  assert.equal(fs.existsSync(data), false, "Use a fresh hosted-runner personal data location");
+  // Make the entire extracted application read-only; only its external data is writable.
+  const modes = [];
+  function protect(file) {
+    const stat = fs.lstatSync(file);
+    if (stat.isSymbolicLink()) return;
+    modes.push([file, stat.mode & 0o777]);
+    if (stat.isDirectory()) for (const name of fs.readdirSync(file)) protect(path.join(file, name));
+    fs.chmodSync(file, (stat.mode & 0o777) & ~0o222);
+  }
+  protect(folder);
+  const child = start(executable, nativeEnv, out, "platform-default-storage");
+  let backend;
+  try {
+    backend = await waitFor(async () => {
+      if (child.launchError) throw child.launchError;
+      assert.equal(child.exitCode, null);
+      const candidate = children(child.pid).find(p => p.command.includes("cutvoke-engine") && /--port \d+/.test(p.command));
+      if (!candidate) return false;
+      const origin = `http://127.0.0.1:${candidate.command.match(/--port (\d+)/)[1]}`;
+      try {
+        const identity = await (await fetch(origin + "/api/v1/runtime")).json();
+        return identity.processId === candidate.pid ? { pid: candidate.pid, origin, identity } : false;
+      } catch { return false; }
+    });
+    assert.equal(backend.identity.dataPath, path.join(data, "data/projects.sqlite"));
+    assert.ok(fs.existsSync(path.join(data, "profile/mcp-config.json")));
+    closeWindow(child);
+    await waitFor(() => child.exitCode !== null, 30_000);
+    await waitFor(() => !alive(backend.pid), 10_000);
+    report.platformDefaultStorage = { root: data, database: backend.identity.dataPath, applicationDirectoryReadOnly: true };
+    report.checks.platformDefaultDataOutsideReadonlyApplication = true;
+  } finally {
+    if (child.exitCode === null) child.kill();
+    if (backend && alive(backend.pid)) process.kill(backend.pid);
+    for (const [file, mode] of modes) fs.chmodSync(file, mode);
+    fs.rmSync(data, { recursive: true, force: true });
+  }
+}
+module.exports = { verifyNormalLaunch, verifyReadonlyStorage, verifyPlatformStorage };
