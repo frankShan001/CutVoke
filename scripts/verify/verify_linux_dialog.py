@@ -7,11 +7,21 @@ def visit(node, depth=0):
         return
     try:
         print(node.name or '')
+        try:
+            text = node.queryText()
+            print(text.getText(0, text.characterCount))
+        except (NotImplementedError, LookupError, RuntimeError):
+            pass
         for child in node:
             visit(child, depth + 1)
     except (LookupError, RuntimeError):
         pass
 
 for application in pyatspi.Registry.getDesktop(0):
-    if application.get_process_id() == int(sys.argv[1]):
+    pid = application.get_process_id()
+    name = application.name or ''
+    # GTK/Chromium may expose the dialog under an accessibility utility PID.
+    # This Xvfb session contains only this test's CutVoke application.
+    if pid == int(sys.argv[1]) or 'cutvoke' in name.lower():
+        print(f'Application: {name}; accessibility PID: {pid}; launched PID: {sys.argv[1]}')
         visit(application)

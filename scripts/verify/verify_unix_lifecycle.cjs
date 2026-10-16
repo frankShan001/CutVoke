@@ -85,7 +85,7 @@ async function verifyReadonlyStorage({ executable, env, out, data, profile, repo
       }
       const tree = execFileSync("/usr/bin/python3", [path.join(__dirname, "verify_linux_dialog.py"), String(child.pid)], { encoding: "utf8" });
       fs.writeFileSync(path.join(out, "readonly-dialog.txt"), tree);
-      return tree.includes("cannot write") || tree.includes("无法写入");
+      return (tree.includes("cannot write") || tree.includes("无法写入")) && tree.includes(profile);
     });
     assert.equal(children(child.pid).filter(p => p.command.includes("cutvoke-engine")).length, 0);
     if (process.platform === "darwin") {
