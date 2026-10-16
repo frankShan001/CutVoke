@@ -4,17 +4,17 @@
 
 ## Windows portable (x64)
 
-**[Download 0.3.1 portable](https://github.com/frankShan001/CutVoke/actions/runs/38788916823/artifacts/11999831137)** · [successful Windows run](https://github.com/frankShan001/CutVoke/actions/runs/38788916823) · [screenshots and test evidence](https://github.com/frankShan001/CutVoke/actions/runs/38788916823/artifacts/11999596346)
+**[Download 0.3.1 portable](https://github.com/frankShan001/CutVoke/actions/runs/38845496400/artifacts/12022894966)** · [successful Windows run](https://github.com/frankShan001/CutVoke/actions/runs/38845496400) · [screenshots and test evidence](https://github.com/frankShan001/CutVoke/actions/runs/38845496400/artifacts/12023445833)
 
-The Actions download contains `CutVoke-0.3.1-windows-x64-portable.zip`, `SHA256SUMS.txt`, `download-info.json` and `windows-verification.json`. Extract the portable ZIP completely to a writable folder and double-click **CutVoke.exe**. No installer, administrator permission, Python, Node.js or system FFmpeg configuration is needed. GitHub login may be required to download; this artifact expires on **2027-01-13**.
+The Actions download contains `CutVoke-0.3.1-windows-x64-portable.zip`, `SHA256SUMS.txt`, `download-info.json` and `windows-verification.json`. Extract the portable ZIP completely to a writable folder and double-click **CutVoke.exe**. No installer, administrator permission, Python, Node.js or system FFmpeg configuration is needed. GitHub login may be required to download; this artifact expires on **2027-01-14**.
 
 | Portable ZIP | Value |
 | --- | --- |
 | Filename | `CutVoke-0.3.1-windows-x64-portable.zip` |
-| Size | **380,755,991 bytes / 363.1 MiB** |
-| SHA256 of this inner portable ZIP | `13410b6a6c1aedff581f5a42143f22c7f35f6526bf2ee3ab461a4594c7680b73` |
-| Build commit | `1fd2f1fcb48c2c9af54555c558e40354812fc786` |
-| Actions run | `38788916823` |
+| Size | **380,760,157 bytes / 363.1 MiB** |
+| SHA256 of this inner portable ZIP | `2aab6699ee1644f1afe7d6daa4afa9d1fd99311838c46fc4bb4c6ad202cc1dbc` |
+| Build commit | `fdec479c4acbc3c685a5c8adbe8ec91621a7c194` |
+| Actions run | `38845496400` |
 | Signature | Unsigned CutVoke candidate; Windows may display SmartScreen |
 
 The checksum above is for the named **portable ZIP**, not GitHub's outer artifact download. It can be checked in PowerShell with `Get-FileHash -Algorithm SHA256 .\CutVoke-0.3.1-windows-x64-portable.zip`. `build-info.json` and `file-manifest.json` inside the app record component versions and file hashes. There is no formal binary Release/tag yet.
@@ -39,7 +39,14 @@ Basic local import, editing, preview and MP4 export work without an AI account. 
 
 ## macOS (arm64 / x64)
 
-Get the architecture-specific Actions artifact from the [native package workflow](https://github.com/frankShan001/CutVoke/actions/workflows/unix-packages.yml). Only a successful **Upload verified download** step produces a user download. The outer Actions ZIP contains the distribution archive, `SHA256SUMS.txt`, `download-info.json`, native dependency/signature evidence and a platform verification report. GitHub sign-in may be required; artifacts are retained for 90 days. These candidates are not formal Releases/tags.
+**Verified 0.3.1 downloads:** [successful native run 38845496409](https://github.com/frankShan001/CutVoke/actions/runs/38845496409), build `fdec479c4acbc3c685a5c8adbe8ec91621a7c194`. GitHub sign-in may be required; this download expires on **2027-01-14**.
+
+| Inner archive / download | Size | SHA256 of the inner archive | Evidence |
+| --- | --- | --- | --- |
+| [CutVoke-0.3.1-macos-arm64.zip](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12022962244) | 352,156,692 bytes / 335.8 MiB | `24b4c0615618cabf5a641d0aa5abc0b76a5bf768b9291001c0b90fd557b0576b` | [arm64 screenshots/reports](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12022249773) |
+| [CutVoke-0.3.1-macos-x64.zip](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023640599) | 422,388,587 bytes / 402.8 MiB | `93116f49ca982398766abb20efc580bc1f6282581885b1cbb6b95a1a4f7d1854` | [Intel screenshots/reports](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023680611) |
+
+Only a successful **Upload verified download** step in the [native package workflow](https://github.com/frankShan001/CutVoke/actions/workflows/unix-packages.yml) produces a user download. The outer Actions ZIP contains the distribution archive, `SHA256SUMS.txt`, `download-info.json`, native dependency/signature evidence and a platform verification report. These candidates are not formal Releases/tags. The [durable verification record](../development/native-packages-verification.json) also records the outer artifact hashes; the table above hashes the inner named ZIP. On macOS use `shasum -a 256 CutVoke-0.3.1-macos-arm64.zip` (or the x64 filename).
 
 1. Apple Silicon (M-series): choose **CutVoke-macos-arm64**. Intel: choose **CutVoke-macos-x64**. These are separate native builds; no Rosetta requirement is introduced for Apple Silicon.
 2. Extract the Actions download, then the `CutVoke-0.3.1-macos-<arch>.zip` inside it. Keep `START-HERE.txt`, hashes and `licenses/` for reference/redistribution.
@@ -55,7 +62,9 @@ Data uses **`~/Library/Application Support/CutVoke/`**, outside the `.app`. The 
 
 ## Linux (x64)
 
-Get **CutVoke-linux-x64** from the same [native package workflow](https://github.com/frankShan001/CutVoke/actions/workflows/unix-packages.yml). Extract the outer Actions ZIP, then preserve executable permissions and symlinks when extracting the inner archive:
+**[Download verified CutVoke-linux-x64](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023097854)** · [Linux screenshots/reports](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023600328) · [successful native run](https://github.com/frankShan001/CutVoke/actions/runs/38845496409).
+
+The inner `CutVoke-0.3.1-linux-x64.tar.gz` is **359,522,533 bytes / 342.9 MiB**, SHA256 **`c8df79f6a184b9dcf5d12506516db4ef2fca7073d6e091de640b532023010662`**. It uses the same build commit and expiry as the Mac downloads above. Check with `sha256sum CutVoke-0.3.1-linux-x64.tar.gz`; this hashes the inner tar.gz, not the outer Actions ZIP. Extract the outer ZIP, then preserve executable permissions and symlinks when extracting the inner archive:
 
 ```bash
 tar -xzf CutVoke-0.3.1-linux-x64.tar.gz
@@ -104,9 +113,9 @@ Use a new output directory for each demo. Open `http://127.0.0.1:8787` and selec
 | --- | --- |
 | Linux cloud, Python 3.12.14, Node 24.19.0, Chromium 154.0.8037.57, Debian FFmpeg 7.1.5 | Real stdio MCP import, Web availability/thumbnails, manual caption editing, playback, GUI MP4 export and full decode; the 12-second community-transition demo also completes preview/export/package and audio measurements |
 | Ubuntu 24.04 CI, Python 3.10 / 3.12 / 3.13, Node 24, apt FFmpeg | The [CI workflow](../../.github/workflows/ci.yml) runs backend regressions, browser editing and installed-wheel checks; use the status for the exact commit being installed |
-| Windows Server 2022 x64, packaged 0.3.1 portable, Python 3.13.16, Electron 44.5.1, bundled FFmpeg 7.1.5 | [Run 38788916823](https://github.com/frankShan001/CutVoke/actions/runs/38788916823): shipped ZIP extraction in Chinese/space paths, visible GUI and frozen health, eleven languages, real media upload + stdio MCP, playback, GUI export/full H.264/AAC decode, restart, duplicate/port conflict, shutdown and real ACL failure dialog with unchanged DB. Native normal startup has no QA/debug flags; PE manifests use asInvoker. |
+| Windows Server 2022 x64, packaged 0.3.1 portable, Python 3.13.16, Electron 44.5.1, bundled FFmpeg 7.1.5 | [Run 38845496400](https://github.com/frankShan001/CutVoke/actions/runs/38845496400): shipped ZIP extraction in Chinese/space paths, visible GUI and frozen health, eleven languages, real media upload + stdio MCP, playback, GUI export/full H.264/AAC decode, restart, duplicate/port conflict, shutdown and real ACL failure dialog with unchanged DB. Native normal startup has no QA/debug flags; PE manifests use asInvoker. |
 | Windows 10/11 devices, manual picker/drag behavior, device audio/GPU and SmartScreen | Not manually accepted on the user's computer by this workflow; automated server evidence is not a substitute for those device-specific checks |
-| macOS 15 arm64 / Intel and Ubuntu 22.04 x64 native distributions | See the native package verification record below for the exact build and successful runs. Automated extracted-archive GUI, frozen backend, MCP, offline resources, import/preview/export/full decode and lifecycle checks; human audio/GPU and quarantined Mac download launch remain separate. |
+| macOS 15 arm64 / Intel and Ubuntu 22.04 x64 native distributions | See the [native package verification record](../development/native-packages-verification.json) for the exact build and successful runs. Automated extracted-archive GUI, frozen backend, MCP, offline resources, import/preview/export/full decode and lifecycle checks; human audio/GPU and quarantined Mac download launch remain separate. |
 
 FFmpeg 6.1 remains part of the existing Ubuntu regression path. FFmpeg 7.1's `setpts` clears frame-rate metadata: the renderer restores CFR after retiming and uses the explicit sequence rate when assembling animation frames. A cached behavior probe enables the extra xfade normalization only when needed, preserving the last alpha frame and short source handles on builds such as 6.1. Upgrading FFmpeg to hide an invalid graph is not required. A distribution's version number alone does not guarantee the required codecs or filters.
 
@@ -131,4 +140,4 @@ The project version is aligned at **0.3.1** in Python, MCP and desktop metadata.
 
 源码安装需 Python 3.10+、Node.js 20+ 和具备所需编解码器/滤镜的 FFmpeg、ffprobe。先激活虚拟环境，再安装 Python 包、运行 Web 的 `npm ci` 和构建，最后执行 `cutvoke doctor --json`。
 
-云端已分别完成 Linux 源码流程和 Windows Server 2022 便携成品自动验收；没有用 Linux 检查代替 Windows 运行证据。旧 Windows 安装包和用户设备的人工体验仍需各自验收；Mac/Linux 新包及签名、沙箱边界见上方专节。源码版默认个人数据目录只读时，给 Web 和 MCP 指定同一个可写 `--data`；便携版默认使用 exe 旁的数据目录。上表列明准确范围。
+云端已分别完成 Windows Server 2022、macOS 15（arm64/Intel）和 Ubuntu 22.04 x64 发行包真实解压后的自动验收；用户设备的人工体验仍需各自验收。Mac 签名和 Linux 沙箱边界见上方专节。源码版默认个人数据目录只读时，给 Web 和 MCP 指定同一个可写 `--data`；Windows 便携版使用 exe 旁的数据目录，Mac/Linux 使用上方系统数据位置。更新程序时保留数据。上表列明准确范围。
