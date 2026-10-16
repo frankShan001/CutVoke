@@ -150,4 +150,20 @@ function terminateOwnedApplication(pid) {
   for (const child of owned) if (alive(child.pid)) process.kill(child.pid, "SIGKILL");
   if (alive(pid)) process.kill(pid, "SIGKILL");
 }
-module.exports = { verifyNormalLaunch, verifyReadonlyStorage, verifyPlatformStorage, terminateOwnedApplication };
+async function verifyCloseDuringStartup({ executable, env, out, report }) {
+  const hook = path.join(out, "close-during-loading.cjs");
+  const data = path.join(out, "启动中关闭 数据");
+  fs.writeFileSync(hook, 'module.exports = async () => { throw new Error("Unexpected ready state"); };\nmodule.exports.loading = async ({ window }) => { window.close(); };\n');
+  const child = start(executable, { ...env, CUTVOKE_HOME: data, CUTVOKE_DESKTOP_QA: "1",
+    CUTVOKE_DESKTOP_QA_SHOW: "1", CUTVOKE_DESKTOP_QA_SCRIPT: hook }, out, "close-during-startup");
+  try {
+    await waitFor(() => { if (child.launchError) throw child.launchError; return child.exitCode !== null; }, 30_000);
+    assert.equal(child.exitCode, 0);
+    assert.equal(fs.existsSync(path.join(data, "profile/logs/engine.log")), false);
+    assert.equal(fs.existsSync(path.join(data, "data/projects.sqlite")), false);
+    report.checks.closeDuringLoadingDoesNotStartOrLeakBackend = true;
+  } finally {
+    if (child.exitCode === null && child.signalCode === null) terminateOwnedApplication(child.pid);
+  }
+}
+module.exports = { verifyNormalLaunch, verifyReadonlyStorage, verifyPlatformStorage, verifyCloseDuringStartup, terminateOwnedApplication };
