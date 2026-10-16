@@ -1,0 +1,16 @@
+[
+  {
+    "name": "openssl",
+    "version": "4.0.3",
+    "archive": "openssl-4.0.3.tar.gz",
+    "url": "https://github.com/openssl/openssl/releases/download/openssl-4.0.3/openssl-4.0.3.tar.gz",
+    "sha256": "325b5c806167c13b40b1ffeadfe0248197c00eccc4cf123ec1e28d2d2fd216d9"
+  },
+  {
+    "name": "cryptography",
+    "version": "50.0.2",
+    "archive": "cryptography-50.0.2.tar.gz",
+    "url": "https://files.pythonhosted.org/packages/source/c/cryptography/cryptography-50.0.2.tar.gz",
+    "sha256": "7b46165bb56eb4704e2eaaf86f3c940d19154535d9b0ca7d6d590b04060e00d5"
+  }
+]

@@ -14,6 +14,16 @@ remain fixed. The backend's binary-only, hash-checked lock adds macOS's required
 both as the desktop service and as stdio MCP. The launcher chooses the native
 engine filename rather than assuming `.exe`.
 
+Cryptography 50 no longer publishes Intel macOS wheels. Intel uses the same
+50.0.2 version compiled from its SHA256-pinned sdist, linked to a locally built
+static OpenSSL 4.0.3 with a macOS 13 deployment target. Its PEP 517 build backend
+and Python build dependencies are hash-locked; Rust dependencies use the
+upstream Cargo.lock. The wheel is hashed before installation and an Ed25519
+sign/verify smoke check runs before freezing. Corresponding OpenSSL/cryptography
+sources, Rust vendor sources/notices, the exact recipe and compiler information
+are included. No Homebrew OpenSSL path or Rust compiler is required at runtime.
+See [upstream static build instructions](https://cryptography.io/en/50.0.2/installation/#building-cryptography-on-macos).
+
 `prepare_desktop_unix.py` verifies official Electron archives against checksums
 from its locked npm package, then extracts with permissions and symlinks intact.
 `build_ffmpeg_unix.sh` uses the same seven SHA256-pinned upstream sources as the
