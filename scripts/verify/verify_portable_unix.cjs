@@ -18,7 +18,7 @@ const save = () => fs.writeFileSync(path.join(out, "verification.json"), JSON.st
 function run(exe, args, env) { return execFileSync(exe, args, { env, encoding: "utf8", windowsHide: true, timeout: 120_000, maxBuffer: 10 * 1024 * 1024 }); }
 function cleanEnvironment() {
   const env = { ...process.env };
-  for (const key of Object.keys(env)) if (/^(CUTVOKE_|PYTHON|VIRTUAL_ENV$|ELECTRON_RUN_AS_NODE$|__COMPAT_LAYER$)/i.test(key)) delete env[key];
+  for (const key of Object.keys(env)) if (/^(CUTVOKE_|PYTHON|VIRTUAL_ENV$|ELECTRON_RUN_AS_NODE$|__COMPAT_LAYER$|LD_|DYLD_|_PYI_|__PYVENV_LAUNCHER__)/i.test(key)) delete env[key];
   env.PATH = path.join(out, "empty-runtime-path");
   fs.mkdirSync(env.PATH, { recursive: true });
   env.CUTVOKE_HOME = path.join(out, "用户 数据");
@@ -243,6 +243,7 @@ async function main() {
     report.checks.windowCloseStopsOwnedBackend = true;
     report.storage = { database: path.join(data, "data/projects.sqlite"), profile, cache: cache.directory };
     await verifyNormalLaunch({ executable, env, out, data, expectedProject: before, projectId, report });
+    await verifyPlatformStorage({ executable, env, out, folder, report });
     await verifyReadonlyStorage({ executable, env, out, data, profile, report });
     report.passed = true;
   } finally {
@@ -255,7 +256,7 @@ async function main() {
   fs.copyFileSync(path.join(out, "verification.json"), path.join(root, "dist/portable/windows-verification.json"));
   console.log(JSON.stringify(report.checks, null, 2));
 }
-const { verifyNormalLaunch, verifyReadonlyStorage } = require("./verify_unix_lifecycle.cjs");
+const { verifyNormalLaunch, verifyReadonlyStorage, verifyPlatformStorage } = require("./verify_unix_lifecycle.cjs");
 main().catch(error => {
   report.error = error.stack; save(); console.error(error);
   // Keep remote failures diagnosable even when artifact downloads are unavailable.
