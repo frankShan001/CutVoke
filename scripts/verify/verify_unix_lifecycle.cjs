@@ -152,18 +152,22 @@ function terminateOwnedApplication(pid) {
 }
 async function verifyCloseDuringStartup({ executable, env, out, report }) {
   const hook = path.join(out, "close-during-loading.cjs");
-  const data = path.join(out, "启动中关闭 数据");
-  fs.writeFileSync(hook, 'module.exports = async () => { throw new Error("Unexpected ready state"); };\nmodule.exports.loading = async ({ window }) => { window.close(); };\n');
-  const child = start(executable, { ...env, CUTVOKE_HOME: data, CUTVOKE_DESKTOP_QA: "1",
-    CUTVOKE_DESKTOP_QA_SHOW: "1", CUTVOKE_DESKTOP_QA_SCRIPT: hook }, out, "close-during-startup");
-  try {
-    await waitFor(() => { if (child.launchError) throw child.launchError; return child.exitCode !== null; }, 30_000);
-    assert.equal(child.exitCode, 0);
-    assert.equal(fs.existsSync(path.join(data, "profile/logs/engine.log")), false);
-    assert.equal(fs.existsSync(path.join(data, "data/projects.sqlite")), false);
-    report.checks.closeDuringLoadingDoesNotStartOrLeakBackend = true;
-  } finally {
-    if (child.exitCode === null && child.signalCode === null) terminateOwnedApplication(child.pid);
+  for (const delay of [0, 150]) {
+    const data = path.join(out, `启动中关闭 数据 ${delay}`);
+    fs.writeFileSync(hook, `module.exports = async () => new Promise(() => {});\nmodule.exports.loading = async ({ window }) => { ${delay ? `setTimeout(() => window.close(), ${delay});` : 'window.close();'} };\n`);
+    const child = start(executable, { ...env, CUTVOKE_HOME: data, CUTVOKE_DESKTOP_QA: "1",
+      CUTVOKE_DESKTOP_QA_SHOW: "1", CUTVOKE_DESKTOP_QA_SCRIPT: hook }, out, `close-during-startup-${delay}`);
+    try {
+      await waitFor(() => { if (child.launchError) throw child.launchError; return child.exitCode !== null; }, 30_000);
+      assert.equal(child.exitCode, 0);
+      assert.equal(fs.existsSync(path.join(data, "profile/logs/engine.log")), delay > 0);
+      const processes = execFileSync("/bin/ps", ["-axo", "command="], { encoding: "utf8" });
+      assert.equal(processes.split("\n").some(line => line.includes("cutvoke-engine") && line.includes(data)), false);
+    } finally {
+      if (child.exitCode === null && child.signalCode === null) terminateOwnedApplication(child.pid);
+      fs.rmSync(data, { recursive: true, force: true });
+    }
   }
+  report.checks.closeDuringLoadingDoesNotStartOrLeakBackend = true;
 }
 module.exports = { verifyNormalLaunch, verifyReadonlyStorage, verifyPlatformStorage, verifyCloseDuringStartup, terminateOwnedApplication };

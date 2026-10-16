@@ -40,7 +40,8 @@ if not (output / 'SHA256.json').exists():
         assert hashlib.sha256(archive.read_bytes()).hexdigest() == item['sha256'], item['name']
         with tarfile.open(archive) as source:
             source.extractall(work, filter='data')
-    env = {**os.environ, 'MACOSX_DEPLOYMENT_TARGET': '13.0'}
+    env = {**os.environ, 'MACOSX_DEPLOYMENT_TARGET': '13.0',
+           'PATH': str(Path(sys.executable).parent) + os.pathsep + os.environ.get('PATH', '')}
     openssl = work / 'openssl-4.0.3'
     prefix = work / 'openssl-static'
     subprocess.run(['./Configure', 'darwin64-x86_64-cc', 'no-shared', 'no-tests', '-fPIC',
