@@ -49,6 +49,11 @@ for notice in json.loads((notice_root / 'provenance.json').read_text('utf-8')):
 shutil.copytree(notice_root, licenses / 'runtime-components')
 shutil.copytree(root / '.artifacts/portable-ffmpeg/licenses', licenses / 'ffmpeg')
 shutil.copyfile(root / '.artifacts/portable-ffmpeg/Corresponding-Source.zip', licenses / 'ffmpeg/Corresponding-Source.zip')
+intel_crypto = root / '.artifacts/intel-crypto'
+if system == 'macos' and arch == 'x64':
+    shutil.copytree(intel_crypto / 'licenses', licenses / 'intel-cryptography')
+    shutil.copyfile(intel_crypto / 'Corresponding-Source.zip', licenses / 'intel-cryptography/Corresponding-Source.zip')
+    shutil.copyfile(intel_crypto / 'build-info.json', licenses / 'intel-cryptography/build-info.json')
 shutil.copyfile(root / 'desktop/ffmpeg-sources.json', licenses / 'ffmpeg-sources.json')
 python_licenses = [Path(sys.base_prefix) / 'LICENSE.txt',
                    Path(sys.base_prefix) / 'Resources/English.lproj/License.rtf',
@@ -103,6 +108,8 @@ info = {'version': version, 'commit': commit, 'platform': f'{system}-{arch}',
         'dependencies': dependencies,
         'openssl': {'python': ssl.OPENSSL_VERSION, 'cryptography': openssl_backend.openssl_version_text()},
         'runUrl': f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'frankShan001/CutVoke')}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}"}
+if system == 'macos' and arch == 'x64':
+    info['nativeCryptography'] = json.loads((intel_crypto / 'build-info.json').read_text())
 (staging / 'build-info.json').write_text(json.dumps(info, indent=2) + '\n', 'utf-8')
 # Check that the packaged binaries are real Windows x64 PE executables.
 for relative in (('CutVoke.exe', 'resources/engine/cutvoke-engine.exe', 'resources/engine/_internal/bin/ffmpeg.exe', 'resources/engine/_internal/bin/ffprobe.exe') if system == 'windows' else []):

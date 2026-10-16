@@ -89,6 +89,25 @@ jobs:
       - name: Prepare isolated frozen backend
         run: |
           python -m venv .artifacts/venv-portable
+      - name: Restore verified Intel cryptography wheel
+        if: matrix.target == 'macos-x64'
+        id: intel-crypto-cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .artifacts/intel-crypto
+          key: crypto-macos-x64-python313-${{ hashFiles('desktop/intel-crypto-sources.json', 'desktop/requirements-intel-crypto.lock', 'desktop/requirements-build.lock', 'scripts/build/build_macos_intel_crypto.py') }}
+      - name: Build current cryptography for Intel from pinned source and static OpenSSL
+        if: matrix.target == 'macos-x64'
+        run: .artifacts/venv-portable/bin/python scripts/build/build_macos_intel_crypto.py
+      - name: Cache verified Intel cryptography before application acceptance
+        if: matrix.target == 'macos-x64' && steps.intel-crypto-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: .artifacts/intel-crypto
+          key: ${{ steps.intel-crypto-cache.outputs.cache-primary-key }}
+      - name: Install locked binary backend dependencies
+        if: matrix.target != 'macos-x64'
+        run: |
           .artifacts/venv-portable/bin/python -m pip install --require-hashes --only-binary=:all: -r desktop/requirements-build.lock
       - name: Build Web editor
         working-directory: web/app
