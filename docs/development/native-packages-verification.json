@@ -1,0 +1,849 @@
+{
+  "verifiedAt": "2026-10-16",
+  "repository": "frankShan001/CutVoke",
+  "version": "0.3.1",
+  "previousVerifiedMain": "205f5012cc2b36406342287075236f9cc4b926ba",
+  "buildCommit": "fdec479c4acbc3c685a5c8adbe8ec91621a7c194",
+  "distribution": "GitHub Actions candidates; no Release or tag",
+  "archiveChecksumScope": "download.sha256 hashes the inner named platform archive, not GitHub's outer artifact ZIP; outer hashes are recorded separately.",
+  "workflowRuns": [
+    {
+      "id": 38845496409,
+      "url": "https://github.com/frankShan001/CutVoke/actions/runs/38845496409",
+      "name": "macOS and Linux packages",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 116795301558,
+          "name": "Build and accept linux-x64",
+          "conclusion": "success"
+        },
+        {
+          "id": 116795301686,
+          "name": "Build and accept macos-x64",
+          "conclusion": "success"
+        },
+        {
+          "id": 116795301725,
+          "name": "Build and accept macos-arm64",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 38845496400,
+      "url": "https://github.com/frankShan001/CutVoke/actions/runs/38845496400",
+      "name": "Windows portable",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 116794961368,
+          "name": "Build redistributable FFmpeg x64",
+          "conclusion": "success"
+        },
+        {
+          "id": 116795048283,
+          "name": "Package and run Windows x64 portable",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "sourceCI": {
+    "id": 38845496430,
+    "url": "https://github.com/frankShan001/CutVoke/actions/runs/38845496430",
+    "commit": "fdec479c4acbc3c685a5c8adbe8ec91621a7c194",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 116795322567,
+        "name": "Browser editing workflow",
+        "conclusion": "success"
+      },
+      {
+        "id": 116795322766,
+        "name": "Python 3.12",
+        "conclusion": "success"
+      },
+      {
+        "id": 116795322890,
+        "name": "Python 3.10",
+        "conclusion": "success"
+      },
+      {
+        "id": 116795322932,
+        "name": "Python 3.13",
+        "conclusion": "success"
+      }
+    ],
+    "browserResult": "  99 passed (16.7m)",
+    "followup": "The subsequent documentation-only main commit changes no packaged bytes; its separate CI terminal status and final main SHA are included in the delivery response."
+  },
+  "platforms": [
+    {
+      "platform": "macos-arm64",
+      "passed": true,
+      "runner": "macos-15",
+      "download": {
+        "version": "0.3.1",
+        "commit": "fdec479c4acbc3c685a5c8adbe8ec91621a7c194",
+        "platform": "macos-arm64",
+        "signature": "ad-hoc; no Developer ID; not notarized",
+        "python": "3.13.16",
+        "electron": "44.5.1",
+        "ffmpeg": "7.1.5 (own reproducible GPLv3 build; corresponding source included)",
+        "dependencies": [
+          {
+            "name": "cryptography",
+            "version": "50.0.2",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "fonttools",
+            "version": "4.66.1",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "cffi",
+            "version": "2.0.0",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "pycparser",
+            "version": "3.0",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "pyinstaller",
+            "version": "6.22.3",
+            "role": "embedded bootloader"
+          },
+          {
+            "name": "lucide-react",
+            "version": "0.454.0",
+            "license": "ISC"
+          },
+          {
+            "name": "react",
+            "version": "19.3.0",
+            "license": "MIT"
+          },
+          {
+            "name": "react-dom",
+            "version": "19.3.0",
+            "license": "MIT"
+          },
+          {
+            "name": "scheduler",
+            "version": "0.28.0",
+            "license": "MIT"
+          }
+        ],
+        "openssl": {
+          "python": "OpenSSL 3.5.9 29 Sep 2026",
+          "cryptography": "OpenSSL 4.0.3 29 Sep 2026"
+        },
+        "runUrl": "https://github.com/frankShan001/CutVoke/actions/runs/38845496409",
+        "filename": "CutVoke-0.3.1-macos-arm64.zip",
+        "bytes": 352156692,
+        "sha256": "24b4c0615618cabf5a641d0aa5abc0b76a5bf768b9291001c0b90fd557b0576b",
+        "files": 5196
+      },
+      "downloadArtifact": {
+        "id": 12022962244,
+        "name": "CutVoke-macos-arm64",
+        "url": "https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12022962244",
+        "outerArtifactBytes": 352287687,
+        "outerArtifactSHA256": "b6c4fd6a3b10200b8ad6a5fee2a1155514aa9b36b2e3dd931ba327b3979bd777",
+        "expiresAt": "2027-01-14T03:26:07Z"
+      },
+      "evidenceArtifact": {
+        "id": 12022249773,
+        "name": "macos-arm64-evidence",
+        "url": "https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12022249773",
+        "outerArtifactBytes": 1873011,
+        "outerArtifactSHA256": "4dd51d6c2ae9c728a2ed664bcbbc1221b310c9bca04ad6421b89b666b84473ad",
+        "expiresAt": "2027-01-14T03:26:07Z"
+      },
+      "checks": {
+        "extractedZipIntegrity": true,
+        "noSystemPythonNodeOrFFmpegRequired": true,
+        "visibleGUIAndHealthyFrozenBackend": true,
+        "builtinResourcesQualifiedAndOffline": true,
+        "elevenInterfaceLanguages": [
+          "zh-CN",
+          "zh-TW",
+          "en",
+          "ja",
+          "ko",
+          "es",
+          "fr",
+          "de",
+          "pt-BR",
+          "ru",
+          "ar"
+        ],
+        "guiMediaImportAndSharedStdioMCP": true,
+        "actualPreviewPlayback": true,
+        "guiExportAndFullVideoAudioDecode": true,
+        "duplicateLaunchAndOccupiedDefaultPort": true,
+        "restartPreservesProjectAndLanguage": true,
+        "windowCloseStopsOwnedBackend": true,
+        "normalLaunchWithoutQaOrDebugFlags": true,
+        "platformDefaultDataOutsideReadonlyApplication": true,
+        "closeDuringLoadingDoesNotStartOrLeakBackend": true,
+        "readonlyDataShowsNativeErrorAndPreservesDatabase": true
+      },
+      "nativeWindow": {
+        "sandboxDisabled": false,
+        "sandbox": true,
+        "visible": true,
+        "offscreen": false,
+        "handle": "807e0d0024010000",
+        "bounds": {
+          "x": 0,
+          "y": 25,
+          "width": 1024,
+          "height": 682
+        }
+      },
+      "builtinResources": {
+        "qualifiedPresets": 189,
+        "qualifiedStickers": 612,
+        "resourceCount": 843,
+        "version": "1.38.1",
+        "offlineAvailable": true
+      },
+      "nativeAudit": {
+        "architecture": "arm64",
+        "actualOS": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+        "nativeImages": 78,
+        "containedSymlinks": 18,
+        "minimumMacOS": "13.0 (audited deployment versions; execution on macOS 15 only)",
+        "strictDeepCodesignValid": true,
+        "adHocSignature": true,
+        "developerTeamIdentity": "not set",
+        "gatekeeper": {
+          "exitCode": 3,
+          "output": "/Users/runner/work/CutVoke/CutVoke/.artifacts/acceptance/macos-arm64/中文 空格路径/CutVoke-0.3.1-macos-arm64/CutVoke.app: rejected\n",
+          "quarantinedFinderLaunchAccepted": false
+        },
+        "hostSdkDiagnostic": {
+          "exitCode": 1,
+          "output": "error: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/otool-classic: can't open file: /Users/runner/work/CutVoke/CutVoke/.artifacts/acceptance/macos-arm64/中文 空格路径/CutVoke-0.3.1-macos-arm64/CutVoke.app/Contents/Frameworks/CutVoke Helper (GPU).app/Contents/MacOS/CutVoke Helper  (No such file or directory)\n"
+        }
+      },
+      "platformDefaultStorage": {
+        "root": "/Users/runner/Library/Application Support/CutVoke",
+        "database": "/Users/runner/Library/Application Support/CutVoke/data/projects.sqlite",
+        "applicationDirectoryReadOnly": true
+      },
+      "export": {
+        "streams": [
+          {
+            "codec": "h264",
+            "type": "video"
+          },
+          {
+            "codec": "aac",
+            "type": "audio"
+          }
+        ],
+        "duration": "3.000000"
+      }
+    },
+    {
+      "platform": "macos-x64",
+      "passed": true,
+      "runner": "macos-15-intel",
+      "download": {
+        "version": "0.3.1",
+        "commit": "fdec479c4acbc3c685a5c8adbe8ec91621a7c194",
+        "platform": "macos-x64",
+        "signature": "ad-hoc; no Developer ID; not notarized",
+        "python": "3.13.16",
+        "electron": "44.5.1",
+        "ffmpeg": "7.1.5 (own reproducible GPLv3 build; corresponding source included)",
+        "dependencies": [
+          {
+            "name": "cryptography",
+            "version": "50.0.2",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "fonttools",
+            "version": "4.66.1",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "cffi",
+            "version": "2.0.0",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "pycparser",
+            "version": "3.0",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "pyinstaller",
+            "version": "6.22.3",
+            "role": "embedded bootloader"
+          },
+          {
+            "name": "lucide-react",
+            "version": "0.454.0",
+            "license": "ISC"
+          },
+          {
+            "name": "react",
+            "version": "19.3.0",
+            "license": "MIT"
+          },
+          {
+            "name": "react-dom",
+            "version": "19.3.0",
+            "license": "MIT"
+          },
+          {
+            "name": "scheduler",
+            "version": "0.28.0",
+            "license": "MIT"
+          }
+        ],
+        "openssl": {
+          "python": "OpenSSL 3.5.9 29 Sep 2026",
+          "cryptography": "OpenSSL 4.0.3 29 Sep 2026"
+        },
+        "runUrl": "https://github.com/frankShan001/CutVoke/actions/runs/38845496409",
+        "nativeCryptography": {
+          "cryptography": "50.0.2",
+          "openssl": "4.0.3",
+          "architecture": "x64",
+          "deploymentTarget": "13.0",
+          "inputs": [
+            {
+              "name": "openssl",
+              "version": "4.0.3",
+              "archive": "openssl-4.0.3.tar.gz",
+              "url": "https://github.com/openssl/openssl/releases/download/openssl-4.0.3/openssl-4.0.3.tar.gz",
+              "sha256": "325b5c806167c13b40b1ffeadfe0248197c00eccc4cf123ec1e28d2d2fd216d9"
+            },
+            {
+              "name": "cryptography",
+              "version": "50.0.2",
+              "archive": "cryptography-50.0.2.tar.gz",
+              "url": "https://files.pythonhosted.org/packages/source/c/cryptography/cryptography-50.0.2.tar.gz",
+              "sha256": "7b46165bb56eb4704e2eaaf86f3c940d19154535d9b0ca7d6d590b04060e00d5"
+            }
+          ],
+          "staticOpenSSL": true,
+          "staticProviders": true,
+          "toolchain": "rustc 1.98.0 (88d9e12ae 2026-08-18)\n\ncargo 1.98.0 (797e8a9bc 2026-08-05)\n\nApple clang version 17.0.0 (clang-1700.0.13.5)\nTarget: x86_64-apple-darwin24.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin\n"
+        },
+        "filename": "CutVoke-0.3.1-macos-x64.zip",
+        "bytes": 422388587,
+        "sha256": "93116f49ca982398766abb20efc580bc1f6282581885b1cbb6b95a1a4f7d1854",
+        "files": 5260
+      },
+      "downloadArtifact": {
+        "id": 12023640599,
+        "name": "CutVoke-macos-x64",
+        "url": "https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023640599",
+        "outerArtifactBytes": 422522322,
+        "outerArtifactSHA256": "282deb423262b85402c0d2525e6d030e754b927ed71177a54b490a811f014fae",
+        "expiresAt": "2027-01-14T03:26:07Z"
+      },
+      "evidenceArtifact": {
+        "id": 12023680611,
+        "name": "macos-x64-evidence",
+        "url": "https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023680611",
+        "outerArtifactBytes": 2149405,
+        "outerArtifactSHA256": "0835352353e2c6cad0723b427c13fed7d7ec9519bb54856a87fbb325873c7cd2",
+        "expiresAt": "2027-01-14T03:26:07Z"
+      },
+      "checks": {
+        "extractedZipIntegrity": true,
+        "noSystemPythonNodeOrFFmpegRequired": true,
+        "visibleGUIAndHealthyFrozenBackend": true,
+        "builtinResourcesQualifiedAndOffline": true,
+        "elevenInterfaceLanguages": [
+          "zh-CN",
+          "zh-TW",
+          "en",
+          "ja",
+          "ko",
+          "es",
+          "fr",
+          "de",
+          "pt-BR",
+          "ru",
+          "ar"
+        ],
+        "guiMediaImportAndSharedStdioMCP": true,
+        "actualPreviewPlayback": true,
+        "guiExportAndFullVideoAudioDecode": true,
+        "duplicateLaunchAndOccupiedDefaultPort": true,
+        "restartPreservesProjectAndLanguage": true,
+        "windowCloseStopsOwnedBackend": true,
+        "normalLaunchWithoutQaOrDebugFlags": true,
+        "platformDefaultDataOutsideReadonlyApplication": true,
+        "closeDuringLoadingDoesNotStartOrLeakBackend": true,
+        "readonlyDataShowsNativeErrorAndPreservesDatabase": true
+      },
+      "nativeWindow": {
+        "sandboxDisabled": false,
+        "sandbox": true,
+        "visible": true,
+        "offscreen": false,
+        "handle": "807e07002c010000",
+        "bounds": {
+          "x": 210,
+          "y": 45,
+          "width": 1500,
+          "height": 950
+        }
+      },
+      "builtinResources": {
+        "qualifiedPresets": 189,
+        "qualifiedStickers": 612,
+        "resourceCount": 843,
+        "version": "1.38.1",
+        "offlineAvailable": true
+      },
+      "nativeAudit": {
+        "architecture": "x86_64",
+        "actualOS": "macOS-15.7.9-x86_64-i386-64bit-Mach-O",
+        "nativeImages": 78,
+        "containedSymlinks": 18,
+        "minimumMacOS": "13.0 (audited deployment versions; execution on macOS 15 only)",
+        "strictDeepCodesignValid": true,
+        "adHocSignature": true,
+        "developerTeamIdentity": "not set",
+        "gatekeeper": {
+          "exitCode": 3,
+          "output": "/Users/runner/work/CutVoke/CutVoke/.artifacts/acceptance/macos-x64/中文 空格路径/CutVoke-0.3.1-macos-x64/CutVoke.app: rejected\n",
+          "quarantinedFinderLaunchAccepted": false
+        },
+        "hostSdkDiagnostic": {
+          "exitCode": 1,
+          "output": "error: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/otool-classic: can't open file: /Users/runner/work/CutVoke/CutVoke/.artifacts/acceptance/macos-x64/中文 空格路径/CutVoke-0.3.1-macos-x64/CutVoke.app/Contents/Frameworks/CutVoke Helper (GPU).app/Contents/MacOS/CutVoke Helper  (No such file or directory)\n"
+        }
+      },
+      "platformDefaultStorage": {
+        "root": "/Users/runner/Library/Application Support/CutVoke",
+        "database": "/Users/runner/Library/Application Support/CutVoke/data/projects.sqlite",
+        "applicationDirectoryReadOnly": true
+      },
+      "export": {
+        "streams": [
+          {
+            "codec": "h264",
+            "type": "video"
+          },
+          {
+            "codec": "aac",
+            "type": "audio"
+          }
+        ],
+        "duration": "3.000000"
+      }
+    },
+    {
+      "platform": "linux-x64",
+      "passed": true,
+      "runner": "ubuntu-22.04",
+      "download": {
+        "version": "0.3.1",
+        "commit": "fdec479c4acbc3c685a5c8adbe8ec91621a7c194",
+        "platform": "linux-x64",
+        "signature": "unsigned",
+        "python": "3.13.16",
+        "electron": "44.5.1",
+        "ffmpeg": "7.1.5 (own reproducible GPLv3 build; corresponding source included)",
+        "dependencies": [
+          {
+            "name": "cryptography",
+            "version": "50.0.2",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "fonttools",
+            "version": "4.66.1",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "cffi",
+            "version": "2.0.0",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "pycparser",
+            "version": "3.0",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "pyinstaller",
+            "version": "6.22.3",
+            "role": "embedded bootloader"
+          },
+          {
+            "name": "lucide-react",
+            "version": "0.454.0",
+            "license": "ISC"
+          },
+          {
+            "name": "react",
+            "version": "19.3.0",
+            "license": "MIT"
+          },
+          {
+            "name": "react-dom",
+            "version": "19.3.0",
+            "license": "MIT"
+          },
+          {
+            "name": "scheduler",
+            "version": "0.28.0",
+            "license": "MIT"
+          }
+        ],
+        "openssl": {
+          "python": "OpenSSL 3.0.2 15 Mar 2022",
+          "cryptography": "OpenSSL 4.0.3 29 Sep 2026"
+        },
+        "runUrl": "https://github.com/frankShan001/CutVoke/actions/runs/38845496409",
+        "filename": "CutVoke-0.3.1-linux-x64.tar.gz",
+        "bytes": 359522533,
+        "sha256": "c8df79f6a184b9dcf5d12506516db4ef2fca7073d6e091de640b532023010662",
+        "files": 5011
+      },
+      "downloadArtifact": {
+        "id": 12023097854,
+        "name": "CutVoke-linux-x64",
+        "url": "https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023097854",
+        "outerArtifactBytes": 359630760,
+        "outerArtifactSHA256": "5d9197cb0d6952d3d465d152b69556f96429725dba415b539d573244fa593dfd",
+        "expiresAt": "2027-01-14T03:26:07Z"
+      },
+      "evidenceArtifact": {
+        "id": 12023600328,
+        "name": "linux-x64-evidence",
+        "url": "https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023600328",
+        "outerArtifactBytes": 1960806,
+        "outerArtifactSHA256": "7675e56cf138ee9d5fb3d55862ad2804ff486c9b13981902f6a56ba5ad350fc4",
+        "expiresAt": "2027-01-14T03:26:07Z"
+      },
+      "checks": {
+        "extractedZipIntegrity": true,
+        "noSystemPythonNodeOrFFmpegRequired": true,
+        "visibleGUIAndHealthyFrozenBackend": true,
+        "builtinResourcesQualifiedAndOffline": true,
+        "elevenInterfaceLanguages": [
+          "zh-CN",
+          "zh-TW",
+          "en",
+          "ja",
+          "ko",
+          "es",
+          "fr",
+          "de",
+          "pt-BR",
+          "ru",
+          "ar"
+        ],
+        "guiMediaImportAndSharedStdioMCP": true,
+        "actualPreviewPlayback": true,
+        "guiExportAndFullVideoAudioDecode": true,
+        "duplicateLaunchAndOccupiedDefaultPort": true,
+        "restartPreservesProjectAndLanguage": true,
+        "windowCloseStopsOwnedBackend": true,
+        "normalLaunchWithoutQaOrDebugFlags": true,
+        "platformDefaultDataOutsideReadonlyApplication": true,
+        "closeDuringLoadingDoesNotStartOrLeakBackend": true,
+        "readonlyDataShowsNativeErrorAndPreservesDatabase": true
+      },
+      "nativeWindow": {
+        "sandboxDisabled": false,
+        "sandbox": true,
+        "visible": true,
+        "offscreen": false,
+        "handle": "03004000",
+        "bounds": {
+          "x": 1,
+          "y": 37,
+          "width": 1278,
+          "height": 950
+        }
+      },
+      "builtinResources": {
+        "qualifiedPresets": 189,
+        "qualifiedStickers": 612,
+        "resourceCount": 843,
+        "version": "1.38.1",
+        "offlineAvailable": true
+      },
+      "nativeAudit": {
+        "architecture": "x86_64",
+        "actualOS": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.35",
+        "nativeImages": 79,
+        "containedSymlinks": 0,
+        "auditedGLIBCRequirementCeiling": "2.35",
+        "lddNoMissingDependencies": true
+      },
+      "platformDefaultStorage": {
+        "root": "/home/runner/work/CutVoke/CutVoke/.artifacts/acceptance/linux-x64/XDG 系统 数据/CutVoke",
+        "database": "/home/runner/work/CutVoke/CutVoke/.artifacts/acceptance/linux-x64/XDG 系统 数据/CutVoke/data/projects.sqlite",
+        "applicationDirectoryReadOnly": true
+      },
+      "export": {
+        "streams": [
+          {
+            "codec": "h264",
+            "type": "video"
+          },
+          {
+            "codec": "aac",
+            "type": "audio"
+          }
+        ],
+        "duration": "3.000000"
+      }
+    },
+    {
+      "platform": "windows-x64",
+      "passed": true,
+      "runner": "windows-2022 (Windows Server 2022 x64)",
+      "download": {
+        "version": "0.3.1",
+        "commit": "fdec479c4acbc3c685a5c8adbe8ec91621a7c194",
+        "platform": "windows-x64",
+        "signature": "unsigned",
+        "python": "3.13.16",
+        "electron": "44.5.1",
+        "ffmpeg": "7.1.5 (own reproducible GPLv3 build; corresponding source included)",
+        "dependencies": [
+          {
+            "name": "cryptography",
+            "version": "50.0.2",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "fonttools",
+            "version": "4.66.1",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "cffi",
+            "version": "2.0.0",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "pycparser",
+            "version": "3.0",
+            "role": "Python runtime dependency"
+          },
+          {
+            "name": "pyinstaller",
+            "version": "6.22.3",
+            "role": "embedded bootloader"
+          },
+          {
+            "name": "lucide-react",
+            "version": "0.454.0",
+            "license": "ISC"
+          },
+          {
+            "name": "react",
+            "version": "19.3.0",
+            "license": "MIT"
+          },
+          {
+            "name": "react-dom",
+            "version": "19.3.0",
+            "license": "MIT"
+          },
+          {
+            "name": "scheduler",
+            "version": "0.28.0",
+            "license": "MIT"
+          }
+        ],
+        "openssl": {
+          "python": "OpenSSL 3.5.9 29 Sep 2026",
+          "cryptography": "OpenSSL 4.0.3 29 Sep 2026"
+        },
+        "runUrl": "https://github.com/frankShan001/CutVoke/actions/runs/38845496400",
+        "filename": "CutVoke-0.3.1-windows-x64-portable.zip",
+        "bytes": 380760157,
+        "sha256": "2aab6699ee1644f1afe7d6daa4afa9d1fd99311838c46fc4bb4c6ad202cc1dbc",
+        "files": 5008
+      },
+      "downloadArtifact": {
+        "id": 12022894966,
+        "name": "CutVoke-windows-x64-portable",
+        "url": "https://github.com/frankShan001/CutVoke/actions/runs/38845496400/artifacts/12022894966",
+        "outerArtifactBytes": 380774452,
+        "outerArtifactSHA256": "47e8c0a450846e4ca6db8b2ce61a1858efc9a94c679834a3aba88429dc523aac",
+        "expiresAt": "2027-01-14T03:26:07Z"
+      },
+      "evidenceArtifact": {
+        "id": 12023445833,
+        "name": "windows-portable-evidence",
+        "url": "https://github.com/frankShan001/CutVoke/actions/runs/38845496400/artifacts/12023445833",
+        "outerArtifactBytes": 1710691,
+        "outerArtifactSHA256": "38cc95c0c72ee8c1250e2163183ea3f9a4ec3f1057365c2761e3d1008ab7939f",
+        "expiresAt": "2027-01-14T03:26:07Z"
+      },
+      "checks": {
+        "extractedZipIntegrity": true,
+        "noSystemPythonNodeOrFFmpegRequired": true,
+        "visibleGUIAndHealthyFrozenBackend": true,
+        "builtinResourcesQualifiedAndOffline": true,
+        "elevenInterfaceLanguages": [
+          "zh-CN",
+          "zh-TW",
+          "en",
+          "ja",
+          "ko",
+          "es",
+          "fr",
+          "de",
+          "pt-BR",
+          "ru",
+          "ar"
+        ],
+        "guiMediaImportAndSharedStdioMCP": true,
+        "actualPreviewPlayback": true,
+        "guiExportAndFullVideoAudioDecode": true,
+        "duplicateLaunchAndOccupiedDefaultPort": true,
+        "restartPreservesProjectAndLanguage": true,
+        "windowCloseStopsOwnedBackend": true,
+        "normalLaunchWithoutQaOrDebugFlags": true,
+        "readonlyFolderShowsNativeErrorAndPreservesDatabase": true
+      },
+      "normalStartup": {
+        "qaOrDebugFlags": false,
+        "asInvokerManifests": true,
+        "sandboxDisabled": false
+      },
+      "storage": {
+        "root": "CutVoke Data beside CutVoke.exe",
+        "database": "CutVoke Data/data/projects.sqlite",
+        "profile": "CutVoke Data/profile",
+        "readOnlyFailure": "Windows native dialog acknowledged, no backend; existing database bytes unchanged"
+      }
+    }
+  ],
+  "verificationMethod": {
+    "execution": "Native hosted runners; exact shipped ZIP/tar.gz extracted under Chinese/space paths, hash and file manifest checked before frozen doctor and real Electron GUI acceptance.",
+    "hostRuntimes": "Product PATH contains no system Python/Node/FFmpeg; test harness tools remain available to the harness only.",
+    "visibleWindow": "Native visible Electron window, renderer sandbox enabled; additional ordinary launch without QA/debug/offscreen/sandbox-disable flags.",
+    "editing": "Bundled FFmpeg generates real video/audio input; GUI imports it, stdio MCP edits the same database with a lease, actual preview playback advances, GUI exports a 3-second H.264/AAC MP4 and bundled FFmpeg completely decodes it.",
+    "offline": "Outbound browser requests blocked during editing; bundled manifest and all 189 qualified presets/612 qualified stickers checked, fonts/resources offline.",
+    "lifecycle": "Default port occupied, duplicate instance, persisted project/language, owned backend/port cleanup, startup-close race on both sides of backend creation.",
+    "permissions": "Native default data location outside an entirely read-only app tree; isolated read-only data profile produces actual native dialog and leaves the pre-existing database unchanged. Linux dialog captured from the launched PID's X11 window and OCR checked; macOS dialog inspected via native accessibility.",
+    "inspection": "Evidence artifacts include screenshots, native dependency/signature reports, doctor/runtime/MCP results, exported MP4/decoded frame and lifecycle reports. Full runner logs are available at each successful job.",
+    "localChecks": "Web typecheck/build, layering, desktop storage/i18n/downloader checks, and targeted Python native-image/resource tests also passed. Optional local sandboxed Chromium could not launch under the cloud container's namespace policy; no sandbox bypass was used, and native hosted-runner GUI acceptance is the execution evidence."
+  },
+  "remainingLimits": [
+    "macOS apps are ad-hoc signed with no Developer ID or notarization. Both spctl assessments reject with exit 3. Quarantined internet-download/Finder launch is not accepted; warning-free user launch remains blocked on legitimate publisher signing/notarization resources. No security controls were bypassed.",
+    "macOS 13 is the declared deployment floor; actual execution was macOS 15.7.9 on separate native arm64/Intel runners. No physical-device manual acceptance or macOS 13/14 execution is claimed.",
+    "Intel cryptography 50.0.2 is built from pinned source with static OpenSSL 4.0.3 and built-in providers. Upstream's current macOS test matrix is ARM-only; CutVoke verifies its required signing/resource operations and real packaged workflow, not the full upstream test matrix.",
+    "Linux baseline is Ubuntu 22.04 x64/glibc 2.35 with normal desktop libraries, display/drivers, executable filesystem and working unprivileged user-namespace sandbox. No FUSE or user-installed Python/Node/FFmpeg is required. Other distributions, Wayland-only sessions, Ubuntu 24.04 AppArmor policy, root and noexec locations are not accepted.",
+    "Windows evidence is automated Windows Server 2022 x64, not manual Windows 10/11 or SmartScreen acceptance. The CutVoke package remains unsigned.",
+    "Native picker/drag ergonomics, protected-folder permission prompts, speaker/device audio, GPU acceleration, every effect and optional AI clients/cloud services/ASR/person models are outside this automated acceptance.",
+    "All artifacts expire on 2027-01-14; GitHub login may be required. Retain licenses and FFmpeg corresponding source for redistribution. Absolute media references may require project packaging/relink after moving files or machines."
+  ],
+  "developmentRunHistory": {
+    "scope": "Implementation pushes after previousVerifiedMain, before the final accepted build. Final workflow runs are listed above; final documentation-only main commit CI is reported with delivery.",
+    "runURLPrefix": "https://github.com/frankShan001/CutVoke/actions/runs/",
+    "terminalRunIDsByConclusion": {
+      "Windows portable": {
+        "success": [
+          38842646436,
+          38840408453,
+          38839243614,
+          38838713201
+        ],
+        "failure": [
+          38844728765
+        ],
+        "cancelled": [
+          38842495754,
+          38842330710,
+          38841904345,
+          38841496308,
+          38841296125,
+          38841151724
+        ]
+      },
+      "macOS and Linux packages": {
+        "success": [],
+        "failure": [
+          38842646465,
+          38841904438,
+          38838713171
+        ],
+        "cancelled": [
+          38844728683,
+          38843372647,
+          38842557876,
+          38842495775,
+          38842330745,
+          38841496412,
+          38841354107,
+          38841296143,
+          38841151700,
+          38840408463,
+          38839821977,
+          38839667483,
+          38839651339,
+          38839243598
+        ]
+      },
+      "CI": {
+        "success": [],
+        "failure": [],
+        "cancelled": [
+          38844728524,
+          38843372669,
+          38842646482,
+          38842558020,
+          38842495759,
+          38842330692,
+          38841904329,
+          38841496248,
+          38841354077,
+          38841296082,
+          38841151685,
+          38840408419,
+          38839821905,
+          38839667486,
+          38839651350,
+          38839243595,
+          38838713191
+        ]
+      }
+    },
+    "failuresResolvedInFinalAcceptedBuild": [
+      {
+        "run": 38838713171,
+        "reason": "Initial native packaging exposed Linux libass font-provider configuration and Mac native-runtime/Intel-wheel compatibility issues; native recipes and audit were corrected."
+      },
+      {
+        "run": 38841904438,
+        "reason": "Intel source wheel compiled, but corresponding-source ZIP rejected Cargo epoch timestamps; preserved source bytes with timestamp-compatible archival."
+      },
+      {
+        "run": 38842646465,
+        "reason": "Intel GUI import had duplicate role matches; Linux native read-only dialog did not export usable AT-SPI text. Use the actual media panel and owned GTK window screenshot/OCR."
+      },
+      {
+        "run": 38844728765,
+        "reason": "The narrow GUI layout hid the media panel; acceptance now opens it via the actual toolbar before targeting its import action."
+      }
+    ],
+    "additionalResolvedIssues": "Canceled intermediate runs also exposed a loading-window close race, source-build environment/toolchain lookup, and dynamic OpenSSL-provider lookup. These were corrected before the successful native and Windows acceptance."
+  }
+}

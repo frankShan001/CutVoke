@@ -6,6 +6,22 @@ macOS arm64 on `macos-15`, macOS Intel x64 on `macos-15-intel`, and Linux x64 on
 environments. See the [user guide](../user/installation.md#macos-arm64--x64) for
 downloads, storage and system/security requirements. No Release/tag is created.
 
+The **2026-10-16** delivery was built from
+`fdec479c4acbc3c685a5c8adbe8ec91621a7c194`. All three native jobs in
+[38845496409](https://github.com/frankShan001/CutVoke/actions/runs/38845496409)
+and the Windows regression in
+[38845496400](https://github.com/frankShan001/CutVoke/actions/runs/38845496400)
+passed. The [verification record](native-packages-verification.json) records
+each inner archive's bytes/SHA256, outer artifact digest, direct download,
+evidence artifact, actual runner OS and acceptance checks. This records
+functional acceptance separately from the explicitly rejected Mac Gatekeeper
+assessment described below.
+
+The same code's [ordinary CI 38845496430](https://github.com/frankShan001/CutVoke/actions/runs/38845496430)
+also passed all four jobs: Python 3.10, 3.12, 3.13 and the complete browser editing
+workflow. A later documentation-only commit does not alter these archived
+package bytes; use that commit's own CI status for the final source checkout.
+
 ## Build inputs and archive layout
 
 Python 3.13.16, Electron 44.5.1 and the existing frontend/backend dependencies
@@ -16,13 +32,16 @@ engine filename rather than assuming `.exe`.
 
 Cryptography 50 no longer publishes Intel macOS wheels. Intel uses the same
 50.0.2 version compiled from its SHA256-pinned sdist, linked to a locally built
-static OpenSSL 4.0.3 with a macOS 13 deployment target. Its PEP 517 build backend
+static OpenSSL 4.0.3 with a macOS 13 deployment target. Providers are compiled in
+(`no-module`), so no external OpenSSL provider directory is needed. Its PEP 517 build backend
 and Python build dependencies are hash-locked; Rust dependencies use the
 upstream Cargo.lock. The wheel is hashed before installation and an Ed25519
-sign/verify smoke check runs before freezing. Corresponding OpenSSL/cryptography
+sign/verify smoke check and provider-availability assertion run before freezing. Corresponding OpenSSL/cryptography
 sources, Rust vendor sources/notices, the exact recipe and compiler information
 are included. No Homebrew OpenSSL path or Rust compiler is required at runtime.
-See [upstream static build instructions](https://cryptography.io/en/50.0.2/installation/#building-cryptography-on-macos).
+Upstream now tests macOS on ARM only; the Intel boundary is CutVoke’s own
+resource-signature smoke check and packaged application acceptance, not the full
+upstream cryptography test matrix. See [upstream static build instructions](https://cryptography.io/en/50.0.2/installation/#building-cryptography-on-macos).
 
 `prepare_desktop_unix.py` verifies official Electron archives against checksums
 from its locked npm package, then extracts with permissions and symlinks intact.
@@ -72,11 +91,17 @@ Screenshots and an exported frame/MP4 remain inspectable evidence.
 
 The same run occupies the default port, launches a second instance, checks
 project/language persistence on restart, closes the window and verifies that
-its owned backend and port terminate. A separate ordinary launch has no QA,
+its owned backend and port terminate. Closing during the loading phase is also
+checked so a canceled startup cannot launch an orphan backend or hold an error
+dialog open during quit. A separate ordinary launch has no QA,
 debugging, offscreen or sandbox-disable flags and is closed with platform window
-controls. An isolated `chmod 0555` data-profile test inspects the native error
+controls. A separate launch from an entirely read-only application tree verifies the
+real macOS default and Linux XDG data paths. An isolated `chmod 0555` data-profile test inspects the native error
 dialog, proves no backend was launched and verifies the existing database bytes
-after acknowledgement. It never changes a personal data directory.
+after acknowledgement. Linux ties the visible X11 window to the launched
+process, captures the actual GTK dialog and checks its error message with OCR;
+macOS uses its native accessibility interface. These are test tools, not product
+runtime dependencies. It never changes a personal data directory.
 
 The workflow uploads user downloads only after successful acceptance; evidence
 is retained even for failures. Native `.app`/tar archives are nested inside the
