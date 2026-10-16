@@ -31,6 +31,8 @@ function closeWindow(child) {
 }
 async function verifyNormalLaunch({ executable, env, out, data, expectedProject, projectId, report }) {
   // No CUTVOKE_DESKTOP_QA, CDP, debugging, offscreen or sandbox-disable flags.
+  const config = path.join(data, "profile/mcp-config.json");
+  fs.rmSync(config, { force: true });
   const child = start(executable, env, out, "normal-startup");
   let backend;
   try {
@@ -47,6 +49,7 @@ async function verifyNormalLaunch({ executable, env, out, data, expectedProject,
       } catch { return false; }
     });
     assert.equal(backend.identity.dataPath, path.join(data, "data/projects.sqlite"));
+    await waitFor(() => fs.existsSync(config));
     assert.deepEqual(await (await fetch(backend.origin + `/api/v1/projects/${projectId}`)).json(), expectedProject);
     closeWindow(child);
     await waitFor(() => child.exitCode !== null, 30_000);
@@ -55,7 +58,7 @@ async function verifyNormalLaunch({ executable, env, out, data, expectedProject,
     report.normalStartup = { passed: true, pid: child.pid, backend: backend.identity, flags: [] };
     report.checks.normalLaunchWithoutQaOrDebugFlags = true;
   } finally {
-    if (child.exitCode === null) child.kill();
+    if (child.exitCode === null && child.signalCode === null) terminateOwnedApplication(child.pid);
     if (backend && alive(backend.pid)) process.kill(backend.pid);
   }
 }
@@ -92,7 +95,7 @@ async function verifyReadonlyStorage({ executable, env, out, data, profile, repo
     assert.deepEqual(fs.readFileSync(database), original);
     report.checks.readonlyDataShowsNativeErrorAndPreservesDatabase = true;
   } finally {
-    if (child.exitCode === null) child.kill();
+    if (child.exitCode === null && child.signalCode === null) terminateOwnedApplication(child.pid);
     fs.chmodSync(profile, mode);
   }
 }
@@ -129,14 +132,14 @@ async function verifyPlatformStorage({ executable, env, out, folder, report }) {
       } catch { return false; }
     });
     assert.equal(backend.identity.dataPath, path.join(data, "data/projects.sqlite"));
-    assert.ok(fs.existsSync(path.join(data, "profile/mcp-config.json")));
+    await waitFor(() => fs.existsSync(path.join(data, "profile/mcp-config.json")));
     closeWindow(child);
     await waitFor(() => child.exitCode !== null, 30_000);
     await waitFor(() => !alive(backend.pid), 10_000);
     report.platformDefaultStorage = { root: data, database: backend.identity.dataPath, applicationDirectoryReadOnly: true };
     report.checks.platformDefaultDataOutsideReadonlyApplication = true;
   } finally {
-    if (child.exitCode === null) child.kill();
+    if (child.exitCode === null && child.signalCode === null) terminateOwnedApplication(child.pid);
     if (backend && alive(backend.pid)) process.kill(backend.pid);
     for (const [file, mode] of modes) fs.chmodSync(file, mode);
     fs.rmSync(data, { recursive: true, force: true });

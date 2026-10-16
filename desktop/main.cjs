@@ -83,6 +83,7 @@ function showShellError(kind, detail) {
 async function start() {
   prepareStorage(storage);
   const port = await vacantPort(); origin = `http://127.0.0.1:${port}`;
+  if (closing) return;
   fs.mkdirSync(path.dirname(dataPath), { recursive: true });
   const logDir = path.join(app.getPath("userData"), "logs"); fs.mkdirSync(logDir, { recursive: true });
   const log = fs.createWriteStream(path.join(logDir, "engine.log"), { flags: "a" });
@@ -106,15 +107,18 @@ async function start() {
   let runtime;
   const deadline = Date.now() + 90000;
   while (Date.now() < deadline) {
+    if (closing) return;
     if (failure) throw failure;
     if (child.exitCode !== null) throw new Error(`${language.text("startupExit", child.exitCode)}\n${language.text("logLocation", logDir)}`);
     try { runtime = await request("runtime"); if (runtime.processId === child.pid) break; } catch { /* Startup still in progress. */ }
     await new Promise(resolve => setTimeout(resolve, 200));
   }
+  if (closing || window.isDestroyed()) return;
   if (!runtime || runtime.processId !== child.pid) throw new Error(`${language.text("startupTimeout")}\n${language.text("logLocation", logDir)}`);
-  fs.writeFileSync(path.join(app.getPath("userData"), "mcp-config.json"), JSON.stringify(mcpConfig(), null, 2));
   ready = true;
   await window.loadURL(origin);
+  if (closing || window.isDestroyed()) return;
+  fs.writeFileSync(path.join(app.getPath("userData"), "mcp-config.json"), JSON.stringify(mcpConfig(), null, 2));
   // QA uses the same built client without opening a debug port on normal runs.
   if (process.env.CUTVOKE_DESKTOP_QA === "1") {
     fs.writeFileSync(path.join(app.getPath("userData"), "qa-runtime.json"), JSON.stringify({ origin, runtime, executable }));
@@ -184,7 +188,7 @@ else {
     try {
       if (qaHook?.loading) await qaHook.loading({ window, app });
       await start();
-    } catch (error) { showShellError("startup", error.message); app.quit(); }
+    } catch (error) { if (!closing) showShellError("startup", error.message); app.quit(); }
   });
   app.on("window-all-closed", () => app.quit());
   app.on("before-quit", event => {
