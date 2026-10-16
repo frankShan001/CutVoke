@@ -6,8 +6,9 @@ from PyInstaller.utils.hooks import collect_submodules
 
 root = Path(SPECPATH).parent
 tools = Path(os.environ['CUTVOKE_FFMPEG_DIR']) if os.environ.get('CUTVOKE_FFMPEG_DIR') else None
-ffmpeg = (tools / 'ffmpeg.exe' if tools else Path(shutil.which('ffmpeg'))).resolve()
-ffprobe = (tools / 'ffprobe.exe' if tools else Path(shutil.which('ffprobe'))).resolve()
+suffix = '.exe' if os.name == 'nt' else ''
+ffmpeg = (tools / f'ffmpeg{suffix}' if tools else Path(shutil.which('ffmpeg'))).resolve()
+ffprobe = (tools / f'ffprobe{suffix}' if tools else Path(shutil.which('ffprobe'))).resolve()
 assets = root / 'src' / 'cutvoke' / 'assets'
 # Current runtime qualification verifies its review sidecars and audited exports.
 # Keep every file pinned by that manifest; only unrelated development evidence

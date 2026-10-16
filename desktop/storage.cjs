@@ -2,9 +2,12 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
-function storagePlan({ packaged, executable, appData, home, env = process.env }) {
-  const portable = packaged && fs.existsSync(path.join(path.dirname(executable), "portable.json"));
-  const base = portable ? path.resolve(env.CUTVOKE_PORTABLE_HOME || path.join(path.dirname(executable), "CutVoke Data")) : null;
+function storagePlan({ packaged, executable, appData, home, env = process.env, platform = process.platform }) {
+  const portable = packaged && platform !== "darwin" && fs.existsSync(path.join(path.dirname(executable), "portable.json"));
+  const personal = platform === "darwin" ? path.join(appData, "CutVoke")
+    : path.join(env.XDG_DATA_HOME || path.join(home, ".local", "share"), "CutVoke");
+  const base = portable ? path.resolve(env.CUTVOKE_PORTABLE_HOME || path.join(path.dirname(executable), "CutVoke Data"))
+    : platform === "win32" ? null : path.resolve(env.CUTVOKE_HOME || personal);
   const profile = env.CUTVOKE_DESKTOP_QA === "1" && env.CUTVOKE_DESKTOP_QA_HOME
     ? path.resolve(env.CUTVOKE_DESKTOP_QA_HOME) : base ? path.join(base, "profile") : path.join(appData, "CutVoke");
   const data = path.resolve(env.CUTVOKE_DATA || (base ? path.join(base, "data") : path.join(home, ".cutvoke", "data")));
