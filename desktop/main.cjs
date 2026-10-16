@@ -77,6 +77,7 @@ function verifyLanguageSender(event) {
   if (!loading && url.origin !== origin) throw new Error(language.text("invalidClient"));
 }
 function showShellError(kind, detail) {
+  console.error(`CutVoke ${kind}: ${detail}`);
   dialog.showMessageBoxSync(window, errorDialogOptions(language, kind, detail));
 }
 async function start() {

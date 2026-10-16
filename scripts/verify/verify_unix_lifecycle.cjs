@@ -142,4 +142,9 @@ async function verifyPlatformStorage({ executable, env, out, folder, report }) {
     fs.rmSync(data, { recursive: true, force: true });
   }
 }
-module.exports = { verifyNormalLaunch, verifyReadonlyStorage, verifyPlatformStorage };
+function terminateOwnedApplication(pid) {
+  const owned = children(pid).filter(p => p.command.includes("cutvoke-engine"));
+  for (const child of owned) if (alive(child.pid)) process.kill(child.pid, "SIGKILL");
+  if (alive(pid)) process.kill(pid, "SIGKILL");
+}
+module.exports = { verifyNormalLaunch, verifyReadonlyStorage, verifyPlatformStorage, terminateOwnedApplication };

@@ -14,7 +14,15 @@ const target = `${process.platform === "darwin" ? "macos" : "linux"}-${process.a
 const out = path.join(root, ".artifacts/acceptance", target);
 fs.mkdirSync(out, { recursive: true });
 const report = { passed: false, platform: process.platform, scope: "Extracted native distribution; visible GUI driven automatically on a hosted runner. No human device, audio/GPU or quarantined Finder/Gatekeeper acceptance.", checks: {} };
-const save = () => fs.writeFileSync(path.join(out, "verification.json"), JSON.stringify(report, null, 2));
+const save = () => {
+  fs.writeFileSync(path.join(out, "verification.json"), JSON.stringify(report, null, 2));
+  const log = path.join(out, "用户 数据/profile/logs/engine.log");
+  if (fs.existsSync(log)) fs.copyFileSync(log, path.join(out, "engine.log"));
+};
+report.checks = new Proxy(report.checks, { set(target, key, value) {
+  target[key] = value; console.log(`${new Date().toISOString()} ${key}: ${JSON.stringify(value)}`); save(); return true;
+} });
+save();
 function run(exe, args, env) { return execFileSync(exe, args, { env, encoding: "utf8", windowsHide: true, timeout: 120_000, maxBuffer: 10 * 1024 * 1024 }); }
 function cleanEnvironment() {
   const env = { ...process.env };
@@ -117,7 +125,7 @@ async function main() {
     report.nativeWindow = native;
   }
   async function api(route, body) {
-    const response = await fetch(origin + "/api/v1/" + route, body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const response = await fetch(origin + "/api/v1/" + route, { ...(body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }), signal: AbortSignal.timeout(120_000) });
     const value = await response.json();
     assert.ok(response.ok, JSON.stringify(value)); return value;
   }
@@ -247,7 +255,16 @@ async function main() {
     await verifyReadonlyStorage({ executable, env, out, data, profile, report });
     report.passed = true;
   } finally {
-    if (electronApp) await electronApp.close().catch(() => {});
+    save();
+    if (electronApp) {
+      let timer;
+      try {
+        await Promise.race([electronApp.close(), new Promise((_, reject) => { timer = setTimeout(() => reject(new Error("Application cleanup blocked")), 15_000); })]);
+      } catch (error) {
+        report.forcedFailureCleanup = error.message;
+        terminateOwnedApplication(electronApp.process().pid);
+      } finally { clearTimeout(timer); }
+    }
     occupied.close();
     const log = path.join(profile, "logs/engine.log");
     if (fs.existsSync(log)) fs.copyFileSync(log, path.join(out, "engine.log"));
@@ -256,7 +273,7 @@ async function main() {
   fs.copyFileSync(path.join(out, "verification.json"), path.join(root, "dist/portable/windows-verification.json"));
   console.log(JSON.stringify(report.checks, null, 2));
 }
-const { verifyNormalLaunch, verifyReadonlyStorage, verifyPlatformStorage } = require("./verify_unix_lifecycle.cjs");
+const { verifyNormalLaunch, verifyReadonlyStorage, verifyPlatformStorage, terminateOwnedApplication } = require("./verify_unix_lifecycle.cjs");
 main().catch(error => {
   report.error = error.stack; save(); console.error(error);
   // Keep remote failures diagnosable even when artifact downloads are unavailable.

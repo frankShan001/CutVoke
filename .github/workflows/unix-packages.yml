@@ -20,7 +20,7 @@ permissions:
 
 concurrency:
   group: unix-packages-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   native:
@@ -131,11 +131,13 @@ jobs:
         run: .artifacts/venv-portable/bin/python scripts/build/assemble_portable.py
       - name: Extract shipped archive and accept real macOS app
         if: runner.os == 'macOS'
+        timeout-minutes: 12
         run: |
           export CUTVOKE_VERIFY_PYTHON="$GITHUB_WORKSPACE/.artifacts/venv-portable/bin/python"
           node scripts/verify/verify_portable_unix.cjs
       - name: Extract shipped archive and accept real Linux app with sandbox
         if: runner.os == 'Linux'
+        timeout-minutes: 12
         run: |
           export CUTVOKE_VERIFY_PYTHON="$GITHUB_WORKSPACE/.artifacts/venv-portable/bin/python"
           export GTK_MODULES=gail:atk-bridge
