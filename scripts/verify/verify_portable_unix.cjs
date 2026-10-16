@@ -288,7 +288,7 @@ main().catch(error => {
   report.error = error.stack; save(); console.error(error);
   // Keep remote failures diagnosable even when artifact downloads are unavailable.
   for (const name of fs.readdirSync(out, { recursive: true })) {
-    if (name.endsWith("engine.log") || name.endsWith("renderer-errors.log") || name.endsWith("-result.json")) {
+    if (name.endsWith("engine.log") || name.endsWith("renderer-errors.log") || name.endsWith("-result.json") || name.endsWith("dialog.txt") || name.endsWith("readonly-storage.log")) {
       const file = path.join(out, name);
       if (fs.statSync(file).isFile()) console.error(`${name}\n${fs.readFileSync(file, "utf8").slice(-12000)}`);
     }
