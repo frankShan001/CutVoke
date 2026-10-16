@@ -12,7 +12,7 @@ export PKG_CONFIG_PATH="$PKG_CONFIG_LIBDIR"
 export CFLAGS="-O2 -fPIC"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS=""
-task_ass=(-Dfontconfig=disabled -Ddirectwrite=disabled -Dcoretext=disabled)
+task_ass=(-Dfontconfig=disabled -Ddirectwrite=disabled -Dcoretext=disabled -Drequire-system-font-provider=false)
 if [[ "$(uname -s)" == Darwin ]]; then
   export MACOSX_DEPLOYMENT_TARGET=13.0
   export CFLAGS="$CFLAGS -mmacosx-version-min=13.0"

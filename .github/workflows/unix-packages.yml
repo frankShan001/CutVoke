@@ -20,7 +20,7 @@ permissions:
 
 concurrency:
   group: unix-packages-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   native:
@@ -60,7 +60,7 @@ jobs:
         run: brew install nasm ninja pkg-config
       - name: Restore exact native FFmpeg
         id: ffmpeg-cache
-        uses: actions/cache@v5
+        uses: actions/cache/restore@v5
         with:
           path: .artifacts/portable-ffmpeg
           key: ffmpeg-${{ matrix.target }}-${{ hashFiles('desktop/ffmpeg-sources.json', 'scripts/build/build_ffmpeg_unix.sh', 'scripts/build/prepare_ffmpeg_sources.py') }}
@@ -80,6 +80,12 @@ jobs:
           for name in ('ffmpeg','ffprobe'):
               assert (root/'bin'/name).stat().st_mode & 0o111
           PY
+      - name: Cache verified FFmpeg before application acceptance
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: .artifacts/portable-ffmpeg
+          key: ${{ steps.ffmpeg-cache.outputs.cache-primary-key }}
       - name: Prepare isolated frozen backend
         run: |
           python -m venv .artifacts/venv-portable
