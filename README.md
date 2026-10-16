@@ -76,6 +76,15 @@ Projects, imported media, settings and caches use **`CutVoke Data` beside the ex
 
 The extracted executable passed automated Windows Server 2022 x64 GUI, MCP, import → preview → export/decode, restart, single-instance, shutdown and read-only preservation checks. See [download hashes, storage and exact limits](docs/user/installation.md#windows-portable-x64) and [Windows evidence](docs/development/windows-portable-verification.json). Human Windows 10/11 device, audio/GPU and SmartScreen checks remain separate.
 
+### macOS (Apple Silicon / Intel) and Linux (x64)
+
+The [native package workflow](https://github.com/frankShan001/CutVoke/actions/workflows/unix-packages.yml) builds separate **macOS arm64**, **macOS x64** and **Linux x64** downloads. Each includes the built editor, frozen Python backend, FFmpeg/ffprobe, offline resources, fonts and component licenses. Basic editing needs no Python, Node.js or FFmpeg installation. See [downloads, exact requirements and verification evidence](docs/user/installation.md#macos-arm64--x64).
+
+- **macOS 13+:** unzip the matching architecture and move `CutVoke.app` to `/Applications` or `~/Applications`. This candidate has only an ad-hoc integrity signature, **no Developer ID or notarization**. Gatekeeper may block an internet download; a warning-free first launch is not guaranteed. If blocked, wait for a properly signed/notarized build. Keep macOS security protections enabled.
+- **Linux x64 / Ubuntu 22.04+:** extract the `.tar.gz` and run `./cutvoke` in its folder. A graphical desktop, glibc 2.35+, Electron system libraries and working Chromium sandbox/user namespaces are required. The directory package needs no FUSE. Root, `noexec` locations and policies that block the sandbox are outside its supported scope; do not use `--no-sandbox`.
+
+Mac data lives in `~/Library/Application Support/CutVoke/`; Linux data lives in `${XDG_DATA_HOME:-~/.local/share}/CutVoke/`. Keep that data when replacing the application. `profile/mcp-config.json` uses the bundled engine and the same database. Runner automation and human device acceptance are documented separately; macOS quarantine/Gatekeeper, device audio/GPU and every Linux distribution are not automatically accepted.
+
 ### Run from source (developers)
 
 You need **Python 3.10+, Node.js 20+, FFmpeg and ffprobe**. The FFmpeg build must support H.264/AAC, overlays, text and subtitle rendering; `doctor` checks the required dependencies.
@@ -120,9 +129,9 @@ Open **http://127.0.0.1:8787** and select **Trail Notes · editable demo**. Succ
 
 The example imports, edits and exports over real stdio MCP, then verifies that those same assets are available through the human editor API. New imports share the Web upload layout, and exact legacy MCP imports remain accessible. See [the demonstration and verification boundaries](docs/assets/readme/README.md).
 
-The source workflow has been checked in the Linux cloud environment, including FFmpeg 7.1.5, and earlier on Windows. See [installation, tested versions and troubleshooting](docs/user/installation.md) for exact scope; current Windows installer and macOS acceptance still require their respective machines. On Windows, `start-cutvoke.cmd --web` also starts the browser editor using the default personal project library. For the desktop client and building an installer, see [local setup](docs/user/LOCAL_DELIVERY_MCP.md) and [the build entry point](scripts/build/build-cutvoke-desktop.cmd).
+The source workflow has been checked in the Linux cloud environment, including FFmpeg 7.1.5, and earlier on Windows. See [installation, tested versions and troubleshooting](docs/user/installation.md) for exact scope; the legacy Windows installer and human device acceptance still require their respective machines. On Windows, `start-cutvoke.cmd --web` also starts the browser editor using the default personal project library. For the desktop client and building an installer, see [local setup](docs/user/LOCAL_DELIVERY_MCP.md) and [the build entry point](scripts/build/build-cutvoke-desktop.cmd).
 
-The service binds to local loopback by default. Source/CLI installs put default project data and media under the user's `.cutvoke` directory. The example above uses its own `.artifacts/first-edit/data` and does not open the default personal project library. The portable edition uses its sibling `CutVoke Data` folder instead.
+The service binds to local loopback by default. Source/CLI installs put default project data and media under the user's `.cutvoke` directory. The example above uses its own `.artifacts/first-edit/data` and does not open the default personal project library. The Windows portable edition uses its sibling `CutVoke Data` folder; native Mac/Linux desktop packages use the platform directories above.
 
 ### Choose your interface language
 
@@ -132,7 +141,7 @@ Language changes affect interface labels, owned progress messages and operation 
 
 ## Give your AI an editing workflow
 
-**Portable edition:** after first launch, use the generated `CutVoke Data/profile/mcp-config.json` in your agent client. It points to the bundled engine and the same project database; a system Python is not required.
+**Desktop packages:** after first launch, use the generated `profile/mcp-config.json` under the data root in your agent client (`CutVoke Data` for Windows). It points to the bundled engine and the same project database; a system Python is not required.
 
 Configure the client using [the MCP connection guide](docs/user/external-agent-editing.md), and point MCP and the editor at the same `--data` directory:
 

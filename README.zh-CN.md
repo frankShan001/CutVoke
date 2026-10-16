@@ -76,6 +76,15 @@ flowchart LR
 
 已在 Windows Server 2022 x64 runner 上自动验收解压后的真实程序：GUI、MCP、导入 → 预览 → 导出/解码、重启、重复启动、关闭清理和只读保护。准确哈希、存储位置及边界见[安装说明](docs/user/installation.md#windows-portable-x64)与[Windows 验证记录](docs/development/windows-portable-verification.json)。Windows 10/11 设备、音频/GPU 和 SmartScreen 的人工体验仍需分别检查。
 
+### macOS（Apple Silicon / Intel）和 Linux（x64）
+
+[原生发行包工作流](https://github.com/frankShan001/CutVoke/actions/workflows/unix-packages.yml) 分别构建 **macOS arm64**、**macOS x64** 与 **Linux x64** 包。内含编辑器、冻结 Python 后端、FFmpeg/ffprobe、离线资源、字体和组件许可证；基础剪辑无需另装 Python、Node.js 或 FFmpeg。[下载、系统要求及验证证据](docs/user/installation.md#macos-arm64--x64) 列明准确范围。
+
+- **macOS 13+：**按芯片选择架构，解压后把 `CutVoke.app` 移到 `/Applications` 或 `~/Applications` 再打开。候选包仅有 ad-hoc 完整性签名，**没有 Developer ID 和公证**；网络下载可能被 Gatekeeper 阻止，不能保证首次无提示启动。受阻时请等待正式签名/公证版，保持系统安全保护开启。
+- **Linux x64 / Ubuntu 22.04+：**完整解压 `.tar.gz`，在目录运行 `./cutvoke`。需图形桌面、glibc 2.35+、Electron 系统库与可用的 Chromium 沙箱/用户命名空间；目录包无需 FUSE。不支持 root、`noexec` 位置或阻止沙箱的系统策略，不使用 `--no-sandbox`。
+
+Mac 数据位于 `~/Library/Application Support/CutVoke/`，Linux 位于 `${XDG_DATA_HOME:-~/.local/share}/CutVoke/`；更新应用时保留数据。其 `profile/mcp-config.json` 使用内置引擎和同一数据库。自动 runner 验收与人工设备验收分别记录，不能据此声称已人工验证 Gatekeeper、设备音频/GPU 或所有 Linux 发行版。
+
 ### 从源码运行（开发者）
 
 需要 **Python 3.10+、Node.js 20+、FFmpeg 与 ffprobe**。FFmpeg 构建需要支持 H.264/AAC、叠加、文字和字幕渲染；`doctor` 会实际检查必要依赖。
@@ -120,9 +129,9 @@ cutvoke serve --data .artifacts/first-edit/data
 
 示例默认通过真实 stdio MCP 导入、编辑与导出，再从人工编辑器接口检查同一批素材可用。新导入与 Web 上传共用标准存储路径，旧 MCP 导入也按严格路径规则保持可用，详见 [演示与验证边界](docs/assets/readme/README.md)。
 
-源码流程已在云 Linux（含 FFmpeg 7.1.5）实测，之前也检查过 Windows 源码路径。准确范围见[安装、已测版本与排障](docs/user/installation.md)；当前 Windows 安装包与 macOS 仍需对应实机验收。Windows 也可以用 `start-cutvoke.cmd --web` 启动浏览器编辑器，默认使用个人工程库。想运行桌面客户端或构建安装包，见 [本地使用说明](docs/user/LOCAL_DELIVERY_MCP.md) 与 [构建入口](scripts/build/build-cutvoke-desktop.cmd)。
+源码流程已在云 Linux（含 FFmpeg 7.1.5）实测，之前也检查过 Windows 源码路径。准确范围见[安装、已测版本与排障](docs/user/installation.md)；旧 Windows 安装包与人工设备体验仍需分别验收。Windows 也可以用 `start-cutvoke.cmd --web` 启动浏览器编辑器，默认使用个人工程库。想运行桌面客户端或构建安装包，见 [本地使用说明](docs/user/LOCAL_DELIVERY_MCP.md) 与 [构建入口](scripts/build/build-cutvoke-desktop.cmd)。
 
-默认服务只监听本机回环地址。源码/CLI 版的默认数据库和素材放在用户目录 `.cutvoke`；上面的示例使用独立 `.artifacts/first-edit/data`，不会打开默认个人工程库。便携版则使用 exe 旁的 `CutVoke Data`。
+默认服务只监听本机回环地址。源码/CLI 版的默认数据库和素材放在用户目录 `.cutvoke`；上面的示例使用独立 `.artifacts/first-edit/data`，不会打开默认个人工程库。Windows 便携版使用 exe 旁的 `CutVoke Data`，Mac/Linux 桌面包使用上方平台数据目录。
 
 ### 选择界面语言
 
@@ -132,7 +141,7 @@ cutvoke serve --data .artifacts/first-edit/data
 
 ## 给你的 AI 一套剪辑工作流
 
-**便携版**：首次启动后，将 `CutVoke Data/profile/mcp-config.json` 的内容配置到 Agent 客户端。它使用内置后端与同一工程库，不需要系统 Python。
+**桌面发行包**：首次启动后，将数据根目录下 `profile/mcp-config.json` 的内容配置到 Agent 客户端（Windows 为 `CutVoke Data`）。它使用内置后端与同一工程库，不需要系统 Python。
 
 先按 [MCP 接入说明](docs/user/external-agent-editing.md) 配置客户端，并让它与编辑器使用同一 `--data` 目录：
 

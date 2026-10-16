@@ -37,6 +37,42 @@ Basic local import, editing, preview and MP4 export work without an AI account. 
 
 **中文启动说明：** 下载 Actions 文件后，取出上述便携 ZIP，完整解压到可写目录，再双击 `CutVoke.exe`。无需安装或配置开发环境。工程、素材和缓存位置如上表；更新先关闭程序，保留 `CutVoke Data`，不要用测试库覆盖工程。包未签名，可能有 SmartScreen 提示。基础剪辑可本机离线完成，可选 AI/语音/人物功能另行配置。Windows runner 的自动验收已完成，人工设备体验边界见下表。
 
+## macOS (arm64 / x64)
+
+Get the architecture-specific Actions artifact from the [native package workflow](https://github.com/frankShan001/CutVoke/actions/workflows/unix-packages.yml). Only a successful **Upload verified download** step produces a user download. The outer Actions ZIP contains the distribution archive, `SHA256SUMS.txt`, `download-info.json`, native dependency/signature evidence and a platform verification report. GitHub sign-in may be required; artifacts are retained for 90 days. These candidates are not formal Releases/tags.
+
+1. Apple Silicon (M-series): choose **CutVoke-macos-arm64**. Intel: choose **CutVoke-macos-x64**. These are separate native builds; no Rosetta requirement is introduced for Apple Silicon.
+2. Extract the Actions download, then the `CutVoke-0.3.1-macos-<arch>.zip` inside it. Keep `START-HERE.txt`, hashes and `licenses/` for reference/redistribution.
+3. Move `CutVoke.app` into `/Applications` or `~/Applications`, then open it. No Python, Node.js or FFmpeg install is needed for basic local editing.
+
+The declared minimum is **macOS 13 (Ventura)**, required by [Electron 44](https://www.electronjs.org/docs/latest/breaking-changes#removed-macos-12-support). Native images are audited for architecture, deployment target, unresolved build-machine paths and signature integrity. The actual automated execution baseline is macOS 15 on GitHub's separate Apple Silicon and Intel runners; macOS 13/14 and user hardware are not manually accepted by that run.
+
+**Signing boundary:** these apps have an **ad-hoc integrity signature only**, no Apple Developer ID publisher identity and no notarization. Internet-download quarantine may cause Gatekeeper to block launch. The package is self-contained, but this candidate cannot guarantee a normal warning-free first launch on another Mac. If blocked, stop and wait for a Developer ID signed/notarized build. No certificate was purchased, signing credential added, quarantine removed or Gatekeeper control disabled. The evidence records `codesign --verify --deep --strict`, identity information and `spctl --assess`; direct execution of a non-quarantined CI build does not establish acceptance of Finder's quarantined download path. See [Apple's explanation of app security checks](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac).
+
+Data uses **`~/Library/Application Support/CutVoke/`**, outside the `.app`. The application bundle can be read-only. `data/projects.sqlite`, uploaded media, preview caches and `data/font-cache` share that root; `profile/` contains language settings, Chromium state, `logs/engine.log` and generated `mcp-config.json`. Keep this data when replacing the app. If you move the app, launch it once to refresh the MCP command path. macOS may request normal file-access permissions for protected folders; denied permissions are not bypassed. Optional AI clients/accounts and ASR/person models are separate.
+
+**中文：**Apple Silicon 选 arm64，Intel 选 x64；需 macOS 13+，实际自动执行基线为 macOS 15。完整解压后把 `.app` 移到应用程序目录。基础功能无需 Python/Node/FFmpeg；数据在 `~/Library/Application Support/CutVoke/`。仅 ad-hoc 签名、没有 Developer ID 或公证，网络下载可能被 Gatekeeper 阻止；受阻时等待正式签名/公证构建，不降低系统安全保护。runner 直接启动不等于已通过用户 Mac 的隔离下载/Finder 验收。
+
+## Linux (x64)
+
+Get **CutVoke-linux-x64** from the same [native package workflow](https://github.com/frankShan001/CutVoke/actions/workflows/unix-packages.yml). Extract the outer Actions ZIP, then preserve executable permissions and symlinks when extracting the inner archive:
+
+```bash
+tar -xzf CutVoke-0.3.1-linux-x64.tar.gz
+cd CutVoke-0.3.1-linux-x64
+./cutvoke
+```
+
+A file manager can also open `cutvoke` if it permits launching local executables. Keep the full directory. There is no FUSE/AppImage dependency or package installer, and no system Python, Node.js or FFmpeg is needed. The archive includes its own media codecs and filters.
+
+The supported baseline is **Ubuntu 22.04 x64 / glibc 2.35+**, a graphical desktop, and Electron's system libraries: GTK3, NSS/NSPR, ATK/AT-SPI, X11/XCB, GBM/DRM, ALSA, libstdc++ and related distribution dependencies. A minimal/server image may need administrator installation of those desktop libraries; a display server and usable audio/video drivers remain system requirements. Native ELF headers, `ldd` resolution and required GLIBC symbol versions are audited. Other distributions, Wayland-only environments, device audio/GPU and newer/older desktops require their own acceptance.
+
+Run as a **normal desktop user**, from a filesystem which permits execution. Chromium's sandbox must work through the system's unprivileged user namespaces. Root and systems whose policy blocks that mechanism are outside this directory package's supported scope. In particular, Ubuntu 24.04 AppArmor may restrict user namespaces; an administrator-reviewed application policy or a future installed package may be required. This package does not install a root-owned setuid helper, set global sysctls or disable the sandbox. Do not use `--no-sandbox` as a workaround. The GUI acceptance explicitly keeps the renderer sandbox enabled. See [Ubuntu's user-namespace policy](https://documentation.ubuntu.com/security/security-features/privilege-restriction/unprivileged-user-namespace-restrictions/).
+
+Data uses **`${XDG_DATA_HOME:-~/.local/share}/CutVoke/`** with the same `data/` and `profile/` structure as macOS. No write access to the extracted application directory is required. Keep the data root when updating. Desktop packages accept `CUTVOKE_HOME` to select a different writable root and `CUTVOKE_DATA` to select an explicit database; `CUTVOKE_DATA` also changes the associated media/cache location. A read-only data directory produces a native error and exits after acknowledgement, preserving the existing database. The launcher does not fall back to an empty library. For moving media between paths/computers, use project packaging and relink.
+
+**中文：**下载 x64 的 tar.gz，完整解压后运行 `./cutvoke`。基线为 Ubuntu 22.04 / glibc 2.35+，需桌面系统库、可执行文件系统及普通用户可用的 Chromium 沙箱。无需 FUSE 或另装 Python/Node/FFmpeg，但精简系统可能需要管理员安装 GTK/NSS/音频等桌面库。Ubuntu 24.04 的 AppArmor 可能限制用户命名空间；不要用 `--no-sandbox` 或降低全局策略。数据在 `${XDG_DATA_HOME:-~/.local/share}/CutVoke/`，更新程序时保留数据。
+
 ## Install from source (developers)
 
 Use Python **3.10+**, Node.js **20+**, and `ffmpeg` plus `ffprobe` on PATH. FFmpeg must include `libx264`, AAC, overlay, drawtext and subtitles/libass. Optional ASR/person features need their own dependencies and model preparation; they are not required for the basic editor/demo.
@@ -70,7 +106,7 @@ Use a new output directory for each demo. Open `http://127.0.0.1:8787` and selec
 | Ubuntu 24.04 CI, Python 3.10 / 3.12 / 3.13, Node 24, apt FFmpeg | The [CI workflow](../../.github/workflows/ci.yml) runs backend regressions, browser editing and installed-wheel checks; use the status for the exact commit being installed |
 | Windows Server 2022 x64, packaged 0.3.1 portable, Python 3.13.16, Electron 44.5.1, bundled FFmpeg 7.1.5 | [Run 38788916823](https://github.com/frankShan001/CutVoke/actions/runs/38788916823): shipped ZIP extraction in Chinese/space paths, visible GUI and frozen health, eleven languages, real media upload + stdio MCP, playback, GUI export/full H.264/AAC decode, restart, duplicate/port conflict, shutdown and real ACL failure dialog with unchanged DB. Native normal startup has no QA/debug flags; PE manifests use asInvoker. |
 | Windows 10/11 devices, manual picker/drag behavior, device audio/GPU and SmartScreen | Not manually accepted on the user's computer by this workflow; automated server evidence is not a substitute for those device-specific checks |
-| macOS, other FFmpeg/platform builds | Not verified by this cloud run; record an actual machine/build before claiming support |
+| macOS 15 arm64 / Intel and Ubuntu 22.04 x64 native distributions | See the native package verification record below for the exact build and successful runs. Automated extracted-archive GUI, frozen backend, MCP, offline resources, import/preview/export/full decode and lifecycle checks; human audio/GPU and quarantined Mac download launch remain separate. |
 
 FFmpeg 6.1 remains part of the existing Ubuntu regression path. FFmpeg 7.1's `setpts` clears frame-rate metadata: the renderer restores CFR after retiming and uses the explicit sequence rate when assembling animation frames. A cached behavior probe enables the extra xfade normalization only when needed, preserving the last alpha frame and short source handles on builds such as 6.1. Upgrading FFmpeg to hide an invalid graph is not required. A distribution's version number alone does not guarantee the required codecs or filters.
 
@@ -95,4 +131,4 @@ The project version is aligned at **0.3.1** in Python, MCP and desktop metadata.
 
 源码安装需 Python 3.10+、Node.js 20+ 和具备所需编解码器/滤镜的 FFmpeg、ffprobe。先激活虚拟环境，再安装 Python 包、运行 Web 的 `npm ci` 和构建，最后执行 `cutvoke doctor --json`。
 
-云端已分别完成 Linux 源码流程和 Windows Server 2022 便携成品自动验收；没有用 Linux 检查代替 Windows 运行证据。Windows 安装包、macOS 和用户设备的人工体验仍需各自验收。源码版默认个人数据目录只读时，给 Web 和 MCP 指定同一个可写 `--data`；便携版默认使用 exe 旁的数据目录。上表列明准确范围。
+云端已分别完成 Linux 源码流程和 Windows Server 2022 便携成品自动验收；没有用 Linux 检查代替 Windows 运行证据。旧 Windows 安装包和用户设备的人工体验仍需各自验收；Mac/Linux 新包及签名、沙箱边界见上方专节。源码版默认个人数据目录只读时，给 Web 和 MCP 指定同一个可写 `--data`；便携版默认使用 exe 旁的数据目录。上表列明准确范围。
