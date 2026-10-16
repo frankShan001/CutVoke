@@ -38,12 +38,14 @@ const shutdownKey = crypto.randomBytes(32).toString("hex");
 const root = path.resolve(__dirname, "..");
 const dataPath = storage.dataPath;
 const fontCache = path.resolve(process.env.CUTVOKE_FONT_CACHE || path.join(path.dirname(dataPath), "font-cache"));
-const engine = app.isPackaged ? path.join(process.resourcesPath, "engine", "cutvoke-engine.exe")
-  : path.join(root, ".artifacts", "build", "desktop-engine", "cutvoke-engine", "cutvoke-engine.exe");
+const engineName = process.platform === "win32" ? "cutvoke-engine.exe" : "cutvoke-engine";
+const engine = app.isPackaged ? path.join(process.resourcesPath, "engine", engineName)
+  : path.join(root, ".artifacts", "build", "desktop-engine", "cutvoke-engine", engineName);
 const engineExists = fs.existsSync(engine) && !(process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_PYTHON === "1");
 const qaPython = process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_PYTHON === "1"
   ? process.env.CUTVOKE_DESKTOP_QA_PYTHON_EXE : undefined;
-const executable = engineExists ? engine : qaPython || path.join(root, ".venv", "Scripts", "python.exe");
+const executable = engineExists ? engine : qaPython || (process.platform === "win32"
+  ? path.join(root, ".venv", "Scripts", "python.exe") : path.join(root, ".venv", "bin", "python"));
 const prefix = engineExists ? [] : ["-m", "cutvoke"];
 
 function mcpConfig() {
@@ -137,7 +139,7 @@ if (storageFailure) {
   app.whenReady().then(() => {
     dialog.showMessageBoxSync({ type: "error", title: "CutVoke — Storage / 存储位置",
       message: "CutVoke cannot write to its data folder. / 无法写入数据文件夹。",
-      detail: "Extract the entire CutVoke folder to a writable location, such as Documents, then reopen CutVoke.exe. Keep your existing CutVoke Data folder. No projects were replaced.\n请将整个 CutVoke 文件夹解压到可写位置（如文档），保留原有 CutVoke Data 文件夹后重新打开。工程未被替换。\n\n" + storageFailure.message,
+      detail: "Check write permission and free space for the data location below, then reopen CutVoke. Keep your existing data. No projects were replaced.\n请检查下方数据位置的写入权限与剩余空间，保留原有数据后重新打开。工程未被替换。\n\n" + storage.profile + "\n" + storageFailure.message,
       buttons: ["Close / 关闭"] });
     app.quit();
   });
@@ -145,7 +147,9 @@ if (storageFailure) {
 else {
   app.on("second-instance", () => { if (window) { if (window.isMinimized()) window.restore(); window.focus(); } });
   app.whenReady().then(async () => {
-    Menu.setApplicationMenu(null);
+    Menu.setApplicationMenu(process.platform === "darwin" ? Menu.buildFromTemplate([
+      { role: "appMenu" }, { role: "editMenu" }, { role: "windowMenu" },
+    ]) : null);
     session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
     window = new BrowserWindow({ show: process.env.CUTVOKE_DESKTOP_QA !== "1" || process.env.CUTVOKE_DESKTOP_QA_SHOW === "1", width: 1500, height: 950, minWidth: 900, minHeight: 640, backgroundColor: "#101318", title: "CutVoke",
       webPreferences: { preload: path.join(__dirname, "preload.cjs"), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false,

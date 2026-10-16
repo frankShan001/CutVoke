@@ -1,0 +1,143 @@
+name: macOS and Linux packages
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - desktop/**
+      - src/**
+      - web/app/**
+      - scripts/build/**
+      - scripts/verify/verify_portable_unix.cjs
+      - scripts/verify/verify_unix_*
+      - scripts/verify/verify_linux_dialog.py
+      - .github/workflows/unix-packages.yml
+      - .gitattributes
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unix-packages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    name: Build and accept ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { target: macos-arm64, runner: macos-15, builder: '--mac --arm64' }
+          - { target: macos-x64, runner: macos-15-intel, builder: '--mac --x64' }
+          - { target: linux-x64, runner: ubuntu-22.04, builder: '--linux --x64' }
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      MACOSX_DEPLOYMENT_TARGET: '13.0'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13.16'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.15.0'
+          cache: npm
+          cache-dependency-path: |
+            desktop/package-lock.json
+            web/app/package-lock.json
+      - name: Install Linux build and desktop test tools
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nasm ninja-build pkg-config libgtk-3-0 libnss3 libasound2 libgbm1 libatk-bridge2.0-0 libxss1 libdrm2 libxkbcommon0 xvfb xdotool openbox dbus-x11 at-spi2-core python3-pyatspi
+      - name: Install macOS build tools
+        if: runner.os == 'macOS'
+        run: brew install nasm ninja pkg-config
+      - name: Restore exact native FFmpeg
+        id: ffmpeg-cache
+        uses: actions/cache@v5
+        with:
+          path: .artifacts/portable-ffmpeg
+          key: ffmpeg-${{ matrix.target }}-${{ hashFiles('desktop/ffmpeg-sources.json', 'scripts/build/build_ffmpeg_unix.sh', 'scripts/build/prepare_ffmpeg_sources.py') }}
+      - name: Build FFmpeg from pinned sources with corresponding source
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install meson==1.10.0
+          bash scripts/build/build_ffmpeg_unix.sh
+      - name: Verify native FFmpeg integrity
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          root=Path('.artifacts/portable-ffmpeg')
+          for name,expected in json.loads((root/'SHA256.json').read_text()).items():
+              assert hashlib.sha256((root/name).read_bytes()).hexdigest()==expected, name
+          for name in ('ffmpeg','ffprobe'):
+              assert (root/'bin'/name).stat().st_mode & 0o111
+          PY
+      - name: Prepare isolated frozen backend
+        run: |
+          python -m venv .artifacts/venv-portable
+          .artifacts/venv-portable/bin/python -m pip install --require-hashes --only-binary=:all: -r desktop/requirements-build.lock
+      - name: Build Web editor
+        working-directory: web/app
+        run: |
+          npm ci
+          npm run typecheck
+          npm run build
+      - name: Freeze native backend with bundled media tools
+        run: |
+          export CUTVOKE_FFMPEG_DIR="$GITHUB_WORKSPACE/.artifacts/portable-ffmpeg/bin"
+          .artifacts/venv-portable/bin/python -m PyInstaller --noconfirm --distpath .artifacts/build/desktop-engine --workpath .artifacts/build/desktop-work desktop/engine.spec
+      - name: Verify Electron and package native app
+        run: |
+          npm ci --prefix desktop
+          npm run test:build-deps --prefix desktop
+          npm run test:i18n --prefix desktop
+          npm run test:storage --prefix desktop
+          python scripts/build/prepare_desktop_unix.py
+          npm run package:unix --prefix desktop -- ${{ matrix.builder }}
+      - name: Assemble distribution preserving executable modes and symlinks
+        run: .artifacts/venv-portable/bin/python scripts/build/assemble_portable.py
+      - name: Extract shipped archive and accept real macOS app
+        if: runner.os == 'macOS'
+        run: |
+          export CUTVOKE_VERIFY_PYTHON="$GITHUB_WORKSPACE/.artifacts/venv-portable/bin/python"
+          node scripts/verify/verify_portable_unix.cjs
+      - name: Extract shipped archive and accept real Linux app with sandbox
+        if: runner.os == 'Linux'
+        run: |
+          export CUTVOKE_VERIFY_PYTHON="$GITHUB_WORKSPACE/.artifacts/venv-portable/bin/python"
+          export GTK_MODULES=gail:atk-bridge
+          export NO_AT_BRIDGE=0
+          dbus-run-session -- xvfb-run -a bash -e -c '
+            openbox > /tmp/cutvoke-openbox.log 2>&1 &
+            node scripts/verify/verify_portable_unix.cjs
+          '
+      - name: Upload verified download
+        uses: actions/upload-artifact@v7
+        with:
+          name: CutVoke-${{ matrix.target }}
+          path: dist/portable/*
+          compression-level: 0
+          retention-days: 90
+          if-no-files-found: error
+      - name: Preserve native build and acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.target }}-evidence
+          path: |
+            .artifacts/acceptance/${{ matrix.target }}/*
+            !.artifacts/acceptance/${{ matrix.target }}/中文 空格路径/**
+            !.artifacts/acceptance/${{ matrix.target }}/用户 数据/**
+            .artifacts/portable-ffmpeg/licenses/*
+            dist/portable/download-info.json
+            dist/portable/native-runtime.json
+          retention-days: 90
+          if-no-files-found: warn

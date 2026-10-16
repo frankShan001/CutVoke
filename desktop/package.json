@@ -14,7 +14,8 @@
     "test:storage": "node --test storage.test.cjs",
     "test:build-deps": "node --test build-dependencies.test.cjs",
     "test:i18n": "node --test i18n.test.cjs",
-    "test:i18n:electron": "node --test i18n.electron.test.cjs"
+    "test:i18n:electron": "node --test i18n.electron.test.cjs",
+    "package:unix": "electron-builder --config unix-builder.cjs --dir --config.directories.output=../.artifacts/desktop"
   },
   "devDependencies": {
     "electron": "44.5.1",
