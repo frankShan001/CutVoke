@@ -154,7 +154,7 @@ async function verifyCloseDuringStartup({ executable, env, out, report }) {
   const hook = path.join(out, "close-during-loading.cjs");
   for (const delay of [0, 150]) {
     const data = path.join(out, `启动中关闭 数据 ${delay}`);
-    fs.writeFileSync(hook, `module.exports = async () => new Promise(() => {});\nmodule.exports.loading = async ({ window }) => { ${delay ? `setTimeout(() => window.close(), ${delay});` : 'window.close();'} };\n`);
+    fs.writeFileSync(hook, `module.exports = async () => new Promise(() => {});\nmodule.exports.loading = async ({ window }) => { ${delay ? `setTimeout(() => window.close(), ${delay});` : 'await new Promise(resolve => { window.once("close", resolve); window.close(); });'} };\n`);
     const child = start(executable, { ...env, CUTVOKE_HOME: data, CUTVOKE_DESKTOP_QA: "1",
       CUTVOKE_DESKTOP_QA_SHOW: "1", CUTVOKE_DESKTOP_QA_SCRIPT: hook }, out, `close-during-startup-${delay}`);
     try {
