@@ -83,7 +83,7 @@ function showShellError(kind, detail) {
 async function start() {
   prepareStorage(storage);
   const port = await vacantPort(); origin = `http://127.0.0.1:${port}`;
-  if (closing) return;
+  if (closing || window.isDestroyed()) return;
   fs.mkdirSync(path.dirname(dataPath), { recursive: true });
   const logDir = path.join(app.getPath("userData"), "logs"); fs.mkdirSync(logDir, { recursive: true });
   const log = fs.createWriteStream(path.join(logDir, "engine.log"), { flags: "a" });
