@@ -6,7 +6,7 @@ MACH_MAGICS = {b'\xcf\xfa\xed\xfe', b'\xce\xfa\xed\xfe', b'\xca\xfe\xba\xbe',
 
 def read_macho(data):
     """Return one entry per Mach-O slice; reject malformed command boundaries."""
-    magic = data[:4]
+    magic = bytes(data[:4])
     if magic in {b'\xca\xfe\xba\xbe', b'\xbe\xba\xfe\xca', b'\xca\xfe\xba\xbf', b'\xbf\xba\xfe\xca'}:
         endian = '>' if magic in {b'\xca\xfe\xba\xbe', b'\xca\xfe\xba\xbf'} else '<'
         wide = magic in {b'\xca\xfe\xba\xbf', b'\xbf\xba\xfe\xca'}
