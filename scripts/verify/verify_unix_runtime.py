@@ -15,7 +15,7 @@ arch = 'arm64' if platform.machine() in {'arm64', 'aarch64'} else 'x86_64'
 report = {'passed': False, 'architecture': arch, 'os': platform.platform(), 'images': [], 'links': 0}
 
 def run(*args):
-    result = subprocess.run(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result = subprocess.run(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60)
     if result.returncode:
         raise RuntimeError(f'{args}:\n{result.stdout}')
     return result.stdout
@@ -34,8 +34,11 @@ try:
         if mac and magic in MACH_MAGICS:
             slices = read_macho(file.read_bytes())
             if not report['images']:
-                sdk = subprocess.run(['/usr/bin/otool', '-L', str(file)], capture_output=True, text=True)
-                report['hostSdkDiagnostic'] = {'exitCode': sdk.returncode, 'output': sdk.stdout + sdk.stderr}
+                try:
+                    sdk = subprocess.run(['/usr/bin/otool', '-L', str(file)], capture_output=True, text=True, timeout=10)
+                    report['hostSdkDiagnostic'] = {'exitCode': sdk.returncode, 'output': sdk.stdout + sdk.stderr}
+                except subprocess.TimeoutExpired:
+                    report['hostSdkDiagnostic'] = {'timedOut': True}
             arches = [item['architecture'] for item in slices]
             assert arch in arches, (relative, arches)
             for item in slices:
@@ -71,9 +74,12 @@ try:
         report['signature'] = signature.stdout + signature.stderr
         assert 'Signature=adhoc' in report['signature']
         assert 'TeamIdentifier=not set' in report['signature']
-        gatekeeper = subprocess.run(['/usr/sbin/spctl', '--assess', '--type', 'execute', '--verbose=4', str(app)], capture_output=True, text=True)
-        report['gatekeeperAssessment'] = {'exitCode': gatekeeper.returncode, 'output': gatekeeper.stdout + gatekeeper.stderr,
-                                          'quarantinedFinderLaunchAccepted': False}
+        try:
+            gatekeeper = subprocess.run(['/usr/sbin/spctl', '--assess', '--type', 'execute', '--verbose=4', str(app)], capture_output=True, text=True, timeout=30)
+            report['gatekeeperAssessment'] = {'exitCode': gatekeeper.returncode, 'output': gatekeeper.stdout + gatekeeper.stderr,
+                                              'quarantinedFinderLaunchAccepted': False}
+        except subprocess.TimeoutExpired:
+            report['gatekeeperAssessment'] = {'timedOut': True, 'quarantinedFinderLaunchAccepted': False}
         executables = [app / 'Contents/MacOS/CutVoke', app / 'Contents/Resources/engine/cutvoke-engine']
     else:
         executables = [folder / 'cutvoke', folder / 'resources/engine/cutvoke-engine']
