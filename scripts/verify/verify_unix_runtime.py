@@ -6,6 +6,7 @@ import platform
 import re
 import subprocess
 import sys
+from verify_unix_macho import MACH_MAGICS, read_macho
 
 folder, output = map(Path, sys.argv[1:])
 folder = folder.resolve()
@@ -14,7 +15,10 @@ arch = 'arm64' if platform.machine() in {'arm64', 'aarch64'} else 'x86_64'
 report = {'passed': False, 'architecture': arch, 'os': platform.platform(), 'images': [], 'links': 0}
 
 def run(*args):
-    return subprocess.check_output(args, text=True, stderr=subprocess.STDOUT)
+    result = subprocess.run(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    if result.returncode:
+        raise RuntimeError(f'{args}:\n{result.stdout}')
+    return result.stdout
 
 try:
     for file in sorted(folder.rglob('*')):
@@ -27,21 +31,21 @@ try:
         with file.open('rb') as stream:
             magic = stream.read(4)
         relative = file.relative_to(folder).as_posix()
-        if mac and magic in {b'\xcf\xfa\xed\xfe', b'\xce\xfa\xed\xfe', b'\xca\xfe\xba\xbe', b'\xbe\xba\xfe\xca', b'\xca\xfe\xba\xbf'}:
-            arches = run('/usr/bin/lipo', '-archs', str(file)).strip().split()
+        if mac and magic in MACH_MAGICS:
+            slices = read_macho(file.read_bytes())
+            if not report['images']:
+                sdk = subprocess.run(['/usr/bin/otool', '-L', str(file)], capture_output=True, text=True)
+                report['hostSdkDiagnostic'] = {'exitCode': sdk.returncode, 'output': sdk.stdout + sdk.stderr}
+            arches = [item['architecture'] for item in slices]
             assert arch in arches, (relative, arches)
-            dependencies = run('/usr/bin/otool', '-L', str(file))
-            for line in dependencies.splitlines()[1:]:
-                dependency = line.strip().split(' (', 1)[0]
-                # Universal output can contain architecture headings.
-                if dependency.startswith('/') and not line.endswith(':'):
+            for item in slices:
+                for dependency in item['dependencies'] + item['rpaths']:
+                    if not dependency.startswith('/'):
+                        assert dependency.startswith(('@rpath/', '@loader_path', '@executable_path')), (relative, dependency)
+                        continue
                     assert dependency.startswith(('/System/Library/', '/usr/lib/')), (relative, dependency)
-            commands = run('/usr/bin/otool', '-l', str(file))
-            versions = re.findall(r'\b(?:minos|version) (\d+\.\d+(?:\.\d+)?)', commands)
-            # Only deployment versions in LC_BUILD_VERSION/LC_VERSION_MIN_MACOSX.
-            deployment = re.findall(r'(?:cmd LC_BUILD_VERSION[\s\S]*?\bminos |cmd LC_VERSION_MIN_MACOSX[\s\S]*?\bversion )(\d+\.\d+(?:\.\d+)?)', commands)
-            assert all(tuple(map(int, v.split('.'))) <= (13, 0, 0) for v in deployment), (relative, deployment)
-            report['images'].append({'path': relative, 'architectures': arches, 'deployment': deployment, 'dependencies': dependencies})
+                assert all(version <= (13, 0, 0) for version in item['deployment']), (relative, item['deployment'])
+            report['images'].append({'path': relative, 'architectures': arches, 'slices': slices})
         elif not mac and magic == b'\x7fELF':
             header = run('/usr/bin/readelf', '-h', str(file))
             assert 'Advanced Micro Devices X86-64' in header, relative
