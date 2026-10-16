@@ -252,6 +252,7 @@ async function main() {
     report.storage = { database: path.join(data, "data/projects.sqlite"), profile, cache: cache.directory };
     await verifyNormalLaunch({ executable, env, out, data, expectedProject: before, projectId, report });
     await verifyPlatformStorage({ executable, env, out, folder, report });
+    await verifyCloseDuringStartup({ executable, env, out, report });
     await verifyReadonlyStorage({ executable, env, out, data, profile, report });
     report.passed = true;
   } finally {
@@ -273,7 +274,7 @@ async function main() {
   fs.copyFileSync(path.join(out, "verification.json"), path.join(root, "dist/portable/windows-verification.json"));
   console.log(JSON.stringify(report.checks, null, 2));
 }
-const { verifyNormalLaunch, verifyReadonlyStorage, verifyPlatformStorage, terminateOwnedApplication } = require("./verify_unix_lifecycle.cjs");
+const { verifyNormalLaunch, verifyReadonlyStorage, verifyPlatformStorage, verifyCloseDuringStartup, terminateOwnedApplication } = require("./verify_unix_lifecycle.cjs");
 main().catch(error => {
   report.error = error.stack; save(); console.error(error);
   // Keep remote failures diagnosable even when artifact downloads are unavailable.
