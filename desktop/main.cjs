@@ -31,7 +31,7 @@ if (process.platform === "win32" && process.env.CUTVOKE_DIRECT_COMPOSITION !== "
 
 if (process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_OFFSCREEN === "1") app.disableHardwareAcceleration();
 
-let child, window, origin, qaHook, closing = false, ready = false;
+let child, window, origin, qaHook, closing = false, windowClosing = false, ready = false;
 const language = createLanguageController(path.join(app.getPath("userData"), "ui-language.json"),
   () => app.getPreferredSystemLanguages());
 const shutdownKey = crypto.randomBytes(32).toString("hex");
@@ -83,7 +83,7 @@ function showShellError(kind, detail) {
 async function start() {
   prepareStorage(storage);
   const port = await vacantPort(); origin = `http://127.0.0.1:${port}`;
-  if (closing || window.isDestroyed()) return;
+  if (closing || windowClosing || window.isDestroyed()) return;
   fs.mkdirSync(path.dirname(dataPath), { recursive: true });
   const logDir = path.join(app.getPath("userData"), "logs"); fs.mkdirSync(logDir, { recursive: true });
   const log = fs.createWriteStream(path.join(logDir, "engine.log"), { flags: "a" });
@@ -99,7 +99,7 @@ async function start() {
   child.stdout.pipe(log, { end: false }); child.stderr.pipe(log, { end: false });
   child.once("exit", (code) => {
     log.end();
-    if (ready && !closing) {
+    if (ready && !closing && !windowClosing) {
       showShellError("service", `${language.text("serviceExitCode", code)}\n${language.text("logLocation", logDir)}`);
       app.quit();
     }
@@ -107,17 +107,17 @@ async function start() {
   let runtime;
   const deadline = Date.now() + 90000;
   while (Date.now() < deadline) {
-    if (closing) return;
+    if (closing || windowClosing) return;
     if (failure) throw failure;
     if (child.exitCode !== null) throw new Error(`${language.text("startupExit", child.exitCode)}\n${language.text("logLocation", logDir)}`);
     try { runtime = await request("runtime"); if (runtime.processId === child.pid) break; } catch { /* Startup still in progress. */ }
     await new Promise(resolve => setTimeout(resolve, 200));
   }
-  if (closing || window.isDestroyed()) return;
+  if (closing || windowClosing || window.isDestroyed()) return;
   if (!runtime || runtime.processId !== child.pid) throw new Error(`${language.text("startupTimeout")}\n${language.text("logLocation", logDir)}`);
   ready = true;
   await window.loadURL(origin);
-  if (closing || window.isDestroyed()) return;
+  if (closing || windowClosing || window.isDestroyed()) return;
   fs.writeFileSync(path.join(app.getPath("userData"), "mcp-config.json"), JSON.stringify(mcpConfig(), null, 2));
   // QA uses the same built client without opening a debug port on normal runs.
   if (process.env.CUTVOKE_DESKTOP_QA === "1") {
@@ -160,6 +160,9 @@ else {
       webPreferences: { preload: path.join(__dirname, "preload.cjs"), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false,
         offscreen: process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_OFFSCREEN === "1" } });
     window.removeMenu();
+    // A native close request can precede window destruction and before-quit.
+    // Stop startup immediately while the existing quit path drains its child.
+    window.on("close", () => { windowClosing = true; });
     window.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
     window.webContents.on("will-navigate", (event, url) => { if (new URL(url).origin !== origin) event.preventDefault(); });
     window.webContents.on("will-attach-webview", event => event.preventDefault());
@@ -188,7 +191,7 @@ else {
     try {
       if (qaHook?.loading) await qaHook.loading({ window, app });
       await start();
-    } catch (error) { if (!closing) showShellError("startup", error.message); app.quit(); }
+    } catch (error) { if (!closing && !windowClosing) showShellError("startup", error.message); app.quit(); }
   });
   app.on("window-all-closed", () => app.quit());
   app.on("before-quit", event => {
