@@ -4,7 +4,7 @@
   "version": "0.3.1",
   "previousVerifiedMain": "205f5012cc2b36406342287075236f9cc4b926ba",
   "buildCommit": "fdec479c4acbc3c685a5c8adbe8ec91621a7c194",
-  "distribution": "GitHub Actions candidates; no Release or tag",
+  "distribution": "GitHub v0.3.1 prerelease; original Actions artifact provenance retained below",
   "archiveChecksumScope": "download.sha256 hashes the inner named platform archive, not GitHub's outer artifact ZIP; outer hashes are recorded separately.",
   "workflowRuns": [
     {
@@ -753,7 +753,7 @@
     "Linux baseline is Ubuntu 22.04 x64/glibc 2.35 with normal desktop libraries, display/drivers, executable filesystem and working unprivileged user-namespace sandbox. No FUSE or user-installed Python/Node/FFmpeg is required. Other distributions, Wayland-only sessions, Ubuntu 24.04 AppArmor policy, root and noexec locations are not accepted.",
     "Windows evidence is automated Windows Server 2022 x64, not manual Windows 10/11 or SmartScreen acceptance. The CutVoke package remains unsigned.",
     "Native picker/drag ergonomics, protected-folder permission prompts, speaker/device audio, GPU acceleration, every effect and optional AI clients/cloud services/ASR/person models are outside this automated acceptance.",
-    "All artifacts expire on 2027-01-14; GitHub login may be required. Retain licenses and FFmpeg corresponding source for redistribution. Absolute media references may require project packaging/relink after moving files or machines."
+    "Original Actions artifacts/evidence expire on 2027-01-14 and may require GitHub login. The four actual archives and fresh SHA256SUMS are also published in the linked v0.3.1 prerelease. Retain licenses and FFmpeg corresponding source for redistribution. Absolute media references may require project packaging/relink after moving files or machines."
   ],
   "developmentRunHistory": {
     "scope": "Implementation pushes after previousVerifiedMain, before the final accepted build. Final workflow runs are listed above; final documentation-only main commit CI is reported with delivery.",
@@ -845,5 +845,26 @@
       }
     ],
     "additionalResolvedIssues": "Canceled intermediate runs also exposed a loading-window close race, source-build environment/toolchain lookup, and dynamic OpenSSL-provider lookup. These were corrected before the successful native and Windows acceptance."
+  },
+  "release": {
+    "url": "https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1",
+    "id": 415558347,
+    "tag": "v0.3.1",
+    "tagCommit": "58f890090463300c007f541ac36be8bca71bb4e9",
+    "binaryBuildCommit": "fdec479c4acbc3c685a5c8adbe8ec91621a7c194",
+    "prerelease": true,
+    "publishedAt": "2026-10-17T03:29:40Z",
+    "stagingRun": {
+      "id": 38998824276,
+      "url": "https://github.com/frankShan001/CutVoke/actions/runs/38998824276",
+      "conclusion": "success",
+      "allFourActualArchivesVerifiedBeforeUpload": true,
+      "allFiveServerDigestsMatch": true
+    },
+    "sha256sums": "https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS",
+    "targetCI": {
+      "id": 38847242045,
+      "conclusion": "success"
+    }
   }
 }

@@ -4,7 +4,7 @@ The [native package workflow](../../.github/workflows/unix-packages.yml) builds
 macOS arm64 on `macos-15`, macOS Intel x64 on `macos-15-intel`, and Linux x64 on
 `ubuntu-22.04`. These are independent native builds, not cross-compiled Python
 environments. See the [user guide](../user/installation.md#macos-arm64--x64) for
-downloads, storage and system/security requirements. No Release/tag is created.
+downloads, storage and system/security requirements. This build workflow does not publish a Release. The exact accepted archives are now available in the [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1), after independent full-byte/hash verification during [staging run 38998824276](https://github.com/frankShan001/CutVoke/actions/runs/38998824276). The tag points to `58f890090463300c007f541ac36be8bca71bb4e9`; the binaries retain the build commit below.
 
 The **2026-10-16** delivery was built from
 `fdec479c4acbc3c685a5c8adbe8ec91621a7c194`. All three native jobs in

@@ -2,11 +2,13 @@
 
 [English README](../../README.md) · [中文 README](../../README.zh-CN.md) · [Contributing](../../CONTRIBUTING.md)
 
+**[v0.3.1 prerelease / 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1)** · [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS). Release assets are the actual archives, ready to extract. The tag is `58f890090463300c007f541ac36be8bca71bb4e9`; binaries remain the original `fdec479c4acbc3c685a5c8adbe8ec91621a7c194` build. 标签对应文档最终提交，二进制未重建；本页保留原始 runner 证据。
+
 ## Windows portable (x64)
 
-**[Download 0.3.1 portable](https://github.com/frankShan001/CutVoke/actions/runs/38845496400/artifacts/12022894966)** · [successful Windows run](https://github.com/frankShan001/CutVoke/actions/runs/38845496400) · [screenshots and test evidence](https://github.com/frankShan001/CutVoke/actions/runs/38845496400/artifacts/12023445833)
+**[Download 0.3.1 portable](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-windows-x64-portable.zip)** · [successful Windows run](https://github.com/frankShan001/CutVoke/actions/runs/38845496400) · [screenshots and test evidence](https://github.com/frankShan001/CutVoke/actions/runs/38845496400/artifacts/12023445833)
 
-The Actions download contains `CutVoke-0.3.1-windows-x64-portable.zip`, `SHA256SUMS.txt`, `download-info.json` and `windows-verification.json`. Extract the portable ZIP completely to a writable folder and double-click **CutVoke.exe**. No installer, administrator permission, Python, Node.js or system FFmpeg configuration is needed. GitHub login may be required to download; this artifact expires on **2027-01-14**.
+The Release download is `CutVoke-0.3.1-windows-x64-portable.zip`; download `SHA256SUMS` separately for verification. Extract the ZIP completely to a writable folder and double-click **CutVoke.exe**. No installer, administrator permission, Python, Node.js or system FFmpeg configuration is needed. The original Actions wrapper and runner evidence remain provenance records with their own retention limits.
 
 | Portable ZIP | Value |
 | --- | --- |
@@ -17,7 +19,7 @@ The Actions download contains `CutVoke-0.3.1-windows-x64-portable.zip`, `SHA256S
 | Actions run | `38845496400` |
 | Signature | Unsigned CutVoke candidate; Windows may display SmartScreen |
 
-The checksum above is for the named **portable ZIP**, not GitHub's outer artifact download. It can be checked in PowerShell with `Get-FileHash -Algorithm SHA256 .\CutVoke-0.3.1-windows-x64-portable.zip`. `build-info.json` and `file-manifest.json` inside the app record component versions and file hashes. There is no formal binary Release/tag yet.
+The checksum above is for the named **portable ZIP**, not GitHub's outer artifact download. It can be checked in PowerShell with `Get-FileHash -Algorithm SHA256 .\CutVoke-0.3.1-windows-x64-portable.zip`. `build-info.json` and `file-manifest.json` inside the app record component versions and file hashes. These exact bytes are published in the [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1).
 
 | Relative to CutVoke.exe | Purpose |
 | --- | --- |
@@ -35,36 +37,36 @@ The package contains the built Web editor, Electron 44.5.1, Python 3.13.16 froze
 
 Basic local import, editing, preview and MP4 export work without an AI account. Optional external AI services/clients need their own configuration/account/network/key; optional speech/person models and dependencies are not bundled or claimed as part of basic offline operation.
 
-**中文启动说明：** 下载 Actions 文件后，取出上述便携 ZIP，完整解压到可写目录，再双击 `CutVoke.exe`。无需安装或配置开发环境。工程、素材和缓存位置如上表；更新先关闭程序，保留 `CutVoke Data`，不要用测试库覆盖工程。包未签名，可能有 SmartScreen 提示。基础剪辑可本机离线完成，可选 AI/语音/人物功能另行配置。Windows runner 的自动验收已完成，人工设备体验边界见下表。
+**中文启动说明：** 从 Release 下载上述便携 ZIP，核对 SHA256SUMS，完整解压到可写目录，再双击 `CutVoke.exe`。无需安装或配置开发环境。工程、素材和缓存位置如上表；更新先关闭程序，保留 `CutVoke Data`，不要用测试库覆盖工程。包未签名，可能有 SmartScreen 提示。基础剪辑可本机离线完成，可选 AI/语音/人物功能另行配置。Windows runner 的自动验收已完成，人工设备体验边界见下表。
 
 ## macOS (arm64 / x64)
 
-**Verified 0.3.1 downloads:** [successful native run 38845496409](https://github.com/frankShan001/CutVoke/actions/runs/38845496409), build `fdec479c4acbc3c685a5c8adbe8ec91621a7c194`. GitHub sign-in may be required; this download expires on **2027-01-14**.
+**Verified 0.3.1 downloads:** [successful native run 38845496409](https://github.com/frankShan001/CutVoke/actions/runs/38845496409), build `fdec479c4acbc3c685a5c8adbe8ec91621a7c194`. The original verified archives are now available directly from the [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1); Actions evidence retains its original expiry.
 
 | Inner archive / download | Size | SHA256 of the inner archive | Evidence |
 | --- | --- | --- | --- |
-| [CutVoke-0.3.1-macos-arm64.zip](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12022962244) | 352,156,692 bytes / 335.8 MiB | `24b4c0615618cabf5a641d0aa5abc0b76a5bf768b9291001c0b90fd557b0576b` | [arm64 screenshots/reports](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12022249773) |
-| [CutVoke-0.3.1-macos-x64.zip](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023640599) | 422,388,587 bytes / 402.8 MiB | `93116f49ca982398766abb20efc580bc1f6282581885b1cbb6b95a1a4f7d1854` | [Intel screenshots/reports](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023680611) |
+| [CutVoke-0.3.1-macos-arm64.zip](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-arm64.zip) | 352,156,692 bytes / 335.8 MiB | `24b4c0615618cabf5a641d0aa5abc0b76a5bf768b9291001c0b90fd557b0576b` | [arm64 screenshots/reports](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12022249773) |
+| [CutVoke-0.3.1-macos-x64.zip](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-x64.zip) | 422,388,587 bytes / 402.8 MiB | `93116f49ca982398766abb20efc580bc1f6282581885b1cbb6b95a1a4f7d1854` | [Intel screenshots/reports](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023680611) |
 
-Only a successful **Upload verified download** step in the [native package workflow](https://github.com/frankShan001/CutVoke/actions/workflows/unix-packages.yml) produces a user download. The outer Actions ZIP contains the distribution archive, `SHA256SUMS.txt`, `download-info.json`, native dependency/signature evidence and a platform verification report. These candidates are not formal Releases/tags. The [durable verification record](../development/native-packages-verification.json) also records the outer artifact hashes; the table above hashes the inner named ZIP. On macOS use `shasum -a 256 CutVoke-0.3.1-macos-arm64.zip` (or the x64 filename).
+The original **Upload verified download** steps in the [native package workflow](https://github.com/frankShan001/CutVoke/actions/workflows/unix-packages.yml) produced the accepted archives. The Release uploads those same inner archives after fresh byte/hash checks. Its attachments are ready to extract; the original outer Actions ZIP, metadata and verification reports remain provenance evidence. The [durable verification record](../development/native-packages-verification.json) also records the outer artifact hashes; the table above hashes the inner named ZIP. On macOS use `shasum -a 256 CutVoke-0.3.1-macos-arm64.zip` (or the x64 filename).
 
 1. Apple Silicon (M-series): choose **CutVoke-macos-arm64**. Intel: choose **CutVoke-macos-x64**. These are separate native builds; no Rosetta requirement is introduced for Apple Silicon.
-2. Extract the Actions download, then the `CutVoke-0.3.1-macos-<arch>.zip` inside it. Keep `START-HERE.txt`, hashes and `licenses/` for reference/redistribution.
+2. Verify and extract the directly downloaded `CutVoke-0.3.1-macos-<arch>.zip`. Keep `START-HERE.txt`, hashes and `licenses/` for reference/redistribution.
 3. Move `CutVoke.app` into `/Applications` or `~/Applications`, then open it. No Python, Node.js or FFmpeg install is needed for basic local editing.
 
 The declared minimum is **macOS 13 (Ventura)**, required by [Electron 44](https://www.electronjs.org/docs/latest/breaking-changes#removed-macos-12-support). Native images are audited for architecture, deployment target, unresolved build-machine paths and signature integrity. The actual automated execution baseline is macOS 15 on GitHub's separate Apple Silicon and Intel runners; macOS 13/14 and user hardware are not manually accepted by that run.
 
-**Signing boundary:** these apps have an **ad-hoc integrity signature only**, no Apple Developer ID publisher identity and no notarization. Internet-download quarantine may cause Gatekeeper to block launch. The package is self-contained, but this candidate cannot guarantee a normal warning-free first launch on another Mac. If blocked, stop and wait for a Developer ID signed/notarized build. No certificate was purchased, signing credential added, quarantine removed or Gatekeeper control disabled. The evidence records `codesign --verify --deep --strict`, identity information and `spctl --assess`; direct execution of a non-quarantined CI build does not establish acceptance of Finder's quarantined download path. See [Apple's explanation of app security checks](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac).
+**Signing boundary:** these apps have an **ad-hoc integrity signature only**, no Apple Developer ID publisher identity and no notarization. Internet-download quarantine may cause Gatekeeper to block launch. The package is self-contained, but this candidate cannot guarantee a normal warning-free first launch on another Mac. Both `spctl --assess` checks rejected automatic trust (exit 3). After checking the source and matching SHA256, users who trust the unmodified app may follow Apple's app-specific **System Settings → Privacy & Security → Open Anyway** approval after attempting to open it. Stop if trust cannot be established or the system still refuses. Users need no developer account purchase. Keep global security protections enabled; no signing credentials, quarantine removal or Gatekeeper disabling are part of this process. The evidence records `codesign --verify --deep --strict`, identity information and `spctl --assess`; direct execution of a non-quarantined CI build does not establish acceptance of Finder's quarantined download path. See [Apple's explanation of app security checks](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac).
 
 Data uses **`~/Library/Application Support/CutVoke/`**, outside the `.app`. The application bundle can be read-only. `data/projects.sqlite`, uploaded media, preview caches and `data/font-cache` share that root; `profile/` contains language settings, Chromium state, `logs/engine.log` and generated `mcp-config.json`. Keep this data when replacing the app. If you move the app, launch it once to refresh the MCP command path. macOS may request normal file-access permissions for protected folders; denied permissions are not bypassed. Optional AI clients/accounts and ASR/person models are separate.
 
-**中文：**Apple Silicon 选 arm64，Intel 选 x64；需 macOS 13+，实际自动执行基线为 macOS 15。完整解压后把 `.app` 移到应用程序目录。基础功能无需 Python/Node/FFmpeg；数据在 `~/Library/Application Support/CutVoke/`。仅 ad-hoc 签名、没有 Developer ID 或公证，网络下载可能被 Gatekeeper 阻止；受阻时等待正式签名/公证构建，不降低系统安全保护。runner 直接启动不等于已通过用户 Mac 的隔离下载/Finder 验收。
+**中文：**Apple Silicon 选 arm64，Intel 选 x64；需 macOS 13+，实际自动执行基线为 macOS 15。完整解压后把 `.app` 移到应用程序目录。基础功能无需 Python/Node/FFmpeg；数据在 `~/Library/Application Support/CutVoke/`。仅 ad-hoc 签名、没有 Developer ID 或公证，网络下载可能被 Gatekeeper 阻止；确认来源可信且 SHA256 一致后，可在尝试启动后的“系统设置 → 隐私与安全性”中针对该 app 确认“仍要打开”；无需购买开发者账号，不关闭全局安全保护。无法确认来源或仍被拒绝时停止并保留错误。runner 直接启动不等于已通过用户 Mac 的隔离下载/Finder 验收。
 
 ## Linux (x64)
 
-**[Download verified CutVoke-linux-x64](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023097854)** · [Linux screenshots/reports](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023600328) · [successful native run](https://github.com/frankShan001/CutVoke/actions/runs/38845496409).
+**[Download verified CutVoke-linux-x64](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-linux-x64.tar.gz)** · [Linux screenshots/reports](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023600328) · [successful native run](https://github.com/frankShan001/CutVoke/actions/runs/38845496409).
 
-The inner `CutVoke-0.3.1-linux-x64.tar.gz` is **359,522,533 bytes / 342.9 MiB**, SHA256 **`c8df79f6a184b9dcf5d12506516db4ef2fca7073d6e091de640b532023010662`**. It uses the same build commit and expiry as the Mac downloads above. Check with `sha256sum CutVoke-0.3.1-linux-x64.tar.gz`; this hashes the inner tar.gz, not the outer Actions ZIP. Extract the outer ZIP, then preserve executable permissions and symlinks when extracting the inner archive:
+The inner `CutVoke-0.3.1-linux-x64.tar.gz` is **359,522,533 bytes / 342.9 MiB**, SHA256 **`c8df79f6a184b9dcf5d12506516db4ef2fca7073d6e091de640b532023010662`**. It uses the same binary build commit as the Mac packages. Check the actual Release archive with `sha256sum CutVoke-0.3.1-linux-x64.tar.gz` or `sha256sum -c SHA256SUMS`. Preserve executable permissions and symlinks when extracting the directly downloaded archive:
 
 ```bash
 tar -xzf CutVoke-0.3.1-linux-x64.tar.gz
@@ -119,7 +121,7 @@ Use a new output directory for each demo. Open `http://127.0.0.1:8787` and selec
 
 FFmpeg 6.1 remains part of the existing Ubuntu regression path. FFmpeg 7.1's `setpts` clears frame-rate metadata: the renderer restores CFR after retiming and uses the explicit sequence rate when assembling animation frames. A cached behavior probe enables the extra xfade normalization only when needed, preserving the last alpha frame and short source handles on builds such as 6.1. Upgrading FFmpeg to hide an invalid graph is not required. A distribution's version number alone does not guarantee the required codecs or filters.
 
-The project version is aligned at **0.3.1** in Python, MCP and desktop metadata. The portable candidate above is an Actions artifact, not a formal binary Release. Wheel/source candidates are developer distributions that still need Python and FFmpeg; they are not substitutes for the self-contained portable ZIP. See [candidate packaging](../development/prerelease.md).
+The project version is aligned at **0.3.1** in Python, MCP and desktop metadata. The four original desktop archives above are published in the [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1). Wheel/source candidates are developer distributions that still need Python and FFmpeg; they are not substitutes for the self-contained portable ZIP. See [candidate packaging](../development/prerelease.md).
 
 ## Troubleshooting
 

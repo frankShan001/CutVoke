@@ -62,38 +62,34 @@ The timeline supports multiple media tracks, text and captions, clip adjustments
 
 ## Get started
 
-### Windows portable (x64 candidate)
+### Windows portable (x64 prerelease)
 
-[Download the verified Windows portable artifact](https://github.com/frankShan001/CutVoke/actions/runs/38845496400/artifacts/12022894966) — version **0.3.1**, **363.1 MiB**. GitHub sign-in may be required; this Actions download is retained until **2027-01-14**.
+[Download Windows portable 0.3.1](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-windows-x64-portable.zip) — **363.1 MiB**, from the [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1).
 
-1. Extract the Actions download to find `CutVoke-0.3.1-windows-x64-portable.zip` and its `SHA256SUMS.txt`.
-2. Fully extract that portable ZIP into a writable folder.
-3. Double-click **`CutVoke.exe`**. Keep the other files beside it.
+1. Download the ZIP and [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS); verify the ZIP with `Get-FileHash -Algorithm SHA256`.
+2. Fully extract `CutVoke-0.3.1-windows-x64-portable.zip` into a writable folder.
+3. Double-click **`CutVoke.exe`**. Keep all neighboring files.
 
-There is no installer, and you do not need administrator permission, Python, Node.js or a system FFmpeg. The ZIP contains the built editor, frozen backend, FFmpeg/ffprobe, fonts and licenses. Basic local import, editing, preview and MP4 export work without an AI account. Optional AI clients, cloud services and speech/person models have separate requirements.
+No installer, administrator permission, Python, Node.js or system FFmpeg is needed. Basic local import, editing, preview and MP4 export work without an AI account. Optional AI clients, cloud services and speech/person models have separate requirements.
 
-Projects, imported media, settings and caches use **`CutVoke Data` beside the executable**. Keep it when updating; use project packaging/relink when moving media to another path or computer. A read-only data location produces an explanation and exits. This is an **unsigned candidate**; Windows may display SmartScreen. No formal binary Release/tag has been published.
-
-The extracted executable passed automated Windows Server 2022 x64 GUI, MCP, import → preview → export/decode, restart, single-instance, shutdown and read-only preservation checks. See [download hashes, storage and exact limits](docs/user/installation.md#windows-portable-x64) and [Windows evidence](docs/development/native-packages-verification.json). Human Windows 10/11 device, audio/GPU and SmartScreen checks remain separate.
+Projects, imported media, settings and caches use **`CutVoke Data` beside the executable**. Preserve it when updating; use project packaging/relink when moving media. The package is **unsigned** and may trigger SmartScreen. It passed automated Windows Server 2022 x64 frozen-package GUI, MCP, import → preview → export/decode and lifecycle checks. Manual Windows 10/11, audio/GPU and SmartScreen acceptance remain separate. See [exact hashes, storage and limits](docs/user/installation.md#windows-portable-x64).
 
 ### macOS (Apple Silicon / Intel) and Linux (x64)
 
-The [native package workflow](https://github.com/frankShan001/CutVoke/actions/workflows/unix-packages.yml) builds separate **macOS arm64**, **macOS x64** and **Linux x64** downloads. Each includes the built editor, frozen Python backend, FFmpeg/ffprobe, offline resources, fonts and component licenses. Basic editing needs no Python, Node.js or FFmpeg installation. See [downloads, exact requirements and verification evidence](docs/user/installation.md#macos-arm64--x64).
+The [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1) contains the original verified packages, built from `fdec479c4acbc3c685a5c8adbe8ec91621a7c194`. The tag points to documentation commit `58f890090463300c007f541ac36be8bca71bb4e9`; the binaries were not rebuilt.
 
-Verified **0.3.1** downloads from [run 38845496409](https://github.com/frankShan001/CutVoke/actions/runs/38845496409), retained until **2027-01-14** (GitHub sign-in may be required):
-
-| Platform | Download | Inner archive size |
+| Platform | Direct Release download | Archive size |
 | --- | --- | --- |
-| Mac Apple Silicon | [macOS arm64 ZIP](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12022962244) | 335.8 MiB |
-| Mac Intel | [macOS x64 ZIP](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023640599) | 402.8 MiB |
-| Linux x64 | [Linux tar.gz](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023097854) | 342.9 MiB |
+| Mac Apple Silicon | [macOS arm64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-arm64.zip) | 335.8 MiB |
+| Mac Intel | [macOS x64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-x64.zip) | 402.8 MiB |
+| Linux x64 | [Linux tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-linux-x64.tar.gz) | 342.9 MiB |
 
-The Actions download wraps the named distribution archive. Extract both layers; check the inner archive against the [exact bytes/SHA256 and per-platform evidence](docs/development/native-packages-verification.json). All three passed actual extracted-package automation; this is not human device acceptance.
+These are the actual archives, ready to extract; no outer Actions ZIP is involved. Verify against [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS). The built editor, frozen backend, FFmpeg/ffprobe, resources, fonts and licenses are included; basic editing needs no separate Python, Node.js or FFmpeg. [Installation and requirements](docs/user/installation.md#macos-arm64--x64) and the [original native evidence](docs/development/native-packages-verification.json) describe the exact scope.
 
-- **macOS 13+:** unzip the matching architecture and move `CutVoke.app` to `/Applications` or `~/Applications`. This candidate has only an ad-hoc integrity signature, **no Developer ID or notarization**. Gatekeeper may block an internet download; a warning-free first launch is not guaranteed. If blocked, wait for a properly signed/notarized build. Keep macOS security protections enabled.
-- **Linux x64 / Ubuntu 22.04 baseline:** extract the `.tar.gz` and run `./cutvoke` in its folder. A graphical desktop, glibc 2.35+, Electron system libraries and working Chromium sandbox/user namespaces are required. The directory package needs no FUSE. Root, `noexec` locations and policies that block the sandbox are outside its supported scope; do not use `--no-sandbox`. Other distributions and newer Ubuntu versions need separate acceptance.
+- **macOS 13+:** choose the matching architecture, unzip and move `CutVoke.app` to `/Applications` or `~/Applications`. It has an ad-hoc integrity signature, **no Developer ID or notarization**. Gatekeeper's automatic trust checks rejected both builds. After verifying the source and SHA256, users who trust the unmodified app may follow [Apple's app-specific approval instructions](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac) in **System Settings → Privacy & Security → Open Anyway** after trying to open it. Keep global security protections enabled; no developer account purchase is needed. Actual automation ran on macOS 15.7.9 arm64 and Intel, not every user device or macOS 13/14.
+- **Linux x64 / Ubuntu 22.04 baseline:** preserve executable permissions/symlinks while extracting the tar.gz, then run `./cutvoke` in its directory. A graphical desktop, glibc 2.35+, Electron system libraries and working unprivileged user-namespace sandbox are required. No FUSE is needed. Root, `noexec` and policies blocking the sandbox are outside this directory package's supported scope; do not use `--no-sandbox`. Other distributions, Wayland-only sessions and Ubuntu 24.04 AppArmor need separate acceptance.
 
-Mac data lives in `~/Library/Application Support/CutVoke/`; Linux data lives in `${XDG_DATA_HOME:-~/.local/share}/CutVoke/`. Keep that data when replacing the application. `profile/mcp-config.json` uses the bundled engine and the same database. Runner automation and human device acceptance are documented separately; macOS quarantine/Gatekeeper, device audio/GPU and every Linux distribution are not automatically accepted.
+Mac data lives in `~/Library/Application Support/CutVoke/`; Linux data lives in `${XDG_DATA_HOME:-~/.local/share}/CutVoke/`. Preserve it when replacing the app. Automated frozen-package import, preview, export/full decode and lifecycle checks do not establish manual audio/GPU, quarantined Finder launch or all-device acceptance.
 
 ### Run from source (developers)
 
