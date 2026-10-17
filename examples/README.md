@@ -1,5 +1,11 @@
 # 最小示例
 
+## 完整视频案例
+
+[CHASE THE LIGHT：原始素材与剪辑效果](showcases/chase-the-light/README.md) 包含四宫格原始素材展示、已完成的 V7 成片、两个可导入工程包及制作过程素材。大文件使用 Git LFS；克隆后运行 `git lfs pull`。
+
+## 从零创建最小工程
+
 需要直接跑出一条可编辑短片时，使用 [cutvoke-editor 演示脚本](../skills/cutvoke-editor/scripts/demo.py)：
 
 ```bash
@@ -19,4 +25,4 @@ cutvoke project create --name "目录示例" --width 1920 --height 1080 --fps 30
 
 > 调用 editor_help 读取工作流程，找到“目录示例”工程，添加一条持续 3 秒的文字“你好，CutVoke”，准备预览并检查实际画面。保持工程可继续手工编辑。
 
-真实素材通过 `media_import` 导入持久素材库；测试成片和工程包写入源码目录外，测试报告写入 `.artifacts/acceptance/`。
+真实素材通过 `media_import` 导入持久素材库；日常测试成片和工程包写入源码目录外，测试报告写入 `.artifacts/acceptance/`。上方明确纳入版本管理的展示案例使用独立目录，不包含运行缓存或本地数据库。

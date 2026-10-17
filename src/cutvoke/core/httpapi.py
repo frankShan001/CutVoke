@@ -75,7 +75,7 @@ from .luts import CubeInvalid, MAX_CUBE_BYTES, validate_cube
 
 # Bump when preview rendering changes so neither disk cache nor browser ETag can
 # treat media produced by an older renderer as current for the same project data.
-PREVIEW_RENDER_CACHE_VERSION = 18
+PREVIEW_RENDER_CACHE_VERSION = 22
 PREVIEW_WINDOW_SECONDS = 8
 ASSET_MEDIA_TYPES = {
     ".mp3": "audio/mpeg", ".wav": "audio/wav", ".flac": "audio/flac",
@@ -1070,13 +1070,14 @@ class HttpApi:
         # shares the packaged files with Web instead of duplicating 43MB in Vite.
         if method == "GET" and len(parts) == 4 and parts[:3] == ["api", "v1", "fonts"]:
             from .caption_render import resolve_title_font, CaptionFontError
-            families = {"NotoSansSC-VF.ttf": "Noto Sans SC",
-                        "NotoSerifSC-VF.ttf": "Noto Serif SC"}
+            from .font_catalog import FONT_FILES, FONT_BOLD_FILES
+            families = {filename: (family, False) for family, filename in FONT_FILES.items()}
+            families.update({filename: (family, True) for family, filename in FONT_BOLD_FILES.items()})
             family = families.get(parts[3])
             if family is None:
                 return 404, {"error": {"code": "NOT_FOUND", "message": "unknown caption font"}}
             try:
-                font_path = resolve_title_font(family)
+                font_path = resolve_title_font(family[0], bold=True) if family[1] else resolve_title_font(family[0])
                 stat = os.stat(font_path)
             except (CaptionFontError, OSError) as error:
                 return 422, {"error": {"code": "FONT_UNAVAILABLE", "message": str(error)}}

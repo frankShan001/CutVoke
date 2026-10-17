@@ -1,0 +1,26 @@
+{
+  "archives": [
+    {
+      "file": "source-and-edit.cvkpkg",
+      "crc": "passed",
+      "mediaSHA256": "passed",
+      "mediaFiles": 6,
+      "projectId": "cutvoke-chase-light-before-after-20261017",
+      "revision": "2"
+    },
+    {
+      "file": "spectral-v7.cvkpkg",
+      "crc": "passed",
+      "mediaSHA256": "passed",
+      "mediaFiles": 14,
+      "projectId": "cutvoke-chase-light-vfx-v7-20261017",
+      "revision": "23"
+    },
+    {
+      "file": "production-materials.zip",
+      "crc": "passed",
+      "entries": 84
+    }
+  ],
+  "textCredentialPatternScan": "passed"
+}

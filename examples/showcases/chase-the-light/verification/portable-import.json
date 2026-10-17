@@ -1,0 +1,19 @@
+{
+  "method": "Native CutVoke CLI unpack into separate fresh directories and SQLite stores",
+  "packages": [
+    {
+      "file": "source-and-edit.cvkpkg",
+      "projectId": "cutvoke-chase-light-before-after-20261017",
+      "mediaFiles": 6,
+      "warnings": [],
+      "unknownEffects": []
+    },
+    {
+      "file": "spectral-v7.cvkpkg",
+      "projectId": "cutvoke-chase-light-vfx-v7-20261017",
+      "mediaFiles": 14,
+      "warnings": [],
+      "unknownEffects": []
+    }
+  ]
+}

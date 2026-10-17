@@ -42,6 +42,7 @@ from .rational import Rational
 from .model import Project, Sequence, Clip, AssetReference, Track, Caption
 from .keyframes import evaluate as kf_evaluate
 from .keyframes import expression as kf_expression
+from .mask_motion import animate_expression as animate_mask, coordinates as mask_coordinates
 from .effects import (EffectRegistry, default_registry, find_transition,
                       xfade_transition_name, collect_used_effect_ids,
                       animation_slot)
@@ -106,6 +107,21 @@ def _filter_complex_file_option(ffmpeg_path: str) -> str:
     if "Unrecognized option '/filter_complex'" in probe.stderr:
         return "-filter_complex_script"
     return "-/filter_complex"
+
+
+def _filter_graph_arguments(ffmpeg: str, graph: str, directory: Optional[str] = None):
+    """Keep every preview/export entry point below Windows' command limit."""
+    if len(graph.encode("utf-16-le")) // 2 <= _FILTER_COMPLEX_INLINE_LIMIT:
+        return ["-filter_complex", graph], None
+    descriptor, path = tempfile.mkstemp(prefix="cutvoke-filter-", suffix=".ffgraph", dir=directory)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="") as script:
+            script.write(graph)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.remove(path)
+        raise
+    return [_filter_complex_file_option(ffmpeg), path], path
 
 # ---- V05 透明通道输出（alpha）----
 # 只认 ProRes 4444(.mov)：它是剪辑软件交接透明素材的通用口径，且 ffprobe
@@ -501,17 +517,34 @@ def _fx_mask_expr(p: dict) -> str:
             mask = f"if({inside}\\,1\\,0)"
         if invert:
             mask = f"(1-{mask})"
+        mask = animate_mask(mask, p)
         return ("format=rgba,geq="
                 "r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
-                f"a='alpha(X,Y)*{mask}'")
+                f"a='alpha(X,Y)*({mask})'")
 
-    if shape not in ("rect", "circle"):
+    if shape not in ("rect", "circle", "wipe", "ink"):
         shape = "rect"
     x = max(0.0, min(1.0, float(p.get("x", 0.15))))
     y = max(0.0, min(1.0, float(p.get("y", 0.15))))
     w = max(0.01, min(1.0, float(p.get("w", 0.7))))
     h = max(0.01, min(1.0, float(p.get("h", 0.7))))
-    if shape == "rect":
+    if shape == 'ink':
+        seed=float(p.get('inkSeed',17))
+        detail=float(p.get('inkDetail',1))
+        noise=(f'0.50*sin(X/W*{23*detail:.6f}+{seed:.6f})*sin(Y/H*{19*detail:.6f}-{seed:.6f})+'
+               f'0.25*sin((X+Y)/W*{57*detail:.6f})*cos((X-Y)/H*{41*detail:.6f})+'
+               f'0.125*sin(X/W*{113*detail:.6f}+Y/H*{89*detail:.6f}+{seed*2:.6f})')
+        radius=f'sqrt(pow((X/W-{x:.6f})/0.85\\,2)+pow((Y/H-{y:.6f})/0.85\\,2))'
+        q='ld(1)' if p.get('motion','none')!='none' else '1'
+        mask=(f'if(lte({q}\\,0)\\,0\\,if(gte({q}\\,1)\\,1\\,'
+              f'clip((2.0*{q}-{radius}+({noise})*0.25)/'
+              f'max({feather:.6f}\\,0.015)\\,0\\,1)))')
+    elif shape == "wipe":
+        angle = math.radians(float(p.get("angle", 0)))
+        distance = (f"({x:.6f}*W-X)*{math.cos(angle):.9f}+"
+                    f"({y:.6f}*H-Y)*{math.sin(angle):.9f}")
+        mask = f"clip(0.5+({distance})/max({feather:.6f}*min(W\\,H)\\,0.5)\\,0\\,1)"
+    elif shape == "rect":
         x0, x1 = f"{x:.6f}*W", f"{x + w:.6f}*W"
         y0, y1 = f"{y:.6f}*H", f"{y + h:.6f}*H"
         fw = f"max({feather * w:.6f}*W\\,0.5)"
@@ -532,9 +565,10 @@ def _fx_mask_expr(p: dict) -> str:
 
     if invert:
         mask = f"(1-{mask})"
+    mask = animate_mask(mask, p)
     return ("format=rgba,geq="
             "r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':"
-            f"a='alpha(X,Y)*{mask}'")
+            f"a='alpha(X,Y)*({mask})'")
 
 
 def _escape_drawtext(value: str) -> str:
@@ -1161,8 +1195,10 @@ def _prepare_static_masks(method):
     @wraps(method)
     def prepared(self, project, *args, **kwargs):
         arguments = signature.bind(self, project, *args, **kwargs)
-        with self._static_mask_sources(project, arguments.arguments.get("cancel_event")) as snapshot:
-            return method(self, snapshot, *args, **kwargs)
+        cancel = arguments.arguments.get("cancel_event")
+        with self._procedural_sources(project, cancel) as procedural:
+            with self._static_mask_sources(procedural, cancel) as snapshot:
+                return method(self, snapshot, *args, **kwargs)
     return prepared
 
 
@@ -1181,8 +1217,46 @@ class RenderService:
         self._render_ctx = threading.local()
 
     @contextlib.contextmanager
+    def _procedural_sources(self, project, cancel_event=None):
+        """Cache generated optical layers without modifying editable authority."""
+        targets=[(c,e) for t in project.sequence.tracks if t.visible for c in t.clips
+                 if not c.hidden for e in c.effects if _is_effect_enabled(e)
+                 and e.get('effectId') in ('cutvoke.fx.lightWeave','cutvoke.fx.opticalField')]
+        if not targets:
+            yield project
+            return
+        from .vfx_light import cached_source
+        snapshot=copy.deepcopy(project)
+        for track in snapshot.sequence.tracks:
+            if not track.visible:continue
+            for clip in track.clips:
+                if clip.hidden:continue
+                for effect in clip.effects:
+                    if not _is_effect_enabled(effect) or effect.get('effectId') not in ('cutvoke.fx.lightWeave','cutvoke.fx.opticalField'):continue
+                    params=effect.setdefault('params',{})
+                    if params.get('_renderedLightPath') and Path(params['_renderedLightPath']).is_file():continue
+                    try:
+                        extra={}
+                        if effect.get('effectId')=='cutvoke.fx.opticalField':
+                            from .vfx_optics import frame as optical_frame, VERSION as optical_version
+                            extra=dict(renderer=optical_frame,kind=f'optics-{optical_version}')
+                        path=cached_source(params,project.sequence.width,project.sequence.height,
+                            project.sequence.fps.to_fraction(),float(clip.duration.to_fraction()),
+                            self.ffmpeg,lambda:bool(cancel_event and cancel_event.is_set()),**extra)
+                    except RuntimeError as exc:
+                        if cancel_event and cancel_event.is_set():raise RenderCancelled(str(exc)) from exc
+                        raise RenderError('light layer preparation failed: '+str(exc)) from exc
+                    params['_renderedLightPath']=path
+        yield snapshot
+
+    @contextlib.contextmanager
     def _static_mask_sources(self, project: Project, cancel_event=None):
-        """Evaluate a static image's path mask once, using the same exact FFmpeg filter."""
+        """Evaluate static masks/graphic stacks once; retain editable source effects.
+
+        Frame-invariant shapes and light on a still should not repeat expensive
+        pixel equations on every animation frame. Only an explicit static
+        allowlist is folded, before clip transforms and their keyframes.
+        """
         static_sources = {}
         def is_static(source):
             if source in static_sources:
@@ -1211,10 +1285,17 @@ class RenderService:
             return result
         def eligible(clip):
             effects = self._enabled_fx(clip)
-            return (len(effects) == 1 and effects[0].get("range") is None
+            path_mask = (len(effects) == 1 and effects[0].get("range") is None
                     and self._fx_key_params(effects[0])[0] == "mask"
-                    and effects[0].get("params", {}).get("shape") == "freehand"
-                    and is_static(clip.asset_ref.source_path))
+                    and effects[0].get("params", {}).get("shape") in {"rect", "circle", "freehand", "wipe"}
+                    and effects[0].get("params", {}).get("motion", "none") == "none")
+            static_keys = {"shape", "glow", "chromatic", "chromakey"}
+            graphic = (any(self._fx_key_params(e)[0] == "shape" for e in effects)
+                       and all(e.get("range") is None and self._fx_key_params(e)[0] in static_keys
+                               for e in effects)
+                       and not any(e.get("effectId") == "cutvoke.color" and _is_effect_enabled(e)
+                                   for e in clip.effects))
+            return (path_mask or graphic) and is_static(clip.asset_ref.source_path)
         if not any(eligible(c) for t in project.sequence.tracks if t.visible for c in t.clips if not c.hidden):
             yield project
             return
@@ -1227,26 +1308,37 @@ class RenderService:
                 for clip in track.clips:
                     if clip.hidden or not eligible(clip):
                         continue
-                    effect = self._enabled_fx(clip)[0]
+                    effects = self._enabled_fx(clip)
                     source = clip.asset_ref.source_path
                     if not os.path.isfile(source):
                         raise RenderError(f"source file missing for clip {clip.id}: {source}")
                     if cancel_event is not None and cancel_event.is_set():
                         raise RenderCancelled("mask preparation cancelled")
-                    key = json.dumps([source, effect["params"]], sort_keys=True)
+                    key = json.dumps([source, effects], sort_keys=True)
                     if key not in prepared:
                         output = str(Path(directory) / f"mask-{len(prepared)}.png")
+                        parts, counter, current = [], [0], "0:v"
+                        for effect in effects:
+                            filter_key, params = self._fx_key_params(effect)
+                            current = self._fx_one(filter_key, params, current, parts, counter, 0)
+                        parts.append(f"[{current}]format=rgba[staticgraphic]")
+                        filter_args, filter_file = _filter_graph_arguments(self.ffmpeg, ';'.join(parts), directory)
                         command = [self.ffmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
-                                   "-filter_threads", "2", "-threads", "2", "-i", source,
-                                   "-vf", _fx_mask_expr(effect["params"]), "-frames:v", "1",
+                                   "-filter_threads", "2", "-filter_complex_threads", "2", "-threads", "2", "-i", source,
+                                   *filter_args, "-map", "[staticgraphic]", "-frames:v", "1",
                                    "-threads", "2", "-pix_fmt", "rgba", output]
-                        result = subprocess.run(command, stdin=subprocess.DEVNULL,
-                                                capture_output=True, timeout=30)
+                        try:
+                            result = subprocess.run(command, stdin=subprocess.DEVNULL,
+                                                    capture_output=True, timeout=30)
+                        finally:
+                            if filter_file:
+                                with contextlib.suppress(OSError):
+                                    os.remove(filter_file)
                         if result.returncode:
                             raise RenderError("static mask preparation failed: " + result.stderr.decode("utf-8", "replace")[-800:])
                         prepared[key] = output
                     clip.asset_ref.source_path = prepared[key]
-                    clip.effects = [e for e in clip.effects if e is not effect]
+                    clip.effects = [e for e in clip.effects if not any(e is folded for folded in effects)]
             if cancel_event is not None and cancel_event.is_set():
                 raise RenderCancelled("mask preparation cancelled")
             yield snapshot
@@ -1478,7 +1570,15 @@ class RenderService:
             cursor = start
             end = start + duration
             frame_rate = seq.fps.to_fraction()
-            window_duration = max(1, round(float(frame_rate) * 8)) / float(frame_rate)
+            # Fragment graphs contain many independently timed alpha branches.
+            # Keep fewer simultaneous shot/effect clocks alive in FFmpeg.
+            fragment_graph = any(
+                effect.get("effectId") == "cutvoke.fx.shatter"
+                for track in seq.tracks if track.visible
+                for clip in track.clips if not clip.hidden
+                for effect in clip.effects)
+            window_seconds = 4 if fragment_graph else 8
+            window_duration = max(1, round(float(frame_rate) * window_seconds)) / float(frame_rate)
             while cursor < end - 1e-7:
                 check_cancel()
                 chunk_duration = min(window_duration, end - cursor)
@@ -1498,6 +1598,15 @@ class RenderService:
                         output_duration=chunk_duration, lossless=True)
                     self._verify(str(path), chunk_duration, seq.width, seq.height,
                                  expect_alpha=alpha)
+                except RenderError as exc:
+                    if ("stopped making progress" not in str(exc)
+                            or chunk_duration <= 2):
+                        raise
+                    # Retry only the stalled interval with fewer active inputs;
+                    # do not reset the source/effect clocks or reuse partial media.
+                    window_duration = max(1, round(float(frame_rate) * chunk_duration / 2)) / float(frame_rate)
+                    warnings.append(f"Encoder stall: reduced export windows to {window_duration:.3f}s")
+                    continue
                 finally:
                     if caption_cwd and os.path.isdir(caption_cwd):
                         shutil.rmtree(caption_cwd, ignore_errors=True)
@@ -1617,7 +1726,8 @@ class RenderService:
                         f"{fps_rat.numerator}/{fps_rat.denominator}", "-i", src]
             else:
                 cmd += ["-i", src]
-        cmd += ["-filter_complex", graph,
+        filter_args, filter_script_path = _filter_graph_arguments(self.ffmpeg, graph, caption_cwd)
+        cmd += [*filter_args,
                 # 视频流必须被 filtergraph 消耗（-f null - 丢弃），否则
                 # outv 未连接 ffmpeg 报错；真正输出的只有音频 [outa]
                 "-map", "[outv]", "-f", "null", "-",
@@ -1625,12 +1735,17 @@ class RenderService:
                 "-c:a", "aac", "-b:a", "192k",
                 "-movflags", "+faststart",
                 tmp_path]
-        proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL,
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                cwd=caption_cwd if caption_cwd else None)
-        _, err = proc.communicate()
-        if caption_cwd and os.path.isdir(caption_cwd):
-            shutil.rmtree(caption_cwd, ignore_errors=True)
+        try:
+            proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL,
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                    cwd=caption_cwd if caption_cwd else None)
+            _, err = proc.communicate()
+        finally:
+            if filter_script_path:
+                with contextlib.suppress(OSError):
+                    os.remove(filter_script_path)
+            if caption_cwd and os.path.isdir(caption_cwd):
+                shutil.rmtree(caption_cwd, ignore_errors=True)
         if proc.returncode != 0:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
@@ -1723,6 +1838,7 @@ class RenderService:
         frame_offset = frame_time - self._render_ctx.compile_origin
         graph += f";[outv]trim=start={frame_offset:.9f},setpts=PTS-STARTPTS[previewbase]"
         video_label = "[previewbase]"
+        filter_script_path = None
         try:
             if size is not None:
                 graph = (graph + f";[previewbase]scale={size[0]}:{size[1]}:"
@@ -1739,11 +1855,10 @@ class RenderService:
                             "-i", src]
                 else:
                     cmd += ["-i", src]
-            cmd += ["-filter_complex", graph]
             if has_audio:
-                # 完整编译图包含 [outa]；静帧不输出音频，但必须消费它，
-                # 否则 ffmpeg 会因未连接的 filter 输出而失败。
-                cmd += ["-map", "[outa]", "-f", "null", "-"]
+                graph += ";[outa]anullsink"
+            filter_args, filter_script_path = _filter_graph_arguments(self.ffmpeg, graph, caption_cwd)
+            cmd += filter_args
             cmd += ["-map", video_label,
                     "-frames:v", "1", "-threads", "2",
                     "-f", "image2", out_png]
@@ -1754,6 +1869,9 @@ class RenderService:
         except subprocess.TimeoutExpired as e:
             raise RenderError(f"preview frame timed out: {e}") from e
         finally:
+            if filter_script_path:
+                with contextlib.suppress(OSError):
+                    os.remove(filter_script_path)
             # 清理字幕 ASS 临时目录（无论成功失败）
             if caption_cwd and os.path.isdir(caption_cwd):
                 shutil.rmtree(caption_cwd, ignore_errors=True)
@@ -1799,6 +1917,7 @@ class RenderService:
         tmp_path = out_path + ".tmp" + (os.path.splitext(out_path)[1] or ".png")
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
+        filter_script_path = None
         try:
             if alpha:
                 # 静帧容器（PNG）原生支持 alpha；显式转 rgba 避免编码器选 rgb24
@@ -1815,11 +1934,10 @@ class RenderService:
                             "-i", src]
                 else:
                     cmd += ["-i", src]
-            cmd += ["-filter_complex", graph]
             if _has_audio:
-                # 编译图里若生成了音轨，必须被消耗掉，否则 ffmpeg 报
-                # "Filter 'anull' has output 0 (outa) unconnected"（静帧不要声音）
-                cmd += ["-map", "[outa]", "-f", "null", "-"]
+                graph += ";[outa]anullsink"
+            filter_args, filter_script_path = _filter_graph_arguments(self.ffmpeg, graph, caption_cwd)
+            cmd += filter_args
             cmd += ["-map", "[outv]",
                     "-frames:v", "1",
                     "-f", "image2", tmp_path]
@@ -1844,6 +1962,9 @@ class RenderService:
                     pass
             raise
         finally:
+            if filter_script_path:
+                with contextlib.suppress(OSError):
+                    os.remove(filter_script_path)
             if caption_cwd and os.path.isdir(caption_cwd):
                 shutil.rmtree(caption_cwd, ignore_errors=True)
 
@@ -2035,6 +2156,7 @@ class RenderService:
         # 渲染期标志（见 __init__ 注释）：供深层画布构建读取，避免层层传参漏传
         self._render_ctx.alpha = alpha
         self._render_ctx.canvas_height = seq.height
+        self._render_ctx.canvas_width = seq.width
         self._render_ctx.window = render_window
         canvas_color = getattr(seq, "background_color", "#000000")
         if (not isinstance(canvas_color, str) or len(canvas_color) != 7
@@ -2268,6 +2390,8 @@ class RenderService:
         merge_captions = [c for c in seq.captions if render_window is None or
                           (float(c.start.to_fraction()) < render_window[1] and
                            float(c.end.to_fraction()) > render_window[0])]
+        title_motion = {}
+        from .title_motion import needs_title_motion
         for _t in seq.tracks:
             if _t.kind != "text" or not _t.visible:
                 continue
@@ -2312,15 +2436,23 @@ class RenderService:
                     continue  # 参数异常：跳过该文字片段，不阻断渲染
                 if _cap.text and _cap.end > _cap.start:
                     merge_captions.append(_cap)
+                    if needs_title_motion(_p, _c.keyframes):
+                        title_motion[_cap.id] = {"params": _p, "keyframes": _c.keyframes,
+                                                 "fps": seq.fps, "window": render_window}
         if merge_captions:
             caption_cwd = prepare_caption_render(
                 merge_captions, seq.width, seq.height,
-                css_caption_ids={caption.id for caption in seq.captions})
+                css_caption_ids={caption.id for caption in seq.captions},
+                title_motion=title_motion)
             # ASS animation/fades retain their original absolute timeline clock.
             # Rebase only around libass; geometry/source clocks remain local.
             before = f"setpts=PTS+{origin:.9f}/TB," if origin else ""
             after = f",setpts=PTS-{origin:.9f}/TB" if origin else ""
-            parts.append(f"[outv]{before}ass=cutvoke_captions.ass:fontsdir=.{after}[outv]")
+            # libass otherwise leaves a transparent canvas's alpha untouched:
+            # visible glyph RGB would export with zero alpha and disappear in an NLE.
+            ass_alpha = ':alpha=1' if alpha else ''
+            alpha_format = 'format=rgba,' if alpha else ''
+            parts.append(f"[outv]{before}{alpha_format}ass=cutvoke_captions.ass:fontsdir=.{ass_alpha}{after}[outv]")
 
         # 主轴时长：取所有视频轨的绝对结束时间最大值（A04：偏移轨不能截断总长）
         video_expected = canvas_dur
@@ -4013,6 +4145,29 @@ class RenderService:
     def _fx_one(self, key: str, params: dict, cur: str, parts: list[str],
                 vseg: list[int], idx: int) -> str:
         """应用单个滤镜：多流滤镜显式建图，其余内联续接。"""
+        if key == 'shatter':
+            from .vfx_fragments import build
+            return build(params,cur,parts,vseg,
+                         getattr(self._render_ctx,'canvas_width',1920),
+                         getattr(self._render_ctx,'canvas_height',1080))
+        if key in ('lightWeave','opticalField'):
+            path=params.get('_renderedLightPath')
+            if not path:
+                # Keep the single-effect compiler usable for catalog thumbnails
+                # and smoke previews outside a complete project snapshot.
+                from .vfx_light import cached_source
+                extra={}
+                if key=='opticalField':
+                    from .vfx_optics import frame as optical_frame, VERSION as optical_version
+                    extra=dict(renderer=optical_frame,kind=f'optics-{optical_version}')
+                path=cached_source(params,getattr(self._render_ctx,'canvas_width',1920),
+                    getattr(self._render_ctx,'canvas_height',1080),Fraction(30,1),
+                    float(params.get('start',0))+float(params.get('duration',1.7))+.35,self.ffmpeg,**extra)
+            escaped=str(path).replace('\\','/').replace(':','\\:').replace("'", "\\'")
+            stem=f'lightweave{vseg[0]}';vseg[0]+=1
+            parts.append(f"movie=filename='{escaped}':dec_threads=2,setpts=PTS-STARTPTS[{stem}_light]")
+            parts.append(f'[{cur}][{stem}_light]overlay=shortest=1:eof_action=pass:format=auto[{stem}_out]')
+            return f'{stem}_out'
         if key == "person_halo":
             return self._fx_person_halo(params, cur, parts, vseg, idx)
         if key in _FX_MULTI:
@@ -4044,7 +4199,7 @@ class RenderService:
         try:
             # FreeType versions disagree on a variable font's default weight.
             # Use the same explicit Regular instance for mask glyphs everywhere.
-            _family, font_path = _caption_font_instance("Noto Sans SC", False)
+            _family, font_path = _caption_font_instance(str(params.get("fontFamily", "Noto Sans SC")), bool(params.get("bold", False)))
         except CaptionFontError as error:
             raise RenderError(f"无法准备文字蒙版字体: {error}") from error
         font_path = font_path.replace("\\", "/").replace(":", "\\:")
@@ -4064,10 +4219,29 @@ class RenderService:
             f"drawtext=fontfile='{font_path}':text='{literal}':expansion=none:"
             f"fontsize=h*{font_size:.6f}:fontcolor={glyph_color}:"
             f"x=w*{x:.6f}:y=h*{y:.6f}")
+        if params.get('tileText',False):
+            spacing=float(params.get('tileSpacing',1.25))
+            drift=float(params.get('tileDrift',0))
+            # An overscanned text field stays filled while the lines drift.
+            repetitions=max(2,min(32,math.ceil(5/(max(1,len(content))*font_size))))
+            repeated=_escape_drawtext((content+'   ')*repetitions)
+            row_count=min(64,math.ceil(1.25/(font_size*spacing))+1)
+            drawtext=','.join(
+                f"drawtext=fontfile='{font_path}':text='{repeated}':expansion=none:"
+                f"fontsize=h*{font_size:.6f}:fontcolor={glyph_color}:"
+                f"x=-w*0.45+{row%2}*h*{font_size*3:.6f}+t*w*{drift:.6f}:"
+                f"y=h*{row*font_size*spacing-.10:.9f}"
+                for row in range(row_count))
         sigma = font_size * feather * float(getattr(self._render_ctx, "canvas_height", 1080))
         blur = f",gblur=sigma={max(0.1, sigma):.3f}:steps=2" if feather > 0 else ""
+        initial, mx, my = mask_coordinates(params)
+        motion = ""
+        if initial:
+            sample = (f"if(gte({mx}\\,0)*lt({mx}\\,W)*gte({my}\\,0)*lt({my}\\,H)"
+                      f"\\,lum({mx}\\,{my})\\,{base_luma})")
+            motion = f",geq=lum='{initial}{sample}'"
         parts.append(
-            f"[{matte}]format=gray,geq=lum='{base_luma}',{drawtext}{blur},"
+            f"[{matte}]format=gray,geq=lum='{base_luma}',{drawtext}{blur}{motion},"
             f"format=gray[{mask}]")
         parts.append(
             f"[{original_alpha}][{mask}]blend=all_expr='A*B/255':shortest=1"
@@ -4457,22 +4631,7 @@ class RenderService:
             else:
                 cmd += ["-i", src]
 
-        filter_args = ["-filter_complex", graph]
-        filter_script_path: Optional[str] = None
-        graph_command_length = len(graph.encode("utf-16-le")) // 2
-        if graph_command_length > _FILTER_COMPLEX_INLINE_LIMIT:
-            script_fd, filter_script_path = tempfile.mkstemp(
-                prefix="cutvoke-filter-", suffix=".ffgraph",
-                dir=caption_cwd if caption_cwd else None)
-            try:
-                with os.fdopen(script_fd, "w", encoding="utf-8", newline="") as script:
-                    script.write(graph)
-            except BaseException:
-                with contextlib.suppress(OSError):
-                    os.remove(filter_script_path)
-                raise
-            filter_args = [
-                _filter_complex_file_option(self.ffmpeg), filter_script_path]
+        filter_args, filter_script_path = _filter_graph_arguments(self.ffmpeg, graph, caption_cwd)
 
         ext = os.path.splitext(out_path)[1].lower()
         if lossless:

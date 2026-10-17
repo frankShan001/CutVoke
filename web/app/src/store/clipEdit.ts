@@ -276,7 +276,7 @@ export async function updateCaption(
     end?: Rational;
     words?: { text: string; start: Rational; end: Rational }[];
     fontSize?: number;
-    fontFamily?: "Noto Sans SC" | "Noto Serif SC";
+    fontFamily?: "Noto Sans SC" | "Noto Serif SC" | "Barlow Condensed" | "Space Grotesk" | "Cormorant Garamond" | "IBM Plex Mono";
     color?: string;
     wordHighlightColor?: string;
     strokeColor?: string;

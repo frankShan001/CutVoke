@@ -173,6 +173,19 @@ function FxParams({
         (control.name === "file" || control.name === "name")) return false;
     if (spec.effectId === "cutvoke.fx.mask" && local.shape !== "text" &&
         (control.name === "content" || control.name === "fontSize")) return false;
+    if (spec.effectId === "cutvoke.fx.mask") {
+      if (control.name.startsWith('tile') && local.shape !== 'text') return false;
+      if (control.name.startsWith('ink') && local.shape !== 'ink') return false;
+      if (['fontFamily','bold'].includes(control.name) && local.shape !== 'text') return false;
+      if (['tileSpacing','tileDrift'].includes(control.name) && !local.tileText) return false;
+      if (control.name === "angle" && local.shape !== "wipe") return false;
+      if (control.name === "pathMode" && local.shape !== "freehand") return false;
+      if (control.name === "aspectMode" && local.shape !== "circle") return false;
+      if (local.shape === "wipe" && ["w", "h"].includes(control.name)) return false;
+      if (control.name.startsWith("motion") && control.name !== "motion" &&
+          (!local.motion || local.motion === "none")) return false;
+      if (control.name === "motionRamp" && local.motion !== "inertia") return false;
+    }
     return true;
   }), [spec, local, locale]);
 

@@ -8,7 +8,7 @@ version = "0.3.1"
 description = "A local video editing workspace shared by people and external AI agents."
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["cryptography>=44.0.1", "fontTools>=4.59.0"]
+dependencies = ["cryptography>=44.0.1", "fontTools>=4.59.0", "numpy>=1.24", "Pillow>=10", "opencv-python-headless>=4.11,<5"]
 license = "MIT"
 authors = [{ name = "frankShan001" }]
 keywords = ["video", "editing", "agent", "mcp", "ffmpeg", "timeline", "nle"]

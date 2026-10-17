@@ -1,3 +1,4 @@
+import { FONT_FAMILIES } from "../../lib/fontFamilies";
 import { tr, useLocale } from "../../i18n";
 /** 独立标题片段的内容、排版与动画参数，写回同一 cutvoke.text 效果。 */
 
@@ -8,9 +9,9 @@ import { getLatestState } from "../../store/actions";
 import { updateEffect } from "../../store/effectEdit";
 
 type Align = "left" | "center" | "right";
-type InStyle = "none" | "fade" | "scale" | "typewriter";
-type OutStyle = "none" | "fade" | "scale";
-type LoopStyle = "none" | "pulse" | "blink";
+type InStyle = "none" | "fade" | "scale" | "typewriter" | "impact" | "slide-left" | "slide-up" | "flip" | "stagger" | "blur-in";
+type OutStyle = "none" | "fade" | "scale" | "zoom-through" | "slide-right" | "scatter";
+type LoopStyle = "none" | "pulse" | "blink" | "glitch" | "wave";
 interface Form {
   content: string; fontSize: string; fontFamily: string; lineSpacing: string;
   color: string; strokeColor: string; strokeWidth: string;
@@ -18,6 +19,7 @@ interface Form {
   align: Align; x: string; y: string;
   scale: string; rotation: string; shadow: string; animIn: string; animOut: string;
   animInStyle: InStyle; animOutStyle: OutStyle; animLoopStyle: LoopStyle; animLoopMs: string;
+  animStrength: string; animStaggerMs: string; animGlow: string; animColor: string;
 }
 const defaults: Form = {
   content: "", fontSize: "48", fontFamily: "Noto Sans SC", lineSpacing: "1",
@@ -26,6 +28,7 @@ const defaults: Form = {
   x: "50", y: "50", scale: "1", rotation: "0", shadow: "1",
   animIn: "0", animOut: "0", animInStyle: "fade", animOutStyle: "fade",
   animLoopStyle: "none", animLoopMs: "1000",
+  animStrength: "1", animStaggerMs: "45", animGlow: "0", animColor: "#ff39d4",
 };
 
 function fromParams(params: Record<string, unknown>): Form {
@@ -47,6 +50,8 @@ function fromParams(params: Record<string, unknown>): Form {
     animOutStyle: (params.animOutStyle as OutStyle) || "fade",
     animLoopStyle: (params.animLoopStyle as LoopStyle) || "none",
     animLoopMs: value("animLoopMs"),
+    animStrength: value("animStrength"), animStaggerMs: value("animStaggerMs"),
+    animGlow: value("animGlow"), animColor: value("animColor"),
   };
 }
 
@@ -65,7 +70,7 @@ export function TitleEditor({ clip }: { clip: Clip }) {
     Number.isFinite(value) && (value < 10 || value > 90));
   const valid = form.content.trim().length > 0 && form.content.length <= 180 &&
     number("fontSize") >= 8 && number("fontSize") <= 200 &&
-    ["Noto Sans SC", "Noto Serif SC"].includes(form.fontFamily) &&
+    (FONT_FAMILIES as readonly string[]).includes(form.fontFamily) &&
     number("lineSpacing") >= 0.5 && number("lineSpacing") <= 2.5 &&
     number("panelWidth") >= 0 && number("panelWidth") <= 100 &&
     number("panelHeight") >= 0 && number("panelHeight") <= 100 &&
@@ -76,9 +81,13 @@ export function TitleEditor({ clip }: { clip: Clip }) {
     Number.isInteger(number("shadow")) && number("shadow") >= 0 && number("shadow") <= 12 &&
     Number.isInteger(number("animIn")) && number("animIn") >= 0 && number("animIn") <= 3000 &&
     Number.isInteger(number("animOut")) && number("animOut") >= 0 && number("animOut") <= 3000 &&
-    ["none", "fade", "scale", "typewriter"].includes(form.animInStyle) &&
-    ["none", "fade", "scale"].includes(form.animOutStyle) &&
-    ["none", "pulse", "blink"].includes(form.animLoopStyle) &&
+    ["none", "fade", "scale", "typewriter", "impact", "slide-left", "slide-up", "flip", "stagger", "blur-in"].includes(form.animInStyle) &&
+    ["none", "fade", "scale", "zoom-through", "slide-right", "scatter"].includes(form.animOutStyle) &&
+    ["none", "pulse", "blink", "glitch", "wave"].includes(form.animLoopStyle) &&
+    number("animStrength") >= 0.1 && number("animStrength") <= 3 &&
+    number("animGlow") >= 0 && number("animGlow") <= 24 &&
+    Number.isInteger(number("animStaggerMs")) && number("animStaggerMs") >= 0 && number("animStaggerMs") <= 250 &&
+    /^#[0-9a-f]{6}$/i.test(form.animColor) &&
     Number.isInteger(number("animLoopMs")) && number("animLoopMs") >= 300 && number("animLoopMs") <= 3000;
 
   const numericFields: { key: keyof Form; label: string; min: number; max: number; step: number }[] = [
@@ -95,8 +104,11 @@ export function TitleEditor({ clip }: { clip: Clip }) {
     { key: "animIn", label: tr("淡入毫秒"), min: 0, max: 3000, step: 50 },
     { key: "animOut", label: tr("淡出毫秒"), min: 0, max: 3000, step: 50 },
     { key: "animLoopMs", label: tr("循环周期毫秒"), min: 300, max: 3000, step: 50 },
+    { key: "animStrength", label: tr("动效强度"), min: 0.1, max: 3, step: 0.1 },
+    { key: "animStaggerMs", label: tr("逐字间隔毫秒"), min: 0, max: 250, step: 5 },
+    { key: "animGlow", label: tr("霓虹光晕"), min: 0, max: 24, step: 1 },
   ];
-  const integerFields = new Set<keyof Form>(["shadow", "animIn", "animOut", "animLoopMs"]);
+  const integerFields = new Set<keyof Form>(["shadow", "animIn", "animOut", "animLoopMs", "animStaggerMs"]);
   const invalidNumericField = numericFields.find((field) => {
     const value = number(field.key);
     return !Number.isFinite(value) || value < field.min || value > field.max ||
@@ -135,6 +147,8 @@ export function TitleEditor({ clip }: { clip: Clip }) {
           shadow: number("shadow"), animIn: number("animIn"), animOut: number("animOut"),
           animInStyle: form.animInStyle, animOutStyle: form.animOutStyle,
           animLoopStyle: form.animLoopStyle, animLoopMs: number("animLoopMs"),
+          animStrength: number("animStrength"), animStaggerMs: number("animStaggerMs"),
+          animGlow: number("animGlow"), animColor: form.animColor,
         },
       });
     } finally {
@@ -145,6 +159,17 @@ export function TitleEditor({ clip }: { clip: Clip }) {
   return (
     <section className="title-editor" aria-label={tr("文字标题属性")}>
       <strong>{tr("文字标题")}</strong>
+      <div className="title-editor__actions" aria-label={tr("动效组合")}>
+        <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary" onClick={() => setForm(old => ({ ...old,
+          bold: true, animInStyle: "impact", animIn: "350", animOutStyle: "zoom-through", animOut: "300",
+          animLoopStyle: "glitch", animLoopMs: "600", animGlow: "12", animStrength: "1.4", animColor: "#ff39d4" }))}>{tr("霓虹冲击")}</button>
+        <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary" onClick={() => setForm(old => ({ ...old,
+          bold: true, animInStyle: "stagger", animIn: "500", animOutStyle: "scatter", animOut: "350",
+          animLoopStyle: "wave", animLoopMs: "800", animGlow: "8", animStrength: "1", animColor: "#32f5ff" }))}>{tr("逐字浪潮")}</button>
+        <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary" onClick={() => setForm(old => ({ ...old,
+          bold: true, animInStyle: "flip", animIn: "400", animOutStyle: "slide-right", animOut: "300",
+          animLoopStyle: "none", animGlow: "6", animStrength: "1", animColor: "#b8ff39" }))}>{tr("翻转飞出")}</button>
+      </div>
       <label>{tr("内容")}<textarea className="cv-input" rows={3} maxLength={180} aria-label={tr("编辑标题内容")}
           value={form.content} onChange={(event) => set("content", event.target.value)} />
       </label>
@@ -152,6 +177,11 @@ export function TitleEditor({ clip }: { clip: Clip }) {
           onChange={(event) => set("fontFamily", event.target.value)}>
           <option value="Noto Sans SC">{tr("思源黑体风格 · Noto Sans SC")}</option>
           <option value="Noto Serif SC">{tr("思源宋体风格 · Noto Serif SC")}</option>
+          <option value="Barlow Condensed">Barlow Condensed</option>
+          <option value="Space Grotesk">Space Grotesk</option>
+          <option value="Cormorant Garamond">Cormorant Garamond</option>
+          <option value="IBM Plex Mono">IBM Plex Mono</option>
+
         </select>
       </label>
       <div className="title-editor__two">
@@ -183,24 +213,36 @@ export function TitleEditor({ clip }: { clip: Clip }) {
       </div>
       <div className="title-editor__two">
         <label>{tr("入场方式")}<select className="cv-input" aria-label={tr("标题入场方式")} value={form.animInStyle}
-            onChange={(event) => set("animInStyle", event.target.value)}>
+            onChange={(event) => { const style = event.target.value as InStyle;
+              setForm(old => ({ ...old, animInStyle: style,
+                animIn: style !== "none" && Number(old.animIn) === 0 ? "300" : old.animIn })); }}>
             <option value="none">{tr("无")}</option><option value="fade">{tr("淡入")}</option>
             <option value="scale">{tr("缩放出现")}</option><option value="typewriter">{tr("逐字出现")}</option>
+            <option value="impact">{tr("冲击弹入")}</option><option value="slide-left">{tr("左侧弹入")}</option>
+            <option value="slide-up">{tr("向上弹入")}</option><option value="flip">{tr("立体翻入")}</option>
+            <option value="stagger">{tr("逐字弹跳")}</option><option value="blur-in">{tr("聚焦显现")}</option>
           </select>
         </label>
         <label>{tr("出场方式")}<select className="cv-input" aria-label={tr("标题出场方式")} value={form.animOutStyle}
-            onChange={(event) => set("animOutStyle", event.target.value)}>
+            onChange={(event) => { const style = event.target.value as OutStyle;
+              setForm(old => ({ ...old, animOutStyle: style,
+                animOut: style !== "none" && Number(old.animOut) === 0 ? "250" : old.animOut })); }}>
             <option value="none">{tr("无")}</option><option value="fade">{tr("淡出")}</option>
             <option value="scale">{tr("缩小消失")}</option>
+            <option value="zoom-through">{tr("放大穿出")}</option><option value="slide-right">{tr("右侧飞出")}</option>
+            <option value="scatter">{tr("逐字散开")}</option>
           </select>
         </label>
         <label>{tr("循环方式")}<select className="cv-input" aria-label={tr("标题循环方式")} value={form.animLoopStyle}
             onChange={(event) => set("animLoopStyle", event.target.value)}>
             <option value="none">{tr("无")}</option><option value="pulse">{tr("呼吸放大")}</option>
             <option value="blink">{tr("闪烁")}</option>
+            <option value="glitch">{tr("故障色分离")}</option><option value="wave">{tr("逐字波浪")}</option>
           </select>
         </label>
       </div>
+      <label>{tr("光晕颜色")}<input className="cv-input" type="color" aria-label={tr("标题光晕颜色")}
+          value={form.animColor} onChange={(event) => set("animColor", event.target.value)} /></label>
       {validationMessage ? <p id={validationMessageId} className="cv-hint" role="status">
         {validationMessage}
       </p> : null}

@@ -6,3 +6,9 @@ desktop/licenses/* -text
 src/cutvoke/assets/**/*.json -text
 src/cutvoke/core/builtin_presets.json -text
 src/cutvoke/core/builtin_stickers.json -text
+src/cutvoke/assets/fonts/OFL-*.txt -text -whitespace
+
+# Versioned showcase packages and finished videos are deliberate project assets.
+examples/showcases/chase-the-light/*.mp4 filter=lfs diff=lfs merge=lfs -text
+examples/showcases/chase-the-light/*.cvkpkg filter=lfs diff=lfs merge=lfs -text
+examples/showcases/chase-the-light/*.zip filter=lfs diff=lfs merge=lfs -text

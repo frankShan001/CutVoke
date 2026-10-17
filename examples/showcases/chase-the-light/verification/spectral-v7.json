@@ -1,0 +1,95 @@
+{
+  "projectId": "cutvoke-chase-light-vfx-v7-20261017",
+  "revision": "23",
+  "durationSeconds": 22.333333333333332,
+  "canvas": [
+    1024,
+    576
+  ],
+  "fps": "24/1",
+  "decodedFrames": 536,
+  "timelineFrames": 536,
+  "finalFrameNote": "",
+  "unexpectedBlackFrames": 0,
+  "bgmCorrelation": 0.9822585945476552,
+  "audioPeak": 0.6532520651817322,
+  "movingMaskClips": [
+    {
+      "clipId": "arrival",
+      "shape": "ink",
+      "motion": "minimum-jerk"
+    },
+    {
+      "clipId": "cinema-type-portal",
+      "shape": "text",
+      "motion": "minimum-jerk"
+    },
+    {
+      "clipId": "ignition-occluding-subject",
+      "shape": "ink",
+      "motion": "minimum-jerk"
+    },
+    {
+      "clipId": "blue-material-reveal",
+      "shape": "ink",
+      "motion": "minimum-jerk"
+    },
+    {
+      "clipId": "solar-glint",
+      "shape": "ink",
+      "motion": "minimum-jerk"
+    },
+    {
+      "clipId": "night-material",
+      "shape": "ink",
+      "motion": "minimum-jerk"
+    },
+    {
+      "clipId": "ignition-v7-occluder",
+      "shape": "ink",
+      "motion": "minimum-jerk"
+    },
+    {
+      "clipId": "blue-v7-occluder",
+      "shape": "ink",
+      "motion": "minimum-jerk"
+    }
+  ],
+  "onScreenLanguage": "English",
+  "titleClips": 21,
+  "fontFamilies": [
+    "Barlow Condensed",
+    "Cormorant Garamond",
+    "IBM Plex Mono",
+    "Space Grotesk"
+  ],
+  "effectTypes": [
+    "cutvoke.color",
+    "cutvoke.fx.chromatic",
+    "cutvoke.fx.colorbalance",
+    "cutvoke.fx.colorize",
+    "cutvoke.fx.glow",
+    "cutvoke.fx.lens",
+    "cutvoke.fx.lightWeave",
+    "cutvoke.fx.mask",
+    "cutvoke.fx.opticalField",
+    "cutvoke.fx.shatter",
+    "cutvoke.fx.trail",
+    "cutvoke.fx.vibrance",
+    "cutvoke.text",
+    "cutvoke.transform"
+  ],
+  "noDecorativeShapes": true,
+  "noAIUpscale": true,
+  "frameInterpolation": "none",
+  "packageCRC": "passed",
+  "packageMediaSHA256": "passed",
+  "packageMediaCount": 14,
+  "reviewedSampleFrames": 179,
+  "reviewCoverageSeconds": [
+    0.0,
+    22.25
+  ],
+  "movieSHA256": "15ca0deea50cd002003a010e30cff01c78a9ef37b3562c28861b5b88398ce6b2",
+  "packageSHA256": "2f5639c51b43b06153525697b4b9b1f0ac483717af5c64192d54bcca0140747f"
+}

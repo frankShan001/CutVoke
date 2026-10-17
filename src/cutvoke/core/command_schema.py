@@ -4,6 +4,7 @@ Effect and title parameter schemas come from the effect registry. These schemas
 describe command inputs; EditService remains the authority for edit invariants.
 """
 from __future__ import annotations
+from .font_catalog import TITLE_FONT_FAMILIES
 
 import copy
 
@@ -28,7 +29,7 @@ WORDS = {"type": "array", "maxItems": 10000, "items": {
     "description": "Absolute timeline times, ordered and inside the parent caption."}}
 CAPTION_STYLE = {
     **{k: STRING for k in ("color", "strokeColor", "background", "wordHighlightColor")},
-    "fontFamily": {"type": "string", "enum": ["Noto Sans SC", "Noto Serif SC"]},
+    "fontFamily": {"type": "string", "enum": list(TITLE_FONT_FAMILIES)},
     **{k: {"type": "integer"} for k in ("fontSize", "strokeWidth", "animIn", "animOut")},
     "align": {"type": "string", "enum": ["left", "center", "right"]}, "bold": BOOL,
     "animInStyle": {"type": "string", "enum": ["none", "fade", "scale", "typewriter"]},

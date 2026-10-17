@@ -81,6 +81,7 @@ interface EffectParamSpecLike {
   enum?: unknown[];
   unit?: string;
   description?: unknown;
+  "x-cutvoke-enum-labels"?: Record<string, unknown>;
 }
 
 /** 把 effect 的 parameters 顶层属性转成控件描述（嵌套 object/array 跳过，交调用方处理）。 */
@@ -123,7 +124,8 @@ export function paramControls(
         const value = String(v);
         return {
           value,
-          label: PARAM_ENUM_LABELS[name]?.[value] ?? value,
+          label: PARAM_ENUM_LABELS[name]?.[value] ??
+            (localizedDescriptor(sub["x-cutvoke-enum-labels"]?.[value]) || value),
         };
       });
     }

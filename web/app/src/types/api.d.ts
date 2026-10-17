@@ -116,7 +116,7 @@ export interface Caption {
   wordHighlightColor?: string;
   /** 样式字段（后端 caption.add/update 支持；缺省时后端给默认值）。 */
   fontSize?: number;
-  fontFamily?: "Noto Sans SC" | "Noto Serif SC";
+  fontFamily?: "Noto Sans SC" | "Noto Serif SC" | "Barlow Condensed" | "Space Grotesk" | "Cormorant Garamond" | "IBM Plex Mono";
   lineSpacing?: number;
   color?: string;
   strokeColor?: string;

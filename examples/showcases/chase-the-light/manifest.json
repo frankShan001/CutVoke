@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-17T14:09:01.817053+00:00",
+  "editor": "CutVoke",
+  "comparisonProjectId": "cutvoke-chase-light-before-after-20261017",
+  "comparisonRevision": "2",
+  "spectralProjectId": "cutvoke-chase-light-vfx-v7-20261017",
+  "spectralRevision": "23",
+  "files": [
+    {
+      "path": "source-and-edit.mp4",
+      "bytes": 10889839,
+      "sha256": "503ba7e165767a3986560b32b090ac916a5836656bdc573e1ca1a62fb385df9e"
+    },
+    {
+      "path": "source-and-edit.cvkpkg",
+      "bytes": 21917228,
+      "sha256": "cb93193541ddb7cedfe401bf7672507db71b12c671cfd3e1994a7112710deada"
+    },
+    {
+      "path": "spectral-v7.mp4",
+      "bytes": 9139839,
+      "sha256": "15ca0deea50cd002003a010e30cff01c78a9ef37b3562c28861b5b88398ce6b2"
+    },
+    {
+      "path": "spectral-v7.cvkpkg",
+      "bytes": 216186353,
+      "sha256": "2f5639c51b43b06153525697b4b9b1f0ac483717af5c64192d54bcca0140747f"
+    },
+    {
+      "path": "production-materials.zip",
+      "bytes": 82244608,
+      "sha256": "7d88f2ea59feb972f29166013c880b4a301b9ca1d332483aafa5cdb2dca6346b"
+    }
+  ]
+}

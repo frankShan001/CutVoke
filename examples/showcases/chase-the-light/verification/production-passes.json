@@ -1,0 +1,30 @@
+{
+  "CutVoke_V7_editorial_capture.mp4": {
+    "frames": 240,
+    "codec": "h264",
+    "pixelFormat": "yuvj420p",
+    "alphaPeak": 0,
+    "transparentPixelsOnVisibleSample": 0
+  },
+  "01-optical-layers.mov": {
+    "frames": 56,
+    "codec": "prores",
+    "pixelFormat": "yuva444p12le",
+    "alphaPeak": 255,
+    "transparentPixelsOnVisibleSample": 536929
+  },
+  "02-fragment-reconstruction.mov": {
+    "frames": 57,
+    "codec": "prores",
+    "pixelFormat": "yuva444p12le",
+    "alphaPeak": 255,
+    "transparentPixelsOnVisibleSample": 501249
+  },
+  "03-english-title-animation.mov": {
+    "frames": 56,
+    "codec": "prores",
+    "pixelFormat": "yuva444p12le",
+    "alphaPeak": 255,
+    "transparentPixelsOnVisibleSample": 585140
+  }
+}

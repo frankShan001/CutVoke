@@ -12,6 +12,8 @@ Make a first cut from your media, ask your preferred AI to refine a shot, title 
 
 *Trail Notes in the actual local editor: three original illustrations, music, titles, captions, scale keyframes and transitions. The repository example creates it through real interfaces, with no video generation service. Captured with the interface set to English, with English demo titles and captions.*
 
+For a footage-based example, see [CHASE THE LIGHT](examples/showcases/chase-the-light/README.md): four original shots, the finished cinematic edit, portable editable projects and production materials, versioned with Git LFS.
+
 ## Why try it?
 
 A first cut often leads to many small revisions: change a subtitle, shorten the opening, replace an image, or take over an AI-assisted edit. CutVoke makes those revisions addressable changes to a visible project.

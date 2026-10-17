@@ -35,6 +35,9 @@ class AgentWorkflowTests(unittest.TestCase):
         Image.new("RGB", (320, 180), (15, 35, 65)).save(self.image)
 
     def tearDown(self):
+        # unittest runs registered cleanups after tearDown. Close the separate
+        # human API/store first, while its temporary SQLite directory exists.
+        self.doCleanups()
         self.server.close()
         self.store.close()
         self.temporary.cleanup()

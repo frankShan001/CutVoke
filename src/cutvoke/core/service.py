@@ -7,6 +7,7 @@ M0 原型：in-memory 状态 + 幂等记录；M1 T08/T09 接 SQLite 权威持久
 """
 
 from __future__ import annotations
+from .font_catalog import TITLE_FONT_FAMILIES
 
 import contextlib
 import copy
@@ -126,9 +127,9 @@ def _apply_caption_style(cap: "Caption", p: dict) -> None:
     """
     if "fontFamily" in p:
         family = p["fontFamily"]
-        if not isinstance(family, str) or family not in ("Noto Sans SC", "Noto Serif SC"):
+        if not isinstance(family, str) or family not in TITLE_FONT_FAMILIES:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
-                            "caption fontFamily must be Noto Sans SC or Noto Serif SC")
+                            "caption fontFamily must be a packaged CutVoke font")
         cap.fontFamily = family
     if "fontSize" in p:
         cap.fontSize = int(p["fontSize"])
@@ -261,7 +262,7 @@ _NONMUTATING_COMMANDS = frozenset({"export.cover", "export.video",
                                     "caption.exportVtt",
                                     "audio.denoise", "audio.vocalEnhance",
                                     "audio.normalize",
-                                    "media.stabilize", "media.enhance",
+                                    "media.stabilize", "media.enhance", "media.trackPoint",
                                     "media.gif2video", "media.video2gif",
                                     "audio.record", "audio.export",
                                     # 导出队列命令：不修改工程（只动队列/账本），
@@ -414,6 +415,7 @@ class EditService:
             "audio.normalize": self._h_audio_normalize,
             # J06 合成/画质：纯 ffmpeg 真实视频处理（稳定 / 画质增强）
             "media.stabilize": self._h_media_stabilize,
+            "media.trackPoint": self._h_media_track_point,
             "media.enhance": self._h_media_enhance,
             "media.gif2video": self._h_media_gif2video,
             "media.video2gif": self._h_media_video2gif,
@@ -1087,6 +1089,16 @@ class EditService:
                 {"name": "audioPath", "description": "音频文件绝对路径", "required": True},
                 {"name": "outPath", "description": "输出路径（缺省同目录加 _normalized 后缀）", "required": False},
                 {"name": "I", "description": "目标集成响度 LUFS（默认 -16）", "required": False},
+            ],
+        },
+        "media.trackPoint": {
+            "description": "源视频附着点双向光流跟踪；返回归一化坐标、源时间和丢失帧，不修改工程。供光效 anchorFrames 等原生参数使用。",
+            "params": [
+                {"name": "videoPath", "description": "源视频绝对路径；最多30秒、900帧", "required": True},
+                {"name": "x", "description": "种子点源画面 X，0~1", "required": True},
+                {"name": "y", "description": "种子点源画面 Y，0~1", "required": True},
+                {"name": "t", "description": "种子点所在源视频秒数，默认0", "required": False},
+                {"name": "seconds", "description": "允许分析的源时长上限，0~30，默认30；超限拒绝", "required": False},
             ],
         },
         "media.stabilize": {
@@ -1956,7 +1968,7 @@ class EditService:
                                 "audio.splitSentences", "audio.denoise",
                                 "audio.vocalEnhance", "audio.normalize",
                                 # J12：模板清单只读目录，不需要工程
-                                "template.list"):
+                                "template.list", "media.trackPoint"):
                 # 分析/切分/音频处理本身不依赖工程
                 payload = handler(None, command.payload)
             else:  # export.cover 需要工程
@@ -3692,6 +3704,13 @@ class EditService:
         return [{"type": "audio_normalize", "change": "normalized",
                  "outPath": result["outPath"], "duration": result["duration"],
                  "targetI": result["targetI"], "measuredI": result["measuredI"]}]
+
+    def _h_media_track_point(self, proj: Optional[Project], p: dict) -> list[dict]:
+        from .point_tracking import track_point
+        if not p.get("videoPath") or "x" not in p or "y" not in p:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "media.trackPoint requires videoPath, x, y")
+        result = track_point(str(p["videoPath"]), p["x"], p["y"], p.get("t", 0), p.get("seconds", 30))
+        return [{"type": "media_point_tracking", "change": "analyzed", **result}]
 
     def _h_media_stabilize(self, proj: Optional[Project], p: dict) -> list[dict]:
         """视频稳定（J06）：vidstab 两遍或 deshake 单遍，文件级输出。"""

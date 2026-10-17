@@ -1,6 +1,7 @@
 """Keep legacy Agent handoffs usable without serving arbitrary local files."""
 import hashlib
 from pathlib import Path
+import pytest
 
 from PIL import Image
 
@@ -58,7 +59,12 @@ def test_media_layout_checks_reject_mismatched_ids_paths_and_symlinks(tmp_path):
                      root / "other" / (digest + ".png")):
             assert api._imported_media_path({"assetId": asset_id, "path": str(path)}) is None
         linked = root / (asset_id + ".png")
-        linked.symlink_to(outside)
+        try:
+            linked.symlink_to(outside)
+        except OSError as error:
+            if getattr(error, 'winerror', None) == 1314:
+                pytest.skip('Windows symlink creation requires an unavailable privilege')
+            raise
         assert api._asset_media_path({"assetId": asset_id, "path": str(linked)}) is None
         linked.unlink()
         legacy_link = root / "imports" / (digest + ".png")
