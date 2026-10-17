@@ -62,38 +62,34 @@ flowchart LR
 
 ## 开始体验
 
-### Windows 免安装便携版（x64 候选）
+### Windows 免安装便携版（x64 预发布）
 
-[下载已验证的 Windows 便携包](https://github.com/frankShan001/CutVoke/actions/runs/38845496400/artifacts/12022894966) — **0.3.1**，**363.1 MiB**。可能需要登录 GitHub；本次 Actions 下载保留至 **2027-01-14**。
+[下载 Windows 便携版 0.3.1](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-windows-x64-portable.zip) — **363.1 MiB**，来自 [v0.3.1 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1)。
 
-1. 解压 Actions 下载文件，找到 `CutVoke-0.3.1-windows-x64-portable.zip` 和 `SHA256SUMS.txt`。
-2. 将这个便携 ZIP **完整解压到可写文件夹**。
-3. 双击 **`CutVoke.exe`**；保留旁边的所有文件。
+1. 下载 ZIP 和 [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS)，用 `Get-FileHash -Algorithm SHA256` 核对 ZIP。
+2. 将 `CutVoke-0.3.1-windows-x64-portable.zip` **完整解压到可写文件夹**。
+3. 双击 **`CutVoke.exe`**，保留旁边的所有文件。
 
-没有安装向导，**无需管理员，也不用配置 Python、Node.js 或系统 FFmpeg**。包内已带构建后的编辑器、冻结后端、FFmpeg/ffprobe、字体和许可证。基础本地导入、剪辑、预览与 MP4 导出不需要 AI 账号；外部 AI 客户端、云服务及可选语音/人物模型另有要求。
+没有安装向导，**无需管理员，也不用配置 Python、Node.js 或系统 FFmpeg**。基础本地导入、剪辑、预览和 MP4 导出不需要 AI 账号；外部 AI 客户端、云服务及可选语音/人物模型另有要求。
 
-工程、导入素材、设置和缓存默认放在 **exe 旁的 `CutVoke Data`**。更新时保留该目录；换路径/换电脑移动素材时请使用工程打包或重新关联。数据位置只读时会解释原因并退出。本候选版**未签名**，Windows 可能显示 SmartScreen；尚未创建正式二进制 Release 或标签。
-
-已在 Windows Server 2022 x64 runner 上自动验收解压后的真实程序：GUI、MCP、导入 → 预览 → 导出/解码、重启、重复启动、关闭清理和只读保护。准确哈希、存储位置及边界见[安装说明](docs/user/installation.md#windows-portable-x64)与[Windows 验证记录](docs/development/native-packages-verification.json)。Windows 10/11 设备、音频/GPU 和 SmartScreen 的人工体验仍需分别检查。
+工程、素材、设置和缓存默认放在 **exe 旁的 `CutVoke Data`**，更新时保留；换路径或电脑时使用工程打包或重新关联。包**未签名**，可能出现 SmartScreen。真实成品已通过 Windows Server 2022 x64 上的 GUI、MCP、导入 → 预览 → 导出/解码和生命周期自动验收；Windows 10/11、音频/GPU 和 SmartScreen 的人工体验仍需分别检查。[准确哈希、存储位置与边界](docs/user/installation.md#windows-portable-x64)见安装说明。
 
 ### macOS（Apple Silicon / Intel）和 Linux（x64）
 
-[原生发行包工作流](https://github.com/frankShan001/CutVoke/actions/workflows/unix-packages.yml) 分别构建 **macOS arm64**、**macOS x64** 与 **Linux x64** 包。内含编辑器、冻结 Python 后端、FFmpeg/ffprobe、离线资源、字体和组件许可证；基础剪辑无需另装 Python、Node.js 或 FFmpeg。[下载、系统要求及验证证据](docs/user/installation.md#macos-arm64--x64) 列明准确范围。
+[v0.3.1 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1) 提供已验证的原始包，二进制实际构建自 `fdec479c4acbc3c685a5c8adbe8ec91621a7c194`；标签指向文档提交 `58f890090463300c007f541ac36be8bca71bb4e9`，本次未重新构建二进制。
 
-以下 **0.3.1** 包已通过 [38845496409](https://github.com/frankShan001/CutVoke/actions/runs/38845496409) 的成品验收，保留至 **2027-01-14**（下载可能需要登录 GitHub）：
-
-| 平台 | 下载 | 内层发行包大小 |
+| 平台 | Release 直接下载 | 发行包大小 |
 | --- | --- | --- |
-| Mac Apple Silicon | [macOS arm64 ZIP](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12022962244) | 335.8 MiB |
-| Mac Intel | [macOS x64 ZIP](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023640599) | 402.8 MiB |
-| Linux x64 | [Linux tar.gz](https://github.com/frankShan001/CutVoke/actions/runs/38845496409/artifacts/12023097854) | 342.9 MiB |
+| Mac Apple Silicon | [macOS arm64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-arm64.zip) | 335.8 MiB |
+| Mac Intel | [macOS x64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-x64.zip) | 402.8 MiB |
+| Linux x64 | [Linux tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-linux-x64.tar.gz) | 342.9 MiB |
 
-Actions 下载文件外还有一层 ZIP，需取出并解压内层发行包。准确字节数、内层包 SHA256 与各平台证据见[验证记录](docs/development/native-packages-verification.json)。三包均为真实解压后的自动验收，不代表人工设备验证。
+附件就是可直接解压的真实发行包，无需再取出 Actions 外层 ZIP。请核对 [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS)。内含编辑器、冻结后端、FFmpeg/ffprobe、资源、字体和许可，基础剪辑无需另装 Python、Node.js 或 FFmpeg。[安装与系统要求](docs/user/installation.md#macos-arm64--x64)和[原生验证记录](docs/development/native-packages-verification.json)列明准确范围。
 
-- **macOS 13+：**按芯片选择架构，解压后把 `CutVoke.app` 移到 `/Applications` 或 `~/Applications` 再打开。候选包仅有 ad-hoc 完整性签名，**没有 Developer ID 和公证**；网络下载可能被 Gatekeeper 阻止，不能保证首次无提示启动。受阻时请等待正式签名/公证版，保持系统安全保护开启。
-- **Linux x64 / Ubuntu 22.04 基线：**完整解压 `.tar.gz`，在目录运行 `./cutvoke`。需图形桌面、glibc 2.35+、Electron 系统库与可用的 Chromium 沙箱/用户命名空间；目录包无需 FUSE。不支持 root、`noexec` 位置或阻止沙箱的系统策略，不使用 `--no-sandbox`。其他发行版及更新 Ubuntu 版本仍需分别验收。
+- **macOS 13+：**按芯片选择架构，解压后把 `CutVoke.app` 移到 `/Applications` 或 `~/Applications`。仅有 ad-hoc 完整性签名，**没有 Developer ID 和公证**，两种架构的 Gatekeeper 自动信任检查均拒绝。确认来源可信且 SHA256 一致后，可按 [Apple 针对该 app 的确认打开说明](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac)，在尝试启动后到 **系统设置 → 隐私与安全性 → 仍要打开**确认；保持全局安全保护开启，无需购买开发者账号。实际自动执行环境为两种架构的 macOS 15.7.9，未宣称覆盖 macOS 13/14 或所有用户设备。
+- **Linux x64 / Ubuntu 22.04 基线：**保留执行权限和符号链接解压 tar.gz，在目录运行 `./cutvoke`。需图形桌面、glibc 2.35+、Electron 系统库和非特权用户命名空间沙箱；无需 FUSE。不支持 root、`noexec` 或阻止沙箱的系统策略，不使用 `--no-sandbox`。其他发行版、Wayland-only 和 Ubuntu 24.04 AppArmor 需独立验收。
 
-Mac 数据位于 `~/Library/Application Support/CutVoke/`，Linux 位于 `${XDG_DATA_HOME:-~/.local/share}/CutVoke/`；更新应用时保留数据。其 `profile/mcp-config.json` 使用内置引擎和同一数据库。自动 runner 验收与人工设备验收分别记录，不能据此声称已人工验证 Gatekeeper、设备音频/GPU 或所有 Linux 发行版。
+Mac 数据位于 `~/Library/Application Support/CutVoke/`，Linux 位于 `${XDG_DATA_HOME:-~/.local/share}/CutVoke/`；更新应用时保留。真实冻结包导入、预览、导出/完整解码和生命周期自动验收，不等于手工音质、设备 GPU、带隔离标记的 Finder 首次启动或所有系统测试。
 
 ### 从源码运行（开发者）
 

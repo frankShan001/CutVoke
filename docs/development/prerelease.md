@@ -2,6 +2,8 @@
 
 This workflow prepares inspectable artifacts. It does not create a tag, GitHub Release, upload public binaries, deploy or publish to PyPI. A maintainer must approve an actual artifact set and its supported platforms before publication.
 
+The approved four original desktop archives are published in [v0.3.1](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1), with a freshly computed [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS). The fixed, manual-only [staging workflow](../../.github/workflows/release-v0.3.1.yml) verifies every archive before uploading to the task-owned draft. Only its staging job has `actions: read` and `contents: write`; repository default permissions remain read-only. It does not execute artifact contents or rebuild products. Final publication uses the maintainer's existing local login.
+
 ## Source and wheel candidate
 
 From an activated development environment with the Web editor already built:
@@ -56,7 +58,7 @@ FFmpeg source, extracts the shipped ZIP and actually starts `CutVoke.exe` on
 Windows. It validates GUI/health, offline resource integrity, stdio MCP,
 import/preview/export/full decode, persistence, cleanup and read-only data
 protection. It does not run an installer or modify global PATH/registry.
-The unsigned Actions candidate is not a formal Release/tag. Human device,
+The latest verified unsigned Windows archive is now a v0.3.1 prerelease asset. Human device,
 native picker, GPU/audio and SmartScreen checks remain separate.
 
 ## Legacy Windows installer boundary
@@ -75,4 +77,4 @@ Return the exact filenames and hashes, originating SHA/CI, tested platforms, out
 
 先生成候选源码包/wheel、校验清单与版本说明草案，在干净环境安装并从源码包重建。候选包不是正式发行；`dirty:true` 的产物只供本地审查，公开前需从获准的干净提交重新构建。
 
-Windows 便携 ZIP 已在实际 Windows runner 上自动验收，下载、准确哈希、提交和证据见上方专门入口；基础使用无需安装或配置 Python/Node/系统 FFmpeg。该候选带完整许可与对应 FFmpeg 源码，未签名，也未创建正式 Release/标签。传统安装包、macOS 和用户设备的人工体验仍需各自验收；正式 Release 需在核对具体成品后另行确认。
+Windows 便携 ZIP 已在实际 Windows runner 上自动验收，下载、准确哈希、提交和证据见上方专门入口；基础使用无需安装或配置 Python/Node/系统 FFmpeg。该候选带完整许可与对应 FFmpeg 源码，未签名；最新已验证的四平台原包现已发布为上方 v0.3.1 预发布，历史候选记录继续保留。传统安装包、macOS 和用户设备的人工体验仍需各自验收；正式 Release 需在核对具体成品后另行确认。
