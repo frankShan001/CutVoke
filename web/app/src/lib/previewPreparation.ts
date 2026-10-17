@@ -24,6 +24,10 @@ export interface PreviewJob {
   totalWindows: number;
   progress: number;
   cached: boolean;
+  currentWindow?: number;
+  windowStart?: number;
+  windowEnd?: number;
+  elapsedSeconds?: number;
   error?: string;
 }
 

@@ -74,7 +74,7 @@ class PreviewPreparation:
     def submit(self, project) -> dict:
         snapshot = copy.deepcopy(project)
         clips = [clip for track in snapshot.sequence.tracks
-                 if track.visible and (track.kind == "video" or
+                 if track.visible and (track.kind in {"video", "text"} or
                                        (track.kind == "audio" and not track.muted))
                  for clip in track.clips if not clip.hidden]
         if not clips:
@@ -97,6 +97,8 @@ class PreviewPreparation:
                 "revision": snapshot.revision, "state": "queued", "phase": "queued",
                 "completedWindows": 0, "totalWindows": math.ceil(duration / self.window_seconds),
                 "progress": 0, "duration": duration, "cached": False,
+                "startedAt": time.time(), "currentWindow": 0,
+                "windowStart": 0, "windowEnd": 0,
                 "_snapshot": snapshot,
             }
             if self._worker is None:
@@ -110,7 +112,9 @@ class PreviewPreparation:
             job = self._jobs.get(job_id)
             if job is None:
                 raise KeyError(job_id)
-            return {key: value for key, value in job.items() if not key.startswith("_")}
+            result = {key: value for key, value in job.items() if not key.startswith("_")}
+            result["elapsedSeconds"] = round(job.get("finishedAt", time.time()) - job["startedAt"], 1)
+            return result
 
     def cancel(self, job_id: str) -> dict:
         with self._lock:
@@ -119,7 +123,7 @@ class PreviewPreparation:
                 raise KeyError(job_id)
             if job["state"] not in ("completed", "failed", "cancelled"):
                 self._events[job_id].set()
-                job.update(state="cancelled", phase="cancelled")
+                job.update(state="cancelled", phase="cancelled", finishedAt=time.time())
             return self.get(job_id)
 
     def media(self, job_id: str) -> tuple[str, str, float]:
@@ -158,6 +162,8 @@ class PreviewPreparation:
             if self._events[job_id].is_set():
                 raise RenderCancelled("preview preparation cancelled")
             job.update(values)
+            if values.get('state') in {'completed', 'failed', 'cancelled'}:
+                job['finishedAt'] = time.time()
 
     def _run(self):
         while (job_id := self._queue.get()) is not None:
@@ -173,7 +179,7 @@ class PreviewPreparation:
                 with self._lock:
                     job.update(state="cancelled" if event.is_set() else "failed",
                                phase="cancelled" if event.is_set() else "failed",
-                               error=str(error))
+                               error=str(error), finishedAt=time.time())
 
     def _command(self, args: list[str], event: threading.Event, work: Path):
         # Own only this subprocess; cancellation never terminates the Web service.
@@ -240,7 +246,9 @@ class PreviewPreparation:
             work = Path(directory)
             manifest = []
             for index in range(total):
-                self._update(job_id, phase="rendering")
+                self._update(job_id, phase="rendering", currentWindow=index + 1,
+                             windowStart=index * self.window_seconds,
+                             windowEnd=min(duration, (index + 1) * self.window_seconds))
                 original = work / f"source_{index}.mp4"
                 # Background renders yield to foreground seeks between windows.
                 if self.disk_cache:

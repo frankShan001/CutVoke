@@ -10,8 +10,48 @@ import platform
 import shutil
 import subprocess
 import sys
+import threading
 import urllib.error
 import urllib.request
+
+_freshness_lock = threading.Lock()
+_freshness_cache = {}
+
+
+def runtime_status(loaded: dict) -> dict:
+    """Compare running code with disk; never advertise unloaded capabilities.
+
+    Stat checks are cheap on polling requests. Hash bytes only after a source
+    or Web build changes. Restart is explicit because queues and leases belong
+    to this process and cannot safely survive Python module hot-reloading.
+    """
+    package = Path(__file__).resolve().parent
+    files = list(package.glob('*.py')) + list((package / 'core').glob('*.py'))
+    files += list((package / 'core').glob('*.json'))
+    web = web_directory()
+    if web:
+        files += [p for p in web.rglob('*') if p.is_file()]
+    if getattr(sys, 'frozen', False):
+        files.append(Path(sys.executable))
+    try:
+        signature = tuple((str(p), p.stat().st_size, p.stat().st_mtime_ns) for p in sorted(files))
+        with _freshness_lock:
+            if _freshness_cache.get('signature') != signature:
+                _freshness_cache.update(signature=signature, fingerprint=source_fingerprint())
+            current = _freshness_cache['fingerprint']
+    except OSError:
+        current = None
+    outdated = current != loaded.get('sourceFingerprint')
+    return {**loaded, 'currentSourceFingerprint': current,
+            'restartRequired': outdated, 'status': 'outdated' if outdated else 'current'}
+
+
+def restart_error(status: dict) -> dict:
+    return {'code': 'RUNTIME_RESTART_REQUIRED', 'retryable': False, 'committed': False,
+            'message': 'CutVoke source changed after this process started. Finish or cancel running jobs, restart this service and reconnect the MCP client before requesting schemas or editing.',
+            'runtime': status,
+            'recovery': {'action': 'restart_and_reconnect',
+                         'tools': ['runtime'], 'retrySameCommand': False}}
 
 
 def web_directory() -> Path | None:

@@ -277,7 +277,7 @@ _BATCH_EDIT_COMMANDS = frozenset({
     "track.add", "track.remove", "track.update",
     "sequence.background",
     "clip.insert", "clip.attach", "clip.trim", "clip.move", "clip.split", "clip.speed",
-    "clip.remove", "clip.duplicate", "clip.audio", "clip.batch",
+    "clip.remove", "clip.duplicate", "clip.duplicateGroup", "clip.audio", "clip.batch",
     "clip.keyframe", "clip.group", "clip.ungroup", "clip.rippleDelete",
     "clip.closeGap", "clip.align", "clip.distribute", "asset.swap",
     "effect.add", "effect.remove", "effect.update", "effect.copyVisual", "effect.setAnimation",
@@ -359,6 +359,7 @@ class EditService:
             "clip.speed": self._h_clip_speed,
             "clip.remove": self._h_clip_remove,
             "clip.duplicate": self._h_clip_duplicate,
+            "clip.duplicateGroup": self._h_clip_duplicate_group,
             "clip.audio": self._h_clip_audio,
             "clip.detachAudio": self._h_clip_detach_audio,
             "clip.batch": self._h_clip_batch,
@@ -701,6 +702,14 @@ class EditService:
                 {"name": "clipId", "description": "源片段 ID", "required": True},
                 {"name": "newClipId", "description": "新片段 ID（缺省自动生成）", "required": False},
                 {"name": "timelineStart", "description": "新片段时间线入点（缺省紧跟原片段）", "required": False},
+            ],
+        },
+        "clip.duplicateGroup": {
+            "description": "跨轨复制整组图层，保留相对时间、效果、关键帧与变速。默认递归带上绑定子图层，并重映射内部绑定；外部绑定解除。作为一个编辑步骤保存、撤销。",
+            "params": [
+                {"name": "clipIds", "description": "源片段 ID 列表，1..256 个，可跨轨", "required": True},
+                {"name": "timelineStart", "description": "新组合最早入点；缺省紧跟原组合末尾", "required": False},
+                {"name": "includeAttached", "description": "递归复制绑定到所选片段的子图层，默认 true", "required": False},
             ],
         },
         "clip.audio": {
@@ -4747,6 +4756,67 @@ class EditService:
             else:
                 cursor = c.timeline_end
         changed.extend(self._follow_attached_clips(proj, before, True))
+        return changed
+
+    def _h_clip_duplicate_group(self, proj: Project, p: dict) -> list[dict]:
+        ids = p.get('clipIds')
+        if (not isinstance(ids, list) or not 1 <= len(ids) <= 256 or
+                any(not isinstance(item, str) for item in ids) or len(set(ids)) != len(ids)):
+            raise EditError(ErrorCode.INVALID_ARGUMENT, 'clipIds must contain 1..256 unique clip IDs')
+        all_clips = {c.id: (t, c) for t in proj.sequence.tracks for c in t.clips}
+        selected = set(ids)
+        if not selected <= all_clips.keys():
+            raise EditError(ErrorCode.INVALID_ARGUMENT, 'some clipIds were not found')
+        if 'includeAttached' in p and not isinstance(p['includeAttached'], bool):
+            raise EditError(ErrorCode.INVALID_ARGUMENT, 'includeAttached must be a boolean')
+        if p.get('includeAttached', True):
+            while True:
+                children = {cid for cid, (_t, c) in all_clips.items()
+                            if c.attached_to_clip_id in selected}
+                if children <= selected:
+                    break
+                selected.update(children)
+        if len(selected) > 256:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, 'attached group exceeds 256 clips')
+        originals = [(t, c) for t in proj.sequence.tracks for c in t.clips if c.id in selected]
+        if any(t.locked for t, _c in originals):
+            raise EditError(ErrorCode.INVALID_ARGUMENT, 'cannot copy a group into locked tracks')
+        first = min(c.timeline_start for _t, c in originals)
+        start = (Rational.from_json(**p['timelineStart']) if 'timelineStart' in p else
+                 max(c.timeline_end for _t, c in originals))
+        if start < Rational.of(0):
+            raise EditError(ErrorCode.INVALID_ARGUMENT, 'timelineStart must be nonnegative')
+        copies = [(t, c, c.to_dict()) for t, c in originals]
+        mapping = {}
+        def collect(value):
+            if isinstance(value, dict):
+                if isinstance(value.get('id'), str):
+                    mapping[value['id']] = new_id('copy')
+                for item in value.values():
+                    collect(item)
+            elif isinstance(value, list):
+                for item in value:
+                    collect(item)
+        for _track, _clip, data in copies:
+            collect(data)
+        def rewrite(value):
+            if isinstance(value, dict):
+                return {k: (mapping.get(v, v) if k in {'id', 'attachedToClipId', 'activeTrackId'}
+                             and isinstance(v, str) else
+                             [mapping.get(item, item) for item in v] if k in {'trackIds', 'clipIds'}
+                             and isinstance(v, list) else rewrite(v)) for k, v in value.items()}
+            if isinstance(value, list):
+                return [rewrite(item) for item in value]
+            return value
+        changed = []
+        for track, original, data in copies:
+            duplicate = Clip.from_dict(rewrite(data))
+            duplicate.timeline_start = original.timeline_start + start - first
+            duplicate.timeline_end = original.timeline_end + start - first
+            duplicate.attached_to_clip_id = mapping.get(original.attached_to_clip_id)
+            track.clips.append(duplicate)
+            changed.append({'type': 'clip', 'id': duplicate.id, 'change': 'created',
+                            'trackId': track.id, 'sourceClipId': original.id})
         return changed
 
     def _h_clip_duplicate(self, proj: Project, p: dict) -> list[dict]:

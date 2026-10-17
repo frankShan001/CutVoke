@@ -69,6 +69,10 @@ AGENT_TOOLS = [
     _tool("project_package", "将工程与引用素材打包为可继续编辑的交接文件；默认拒绝覆盖已有文件。",
           {**REVISION, "outPath": STRING, "overwrite": {"type": "boolean", "default": False}},
           ("projectId", "expectedRevision", "outPath")),
+    _tool("project_archive", "保存可重新打开的原生工程包，附制作事件、保留的历史快照、导出记录和可选抽帧。不会修改工程；抽帧不是剪辑过程录屏。未指定 outPath 时写入本地 archives 目录。",
+          {**REVISION, "outPath": STRING, "overwrite": {"type": "boolean", "default": False},
+           "frameTimes": {"type": "array", "maxItems": 6, "items": {"type": "number", "minimum": 0}}},
+          ("projectId", "expectedRevision")),
 ]
 
 
@@ -338,3 +342,19 @@ class AgentTools:
         output = pack_project(project, str(path))
         return {"projectId": project.project_id, "revision": project.revision,
                 "path": output, "sizeBytes": Path(output).stat().st_size}
+
+    def project_archive(self, a):
+        from datetime import datetime, timezone
+        from .production_archive import write_archive
+        from ..runtime import runtime_status
+        self._project(a)
+        if not self.service.store:
+            raise ValueError('persistent storage is required for production archives')
+        record = self.service.store.production_snapshot(a['projectId'])
+        if record['project']['revision'] != a['expectedRevision']:
+            raise EditError(ErrorCode.REVISION_CONFLICT, 'project changed before archive snapshot', retryable=True)
+        default = Path(self.api.media_dir).parent / 'archives' / (
+            datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S-') + uuid.uuid4().hex[:8] + '.cvkpkg')
+        return write_archive(record, a.get('outPath', str(default)), self.render,
+                             frame_times=a.get('frameTimes', []), overwrite=a.get('overwrite', False),
+                             runtime=runtime_status(self.api.runtime_info))

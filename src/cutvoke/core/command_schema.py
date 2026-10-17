@@ -47,7 +47,7 @@ KEYFRAME = {"type": "object", "properties": {
     "interpolation": {"type": "string", "enum": ["linear", "ease-in", "ease-out"]}},
     "required": ["param", "time", "value"], "additionalProperties": False}
 
-_BOOLEAN_FIELDS = set("locked muted visible switch enabled bold preservePitch followAttachments applyToProject clearExisting setCanvas overwrite versioned transparent".split())
+_BOOLEAN_FIELDS = set("locked muted visible switch enabled bold preservePitch followAttachments includeAttached applyToProject clearExisting setCanvas overwrite versioned transparent".split())
 _INTEGER_FIELDS = set("width height fontSize strokeWidth animIn animOut toIndex limit maxWords videoBitrateKbps audioBitrateKbps".split())
 _NUMBER_FIELDS = set("fps volume fadeIn fadeOut pitch stickerScale duration strength amount I seconds minSilence sharpness denoise overlap rotation scale x y value timelineTime t".split())
 _RATIONAL_FIELDS = set("timelineStart timelineEnd sourceStart sourceTime start end at fromTime toTime".split())

@@ -75,7 +75,7 @@ from .luts import CubeInvalid, MAX_CUBE_BYTES, validate_cube
 
 # Bump when preview rendering changes so neither disk cache nor browser ETag can
 # treat media produced by an older renderer as current for the same project data.
-PREVIEW_RENDER_CACHE_VERSION = 22
+PREVIEW_RENDER_CACHE_VERSION = 23
 PREVIEW_WINDOW_SECONDS = 8
 ASSET_MEDIA_TYPES = {
     ".mp3": "audio/mpeg", ".wav": "audio/wav", ".flac": "audio/flac",
@@ -402,7 +402,7 @@ class HttpApi:
         if index < 0:
             raise EditError(ErrorCode.INVALID_ARGUMENT, "preview window index must be >= 0")
         seq = project.sequence
-        visible = [clip for track in seq.tracks if track.kind == "video" and track.visible
+        visible = [clip for track in seq.tracks if track.kind in {"video", "text"} and track.visible
                    for clip in track.clips if not clip.hidden]
         audible = [clip for track in seq.tracks
                    if track.kind == "audio" and track.visible and not track.muted
@@ -501,13 +501,13 @@ class HttpApi:
                         clip.id for clip in clips
                         if clip.timeline_start < stop and clip.timeline_end > start
                     }
-                    for index, clip in enumerate(clips):
-                        if clip.id not in retained or index == 0:
+                    for clip_index, clip in enumerate(clips):
+                        if clip.id not in retained or clip_index == 0:
                             continue
                         transition = find_transition(clip, getattr(self.render, "effects", None))
                         if transition is None:
                             continue
-                        previous = clips[index - 1]
+                        previous = clips[clip_index - 1]
                         if abs(float((clip.timeline_start - previous.timeline_end).to_fraction())) > 1e-6:
                             continue
                         params = transition.get("params") or {}
@@ -961,6 +961,15 @@ class HttpApi:
                 "message": "request body must be a JSON object",
             }}
         try:
+            from ..runtime import runtime_status, restart_error
+            status = runtime_status(self.runtime_info)
+            discovery = path in ('/api/v1/capabilities', '/api/v1/commands', '/api/v1/effects', '/api/v1/agent/tools')
+            safe_post = (path.endswith('/cancel') or path.endswith('/keepalive') or
+                         path in ('/api/v1/agent/preview_job', '/api/v1/agent/export_job',
+                                  '/api/v1/agent/project_events', '/api/v1/agent/project_list') or
+                         path.endswith('/edit-lock/release'))
+            if status['restartRequired'] and (discovery or (method != 'GET' and not safe_post)):
+                return 409, {'error': restart_error(status)}
             return self._dispatch(method, path, body, inline_media=inline_media)
         except EditError as e:
             return 400 if e.code == ErrorCode.INVALID_ARGUMENT else 409, {
@@ -1063,7 +1072,8 @@ class HttpApi:
 
         # ---- 能力与效果发现（AC18：UI/CLI/HTTP/MCP 都能列出效果）----
         if method == "GET" and parts == ["api", "v1", "runtime"]:
-            return 200, {"ok": True, **self.runtime_info,
+            from ..runtime import runtime_status
+            return 200, {"ok": True, **runtime_status(self.runtime_info),
                          "previewPreparation": {"supported": True, "windowSeconds": PREVIEW_WINDOW_SECONDS}}
 
         # Fixed font names expose only the fonts used by caption export. This

@@ -66,6 +66,8 @@ flowchart LR
 
 The timeline supports multiple media tracks, text and captions, clip adjustments, volume and fades, keyframes, and existing transitions/effects. Edits can be previewed and undone/redone; an editing lease keeps grouped agent changes from colliding with manual writes. Continuous preview prepares time windows and reuses cached work. Exports use the project version captured when queued.
 
+For the latest source build, see the [production workflow](docs/production-workflow.md): standalone titles, reusable attached layers, on-demand previews and production archives.
+
 ![CutVoke English caption editor with selected text, start and end times, and the actual preview](docs/assets/readme/en/caption-editing.png)
 
 *English caption editing: the selected line, its 0–4 second interval and its editable preview overlay. Captions remain individual project objects you can refine.*

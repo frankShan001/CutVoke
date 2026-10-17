@@ -366,6 +366,19 @@ class PreviewWindowTests(unittest.TestCase):
                 self.assertNotEqual((changed_path, changed_digest),
                                     (mode_changed_path, mode_changed_digest))
                 self.assertEqual(len(renderer.projects), 3)
+                # Animated shots take the full-clock compilation route. Adding
+                # unrelated future clips must not replace the requested window
+                # index with an iteration index in that route's cache key.
+                from cutvoke.core.keyframes import Keyframe
+                overlay_now.keyframes = {"opacity": [Keyframe("fixed-opacity", r(0), 1.0)]}
+                dynamic_path, dynamic_digest, _ = api._preview_window_file(project, 0)
+                renders = len(renderer.projects)
+                project.sequence.tracks[1].clips.append(Clip(
+                    "future-overlay", AssetReference("o2", "future-overlay.mp4"),
+                    r(32), r(40), r(0)))
+                reused_path, reused_digest, _ = api._preview_window_file(project, 0)
+                self.assertEqual((reused_path, reused_digest), (dynamic_path, dynamic_digest))
+                self.assertEqual(len(renderer.projects), renders)
             finally:
                 api.close()
 

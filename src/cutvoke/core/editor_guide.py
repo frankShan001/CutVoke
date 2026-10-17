@@ -80,6 +80,16 @@ def rat(seconds):
 
 
 RECIPES = {
+    "layered-shot": {
+        "title": "Reuse a layered shot and archive its production evidence",
+        "steps": [
+            {"tool": "editor_help", "arguments": {"topic": "command", "command": "clip.duplicateGroup"}},
+            {"tool": "command_preview", "arguments": {"projectId": "<PROJECT>", "expectedRevision": "<REVISION>",
+             "type": "clip.duplicateGroup", "payload": {"clipIds": ["<BASE_CLIP>"], "includeAttached": True, "timelineStart": rat(8)}}},
+            {"tool": "command_apply", "reuse": "Commit the same payload with a lease and stable commandId. changedEntities maps sourceClipId to each new clip ID. Explicit clipIds may span tracks. Existing overlap and track-lock rules still apply."},
+            {"tool": "preview_frames", "arguments": {"projectId": "<PROJECT>", "expectedRevision": "<REVISION>", "times": [8.5]}},
+            {"tool": "project_archive", "arguments": {"projectId": "<PROJECT>", "expectedRevision": "<REVISION>", "outPath": "<ABSOLUTE_CVKPKG_PATH>", "frameTimes": [8.5]}}],
+        "notes": ["The archive contains current project media, retained undo/redo snapshots and actor events. Old snapshots may still reference old local paths; frames are not a screen recording."]},
     "assemble": {
         "title": "Build an editable clip with a title and caption",
         "bindings": {"PROJECT": "projectId from create_project", "REVISION": "current revision from the previous result",

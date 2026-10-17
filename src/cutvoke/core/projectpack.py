@@ -92,9 +92,19 @@ def _sha256_stream(src: Path) -> tuple[str, int]:
 
 
 def _project_sequences(project: Project) -> list:
-    """Use the active sequence and every other sequence exactly once."""
-    return [project.sequence] + [sequence for sequence in project.sequences
-                                 if sequence.id != project.sequence.id]
+    """Include nested compound media as well as every top-level sequence."""
+    pending = [project.sequence] + [sequence for sequence in project.sequences
+                                    if sequence.id != project.sequence.id]
+    sequences, seen = [], set()
+    while pending:
+        sequence = pending.pop(0)
+        if sequence.id in seen:
+            continue
+        seen.add(sequence.id)
+        sequences.append(sequence)
+        pending.extend(clip.nested for track in sequence.tracks for clip in track.clips
+                       if clip.nested is not None)
+    return sequences
 
 
 def _collect_asset_refs(project: Project) -> list:
@@ -162,14 +172,15 @@ def _scan_unknown_effects(project: Project, known_effect_ids) -> list[str]:
     if known_effect_ids is None:
         return []
     unknown: list[str] = []
-    for track in project.sequence.tracks:
-        for clip in track.clips:
-            for fx in clip.effects:
-                eid = fx.get("effectId") if isinstance(fx, dict) else None
-                if eid is None:
-                    continue
-                if eid not in known_effect_ids and eid not in unknown:
-                    unknown.append(eid)
+    for sequence in _project_sequences(project):
+        for track in sequence.tracks:
+            for clip in track.clips:
+                for fx in clip.effects:
+                    eid = fx.get("effectId") if isinstance(fx, dict) else None
+                    if eid is None:
+                        continue
+                    if eid not in known_effect_ids and eid not in unknown:
+                        unknown.append(eid)
     return unknown
 
 

@@ -176,6 +176,8 @@ export interface ChangedEntity {
   id: string;
   change: string;
   reason?: string;
+  trackId?: string;
+  sourceClipId?: string;
   /** Dry-run impact for time-based entities; null marks creation or deletion. */
   timelineRange?: {
     before: { start: Rational; end: Rational } | null;
