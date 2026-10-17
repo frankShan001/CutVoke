@@ -1,0 +1,41 @@
+name: Stage approved v0.3.1 release
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: cutvoke-release-v0.3.1
+  cancel-in-progress: false
+
+jobs:
+  stage:
+    name: Verify original packages and upload task draft
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Verify all four original archives before any upload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/release/stage_v031.py verify
+      - name: Upload only verified inner packages and fresh SHA256SUMS
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/release/stage_v031.py upload
+      - name: Retain small verification report
+        if: success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: v0.3.1-release-verification
+          path: |
+            ${{ runner.temp }}/cutvoke-v031-staging/staged-release.json
+            ${{ runner.temp }}/cutvoke-v031-staging/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 90
