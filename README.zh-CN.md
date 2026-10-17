@@ -8,11 +8,19 @@
 
 [开始体验](#开始体验) · [给你的-ai-一套剪辑工作流](#给你的-ai-一套剪辑工作流) · [一起打造特效](#一起打造特效)
 
+## 四段原始素材，一条电影感成片
+
+从四段原始镜头到完整成片，看看 CutVoke 如何通过移动遮罩、文字动效与多层光影合成，让画面产生视觉冲击。
+
+https://github.com/user-attachments/assets/d3fde0a6-7928-4f2c-81ef-94618c6262ae
+
+*31 秒对比视频：先展示 8 秒静音原始素材，再播放带配乐的剪辑效果。原始镜头由 MiniMax 生成，全部剪辑、合成与成片导出均由 CutVoke 完成。*
+
+[下载对比视频](examples/showcases/chase-the-light/source-and-edit.mp4) · [查看可编辑工程与制作过程素材](examples/showcases/chase-the-light/README.md)
+
 ![CutVoke 简体中文界面：素材库、风景短片预览和多轨可编辑时间线](docs/assets/readme/zh-CN/editor-overview.png)
 
 *真实本机编辑器中的「山野手记」演示：三张原创插画、音乐、标题、字幕、缩放关键帧和转场。由仓库示例通过真实接口创建；没有生成视频服务。界面、演示标题与字幕均使用简体中文。*
-
-视频素材案例见 [CHASE THE LIGHT](examples/showcases/chase-the-light/README.md)：包含四段原始素材、电影感成片、可导入编辑的工程与制作过程素材，使用 Git LFS 纳入版本管理。
 
 ## 为什么值得试
 
