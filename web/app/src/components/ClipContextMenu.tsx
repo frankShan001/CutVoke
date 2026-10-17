@@ -5,7 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type Dispatch } from "rea
 import { Scissors, Trash2, Gauge, Wand2, Copy } from "lucide-react";
 import type { Clip } from "../types/api";
 import { getLatestState } from "../store/actions";
-import { addEffect, duplicateClip, removeClip, setClipSpeed, splitClip } from "../store/clipEdit";
+import { addEffect, duplicateClip, duplicateClipGroup, removeClip, setClipSpeed, splitClip } from "../store/clipEdit";
 import type { EditorAction } from "../store/editor";
 import { rationalToSecs, secsToRational } from "../lib/rational";
 import { assetDisplayName, useSessionAssets } from "../lib/assetStore";
@@ -114,6 +114,8 @@ export function ClipContextMenu({
           <Scissors size={14} />{tr(" 在播放头分割")}</button>
         <button className="ctx-menu__item" onClick={handleDuplicate}>
           <Copy size={14} />{tr(" 复制片段")}</button>
+        <button className="ctx-menu__item" onClick={() => clip && run(() => duplicateClipGroup(dispatch, ctx, clip.id))}>
+          <Copy size={14} />{tr("复制片段及绑定图层")}</button>
         <button className="ctx-menu__item ctx-menu__item--danger" onClick={handleRemove}>
           <Trash2 size={14} />{tr(" 删除片段")}</button>
         <div className="ctx-menu__sep" />

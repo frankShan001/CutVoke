@@ -49,7 +49,7 @@ export function useProjectPreparation() {
     setError(null); setJob(null); setProgress(0); setPhase("checking");
     dispatch({ type: "PREPARED_PREVIEW_SET", preview: null });
     const renderable = project.sequence.tracks.some((track) => track.visible !== false &&
-      (track.kind === "video" || (track.kind === "audio" && !track.muted)) &&
+      (track.kind === "video" || track.kind === "text" || (track.kind === "audio" && !track.muted)) &&
       track.clips.some((clip) => !clip.hidden));
     if (!renderable) {
       dispatch({ type: "PROJECT_OPEN_READY", projectId });
@@ -150,6 +150,9 @@ export function ProjectLoading({ preparation }: { preparation: ReturnType<typeof
               aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
               <div style={{ width: `${progress}%` }} />
             </div>
+            {job?.phase === "rendering" && job.currentWindow ? <p className="project-loading__hint" role="status">
+              {tr("正在渲染第 {0} 段（{1}–{2} 秒），已用 {3} 秒", job.currentWindow, job.windowStart, job.windowEnd, job.elapsedSeconds)}
+            </p> : null}
             <div className="project-loading__detail" role="status" aria-live="polite">
               <span>{job?.cached ? tr("正在复用已准备的预览") : job && job.totalWindows > 0
                 ? tr("已准备 {0} / {1} 段", job.completedWindows, job.totalWindows) : tr("正在读取时间线与素材")}</span>
@@ -168,6 +171,7 @@ export function ProjectLoading({ preparation }: { preparation: ReturnType<typeof
         )}
         <div className="project-loading__actions">
           <button className="tool-btn" autoFocus onClick={preparation.back}>{tr("返回工程列表")}</button>
+          {!error && state.project ? <button className="tool-btn" onClick={preparation.repair}>{tr("先进入编辑，按需预览")}</button> : null}
           {error && state.project ? <button className="tool-btn" onClick={preparation.repair}>{tr("进入工程修复")}</button> : null}
           {error ? <button className="tool-btn tool-btn--primary" onClick={preparation.retry}>{tr("重试加载")}</button> : null}
         </div>

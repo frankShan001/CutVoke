@@ -205,7 +205,7 @@ class MCPServer:
             },
             {
                 "name": "runtime",
-                "description": "读取此MCP进程启动时的版本、源码指纹与持久化数据目录；源码更新后需重连MCP客户端。",
+                "description": "读取运行中与磁盘上的源码指纹、restartRequired、版本与持久化目录。源码更新后，旧进程停止提供编辑能力，需结束任务、重启服务并重连客户端。",
                 "inputSchema": {"type": "object", "properties": {}},
             },
             {
@@ -294,6 +294,16 @@ class MCPServer:
 
     def call_tool(self, name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         try:
+            if not isinstance(arguments, dict):
+                raise ValueError('arguments must be an object')
+            from ..runtime import runtime_status, restart_error
+            status = runtime_status(self.runtime_info)
+            readable = {'runtime', 'project_list', 'project_query', 'project_summary',
+                        'project_lookup', 'project_events', 'preview_job', 'export_job',
+                        'preview_cache_status'}
+            releasing = name == 'edit_lock' and arguments.get('action') == 'release'
+            if status['restartRequired'] and name not in readable and not releasing:
+                return {'ok': False, 'error': restart_error(status)}
             tool = next((tool for tool in self.list_tools() if tool["name"] == name), None)
             if tool is None:
                 raise ValueError(f"unknown tool: {name}")
@@ -324,7 +334,7 @@ class MCPServer:
             if name == "capabilities":
                 return self._capabilities(arguments)
             if name == "runtime":
-                return {"ok": True, **self.runtime_info}
+                return {"ok": True, **status}
             if name == "preview_cache_status":
                 from .preview_cache import PreviewDiskCache
                 cache = PreviewDiskCache(str(self._media_directory()))
@@ -499,6 +509,14 @@ class MCPServer:
         if not isinstance(msg.get("params", {}), dict):
             return {"jsonrpc": "2.0", "id": rid,
                     "error": {"code": -32602, "message": "params must be an object"}}
+
+        if method.startswith('resources/'):
+            from ..runtime import runtime_status, restart_error
+            status = runtime_status(self.runtime_info)
+            if status['restartRequired']:
+                error = restart_error(status)
+                return {'jsonrpc': '2.0', 'id': rid, 'error': {
+                    'code': -32001, 'message': error['message'], 'data': error}}
 
         if method == "initialize":
             return {"jsonrpc": "2.0", "id": rid, "result": {

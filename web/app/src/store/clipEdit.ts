@@ -407,6 +407,20 @@ export async function duplicateClip(
   return res;
 }
 
+/** Duplicate a layered shot and rebind its attached title/mask/audio children. */
+export async function duplicateClipGroup(
+  dispatch: Dispatch<EditorAction>, state: EditorState, clipId: string,
+): Promise<ActionResult> {
+  const res = await runCommand(dispatch, state, "clip.duplicateGroup", { clipIds: [clipId], includeAttached: true });
+  if (res.ok) {
+    dispatch({ type: "UNDO_SET", blocked: false });
+    const created = res.command?.changedEntities.find((e) => e.type === "clip");
+    if (created?.trackId) dispatch({ type: "SELECTION_SET", selection: { trackId: String(created.trackId), clipId: created.id } });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已复制片段及绑定图层") });
+  }
+  return res;
+}
+
 /** 调速（payload: {clipId, speed}，speed 为数字或有理数，负数倒放）。 */
 export async function setClipSpeed(
   dispatch: Dispatch<EditorAction>,

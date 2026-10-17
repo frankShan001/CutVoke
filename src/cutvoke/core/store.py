@@ -1079,6 +1079,25 @@ class ProjectStore:
     # ------------------------------------------------------------------
 
     @_synchronized
+    def production_snapshot(self, project_id: str) -> dict:
+        """Freeze project, events and retained undo/redo in one read transaction.
+
+        File copying/rendering happens after releasing this transaction so an
+        archive never holds the database lock during a long media operation.
+        """
+        with self._transaction(immediate=False):
+            project = self.load(project_id)
+            if project is None:
+                raise KeyError(project_id)
+            rows = self._conn.execute(
+                'SELECT depth, revision, snapshot_json FROM history WHERE project_id=? ORDER BY depth',
+                (project_id,)).fetchall()
+            return {'project': project.to_dict(), 'events': self.events_since(project_id),
+                    'history': [{'depth': depth, 'revision': revision, 'project': json.loads(snapshot)}
+                                for depth, revision, snapshot in rows],
+                    'exports': self.list_export_jobs(project_id, limit=200)}
+
+    @_synchronized
     def close(self) -> None:
         self._conn.close()
 

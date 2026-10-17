@@ -1196,8 +1196,18 @@ def _prepare_static_masks(method):
     def prepared(self, project, *args, **kwargs):
         arguments = signature.bind(self, project, *args, **kwargs)
         cancel = arguments.arguments.get("cancel_event")
-        with self._procedural_sources(project, cancel) as procedural:
-            with self._static_mask_sources(procedural, cancel) as snapshot:
+        values = arguments.arguments
+        window = None
+        if "timeline_time" in values:
+            at, step = self._static_frame_time(project.sequence, values["timeline_time"])
+            window = (at, at + 2 * step)
+        elif "start" in values and "duration" in values:
+            window = (values["start"], values["start"] + values["duration"])
+        elif values.get("output_duration") is not None:
+            start = values.get("output_start", 0.0)
+            window = (start, start + values["output_duration"])
+        with self._procedural_sources(project, cancel, window) as procedural:
+            with self._static_mask_sources(procedural, cancel, window) as snapshot:
                 return method(self, snapshot, *args, **kwargs)
     return prepared
 
@@ -1216,10 +1226,35 @@ class RenderService:
         # 都会"静默变成黑底"（alpha 存在但内容不透明），比报错更难发现。
         self._render_ctx = threading.local()
 
+    def _preparation_clip_ids(self, seq, window):
+        """Keep preparation bounded without changing the editable/render clock.
+
+        A transition can read the outgoing clip after its nominal end. Retain
+        that predecessor just as _compile does, including its optical layers.
+        """
+        needed = set()
+        for track in seq.tracks:
+            if not track.visible:
+                continue
+            clips = sorted((c for c in track.clips if not c.hidden),
+                           key=lambda c: c.timeline_start)
+            for i, clip in enumerate(clips):
+                if window is not None and not (
+                    float(clip.timeline_start.to_fraction()) < window[1] and
+                    float(clip.timeline_end.to_fraction()) > window[0]):
+                    continue
+                needed.add(clip.id)
+                if window is not None and i and find_transition(clip, self.effects):
+                    previous = clips[i - 1]
+                    if previous.timeline_end == clip.timeline_start:
+                        needed.add(previous.id)
+        return needed
+
     @contextlib.contextmanager
-    def _procedural_sources(self, project, cancel_event=None):
+    def _procedural_sources(self, project, cancel_event=None, render_window=None):
         """Cache generated optical layers without modifying editable authority."""
-        targets=[(c,e) for t in project.sequence.tracks if t.visible for c in t.clips
+        needed = self._preparation_clip_ids(project.sequence, render_window)
+        targets=[(c,e) for t in project.sequence.tracks if t.visible for c in t.clips if c.id in needed
                  if not c.hidden for e in c.effects if _is_effect_enabled(e)
                  and e.get('effectId') in ('cutvoke.fx.lightWeave','cutvoke.fx.opticalField')]
         if not targets:
@@ -1230,7 +1265,7 @@ class RenderService:
         for track in snapshot.sequence.tracks:
             if not track.visible:continue
             for clip in track.clips:
-                if clip.hidden:continue
+                if clip.hidden or clip.id not in needed:continue
                 for effect in clip.effects:
                     if not _is_effect_enabled(effect) or effect.get('effectId') not in ('cutvoke.fx.lightWeave','cutvoke.fx.opticalField'):continue
                     params=effect.setdefault('params',{})
@@ -1250,7 +1285,7 @@ class RenderService:
         yield snapshot
 
     @contextlib.contextmanager
-    def _static_mask_sources(self, project: Project, cancel_event=None):
+    def _static_mask_sources(self, project: Project, cancel_event=None, render_window=None):
         """Evaluate static masks/graphic stacks once; retain editable source effects.
 
         Frame-invariant shapes and light on a still should not repeat expensive
@@ -1258,6 +1293,7 @@ class RenderService:
         allowlist is folded, before clip transforms and their keyframes.
         """
         static_sources = {}
+        needed = self._preparation_clip_ids(project.sequence, render_window)
         def is_static(source):
             if source in static_sources:
                 return static_sources[source]
@@ -1284,6 +1320,8 @@ class RenderService:
             static_sources[source] = result
             return result
         def eligible(clip):
+            if clip.id not in needed:
+                return False
             effects = self._enabled_fx(clip)
             path_mask = (len(effects) == 1 and effects[0].get("range") is None
                     and self._fx_key_params(effects[0])[0] == "mask"
@@ -1786,14 +1824,14 @@ class RenderService:
         source_seq = project.sequence
         t_rat = Rational.from_float(timeline_time)
         multicam = getattr(source_seq, "multicam", None)
-        active_track_id = getattr(multicam, "active_track_id", None)
+        active_track_id = multicam.get("activeTrackId") if isinstance(multicam, dict) else None
 
         def covers(track: Any) -> bool:
-            if getattr(track, "kind", "video") != "video":
+            if getattr(track, "kind", "video") not in {"video", "text"}:
                 return False
             if not getattr(track, "visible", True):
                 return False
-            if active_track_id and getattr(track, "track_id", None) != active_track_id:
+            if track.kind == "video" and active_track_id and track.id != active_track_id:
                 return False
             return any(
                 not getattr(clip, "hidden", False)
@@ -1810,7 +1848,7 @@ class RenderService:
         # otherwise skip a missing file, then report that the timeline has no
         # visible video at all.
         for track in source_seq.tracks:
-            if not covers(track):
+            if track.kind != "video" or not covers(track):
                 continue
             for clip in track.clips:
                 if (clip.hidden or clip.nested is not None or
@@ -1886,13 +1924,14 @@ class RenderService:
         frame_duration = float(1 / fps)
         frame_index = max(0, math.floor(timeline_time * float(fps) + 1e-7))
         end = max((float(c.timeline_end.to_fraction()) for t in seq.tracks
-                   if t.visible and t.kind in {"video", "audio"}
+                   if t.visible and t.kind in {"video", "audio", "text"}
                    for c in t.clips if not c.hidden), default=0)
         if end > 0:
             last_frame = max(0, math.ceil(end * float(fps) - 1e-7) - 1)
             frame_index = min(frame_index, last_frame)
         return float(frame_index / fps), frame_duration
 
+    @_prepare_static_masks
     def extract_still(self, project: Project, timeline_time: float,
                       out_path: str, alpha: bool = False,
                       timeout: float = 60.0) -> dict[str, Any]:
@@ -1989,7 +2028,9 @@ class RenderService:
                                 for t in video_tracks)
         has_audible_audio = any(t.kind == "audio" and t.visible and not t.muted and
                                 any(not c.hidden for c in t.clips) for t in seq.tracks)
-        if not has_visible_video and not has_audible_audio:
+        has_text = any(t.visible and t.kind == "text" and any(not c.hidden for c in t.clips)
+                       for t in seq.tracks)
+        if not has_visible_video and not has_audible_audio and not has_text:
             raise RenderError(
                 "EMPTY_TIMELINE: no visible video or audible audio clips to render")
 
@@ -2125,10 +2166,11 @@ class RenderService:
                     # requiring that unrelated source to decode successfully.
                     info[src] = {"has_video":True, "has_audio":False, "duration":0}
             return info[src]
-        end = 0.0
+        end = max((float(c.timeline_end.to_fraction()) for t in seq.tracks
+                   if t.visible and t.kind == 'text' for c in t.clips if not c.hidden), default=0.0)
         for clip in sorted(visual, key=lambda c:c.timeline_end, reverse=True):
             if media(clip).get("has_video"):
-                end = float(clip.timeline_end.to_fraction())
+                end = max(end, float(clip.timeline_end.to_fraction()))
                 break
         for clip in sorted(audible, key=lambda c:c.timeline_end, reverse=True):
             if float(clip.timeline_end.to_fraction()) <= end:
@@ -2338,7 +2380,8 @@ class RenderService:
             # synchronized preview and MP4 export. The real audio mix below
             # remains authoritative; only the configured canvas fill is shown.
             audio_end = max((float(clip.timeline_end.to_fraction())
-                             for track in audio_tracks if track.visible and not track.muted
+                             for track in seq.tracks if track.visible and
+                             (track.kind == "text" or (track.kind == "audio" and not track.muted))
                              for clip in track.clips if not clip.hidden), default=0.0)
             if render_window is not None:
                 audio_end = render_window[1] - origin
@@ -2361,7 +2404,9 @@ class RenderService:
         x, y = int(overlay_position[0]), int(overlay_position[1])
         fps = seq.fps.to_fraction()
         fps_expr = f"{fps.numerator}/{fps.denominator}"
-        canvas_dur = max(max(track_durs), render_window[1] - origin if render_window else 0)
+        title_end = max((float(c.timeline_end.to_fraction()) for t in seq.tracks
+                         if t.kind == "text" and t.visible for c in t.clips if not c.hidden), default=0)
+        canvas_dur = max(max(track_durs), render_window[1] - origin if render_window else title_end)
         base_color = "black@0.0" if alpha else canvas_fill
         base_format = ",format=yuva420p" if alpha else ""
         parts.append(

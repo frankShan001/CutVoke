@@ -19,6 +19,7 @@ import { loadProjects, redo, refreshProject, undo } from "../store/actions";
 import { ToolbarTools } from "./ToolbarTools";
 import { CacheSettings } from "./CacheSettings";
 import { LanguageSelect } from "./LanguageSelect";
+import { RuntimeStatus } from "./RuntimeStatus";
 
 export function TopToolbar({
   leftPanelOpen,
@@ -93,6 +94,7 @@ export function TopToolbar({
         <span className="topbar__btn-label">{tr("模板库")}</span>
       </Button>
       <span className="topbar__spacer" />
+      <RuntimeStatus />
       <CacheSettings />
       <LanguageSelect />
       <Button

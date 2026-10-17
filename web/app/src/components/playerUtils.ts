@@ -19,7 +19,7 @@ export function rationalSeconds(rt: { num: string; den: string }): number {
 export function playbackEndSecs(tracks: Track[]): number {
   let end = 0;
   for (const track of tracks) {
-    if (track.visible === false || (track.kind !== "video" && track.kind !== "audio")) continue;
+    if (track.visible === false || !["video", "audio", "text"].includes(track.kind)) continue;
     if (track.kind === "audio" && track.muted) continue;
     for (const clip of track.clips || []) {
       if (clip.hidden) continue;
@@ -30,11 +30,11 @@ export function playbackEndSecs(tracks: Track[]): number {
   return end;
 }
 
-/** Whether the current position is covered by a visible video clip. */
+/** Text tracks are rendered pixels too, including title cards without footage. */
 export function hasVideoCoverageAt(tracks: Track[], time: number): boolean {
   if (!Number.isFinite(time)) return false;
   return tracks.some((track) =>
-    track.kind === "video" && track.visible !== false && (track.clips || []).some((clip) => {
+    (track.kind === "video" || track.kind === "text") && track.visible !== false && (track.clips || []).some((clip) => {
       if (clip.hidden) return false;
       const start = rationalSeconds(clip.timelineStart);
       const end = rationalSeconds(clip.timelineEnd);

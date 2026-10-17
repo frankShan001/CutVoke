@@ -13,6 +13,7 @@ import {
   Undo2,
   User,
   X,
+  Archive,
 } from "lucide-react";
 import { Button } from "./ui";
 import { useEditor } from "../store/editor";
@@ -73,6 +74,27 @@ export function AgentActivityPanel() {
   const [error, setError] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState(0);
   const [busyRev, setBusyRev] = useState<string | null>(null);
+  const [archiving, setArchiving] = useState(false);
+  const [archivePath, setArchivePath] = useState("");
+
+  const archive = async () => {
+    const current = getLatestState();
+    if (!current?.currentId || archiving) return;
+    setArchiving(true); setArchivePath("");
+    try {
+      const response = await fetch("/api/v1/agent/project_archive", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId: current.currentId, expectedRevision: current.revision,
+          frameTimes: [current.playhead] }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) throw new Error(result.error?.message || tr("制作归档失败"));
+      setArchivePath(result.path);
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("制作归档已保存：{0}", result.path) });
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : tr("制作归档失败"));
+    } finally { setArchiving(false); }
+  };
 
   const load = useCallback(async () => {
     if (!state.currentId) return;
@@ -196,6 +218,11 @@ export function AgentActivityPanel() {
             </span>
           </div>
           <div className="agent-panel__actions">
+            <Button variant="ghost" size="sm" disabled={!state.currentId || archiving}
+              onClick={() => void archive()} aria-label={tr("保存制作归档")}
+              title={archiving ? tr("正在归档…") : tr("保存工程、历史与当前画面")}>
+              <Archive size={14} className={archiving ? "agent-spin" : ""} /><span hidden>{tr("制作归档")}</span>
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -219,6 +246,7 @@ export function AgentActivityPanel() {
         </header>
 
         <div className="agent-panel__body">
+          {archivePath ? <p className="agent-empty" role="status">{tr("制作归档已保存：{0}", archivePath)}</p> : null}
           {!state.currentId ? (
             <span className="agent-empty">{tr("请先选择一个工程")}</span>
           ) : error ? (

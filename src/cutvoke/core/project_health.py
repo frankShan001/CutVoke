@@ -81,8 +81,11 @@ def project_preflight(project: Project, *, output_range: tuple[float, float] | N
                 end = float(clip.timeline_end.to_fraction())
                 in_window = (window is None or (end > window[0] and start < window[1])
                              or clip.id in transition_neighbors)
+                text_active = track.kind == 'text' and track.visible
                 required = (parent_required and not clip.hidden and in_window
-                            and (picture_active or audio_active))
+                            and (picture_active or audio_active or text_active))
+                if required and text_active:
+                    active_clip_count += 1
                 reference = {"clipId": clip.id, "trackId": track.id,
                              "assetId": clip.asset_ref.asset_id, "required": required}
                 for effect in clip.effects:

@@ -204,3 +204,5 @@ button {
 @font-face { font-family: "IBM Plex Mono"; src: url("/api/v1/fonts/IBMPlexMono-Regular.ttf") format("truetype"); font-style: normal; font-weight: 400; font-display: swap; }
 
 @font-face { font-family: "IBM Plex Mono"; src: url("/api/v1/fonts/IBMPlexMono-Bold.ttf") format("truetype"); font-style: normal; font-weight: 700; font-display: swap; }
+
+.topbar__runtime-warning { color: #ffd18b; font-size: 12px; max-width: 180px; }

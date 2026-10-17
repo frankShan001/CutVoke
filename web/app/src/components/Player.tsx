@@ -131,7 +131,7 @@ export function Player() {
   const windowStart = usePrepared ? 0 : windowIndex * PREVIEW_WINDOW_SECONDS;
   const windowEnd = usePrepared ? mediaEndSecs : Math.min(mediaEndSecs, windowStart + PREVIEW_WINDOW_SECONDS);
   const hasVideoMedia = tracks.some(
-    (t) => t.kind === "video" && t.visible !== false && (t.clips || []).some((c) => !c.hidden),
+    (t) => (t.kind === "video" || t.kind === "text") && t.visible !== false && (t.clips || []).some((c) => !c.hidden),
   );
   const hasAudioMedia = tracks.some(
     (t) => t.kind === "audio" && t.visible !== false && !t.muted && (t.clips || []).some((c) => !c.hidden),
