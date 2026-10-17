@@ -1,0 +1,14 @@
+{
+  "url": "https://github.com/user-attachments/assets/d3fde0a6-7928-4f2c-81ef-94618c6262ae",
+  "source": "source-and-edit.mp4",
+  "bytes": 10889839,
+  "sha256": "503ba7e165767a3986560b32b090ac916a5836656bdc573e1ca1a62fb385df9e",
+  "durationSeconds": 31.583333333333332,
+  "hosting": "GitHub native user attachment",
+  "timelineChanged": false,
+  "verifiedReadmes": [
+    "README.md",
+    "README.zh-CN.md"
+  ],
+  "verification": "GitHub Markdown API rendered native video elements for both READMEs"
+}

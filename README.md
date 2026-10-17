@@ -8,11 +8,19 @@ Make a first cut from your media, ask your preferred AI to refine a shot, title 
 
 [Get started](#get-started) · [Give your AI an editing workflow](#give-your-ai-an-editing-workflow) · [Build effects together](#build-effects-together)
 
+## Four source clips. One cinematic edit.
+
+Watch four original shots become a cinematic sequence with moving masks, animated typography and layered light effects, all edited and rendered in CutVoke.
+
+https://github.com/user-attachments/assets/d3fde0a6-7928-4f2c-81ef-94618c6262ae
+
+*The 31-second comparison opens with 8 seconds of silent source footage, followed by the finished edit with music. Source clips were generated with MiniMax; the editing and compositing were done in CutVoke.*
+
+[Download the video](examples/showcases/chase-the-light/source-and-edit.mp4) · [Open the editable projects and production materials](examples/showcases/chase-the-light/README.md)
+
 ![CutVoke English interface: media library, landscape preview and editable multitrack timeline](docs/assets/readme/en/editor-overview.png)
 
 *Trail Notes in the actual local editor: three original illustrations, music, titles, captions, scale keyframes and transitions. The repository example creates it through real interfaces, with no video generation service. Captured with the interface set to English, with English demo titles and captions.*
-
-For a footage-based example, see [CHASE THE LIGHT](examples/showcases/chase-the-light/README.md): four original shots, the finished cinematic edit, portable editable projects and production materials, versioned with Git LFS.
 
 ## Why try it?
 
