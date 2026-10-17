@@ -277,6 +277,7 @@ export function MaskCanvasOverlay() {
   }, [clip?.id, params.shape, params.pathMode]);
 
   if (!project || !clip || !mask || track?.kind !== "video" ||
+      params.shape === "wipe" || params.shape === "ink" || (params.motion && params.motion !== "none") ||
       rationalToSecs(clip.timelineStart) > state.playhead ||
       rationalToSecs(clip.timelineEnd) <= state.playhead) return null;
 

@@ -37,7 +37,7 @@ from .model import Caption
 
 # 冻结的字体族名（基础字幕默认 Noto Sans SC；标题可选两种字体）
 CAPTION_FONT_FAMILY = "Noto Sans SC"
-TITLE_FONT_FAMILIES = ("Noto Sans SC", "Noto Serif SC")
+from .font_catalog import FONT_FILES, FONT_BOLD_FILES, TITLE_FONT_FAMILIES
 
 # 包内随发行打包的字体资源目录（相对 src/cutvoke/）。
 _PACKAGE_FONTS_DIR = os.path.join(
@@ -121,15 +121,16 @@ def resolve_font() -> str:
         "  set CUTVOKE_FONT=C:/Windows/Fonts/NotoSansSC-VF.ttf")
 
 
-def resolve_title_font(family: str) -> str:
+def resolve_title_font(family: str, bold: bool = False) -> str:
     """Resolve one of the packaged title families without silent substitution."""
     if family == CAPTION_FONT_FAMILY:
         return resolve_font()
-    if family == "Noto Serif SC":
-        path = os.path.join(_PACKAGE_FONTS_DIR, "NotoSerifSC-VF.ttf")
+    if family in FONT_FILES:
+        filename = FONT_BOLD_FILES.get(family) if bold else None
+        path = os.path.join(_PACKAGE_FONTS_DIR, filename or FONT_FILES[family])
         if os.path.isfile(path):
             return os.path.abspath(path)
-        raise CaptionFontError("缺少随包 Noto Serif SC 字体: " + path)
+        raise CaptionFontError("缺少随包字体: " + path)
     raise CaptionFontError(f"不支持的标题字体: {family!r}")
 
 
@@ -212,7 +213,7 @@ def _caption_font_instance(family: str, bold: bool) -> tuple[str, str]:
     from fontTools.ttLib import TTFont
     from fontTools.varLib.instancer import instantiateVariableFont
 
-    source = resolve_title_font(family)
+    source = resolve_title_font(family, bold=True) if bold and family in FONT_BOLD_FILES else resolve_title_font(family)
     stat = os.stat(source)
     digest = _font_source_digest(source, stat.st_mtime_ns, stat.st_size)
     weight = 700 if bold else 400
@@ -407,7 +408,8 @@ def _text_animation_tags(cap: Caption, duration_ms: int, *,
 def build_ass(captions: List[Caption], width: int, height: int,
               font_family: str = CAPTION_FONT_FAMILY, *,
               css_caption_ids: Optional[set[str]] = None,
-              css_font_files: Optional[dict[tuple[str, bool], tuple[str, str]]] = None) -> str:
+              css_font_files: Optional[dict[tuple[str, bool], tuple[str, str]]] = None,
+              title_motion: Optional[dict] = None) -> str:
     """由字幕列表生成 ASS 文件内容（UTF-8，无 BOM，LF 换行）。
 
     - PlayResX/Y = 序列画布，字号随画布高度比例缩放（1080p 基准 32）
@@ -437,7 +439,8 @@ def build_ass(captions: List[Caption], width: int, height: int,
 
     def _ensure_style(cap: Caption) -> str:
         nonlocal _style_seq
-        css_metrics = css_caption_ids is not None and cap.id in css_caption_ids
+        css_metrics = ((css_caption_ids is not None and cap.id in css_caption_ids)
+                       or bool(title_motion and cap.id in title_motion))
         has_panel = bool(cap.background and cap.panelWidth > 0 and cap.panelHeight > 0)
         key = (cap.fontFamily, cap.fontSize, cap.color, cap.strokeColor, cap.strokeWidth,
                cap.background, cap.align, cap.bold, cap.shadow, has_panel, css_metrics)
@@ -482,6 +485,14 @@ def build_ass(captions: List[Caption], width: int, height: int,
         start = rational_to_ass_time(cap.start)
         end = rational_to_ass_time(cap.end)
         style = _ensure_style(cap)
+        if title_motion and cap.id in title_motion:
+            from .title_motion import title_motion_events
+            selected_font = (css_font_files or {}).get((cap.fontFamily, cap.bold))
+            events.extend(title_motion_events(
+                cap, title_motion[cap.id], style, width, height,
+                font_path=selected_font[1] if selected_font else resolve_title_font(cap.fontFamily),
+                escape=_ass_escape, color=_ass_color_hex_to_bgr))
+            continue
         # 文字几何（H01 画布编辑）：x/y 是归一化画布锚点。
         px = round(cap.x * width)
         py = round(cap.y * height)
@@ -686,7 +697,8 @@ def build_ass(captions: List[Caption], width: int, height: int,
 
 
 def prepare_caption_render(captions: List[Caption], width: int, height: int, *,
-                           css_caption_ids: Optional[set[str]] = None) -> str:
+                           css_caption_ids: Optional[set[str]] = None,
+                           title_motion: Optional[dict] = None) -> str:
     """写 ASS 文件并把字体副本放入临时目录，返回该目录绝对路径（用作 ffmpeg cwd）。
 
     调用方用完须清理该目录。滤镜里用相对文件名 `ass=cutvoke_captions.ass` 且
@@ -701,11 +713,12 @@ def prepare_caption_render(captions: List[Caption], width: int, height: int, *,
     try:
         css_fonts = {
             (cap.fontFamily, cap.bold): _caption_font_instance(cap.fontFamily, cap.bold)
-            for cap in captions if css_caption_ids is not None and cap.id in css_caption_ids
+            for cap in captions if ((css_caption_ids is not None and cap.id in css_caption_ids)
+                                    or bool(title_motion and cap.id in title_motion))
         }
         with open(ass_path, "w", encoding="utf-8", newline="\n") as f:
             f.write(build_ass(captions, width, height, css_caption_ids=css_caption_ids,
-                              css_font_files=css_fonts))
+                              css_font_files=css_fonts, title_motion=title_motion))
         # Title fonts retain the original VF; caption aliases select real weights.
         for family, font in fonts.items():
             target = "cutvoke_serif.ttf" if family == "Noto Serif SC" else "cutvoke_sans.ttf"

@@ -15,6 +15,7 @@
 """
 
 from __future__ import annotations
+from .font_catalog import TITLE_FONT_FAMILIES
 
 import json
 import os
@@ -1657,17 +1658,20 @@ def _builtin_specs() -> list[EffectSpec]:
     # N02 蒙版：几何、钢笔自由路径和文字都写入真实 Alpha，透出下层轨道。
     fx_mask = _fx("几何/文字/钢笔蒙版", "Shape, text and pen mask", EFFECT_FX_MASK, "mask",
                   "按矩形、椭圆、文字或画布自由路径生成透明蒙版；钢笔路径可选折线或平滑曲线，"
-                  "贝塞尔路径点支持切线联动或独立编辑，并支持羽化与反转。",
+                  "贝塞尔路径点支持切线联动或独立编辑，并支持羽化与反转。"
+                  "独立蒙版运动支持最小加加速度和加速-巡航-制动曲线，素材画面保持原位。",
                   ["蒙版", "遮罩", "矩形", "椭圆", "圆形", "钢笔", "文字蒙版", "羽化", "mask"],
-                  {"shape": {"type": "string", "enum": ["rect", "circle", "freehand", "text"],
+                  {"shape": {"type": "string", "enum": ["rect", "circle", "freehand", "text", "wipe", "ink"],
                              "default": "rect",
-                             "description": {"zh-CN": "形状：矩形、椭圆、钢笔自由路径或文字"}},
+                             "description": {"zh-CN": "形状：矩形、椭圆、钢笔、文字或方向擦除"}},
+                   "angle": {"type": "number", "minimum": -180, "maximum": 180,
+                             "default": 0, "description": {"zh-CN": "擦除边缘角度", "en": "Wipe edge angle"}},
                    "x": {"type": "number", "minimum": 0.0, "maximum": 1.0,
                          "default": 0.15,
-                         "description": {"zh-CN": "蒙版左上角/文字起点或椭圆中心的 X（比例 0~1）"}},
+                         "description": {"zh-CN": "位置 X；左上角、文字起点或椭圆中心的横坐标（比例 0~1）"}},
                    "y": {"type": "number", "minimum": 0.0, "maximum": 1.0,
                          "default": 0.15,
-                         "description": {"zh-CN": "蒙版左上角/文字起点或椭圆中心的 Y（比例 0~1）"}},
+                         "description": {"zh-CN": "位置 Y；左上角、文字起点或椭圆中心的纵坐标（比例 0~1）"}},
                    "w": {"type": "number", "minimum": 0.01, "maximum": 1.0,
                          "default": 0.7,
                          "description": {"zh-CN": "蒙版宽或椭圆横向直径（比例）"}},
@@ -1706,6 +1710,34 @@ def _builtin_specs() -> list[EffectSpec]:
                                "description": {"zh-CN": "边缘羽化（0 为硬边）"}},
                    "invert": {"type": "boolean", "default": False,
                               "description": {"zh-CN": "反转：保留外部、遮掉内部"}}})
+
+    from .mask_motion import schema as mask_motion_schema
+    fx_mask.parameters["properties"].update(mask_motion_schema())
+    fx_mask.parameters['properties'].update({
+        'inkSeed': {'type':'integer','minimum':0,'maximum':100000,'default':17,'description':{'zh-CN':'有机侵蚀纹理种子'}},
+        'inkDetail': {'type':'number','minimum':.3,'maximum':3,'default':1,'description':{'zh-CN':'有机侵蚀细节'}},
+        'tileText': {'type':'boolean','default':False,'description':{'zh-CN':'重复文字铺满蒙版'}},
+        'fontFamily': {'type':'string','enum':list(TITLE_FONT_FAMILIES),'description':{'zh-CN':'文字蒙版字体','en':'Text mask font'}},
+        'bold': {'type':'boolean','description':{'zh-CN':'文字蒙版加粗','en':'Bold text mask'}},
+        'tileSpacing': {'type':'number','minimum':.8,'maximum':2,'default':1.25,'description':{'zh-CN':'文字行距比例'}},
+        'tileDrift': {'type':'number','minimum':-1,'maximum':1,'default':0,'description':{'zh-CN':'文字横向流动速度'}},
+    })
+    fx_mask.parameters['properties']['shape']['x-cutvoke-enum-labels']={
+        'rect':{'zh-CN':'矩形','en':'Rectangle'},'circle':{'zh-CN':'椭圆','en':'Ellipse'},
+        'freehand':{'zh-CN':'钢笔路径','en':'Pen path'},'text':{'zh-CN':'文字','en':'Text'},
+        'wipe':{'zh-CN':'方向擦除','en':'Directional wipe'},'ink':{'zh-CN':'有机侵蚀','en':'Organic erosion'}}
+    from .vfx_fragments import schema as fragment_schema
+    from .vfx_light import schema as light_schema
+    fx_shatter=_fx('斜向碎片重构','Directional fragment reconstruction',
+        'cutvoke.fx.shatter','shatter','将画面或透明主体拆成斜向分片；独立错时加速与刹停，支持聚合和飞散。',
+        ['碎片','解构','重构','机车','shatter','fragments'],fragment_schema())
+    fx_light_weave=_fx('空间光丝','Spatial light filaments','cutvoke.fx.lightWeave','lightWeave',
+        '光流可附着逐帧光源位置；前后景、光丝与地面反射分层控制，并保留可编辑参数。',
+        ['体积光','光丝','光流','反射','light','filaments'],light_schema())
+    from .vfx_optics import schema as optics_schema
+    fx_optics=_fx('光谱光学场','Spectral optical field','cutvoke.fx.opticalField','opticalField',
+        '附着源画面的光谱衍射、定向光束与具有阻力和重力的火花；各层可独立合成。',
+        ['衍射','光束','火花','光谱','optical','diffraction','sparks'],optics_schema())
 
     # R02 形状标注：在画面上叠矩形/椭圆/直线/箭头（填充或描边），用于圈重点/画框/指引
     fx_shape = _fx("形状标注", "Shape annotation", EFFECT_FX_SHAPE, "shape",
@@ -1919,9 +1951,9 @@ def _builtin_specs() -> list[EffectSpec]:
                 "fontSize": {"type": "number", "minimum": 8.0, "maximum": 200.0,
                              "default": 48.0,
                              "description": {"zh-CN": "字号（像素）"}},
-                "fontFamily": {"type": "string", "enum": ["Noto Sans SC", "Noto Serif SC"],
+                "fontFamily": {"type": "string", "enum": list(TITLE_FONT_FAMILIES),
                                "default": "Noto Sans SC",
-                               "description": {"zh-CN": "随软件打包的中文字族"}},
+                               "description": {"zh-CN": "随软件打包的标题字体"}},
                 "lineSpacing": {"type": "number", "minimum": 0.5, "maximum": 2.5,
                                 "default": 1.0,
                                 "description": {"zh-CN": "多行标题行距倍率"}},
@@ -1956,20 +1988,32 @@ def _builtin_specs() -> list[EffectSpec]:
                 "shadow": {"type": "integer", "minimum": 0, "maximum": 12,
                            "default": 1, "description": {"zh-CN": "文字阴影宽度"}},
                 "animIn": {"type": "integer", "minimum": 0, "maximum": 3000,
-                           "default": 0, "description": {"zh-CN": "淡入时长（毫秒）"}},
+                           "default": 0, "description": {"zh-CN": "入场动画时长（毫秒）"}},
                 "animOut": {"type": "integer", "minimum": 0, "maximum": 3000,
-                            "default": 0, "description": {"zh-CN": "淡出时长（毫秒）"}},
+                            "default": 0, "description": {"zh-CN": "出场动画时长（毫秒）"}},
                 "animInStyle": {"type": "string",
-                                "enum": ["none", "fade", "scale", "typewriter"],
+                                "enum": ["none", "fade", "scale", "typewriter", "impact",
+                                         "slide-left", "slide-up", "flip", "stagger", "blur-in"],
                                 "description": {"zh-CN": "文字入场方式；缺省沿用淡入"}},
                 "animOutStyle": {"type": "string",
-                                 "enum": ["none", "fade", "scale"],
+                                 "enum": ["none", "fade", "scale", "zoom-through", "slide-right", "scatter"],
                                  "description": {"zh-CN": "文字出场方式；缺省沿用淡出"}},
                 "animLoopStyle": {"type": "string",
-                                  "enum": ["none", "pulse", "blink"],
+                                  "enum": ["none", "pulse", "blink", "glitch", "wave"],
                                   "description": {"zh-CN": "文字循环方式；缺省不循环"}},
                 "animLoopMs": {"type": "integer", "minimum": 300, "maximum": 3000,
                                "description": {"zh-CN": "循环周期（毫秒）；缺省 1000"}},
+                # Keep opt-in motion controls absent from legacy normalized
+                # presets; renderer fallbacks supply their documented defaults.
+                "animStrength": {"type": "number", "minimum": 0.1, "maximum": 3.0,
+                                 "description": {"zh-CN": "动效幅度；缺省 1，最大 3"}},
+                "animStaggerMs": {"type": "integer", "minimum": 0, "maximum": 250,
+                                  "description": {"zh-CN": "逐字弹跳的间隔毫秒；缺省 45"}},
+                "animGlow": {"type": "number", "minimum": 0.0, "maximum": 24.0,
+                             "description": {"zh-CN": "标题霓虹光晕宽度；缺省 0，关闭"}},
+                "animColor": {"type": "string",
+                              "pattern": "^#[0-9a-fA-F]{6}$",
+                              "description": {"zh-CN": "标题光晕颜色（#RRGGBB）"}},
             },
             "additionalProperties": False,
         },
@@ -2000,7 +2044,7 @@ def _builtin_specs() -> list[EffectSpec]:
              fx_loudnorm, fx_crop,
              fx_equalizer, fx_compressor, fx_flicker,
              fx_pan, fx_trail, fx_swing, fx_shake, fx_hsl, fx_colorbalance,
-             fx_mask, fx_shape,
+             fx_mask, fx_shape, fx_shatter, fx_light_weave, fx_optics,
              fx_vibrance, fx_colorize, fx_deband, fx_lens, fx_cas, fx_vflip,
              fx_film_grain, fx_grid,
              fx_person_halo, fx_person_echo, fx_person_tint,
@@ -2167,11 +2211,32 @@ class EffectRegistry:
         if errors:
             raise EffectParamInvalid(f"{effect_id} 参数非法: " + "; ".join(errors))
         resolved = resolve_defaults(spec.parameters, value)
+        if effect_id == "cutvoke.text":
+            glow_color = resolved.get("animColor", "#FF39D4")
+            if (len(glow_color) != 7 or not glow_color.startswith("#")
+                    or any(c not in "0123456789abcdefABCDEF" for c in glow_color[1:])):
+                raise EffectParamInvalid("cutvoke.text: animColor must be #RRGGBB")
         if effect_id == "cutvoke.fx.mask" and isinstance(resolved, dict):
+            # Preserve legacy static snapshots; new controls have UI defaults
+            # without adding redundant motion fields to every existing mask.
+            if resolved.get("motion", "none") == "none":
+                for key in list(resolved):
+                    if key.startswith("motion") and key not in value:
+                        resolved.pop(key)
+            if resolved.get("shape") != "wipe" and "angle" not in value:
+                resolved.pop("angle", None)
+            for key in ('tileText','tileSpacing','tileDrift'):
+                if key not in value and not resolved.get('tileText',False):resolved.pop(key,None)
+            for key in ('inkSeed','inkDetail'):
+                if key not in value and resolved.get('shape')!='ink':resolved.pop(key,None)
             content = resolved.get("content", "")
             if isinstance(content, str) and len(content) > 240:
                 raise EffectParamInvalid(
                     f"{effect_id} 参数非法: 文字蒙版最多 240 个字符")
+        if effect_id in ('cutvoke.fx.lightWeave','cutvoke.fx.opticalField'):
+            times=[frame['time'] for frame in resolved.get('anchorFrames',[])]
+            if any(a>=b for a,b in zip(times,times[1:])):
+                raise EffectParamInvalid('光源附着点时间必须严格递增')
         if effect_id == "cutvoke.fx.edge" and isinstance(resolved, dict):
             if float(resolved["low"]) >= float(resolved["high"]):
                 raise EffectParamInvalid(

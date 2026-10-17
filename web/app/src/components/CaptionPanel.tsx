@@ -1,3 +1,4 @@
+import { FONT_FAMILIES } from "../lib/fontFamilies";
 import { msg, tr, useLocale } from "../i18n";
 /** 字幕面板：添加（文本 + 起止秒→rational）、列出当前字幕、删除、样式编辑、SRT 导入/导出。
     数据来源：project.sequence.captions（caption.add/update/remove）。
@@ -20,7 +21,7 @@ type Align = "left" | "center" | "right";
 
 interface StyleForm {
   fontSize: string;
-  fontFamily: "Noto Sans SC" | "Noto Serif SC";
+  fontFamily: "Noto Sans SC" | "Noto Serif SC" | "Barlow Condensed" | "Space Grotesk" | "Cormorant Garamond" | "IBM Plex Mono";
   color: string;
   wordHighlightColor: string;
   strokeWidth: string;
@@ -92,7 +93,7 @@ export function CaptionPanel() {
     const draftSnapshot = JSON.stringify([c.id, c.text, c.start, c.end]);
     setForm({
       fontSize: c.fontSize != null ? String(c.fontSize) : "",
-      fontFamily: c.fontFamily === "Noto Serif SC" ? "Noto Serif SC" : "Noto Sans SC",
+      fontFamily: FONT_FAMILIES.includes(c.fontFamily as StyleForm["fontFamily"]) ? c.fontFamily as StyleForm["fontFamily"] : "Noto Sans SC",
       color: c.color || "#ffffff",
       wordHighlightColor: c.wordHighlightColor || "#FFD54A",
       strokeWidth: c.strokeWidth != null ? String(c.strokeWidth) : "",
@@ -197,7 +198,7 @@ export function CaptionPanel() {
     selectedCaptionDraftSnapshot.current = draftSnapshot;
     setForm({
       fontSize: caption.fontSize != null ? String(caption.fontSize) : "",
-      fontFamily: caption.fontFamily === "Noto Serif SC" ? "Noto Serif SC" : "Noto Sans SC",
+      fontFamily: FONT_FAMILIES.includes(caption.fontFamily as StyleForm["fontFamily"]) ? caption.fontFamily as StyleForm["fontFamily"] : "Noto Sans SC",
       color: caption.color || "#ffffff",
       wordHighlightColor: caption.wordHighlightColor || "#FFD54A",
       strokeWidth: caption.strokeWidth != null ? String(caption.strokeWidth) : "",
@@ -666,6 +667,11 @@ export function CaptionPanel() {
               onChange={(event) => commitStyle({ fontFamily: event.target.value as StyleForm["fontFamily"] })}>
               <option value="Noto Sans SC">{tr("思源黑体 · Noto Sans SC")}</option>
               <option value="Noto Serif SC">{tr("思源宋体 · Noto Serif SC")}</option>
+              <option value="Barlow Condensed">Barlow Condensed</option>
+              <option value="Space Grotesk">Space Grotesk</option>
+              <option value="Cormorant Garamond">Cormorant Garamond</option>
+              <option value="IBM Plex Mono">IBM Plex Mono</option>
+
             </select>
           </Field>
           <FontStylePanel captionId={selectedId} disabled={readOnly} />

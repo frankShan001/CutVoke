@@ -1,0 +1,208 @@
+{
+  "ok": true,
+  "revision": "2",
+  "events": [
+    {
+      "eventId": "event_cutvoke-before-after-native-001",
+      "projectId": "cutvoke-chase-light-before-after-20261017",
+      "previousRevision": "0",
+      "revision": "1",
+      "commandId": "cutvoke-before-after-native-001",
+      "transactionId": "tx_cutvoke-before-after-native-001",
+      "type": "project.changed",
+      "changedEntities": [
+        {
+          "type": "track",
+          "id": "raw-track-1",
+          "change": "created",
+          "batchIndex": 0,
+          "commandType": "clip.insert"
+        },
+        {
+          "type": "clip",
+          "id": "raw-1",
+          "change": "created",
+          "mode": "append",
+          "batchIndex": 0,
+          "commandType": "clip.insert"
+        },
+        {
+          "type": "clip",
+          "id": "raw-1",
+          "change": "updated",
+          "batchIndex": 1,
+          "commandType": "clip.audio"
+        },
+        {
+          "type": "clip",
+          "id": "raw-1",
+          "change": "updated",
+          "effectId": "cutvoke.transform",
+          "batchIndex": 2,
+          "commandType": "effect.add"
+        },
+        {
+          "type": "track",
+          "id": "raw-track-2",
+          "change": "created",
+          "batchIndex": 3,
+          "commandType": "clip.insert"
+        },
+        {
+          "type": "clip",
+          "id": "raw-2",
+          "change": "created",
+          "mode": "append",
+          "batchIndex": 3,
+          "commandType": "clip.insert"
+        },
+        {
+          "type": "clip",
+          "id": "raw-2",
+          "change": "updated",
+          "batchIndex": 4,
+          "commandType": "clip.audio"
+        },
+        {
+          "type": "clip",
+          "id": "raw-2",
+          "change": "updated",
+          "effectId": "cutvoke.transform",
+          "batchIndex": 5,
+          "commandType": "effect.add"
+        },
+        {
+          "type": "track",
+          "id": "raw-track-3",
+          "change": "created",
+          "batchIndex": 6,
+          "commandType": "clip.insert"
+        },
+        {
+          "type": "clip",
+          "id": "raw-3",
+          "change": "created",
+          "mode": "append",
+          "batchIndex": 6,
+          "commandType": "clip.insert"
+        },
+        {
+          "type": "clip",
+          "id": "raw-3",
+          "change": "updated",
+          "batchIndex": 7,
+          "commandType": "clip.audio"
+        },
+        {
+          "type": "clip",
+          "id": "raw-3",
+          "change": "updated",
+          "effectId": "cutvoke.transform",
+          "batchIndex": 8,
+          "commandType": "effect.add"
+        },
+        {
+          "type": "track",
+          "id": "raw-track-4",
+          "change": "created",
+          "batchIndex": 9,
+          "commandType": "clip.insert"
+        },
+        {
+          "type": "clip",
+          "id": "raw-4",
+          "change": "created",
+          "mode": "append",
+          "batchIndex": 9,
+          "commandType": "clip.insert"
+        },
+        {
+          "type": "clip",
+          "id": "raw-4",
+          "change": "updated",
+          "batchIndex": 10,
+          "commandType": "clip.audio"
+        },
+        {
+          "type": "clip",
+          "id": "raw-4",
+          "change": "updated",
+          "effectId": "cutvoke.transform",
+          "batchIndex": 11,
+          "commandType": "effect.add"
+        },
+        {
+          "type": "clip",
+          "id": "approved-v7",
+          "change": "created",
+          "mode": "append",
+          "batchIndex": 12,
+          "commandType": "clip.insert"
+        },
+        {
+          "type": "track",
+          "id": "section-titles",
+          "change": "created",
+          "batchIndex": 13,
+          "commandType": "clip.insert"
+        },
+        {
+          "type": "clip",
+          "id": "section-01",
+          "change": "created",
+          "mode": "append",
+          "batchIndex": 13,
+          "commandType": "clip.insert"
+        },
+        {
+          "type": "clip",
+          "id": "section-02",
+          "change": "created",
+          "mode": "append",
+          "batchIndex": 14,
+          "commandType": "clip.insert"
+        }
+      ],
+      "actor": {
+        "kind": "mcp",
+        "id": "agent"
+      },
+      "seq": 0
+    },
+    {
+      "eventId": "event_cutvoke-before-after-layout-002",
+      "projectId": "cutvoke-chase-light-before-after-20261017",
+      "previousRevision": "1",
+      "revision": "2",
+      "commandId": "cutvoke-before-after-layout-002",
+      "transactionId": "tx_cutvoke-before-after-layout-002",
+      "type": "project.changed",
+      "changedEntities": [
+        {
+          "type": "clip",
+          "id": "section-01",
+          "change": "effect.updated",
+          "effectId": "cutvoke.text",
+          "effectIndex": 0,
+          "batchIndex": 0,
+          "commandType": "effect.update"
+        },
+        {
+          "type": "clip",
+          "id": "section-02-background",
+          "change": "created",
+          "mode": "append",
+          "batchIndex": 1,
+          "commandType": "clip.insert"
+        }
+      ],
+      "actor": {
+        "kind": "mcp",
+        "id": "agent"
+      },
+      "seq": 1
+    }
+  ],
+  "nextAfterSeq": 1,
+  "lease": null
+}

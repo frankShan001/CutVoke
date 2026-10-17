@@ -9,7 +9,7 @@ export type CaptionAlign = "left" | "center" | "right";
 /** 字幕样式字段（与后端 caption.add/update 的 style 字段对齐）。 */
 export interface CaptionStyle {
   fontSize: number;
-  fontFamily?: "Noto Sans SC" | "Noto Serif SC";
+  fontFamily?: "Noto Sans SC" | "Noto Serif SC" | "Barlow Condensed" | "Space Grotesk" | "Cormorant Garamond" | "IBM Plex Mono";
   color: string;
   strokeColor: string;
   strokeWidth: number;

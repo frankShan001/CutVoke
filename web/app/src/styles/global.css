@@ -192,3 +192,15 @@ button {
   font-weight: 100 900;
   font-display: swap;
 }
+
+@font-face { font-family: "Barlow Condensed"; src: url("/api/v1/fonts/BarlowCondensed-Regular.ttf") format("truetype"); font-style: normal; font-weight: 400; font-display: swap; }
+
+@font-face { font-family: "Barlow Condensed"; src: url("/api/v1/fonts/BarlowCondensed-Bold.ttf") format("truetype"); font-style: normal; font-weight: 700; font-display: swap; }
+
+@font-face { font-family: "Space Grotesk"; src: url("/api/v1/fonts/SpaceGrotesk[wght].ttf") format("truetype"); font-style: normal; font-weight: 300 700; font-display: swap; }
+
+@font-face { font-family: "Cormorant Garamond"; src: url("/api/v1/fonts/CormorantGaramond[wght].ttf") format("truetype"); font-style: normal; font-weight: 300 700; font-display: swap; }
+
+@font-face { font-family: "IBM Plex Mono"; src: url("/api/v1/fonts/IBMPlexMono-Regular.ttf") format("truetype"); font-style: normal; font-weight: 400; font-display: swap; }
+
+@font-face { font-family: "IBM Plex Mono"; src: url("/api/v1/fonts/IBMPlexMono-Bold.ttf") format("truetype"); font-style: normal; font-weight: 700; font-display: swap; }

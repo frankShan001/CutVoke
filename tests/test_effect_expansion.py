@@ -122,6 +122,8 @@ class BuiltinEffectExpansionTests(unittest.TestCase):
     def test_builtin_visual_effect_defaults_render_a_frame(self) -> None:
         registry = default_registry(refresh=True)
         renderer = RenderService(registry=registry)
+        renderer._render_ctx.canvas_width = 64
+        renderer._render_ctx.canvas_height = 64
         for spec in registry.all():
             if spec.category != "fx" or not set(spec.applies_to).intersection({"image", "video"}):
                 continue
@@ -136,15 +138,19 @@ class BuiltinEffectExpansionTests(unittest.TestCase):
                 # File-backed effects such as LUT do nothing until given a resource.
                 if not parts:
                     continue
-                result = subprocess.run(
+                from cutvoke.core.render import _filter_graph_arguments
+                import tempfile
+                with tempfile.TemporaryDirectory() as directory:
+                    filter_args, _file = _filter_graph_arguments('ffmpeg', ';'.join(parts), directory)
+                    result = subprocess.run(
                     [
                         "ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin",
                         "-f", "lavfi", "-i", "testsrc2=size=64x64:rate=30:duration=0.1",
-                        "-filter_complex", ";".join(parts), "-map", f"[{output}]",
+                        *filter_args, "-map", f"[{output}]",
                         "-frames:v", "1", "-f", "null", "-",
                     ],
                     capture_output=True, text=True, timeout=15,
-                )
+                    )
                 self.assertEqual(result.returncode, 0, result.stderr)
 
     @unittest.skipUnless(shutil.which("ffmpeg"), "ffmpeg is required for effect render smoke test")

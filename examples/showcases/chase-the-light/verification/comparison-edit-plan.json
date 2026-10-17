@@ -1,0 +1,296 @@
+{
+  "initial": {
+    "projectId": "cutvoke-chase-light-before-after-20261017",
+    "expectedRevision": "0",
+    "commandId": "cutvoke-before-after-native-001",
+    "editLeaseId": "lease_f23813d39c484c33",
+    "type": "edit.batch",
+    "payload": {
+      "commands": [
+        {
+          "type": "clip.insert",
+          "payload": {
+            "clipId": "raw-1",
+            "trackId": "raw-track-1",
+            "createTrackKind": "video",
+            "sourcePath": "E:/myproject/opencut/output/cutvoke-promo-20261017/video/01-dawn_h3-direct_00001_.mp4",
+            "sourceStart": {
+              "num": "0",
+              "den": "1"
+            },
+            "timelineStart": {
+              "num": "0",
+              "den": "1"
+            },
+            "timelineEnd": {
+              "num": "8",
+              "den": "1"
+            }
+          }
+        },
+        {
+          "type": "clip.audio",
+          "payload": {
+            "clipId": "raw-1",
+            "volume": 0
+          }
+        },
+        {
+          "type": "effect.add",
+          "payload": {
+            "clipId": "raw-1",
+            "effectId": "cutvoke.transform",
+            "params": {
+              "scale": 0.4375,
+              "position": {
+                "x": 56,
+                "y": 60
+              }
+            }
+          }
+        },
+        {
+          "type": "clip.insert",
+          "payload": {
+            "clipId": "raw-2",
+            "trackId": "raw-track-2",
+            "createTrackKind": "video",
+            "sourcePath": "E:/myproject/opencut/output/cutvoke-promo-20261017/video/02-daylight_h3-direct_00001_.mp4",
+            "sourceStart": {
+              "num": "0",
+              "den": "1"
+            },
+            "timelineStart": {
+              "num": "0",
+              "den": "1"
+            },
+            "timelineEnd": {
+              "num": "8",
+              "den": "1"
+            }
+          }
+        },
+        {
+          "type": "clip.audio",
+          "payload": {
+            "clipId": "raw-2",
+            "volume": 0
+          }
+        },
+        {
+          "type": "effect.add",
+          "payload": {
+            "clipId": "raw-2",
+            "effectId": "cutvoke.transform",
+            "params": {
+              "scale": 0.4375,
+              "position": {
+                "x": 520,
+                "y": 60
+              }
+            }
+          }
+        },
+        {
+          "type": "clip.insert",
+          "payload": {
+            "clipId": "raw-3",
+            "trackId": "raw-track-3",
+            "createTrackKind": "video",
+            "sourcePath": "E:/myproject/opencut/output/cutvoke-promo-20261017/video/03-bluehour_h3-direct_00001_.mp4",
+            "sourceStart": {
+              "num": "0",
+              "den": "1"
+            },
+            "timelineStart": {
+              "num": "0",
+              "den": "1"
+            },
+            "timelineEnd": {
+              "num": "8",
+              "den": "1"
+            }
+          }
+        },
+        {
+          "type": "clip.audio",
+          "payload": {
+            "clipId": "raw-3",
+            "volume": 0
+          }
+        },
+        {
+          "type": "effect.add",
+          "payload": {
+            "clipId": "raw-3",
+            "effectId": "cutvoke.transform",
+            "params": {
+              "scale": 0.4375,
+              "position": {
+                "x": 56,
+                "y": 322
+              }
+            }
+          }
+        },
+        {
+          "type": "clip.insert",
+          "payload": {
+            "clipId": "raw-4",
+            "trackId": "raw-track-4",
+            "createTrackKind": "video",
+            "sourcePath": "E:/myproject/opencut/output/cutvoke-promo-20261017/video/04-rainnight_h3-direct_00001_.mp4",
+            "sourceStart": {
+              "num": "0",
+              "den": "1"
+            },
+            "timelineStart": {
+              "num": "0",
+              "den": "1"
+            },
+            "timelineEnd": {
+              "num": "8",
+              "den": "1"
+            }
+          }
+        },
+        {
+          "type": "clip.audio",
+          "payload": {
+            "clipId": "raw-4",
+            "volume": 0
+          }
+        },
+        {
+          "type": "effect.add",
+          "payload": {
+            "clipId": "raw-4",
+            "effectId": "cutvoke.transform",
+            "params": {
+              "scale": 0.4375,
+              "position": {
+                "x": 520,
+                "y": 322
+              }
+            }
+          }
+        },
+        {
+          "type": "clip.insert",
+          "payload": {
+            "clipId": "approved-v7",
+            "trackId": "raw-track-1",
+            "sourcePath": "E:/myproject/opencut/output/cutvoke-promo-20261017/spectral-v7/CutVoke_CHASE_THE_LIGHT_spectral_v7.mp4",
+            "sourceStart": {
+              "num": "0",
+              "den": "1"
+            },
+            "timelineStart": {
+              "num": "222",
+              "den": "24"
+            },
+            "timelineEnd": {
+              "num": "758",
+              "den": "24"
+            }
+          }
+        },
+        {
+          "type": "clip.insert",
+          "payload": {
+            "clipId": "section-01",
+            "trackId": "section-titles",
+            "createTrackKind": "text",
+            "timelineStart": {
+              "num": "0",
+              "den": "1"
+            },
+            "timelineEnd": {
+              "num": "8",
+              "den": "1"
+            },
+            "text": {
+              "content": "01，原始素材",
+              "fontFamily": "Noto Sans SC",
+              "fontSize": 110,
+              "bold": true,
+              "x": 0.5,
+              "y": 0.045,
+              "color": "#F5F7FA",
+              "strokeWidth": 0,
+              "shadow": 0,
+              "animIn": 0,
+              "animOut": 0
+            }
+          }
+        },
+        {
+          "type": "clip.insert",
+          "payload": {
+            "clipId": "section-02",
+            "trackId": "section-titles",
+            "timelineStart": {
+              "num": "8",
+              "den": "1"
+            },
+            "timelineEnd": {
+              "num": "222",
+              "den": "24"
+            },
+            "text": {
+              "content": "02，cutvoke剪辑后效果",
+              "fontFamily": "Noto Sans SC",
+              "fontSize": 140,
+              "bold": true,
+              "x": 0.5,
+              "y": 0.5,
+              "color": "#F5F7FA",
+              "strokeWidth": 0,
+              "shadow": 0,
+              "animIn": 140,
+              "animOut": 100
+            }
+          }
+        }
+      ]
+    }
+  },
+  "layoutCorrection": {
+    "projectId": "cutvoke-chase-light-before-after-20261017",
+    "expectedRevision": "1",
+    "type": "edit.batch",
+    "payload": {
+      "commands": [
+        {
+          "type": "effect.update",
+          "payload": {
+            "clipId": "section-01",
+            "effectId": "cutvoke.text",
+            "params": {
+              "fontSize": 84,
+              "y": 0.09
+            }
+          }
+        },
+        {
+          "type": "clip.insert",
+          "payload": {
+            "clipId": "section-02-background",
+            "trackId": "raw-track-1",
+            "sourcePath": "E:/myproject/opencut/output/cutvoke-promo-20261017/cinema-v5/assets/matte-canvas.png",
+            "timelineStart": {
+              "num": "8",
+              "den": "1"
+            },
+            "timelineEnd": {
+              "num": "37",
+              "den": "4"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "approvedSourceRevision": "23",
+  "note": "All editing, picture-in-picture, titles, mixing, and export use CutVoke."
+}
