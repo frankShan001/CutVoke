@@ -628,9 +628,12 @@ def cmd_mcp(args) -> int:
     MCP 与 CLI / HTTP 共享同一个持久化工程库，所以 Agent 建的工程
     在 `cutvoke serve` 的 Web UI 里能直接看到（同一时间线，RQ03）。
     """
+    if not getattr(args, "worker", False):
+        from .mcp_supervisor import MCPSupervisor
+        return MCPSupervisor(_resolve_db(args)).run()
     from .core.mcp_server import MCPServer
     svc, store = _service_for(args)
-    server = MCPServer(service=svc)
+    server = MCPServer(service=svc, managed=True)
     # J07：MCP 启动同样登记内置声音/贴纸资产（幂等，与用户素材共存同表）
     from .core.builtin_assets import (ensure_builtin_audio, ensure_builtin_stickers,
                                        ensure_builtin_backgrounds)
@@ -663,6 +666,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_mcp = sub.add_parser("mcp", help="start MCP server (stdio) for AI agents")
     p_mcp.add_argument("--data", help="SQLite store path（与 serve 共用同一工程库）")
+    p_mcp.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
     p_mcp.set_defaults(func=cmd_mcp)
 
     p_serve = sub.add_parser("serve", help="start local service + web UI")

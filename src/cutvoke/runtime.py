@@ -22,8 +22,8 @@ def runtime_status(loaded: dict) -> dict:
     """Compare running code with disk; never advertise unloaded capabilities.
 
     Stat checks are cheap on polling requests. Hash bytes only after a source
-    or Web build changes. Restart is explicit because queues and leases belong
-    to this process and cannot safely survive Python module hot-reloading.
+    or Web build changes. A supervised MCP connection replaces workers; direct
+    services still need a restart. Python modules are never hot-reloaded.
     """
     package = Path(__file__).resolve().parent
     files = list(package.glob('*.py')) + list((package / 'core').glob('*.py'))

@@ -58,7 +58,7 @@ AGENT_TOOLS = [
            "width": {"type": "integer", "minimum": 160, "maximum": 1920, "default": 960}}, ("times",)),
     _tool("preview_prepare", "异步准备完整的连续预览；返回 jobId，随后调用 preview_job 查询或取消。视频底层含文字轨，字幕由人类编辑器叠加；视觉验收用 preview_frames。",
           REVISION, ("projectId", "expectedRevision")),
-    _tool("preview_job", "查询/取消预览任务；完成返回本机可播放文件路径。任务属于创建它的服务进程，服务重启后可重新提交并复用磁盘缓存。",
+    _tool("preview_job", "查询/取消预览任务；完成返回本机可播放文件路径。标准 MCP 自动更新保留任务；整个服务关闭后可重新提交并复用磁盘缓存。",
           {**PROJECT, "jobId": STRING, "action": {"type": "string", "enum": ["status", "cancel"], "default": "status"}},
           ("projectId", "jobId")),
     _tool("export_job", "非阻塞查询/取消导出任务。用 command_apply export.enqueue 创建任务，传 expectedRevision、outPath、quality、range；轮询本工具直到 succeeded，再读取 result.output_path。",

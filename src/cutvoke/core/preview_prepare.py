@@ -70,6 +70,7 @@ class PreviewPreparation:
         self._queue = queue.Queue()
         self._worker = None
         self._closed = False
+        self._executing = False
 
     def submit(self, project) -> dict:
         snapshot = copy.deepcopy(project)
@@ -154,7 +155,23 @@ class PreviewPreparation:
 
     def busy(self):
         with self._lock:
-            return any(job["state"] in ("queued", "running") for job in self._jobs.values())
+            return self._executing or any(job["state"] in ("queued", "running") for job in self._jobs.values())
+
+    def reload_snapshot(self):
+        """Transfer completed metadata, never snapshots, events or running work."""
+        with self._lock:
+            return [copy.deepcopy({key: value for key, value in job.items() if key != "_snapshot"})
+                    for job in self._jobs.values()
+                    if job["state"] in ("completed", "failed", "cancelled")]
+
+    def reload_restore(self, jobs):
+        with self._lock:
+            for job in jobs:
+                if job.get("state") not in ("completed", "failed", "cancelled"):
+                    raise ValueError("cannot transfer active preview work")
+                if job["jobId"] not in self._jobs:
+                    self._jobs[job["jobId"]] = copy.deepcopy(job)
+                    self._events[job["jobId"]] = threading.Event()
 
     def _update(self, job_id, **values):
         with self._lock:
@@ -173,6 +190,7 @@ class PreviewPreparation:
                     continue
                 job = self._jobs[job_id]
                 snapshot = job.pop("_snapshot")
+                self._executing = True
             try:
                 self._prepare(job_id, snapshot, event)
             except Exception as error:  # noqa: BLE001 — keep worker alive after a bad project
@@ -180,6 +198,9 @@ class PreviewPreparation:
                     job.update(state="cancelled" if event.is_set() else "failed",
                                phase="cancelled" if event.is_set() else "failed",
                                error=str(error), finishedAt=time.time())
+            finally:
+                with self._lock:
+                    self._executing = False
 
     def _command(self, args: list[str], event: threading.Event, work: Path):
         # Own only this subprocess; cancellation never terminates the Web service.

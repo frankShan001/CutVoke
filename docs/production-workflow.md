@@ -60,12 +60,34 @@ published atomically after ZIP integrity verification.
 
 ## Runtime changes / 服务版本变化
 
-`runtime` and `/api/v1/runtime` report both the loaded and on-disk source
-fingerprints, `status` and `restartRequired`. An outdated process rejects schema
-discovery and new edits with `RUNTIME_RESTART_REQUIRED` before revision changes.
-Reading projects, checking/cancelling jobs and releasing edit leases remain
-available. The Web toolbar shows a restart notice. Finish/cancel active jobs,
-restart the service and reconnect MCP; live Python modules are not hot-reloaded.
+The standard `cutvoke mcp` / `cutvoke-mcp` entry points keep the stdio connection
+in a supervisor. After a stable source/build change, a fresh Python engine is
+started and checked before receiving new requests. Existing exports and prepared
+previews finish in their original worker; status and cancellation still reach that
+worker. Finished preview metadata transfers with its original revision/cache
+identity. Projects, idempotent command results, undo history and leases stay in
+the same SQLite library. Python modules are never hot-reloaded.
 
-源码更新后，旧进程会明确阻止继续查询旧能力或执行新编辑。先结束或取消任务，
-重启服务并重连 MCP，避免 Agent 按旧参数继续操作。
+`runtime.autoReload` reports the generation, pending/current state, supervisor PID
+and draining workers. A partial or broken installation leaves the connection up
+and retries automatically. New writes/schema discovery return retryable
+`AUTO_UPDATE_PENDING` until a healthy engine is ready; they are not applied by
+the stale engine. A lost write response is never automatically replayed: read
+the revision and reuse the original command ID. At most two older generations
+drain concurrently; more rapid updates coalesce until a slot is available.
+
+Tool/resource list-change notifications follow the
+[MCP tools](https://modelcontextprotocol.io/specification/2024-11-05/server/tools)
+and [resources](https://modelcontextprotocol.io/specification/2024-11-05/server/resources)
+protocol. Whether newly added tool names appear automatically depends on client
+support; existing discovery/editing tools use the new engine without reconnecting.
+
+已经运行的旧 MCP 首次安装此机制后需重连一次，此后源码或 Web 构建更新会自动
+切换引擎；配置和数据目录不变。运行中任务继续执行，取消后的实际清理线程结束
+之前也不会退役。连接主动关闭时按正常退出流程清理任务。此机制不下载更新，
+不迁移不兼容的数据库结构，也不替换正在运行的启动器或安装包可执行文件。
+
+Directly embedded `MCPServer` instances and the Web HTTP service still report
+loaded/on-disk fingerprints through `runtime` / `/api/v1/runtime` and reject
+stale writes with `RUNTIME_RESTART_REQUIRED`. The Web service needs its own restart;
+the MCP supervisor does not stop or restart unrelated services.

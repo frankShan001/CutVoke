@@ -132,6 +132,7 @@ class ExportQueue:
         self._lock = threading.RLock()
         self._worker: Optional[threading.Thread] = None
         self._stopping = False
+        self._executing = False
         self._owner = f"{os.getpid()}:{_process_stamp(os.getpid())}"
         if autostart:
             self.start()
@@ -336,7 +337,20 @@ class ExportQueue:
                 continue
             if job["status"] == STATUS_CANCELLED:
                 continue  # 出队前已被取消：不渲染，不覆盖状态
-            self._execute(job, ev)
+            with self._lock:
+                self._executing = True
+            try:
+                self._execute(job, ev)
+            finally:
+                with self._lock:
+                    self._executing = False
+
+    def reload_status(self) -> dict:
+        """Only jobs owned by this queue; terminal ledger rows are cross-process."""
+        with self._lock:
+            return {"busy": self._executing or any(
+                job["status"] in (STATUS_QUEUED, STATUS_RUNNING) for job in self._jobs.values()),
+                "jobIds": list(self._jobs)}
 
     def _execute(self, job: dict, cancel_event: Optional[threading.Event]) -> None:
         with self._lock:

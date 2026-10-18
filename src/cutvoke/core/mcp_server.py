@@ -33,7 +33,7 @@ class MCPServer:
 
     def __init__(self, service: Optional[EditService] = None,
                  render: Optional[RenderService] = None,
-                 *, media_dir: Optional[str] = None) -> None:
+                 *, media_dir: Optional[str] = None, managed: bool = False) -> None:
         self.service = service or EditService()
         self.render = render or RenderService()
         from ..runtime import runtime_identity
@@ -41,6 +41,26 @@ class MCPServer:
         self.runtime_info = runtime_identity(store_path)
         self._agent_api = None
         self._media_dir = media_dir
+        self._managed = managed
+
+    def _reload_status(self):
+        """Private worker control, never exposed as an editor tool/resource."""
+        queue = self.service._export_queue
+        exports = queue.reload_status() if queue else {"busy": False, "jobIds": []}
+        busy = exports["busy"]
+        previews = []
+        if self._agent_api is not None:
+            api = self._agent_api.api
+            preparation = api._preview_preparation
+            busy = busy or preparation.busy()
+            # ASR/cutout cancellation can precede their thread's actual exit.
+            for manager in (api._asr_jobs, api._person_cutout_jobs):
+                with manager._lock:
+                    busy = busy or any(thread.is_alive() for thread in manager._threads.values())
+            with preparation._lock:
+                previews = list(preparation._jobs)
+        return {"runtime": self.runtime_info, "busy": busy,
+                "exportJobs": exports["jobIds"], "previewJobs": previews}
 
     def _media_directory(self):
         from pathlib import Path
@@ -205,7 +225,7 @@ class MCPServer:
             },
             {
                 "name": "runtime",
-                "description": "读取运行中与磁盘上的源码指纹、restartRequired、版本与持久化目录。源码更新后，旧进程停止提供编辑能力，需结束任务、重启服务并重连客户端。",
+                "description": "读取已加载与磁盘源码指纹、版本与持久化目录。标准 stdio MCP 入口自动切换新版引擎，autoReload 报告状态；直接嵌入的旧服务仍需重启。",
                 "inputSchema": {"type": "object", "properties": {}},
             },
             {
@@ -302,7 +322,9 @@ class MCPServer:
                         'project_lookup', 'project_events', 'preview_job', 'export_job',
                         'preview_cache_status'}
             releasing = name == 'edit_lock' and arguments.get('action') == 'release'
-            if status['restartRequired'] and name not in readable and not releasing:
+            cancelling = (self._managed and name == 'command_apply' and
+                          arguments.get('type') == 'export.cancel')
+            if status['restartRequired'] and name not in readable and not releasing and not cancelling:
                 return {'ok': False, 'error': restart_error(status)}
             tool = next((tool for tool in self.list_tools() if tool["name"] == name), None)
             if tool is None:
@@ -509,6 +531,26 @@ class MCPServer:
         if not isinstance(msg.get("params", {}), dict):
             return {"jsonrpc": "2.0", "id": rid,
                     "error": {"code": -32602, "message": "params must be an object"}}
+
+        if self._managed and method.startswith('_cutvoke/'):
+            if method == '_cutvoke/status':
+                result = self._reload_status()
+            elif method == '_cutvoke/drain':
+                if self._agent_api is not None:
+                    # This worker receives no new editing/preview requests after
+                    # handoff. Its submitted previews retain their snapshots
+                    # while newer revisions are edited in the fresh worker.
+                    self._agent_api.api._preserve_preview_snapshots = True
+                result = {}
+            elif method == '_cutvoke/snapshot':
+                result = {"previews": (self._agent_api.api._preview_preparation.reload_snapshot()
+                                       if self._agent_api else [])}
+            elif method == '_cutvoke/restore':
+                self._agent_tools().api._preview_preparation.reload_restore(msg.get('params', {}).get('previews', []))
+                result = {}
+            else:
+                return {"jsonrpc": "2.0", "id": rid, "error": {"code": -32601, "message": "unknown worker control"}}
+            return {"jsonrpc": "2.0", "id": rid, "result": result}
 
         if method.startswith('resources/'):
             from ..runtime import runtime_status, restart_error

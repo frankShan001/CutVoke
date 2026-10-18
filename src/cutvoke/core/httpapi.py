@@ -668,6 +668,10 @@ class HttpApi:
             return out_path, digest, duration
 
     def _require_current_preview(self, project, visual_identity: str) -> None:
+        if getattr(self, '_preserve_preview_snapshots', False):
+            # A draining MCP worker owns immutable submitted work only. Browser
+            # seeks in ordinary services still cancel obsolete revisions.
+            return
         from .preview_prepare import preview_identity
         from .render import RenderCancelled
         current = self.service.get_project(str(project.project_id))

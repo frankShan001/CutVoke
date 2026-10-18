@@ -36,7 +36,7 @@ import ast
 import os
 import sys
 
-INTERFACE_MODULES = {"main", "httpapi", "mcp_server"}
+INTERFACE_MODULES = {"main", "httpapi", "mcp_server", "mcp_supervisor"}
 
 LOGIC_MODULES = {
     "rational", "protocol", "model", "service", "store",
