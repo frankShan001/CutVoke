@@ -53,6 +53,10 @@ cutvoke serve --data .artifacts/acceptance/vlog-effects-new/data
 
 [验证快照](../assets/vlog-effects-verification.json)记录真实参数、输出哈希、帧数、本地导出耗时及便携工程解包后重渲染对比。完整浏览器运行通过 102 项；剩余录屏场景起初缺少 Playwright 专用 FFmpeg，补齐既有测试依赖后复测通过，没有放宽产品断言。
 
+渲染回归同时覆盖 FFmpeg 6 和 7：片头黑场保留首段最后一帧，转场预留后继帧以完整输出渐变步骤，预览时间原点偏移后仍与导出一致。测试继续断言 24 与 30000/1001 fps 的精确切点、透明度、音频及窗口/完整导出像素差。
+
+亮度蒙版不使用可变表达式寄存器：FFmpeg 的[自定义 xfade 求值](https://github.com/FFmpeg/FFmpeg/blob/n6.1/libavfilter/vf_xfade.c)在切片线程间共享求值器。测试要求单线程、四线程、八线程的原始转场输出逐字节一致，可发现单张截图容易漏掉的间歇彩噪。
+
 [暗墨揭示社区示例](../../effects/transitions/cutvoke.transition.community.luma-ink/README.zh-CN.md) 使用同一个亮度渲染器和不同默认值，是扩展配方而非第五个算法。内置四项正常打包，社区目录仍需 `CUTVOKE_EFFECTS_PATH` 显式启用，修改清单后重启服务。需要包含 `vlog_fx.py` 的最新源码；旧 `0.3.1` 二进制可能不具备这些映射。最低内核版本字段仅供说明，不负责能力协商。
 
 遵循[贡献指南](effect-contributing.zh-CN.md)：稳定 ID、作者、许可、来源、可支持实现、参数边界、真实本地预览、非法输入测试、帧数/透明度/局部预览对照和可编辑样片。`x-cutvoke-label`、`x-cutvoke-step`、`x-cutvoke-enum-labels` 可驱动通用控件及转场面板；清单不能引入任意代码或任意 FFmpeg 表达式。

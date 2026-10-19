@@ -116,6 +116,35 @@ class WindowContracts(unittest.TestCase):
 
 @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"),"FFmpeg required")
 class RealWindowRendering(unittest.TestCase):
+    def test_leading_gap_retains_last_picture_before_the_next_cut(self):
+        # FFmpeg 6 used to discard the first clip's final picture after the
+        # generated black prefix. The final lane padding hid the frame loss,
+        # while every following cut moved one frame earlier than its window.
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);red=root/"red.png";blue=root/"blue.png"
+            Image.new("RGB",(160,90),"red").save(red)
+            Image.new("RGB",(160,90),"blue").save(blue)
+            for fps,block in [(Rational.of(24),24),(Rational.of(30000,1001),30)]:
+                with self.subTest(fps=str(fps)):
+                    def at(frame):return Rational.of(frame*fps.den,fps.num)
+                    project=EditService().create_project("leading-gap",width=160,height=90,fps=fps)
+                    project.sequence.tracks=[Track("v","video",[
+                        Clip("a",AssetReference("a",str(red)),at(block),at(2*block),r(0)),
+                        Clip("b",AssetReference("b",str(blue)),at(2*block),at(3*block),r(0))])]
+                    renderer=RenderService();full=root/f"full-{fps.num}.mp4"
+                    window=root/f"window-{fps.num}.mp4"
+                    renderer.render(project,str(full),quality="high")
+                    renderer.render_preview_window(project,str(window),
+                        float(at(2*block-2).to_fraction()),float(at(5).to_fraction()))
+                    a,b=frames(full),frames(window)
+                    self.assertEqual(len(a),3*block);self.assertEqual(len(b),5)
+                    self.assertLess(max(a[block-1][:3]),20)
+                    self.assertGreater(a[block][0],225)
+                    self.assertGreater(a[2*block-1][0],225)
+                    self.assertGreater(a[2*block][2],225)
+                    for original,preview in zip(a[2*block-2:2*block+3],b):
+                        self.assertLess(sum(abs(x-y) for x,y in zip(original,preview))/len(original),3)
+
     def test_fractional_static_frames_and_end_frame_preserve_alpha_and_transition(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);first=root/"first.png";second=root/"second.png"
@@ -188,6 +217,11 @@ class RealWindowRendering(unittest.TestCase):
             self.assertEqual(result["windowCount"],2)
             a,b=frames(actual),frames(reference)
             self.assertEqual(len(a),390);self.assertEqual(len(b),390)
+            # Five of the six fade steps must be visible at frame 245. A
+            # forwarded EOF used to repeat step four in the full render only.
+            for output in (a,b):
+                self.assertLess(output[245][0],65)
+                self.assertGreater(output[245][2],195)
             for i in [0,30,209,210,239,240,241,242,243,244,245,246,299,300,389]:
                 with self.subTest(frame=i):
                     self.assertLess(sum(abs(x-y) for x,y in zip(a[i],b[i]))/len(a[i]),3)

@@ -71,6 +71,10 @@ Use a new output directory on every run. The silent, original-illustration demo 
 
 The [verification snapshot](../assets/vlog-effects-verification.json) records actual parameters, output hashes, frame counts, local export times and portable-package re-render comparisons. The complete browser run passed 102 scenarios; the remaining recording scenario initially lacked Playwright's FFmpeg binary and passed after that existing test dependency was installed. No product assertions were weakened.
 
+The rendering regressions also run against FFmpeg 6 and 7. Leading black gaps keep the first clip's final picture, and transition lookahead keeps every fade step at a shifted preview origin. Exact cut frames at 24 and 30000/1001 fps, alpha, audio and full/window pixel comparisons remain asserted.
+
+The luma mask uses no mutable expression registers: FFmpeg's [custom xfade evaluation](https://github.com/FFmpeg/FFmpeg/blob/n6.1/libavfilter/vf_xfade.c) shares an evaluator between slice workers. Raw transition output must match byte for byte at one, four and eight slice threads; this catches intermittent colored noise that a single sampled frame can miss.
+
 See [Shadow Ink](../../effects/transitions/cutvoke.transition.community.luma-ink/README.md) for an optional community manifest using the same content-luma renderer with different defaults. It is a contribution example, not a fifth algorithm. `CUTVOKE_EFFECTS_PATH` remains opt-in; restart the service after changing a manifest. Built-ins ship normally. Use the latest source containing `vlog_fx.py`; earlier `0.3.1` binaries may lack these mappings. Minimum-core metadata is descriptive and does not enforce feature negotiation.
 
 Follow the [contribution guide](../../effects/README.md): stable IDs, author/license/provenance, supported mappings, schema limits, a real local preview, invalid-parameter tests, frame-count/alpha/window comparisons and an editable sample. `x-cutvoke-label`, `x-cutvoke-step` and `x-cutvoke-enum-labels` now drive generic controls, including the transition panel. Do not supply arbitrary executable code or raw FFmpeg expressions through a manifest.

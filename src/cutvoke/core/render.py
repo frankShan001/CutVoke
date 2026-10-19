@@ -2937,7 +2937,8 @@ class RenderService:
         if first_start > origin:
             current = self._pad_black(current, first_start - origin, parts, fps_expr,
                                       at_start=True, transparent=transparent_layer,
-                                      canvas_size=(seq.width, seq.height))
+                                      canvas_size=(seq.width, seq.height),
+                                      total_duration=first_start - origin + clip_durs[0])
         tl += clip_durs[0]
         film += clip_durs[0]
         for i in range(1, len(clip_labels)):
@@ -3042,10 +3043,15 @@ class RenderService:
                                               str(squeeze_axis), d, offset, parts)
                 else:
                     clock = f"settb=expr={fps.denominator}/{fps.numerator},setpts=N"
-                    if _setpts_clears_frame_rate(self.ffmpeg):
+                    clears_rate = _setpts_clears_frame_rate(self.ffmpeg)
+                    if clears_rate:
                         clock = f"fps={fps_expr},{clock},fps={fps_expr}"
+                    # Older xfade can forward EOF before mixing the outgoing
+                    # final picture. Keep a lookahead picture beyond the seam;
+                    # the completed lane is still bounded to its real duration.
+                    lookahead = "" if clears_rate else "tpad=stop_mode=clone:stop=1,"
                     parts.append(
-                        f"[{transition_outgoing}]{xfade_format}{clock}[inA];"
+                        f"[{transition_outgoing}]{xfade_format}{lookahead}{clock}[inA];"
                         f"[{incoming}]{xfade_format}{clock}[inB];"
                         f"[inA][inB]"
                         f"xfade=transition={xname}:offset={offset:.6f}:"
@@ -3115,7 +3121,8 @@ class RenderService:
     def _pad_black(self, label: str, pad_secs: float, parts: list[str],
                    fps_expr: str, at_start: bool = False,
                    transparent: bool = False,
-                   canvas_size: Optional[tuple[int, int]] = None) -> str:
+                   canvas_size: Optional[tuple[int, int]] = None,
+                   total_duration: Optional[float] = None) -> str:
         """补 pad_secs 秒黑帧（A04：绝对时间空白）。
 
         `at_start=True` → 补在该流**前面**（仅用于"首片段不在 t=0"的开头空白）；
@@ -3140,8 +3147,20 @@ class RenderService:
             color = "black@0.0" if transparent else "black"
             parts.append(f"color=c={color}:s={width}x{height}:r={fps_expr}:"
                          f"d={pad_secs:.9f}{fmt}[{prefix}]")
-            clock = "" if clears_rate else ",setpts=N/FRAME_RATE/TB"
-            parts.append(f"[{prefix}][{label}]concat=n=2:v=1:a=0,fps={fps_expr}{clock}[{out}]")
+            # FFmpeg 6 concat reports EOF at the last picture's timestamp.
+            # Without lookahead, fps drops that picture and advances every
+            # following cut by one frame. Bound the lookahead to the actual
+            # prefix + clip duration, then restore exact integer frame ticks.
+            lookahead = "" if clears_rate else ",tpad=stop_mode=clone:stop=1"
+            clock = ""
+            if not clears_rate:
+                if total_duration is None:
+                    raise RenderError("leading canvas padding requires its stream duration")
+                rate = Fraction(fps_expr)
+                clock = (f",trim=duration={total_duration:.9f},"
+                         f"settb=expr={rate.denominator}/{rate.numerator},setpts=N")
+            parts.append(f"[{prefix}][{label}]concat=n=2:v=1:a=0{lookahead},"
+                         f"fps={fps_expr}{clock}[{out}]")
         elif at_start:
             parts.append(
                 f"[{label}]{before}tpad=start_mode=add:start_duration={pad_secs:.6f}{pad_color}"

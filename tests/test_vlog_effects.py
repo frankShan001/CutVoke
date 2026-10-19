@@ -219,6 +219,30 @@ def test_luma_reveal_follows_content_instead_of_uniform_fade(tmp_path, reverse):
     assert result[44, H//2, W//4, 2] > 220
 
 
+@pytest.mark.parametrize("pattern,reverse", [("lumaReveal", False), ("lumaReveal", True),
+                                           ("matchAlign", False)])
+def test_custom_transition_is_identical_across_slice_threads(tmp_path, pattern, reverse):
+    width, height = 192, 128
+    x, y = np.arange(width)[None, :], np.arange(height)[:, None]
+    source = tmp_path / "slice-pattern.png"
+    Image.fromarray(((x*3+y*5) % 256).astype(np.uint8)).convert("RGB").save(source)
+    expression = transition_expr(pattern, {"softness": .08, "reverse": reverse})
+
+    def raw(threads):
+        return subprocess.run(["ffmpeg", "-v", "error", "-filter_complex_threads", str(threads),
+            "-loop", "1", "-framerate", "24", "-i", str(source), "-f", "lavfi", "-i",
+            "color=c=blue:s=192x128:r=24:d=1,format=yuv444p", "-filter_complex",
+            f"[0:v]format=yuv444p[a];[a][1:v]xfade=duration=0.5:offset=0.25:"
+            f"transition=custom:expr='{expression}'[v]", "-map", "[v]", "-frames:v", "24",
+            "-pix_fmt", "yuv444p", "-f", "rawvideo", "-"],
+            check=True, capture_output=True, timeout=30).stdout
+
+    expected = raw(1)
+    assert len(expected) == 24*width*height*3
+    for threads in (4, 8):
+        assert raw(threads) == expected
+
+
 def test_match_align_brings_different_subjects_to_the_same_handoff(tmp_path):
     paths = []
     for i, (x, radius, color) in enumerate(((.3, 5, "yellow"), (.7, 10, "cyan"))):

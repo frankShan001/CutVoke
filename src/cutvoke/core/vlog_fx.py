@@ -160,7 +160,9 @@ def transition_expr(pattern: str, params: dict, *, has_alpha=False) -> str:
         soft = float(params.get("softness", .08))
         threshold = f"(1+{soft:.9f}-(1+{2*soft:.9f})*{phase})"
         mask = f"clip((({luma})-{threshold}+{soft:.9f})/{2*soft:.9f},0,1)"
-        return f"st(0,{mask});A*(1-ld(0))+B*ld(0)"
+        # xfade shares one AVExpr across slice workers. st/ld registers would
+        # race between pixels and produce colored noise; keep the mask pure.
+        return f"A*(1-({mask}))+B*({mask})"
     if pattern != "matchAlign":
         raise ValueError(f"unsupported Vlog transition: {pattern}")
 
