@@ -1,0 +1,54 @@
+{
+  "hosting": "GitHub native user attachment",
+  "timelineChanged": false,
+  "transcoded": false,
+  "attachments": [
+    {
+      "source": "examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4",
+      "url": "https://github.com/user-attachments/assets/5d87a1b1-b0cc-4a1b-ab76-ef31981e8326",
+      "bytes": 87152479,
+      "sha256": "a3d803d07876b39d4e7347b45c83402b463acd967a260ecdc496e69618afa60d",
+      "language": "en",
+      "verifiedReadmes": [
+        "README.md",
+        "examples/showcases/travel-vlog/README.md"
+      ]
+    },
+    {
+      "source": "examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4",
+      "url": "https://github.com/user-attachments/assets/1210c3ae-eb37-47db-b1c7-1598f4e7b136",
+      "bytes": 65743292,
+      "sha256": "28f464175549c85f784d8ada52dc63f916ee53d586b30e91ca4cb1a264f51fba",
+      "language": "zh-CN",
+      "verifiedReadmes": [
+        "README.zh-CN.md",
+        "examples/showcases/travel-vlog/README.zh-CN.md"
+      ]
+    }
+  ],
+  "verification": {
+    "method": "Unauthenticated GitHub Markdown API and playback source HEAD requests",
+    "nativeVideoElementsWithControls": true,
+    "languageMappingMatched": true,
+    "publicPlaybackResponses": [
+      {
+        "source": "examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4",
+        "url": "https://github.com/user-attachments/assets/5d87a1b1-b0cc-4a1b-ab76-ef31981e8326",
+        "status": 200,
+        "contentType": "video/mp4",
+        "bytes": 87152479,
+        "localSha256Matched": true,
+        "access": "Unauthenticated playback through the GitHub-rendered player source"
+      },
+      {
+        "source": "examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4",
+        "url": "https://github.com/user-attachments/assets/1210c3ae-eb37-47db-b1c7-1598f4e7b136",
+        "status": 200,
+        "contentType": "video/mp4",
+        "bytes": 65743292,
+        "localSha256Matched": true,
+        "access": "Unauthenticated playback through the GitHub-rendered player source"
+      }
+    ]
+  }
+}

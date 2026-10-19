@@ -1,0 +1,54 @@
+{
+  "hosting": "GitHub native user attachment",
+  "timelineChanged": false,
+  "transcoded": false,
+  "attachments": [
+    {
+      "source": "examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4",
+      "url": "https://github.com/user-attachments/assets/3504df36-059c-4ca5-ade9-dbde6a0e1663",
+      "bytes": 62132310,
+      "sha256": "9403df2ce01df6e3400568977fc6ce32d98126ca6e6aa699c50e388b7d44ea09",
+      "language": "en",
+      "verifiedReadmes": [
+        "README.md",
+        "examples/showcases/chase-the-light/README.md"
+      ]
+    },
+    {
+      "source": "examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4",
+      "url": "https://github.com/user-attachments/assets/5647c4b6-2b2b-45db-bda4-e6ad83a4eca3",
+      "bytes": 42489225,
+      "sha256": "21f7e1eb5bcd6b9478e23d96a95df2bd5c9459e75283312357912dd46cee88d4",
+      "language": "zh-CN",
+      "verifiedReadmes": [
+        "README.zh-CN.md",
+        "examples/showcases/chase-the-light/README.zh-CN.md"
+      ]
+    }
+  ],
+  "verification": {
+    "method": "Unauthenticated GitHub Markdown API and playback source HEAD requests",
+    "nativeVideoElementsWithControls": true,
+    "languageMappingMatched": true,
+    "publicPlaybackResponses": [
+      {
+        "source": "examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4",
+        "url": "https://github.com/user-attachments/assets/3504df36-059c-4ca5-ade9-dbde6a0e1663",
+        "status": 200,
+        "contentType": "video/mp4",
+        "bytes": 62132310,
+        "localSha256Matched": true,
+        "access": "Unauthenticated playback through the GitHub-rendered player source"
+      },
+      {
+        "source": "examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4",
+        "url": "https://github.com/user-attachments/assets/5647c4b6-2b2b-45db-bda4-e6ad83a4eca3",
+        "status": 200,
+        "contentType": "video/mp4",
+        "bytes": 42489225,
+        "localSha256Matched": true,
+        "access": "Unauthenticated playback through the GitHub-rendered player source"
+      }
+    ]
+  }
+}

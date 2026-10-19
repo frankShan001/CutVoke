@@ -6,9 +6,9 @@
 
 ## 观看中文版本
 
-[![中文版原素材与剪辑效果完整动态预览（静音）](previews/travel-vlog-case_zh-CN.gif)](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4)
+https://github.com/user-attachments/assets/1210c3ae-eb37-47db-b1c7-1598f4e7b136
 
-动图完整预览原素材与剪辑效果时间线，不含声音。点击画面可下载带声音的完整 MP4。
+上方播放窗口可直接观看带声音的完整原素材与剪辑效果对比片。
 
 | 文件 | 用途 |
 | --- | --- |
@@ -41,6 +41,6 @@ git lfs pull --include="examples/showcases/travel-vlog/**"
 
 ## 验证与素材说明
 
-[bilingual-manifest.json](bilingual-manifest.json) 记录交付文件大小与 SHA-256。[verification/](verification/) 保存完整解码、时长与帧数、采样峰值和实际导出画面记录。`scripts/verify/verify_bilingual_showcases.py` 检查工程包 CRC、包内素材哈希、语言覆盖及独立素材哈希。静音动图由完整 CutVoke 成片缩小转换，仅用于文档预览；MP4 没有使用其他剪辑器制作。
+[bilingual-manifest.json](bilingual-manifest.json) 记录交付文件大小与 SHA-256。[verification/](verification/) 保存完整解码、时长与帧数、采样峰值和实际导出画面记录。`scripts/verify/verify_bilingual_showcases.py` 检查工程包 CRC、包内素材哈希、语言覆盖及独立素材哈希。内嵌播放器使用 `videos/` 中原始 MP4 的 GitHub 托管副本；[readme-players.json](verification/readme-players.json) 记录对应网址与 SHA-256。全部 MP4 剪辑和导出使用 CutVoke。
 
 示例媒体和用户提供的配乐不属于软件 MIT 许可证的授权范围；纳入仓库不额外授予音乐或模型使用权。已有字体许可证保留在 `src/cutvoke/assets/fonts/`。

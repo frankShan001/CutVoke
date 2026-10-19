@@ -6,9 +6,9 @@ Four 8-second MiniMax direct outputs become a 22.333-second cinematic film. All 
 
 ## Watch the English version
 
-[![Complete English source-to-edit comparison, muted animated preview](previews/motorcycle-case_en.gif)](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4)
+https://github.com/user-attachments/assets/3504df36-059c-4ca5-ade9-dbde6a0e1663
 
-The animation previews the complete native comparison timeline without sound. Click it to download the MP4 with audio.
+Play the complete source-to-edit comparison, with sound, directly in the video player above.
 
 | File | Purpose |
 | --- | --- |
@@ -41,7 +41,7 @@ Use the latest repository source build for the added travel effects and producti
 
 ## Verification and provenance
 
-[bilingual-manifest.json](bilingual-manifest.json) pins delivered file bytes and hashes. [verification/](verification/) records full MP4 decode, duration/frame counts, sample peaks and sampled exported pictures. Package CRCs, embedded-media hashes, language coverage and standalone source hashes are verified by `scripts/verify/verify_bilingual_showcases.py`. The silent GIFs are scaled documentation conversions of complete CutVoke exports; no alternative video editor produced the MP4s.
+[bilingual-manifest.json](bilingual-manifest.json) pins delivered file bytes and hashes. [verification/](verification/) records full MP4 decode, duration/frame counts, sample peaks and sampled exported pictures. Package CRCs, embedded-media hashes, language coverage and standalone source hashes are verified by `scripts/verify/verify_bilingual_showcases.py`. The embedded players use GitHub-hosted copies of the exact MP4s in `videos/`; [readme-players.json](verification/readme-players.json) records their URLs and SHA-256 hashes. All MP4 editing and export use CutVoke.
 
 The media and user-supplied music are separate from the software MIT license. Inclusion does not grant additional music or model rights. Existing bundled font licenses remain under `src/cutvoke/assets/fonts/`.
 

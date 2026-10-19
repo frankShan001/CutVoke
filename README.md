@@ -10,11 +10,11 @@ Make a first cut from your media, ask your preferred AI to refine a shot, title 
 
 ## Watch two complete edits
 
-Both examples include original media, portable editable projects and final videos in **English and Simplified Chinese**. This README shows the English versions. The animations below preview the complete comparison timelines without sound; **click a preview to download the full MP4 with audio**.
+Both examples include original media, portable editable projects and final videos in **English and Simplified Chinese**. This README shows the English versions. Play the complete source-to-edit comparisons below, with sound, directly in the embedded video players.
 
 ### CHASE THE LIGHT · motorcycle film
 
-[![Watch the English motorcycle source-to-edit comparison](examples/showcases/chase-the-light/previews/motorcycle-case_en.gif)](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4)
+https://github.com/user-attachments/assets/3504df36-059c-4ca5-ade9-dbde6a0e1663
 
 Four MiniMax shots become a cinematic edit with moving masks, fragment reconstruction, tracked light anchors and animated typography. The 31.583-second comparison starts with an 8-second source grid, then a section card and the 22.333-second film.
 
@@ -22,7 +22,7 @@ Four MiniMax shots become a cinematic edit with moving masks, fragment reconstru
 
 ### Coastal Joy · handheld travel vlog
 
-[![Watch the English vertical travel vlog source-to-edit comparison](examples/showcases/travel-vlog/previews/travel-vlog-case_en.gif)](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4)
+https://github.com/user-attachments/assets/5d87a1b1-b0cc-4a1b-ab76-ef31981e8326
 
 A cheerful 9:16 companion travel story: six source clips, a splash that ruins a pose, a laughing camera operator and a shared memory. The 42.5-second case shows the source grid first, followed by split screens, layered lettering, speed ramps, masks, color and sound bridges. Original sound remains audible under the music.
 
