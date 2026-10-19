@@ -8,7 +8,7 @@ Four 8-second MiniMax direct outputs become a 22.333-second cinematic film. All 
 
 [![Complete English source-to-edit comparison, muted animated preview](previews/motorcycle-case_en.gif)](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4)
 
-The animation previews the complete native comparison timeline without sound. Click it for the MP4 with audio.
+The animation previews the complete native comparison timeline without sound. Click it to download the MP4 with audio.
 
 | File | Purpose |
 | --- | --- |

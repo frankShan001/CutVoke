@@ -10,7 +10,7 @@
 
 ## 看看两个完整剪辑案例
 
-两个案例均提供**中文、英文成片，配套可编辑工程和原始素材**。本页展示中文版本。下方动图完整预览对比时间线，不含声音；**点击画面即可打开带声音的完整 MP4**。
+两个案例均提供**中文、英文成片，配套可编辑工程和原始素材**。本页展示中文版本。下方动图完整预览对比时间线，不含声音；**点击画面即可下载带声音的完整 MP4**。
 
 ### 逐光而行 · 摩托短片
 
@@ -18,7 +18,7 @@
 
 从四段 MiniMax 原始镜头出发，展示移动遮罩、碎片重构、光源锚点跟踪、多层光影和文字动态。31.583 秒对比片先展示 8 秒原始四宫格，再进入分段卡和 22.333 秒成片。成片内部标题、短句和文字遮罩也已中文化，保留 CutVoke 品牌名。
 
-[观看中文纯成片](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/chase-the-light/videos/motorcycle-film_zh-CN.mp4) · [中文完整剪辑工程](examples/showcases/chase-the-light/projects/motorcycle-edit_zh-CN.cutvokepack) · [素材与中英文版本](examples/showcases/chase-the-light/README.zh-CN.md)
+[下载中文纯成片](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/chase-the-light/videos/motorcycle-film_zh-CN.mp4) · [中文完整剪辑工程](examples/showcases/chase-the-light/projects/motorcycle-edit_zh-CN.cutvokepack) · [素材与中英文版本](examples/showcases/chase-the-light/README.zh-CN.md)
 
 ### 海岸快乐日记 · 手持旅拍 Vlog
 
@@ -26,7 +26,7 @@
 
 9:16 竖屏旅伴日记：摆拍被海浪打断，摄影师先笑场，最后留下两个人的快乐回忆。42.5 秒案例先展示六宫格原始素材，再展示分屏、彩色分层花字、曲线变速、遮罩、调色及声音衔接；配乐下保留环境声。
 
-[观看中文纯成片](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/travel-vlog/videos/travel-vlog-film_zh-CN.mp4) · [中文可编辑工程](examples/showcases/travel-vlog/projects/travel-vlog_zh-CN.cutvokepack) · [素材与中英文版本](examples/showcases/travel-vlog/README.zh-CN.md)
+[下载中文纯成片](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/travel-vlog/videos/travel-vlog-film_zh-CN.mp4) · [中文可编辑工程](examples/showcases/travel-vlog/projects/travel-vlog_zh-CN.cutvokepack) · [素材与中英文版本](examples/showcases/travel-vlog/README.zh-CN.md)
 
 全部时间线剪辑、合成、混音与 MP4 导出均由 CutVoke 完成。视频、原始素材和工程包使用 Git LFS，克隆后运行 `git lfs pull`。在 CutVoke 首页通过「解包打开」导入 `.cutvokepack`，即可继续编辑。
 

@@ -8,7 +8,7 @@ A cheerful 1080×1920, 24 fps travel story about two companions, a failed seasid
 
 [![Complete English source-to-edit comparison, muted animated preview](previews/travel-vlog-case_en.gif)](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4)
 
-The animation previews the complete native comparison timeline without sound. Click it for the MP4 with audio.
+The animation previews the complete native comparison timeline without sound. Click it to download the MP4 with audio.
 
 | File | Purpose |
 | --- | --- |

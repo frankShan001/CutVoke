@@ -10,7 +10,7 @@ Make a first cut from your media, ask your preferred AI to refine a shot, title 
 
 ## Watch two complete edits
 
-Both examples include original media, portable editable projects and final videos in **English and Simplified Chinese**. This README shows the English versions. The animations below preview the complete comparison timelines without sound; **click a preview to watch the full MP4 with audio**.
+Both examples include original media, portable editable projects and final videos in **English and Simplified Chinese**. This README shows the English versions. The animations below preview the complete comparison timelines without sound; **click a preview to download the full MP4 with audio**.
 
 ### CHASE THE LIGHT · motorcycle film
 
@@ -18,7 +18,7 @@ Both examples include original media, portable editable projects and final video
 
 Four MiniMax shots become a cinematic edit with moving masks, fragment reconstruction, tracked light anchors and animated typography. The 31.583-second comparison starts with an 8-second source grid, then a section card and the 22.333-second film.
 
-[Watch the English film](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/chase-the-light/videos/motorcycle-film_en.mp4) · [English editable project](examples/showcases/chase-the-light/projects/motorcycle-edit_en.cutvokepack) · [Source media and both languages](examples/showcases/chase-the-light/README.md)
+[Download the English film](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/chase-the-light/videos/motorcycle-film_en.mp4) · [English editable project](examples/showcases/chase-the-light/projects/motorcycle-edit_en.cutvokepack) · [Source media and both languages](examples/showcases/chase-the-light/README.md)
 
 ### Coastal Joy · handheld travel vlog
 
@@ -26,7 +26,7 @@ Four MiniMax shots become a cinematic edit with moving masks, fragment reconstru
 
 A cheerful 9:16 companion travel story: six source clips, a splash that ruins a pose, a laughing camera operator and a shared memory. The 42.5-second case shows the source grid first, followed by split screens, layered lettering, speed ramps, masks, color and sound bridges. Original sound remains audible under the music.
 
-[Watch the English film](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/travel-vlog/videos/travel-vlog-film_en.mp4) · [English editable project](examples/showcases/travel-vlog/projects/travel-vlog_en.cutvokepack) · [Source media and both languages](examples/showcases/travel-vlog/README.md)
+[Download the English film](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/travel-vlog/videos/travel-vlog-film_en.mp4) · [English editable project](examples/showcases/travel-vlog/projects/travel-vlog_en.cutvokepack) · [Source media and both languages](examples/showcases/travel-vlog/README.md)
 
 All timeline editing, compositing, mixing and MP4 exports were done in CutVoke. Install Git LFS and run `git lfs pull` to retrieve the videos, original media and project packages. Open a `.cutvokepack` through **Unpack and open** in CutVoke.
 

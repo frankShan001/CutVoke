@@ -8,7 +8,7 @@
 
 [![中文版原素材与剪辑效果完整动态预览（静音）](previews/travel-vlog-case_zh-CN.gif)](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4)
 
-动图完整预览原素材与剪辑效果时间线，不含声音。点击画面可打开带声音的完整 MP4。
+动图完整预览原素材与剪辑效果时间线，不含声音。点击画面可下载带声音的完整 MP4。
 
 | 文件 | 用途 |
 | --- | --- |
