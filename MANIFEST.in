@@ -2,7 +2,7 @@ recursive-include .artifacts/web *
 include README.zh-CN.md CONTRIBUTING.md CONTRIBUTING.zh-CN.md SECURITY.md CHANGELOG.md
 recursive-include docs *.md *.json *.png
 recursive-include skills *.md *.py
-recursive-include effects *.md *.json *.png
+recursive-include effects *.md *.json *.png LICENSE
 recursive-include examples *.md *.py *.json
 recursive-include scripts *.py *.mjs *.cmd *.ps1
 recursive-include web/app *.json *.ts *.tsx *.css *.html *.mjs

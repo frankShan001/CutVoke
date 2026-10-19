@@ -16,11 +16,12 @@ class ContributionTests(unittest.TestCase):
         registry = EffectRegistry()
         loaded = registry.discover([SAMPLE.parent], strict=True)
         self.assertIn("cutvoke.transition.community.soft-reveal", loaded)
-        self.assertEqual(registry.validate_params(loaded[0], {}), {"duration": 0.6})
-        self.assertEqual(registry.get(loaded[0]).xfade_transition, "fade")
+        sample_id = "cutvoke.transition.community.soft-reveal"
+        self.assertEqual(registry.validate_params(sample_id, {}), {"duration": 0.6})
+        self.assertEqual(registry.get(sample_id).xfade_transition, "fade")
         for params in ({"duration": -1}, {"duration": 2}, {"invented": 1}):
             with self.assertRaises(EffectParamInvalid):
-                registry.validate_params(loaded[0], params)
+                registry.validate_params(sample_id, params)
         with self.assertRaises(ManifestInvalid):
             registry.discover([SAMPLE.parent], strict=True)
 

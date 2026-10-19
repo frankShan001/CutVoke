@@ -1,0 +1,18 @@
+# Shadow Ink · optional contribution recipe
+
+[简体中文](README.zh-CN.md) · [Vlog effects and source evidence](../../../docs/user/vlog-effects.md)
+
+Reveal the next shot through the outgoing picture's darker regions first. This manifest reuses **`cutvoke.transition.lumaReveal`'s original internal implementation** with `reverse:true` and `duration:0.8`. It is a reusable configuration, not a fifth renderer or a downloaded shader. The local preview comes from CutVoke rendering original procedural illustrations; no reference-film frame is included. Code, manifest and procedural illustration use the repository MIT license; FFmpeg is an independent external dependency.
+
+Set `CUTVOKE_EFFECTS_PATH` to the absolute `effects/transitions` directory before starting editor/MCP, then restart them after manifest edits. The loader is opt-in and does not install a gallery preset. Requires the current source containing `vlog_fx.py`; the minimum-core field is descriptive and cannot guarantee that an earlier `0.3.1` binary knows this mapping.
+
+Choose adjacent image/video clips, attach `cutvoke.transition.community.luma-ink` to the incoming clip with `effect.setTransition`, or choose it in the editor transition panel. Tune `duration` (`0.05–2s`, editor minimum `0.1s`), `softness` (`0.005–0.35`), `reverse`, `keySource` (`outgoing`/`incoming`) and `curve` (`linear`/`smooth`). The preview and apply controls share these values. Identical or uniformly lit shots give little visible spatial structure; use distinct SDR pictures with readable highlights and shadows.
+
+```bash
+python scripts/verify/validate_effect_contributions.py
+python -m pytest -q tests/test_effect_contributions.py tests/test_vlog_effects.py
+```
+
+For the editable original-media sample and render/alpha/window tests, follow the [bilingual usage guide](../../../docs/user/vlog-effects.md#reproduce-and-contribute). The effect contract is the manifest schema and renderer, not a third-party SDK. Change parameters and metadata under a new contributor ID; do not supply executable code in a manifest.
+
+[Peter McKinnon's named Luma Fade tutorial](https://www.youtube.com/watch?v=1Qm1EGxdZ6E) motivated the technique. The research could verify source metadata and a named method, but main-film playback remained buffering. No exact shot, timestamp, asset or algorithm is claimed to have been copied. See the [reference record](../../../docs/user/vlog-effect-references.json). Translations are technical drafts without native-speaker review.

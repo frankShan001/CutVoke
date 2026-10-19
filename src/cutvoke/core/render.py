@@ -2983,6 +2983,7 @@ class RenderService:
                 transition_spec = self.effects.get(str(tr.get("effectId", "")))
                 blur_pattern = transition_spec.implementation.get("blurPattern")
                 camera_pattern = transition_spec.implementation.get("cameraPattern")
+                vlog_pattern = transition_spec.implementation.get("vlogPattern")
                 squeeze_axis = transition_spec.implementation.get("squeezeAxis")
                 if squeeze_axis is not None and not handle:
                     # Both the squeeze and timeline bed consume the held stream.
@@ -2994,7 +2995,7 @@ class RenderService:
                 # FFmpeg only evaluates expr when transition=custom. Keep all
                 # other transition names manifest-driven; blur presets provide
                 # their own bounded, spatially shaped expression.
-                xname = ("custom" if blur_pattern is not None or camera_pattern is not None else
+                xname = ("custom" if any(p is not None for p in (blur_pattern, camera_pattern, vlog_pattern)) else
                          xfade_transition_name(clips[i], self.effects))
                 has_alpha = bool(getattr(self._render_ctx, "alpha", False))
                 xfade_expr = (_xfade_blur_expr(str(blur_pattern), has_alpha=has_alpha)
@@ -3003,6 +3004,10 @@ class RenderService:
                     from .travel_fx import camera_transition_expr
                     xfade_expr = camera_transition_expr(str(camera_pattern), tr.get("params", {}),
                                                         has_alpha=has_alpha)
+                if vlog_pattern is not None:
+                    from .vlog_fx import transition_expr
+                    xfade_expr = transition_expr(str(vlog_pattern), tr.get("params", {}),
+                                                 has_alpha=has_alpha)
                 expr_option = f":expr='{xfade_expr}'" if xfade_expr else ""
                 incoming_zoom = float(transition_spec.implementation.get("incomingZoom", 1.0))
                 if 1.0 < incoming_zoom <= 1.5:
@@ -3031,7 +3036,7 @@ class RenderService:
                 # planes first; otherwise chroma/alpha samples use incompatible
                 # coordinates and the midpoint collapses toward dark colors.
                 xfade_format = (f"format={'yuva444p' if has_alpha else 'yuv444p'},"
-                                if blur_pattern is not None or camera_pattern is not None else "")
+                                if any(p is not None for p in (blur_pattern, camera_pattern, vlog_pattern)) else "")
                 if squeeze_axis is not None:
                     _build_squeeze_transition(transition_outgoing, incoming, out,
                                               str(squeeze_axis), d, offset, parts)
@@ -4217,6 +4222,12 @@ class RenderService:
     def _fx_one(self, key: str, params: dict, cur: str, parts: list[str],
                 vseg: list[int], idx: int) -> str:
         """应用单个滤镜：多流滤镜显式建图，其余内联续接。"""
+        if key in ("vlogSubjectLock", "vlogPunchIn"):
+            from .vlog_fx import geometry_filter
+            out = f"vlogfx{vseg[0]}"
+            vseg[0] += 1
+            parts.append(f"[{cur}]{geometry_filter(key, params)}[{out}]")
+            return out
         if key == "travelMotionBlur":
             from .travel_fx import build_motion_blur
             return build_motion_blur(params, cur, parts, vseg)

@@ -4,6 +4,7 @@
 - [外部 Agent 编辑流程](user/external-agent-editing.md)
 - [AI 剪辑技能安装与使用](user/agent-skill.zh-CN.md) / [English](user/agent-skill.md)
 - [社区特效贡献](user/effect-contributing.zh-CN.md) / [English](../effects/README.md)
+- [可复用 Vlog 特效、参考依据与可编辑样片](user/vlog-effects.zh-CN.md) / [English](user/vlog-effects.md)
 - [真实演示截图与验证边界](assets/readme/README.md)
 - [本地语音识别](user/LOCAL_ASR.md)
 - [资源包发布](user/resource-pack-registry.md)

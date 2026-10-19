@@ -1,0 +1,294 @@
+{
+  "id": "cutvoke.transition.community.luma-ink",
+  "version": "1.0.0",
+  "name": {
+    "zh-CN": "暗墨揭示",
+    "zh-TW": "暗墨揭示",
+    "en": "Shadow Ink · Content luma reveal",
+    "ja": "Shadow Ink · 映像輝度リビール",
+    "ko": "Shadow Ink · 콘텐츠 밝기 리빌",
+    "es": "Shadow Ink · Revelado por luminancia",
+    "fr": "Shadow Ink · Révélation par luminance",
+    "de": "Shadow Ink · Luminanzgesteuerte Enthüllung",
+    "pt-BR": "Shadow Ink · Revelação por luminância",
+    "ru": "Shadow Ink · Проявление по яркости",
+    "ar": "Shadow Ink · كشف بحسب سطوع الصورة"
+  },
+  "description": {
+    "zh-CN": "依据真实画面的明暗逐像素揭示下一镜头，可切换亮暗顺序、软边、亮度来源和阈值曲线。",
+    "zh-TW": "依據真實畫面的明暗逐像素揭示下一鏡頭，可切換亮暗順序、軟邊、亮度來源和閾值曲線。",
+    "en": "Reveal the next shot pixel by pixel using actual image luminance, with dark-first inversion, feathering, key source and threshold curve.",
+    "ja": "実際の映像輝度で次のショットを画素ごとに表示します。暗部優先、ぼかし、輝度ソース、しきい値カーブを選べます。",
+    "ko": "실제 영상 밝기에 따라 다음 샷을 픽셀별로 드러냅니다. 어두운 부분 우선, 경계 부드러움, 밝기 소스와 임계 곡선을 조절합니다.",
+    "es": "Revela la siguiente toma por píxel según su luminancia real, con orden invertido, suavizado, fuente y curva de umbral.",
+    "fr": "Révèle le plan suivant pixel par pixel selon la luminance réelle, avec inversion, bord doux, source et courbe du seuil.",
+    "de": "Enthüllt die nächste Aufnahme anhand der tatsächlichen Bildhelligkeit, mit Umkehrung, weichem Rand, Quelle und Schwellenkurve.",
+    "pt-BR": "Revela a próxima tomada por pixel usando a luminância real, com inversão, suavização, fonte e curva de limiar.",
+    "ru": "Проявляет следующий кадр попиксельно по реальной яркости с инверсией порядка, растушёвкой, выбором источника и кривой порога.",
+    "ar": "يكشف اللقطة التالية بكسلًا ببكسل بحسب السطوع الفعلي، مع عكس الترتيب وتنعيم الحواف واختيار المصدر ومنحنى العتبة."
+  },
+  "category": "transition",
+  "subcategory": "叠化",
+  "keywords": [
+    "vlog",
+    "luma",
+    "shadow",
+    "墨迹",
+    "暗部"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "CutVoke contributors"
+  },
+  "inputs": [
+    "video:a",
+    "video:b"
+  ],
+  "output": "video",
+  "appliesTo": [
+    "image",
+    "video"
+  ],
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "duration": {
+        "type": "number",
+        "default": 0.8,
+        "minimum": 0.05,
+        "maximum": 2,
+        "description": {
+          "zh-CN": "转场时长",
+          "zh-TW": "轉場時長",
+          "en": "Transition duration",
+          "ja": "切り替え時間",
+          "ko": "전환 시간",
+          "es": "Duración de transición",
+          "fr": "Durée de transition",
+          "de": "Übergangsdauer",
+          "pt-BR": "Duração da transição",
+          "ru": "Длительность перехода",
+          "ar": "مدة الانتقال"
+        },
+        "x-cutvoke-label": {
+          "zh-CN": "转场时长",
+          "zh-TW": "轉場時長",
+          "en": "Transition duration",
+          "ja": "切り替え時間",
+          "ko": "전환 시간",
+          "es": "Duración de transición",
+          "fr": "Durée de transition",
+          "de": "Übergangsdauer",
+          "pt-BR": "Duração da transição",
+          "ru": "Длительность перехода",
+          "ar": "مدة الانتقال"
+        },
+        "x-cutvoke-step": 0.01,
+        "unit": "s"
+      },
+      "softness": {
+        "type": "number",
+        "default": 0.08,
+        "minimum": 0.005,
+        "maximum": 0.35,
+        "description": {
+          "zh-CN": "亮度软边",
+          "zh-TW": "亮度軟邊",
+          "en": "Luma feather",
+          "ja": "輝度のぼかし",
+          "ko": "밝기 경계 부드러움",
+          "es": "Suavizado de luminancia",
+          "fr": "Douceur de luminance",
+          "de": "Luminanzweichheit",
+          "pt-BR": "Suavização de luminância",
+          "ru": "Растушёвка яркости",
+          "ar": "تنعيم السطوع"
+        },
+        "x-cutvoke-label": {
+          "zh-CN": "亮度软边",
+          "zh-TW": "亮度軟邊",
+          "en": "Luma feather",
+          "ja": "輝度のぼかし",
+          "ko": "밝기 경계 부드러움",
+          "es": "Suavizado de luminancia",
+          "fr": "Douceur de luminance",
+          "de": "Luminanzweichheit",
+          "pt-BR": "Suavização de luminância",
+          "ru": "Растушёвка яркости",
+          "ar": "تنعيم السطوع"
+        },
+        "x-cutvoke-step": 0.005
+      },
+      "reverse": {
+        "type": "boolean",
+        "default": true,
+        "description": {
+          "zh-CN": "暗部优先",
+          "zh-TW": "暗部優先",
+          "en": "Shadows first",
+          "ja": "暗部優先",
+          "ko": "어두운 부분 우선",
+          "es": "Sombras primero",
+          "fr": "Ombres d’abord",
+          "de": "Schatten zuerst",
+          "pt-BR": "Sombras primeiro",
+          "ru": "Сначала тени",
+          "ar": "الظلال أولًا"
+        },
+        "x-cutvoke-label": {
+          "zh-CN": "暗部优先",
+          "zh-TW": "暗部優先",
+          "en": "Shadows first",
+          "ja": "暗部優先",
+          "ko": "어두운 부분 우선",
+          "es": "Sombras primero",
+          "fr": "Ombres d’abord",
+          "de": "Schatten zuerst",
+          "pt-BR": "Sombras primeiro",
+          "ru": "Сначала тени",
+          "ar": "الظلال أولًا"
+        }
+      },
+      "keySource": {
+        "type": "string",
+        "enum": [
+          "outgoing",
+          "incoming"
+        ],
+        "default": "outgoing",
+        "description": {
+          "zh-CN": "亮度来源",
+          "zh-TW": "亮度來源",
+          "en": "Luma source",
+          "ja": "輝度ソース",
+          "ko": "밝기 소스",
+          "es": "Fuente de luminancia",
+          "fr": "Source de luminance",
+          "de": "Luminanzquelle",
+          "pt-BR": "Fonte de luminância",
+          "ru": "Источник яркости",
+          "ar": "مصدر السطوع"
+        },
+        "x-cutvoke-label": {
+          "zh-CN": "亮度来源",
+          "zh-TW": "亮度來源",
+          "en": "Luma source",
+          "ja": "輝度ソース",
+          "ko": "밝기 소스",
+          "es": "Fuente de luminancia",
+          "fr": "Source de luminance",
+          "de": "Luminanzquelle",
+          "pt-BR": "Fonte de luminância",
+          "ru": "Источник яркости",
+          "ar": "مصدر السطوع"
+        },
+        "x-cutvoke-enum-labels": {
+          "outgoing": {
+            "zh-CN": "前镜头",
+            "zh-TW": "前鏡頭",
+            "en": "Outgoing shot",
+            "ja": "前のショット",
+            "ko": "이전 샷",
+            "es": "Toma saliente",
+            "fr": "Plan sortant",
+            "de": "Ausgehende Aufnahme",
+            "pt-BR": "Tomada anterior",
+            "ru": "Первый кадр",
+            "ar": "اللقطة السابقة"
+          },
+          "incoming": {
+            "zh-CN": "后镜头",
+            "zh-TW": "後鏡頭",
+            "en": "Incoming shot",
+            "ja": "次のショット",
+            "ko": "다음 샷",
+            "es": "Toma entrante",
+            "fr": "Plan entrant",
+            "de": "Eingehende Aufnahme",
+            "pt-BR": "Tomada seguinte",
+            "ru": "Второй кадр",
+            "ar": "اللقطة التالية"
+          }
+        }
+      },
+      "curve": {
+        "type": "string",
+        "enum": [
+          "linear",
+          "smooth"
+        ],
+        "default": "smooth",
+        "description": {
+          "zh-CN": "阈值曲线",
+          "zh-TW": "閾值曲線",
+          "en": "Threshold curve",
+          "ja": "しきい値カーブ",
+          "ko": "임계 곡선",
+          "es": "Curva de umbral",
+          "fr": "Courbe du seuil",
+          "de": "Schwellenkurve",
+          "pt-BR": "Curva de limiar",
+          "ru": "Кривая порога",
+          "ar": "منحنى العتبة"
+        },
+        "x-cutvoke-label": {
+          "zh-CN": "阈值曲线",
+          "zh-TW": "閾值曲線",
+          "en": "Threshold curve",
+          "ja": "しきい値カーブ",
+          "ko": "임계 곡선",
+          "es": "Curva de umbral",
+          "fr": "Courbe du seuil",
+          "de": "Schwellenkurve",
+          "pt-BR": "Curva de limiar",
+          "ru": "Кривая порога",
+          "ar": "منحنى العتبة"
+        },
+        "x-cutvoke-enum-labels": {
+          "linear": {
+            "zh-CN": "匀速",
+            "zh-TW": "勻速",
+            "en": "Linear",
+            "ja": "線形",
+            "ko": "선형",
+            "es": "Lineal",
+            "fr": "Linéaire",
+            "de": "Linear",
+            "pt-BR": "Linear",
+            "ru": "Линейная",
+            "ar": "خطي"
+          },
+          "smooth": {
+            "zh-CN": "平滑",
+            "zh-TW": "平滑",
+            "en": "Smooth",
+            "ja": "滑らか",
+            "ko": "부드럽게",
+            "es": "Suave",
+            "fr": "Lisse",
+            "de": "Sanft",
+            "pt-BR": "Suave",
+            "ru": "Плавная",
+            "ar": "سلس"
+          }
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+  "implementation": {
+    "engine": "ffmpeg-xfade",
+    "filter": "xfade",
+    "transition": "custom",
+    "vlogPattern": "lumaReveal"
+  },
+  "x-cutvoke-min-core": "0.3.1",
+  "x-cutvoke-contribution": {
+    "testedWith": "CutVoke 0.3.1 source containing vlog_fx.py; Python 3.12; FFmpeg 7.1.5",
+    "previewFile": "preview.png",
+    "originalRenderer": "cutvoke.transition.lumaReveal",
+    "recipeOnly": true,
+    "reference": "https://www.youtube.com/watch?v=1Qm1EGxdZ6E",
+    "observationLimit": "Source metadata and named written technique only; main-film playback was blocked. No shot timestamps."
+  }
+}

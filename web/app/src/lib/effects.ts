@@ -307,9 +307,11 @@ export async function fetchResourcePreview(
   effectId: string,
   signal?: AbortSignal,
   duration?: number,
+  params?: Record<string, unknown>,
 ): Promise<{ kind: "frame"; url: string } | { kind: "empty" } | { kind: "error"; message: string }> {
   const query = new URLSearchParams({ clipId, effectId });
   if (duration !== undefined) query.set("duration", String(duration));
+  if (params) query.set("params", JSON.stringify(params));
   const url = `${API_BASE}/projects/${encodeURIComponent(projectId)}/resource-preview?${query}`;
   try {
     const res = await fetch(url, { headers: { Accept: "image/png" }, signal });

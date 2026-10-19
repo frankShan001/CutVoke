@@ -2107,6 +2107,18 @@ class HttpApi:
                     return 404, {"error": {"code": "EFFECT_UNAVAILABLE",
                                            "message": f"unknown effect: {effect_id}"}}
                 params: dict = {}
+                if "params" in body:
+                    raw_params = body["params"]
+                    try:
+                        if isinstance(raw_params, str):
+                            if len(raw_params) > 16_384:
+                                raise ValueError("preview parameters are too large")
+                            raw_params = json.loads(raw_params)
+                        if not isinstance(raw_params, dict):
+                            raise ValueError("preview params must be an object")
+                        params = raw_params
+                    except (ValueError, TypeError) as error:
+                        return 400, {"error": {"code": "INVALID_ARGUMENT", "message": str(error)}}
                 if "duration" in body:
                     import math
                     try:
@@ -2160,6 +2172,10 @@ class HttpApi:
                     t = start + min(0.25, (end - start) / 2)
                 else:
                     t = start + (end - start) / 2
+                    from .vlog_fx import preview_time
+                    action_time = preview_time(spec, end - start, params)
+                    if action_time is not None:
+                        t = start + action_time
                 import tempfile
                 fd, tmp_png = tempfile.mkstemp(suffix=".png")
                 os.close(fd)

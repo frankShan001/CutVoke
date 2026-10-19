@@ -18,6 +18,7 @@ from __future__ import annotations
 from .font_catalog import TITLE_FONT_FAMILIES
 
 import json
+import math
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -193,6 +194,9 @@ def validate_against_schema(schema: dict, value: Any, path: str = "") -> list[st
 
     # 数值区间
     if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if isinstance(value, float) and not math.isfinite(value):
+            errors.append(f"{where}: number must be finite")
+            return errors
         mn, mx = schema.get("minimum"), schema.get("maximum")
         if isinstance(mn, (int, float)) and value < mn:
             errors.append(f"{where}: 小于最小值 {mn}（实际 {value}）")
@@ -2064,6 +2068,8 @@ def _builtin_specs() -> list[EffectSpec]:
     specs.extend(extra_transitions)
     from .travel_fx import builtin_travel_effects
     specs.extend(builtin_travel_effects())
+    from .vlog_fx import builtin_vlog_effects
+    specs.extend(builtin_vlog_effects())
 
     # 统一补齐元数据。图片与视频都能进入视觉渲染链，因此画面变换、调色、
     # 动画、视觉特效和转场均可用于这两类片段；转场仍由时间线层保证它发生在

@@ -265,6 +265,7 @@ MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错�
 | 技能复制、任务输入及可运行示例 | [技能使用](docs/user/agent-skill.zh-CN.md) |
 | 可选本地转写与模型准备 | [本地语音识别](docs/user/LOCAL_ASR.md) |
 | 特效贡献与现有资源包机制 | [贡献指南](docs/user/effect-contributing.zh-CN.md) · [资源包](docs/user/resource-pack-registry.md) |
+| Vlog 运镜与内容驱动转场 | [使用与可编辑样片](docs/user/vlog-effects.zh-CN.md) · [参考来源及观察限制](docs/user/vlog-effect-references.json) |
 | 源码、目录规范与提交检查 | [中文贡献指南](CONTRIBUTING.zh-CN.md) · [English](CONTRIBUTING.md) · [可认领任务](docs/development/community-tasks.md) · [目录说明](docs/development/project-layout.md) |
 | 安装与候选包 | [安装排障](docs/user/installation.md) · [预发布流程](docs/development/prerelease.md) |
 | 安全报告 | [安全报告说明](SECURITY.md) |

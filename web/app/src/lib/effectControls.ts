@@ -70,7 +70,8 @@ function localizedDescriptor(v: unknown): string {
 
 function paramLabel(name: string, sub: EffectParamSpecLike): string {
   const description = localizedDescriptor(sub.description);
-  return PARAM_LABELS[name] || description.split(/[；。:：]/, 1)[0].slice(0, 12) || name;
+  return localizedDescriptor(sub["x-cutvoke-label"]) || PARAM_LABELS[name] ||
+    description.split(/[；。:：]/, 1)[0].slice(0, 12) || name;
 }
 
 interface EffectParamSpecLike {
@@ -82,6 +83,8 @@ interface EffectParamSpecLike {
   unit?: string;
   description?: unknown;
   "x-cutvoke-enum-labels"?: Record<string, unknown>;
+  "x-cutvoke-label"?: unknown;
+  "x-cutvoke-step"?: number;
 }
 
 /** 把 effect 的 parameters 顶层属性转成控件描述（嵌套 object/array 跳过，交调用方处理）。 */
@@ -117,7 +120,9 @@ export function paramControls(
     if (kind === "number") {
       if (typeof sub.minimum === "number") ctrl.min = sub.minimum;
       if (typeof sub.maximum === "number") ctrl.max = sub.maximum;
-      ctrl.step = t === "integer" ? 1 : 0.05;
+      ctrl.step = t === "integer" ? 1 :
+        typeof sub["x-cutvoke-step"] === "number" && sub["x-cutvoke-step"] > 0
+          ? sub["x-cutvoke-step"] : 0.05;
     }
     if (kind === "enum") {
       ctrl.options = (sub.enum || []).map((v) => {

@@ -597,12 +597,16 @@ export async function applyTransition(
     clipId: string;
     effectId: string;
     duration: number;
+    params?: Record<string, unknown>;
   },
 ): Promise<ActionResult> {
+  const clip = state.project?.sequence.tracks.flatMap((track) => track.clips)
+    .find((item) => item.id === input.clipId);
+  const existing = clip?.effects?.find((effect) => effect.effectId === input.effectId)?.params;
   const result = await runCommand(dispatch, state, "effect.setTransition", {
     clipId: input.clipId,
     effectId: input.effectId,
-    params: { duration: input.duration },
+    params: { ...existing, ...input.params, duration: input.duration },
   });
   if (result.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已应用转场") });
   return result;

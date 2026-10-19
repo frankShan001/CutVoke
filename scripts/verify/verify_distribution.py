@@ -38,7 +38,8 @@ def verify(directory: Path) -> dict:
         require(names, ["cutvoke/__init__.py", "cutvoke/main.py", "cutvoke/core/mcp_server.py",
                         "cutvoke/web/index.html", "cutvoke/core/builtin_presets.json",
                         "cutvoke/core/builtin_resource_pack.json",
-                        "cutvoke/assets/fonts/NotoSansSC-VF.ttf"])
+                        "cutvoke/assets/fonts/NotoSansSC-VF.ttf",
+                        "cutvoke/core/vlog_fx.py", "cutvoke/assets/effects/vlog-labels.json"])
         if not any(n.startswith("cutvoke/web/assets/") and n.endswith(".js") for n in names):
             raise ValueError("wheel has no compiled editor JavaScript")
         metadata_name, = [n for n in names if n.endswith(".dist-info/METADATA")]
@@ -64,6 +65,10 @@ def verify(directory: Path) -> dict:
             ".artifacts/web/index.html", "web/app/package.json", "web/app/src/main.tsx",
             "skills/cutvoke-editor/SKILL.md", "skills/cutvoke-editor/scripts/demo.py",
             "effects/transitions/cutvoke.transition.community.soft-reveal/manifest.json",
+            "effects/transitions/cutvoke.transition.community.luma-ink/manifest.json",
+            "effects/transitions/cutvoke.transition.community.luma-ink/LICENSE",
+            "docs/user/vlog-effects.md", "docs/user/vlog-effects.zh-CN.md",
+            "scripts/verify/demo_vlog_effects.py",
             "scripts/verify/check_layering.py", "scripts/verify/verify_distribution.py",
             "desktop/package.json", "desktop/engine.spec", ".github/workflows/ci.yml")])
         pkg = archive.extractfile(f"{root}/PKG-INFO")

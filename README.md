@@ -265,6 +265,7 @@ Declarative transitions can reuse supported FFmpeg mappings. Other families depe
 | Skill installation, task inputs and runnable example | [Skill usage](docs/user/agent-skill.md) |
 | Optional local transcription and model preparation | [Local speech recognition](docs/user/LOCAL_ASR.md) |
 | Effect contributions and existing resource packs | [Contribution guide](effects/README.md) · [Resource packs](docs/user/resource-pack-registry.md) |
+| Vlog camera effects and content-aware transitions | [Use and editable demo](docs/user/vlog-effects.md) · [References and observation limits](docs/user/vlog-effect-references.json) |
 | Source conventions, layout and checks | [English](CONTRIBUTING.md) · [中文](CONTRIBUTING.zh-CN.md) · [Community tasks](docs/development/community-tasks.md) · [Project layout](docs/development/project-layout.md) |
 | Installation and candidate packages | [Install / troubleshoot](docs/user/installation.md) · [Candidate packaging](docs/development/prerelease.md) |
 | Security reports | [Security policy](SECURITY.md) |

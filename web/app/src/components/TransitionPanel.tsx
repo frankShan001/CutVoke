@@ -19,6 +19,8 @@ import {
   type EffectSpec,
 } from "../lib/effects";
 import { ApiFailure } from "../lib/api";
+import { paramControls } from "../lib/effectControls";
+import { ParamControls } from "./inspector/ParamControls";
 import type { Clip } from "../types/api";
 
 const DURATION_PRESETS = [0.5, 1.0, 1.5, 2.0];
@@ -34,6 +36,7 @@ export function TransitionPanel() {
   const [transitions, setTransitions] = useState<EffectSpec[]>([]);
   const [transitionId, setTransitionId] = useState("");
   const [duration, setDuration] = useState("1.0");
+  const [params, setParams] = useState<Record<string, unknown>>({});
   const [busy, setBusy] = useState(false);
   const [trial, setTrial] = useState<{ loading: boolean; url?: string; error?: string } | null>(null);
   const trialRequest = useRef<AbortController | null>(null);
@@ -86,6 +89,14 @@ export function TransitionPanel() {
   const currentFx = findTransitionOnClip(currentClip);
   const currentFxId = currentFx ? String(currentFx.effectId) : "";
   const currentFxDuration = currentFx ? transitionDurationSecs(currentFx) : 0;
+  const selectedSpec = transitions.find((spec) => spec.effectId === transitionId);
+  const defaultsKey = JSON.stringify(selectedSpec?.defaults || {});
+  const currentParamsKey = JSON.stringify(currentFx?.params || {});
+  useEffect(() => {
+    setParams(JSON.parse(transitionId === currentFxId ? currentParamsKey : defaultsKey));
+  }, [clipSel, transitionId, currentFxId, currentParamsKey, defaultsKey]);
+  const parameterControls = selectedSpec
+    ? paramControls(selectedSpec, params).filter((control) => control.name !== "duration") : [];
   useEffect(() => {
     if (currentFxId) {
       setTransitionId(currentFxId);
@@ -103,7 +114,7 @@ export function TransitionPanel() {
       if (trialUrl.current) URL.revokeObjectURL(trialUrl.current);
       trialUrl.current = null;
     };
-  }, [state.currentId, clipSel, transitionId, duration, state.project?.revision]);
+  }, [state.currentId, clipSel, transitionId, duration, params, state.project?.revision]);
   const transitionTarget = useMemo(() => {
     if (!currentClip) return { valid: false, reason: tr("请选择要添加转场的后一段片段"), maxDuration: 0 };
     const index = clipOptions.findIndex((clip) => clip.id === currentClip.id);
@@ -118,7 +129,10 @@ export function TransitionPanel() {
     return { valid: true, reason: tr("转场将连接此前一段与当前片段"), maxDuration };
   }, [currentClip, clipOptions, locale]);
   const requestedDuration = Number(duration);
-  const validDuration = Number.isFinite(requestedDuration) && requestedDuration >= 0.1 && requestedDuration <= 5;
+  const durationSchema = selectedSpec?.parameters.properties?.duration;
+  const minDuration = Math.max(.1, Number(durationSchema?.minimum ?? .1));
+  const maxDuration = Math.min(5, Number(durationSchema?.maximum ?? 5));
+  const validDuration = Number.isFinite(requestedDuration) && requestedDuration >= minDuration && requestedDuration <= maxDuration;
   const effectiveDuration = validDuration ? Math.min(requestedDuration, transitionTarget.maxDuration) : 0;
   const currentName = currentFx
     ? transitions.find((s) => s.effectId === String(currentFx.effectId))?.name ||
@@ -132,7 +146,8 @@ export function TransitionPanel() {
     if (!state.currentId || !clipSel || !transitionId || !transitionTarget.valid) return;
     const seconds = Number(duration);
     if (!validDuration) {
-      setTrial({ loading: false, error: tr("时长须在 0.1–5 秒之间") });
+      setTrial({ loading: false, error: maxDuration === 5 ? tr("时长须在 0.1–5 秒之间") :
+        `${tr("无效时长")} (${minDuration}–${maxDuration}s)` });
       return;
     }
     trialRequest.current?.abort();
@@ -142,7 +157,7 @@ export function TransitionPanel() {
     trialRequest.current = controller;
     setTrial({ loading: true });
     const result = await fetchResourcePreview(state.currentId, clipSel, transitionId,
-                                              controller.signal, seconds);
+                                              controller.signal, seconds, params);
     if (controller.signal.aborted) {
       if (result.kind === "frame") URL.revokeObjectURL(result.url);
       return;
@@ -175,7 +190,8 @@ export function TransitionPanel() {
       return;
     }
     if (!validDuration) {
-      showError(dispatch, invalid(tr("转场时长须在 0.1–5 秒之间")));
+      showError(dispatch, invalid(maxDuration === 5 ? tr("转场时长须在 0.1–5 秒之间") :
+        `${tr("无效时长")} (${minDuration}–${maxDuration}s)`));
       return;
     }
     setBusy(true);
@@ -184,6 +200,7 @@ export function TransitionPanel() {
       clipId: clipSel,
       effectId: transitionId,
       duration: Math.round(effectiveDuration * 1000) / 1000,
+      params,
     });
     setBusy(false);
     if (res.ok && currentFx) {
@@ -294,18 +311,29 @@ export function TransitionPanel() {
               key={d}
               className={`cv-chip ${duration === String(d) ? "cv-chip--on" : ""}`}
               onClick={() => setDuration(String(d))}
+              disabled={d < minDuration || d > maxDuration}
             >
               {d}s
             </button>
           ))}
         </div>
         <div style={{ marginTop: 6 }}>
-          <TextInput type="number" step="0.1" min={0.1} max={5} value={duration} onChange={(e) => setDuration(e.target.value)} />
+          <TextInput type="number" step="0.1" min={minDuration} max={maxDuration} value={duration} onChange={(e) => setDuration(e.target.value)} />
         </div>
         {transitionTarget.valid ? (
           <p className="cv-hint" role="status">{tr("最长可生效 ")}{transitionTarget.maxDuration.toFixed(2)}{tr("s；当前填写 ")}{validDuration ? tr("{0}s，实际 {1}s", requestedDuration.toFixed(2), effectiveDuration.toFixed(2)) : tr("无效时长")}{tr("。 转场从切点开始，不压短时间线；前段末帧作为过渡把手，不额外读取源素材。")}</p>
         ) : null}
       </div>
+
+      {parameterControls.length ? <fieldset disabled={readOnly || busy}
+        aria-label={selectedSpec?.name} style={{ border: 0, padding: 0, margin: "10px 0" }}>
+        <ParamControls controls={parameterControls} onChange={(name, value) => setParams((previous) => {
+          const next = { ...previous };
+          if (value === undefined) delete next[name];
+          else next[name] = value;
+          return next;
+        })} />
+      </fieldset> : null}
 
       <Button full onClick={() => void handleTrial()}
         disabled={!clipSel || !transitionId || !transitionTarget.valid || !validDuration}

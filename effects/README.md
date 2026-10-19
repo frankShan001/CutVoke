@@ -20,7 +20,7 @@ New contributions live in `effects/<family>/<effect-id>/`. A contribution folder
 | Transform behavior | `effects/transforms/<id>/` | Existing transform semantics; a manifest alone cannot introduce a new geometry algorithm |
 | Stickers, backgrounds, presets, LUTs, fonts | Contribution-local source assets, then maintained resource registries | Use the [existing resource-pack route](../docs/user/resource-pack-registry.md); installing an effect manifest does not automatically add a preset-gallery card |
 
-Only the sample's transition folder is currently populated. Other folders are conventions for future PRs, not claims of a complete external SDK for every family. If a proposed behavior needs code, place implementation and tests in the existing core/frontend modules through the normal PR process. Do not ship scripts, native binaries or arbitrary FFmpeg expressions for the manifest loader to execute.
+The transition folder contains Soft Reveal and [Shadow Ink](transitions/cutvoke.transition.community.luma-ink/README.md), a content-luma recipe backed by the tested Vlog renderer. Other folders remain conventions for future PRs, not claims of a complete external SDK for every family. If a proposed behavior needs code, place implementation and tests in the existing core/frontend modules through the normal PR process. Do not ship scripts, native binaries or arbitrary FFmpeg expressions for the manifest loader to execute.
 
 ## Manifest contract
 
@@ -31,6 +31,7 @@ Use [the runnable manifest](transitions/cutvoke.transition.community.soft-reveal
 - Add translated `name` and `description` entries for other interface locales when available. The registry uses the requested locale and falls back to English; keep IDs and category keys stable. See the [translation guide](../docs/development/translations.md) and multilingual sample. State whether translations have received native review.
 - Set `category` to the engine category in the table. `subcategory` and `keywords` help discovery; browse categories are distinct from engine categories.
 - Declare a parameter object schema with meaningful limits/defaults and `additionalProperties:false`. Only advertise animation on parameters the renderer actually animates. The schema validator implements a JSON Schema subset; do not assume unsupported schema keywords enforce constraints.
+- Generic effect and transition controls accept localized `x-cutvoke-label`, positive numeric `x-cutvoke-step`, and `x-cutvoke-enum-labels`. Transition trial rendering uses the authored parameter draft, not only duration. See the [Vlog effects](../docs/user/vlog-effects.md) for a tested implementation and its limits.
 - `implementation` names an existing supported engine/filter/kind. For the sample, `ffmpeg-xfade` + `xfade` + `fade` is the implementation. There is no Python/JavaScript module or shader plugin entry point.
 - Include `x-cutvoke-min-core` and `x-cutvoke-contribution.testedWith`, plus a `previewFile` pointing to a PNG in the same folder. These fields aid review. The loader stores minimum-core metadata but does not enforce version negotiation; author/review metadata and `previewFile` do not add a gallery card or compatibility gate.
 
