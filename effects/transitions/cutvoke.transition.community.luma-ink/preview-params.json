@@ -1,0 +1,32 @@
+{
+  "effectId": "cutvoke.transition.community.luma-ink",
+  "params": {
+    "duration": 0.8,
+    "softness": 0.08,
+    "reverse": true,
+    "keySource": "outgoing",
+    "curve": "smooth"
+  },
+  "previewTimelineTime": {
+    "num": 19,
+    "den": 8
+  },
+  "previewFrame": 57,
+  "fps": "24/1",
+  "sourceProject": "vlog-luma-reveal, revision 2; incoming effect replaced with this contribution and its defaults",
+  "sourceGenerator": "scripts/verify/demo_vlog_effects.py",
+  "sourceFiles": [
+    {
+      "name": "dd91e95442ddb3d336bef2f63bf4cbdba85b234e20d034e18d74841fcd38bf35.png",
+      "sha256": "dd91e95442ddb3d336bef2f63bf4cbdba85b234e20d034e18d74841fcd38bf35"
+    },
+    {
+      "name": "1b078b0b61b37d065585b7243879d25db5ba58684142f12d002ac04345a5626c.png",
+      "sha256": "1b078b0b61b37d065585b7243879d25db5ba58684142f12d002ac04345a5626c"
+    }
+  ],
+  "rendererCommit": "62c7b1343017a7feac7f48f1ef70487c3b78c752",
+  "previewSha256": "ff0c3461df943754917f5172462d8fada362c9c042127067f242d5df6f7eef7e",
+  "originalProceduralMedia": true,
+  "warnings": []
+}
