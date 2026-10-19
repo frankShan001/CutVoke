@@ -1,34 +1,56 @@
-# CutVoke
+<p align="center">
+  <img src="docs/assets/readme/banner.svg" alt="CutVoke — local video editor, shared editable timeline" width="960" />
+</p>
 
-**English** · [简体中文](README.zh-CN.md)
+<h3 align="center">Your footage. Your AI. Your editable timeline.</h3>
 
-**A local video editor where you and your AI agent share the same editable timeline.**
+<p align="center">Start a cut with your preferred AI. Refine it by hand. Keep every edit in a local, editable project.</p>
 
-Make a first cut from your media, ask your preferred AI to refine a shot, title or caption, then continue editing by hand. CutVoke keeps clips, text, sound and effects in a visible project you can inspect and revise.
+<p align="center">
+  <a href="https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1"><img src="https://img.shields.io/badge/v0.3.1-prerelease-527fca?style=flat-square" alt="v0.3.1 prerelease" /></a>
+  <a href="https://github.com/frankShan001/CutVoke/actions/workflows/ci.yml"><img src="https://github.com/frankShan001/CutVoke/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-4d8a74?style=flat-square" alt="MIT license" /></a>
+</p>
 
-[Get started](#get-started) · [Give your AI an editing workflow](#give-your-ai-an-editing-workflow) · [Build effects together](#build-effects-together)
+<p align="center"><a href="#get-started">Download</a> · <a href="#watch-two-complete-edits">Watch demos</a> · <a href="#give-your-ai-an-editing-workflow">Connect your AI</a> · <a href="#learn-more-and-contribute">Docs</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
+
+<p align="center"><strong>English</strong> · <a href="README.zh-CN.md">简体中文</a></p>
+
+<table>
+<tr>
+<td width="33%" valign="top"><strong>See every edit</strong><br/>Tracks · Captions · Effects</td>
+<td width="33%" valign="top"><strong>Your agent, your choice</strong><br/>MCP · HTTP · CLI</td>
+<td width="33%" valign="top"><strong>Keep creating</strong><br/>MP4 + editable projects</td>
+</tr>
+</table>
 
 ## Watch two complete edits
 
-Both examples include original media, portable editable projects and final videos in **English and Simplified Chinese**. This README shows the English versions. Play the complete source-to-edit comparisons below, with sound, directly in the embedded video players.
+Original footage first. The complete edit next. Both examples include **English and Chinese videos, source media and editable projects**. These players show the English versions with sound.
 
-### CHASE THE LIGHT · motorcycle film
+### 01 · CHASE THE LIGHT
+
+**Motorcycle film · 31.6 seconds · Landscape**
 
 https://github.com/user-attachments/assets/3504df36-059c-4ca5-ade9-dbde6a0e1663
 
-Four MiniMax shots become a cinematic edit with moving masks, fragment reconstruction, tracked light anchors and animated typography. The 31.583-second comparison starts with an 8-second source grid, then a section card and the 22.333-second film.
+**Look for:** moving masks, fragment reconstruction, tracked light anchors, layered lighting and animated type. Four MiniMax shots lead into the complete 22.3-second film.
 
 [Download the English film](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/chase-the-light/videos/motorcycle-film_en.mp4) · [English editable project](examples/showcases/chase-the-light/projects/motorcycle-edit_en.cutvokepack) · [Source media and both languages](examples/showcases/chase-the-light/README.md)
 
-### Coastal Joy · handheld travel vlog
+### 02 · Coastal Joy
+
+**Handheld travel vlog · 42.5 seconds · 9:16 portrait**
 
 https://github.com/user-attachments/assets/5d87a1b1-b0cc-4a1b-ab76-ef31981e8326
 
-A cheerful 9:16 companion travel story: six source clips, a splash that ruins a pose, a laughing camera operator and a shared memory. The 42.5-second case shows the source grid first, followed by split screens, layered lettering, speed ramps, masks, color and sound bridges. Original sound remains audible under the music.
+A splash ruins a pose. The camera operator laughs. A shared memory takes shape. **Look for:** split screens, layered lettering, speed ramps, masks, color and sound bridges. Original sound stays audible under the music.
 
 [Download the English film](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/travel-vlog/videos/travel-vlog-film_en.mp4) · [English editable project](examples/showcases/travel-vlog/projects/travel-vlog_en.cutvokepack) · [Source media and both languages](examples/showcases/travel-vlog/README.md)
 
 All timeline editing, compositing, mixing and MP4 exports were done in CutVoke. Install Git LFS and run `git lfs pull` to retrieve the videos, original media and project packages. Open a `.cutvokepack` through **Unpack and open** in CutVoke.
+
+## Inside the editor
 
 ![CutVoke English interface: media library, landscape preview and editable multitrack timeline](docs/assets/readme/en/editor-overview.png)
 
@@ -36,7 +58,7 @@ All timeline editing, compositing, mixing and MP4 exports were done in CutVoke. 
 
 ## Why try it?
 
-A first cut often leads to many small revisions: change a subtitle, shorten the opening, replace an image, or take over an AI-assisted edit. CutVoke makes those revisions addressable changes to a visible project.
+After the first cut, a caption fix, a music change or a shorter shot is a focused edit to a project object.
 
 | The friction | How CutVoke helps |
 | --- | --- |
@@ -47,14 +69,8 @@ A first cut often leads to many small revisions: change a subtitle, shorten the 
 
 CutVoke edits and renders media you supply. Your external AI provides understanding, planning and review; the editor contains no large-model or video generation service. This is an early-stage project, so keep original media and independent backups.
 
-## Who is it for, and what can you make first?
-
-- **Video and content creators:** assemble local video, images and music into a small travel, portfolio or product edit, with titles, captions and pacing you can still adjust.
-- **People who iterate on details:** ask an AI to fix one subtitle, swap a source or refine the opening, then inspect the result yourself.
-- **Developers building AI editing tools:** connect locally over MCP or HTTP to reuse projects, editing commands, actual frame inspection and asynchronous export.
-- **Effect and resource developers:** start from a working transition example and contribute manifests, resources and evidence through a PR.
-
-These workflows use existing capabilities. Query the running `editor_help` and command catalog for their current parameters.
+<details>
+<summary><strong>Four practical starting points</strong></summary>
 
 | Scenario | A reproducible starting point |
 | --- | --- |
@@ -63,7 +79,10 @@ These workflows use existing capabilities. Query the running `editor_help` and c
 | Make another version with new media | Use `project_clone`, import the replacement and apply `asset.swap`, preserving the original project |
 | Deliver a video and an editable handoff | Run `project.preflight`, export asynchronously, and use `project_package` when further editing is needed |
 
-## One project, human and AI handoffs
+</details>
+
+<details>
+<summary><strong>See how human and AI handoffs work</strong></summary>
 
 ```mermaid
 flowchart LR
@@ -84,9 +103,26 @@ For the latest source build, see the [production workflow](docs/production-workf
 
 *English caption editing: the selected line, its 0–4 second interval and its editable preview overlay. Captions remain individual project objects you can refine.*
 
+</details>
+
 ## Get started
 
-### Windows portable (x64 prerelease)
+**Download, extract and start editing.** Basic local import, editing, preview and MP4 export need no AI account or separate Python, Node.js or FFmpeg installation.
+
+| Your device | v0.3.1 prerelease |
+| --- | --- |
+| Windows x64 | [Portable ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-windows-x64-portable.zip) |
+| Mac · Apple Silicon | [arm64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-arm64.zip) |
+| Mac · Intel | [x64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-x64.zip) |
+| Linux x64 | [tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-linux-x64.tar.gz) |
+
+[Verify SHA-256](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS) · [Installation / troubleshooting](docs/user/installation.md) · [All release assets](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1)
+
+> [!NOTE]
+> The video showcases were made with the latest source build. Some effects and project-package features postdate v0.3.1. Use the source instructions below to reproduce these examples.
+
+<details>
+<summary><strong>Windows portable (x64 prerelease)</strong></summary>
 
 [Download Windows portable 0.3.1](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-windows-x64-portable.zip) — **363.1 MiB**, from the [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1).
 
@@ -98,15 +134,12 @@ No installer, administrator permission, Python, Node.js or system FFmpeg is need
 
 Projects, imported media, settings and caches use **`CutVoke Data` beside the executable**. Preserve it when updating; use project packaging/relink when moving media. The package is **unsigned** and may trigger SmartScreen. It passed automated Windows Server 2022 x64 frozen-package GUI, MCP, import → preview → export/decode and lifecycle checks. Manual Windows 10/11, audio/GPU and SmartScreen acceptance remain separate. See [exact hashes, storage and limits](docs/user/installation.md#windows-portable-x64).
 
-### macOS (Apple Silicon / Intel) and Linux (x64)
+</details>
+
+<details>
+<summary><strong>macOS (Apple Silicon / Intel) and Linux (x64)</strong></summary>
 
 The [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1) contains the original verified packages, built from `fdec479c4acbc3c685a5c8adbe8ec91621a7c194`. The tag points to documentation commit `58f890090463300c007f541ac36be8bca71bb4e9`; the binaries were not rebuilt.
-
-| Platform | Direct Release download | Archive size |
-| --- | --- | --- |
-| Mac Apple Silicon | [macOS arm64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-arm64.zip) | 335.8 MiB |
-| Mac Intel | [macOS x64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-x64.zip) | 402.8 MiB |
-| Linux x64 | [Linux tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-linux-x64.tar.gz) | 342.9 MiB |
 
 These are the actual archives, ready to extract; no outer Actions ZIP is involved. Verify against [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS). The built editor, frozen backend, FFmpeg/ffprobe, resources, fonts and licenses are included; basic editing needs no separate Python, Node.js or FFmpeg. [Installation and requirements](docs/user/installation.md#macos-arm64--x64) and the [original native evidence](docs/development/native-packages-verification.json) describe the exact scope.
 
@@ -115,7 +148,10 @@ These are the actual archives, ready to extract; no outer Actions ZIP is involve
 
 Mac data lives in `~/Library/Application Support/CutVoke/`; Linux data lives in `${XDG_DATA_HOME:-~/.local/share}/CutVoke/`. Preserve it when replacing the app. Automated frozen-package import, preview, export/full decode and lifecycle checks do not establish manual audio/GPU, quarantined Finder launch or all-device acceptance.
 
-### Run from source (developers)
+</details>
+
+<details>
+<summary><strong>Run from source and make your first 12-second edit</strong></summary>
 
 You need **Python 3.10+, Node.js 20+, FFmpeg and ffprobe**. The FFmpeg build must support H.264/AAC, overlays, text and subtitle rendering; `doctor` checks the required dependencies.
 
@@ -163,11 +199,16 @@ The source workflow has been checked in the Linux cloud environment, including F
 
 The service binds to local loopback by default. Source/CLI installs put default project data and media under the user's `.cutvoke` directory. The example above uses its own `.artifacts/first-edit/data` and does not open the default personal project library. The Windows portable edition uses its sibling `CutVoke Data` folder; native Mac/Linux desktop packages use the platform directories above.
 
-### Choose your interface language
+</details>
+
+<details>
+<summary><strong>Interface languages and translation notes</strong></summary>
 
 Use the language selector on the home screen or editor toolbar. The interface supports Simplified Chinese, Traditional Chinese, English, Japanese, Korean, Spanish, French, German, Portuguese (Brazil), Russian and Arabic. The first visit follows your preferred system/browser languages. An explicit choice stays in the browser after reload; the desktop app also saves it across restarts and uses it for its loading page and native dialog titles, summaries and action buttons. Arabic uses a right-to-left interface while the timeline keeps time moving from left to right.
 
 Language changes affect interface labels, owned progress messages and operation prompts, not project names, captions, media filenames or saved editing data. Technical diagnostics retain their original text beneath localized summaries; resource metadata uses the author's language entries and registry fallback. Operating-system file-dialog controls follow the OS language. Translations include machine-assisted drafts and have **not been reviewed by native speakers**; corrections are welcome through the [translation guide](docs/development/translations.md).
+
+</details>
 
 ## Give your AI an editing workflow
 
@@ -178,6 +219,9 @@ Configure the client using [the MCP connection guide](docs/user/external-agent-e
 ```bash
 cutvoke mcp --data .artifacts/first-edit/data
 ```
+
+<details>
+<summary><strong>Install the editing skill and try a creative task</strong></summary>
 
 MCP already includes `editor_help` for current commands, units, recipes and error recovery. The optional [cutvoke-editor skill](skills/cutvoke-editor/SKILL.md) adds guidance for media inventory, audience and goals, shot rhythm, sound/captions, restrained transitions, preview feedback and final review.
 
@@ -191,9 +235,16 @@ After connecting, try a request such as:
 
 The skill is creative guidance. It does not install a model or guarantee a polished film from installation alone. Media permissions, the agent's ability to see/listen, and editorial judgment still matter. User media must not be uploaded without authorization.
 
+</details>
+
 ## Build effects together
 
 Contribute useful transitions, filters, sound treatments, text animation and reusable resources. Start with a **GitHub PR** and an edit that others can preview and reproduce.
+
+[Contribution guide](effects/README.md) · [Runnable transition example](effects/transitions/cutvoke.transition.community.soft-reveal/README.md)
+
+<details>
+<summary><strong>See the real transition example and contribution scope</strong></summary>
 
 ![CutVoke English transition panel showing Soft Reveal at the 4-second cut and its effective 0.60-second duration](docs/assets/readme/en/community-transition.png)
 
@@ -202,6 +253,8 @@ Contribute useful transitions, filters, sound treatments, text animation and reu
 Start with [the contribution guide](effects/README.md) and [the runnable sample](effects/transitions/cutvoke.transition.community.soft-reveal/README.md). Store new contributions under `effects/<family>/<effect-id>/` with a manifest, description, license and actual preview. Existing assets retain their paths.
 
 Declarative transitions can reuse supported FFmpeg mappings. Other families depend on implemented rendering semantics; a new algorithm still needs an implementation and test PR. A manifest cannot add arbitrary behavior. This contribution path offers no general dynamic-code plugin loading, automatic publication or hot reload.
+
+</details>
 
 ## Learn more and contribute
 
@@ -220,3 +273,9 @@ Declarative transitions can reuse supported FFmpeg mappings. Other families depe
 Treat CutVoke as an early-stage project: project formats and interfaces can change, complex first previews wait for FFmpeg, and optional speech/person processing needs additional dependencies/models. The sample does not establish large-project performance, every effect or every AI client's compatibility. Try a small copy before using it for important work.
 
 Source code uses the [MIT License](LICENSE). FFmpeg is a separate dependency with build-specific licensing and distribution requirements. Preserve the licenses and attribution of external media.
+
+---
+
+**Help shape the next cut.** [Report an issue](https://github.com/frankShan001/CutVoke/issues) · [Pick a task](docs/development/community-tasks.md) · [Contribute an effect](effects/README.md)
+
+If CutVoke helps you create, a Star helps other creators find it.

@@ -1,34 +1,56 @@
-# CutVoke
+<p align="center">
+  <img src="docs/assets/readme/banner.svg" alt="CutVoke — 本地视频编辑器，共享可编辑时间线" width="960" />
+</p>
 
-[English](README.md) · **简体中文**
+<h3 align="center">你的素材，你的 AI，同一条可编辑时间线。</h3>
 
-**让你与 AI Agent 在同一条可编辑时间线上协作的本地视频编辑器。**
+<p align="center">用你熟悉的 AI 剪出初稿，随时回到编辑器精修。每一次修改，都留在可继续编辑的本地工程里。</p>
 
-把素材剪成初稿，让你熟悉的 AI 调整镜头、标题或字幕，再随时回到编辑器精修。CutVoke 保留工程中的片段、文字、声音和效果，每次修改都能继续查看和编辑。
+<p align="center">
+  <a href="https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1"><img src="https://img.shields.io/badge/v0.3.1-prerelease-527fca?style=flat-square" alt="v0.3.1 prerelease" /></a>
+  <a href="https://github.com/frankShan001/CutVoke/actions/workflows/ci.yml"><img src="https://github.com/frankShan001/CutVoke/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-4d8a74?style=flat-square" alt="MIT license" /></a>
+</p>
 
-[开始体验](#开始体验) · [给你的-ai-一套剪辑工作流](#给你的-ai-一套剪辑工作流) · [一起打造特效](#一起打造特效)
+<p align="center"><a href="#开始体验">下载体验</a> · <a href="#看看两个完整剪辑案例">观看案例</a> · <a href="#给你的-ai-一套剪辑工作流">接入 AI</a> · <a href="#深入了解与参与">文档</a> · <a href="CONTRIBUTING.zh-CN.md">参与贡献</a></p>
+
+<p align="center"><a href="README.md">English</a> · <strong>简体中文</strong></p>
+
+<table>
+<tr>
+<td width="33%" valign="top"><strong>剪辑看得见</strong><br/>多轨 · 字幕 · 特效</td>
+<td width="33%" valign="top"><strong>与 Agent 协作</strong><br/>MCP · HTTP · CLI</td>
+<td width="33%" valign="top"><strong>继续你的创作</strong><br/>MP4 + 可编辑工程</td>
+</tr>
+</table>
 
 ## 看看两个完整剪辑案例
 
-两个案例均提供**中文、英文成片，配套可编辑工程和原始素材**。本页展示中文版本。下方播放窗口可直接观看带声音的完整原素材与剪辑效果对比片。
+先看原始素材，再看完整剪辑。两个案例都提供 **中英文视频、原始素材和可编辑工程**；本页播放器使用中文版，打开声音即可观看。
 
-### 逐光而行 · 摩托短片
+### 01 · 逐光而行
+
+**摩托短片 · 31.6 秒 · 横屏**
 
 https://github.com/user-attachments/assets/5647c4b6-2b2b-45db-bda4-e6ad83a4eca3
 
-从四段 MiniMax 原始镜头出发，展示移动遮罩、碎片重构、光源锚点跟踪、多层光影和文字动态。31.583 秒对比片先展示 8 秒原始四宫格，再进入分段卡和 22.333 秒成片。成片内部标题、短句和文字遮罩也已中文化，保留 CutVoke 品牌名。
+**看这些效果：**移动遮罩、碎片重构、光源锚点跟踪、多层光影和动态文字。先展示四段 MiniMax 原始镜头，再播放 22.3 秒成片；片内文字已中文化。
 
 [下载中文纯成片](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/chase-the-light/videos/motorcycle-film_zh-CN.mp4) · [中文完整剪辑工程](examples/showcases/chase-the-light/projects/motorcycle-edit_zh-CN.cutvokepack) · [素材与中英文版本](examples/showcases/chase-the-light/README.zh-CN.md)
 
-### 海岸快乐日记 · 手持旅拍 Vlog
+### 02 · 海岸快乐日记
+
+**手持旅拍 · 42.5 秒 · 9:16 竖屏**
 
 https://github.com/user-attachments/assets/1210c3ae-eb37-47db-b1c7-1598f4e7b136
 
-9:16 竖屏旅伴日记：摆拍被海浪打断，摄影师先笑场，最后留下两个人的快乐回忆。42.5 秒案例先展示六宫格原始素材，再展示分屏、彩色分层花字、曲线变速、遮罩、调色及声音衔接；配乐下保留环境声。
+摆拍被海浪打断，摄影师先笑场，两个人留下快乐回忆。**看这些效果：**分屏、彩色分层花字、曲线变速、遮罩、调色与声音衔接；音乐下保留环境声。
 
 [下载中文纯成片](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/travel-vlog/videos/travel-vlog-film_zh-CN.mp4) · [中文可编辑工程](examples/showcases/travel-vlog/projects/travel-vlog_zh-CN.cutvokepack) · [素材与中英文版本](examples/showcases/travel-vlog/README.zh-CN.md)
 
 全部时间线剪辑、合成、混音与 MP4 导出均由 CutVoke 完成。视频、原始素材和工程包使用 Git LFS，克隆后运行 `git lfs pull`。在 CutVoke 首页通过「解包打开」导入 `.cutvokepack`，即可继续编辑。
+
+## 在编辑器里，继续你的创作
 
 ![CutVoke 简体中文界面：素材库、风景短片预览和多轨可编辑时间线](docs/assets/readme/zh-CN/editor-overview.png)
 
@@ -36,7 +58,7 @@ https://github.com/user-attachments/assets/1210c3ae-eb37-47db-b1c7-1598f4e7b136
 
 ## 为什么值得试
 
-做完初稿，往往才开始反复修改：一句字幕要换、开头镜头要缩短、图片要替换，或者 AI 剪完后还要手动接着改。CutVoke 让这些改动落在可见的工程对象上。
+初稿之后的一句字幕、一段配乐、一次镜头调整，都可以落在具体的工程对象上。
 
 | 你遇到的麻烦 | CutVoke 如何帮助 |
 | --- | --- |
@@ -47,14 +69,8 @@ https://github.com/user-attachments/assets/1210c3ae-eb37-47db-b1c7-1598f4e7b136
 
 CutVoke 负责剪辑和渲染你提供的素材；外部 AI 负责理解需求、规划与审片。编辑器不内置大模型或视频生成服务。项目仍在早期开发阶段，请保留原始素材和独立备份。
 
-## 适合谁、可以先做什么
-
-- **短视频与内容创作者**：把本地视频、图片和音乐做成小型旅行、作品集或产品短片，保留可调整的标题、字幕和节奏。
-- **需要反复精修的人**：让 AI 根据反馈修改一句字幕、替换一段素材或调整开场时长，再人工检查画面。
-- **构建 AI 剪辑工具的开发者**：通过本地 MCP 或 HTTP 接入工程、编辑命令、真实画面检查和异步导出，复用现有引擎。
-- **制作特效与资源的开发者**：从可运行转场样例开始，用 PR 提交清单、资源和验证证据。
-
-下面的使用方式都依赖现有功能，具体操作以运行中的 `editor_help` 与命令目录为准。
+<details>
+<summary><strong>四种可以马上开始的用法</strong></summary>
 
 | 场景 | 可复现的做法 |
 | --- | --- |
@@ -63,7 +79,10 @@ CutVoke 负责剪辑和渲染你提供的素材；外部 AI 负责理解需求�
 | 用新素材制作不同版本 | 先 `project_clone`，再导入素材并使用 `asset.swap`；保留原工程 |
 | 交付成片与工程 | 先 `project.preflight`，再异步导出；需要接续编辑时使用 `project_package` |
 
-## 一条工程，人工与 AI 接力
+</details>
+
+<details>
+<summary><strong>查看人工与 AI 如何接力</strong></summary>
 
 ```mermaid
 flowchart LR
@@ -84,9 +103,26 @@ flowchart LR
 
 *简体中文界面中的字幕编辑：选中「暂别喧嚣。」，查看 0–4 秒区间及可编辑画面叠层，继续精修同一工程。*
 
+</details>
+
 ## 开始体验
 
-### Windows 免安装便携版（x64 预发布）
+**直接下载，解压启动。** 基础本地导入、剪辑、预览与 MP4 导出无需 AI 账号，也无需另装 Python、Node.js 或 FFmpeg。
+
+| 你的设备 | v0.3.1 预发布 |
+| --- | --- |
+| Windows x64 | [免安装 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-windows-x64-portable.zip) |
+| Mac · Apple Silicon | [arm64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-arm64.zip) |
+| Mac · Intel | [x64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-x64.zip) |
+| Linux x64 | [tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-linux-x64.tar.gz) |
+
+[校验 SHA-256](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS) · [安装与排障](docs/user/installation.md) · [全部发行包](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1)
+
+> [!NOTE]
+> 上方视频案例使用最新源码版制作，部分效果和工程包功能晚于 v0.3.1。复现这两个案例时，请使用下方源码启动方式。
+
+<details>
+<summary><strong>Windows 免安装便携版（x64 预发布）</strong></summary>
 
 [下载 Windows 便携版 0.3.1](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-windows-x64-portable.zip) — **363.1 MiB**，来自 [v0.3.1 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1)。
 
@@ -98,15 +134,12 @@ flowchart LR
 
 工程、素材、设置和缓存默认放在 **exe 旁的 `CutVoke Data`**，更新时保留；换路径或电脑时使用工程打包或重新关联。包**未签名**，可能出现 SmartScreen。真实成品已通过 Windows Server 2022 x64 上的 GUI、MCP、导入 → 预览 → 导出/解码和生命周期自动验收；Windows 10/11、音频/GPU 和 SmartScreen 的人工体验仍需分别检查。[准确哈希、存储位置与边界](docs/user/installation.md#windows-portable-x64)见安装说明。
 
-### macOS（Apple Silicon / Intel）和 Linux（x64）
+</details>
+
+<details>
+<summary><strong>macOS（Apple Silicon / Intel）和 Linux（x64）</strong></summary>
 
 [v0.3.1 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1) 提供已验证的原始包，二进制实际构建自 `fdec479c4acbc3c685a5c8adbe8ec91621a7c194`；标签指向文档提交 `58f890090463300c007f541ac36be8bca71bb4e9`，本次未重新构建二进制。
-
-| 平台 | Release 直接下载 | 发行包大小 |
-| --- | --- | --- |
-| Mac Apple Silicon | [macOS arm64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-arm64.zip) | 335.8 MiB |
-| Mac Intel | [macOS x64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-macos-x64.zip) | 402.8 MiB |
-| Linux x64 | [Linux tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-linux-x64.tar.gz) | 342.9 MiB |
 
 附件就是可直接解压的真实发行包，无需再取出 Actions 外层 ZIP。请核对 [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS)。内含编辑器、冻结后端、FFmpeg/ffprobe、资源、字体和许可，基础剪辑无需另装 Python、Node.js 或 FFmpeg。[安装与系统要求](docs/user/installation.md#macos-arm64--x64)和[原生验证记录](docs/development/native-packages-verification.json)列明准确范围。
 
@@ -115,7 +148,10 @@ flowchart LR
 
 Mac 数据位于 `~/Library/Application Support/CutVoke/`，Linux 位于 `${XDG_DATA_HOME:-~/.local/share}/CutVoke/`；更新应用时保留。真实冻结包导入、预览、导出/完整解码和生命周期自动验收，不等于手工音质、设备 GPU、带隔离标记的 Finder 首次启动或所有系统测试。
 
-### 从源码运行（开发者）
+</details>
+
+<details>
+<summary><strong>从源码运行，并制作第一条 12 秒短片</strong></summary>
 
 需要 **Python 3.10+、Node.js 20+、FFmpeg 与 ffprobe**。FFmpeg 构建需要支持 H.264/AAC、叠加、文字和字幕渲染；`doctor` 会实际检查必要依赖。
 
@@ -163,11 +199,16 @@ cutvoke serve --data .artifacts/first-edit/data
 
 默认服务只监听本机回环地址。源码/CLI 版的默认数据库和素材放在用户目录 `.cutvoke`；上面的示例使用独立 `.artifacts/first-edit/data`，不会打开默认个人工程库。Windows 便携版使用 exe 旁的 `CutVoke Data`，Mac/Linux 桌面包使用上方平台数据目录。
 
-### 选择界面语言
+</details>
+
+<details>
+<summary><strong>界面语言与翻译说明</strong></summary>
 
 首页和编辑器顶部均有语言选择器，支持简体中文、繁体中文、英语、日语、韩语、西班牙语、法语、德语、葡萄牙语（巴西）、俄语和阿拉伯语。首次访问按系统或浏览器偏好语言匹配；手动选择会保存在当前浏览器，刷新后仍有效。桌面版还会跨次启动保存偏好，并用于加载页及原生弹窗的标题、摘要和操作按钮。阿拉伯语采用从右到左的界面，时间线仍按从左到右的时间方向操作。
 
 切换影响界面标签、自有进度消息和操作提示，不翻译工程名称、字幕、素材文件名或保存的剪辑数据。技术诊断保留原文，并配本地化摘要；资源元数据使用作者提供的语言项及注册表回退。文件对话框中的系统控件跟随操作系统语言。翻译包含机器辅助初稿，**尚未经母语使用者审校**；欢迎按 [翻译贡献说明](docs/development/translations.zh-CN.md) 修正。
+
+</details>
 
 ## 给你的 AI 一套剪辑工作流
 
@@ -178,6 +219,9 @@ cutvoke serve --data .artifacts/first-edit/data
 ```bash
 cutvoke mcp --data .artifacts/first-edit/data
 ```
+
+<details>
+<summary><strong>安装剪辑技能，并尝试一个创作任务</strong></summary>
 
 MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错误恢复。可选的 [cutvoke-editor 技能](skills/cutvoke-editor/SKILL.md) 进一步指导素材盘点、受众与目标、镜头节奏、声音字幕、克制转场、预览反馈与成片验收。
 
@@ -191,9 +235,16 @@ MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错�
 
 技能是创作指导，不会安装模型，也不保证仅靠安装就能得到精美成片。素材权限、视觉/听音能力和审片判断仍然重要；未经授权不上传用户素材。
 
+</details>
+
 ## 一起打造特效
 
 欢迎贡献有用的转场、滤镜、声音处理、文字动画和可复用资源。以 **GitHub PR** 为入口，把想法变成可预览、可复验的作品。
+
+[中文贡献指南](docs/user/effect-contributing.zh-CN.md) · [可运行转场样例](effects/transitions/cutvoke.transition.community.soft-reveal/README.md)
+
+<details>
+<summary><strong>查看真实转场示例与贡献边界</strong></summary>
 
 ![CutVoke 简体中文转场面板：4 秒切点上的柔和揭幕转场与实际生效的 0.60 秒时长](docs/assets/readme/zh-CN/community-transition.png)
 
@@ -202,6 +253,8 @@ MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错�
 从 [中文贡献指南](docs/user/effect-contributing.zh-CN.md) 和 [可运行样例](effects/transitions/cutvoke.transition.community.soft-reveal/README.md) 开始。新贡献按 `effects/<类型>/<效果ID>/` 保存清单、说明、许可证和真实预览；既有资源保持原路径。
 
 现有声明式转场可复用 FFmpeg 映射；其他类型依赖已实现的渲染语义。新增算法仍需要实现和测试 PR，不能只靠清单增加任意行为。当前贡献路径不提供通用动态代码插件、自动发布或热加载。
+
+</details>
 
 ## 深入了解与参与
 
@@ -220,3 +273,9 @@ MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错�
 目前应将 CutVoke 视为早期项目：工程格式和接口可能调整，首次复杂预览需要等待 FFmpeg，可选语音识别与人物处理另需依赖/模型。示例不能代表长工程性能、所有效果或所有 AI 客户端兼容性。请先在小型副本中试用，再用于重要项目。
 
 源码使用 [MIT License](LICENSE)。FFmpeg 是独立依赖，具体构建的许可证与分发要求单独适用；外部素材应保留各自授权与署名。
+
+---
+
+**一起把下一次剪辑做得更好。** [反馈问题](https://github.com/frankShan001/CutVoke/issues) · [认领任务](docs/development/community-tasks.md) · [贡献特效](docs/user/effect-contributing.zh-CN.md)
+
+如果 CutVoke 帮到了你，欢迎点一颗 Star，让更多创作者发现它。
