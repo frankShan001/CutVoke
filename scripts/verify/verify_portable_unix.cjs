@@ -143,13 +143,13 @@ async function main() {
     await launch();
     report.checks.visibleGUIAndHealthyFrozenBackend = true;
     const presets = await api("presets");
-    assert.equal(presets.qualifiedCount, 189);
+    assert.equal(presets.qualifiedCount, 192);
     assert.equal(presets.resourcePack.offlineAvailable, true, JSON.stringify(presets.resourcePack));
     assert.deepEqual(presets.resourcePack.missingFiles, []);
     assert.deepEqual(presets.resourcePack.invalidFiles, []);
     const stickers = await api("stickers");
     assert.equal(stickers.stickers.filter(item => item.qualified).length, 612);
-    report.builtinResources = { qualifiedPresets: 189, qualifiedStickers: 612,
+    report.builtinResources = { qualifiedPresets: 192, qualifiedStickers: 612,
       resourceCount: presets.resourcePack.resourceCount, version: presets.resourcePack.version, offlineAvailable: true };
     report.checks.builtinResourcesQualifiedAndOffline = true;
     // Block outbound browser traffic and record requests during the entire edit.

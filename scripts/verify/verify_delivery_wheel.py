@@ -142,7 +142,7 @@ print(json.dumps({"sourceFont":resolve_title_font("Noto Sans SC"),"cachePath":pa
     manifest = json.loads((installed_package / 'core/builtin_resource_pack.json').read_text(encoding='utf-8'))
     report['builtinResourcePack'] = {'packId': manifest['packId'], 'version': manifest['version'],
                                    'resourceCount': len(manifest['resources'])}
-    assert manifest['version'] == '1.38.1'
+    assert manifest['version'] == '1.39.0'
     STAGE = 'complete'
     (output / 'result.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print(json.dumps({key: value for key, value in report.items() if key not in ('files', 'doctor')}, ensure_ascii=True))
