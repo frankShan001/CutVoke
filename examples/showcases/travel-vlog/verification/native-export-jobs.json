@@ -1,0 +1,58 @@
+[
+  {
+    "ok": true,
+    "jobId": "export_4449f33adf5f",
+    "projectId": "p_89d1229c",
+    "revision": "4",
+    "requestHash": "queue:40336:134368571143083127:export_4449f33adf5f",
+    "outPath": "videos/travel-vlog-case_zh-CN.mp4",
+    "quality": "high",
+    "status": "succeeded",
+    "result": {
+      "output_path": "E:\\myproject\\opencut\\examples\\showcases\\travel-vlog\\videos\\travel-vlog-case_zh-CN.mp4",
+      "duration": 42.5,
+      "width": 1080,
+      "height": 1920,
+      "has_audio": true,
+      "has_alpha": false,
+      "pix_fmt": "yuv420p",
+      "color_primaries": null,
+      "color_transfer": null,
+      "color_space": "bt709",
+      "warnings": [],
+      "renderStrategy": "lossless-windows",
+      "windowCount": 6
+    },
+    "error": null,
+    "createdAt": 1792391250.3704762,
+    "updatedAt": 1792392062.1104286
+  },
+  {
+    "ok": true,
+    "jobId": "export_5954f00ec214",
+    "projectId": "p_89d1229c",
+    "revision": "5",
+    "requestHash": "queue:40336:134368571143083127:export_5954f00ec214",
+    "outPath": "videos/travel-vlog-film_zh-CN.mp4",
+    "quality": "high",
+    "status": "succeeded",
+    "result": {
+      "output_path": "E:\\myproject\\opencut\\examples\\showcases\\travel-vlog\\videos\\travel-vlog-film_zh-CN.mp4",
+      "duration": 38.5,
+      "width": 1080,
+      "height": 1920,
+      "has_audio": true,
+      "has_alpha": false,
+      "pix_fmt": "yuv420p",
+      "color_primaries": null,
+      "color_transfer": null,
+      "color_space": "bt709",
+      "warnings": [],
+      "renderStrategy": "lossless-windows",
+      "windowCount": 5
+    },
+    "error": null,
+    "createdAt": 1792391250.6563342,
+    "updatedAt": 1792392386.6831863
+  }
+]

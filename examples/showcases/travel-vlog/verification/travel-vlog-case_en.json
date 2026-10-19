@@ -1,0 +1,16 @@
+{
+  "path": "travel-vlog/videos/travel-vlog-case_en.mp4",
+  "width": 1080,
+  "height": 1920,
+  "fps": 24.0,
+  "duration": 42.5,
+  "frames": 1020,
+  "hasAudio": true,
+  "samplePeakDbFS": -2.081,
+  "clippedSamples": 0,
+  "decodedAudioSamples": 4081664,
+  "blackFrameTimes": [],
+  "sha256": "a3d803d07876b39d4e7347b45c83402b463acd967a260ecdc496e69618afa60d",
+  "bytes": 87152479,
+  "scope": "Full decode, sample peaks and sampled visual frames; not a listening or true-peak claim."
+}

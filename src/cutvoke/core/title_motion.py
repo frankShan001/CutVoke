@@ -19,14 +19,17 @@ from .rational import Rational
 
 ENTRANCES = ("impact", "slide-left", "slide-up", "flip", "stagger", "blur-in")
 EXITS = ("zoom-through", "slide-right", "scatter")
-LOOPS = ("glitch", "wave")
+LOOPS = ("glitch", "wave", "float")
 
 
 def needs_title_motion(params: dict, keyframes: dict) -> bool:
     return (any(keyframes.values()) or params.get("animInStyle") in ENTRANCES
             or params.get("animOutStyle") in EXITS
             or params.get("animLoopStyle") in LOOPS
-            or float(params.get("animGlow", 0)) > 0)
+            or float(params.get("animGlow", 0)) > 0
+            or float(params.get("outerStrokeWidth", 0)) > 0
+            or float(params.get("blockShadowX", 0)) != 0
+            or float(params.get("blockShadowY", 0)) != 0)
 
 
 def _clamp(value: float) -> float:
@@ -164,6 +167,12 @@ def _at(cap: Caption, spec: dict, local: Fraction, width: int, height: int,
             phase = now / cycle * math.tau + index * .65
             g = replace(g, y=g.y + em * .14 * strength * math.sin(phase),
                         rotation=g.rotation + 7 * strength * math.sin(phase))
+        elif cap.animLoopStyle == "float":
+            # Move the shaped word together: preserve kerning and keep the
+            # lettering's face, rim and offset shadow on one motion clock.
+            phase = now / cycle * math.tau
+            g = replace(g, y=g.y + em * .08 * strength * math.sin(phase),
+                        rotation=g.rotation + 1.5 * strength * math.sin(phase))
         elif cap.animLoopStyle == "pulse":
             factor = 1 + .22 * math.sin(max(0, now - enter) / cycle * math.pi) ** 2
             g = replace(g, scale=g.scale * factor)
@@ -222,6 +231,14 @@ def title_motion_events(cap: Caption, spec: dict, style: str, width: int, height
     glow = float(spec["params"].get("animGlow", 0)) * height / 1080
     glow_color = color(str(spec["params"].get("animColor", "#FF39D4")))
     strength = float(spec["params"].get("animStrength", 1))
+    params = spec["params"]
+    unit = height / 1080
+    outer = float(params.get("outerStrokeWidth", 0)) * unit
+    border = cap.strokeWidth * unit / 2
+    rim_color = color(str(params.get("outerStrokeColor", "#4B9FAD")))
+    depth_color = color(str(params.get("blockShadowColor", "#2B7183")))
+    depth_x = float(params.get("blockShadowX", 0)) * unit
+    depth_y = float(params.get("blockShadowY", 0)) * unit
     events: list[str] = []
     held: tuple | None = None
     held_start = Fraction(0)
@@ -273,6 +290,19 @@ def title_motion_events(cap: Caption, spec: dict, style: str, width: int, height
                         f"\\frz{glyph.rotation:.2f}\\frx{glyph.flip:.2f}"
                         f"\\alpha&H{alpha:02X}&\\blur{glyph.blur:.2f}")
             text = escape(glyph.text)
+            if depth_x or depth_y:
+                # ASS positive Z rotation is counterclockwise. Rotate the
+                # word-local offset, then apply the same animated scale.
+                angle = math.radians(glyph.rotation)
+                dx = (depth_x * math.cos(angle) + depth_y * math.sin(angle)) * glyph.scale
+                dy = (-depth_x * math.sin(angle) + depth_y * math.cos(angle)) * glyph.scale
+                shifted = geometry.replace(f"\\pos({glyph.x:.2f},{glyph.y:.2f})",
+                    f"\\pos({glyph.x + dx:.2f},{glyph.y + dy:.2f})")
+                pieces.append((0, f"{{{shifted}\\bord{border + outer:.2f}"
+                               f"\\1c{depth_color}&\\3c{depth_color}&\\shad0}}{text}"))
+            if outer:
+                pieces.append((1, f"{{{geometry}\\bord{border + outer:.2f}"
+                               f"\\1c{rim_color}&\\3c{rim_color}&\\shad0}}{text}"))
             if glow:
                 halo = (f"{{{geometry}\\bord{glow:.2f}\\blur{max(1, glow * .6):.2f}"
                         f"\\1a&HFF&\\3c{glow_color}&\\shad0}}{text}")

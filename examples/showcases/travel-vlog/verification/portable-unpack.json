@@ -1,0 +1,18 @@
+[
+  {
+    "package": "travel-vlog_en.cutvokepack",
+    "nativeUnpack": true,
+    "warnings": [],
+    "unknownEffects": [],
+    "relinkedClipReferences": 76,
+    "allReferencesInsideNewDirectory": true
+  },
+  {
+    "package": "travel-vlog_zh-CN.cutvokepack",
+    "nativeUnpack": true,
+    "warnings": [],
+    "unknownEffects": [],
+    "relinkedClipReferences": 76,
+    "allReferencesInsideNewDirectory": true
+  }
+]

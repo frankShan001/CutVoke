@@ -1,0 +1,12 @@
+{
+  "presetId": "cutvoke.preset.text.travel_note",
+  "generator": "scripts/verify/verify_travel_title_presets.py",
+  "renderPath": "RenderService",
+  "coverSha256": "c682eb66f2169eaba1d73074381a5b8b0181f35b3d0e41b27c8ea527850a5092",
+  "previewSha256": "0a79bd661e3e62c1f52610c5449a76a9348b005a8493cb0a07f3bdcdf00115be",
+  "firstLastMeanRgbDifference": 2.9141,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

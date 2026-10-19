@@ -1,4 +1,10 @@
 {
+  "外层描边宽度": "Largura do contorno externo",
+  "外层描边颜色": "Cor do contorno externo",
+  "错位投影水平距离": "Deslocamento X da sombra",
+  "错位投影垂直距离": "Deslocamento Y da sombra",
+  "错位投影颜色": "Cor da sombra deslocada",
+  "整词微浮动": "Flutuação suave da palavra",
   " MB · SHA-256 已登记": " MB · SHA-256 registado",
   " {0}": " {0}",
   " · MagicTouch 点提示跟踪": " • rastreamento do ponto MagicTouch",

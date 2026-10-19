@@ -381,7 +381,7 @@ class StickerLibraryTests(unittest.TestCase):
                 self.assertTrue(item["available"])
                 self.assertTrue(item["previewAvailable"])
                 self.assertEqual(item["resourceRef"]["packId"], "cutvoke.builtin-resources")
-                self.assertEqual(item["resourceRef"]["packVersion"], "1.38.1")
+                self.assertEqual(item["resourceRef"]["packVersion"], "1.39.0")
                 self.assertEqual(len(item["resourceRef"]["sha256"]), 64)
                 generated = next(sticker for sticker in response["stickers"]
                                  if sticker["stickerId"] ==

@@ -1,0 +1,18 @@
+[
+  {
+    "package": "motorcycle-case_zh-CN.cutvokepack",
+    "nativeUnpack": true,
+    "mediaFiles": 6,
+    "warnings": [],
+    "unknownEffects": [],
+    "sha256": "77954b0b5f5e2e2caacd968f2f2291a387338464e525ceddc81e26a821d722fd"
+  },
+  {
+    "package": "motorcycle-edit_zh-CN.cutvokepack",
+    "nativeUnpack": true,
+    "mediaFiles": 14,
+    "warnings": [],
+    "unknownEffects": [],
+    "sha256": "02e31230902cd4562412cb1970b8c1c07b71e6f57102f9562a8e6ce3ee692e55"
+  }
+]

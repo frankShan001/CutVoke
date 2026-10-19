@@ -8,15 +8,27 @@
 
 [开始体验](#开始体验) · [给你的-ai-一套剪辑工作流](#给你的-ai-一套剪辑工作流) · [一起打造特效](#一起打造特效)
 
-## 四段原始素材，一条电影感成片
+## 看看两个完整剪辑案例
 
-从四段原始镜头到完整成片，看看 CutVoke 如何通过移动遮罩、文字动效与多层光影合成，让画面产生视觉冲击。
+两个案例均提供**中文、英文成片，配套可编辑工程和原始素材**。本页展示中文版本。下方动图完整预览对比时间线，不含声音；**点击画面即可打开带声音的完整 MP4**。
 
-https://github.com/user-attachments/assets/d3fde0a6-7928-4f2c-81ef-94618c6262ae
+### 逐光而行 · 摩托短片
 
-*31 秒对比视频：先展示 8 秒静音原始素材，再播放带配乐的剪辑效果。原始镜头由 MiniMax 生成，全部剪辑、合成与成片导出均由 CutVoke 完成。*
+[![观看中文版摩托原素材与剪辑效果对比](examples/showcases/chase-the-light/previews/motorcycle-case_zh-CN.gif)](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4)
 
-[下载对比视频](examples/showcases/chase-the-light/source-and-edit.mp4) · [查看可编辑工程与制作过程素材](examples/showcases/chase-the-light/README.md)
+从四段 MiniMax 原始镜头出发，展示移动遮罩、碎片重构、光源锚点跟踪、多层光影和文字动态。31.583 秒对比片先展示 8 秒原始四宫格，再进入分段卡和 22.333 秒成片。成片内部标题、短句和文字遮罩也已中文化，保留 CutVoke 品牌名。
+
+[观看中文纯成片](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/chase-the-light/videos/motorcycle-film_zh-CN.mp4) · [中文完整剪辑工程](examples/showcases/chase-the-light/projects/motorcycle-edit_zh-CN.cutvokepack) · [素材与中英文版本](examples/showcases/chase-the-light/README.zh-CN.md)
+
+### 海岸快乐日记 · 手持旅拍 Vlog
+
+[![观看中文版竖屏旅拍原素材与剪辑效果对比](examples/showcases/travel-vlog/previews/travel-vlog-case_zh-CN.gif)](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4)
+
+9:16 竖屏旅伴日记：摆拍被海浪打断，摄影师先笑场，最后留下两个人的快乐回忆。42.5 秒案例先展示六宫格原始素材，再展示分屏、彩色分层花字、曲线变速、遮罩、调色及声音衔接；配乐下保留环境声。
+
+[观看中文纯成片](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/travel-vlog/videos/travel-vlog-film_zh-CN.mp4) · [中文可编辑工程](examples/showcases/travel-vlog/projects/travel-vlog_zh-CN.cutvokepack) · [素材与中英文版本](examples/showcases/travel-vlog/README.zh-CN.md)
+
+全部时间线剪辑、合成、混音与 MP4 导出均由 CutVoke 完成。视频、原始素材和工程包使用 Git LFS，克隆后运行 `git lfs pull`。在 CutVoke 首页通过「解包打开」导入 `.cutvokepack`，即可继续编辑。
 
 ![CutVoke 简体中文界面：素材库、风景短片预览和多轨可编辑时间线](docs/assets/readme/zh-CN/editor-overview.png)
 

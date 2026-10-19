@@ -1,0 +1,56 @@
+[
+  {
+    "ok": true,
+    "jobId": "export_c75f6e3ea2bf",
+    "projectId": "p_ca66dde4",
+    "revision": "1",
+    "requestHash": "queue:40336:134368571143083127:export_c75f6e3ea2bf",
+    "outPath": "videos/motorcycle-film_zh-CN.mp4",
+    "quality": "high",
+    "status": "succeeded",
+    "result": {
+      "output_path": "E:\\myproject\\opencut\\examples\\showcases\\chase-the-light\\videos\\motorcycle-film_zh-CN.mp4",
+      "duration": 22.333333,
+      "width": 1024,
+      "height": 576,
+      "has_audio": true,
+      "has_alpha": false,
+      "pix_fmt": "yuv420p",
+      "color_primaries": null,
+      "color_transfer": null,
+      "color_space": "bt709",
+      "warnings": [],
+      "renderStrategy": "lossless-windows",
+      "windowCount": 6
+    },
+    "error": null,
+    "createdAt": 1792391250.3223896,
+    "updatedAt": 1792391741.6987863
+  },
+  {
+    "ok": true,
+    "jobId": "export_0070ffbd78a4",
+    "projectId": "p_e24afad4",
+    "revision": "2",
+    "requestHash": "queue:40336:134368571143083127:export_0070ffbd78a4",
+    "outPath": "videos/motorcycle-case_zh-CN.mp4",
+    "quality": "high",
+    "status": "succeeded",
+    "result": {
+      "output_path": "E:\\myproject\\opencut\\examples\\showcases\\chase-the-light\\videos\\motorcycle-case_zh-CN.mp4",
+      "duration": 31.583333,
+      "width": 1024,
+      "height": 576,
+      "has_audio": true,
+      "has_alpha": false,
+      "pix_fmt": "yuv420p",
+      "color_primaries": null,
+      "color_transfer": null,
+      "color_space": "bt709",
+      "warnings": []
+    },
+    "error": null,
+    "createdAt": 1792391751.9608307,
+    "updatedAt": 1792392397.4254944
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "path": "travel-vlog/projects/travel-vlog_en.cutvokepack",
+    "projectId": "p_2b6a9e32",
+    "name": "Coastal Joy | Travel Vlog | EN",
+    "revision": "0",
+    "crc": "passed",
+    "verifiedAssets": 19,
+    "editableTextCount": 110,
+    "hasChineseText": false,
+    "bytes": 58206207,
+    "sha256": "89af0736f083646847b782e2b4dcce96a28cdbce742687f447bf196ca23c6374"
+  },
+  {
+    "path": "travel-vlog/projects/travel-vlog_zh-CN.cutvokepack",
+    "projectId": "p_89d1229c",
+    "name": "海岸快乐日记 | 旅拍 Vlog | 中文",
+    "revision": "6",
+    "crc": "passed",
+    "verifiedAssets": 19,
+    "editableTextCount": 110,
+    "hasChineseText": true,
+    "bytes": 58427169,
+    "sha256": "57b876c7a644e9f507079f65dd98820f39344c70fac12917dab25fdf96266e8c"
+  }
+]

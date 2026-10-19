@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "sourceLanguage": "en",
+  "targetLanguage": "zh-CN",
+  "strings": {
+    "CHASE\nTHE LIGHT": "逐光\n而行",
+    "A CUTVOKE VISUAL STUDY": "CutVoke 视觉剪辑实验",
+    "CUTVOKE": "CUTVOKE",
+    "IMAGINATION. IN MOTION.": "让想象，动起来。",
+    "BORN IN LIGHT": "生于光芒",
+    "DAWN / WARMTH / MOTION": "晨光 / 暖意 / 驰行",
+    "RE:FORM": "重构",
+    "SCULPTED BY SPEED": "以速度塑形",
+    "MATTER\nBECOMES TYPE": "万物\n化为字形",
+    "AFTERGLOW": "余晖",
+    "ENTER THE FRAME": "驶入画境",
+    "SPEED": "疾速",
+    "WITHOUT LIMITS": "不设边界",
+    "MASK / TRACK / COMPOSE": "遮罩 / 跟踪 / 合成",
+    "SHIFT": "变奏",
+    "BURN": "燃动",
+    "REFRACT": "折光",
+    "BREAK THROUGH": "破界而出",
+    "FOLLOW THE LIGHT": "追随光芒",
+    "MAKE IT MOVE": "让画面动起来",
+    "EDIT. MASK. COMPOSE.": "剪辑 · 遮罩 · 合成",
+    "LIGHT": "光",
+    "LIGHT / MOTION / CUTVOKE /": "光 / 驰行 / CUTVOKE /"
+  }
+}

@@ -1964,6 +1964,18 @@ def _builtin_specs() -> list[EffectSpec]:
                 "strokeWidth": {"type": "number", "minimum": 0.0, "maximum": 8.0,
                                 "default": 2.0,
                                 "description": {"zh-CN": "描边宽度"}},
+                # Opt-in: absent on legacy projects/presets so their appearance
+                # and hash-bound approval data remain unchanged.
+                "outerStrokeWidth": {"type": "number", "minimum": 0.0, "maximum": 16.0,
+                                     "description": {"zh-CN": "外层描边宽度", "en": "Outer rim width"}},
+                "outerStrokeColor": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$",
+                                     "description": {"zh-CN": "外层描边颜色", "en": "Outer rim color"}},
+                "blockShadowX": {"type": "number", "minimum": -24.0, "maximum": 24.0,
+                                 "description": {"zh-CN": "错位投影水平距离", "en": "Offset shadow X"}},
+                "blockShadowY": {"type": "number", "minimum": -24.0, "maximum": 24.0,
+                                 "description": {"zh-CN": "错位投影垂直距离", "en": "Offset shadow Y"}},
+                "blockShadowColor": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$",
+                                     "description": {"zh-CN": "错位投影颜色", "en": "Offset shadow color"}},
                 "align": {"type": "string", "enum": ["left", "center", "right"],
                           "default": "center",
                           "description": {"zh-CN": "水平对齐"}},
@@ -1999,7 +2011,7 @@ def _builtin_specs() -> list[EffectSpec]:
                                  "enum": ["none", "fade", "scale", "zoom-through", "slide-right", "scatter"],
                                  "description": {"zh-CN": "文字出场方式；缺省沿用淡出"}},
                 "animLoopStyle": {"type": "string",
-                                  "enum": ["none", "pulse", "blink", "glitch", "wave"],
+                                  "enum": ["none", "pulse", "blink", "glitch", "wave", "float"],
                                   "description": {"zh-CN": "文字循环方式；缺省不循环"}},
                 "animLoopMs": {"type": "integer", "minimum": 300, "maximum": 3000,
                                "description": {"zh-CN": "循环周期（毫秒）；缺省 1000"}},
@@ -2050,6 +2062,8 @@ def _builtin_specs() -> list[EffectSpec]:
              fx_person_halo, fx_person_echo, fx_person_tint,
              fx_text]
     specs.extend(extra_transitions)
+    from .travel_fx import builtin_travel_effects
+    specs.extend(builtin_travel_effects())
 
     # 统一补齐元数据。图片与视频都能进入视觉渲染链，因此画面变换、调色、
     # 动画、视觉特效和转场均可用于这两类片段；转场仍由时间线层保证它发生在
@@ -2061,6 +2075,7 @@ def _builtin_specs() -> list[EffectSpec]:
         EFFECT_FX_EQ,
         EFFECT_FX_COMPRESSOR,
         EFFECT_FX_PAN,
+        "cutvoke.fx.sidechainDuck",
     }
     out: list[EffectSpec] = []
     for s in specs:
@@ -2212,10 +2227,13 @@ class EffectRegistry:
             raise EffectParamInvalid(f"{effect_id} 参数非法: " + "; ".join(errors))
         resolved = resolve_defaults(spec.parameters, value)
         if effect_id == "cutvoke.text":
-            glow_color = resolved.get("animColor", "#FF39D4")
-            if (len(glow_color) != 7 or not glow_color.startswith("#")
-                    or any(c not in "0123456789abcdefABCDEF" for c in glow_color[1:])):
-                raise EffectParamInvalid("cutvoke.text: animColor must be #RRGGBB")
+            for key in ("animColor", "outerStrokeColor", "blockShadowColor"):
+                if key not in resolved:
+                    continue
+                color = resolved[key]
+                if (len(color) != 7 or not color.startswith("#")
+                        or any(c not in "0123456789abcdefABCDEF" for c in color[1:])):
+                    raise EffectParamInvalid(f"cutvoke.text: {key} must be #RRGGBB")
         if effect_id == "cutvoke.fx.mask" and isinstance(resolved, dict):
             # Preserve legacy static snapshots; new controls have UI defaults
             # without adding redundant motion fields to every existing mask.

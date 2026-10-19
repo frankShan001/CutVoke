@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "packId": "cutvoke.builtin-resources",
-  "version": "1.38.1",
+  "version": "1.39.0",
   "resources": [
     {
       "resourceId": "builtin_background_bg_bokeh",
@@ -4520,6 +4520,84 @@
         "assets/preset_previews/text-motion_type_reveal-v1-0-0.audit.json",
         "assets/preset_previews/text-motion_type_reveal-v1-0-0.audit.json",
         "assets/preset_previews/text-motion_type_reveal-v1-0-0.audit.json"
+      ],
+      "offlineAvailable": true
+    },
+    {
+      "resourceId": "cutvoke.preset.text.travel_note",
+      "kind": "preset",
+      "name": "旅行手记",
+      "family": "text",
+      "subcategory": "信息条",
+      "version": "1.0.0",
+      "license": "MIT",
+      "source": "CutVoke 原创旅行案例沉淀；builtin_presets.json 参数化文字预设；使用内置授权字体，无参考图像像素；单片段统一改字、描边、二维错位投影与微动态。",
+      "status": "approved",
+      "qualified": true,
+      "downloadState": "bundled",
+      "mediaFiles": [
+        "assets/preset_previews/text-travel_note-v1-0-0.png",
+        "assets/preset_previews/text-travel_note-v1-0-0.mp4",
+        "assets/preset_previews/text-travel_note-v1-0-0.qa.json",
+        "assets/preset_previews/text-travel_note-v1-0-0.qa.json",
+        "assets/preset_previews/text-travel_note-v1-0-0.visual.json",
+        "assets/preset_previews/text-travel_note-v1-0-0.audit.json",
+        "assets/preset_previews/text-travel_note-v1-0-0.audit.json",
+        "assets/preset_previews/text-travel_note-v1-0-0.audit.json",
+        "assets/preset_previews/text-travel_note-v1-0-0.audit.json",
+        "assets/preset_previews/text-travel_note-v1-0-0.audit.json"
+      ],
+      "offlineAvailable": true
+    },
+    {
+      "resourceId": "cutvoke.preset.text.travel_reaction",
+      "kind": "preset",
+      "name": "俏皮反应",
+      "family": "text",
+      "subcategory": "花字",
+      "version": "1.0.0",
+      "license": "MIT",
+      "source": "CutVoke 原创旅行案例沉淀；builtin_presets.json 参数化文字预设；使用内置授权字体，无参考图像像素；单片段统一改字、描边、二维错位投影与微动态。",
+      "status": "approved",
+      "qualified": true,
+      "downloadState": "bundled",
+      "mediaFiles": [
+        "assets/preset_previews/text-travel_reaction-v1-0-0.png",
+        "assets/preset_previews/text-travel_reaction-v1-0-0.mp4",
+        "assets/preset_previews/text-travel_reaction-v1-0-0.qa.json",
+        "assets/preset_previews/text-travel_reaction-v1-0-0.qa.json",
+        "assets/preset_previews/text-travel_reaction-v1-0-0.visual.json",
+        "assets/preset_previews/text-travel_reaction-v1-0-0.audit.json",
+        "assets/preset_previews/text-travel_reaction-v1-0-0.audit.json",
+        "assets/preset_previews/text-travel_reaction-v1-0-0.audit.json",
+        "assets/preset_previews/text-travel_reaction-v1-0-0.audit.json",
+        "assets/preset_previews/text-travel_reaction-v1-0-0.audit.json"
+      ],
+      "offlineAvailable": true
+    },
+    {
+      "resourceId": "cutvoke.preset.text.travel_sunshine",
+      "kind": "preset",
+      "name": "晴日旅拍",
+      "family": "text",
+      "subcategory": "花字",
+      "version": "1.0.0",
+      "license": "MIT",
+      "source": "CutVoke 原创旅行案例沉淀；builtin_presets.json 参数化文字预设；使用内置授权字体，无参考图像像素；单片段统一改字、描边、二维错位投影与微动态。",
+      "status": "approved",
+      "qualified": true,
+      "downloadState": "bundled",
+      "mediaFiles": [
+        "assets/preset_previews/text-travel_sunshine-v1-0-0.png",
+        "assets/preset_previews/text-travel_sunshine-v1-0-0.mp4",
+        "assets/preset_previews/text-travel_sunshine-v1-0-0.qa.json",
+        "assets/preset_previews/text-travel_sunshine-v1-0-0.qa.json",
+        "assets/preset_previews/text-travel_sunshine-v1-0-0.visual.json",
+        "assets/preset_previews/text-travel_sunshine-v1-0-0.audit.json",
+        "assets/preset_previews/text-travel_sunshine-v1-0-0.audit.json",
+        "assets/preset_previews/text-travel_sunshine-v1-0-0.audit.json",
+        "assets/preset_previews/text-travel_sunshine-v1-0-0.audit.json",
+        "assets/preset_previews/text-travel_sunshine-v1-0-0.audit.json"
       ],
       "offlineAvailable": true
     },
@@ -24000,6 +24078,96 @@
       "path": "assets/preset_previews/text-motion_type_reveal-v1-0-0.visual.json",
       "sizeBytes": 1582,
       "sha256": "34696a3763452f3dee594059b6918d3ec3c9ca169f87be087ea8721484cd1e28",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_note-v1-0-0.audit.json",
+      "sizeBytes": 1220,
+      "sha256": "e4a6239653315580dc6dde6116ba267f68eb84ac8dc9275149b5fe602a0e97b7",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_note-v1-0-0.mp4",
+      "sizeBytes": 4118,
+      "sha256": "0a79bd661e3e62c1f52610c5449a76a9348b005a8493cb0a07f3bdcdf00115be",
+      "mediaType": "video/mp4"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_note-v1-0-0.png",
+      "sizeBytes": 4966,
+      "sha256": "c682eb66f2169eaba1d73074381a5b8b0181f35b3d0e41b27c8ea527850a5092",
+      "mediaType": "image/png"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_note-v1-0-0.qa.json",
+      "sizeBytes": 425,
+      "sha256": "bd05ee5fcb210e5efdcedd9293281ea41bc2229bca8029983d68375ed8f3aef1",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_note-v1-0-0.visual.json",
+      "sizeBytes": 1602,
+      "sha256": "6590febb1895c3dfbc81c9ab0c04600363994d20bdd335e0b3cf74f0be70147e",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_reaction-v1-0-0.audit.json",
+      "sizeBytes": 1409,
+      "sha256": "c520f8a151a6232769b5a63c38e2a89947164f3dab455899045e79b72ea5d449",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_reaction-v1-0-0.mp4",
+      "sizeBytes": 6282,
+      "sha256": "641e139a782d0d36b82a4f17053a2868af600f73b35ae64b4479e0c59d10e8bd",
+      "mediaType": "video/mp4"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_reaction-v1-0-0.png",
+      "sizeBytes": 29301,
+      "sha256": "f1d24e8e59b4500e5d3de838ef9f74cf71a3dc5e7e863600e7f9a73aa7c530e2",
+      "mediaType": "image/png"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_reaction-v1-0-0.qa.json",
+      "sizeBytes": 429,
+      "sha256": "023effdce782a4ef632ca70fc5d2c6232d60a88aae195f4830b7711cc0859a9c",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_reaction-v1-0-0.visual.json",
+      "sizeBytes": 1827,
+      "sha256": "9756a2e5d9d18872e052310bb0ae979369930553172c83307d2ca894e822ae6f",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_sunshine-v1-0-0.audit.json",
+      "sizeBytes": 1408,
+      "sha256": "0a4c60a9e7270e1343a544eabfcdd21df71dfbe0e7efc21e289d3b254f5f7fd5",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_sunshine-v1-0-0.mp4",
+      "sizeBytes": 6314,
+      "sha256": "8c97ab197e5f26f76a893c97b6b5931e44fddfec91d19bf89d6e5c45487bb376",
+      "mediaType": "video/mp4"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_sunshine-v1-0-0.png",
+      "sizeBytes": 29704,
+      "sha256": "27d6beb4518712ec41c3bc9a22423a4e2aff68f43ae25be04c6c7601e03ff23c",
+      "mediaType": "image/png"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_sunshine-v1-0-0.qa.json",
+      "sizeBytes": 429,
+      "sha256": "b0889818f015ab22acbcce59285415a616ce7611b37457bf78323ada045582b0",
+      "mediaType": "application/json"
+    },
+    {
+      "path": "assets/preset_previews/text-travel_sunshine-v1-0-0.visual.json",
+      "sizeBytes": 1772,
+      "sha256": "351e16678a5a4d0bed2d5f5e675b03bcf9c00426a0465fd7927bde8f588ff517",
       "mediaType": "application/json"
     },
     {
@@ -47218,8 +47386,8 @@
     },
     {
       "path": "core/builtin_presets.json",
-      "sizeBytes": 362809,
-      "sha256": "b24ab54d9c6463ec69ae906640c7aa23a1ffaaef4bcdf7868b9db91c080b90c6",
+      "sizeBytes": 370574,
+      "sha256": "d9c1137056a2983df7ca580fda3b9b15bee4fa4a95e5e42b7040f2954db0c358",
       "mediaType": "application/json"
     },
     {

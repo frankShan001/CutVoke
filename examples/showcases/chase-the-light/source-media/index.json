@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "sourcePackage": "../projects/motorcycle-edit_en.cutvokepack",
+  "files": [
+    {
+      "path": "04-rain-night.mp4",
+      "packagePath": "media/126674a7fd45c34d66749490bfda4181891fc3dc9be9e561bb46725362f74d07.mp4",
+      "sha256": "126674a7fd45c34d66749490bfda4181891fc3dc9be9e561bb46725362f74d07",
+      "bytes": 4661882,
+      "role": "original source clip"
+    },
+    {
+      "path": "01-dawn.mp4",
+      "packagePath": "media/856cf18ca773b566a6875701a7afc722d858479cf7d3facb9cbb4b14ca231598.mp4",
+      "sha256": "856cf18ca773b566a6875701a7afc722d858479cf7d3facb9cbb4b14ca231598",
+      "bytes": 2624894,
+      "role": "original source clip"
+    },
+    {
+      "path": "02-daylight.mp4",
+      "packagePath": "media/7c95842133999ef052aacaaa21b3ca6fb18dec297cb1b8f3b2e142dea055388e.mp4",
+      "sha256": "7c95842133999ef052aacaaa21b3ca6fb18dec297cb1b8f3b2e142dea055388e",
+      "bytes": 2871757,
+      "role": "original source clip"
+    },
+    {
+      "path": "03-blue-hour.mp4",
+      "packagePath": "media/87b909f873f35e3e472f510f957a1e4b1b1584cc99d5e1f61cfc13cd25f35aeb.mp4",
+      "sha256": "87b909f873f35e3e472f510f957a1e4b1b1584cc99d5e1f61cfc13cd25f35aeb",
+      "bytes": 2646823,
+      "role": "original source clip"
+    },
+    {
+      "path": "29f795f9dc3000ef9f89ed52f7366995c66e850e6a18743666474c613cdb3f0a.png",
+      "packagePath": "media/29f795f9dc3000ef9f89ed52f7366995c66e850e6a18743666474c613cdb3f0a.png",
+      "sha256": "29f795f9dc3000ef9f89ed52f7366995c66e850e6a18743666474c613cdb3f0a",
+      "bytes": 3059,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "c35bf5ee4c3d086152cc34a35171bd19a393009ca92ff902089f33b43efaa3ed.wav",
+      "packagePath": "media/c35bf5ee4c3d086152cc34a35171bd19a393009ca92ff902089f33b43efaa3ed.wav",
+      "sha256": "c35bf5ee4c3d086152cc34a35171bd19a393009ca92ff902089f33b43efaa3ed",
+      "bytes": 44019756,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "c3380040b61d829a0f2b8e08831741dc633f60cc87a7e96fb23e19450e8a9984.wav",
+      "packagePath": "media/c3380040b61d829a0f2b8e08831741dc633f60cc87a7e96fb23e19450e8a9984.wav",
+      "sha256": "c3380040b61d829a0f2b8e08831741dc633f60cc87a7e96fb23e19450e8a9984",
+      "bytes": 73004,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "e635da2264c4588c96b424feb6441c4182aa5de7d459eb4123cdcc035d211c84.wav",
+      "packagePath": "media/e635da2264c4588c96b424feb6441c4182aa5de7d459eb4123cdcc035d211c84.wav",
+      "sha256": "e635da2264c4588c96b424feb6441c4182aa5de7d459eb4123cdcc035d211c84",
+      "bytes": 61484,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "ada087163150dab968ccdc94ec97d54c10238bb1e88c49123f06902622519bd9.png",
+      "packagePath": "media/ada087163150dab968ccdc94ec97d54c10238bb1e88c49123f06902622519bd9.png",
+      "sha256": "ada087163150dab968ccdc94ec97d54c10238bb1e88c49123f06902622519bd9",
+      "bytes": 8593,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "6d13fc7b2dcdf932361131cc87d115ad903b88c18bf3b81b9afadb68bff5552b.mov",
+      "packagePath": "media/6d13fc7b2dcdf932361131cc87d115ad903b88c18bf3b81b9afadb68bff5552b.mov",
+      "sha256": "6d13fc7b2dcdf932361131cc87d115ad903b88c18bf3b81b9afadb68bff5552b",
+      "bytes": 48538598,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "8b82eb85e79ad60aa203cc16b9d3352261d7fbfcd2abd113f718d35a1387a9b3.png",
+      "packagePath": "media/8b82eb85e79ad60aa203cc16b9d3352261d7fbfcd2abd113f718d35a1387a9b3.png",
+      "sha256": "8b82eb85e79ad60aa203cc16b9d3352261d7fbfcd2abd113f718d35a1387a9b3",
+      "bytes": 2366,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "5f2f4731104c78352dc0893d0e92770fe531a4fd6785d371fc2d385d02f51e6f.mov",
+      "packagePath": "media/5f2f4731104c78352dc0893d0e92770fe531a4fd6785d371fc2d385d02f51e6f.mov",
+      "sha256": "5f2f4731104c78352dc0893d0e92770fe531a4fd6785d371fc2d385d02f51e6f",
+      "bytes": 31934991,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "5d2554e31268c97fd28738dcfe2bee945d38ba479465e3277619f62ad8dd5aee.mov",
+      "packagePath": "media/5d2554e31268c97fd28738dcfe2bee945d38ba479465e3277619f62ad8dd5aee.mov",
+      "sha256": "5d2554e31268c97fd28738dcfe2bee945d38ba479465e3277619f62ad8dd5aee",
+      "bytes": 46585983,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "37301748316b610facde295a5d62347aa78928c2913230c62de9a2ba9dc9ed5d.mov",
+      "packagePath": "media/37301748316b610facde295a5d62347aa78928c2913230c62de9a2ba9dc9ed5d.mov",
+      "sha256": "37301748316b610facde295a5d62347aa78928c2913230c62de9a2ba9dc9ed5d",
+      "bytes": 44401039,
+      "role": "supporting image, audio or alpha pass"
+    }
+  ]
+}

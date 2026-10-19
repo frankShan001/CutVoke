@@ -1011,6 +1011,7 @@ def _fx_pan_expr(p: dict) -> str:
 
 # 音频特效（loudnorm 等）：视频特效链只处理视频流，音频特效在音频编译链应用。
 _AUDIO_FX_STEPS: dict[str, "Callable[[dict], str]"] = {
+    "sidechainDuck": lambda p: "anull",  # wired to key streams after collection
     "loudnorm": lambda p: (
         f"loudnorm=I={float(p.get('I', -16.0)):.2f}:"
         f"TP={float(p.get('TP', -1.5)):.2f}"),
@@ -2521,7 +2522,7 @@ class RenderService:
                 afx = self._enabled_audio_fx(c)
                 segs.append((src, ss, c.duration, c.speed, c.preserve_pitch, c.volume,
                              c.fade_in, c.fade_out, c.pitch, afx,
-                             c.timeline_start, c.speed_curve))
+                             c.timeline_start, c.speed_curve, c.id))
             return segs
 
         # 音频轨（静音轨不产生音轨）
@@ -2545,11 +2546,14 @@ class RenderService:
         if has_audio:
             sr = int(seq.audio_sample_rate)
             substreams: list[str] = []
+            audio_group_labels = []
+            audio_labels_by_clip = {}
+            duck_requests = []
             aseg = 0
             for g, segs in enumerate(audio_groups):
                 labels: list[str] = []
                 for (src, ss, tl_dur, speed, preserve_pitch, vol, fade_in, fade_out, pitch, afx,
-                     timeline_start, curve) in segs:
+                     timeline_start, curve, clip_id) in segs:
                     ai = get_input(src)
                     seg = f"aseg{aseg}"
                     aseg += 1
@@ -2612,6 +2616,9 @@ class RenderService:
                     # 单遍近似（不依赖双遍测量），作为片段级滤镜生效。
                     for e in (afx or []):
                         key, params = self._fx_key_params(e)
+                        if key == "sidechainDuck":
+                            duck_requests.append((seg, params))
+                            continue
                         fn = _AUDIO_FX_STEPS.get(key)
                         if fn is not None:
                             audio_fx += "," + fn(params)
@@ -2630,14 +2637,9 @@ class RenderService:
                         f"aformat=sample_fmts=fltp:sample_rates={sr}:"
                         f"channel_layouts=stereo[{seg}]")
                     labels.append(seg)
+                    audio_labels_by_clip[clip_id] = seg
                 gtag = f"atk{g}"
-                if len(labels) == 1:
-                    parts.append(f"[{labels[0]}]anull[{gtag}]")
-                else:
-                    ins = "".join(f"[{s}]" for s in labels)
-                    parts.append(
-                        f"{ins}amix=inputs={len(labels)}:"
-                        f"duration=longest:normalize=0[{gtag}]")
+                audio_group_labels.append((gtag, labels))
                 substreams.append(gtag)
                 # 音轨时长按绝对起点 + 实际可用源时长计算；片段之间的
                 # 空白是静音，不能被 concat 吞掉。
@@ -2646,6 +2648,9 @@ class RenderService:
                     max(float(s[10].to_fraction()) - origin + effective_audio_dur(s)
                         for s in segs))
 
+            from .travel_fx import build_sidechain_ducks
+            has_ducking = build_sidechain_ducks(audio_group_labels, audio_labels_by_clip,
+                                               duck_requests, parts, canvas_dur)
             # 多条音轨 amix；单条直接透传 [outa]
             if len(substreams) == 1:
                 parts.append(f"[{substreams[0]}]anull[outa]")
@@ -2654,6 +2659,8 @@ class RenderService:
                 parts.append(
                     f"{ins}amix=inputs={len(substreams)}:"
                     f"duration=longest:normalize=0[outa]")
+            if has_ducking:
+                parts.append("[outa]alimiter=limit=0.794328:level=0:latency=1[outa]")
 
         # 音频轨存在但没提取出任何可用音轨 -> 明确 warning，不静默丢音频
         if audio_track_present and not has_audio:
@@ -2975,6 +2982,7 @@ class RenderService:
                 incoming = clip_labels[i]
                 transition_spec = self.effects.get(str(tr.get("effectId", "")))
                 blur_pattern = transition_spec.implementation.get("blurPattern")
+                camera_pattern = transition_spec.implementation.get("cameraPattern")
                 squeeze_axis = transition_spec.implementation.get("squeezeAxis")
                 if squeeze_axis is not None and not handle:
                     # Both the squeeze and timeline bed consume the held stream.
@@ -2986,11 +2994,15 @@ class RenderService:
                 # FFmpeg only evaluates expr when transition=custom. Keep all
                 # other transition names manifest-driven; blur presets provide
                 # their own bounded, spatially shaped expression.
-                xname = ("custom" if blur_pattern is not None else
+                xname = ("custom" if blur_pattern is not None or camera_pattern is not None else
                          xfade_transition_name(clips[i], self.effects))
                 has_alpha = bool(getattr(self._render_ctx, "alpha", False))
                 xfade_expr = (_xfade_blur_expr(str(blur_pattern), has_alpha=has_alpha)
                               if blur_pattern is not None else None)
+                if camera_pattern is not None:
+                    from .travel_fx import camera_transition_expr
+                    xfade_expr = camera_transition_expr(str(camera_pattern), tr.get("params", {}),
+                                                        has_alpha=has_alpha)
                 expr_option = f":expr='{xfade_expr}'" if xfade_expr else ""
                 incoming_zoom = float(transition_spec.implementation.get("incomingZoom", 1.0))
                 if 1.0 < incoming_zoom <= 1.5:
@@ -3019,7 +3031,7 @@ class RenderService:
                 # planes first; otherwise chroma/alpha samples use incompatible
                 # coordinates and the midpoint collapses toward dark colors.
                 xfade_format = (f"format={'yuva444p' if has_alpha else 'yuv444p'},"
-                                if blur_pattern is not None else "")
+                                if blur_pattern is not None or camera_pattern is not None else "")
                 if squeeze_axis is not None:
                     _build_squeeze_transition(transition_outgoing, incoming, out,
                                               str(squeeze_axis), d, offset, parts)
@@ -3152,16 +3164,9 @@ class RenderService:
         seg = f"vseg{vseg[0]}"
         vseg[0] += 1
         speed = clip.speed
-        # 定格帧（B06）：源窗口恒定为 freeze_at 处 1 帧，再 tpad 克隆补满时间线时长。
+        # 定格帧（B06）：只重复 freeze_at 对应的一帧。
         if clip.freeze_at is not None:
-            ss = float(clip.freeze_at.to_fraction())
-            tl_dur = float(clip.duration.to_fraction())
-            # 定格：截 freeze_at 处 1 帧（trim 短窗），tpad 克隆补满时间线时长。
-            # setpts 先行归零起点，避免 clone 帧 PTS 错乱（实测 5s/150 帧正确）。
-            # 注：帧内容全同由无损编码验证（损失编码量化会致 framemd5 不一致）。
-            chain = (f"[{vi}:v]trim=start={ss:.6f}:duration=0.033,"
-                     f"setpts=PTS-STARTPTS,tpad=stop_mode=clone:"
-                     f"stop_duration={tl_dur:.6f}")
+            chain = self._frozen_clip_chain(clip, vi, fps_expr)
             col = clip.color_grade()
             if (col["brightness"] != 0.0 or col["contrast"] != 1.0
                     or col["saturation"] != 1.0):
@@ -3679,10 +3684,14 @@ class RenderService:
         else:
             abs_f = float(_abs_rat(speed).to_fraction())
             speed_expr = f"reverse,setpts=PTS-STARTPTS,setpts=PTS/{abs_f}"
-        chain = (f"[{get_input(clip.asset_ref.source_path)}:v]"
-                 f"trim=start={ss:.6f}:duration={src_dur:.6f},"
-                 f"setpts=PTS-STARTPTS,{speed_expr}")
-        chain += self._slow_motion_interpolation_filter(clip, fps_expr)
+        if clip.freeze_at is not None:
+            chain = self._frozen_clip_chain(
+                clip, get_input(clip.asset_ref.source_path), fps_expr)
+        else:
+            chain = (f"[{get_input(clip.asset_ref.source_path)}:v]"
+                     f"trim=start={ss:.6f}:duration={src_dur:.6f},"
+                     f"setpts=PTS-STARTPTS,{speed_expr}")
+            chain += self._slow_motion_interpolation_filter(clip, fps_expr)
         if (color["brightness"] != 0.0 or color["contrast"] != 1.0
                 or color["saturation"] != 1.0):
             chain += (f",eq=brightness={color['brightness']:.6f}:"
@@ -4000,6 +4009,21 @@ class RenderService:
               f"trim=end_frame={total_frames},setpts=N/({fps_expr})/TB[{output}]")
         return output
 
+    def _frozen_clip_chain(self, clip: Clip, vi: int, fps_expr: str) -> str:
+        """Select exactly one source frame and keep the sequence frame clock.
+
+        Canvas, masked and animated clips must freeze before their effects,
+        just like plain clips. A fixed 33ms source window can contain several
+        frames at high source rates; looping one decoded frame also avoids
+        relying on frame-rate metadata surviving setpts on every FFmpeg build.
+        """
+        at = float(clip.freeze_at.to_fraction())
+        duration = float(clip.duration.to_fraction())
+        return (f"[{vi}:v]trim=start={at:.9f},trim=end_frame=1,"
+                f"loop=loop=-1:size=1:start=0,"
+                f"setpts=N/(({fps_expr})*TB),fps={fps_expr},"
+                f"trim=duration={duration:.9f}")
+
     def _trim_speed_color(self, clip: Clip, get_input, parts: list[str],
                           vseg: list[int], color: dict, fps_expr: str) -> str:
         """生成 trim + 变速（+ eq 调色）的源尺寸分段，返回 label。"""
@@ -4018,9 +4042,12 @@ class RenderService:
             abs_f = float(_abs_rat(speed).to_fraction())
             speed_expr = (f"reverse,setpts=PTS-STARTPTS,"
                           f"setpts=PTS/{abs_f}")
-        chain = (f"[{vi}:v]trim=start={ss}:duration={src_dur},"
-                 f"setpts=PTS-STARTPTS,{speed_expr}")
-        chain += self._slow_motion_interpolation_filter(clip, fps_expr)
+        if clip.freeze_at is not None:
+            chain = self._frozen_clip_chain(clip, vi, fps_expr)
+        else:
+            chain = (f"[{vi}:v]trim=start={ss}:duration={src_dur},"
+                     f"setpts=PTS-STARTPTS,{speed_expr}")
+            chain += self._slow_motion_interpolation_filter(clip, fps_expr)
         if (color["brightness"] != 0.0 or color["contrast"] != 1.0
                 or color["saturation"] != 1.0):
             chain += (f",eq=brightness={color['brightness']:.6f}:"
@@ -4190,6 +4217,14 @@ class RenderService:
     def _fx_one(self, key: str, params: dict, cur: str, parts: list[str],
                 vseg: list[int], idx: int) -> str:
         """应用单个滤镜：多流滤镜显式建图，其余内联续接。"""
+        if key == "travelMotionBlur":
+            from .travel_fx import build_motion_blur
+            return build_motion_blur(params, cur, parts, vseg)
+        if (key == "mask" and params.get("shape") == "freehand"
+                and params.get("pathMode") == "smooth" and len(params.get("points", [])) >= 8
+                and params.get("motion", "none") == "none"):
+            from .travel_fx import build_cached_smooth_mask
+            return build_cached_smooth_mask(params, cur, parts, vseg)
         if key == 'shatter':
             from .vfx_fragments import build
             return build(params,cur,parts,vseg,

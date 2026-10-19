@@ -1,0 +1,34 @@
+[
+  {
+    "package": "motorcycle-case_en.cutvokepack",
+    "nativeUnpack": true,
+    "warnings": [],
+    "unknownEffects": [],
+    "relinkedClipReferences": 6,
+    "allReferencesInsideNewDirectory": true
+  },
+  {
+    "package": "motorcycle-case_zh-CN.cutvokepack",
+    "nativeUnpack": true,
+    "warnings": [],
+    "unknownEffects": [],
+    "relinkedClipReferences": 6,
+    "allReferencesInsideNewDirectory": true
+  },
+  {
+    "package": "motorcycle-edit_en.cutvokepack",
+    "nativeUnpack": true,
+    "warnings": [],
+    "unknownEffects": [],
+    "relinkedClipReferences": 104,
+    "allReferencesInsideNewDirectory": true
+  },
+  {
+    "package": "motorcycle-edit_zh-CN.cutvokepack",
+    "nativeUnpack": true,
+    "warnings": [],
+    "unknownEffects": [],
+    "relinkedClipReferences": 104,
+    "allReferencesInsideNewDirectory": true
+  }
+]

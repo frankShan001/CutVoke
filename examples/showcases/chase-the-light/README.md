@@ -1,60 +1,48 @@
-# CHASE THE LIGHT · CutVoke showcase
+# CHASE THE LIGHT · motorcycle film
 
-This example keeps the source-to-edit comparison, the approved cinematic edit,
-portable editable projects, and production materials together in the repository.
-All timeline editing, compositing, title animation, mixing and export were done
-in CutVoke. Source video uses four 8-second MiniMax direct outputs, without AI
-upscaling or frame interpolation.
+**English** · [简体中文](README.zh-CN.md)
 
-## Watch and edit
+Four 8-second MiniMax direct outputs become a 22.333-second cinematic film. All timeline editing, compositing, tracking, typography, sound and export use CutVoke.
+
+## Watch the English version
+
+[![Complete English source-to-edit comparison, muted animated preview](previews/motorcycle-case_en.gif)](https://media.githubusercontent.com/media/frankShan001/CutVoke/main/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4)
+
+The animation previews the complete native comparison timeline without sound. Click it for the MP4 with audio.
 
 | File | Purpose |
 | --- | --- |
-| [source-and-edit.mp4](source-and-edit.mp4) | Final 31.583-second comparison |
-| [source-and-edit.cvkpkg](source-and-edit.cvkpkg) | Editable comparison timeline, including its source media |
-| [spectral-v7.mp4](spectral-v7.mp4) | Approved 22.333-second cinematic edit |
-| [spectral-v7.cvkpkg](spectral-v7.cvkpkg) | Full editable V7 effect stack and original media |
-| [production-materials.zip](production-materials.zip) | Screenshots, native edit history, project milestones, alpha passes and a screenshot time-lapse |
+| [English comparison](videos/motorcycle-case_en.mp4) | Original footage followed by the CutVoke edit |
+| [English clean film](videos/motorcycle-film_en.mp4) | Finished film with English on-screen text |
+| [English full edit](projects/motorcycle-edit_en.cutvokepack) | Portable editable timeline and all required media |
+| [English comparison project](projects/motorcycle-case_en.cutvokepack) | Editable source grid and chapter card |
 
-These five binaries use Git LFS. Install Git LFS and run `git lfs pull` after
-cloning. In CutVoke, use **Unpack and open / 解包打开** on either `.cvkpkg`.
-The packages are self-contained; original workstation paths are not required.
-Double-click `play-comparison.cmd` on Windows to play the final comparison.
+The comparison uses an 8-second source grid, a 1.25-second chapter card and the complete film. Open the **full edit** package to change individual masks, fragment reconstruction, alpha passes, tracked light anchors and title clips. The comparison package contains the rendered film as its second segment.
 
-The comparison timeline uses the approved V7 movie as its second segment.
-Open `spectral-v7.cvkpkg` to edit the individual masks, text, light and VFX layers.
+## Chinese version
 
-## 分段内容
+[Chinese comparison](videos/motorcycle-case_zh-CN.mp4) · [Chinese film](videos/motorcycle-film_zh-CN.mp4) · [Chinese full edit](projects/motorcycle-edit_zh-CN.cutvokepack) · [中文说明](README.zh-CN.md)
 
-- **00:00–00:08**：四段原始素材同步四宫格展示，静音；标题“01，原始素材”。
-- **00:08–00:09.25**：静音分段卡“02，cutvoke剪辑后效果”。
-- **00:09.25–00:31.583**：完整播放已认可的 V7 成片，保留其原配乐与音效。
+The Chinese version translates titles, dialogue/callouts, annotations and text masks, uses bundled Chinese-capable fonts, and retains the CutVoke brand name. File names and project names distinguish the two languages.
 
-V7 uses 21 English text clips with Barlow Condensed, Cormorant Garamond,
-IBM Plex Mono and Space Grotesk. Subject mattes, fragment reconstruction,
-tracked light-source anchors, optical layers and title motion remain editable
-in its full project. The engine implementation and font licenses are in `src/`;
-see [cinematic compositing](../../../docs/cinematic-vfx.md),
-[moving masks](../../../docs/moving-masks.md), and
-[title motion](../../../docs/title-motion.md).
+## Original media and opening the project
 
-## Production evidence
+- [source-media/](source-media/) exposes the original source clips and supporting images, audio and alpha passes. [index.json](source-media/index.json) records exact hashes and package member mappings. The same source media serves both languages.
+- Every `.cutvokepack` also embeds its required media and LUTs. In the latest source build of CutVoke, use **Unpack and open** on the home screen. Original workstation paths are relinked on import; you do not need the original data directory.
 
-![Original material grid](previews/source-grid.png)
+Large media and project archives use Git LFS:
 
-The production archive contains actual editor screenshots and a chronological
-**screenshot time-lapse**, not a continuous screen recording of all revisions.
-Its three ProRes 4444 passes have verified alpha channels. Native commands,
-revision history and project snapshots preserve the editing process for later
-CutVoke promotional material. Earlier local diagnostics are retained in the
-archive and should not be presented as final movie frames.
+```bash
+git lfs install
+git lfs pull --include="examples/showcases/chase-the-light/**"
+```
 
-`manifest.json` records exact delivered bytes and SHA-256 values.
-`verification/` preserves decode, silence, V7 comparison, alpha and package
-integrity results. The comparison decodes to 758 frames; its first 9.2 seconds
-measure zero audio peak. The approved V7 source is unchanged, and the final
-comparison's second segment is checked against it after native export.
+Use the latest repository source build for the added travel effects and production archives. Previously released binaries may predate these capabilities.
 
-These are demonstration assets and user-supplied music, separate from the
-software's MIT license; inclusion does not grant additional music/model rights.
-Packaged font licenses are retained alongside the font files in `src/`.
+## Verification and provenance
+
+[bilingual-manifest.json](bilingual-manifest.json) pins delivered file bytes and hashes. [verification/](verification/) records full MP4 decode, duration/frame counts, sample peaks and sampled exported pictures. Package CRCs, embedded-media hashes, language coverage and standalone source hashes are verified by `scripts/verify/verify_bilingual_showcases.py`. The silent GIFs are scaled documentation conversions of complete CutVoke exports; no alternative video editor produced the MP4s.
+
+The media and user-supplied music are separate from the software MIT license. Inclusion does not grant additional music or model rights. Existing bundled font licenses remain under `src/cutvoke/assets/fonts/`.
+
+The earlier [production-materials.zip](production-materials.zip) retains the screenshot time-lapse, native editing records and alpha-pass evidence. Legacy `source-and-edit.*` and `spectral-v7.*` files remain for existing links; the explicitly named bilingual files above are the current entry points.

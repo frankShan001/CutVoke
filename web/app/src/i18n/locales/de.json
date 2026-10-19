@@ -1,4 +1,10 @@
 {
+  "外层描边宽度": "Breite der Außenkontur",
+  "外层描边颜色": "Farbe der Außenkontur",
+  "错位投影水平距离": "Schattenversatz X",
+  "错位投影垂直距离": "Schattenversatz Y",
+  "错位投影颜色": "Farbe des versetzten Schattens",
+  "整词微浮动": "Sanftes Schweben des Wortes",
   " MB · SHA-256 已登记": " MB · SHA-256 registriert",
   " {0}": " {0}",
   " · MagicTouch 点提示跟踪": " • MagicTouch-Punktverfolgung",

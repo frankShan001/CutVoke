@@ -1,0 +1,12 @@
+{
+  "presetId": "cutvoke.preset.text.travel_reaction",
+  "generator": "scripts/verify/verify_travel_title_presets.py",
+  "renderPath": "RenderService",
+  "coverSha256": "f1d24e8e59b4500e5d3de838ef9f74cf71a3dc5e7e863600e7f9a73aa7c530e2",
+  "previewSha256": "641e139a782d0d36b82a4f17053a2868af600f73b35ae64b4479e0c59d10e8bd",
+  "firstLastMeanRgbDifference": 1.9015,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

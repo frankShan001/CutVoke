@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 2,
+  "editor": "CutVoke",
+  "packages": [
+    {
+      "path": "chase-the-light/projects/motorcycle-case_en.cutvokepack",
+      "projectId": "p_10da22a4",
+      "name": "CHASE THE LIGHT | Source and Edit | EN",
+      "revision": "0",
+      "crc": "passed",
+      "verifiedAssets": 6,
+      "editableTextCount": 2,
+      "hasChineseText": false,
+      "bytes": 21918768,
+      "sha256": "45249908c1ed63058d1bbb99db621d440b3502f13e1906f8ac567d8560cddabc"
+    },
+    {
+      "path": "chase-the-light/projects/motorcycle-case_zh-CN.cutvokepack",
+      "projectId": "p_e24afad4",
+      "name": "逐光而行 | 原素材与剪辑效果 | 中文",
+      "revision": "2",
+      "crc": "passed",
+      "verifiedAssets": 6,
+      "editableTextCount": 2,
+      "hasChineseText": true,
+      "bytes": 42736598,
+      "sha256": "77954b0b5f5e2e2caacd968f2f2291a387338464e525ceddc81e26a821d722fd"
+    },
+    {
+      "path": "chase-the-light/projects/motorcycle-edit_en.cutvokepack",
+      "projectId": "cutvoke-chase-light-vfx-v7-20261017",
+      "name": "CHASE THE LIGHT | SPECTRAL V7",
+      "revision": "23",
+      "crc": "passed",
+      "verifiedAssets": 14,
+      "editableTextCount": 23,
+      "hasChineseText": false,
+      "bytes": 216186353,
+      "sha256": "2f5639c51b43b06153525697b4b9b1f0ac483717af5c64192d54bcca0140747f"
+    },
+    {
+      "path": "chase-the-light/projects/motorcycle-edit_zh-CN.cutvokepack",
+      "projectId": "p_ca66dde4",
+      "name": "逐光而行 | 摩托短片 | 中文",
+      "revision": "1",
+      "crc": "passed",
+      "verifiedAssets": 14,
+      "editableTextCount": 23,
+      "hasChineseText": true,
+      "bytes": 216302457,
+      "sha256": "02e31230902cd4562412cb1970b8c1c07b71e6f57102f9562a8e6ce3ee692e55"
+    }
+  ],
+  "sourceAssets": 14,
+  "files": [
+    {
+      "path": "projects/motorcycle-case_en.cutvokepack",
+      "bytes": 21918768,
+      "sha256": "45249908c1ed63058d1bbb99db621d440b3502f13e1906f8ac567d8560cddabc"
+    },
+    {
+      "path": "projects/motorcycle-case_zh-CN.cutvokepack",
+      "bytes": 42736598,
+      "sha256": "77954b0b5f5e2e2caacd968f2f2291a387338464e525ceddc81e26a821d722fd"
+    },
+    {
+      "path": "projects/motorcycle-edit_en.cutvokepack",
+      "bytes": 216186353,
+      "sha256": "2f5639c51b43b06153525697b4b9b1f0ac483717af5c64192d54bcca0140747f"
+    },
+    {
+      "path": "projects/motorcycle-edit_zh-CN.cutvokepack",
+      "bytes": 216302457,
+      "sha256": "02e31230902cd4562412cb1970b8c1c07b71e6f57102f9562a8e6ce3ee692e55"
+    },
+    {
+      "path": "videos/motorcycle-case_en.mp4",
+      "bytes": 62132310,
+      "sha256": "9403df2ce01df6e3400568977fc6ce32d98126ca6e6aa699c50e388b7d44ea09"
+    },
+    {
+      "path": "videos/motorcycle-case_zh-CN.mp4",
+      "bytes": 42489225,
+      "sha256": "21f7e1eb5bcd6b9478e23d96a95df2bd5c9459e75283312357912dd46cee88d4"
+    },
+    {
+      "path": "videos/motorcycle-film_en.mp4",
+      "bytes": 9139839,
+      "sha256": "15ca0deea50cd002003a010e30cff01c78a9ef37b3562c28861b5b88398ce6b2"
+    },
+    {
+      "path": "videos/motorcycle-film_zh-CN.mp4",
+      "bytes": 29945255,
+      "sha256": "35e891fbfce110b43983b1570b48b5d4e5d360d479708aece459c5081d5d6b25"
+    },
+    {
+      "path": "source-media/01-dawn.mp4",
+      "bytes": 2624894,
+      "sha256": "856cf18ca773b566a6875701a7afc722d858479cf7d3facb9cbb4b14ca231598"
+    },
+    {
+      "path": "source-media/02-daylight.mp4",
+      "bytes": 2871757,
+      "sha256": "7c95842133999ef052aacaaa21b3ca6fb18dec297cb1b8f3b2e142dea055388e"
+    },
+    {
+      "path": "source-media/03-blue-hour.mp4",
+      "bytes": 2646823,
+      "sha256": "87b909f873f35e3e472f510f957a1e4b1b1584cc99d5e1f61cfc13cd25f35aeb"
+    },
+    {
+      "path": "source-media/04-rain-night.mp4",
+      "bytes": 4661882,
+      "sha256": "126674a7fd45c34d66749490bfda4181891fc3dc9be9e561bb46725362f74d07"
+    },
+    {
+      "path": "source-media/29f795f9dc3000ef9f89ed52f7366995c66e850e6a18743666474c613cdb3f0a.png",
+      "bytes": 3059,
+      "sha256": "29f795f9dc3000ef9f89ed52f7366995c66e850e6a18743666474c613cdb3f0a"
+    },
+    {
+      "path": "source-media/37301748316b610facde295a5d62347aa78928c2913230c62de9a2ba9dc9ed5d.mov",
+      "bytes": 44401039,
+      "sha256": "37301748316b610facde295a5d62347aa78928c2913230c62de9a2ba9dc9ed5d"
+    },
+    {
+      "path": "source-media/5d2554e31268c97fd28738dcfe2bee945d38ba479465e3277619f62ad8dd5aee.mov",
+      "bytes": 46585983,
+      "sha256": "5d2554e31268c97fd28738dcfe2bee945d38ba479465e3277619f62ad8dd5aee"
+    },
+    {
+      "path": "source-media/5f2f4731104c78352dc0893d0e92770fe531a4fd6785d371fc2d385d02f51e6f.mov",
+      "bytes": 31934991,
+      "sha256": "5f2f4731104c78352dc0893d0e92770fe531a4fd6785d371fc2d385d02f51e6f"
+    },
+    {
+      "path": "source-media/6d13fc7b2dcdf932361131cc87d115ad903b88c18bf3b81b9afadb68bff5552b.mov",
+      "bytes": 48538598,
+      "sha256": "6d13fc7b2dcdf932361131cc87d115ad903b88c18bf3b81b9afadb68bff5552b"
+    },
+    {
+      "path": "source-media/8b82eb85e79ad60aa203cc16b9d3352261d7fbfcd2abd113f718d35a1387a9b3.png",
+      "bytes": 2366,
+      "sha256": "8b82eb85e79ad60aa203cc16b9d3352261d7fbfcd2abd113f718d35a1387a9b3"
+    },
+    {
+      "path": "source-media/ada087163150dab968ccdc94ec97d54c10238bb1e88c49123f06902622519bd9.png",
+      "bytes": 8593,
+      "sha256": "ada087163150dab968ccdc94ec97d54c10238bb1e88c49123f06902622519bd9"
+    },
+    {
+      "path": "source-media/c3380040b61d829a0f2b8e08831741dc633f60cc87a7e96fb23e19450e8a9984.wav",
+      "bytes": 73004,
+      "sha256": "c3380040b61d829a0f2b8e08831741dc633f60cc87a7e96fb23e19450e8a9984"
+    },
+    {
+      "path": "source-media/c35bf5ee4c3d086152cc34a35171bd19a393009ca92ff902089f33b43efaa3ed.wav",
+      "bytes": 44019756,
+      "sha256": "c35bf5ee4c3d086152cc34a35171bd19a393009ca92ff902089f33b43efaa3ed"
+    },
+    {
+      "path": "source-media/e635da2264c4588c96b424feb6441c4182aa5de7d459eb4123cdcc035d211c84.wav",
+      "bytes": 61484,
+      "sha256": "e635da2264c4588c96b424feb6441c4182aa5de7d459eb4123cdcc035d211c84"
+    },
+    {
+      "path": "source-media/index.json",
+      "bytes": 4962,
+      "sha256": "73fea4a1e775c9e68850d48bf780b3336a32fb8ba24de9a25b574f00977a8285"
+    },
+    {
+      "path": "previews/motorcycle-case_en.gif",
+      "bytes": 3039854,
+      "sha256": "7ce85b2fdbcc9bf5fc07aba7989045d58fb2a49a2c0f1dead86d23d185967683"
+    },
+    {
+      "path": "previews/motorcycle-case_en.jpg",
+      "bytes": 42576,
+      "sha256": "4adadb0131b6f5dda92ab0fe9bdc2e4ad985865e3d34d9b3a849ebbb649cef26"
+    },
+    {
+      "path": "previews/motorcycle-case_zh-CN.gif",
+      "bytes": 3010976,
+      "sha256": "86d2b49f06d701164b3c6a4a68d10c09a0243f2665e7674b3b703e12f511b457"
+    },
+    {
+      "path": "previews/motorcycle-case_zh-CN.jpg",
+      "bytes": 25149,
+      "sha256": "f8188ee1dc803c90affe35cb4ee1966b6e25ed2a8bafa4f9d9a35eb63fe8776a"
+    },
+    {
+      "path": "previews/source-grid.png",
+      "bytes": 574182,
+      "sha256": "634183a54f0d06a6681fd5c65e496897dae96d55c9d216464c26e65aceb38907"
+    }
+  ]
+}

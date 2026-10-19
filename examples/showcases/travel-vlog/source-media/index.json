@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "sourcePackage": "../projects/travel-vlog_en.cutvokepack",
+  "files": [
+    {
+      "path": "9ff0cf6e730cbf5314f3728f5ab789175b11f998d737af17215ffa02cb8b25c4.png",
+      "packagePath": "media/9ff0cf6e730cbf5314f3728f5ab789175b11f998d737af17215ffa02cb8b25c4.png",
+      "sha256": "9ff0cf6e730cbf5314f3728f5ab789175b11f998d737af17215ffa02cb8b25c4",
+      "bytes": 10480,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "04-waves.mp4",
+      "packagePath": "media/db288014265982352f84ec31b9362157a004aa2385dbc28326ce45a1f7f2cf8f.mp4",
+      "sha256": "db288014265982352f84ec31b9362157a004aa2385dbc28326ce45a1f7f2cf8f",
+      "bytes": 10243390,
+      "role": "original source clip"
+    },
+    {
+      "path": "05-friend-reaction.mp4",
+      "packagePath": "media/c2e56991b626fabc38842798f9c8c4ceebd55de62e128ccd61c2e29bfd2e3a8d.mp4",
+      "sha256": "c2e56991b626fabc38842798f9c8c4ceebd55de62e128ccd61c2e29bfd2e3a8d",
+      "bytes": 6812752,
+      "role": "original source clip"
+    },
+    {
+      "path": "1fae4288ded1edfb251f06844e87f5925534ef442205222177b3d8131818ff0f.png",
+      "packagePath": "media/1fae4288ded1edfb251f06844e87f5925534ef442205222177b3d8131818ff0f.png",
+      "sha256": "1fae4288ded1edfb251f06844e87f5925534ef442205222177b3d8131818ff0f",
+      "bytes": 61260,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "01-road.mp4",
+      "packagePath": "media/b5a0af7e83570d4da08b8cdc514dbc1aa9566061522fa1cc47762123217d5150.mp4",
+      "sha256": "b5a0af7e83570d4da08b8cdc514dbc1aa9566061522fa1cc47762123217d5150",
+      "bytes": 7715822,
+      "role": "original source clip"
+    },
+    {
+      "path": "02-town.mp4",
+      "packagePath": "media/bd5a95889e422ee71e3cf88a2a742d0e7e963bf550709089bf85dd719ac4d71d.mp4",
+      "sha256": "bd5a95889e422ee71e3cf88a2a742d0e7e963bf550709089bf85dd719ac4d71d",
+      "bytes": 9212299,
+      "role": "original source clip"
+    },
+    {
+      "path": "03-coffee.mp4",
+      "packagePath": "media/2400ae3fcbf2d449cd9927cf9be4b241c3f18be0dac55f25d71caca3be6abf2b.mp4",
+      "sha256": "2400ae3fcbf2d449cd9927cf9be4b241c3f18be0dac55f25d71caca3be6abf2b",
+      "bytes": 4585323,
+      "role": "original source clip"
+    },
+    {
+      "path": "06-selfie.mp4",
+      "packagePath": "media/6975a03fbb913ea57b99be42a2b669360c2d14d5db96dfaeaae28cf35d3f8fde.mp4",
+      "sha256": "6975a03fbb913ea57b99be42a2b669360c2d14d5db96dfaeaae28cf35d3f8fde",
+      "bytes": 4587601,
+      "role": "original source clip"
+    },
+    {
+      "path": "1f4f616c729d67ac3ccfdd3c98c71faee7438e134309a445a7b34231e18cd1c6.wav",
+      "packagePath": "media/1f4f616c729d67ac3ccfdd3c98c71faee7438e134309a445a7b34231e18cd1c6.wav",
+      "sha256": "1f4f616c729d67ac3ccfdd3c98c71faee7438e134309a445a7b34231e18cd1c6",
+      "bytes": 15714092,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "1a462dcf3332c949119db47a280e743b0059a2b48f1c128b7d238a0e7eb71220.wav",
+      "packagePath": "media/1a462dcf3332c949119db47a280e743b0059a2b48f1c128b7d238a0e7eb71220.wav",
+      "sha256": "1a462dcf3332c949119db47a280e743b0059a2b48f1c128b7d238a0e7eb71220",
+      "bytes": 21246,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "012876621a680b2b465bcb0f568b0985ff993e2b0397d7471f4dee017c477818.wav",
+      "packagePath": "media/012876621a680b2b465bcb0f568b0985ff993e2b0397d7471f4dee017c477818.wav",
+      "sha256": "012876621a680b2b465bcb0f568b0985ff993e2b0397d7471f4dee017c477818",
+      "bytes": 123558,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "04cae2e5718c1860ee7fd2d41da28a9612cce5d5b883dfe3e55034b51a5ea783.wav",
+      "packagePath": "media/04cae2e5718c1860ee7fd2d41da28a9612cce5d5b883dfe3e55034b51a5ea783.wav",
+      "sha256": "04cae2e5718c1860ee7fd2d41da28a9612cce5d5b883dfe3e55034b51a5ea783",
+      "bytes": 44178,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "16dc0a1e764bf27832c0681781e63ffdaeddac50b87d8669a92bd7ef95150d6c.wav",
+      "packagePath": "media/16dc0a1e764bf27832c0681781e63ffdaeddac50b87d8669a92bd7ef95150d6c.wav",
+      "sha256": "16dc0a1e764bf27832c0681781e63ffdaeddac50b87d8669a92bd7ef95150d6c",
+      "bytes": 44178,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "b96bbf8772f199180b621a35ff14a6954ca14a4bacef666840e63df2a6c0209e.png",
+      "packagePath": "media/b96bbf8772f199180b621a35ff14a6954ca14a4bacef666840e63df2a6c0209e.png",
+      "sha256": "b96bbf8772f199180b621a35ff14a6954ca14a4bacef666840e63df2a6c0209e",
+      "bytes": 37728,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "48a1125da55d766efdf411efe874f96a9d2e97b449edc5d743ceee7a38024604.png",
+      "packagePath": "media/48a1125da55d766efdf411efe874f96a9d2e97b449edc5d743ceee7a38024604.png",
+      "sha256": "48a1125da55d766efdf411efe874f96a9d2e97b449edc5d743ceee7a38024604",
+      "bytes": 21998,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "32be584364636724f9f3cec5b00ed79669a86c4d02292e912c2690d87d018628.png",
+      "packagePath": "media/32be584364636724f9f3cec5b00ed79669a86c4d02292e912c2690d87d018628.png",
+      "sha256": "32be584364636724f9f3cec5b00ed79669a86c4d02292e912c2690d87d018628",
+      "bytes": 29115,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "f3aa80d39a38e0b09515a7d61721cbd82969bd2ded44ec4f0eae7319a6539715.png",
+      "packagePath": "media/f3aa80d39a38e0b09515a7d61721cbd82969bd2ded44ec4f0eae7319a6539715.png",
+      "sha256": "f3aa80d39a38e0b09515a7d61721cbd82969bd2ded44ec4f0eae7319a6539715",
+      "bytes": 35283,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "f687aa5c3547fdeaec3b51cb556033772e4a0961f0e29511ddd3e445f491c3ac.png",
+      "packagePath": "media/f687aa5c3547fdeaec3b51cb556033772e4a0961f0e29511ddd3e445f491c3ac.png",
+      "sha256": "f687aa5c3547fdeaec3b51cb556033772e4a0961f0e29511ddd3e445f491c3ac",
+      "bytes": 32950,
+      "role": "supporting image, audio or alpha pass"
+    },
+    {
+      "path": "1443bacebe5fd13bce83ad1c3ce1aeafbfe90788f31c7c2aa1d9f9caa3708a2b.png",
+      "packagePath": "media/1443bacebe5fd13bce83ad1c3ce1aeafbfe90788f31c7c2aa1d9f9caa3708a2b.png",
+      "sha256": "1443bacebe5fd13bce83ad1c3ce1aeafbfe90788f31c7c2aa1d9f9caa3708a2b",
+      "bytes": 32667,
+      "role": "supporting image, audio or alpha pass"
+    }
+  ]
+}

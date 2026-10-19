@@ -264,6 +264,7 @@ class BuiltinEffectExpansionTests(unittest.TestCase):
                 "cutvoke.fx.equalizer",
                 "cutvoke.fx.loudnorm",
                 "cutvoke.fx.pan",
+                "cutvoke.fx.sidechainDuck",
             },
         )
         self.assertTrue(image["ok"])

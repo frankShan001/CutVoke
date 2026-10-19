@@ -16,7 +16,7 @@ class TestFirstBatchEffectCoverage(unittest.TestCase):
         self.assertEqual(report["gapAcrossOpenAndRequiredSubcategories"], 0)
         self.assertEqual(report["stickerCandidates"], 0)
         self.assertEqual(report["qualifiedStickers"], 612)
-        self.assertEqual(report["qualifiedContent"], 801)
+        self.assertEqual(report["qualifiedContent"], 804)
         self.assertGreaterEqual(report["qualifiedContent"], 144)
 
         for family in FAMILIES:

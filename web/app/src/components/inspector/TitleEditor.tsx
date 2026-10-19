@@ -11,10 +11,12 @@ import { updateEffect } from "../../store/effectEdit";
 type Align = "left" | "center" | "right";
 type InStyle = "none" | "fade" | "scale" | "typewriter" | "impact" | "slide-left" | "slide-up" | "flip" | "stagger" | "blur-in";
 type OutStyle = "none" | "fade" | "scale" | "zoom-through" | "slide-right" | "scatter";
-type LoopStyle = "none" | "pulse" | "blink" | "glitch" | "wave";
+type LoopStyle = "none" | "pulse" | "blink" | "glitch" | "wave" | "float";
 interface Form {
   content: string; fontSize: string; fontFamily: string; lineSpacing: string;
   color: string; strokeColor: string; strokeWidth: string;
+  outerStrokeWidth: string; outerStrokeColor: string;
+  blockShadowX: string; blockShadowY: string; blockShadowColor: string;
   bold: boolean; background: string; panelWidth: string; panelHeight: string;
   align: Align; x: string; y: string;
   scale: string; rotation: string; shadow: string; animIn: string; animOut: string;
@@ -25,6 +27,8 @@ const defaults: Form = {
   content: "", fontSize: "48", fontFamily: "Noto Sans SC", lineSpacing: "1",
   color: "#ffffff", strokeColor: "#000000",
   strokeWidth: "2", bold: false, background: "", panelWidth: "0", panelHeight: "0", align: "center",
+  outerStrokeWidth: "0", outerStrokeColor: "#4b9fad",
+  blockShadowX: "0", blockShadowY: "0", blockShadowColor: "#2b7183",
   x: "50", y: "50", scale: "1", rotation: "0", shadow: "1",
   animIn: "0", animOut: "0", animInStyle: "fade", animOutStyle: "fade",
   animLoopStyle: "none", animLoopMs: "1000",
@@ -38,6 +42,8 @@ function fromParams(params: Record<string, unknown>): Form {
     fontFamily: value("fontFamily"), lineSpacing: value("lineSpacing"),
     color: value("color"),
     strokeColor: value("strokeColor"), strokeWidth: value("strokeWidth"),
+    outerStrokeWidth: value("outerStrokeWidth"), outerStrokeColor: value("outerStrokeColor"),
+    blockShadowX: value("blockShadowX"), blockShadowY: value("blockShadowY"), blockShadowColor: value("blockShadowColor"),
     bold: Boolean(params.bold ?? defaults.bold), background: value("background"),
     panelWidth: String(Math.round(Number(params.panelWidth ?? 0) * 100)),
     panelHeight: String(Math.round(Number(params.panelHeight ?? 0) * 100)),
@@ -75,6 +81,9 @@ export function TitleEditor({ clip }: { clip: Clip }) {
     number("panelWidth") >= 0 && number("panelWidth") <= 100 &&
     number("panelHeight") >= 0 && number("panelHeight") <= 100 &&
     number("strokeWidth") >= 0 && number("strokeWidth") <= 8 &&
+    number("outerStrokeWidth") >= 0 && number("outerStrokeWidth") <= 16 &&
+    Math.abs(number("blockShadowX")) <= 24 && Math.abs(number("blockShadowY")) <= 24 &&
+    /^#[0-9a-f]{6}$/i.test(form.outerStrokeColor) && /^#[0-9a-f]{6}$/i.test(form.blockShadowColor) &&
     number("x") >= 0 && number("x") <= 100 && number("y") >= 0 && number("y") <= 100 &&
     number("scale") >= 0.1 && number("scale") <= 5 &&
     number("rotation") >= -180 && number("rotation") <= 180 &&
@@ -83,7 +92,7 @@ export function TitleEditor({ clip }: { clip: Clip }) {
     Number.isInteger(number("animOut")) && number("animOut") >= 0 && number("animOut") <= 3000 &&
     ["none", "fade", "scale", "typewriter", "impact", "slide-left", "slide-up", "flip", "stagger", "blur-in"].includes(form.animInStyle) &&
     ["none", "fade", "scale", "zoom-through", "slide-right", "scatter"].includes(form.animOutStyle) &&
-    ["none", "pulse", "blink", "glitch", "wave"].includes(form.animLoopStyle) &&
+    ["none", "pulse", "blink", "glitch", "wave", "float"].includes(form.animLoopStyle) &&
     number("animStrength") >= 0.1 && number("animStrength") <= 3 &&
     number("animGlow") >= 0 && number("animGlow") <= 24 &&
     Number.isInteger(number("animStaggerMs")) && number("animStaggerMs") >= 0 && number("animStaggerMs") <= 250 &&
@@ -94,6 +103,9 @@ export function TitleEditor({ clip }: { clip: Clip }) {
     { key: "fontSize", label: tr("字号"), min: 8, max: 200, step: 1 },
     { key: "lineSpacing", label: tr("多行行距"), min: 0.5, max: 2.5, step: 0.05 },
     { key: "strokeWidth", label: tr("描边宽度"), min: 0, max: 8, step: 0.5 },
+    { key: "outerStrokeWidth", label: tr("外层描边宽度"), min: 0, max: 16, step: 0.5 },
+    { key: "blockShadowX", label: tr("错位投影水平距离"), min: -24, max: 24, step: 0.5 },
+    { key: "blockShadowY", label: tr("错位投影垂直距离"), min: -24, max: 24, step: 0.5 },
     { key: "panelWidth", label: tr("背景条宽度 %"), min: 0, max: 100, step: 1 },
     { key: "panelHeight", label: tr("背景条高度 %"), min: 0, max: 100, step: 1 },
     { key: "x", label: tr("水平位置 %"), min: 0, max: 100, step: 1 },
@@ -139,6 +151,8 @@ export function TitleEditor({ clip }: { clip: Clip }) {
           content: form.content.trim(), fontSize: number("fontSize"),
           fontFamily: form.fontFamily, lineSpacing: number("lineSpacing"), color: form.color,
           strokeColor: form.strokeColor, strokeWidth: number("strokeWidth"),
+          outerStrokeWidth: number("outerStrokeWidth"), outerStrokeColor: form.outerStrokeColor,
+          blockShadowX: number("blockShadowX"), blockShadowY: number("blockShadowY"), blockShadowColor: form.blockShadowColor,
           bold: form.bold, background: form.background.trim(),
           panelWidth: number("panelWidth") / 100, panelHeight: number("panelHeight") / 100,
           align: form.align,
@@ -190,6 +204,12 @@ export function TitleEditor({ clip }: { clip: Clip }) {
         <label>{tr("描边颜色")}<input className="cv-input" type="color" aria-label={tr("标题描边颜色")}
           value={form.strokeColor} onChange={(event) => set("strokeColor", event.target.value)} /></label>
       </div>
+      <div className="title-editor__two">
+        <label>{tr("外层描边颜色")}<input className="cv-input" type="color" aria-label={tr("外层描边颜色")}
+          value={form.outerStrokeColor} onChange={(event) => set("outerStrokeColor", event.target.value)} /></label>
+        <label>{tr("错位投影颜色")}<input className="cv-input" type="color" aria-label={tr("错位投影颜色")}
+          value={form.blockShadowColor} onChange={(event) => set("blockShadowColor", event.target.value)} /></label>
+      </div>
       <label>{tr("背景色（留空为透明）")}<input className="cv-input" type="text" aria-label={tr("标题背景色")} placeholder="#1e1e2e"
           value={form.background} onChange={(event) => set("background", event.target.value)} />
       </label>
@@ -238,6 +258,7 @@ export function TitleEditor({ clip }: { clip: Clip }) {
             <option value="none">{tr("无")}</option><option value="pulse">{tr("呼吸放大")}</option>
             <option value="blink">{tr("闪烁")}</option>
             <option value="glitch">{tr("故障色分离")}</option><option value="wave">{tr("逐字波浪")}</option>
+            <option value="float">{tr("整词微浮动")}</option>
           </select>
         </label>
       </div>

@@ -1,0 +1,19 @@
+{
+  "path": "chase-the-light/videos/motorcycle-film_zh-CN.mp4",
+  "width": 1024,
+  "height": 576,
+  "fps": 24.0,
+  "duration": 22.333333,
+  "frames": 536,
+  "hasAudio": true,
+  "samplePeakDbFS": -3.621,
+  "clippedSamples": 0,
+  "decodedAudioSamples": 2144256,
+  "blackFrameTimes": [
+    0.0,
+    0.0417
+  ],
+  "sha256": "35e891fbfce110b43983b1570b48b5d4e5d360d479708aece459c5081d5d6b25",
+  "bytes": 29945255,
+  "scope": "Full decode, sample peaks and sampled visual frames; not a listening or true-peak claim."
+}

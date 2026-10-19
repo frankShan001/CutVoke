@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 2,
+  "editor": "CutVoke",
+  "packages": [
+    {
+      "path": "travel-vlog/projects/travel-vlog_en.cutvokepack",
+      "projectId": "p_2b6a9e32",
+      "name": "Coastal Joy | Travel Vlog | EN",
+      "revision": "0",
+      "crc": "passed",
+      "verifiedAssets": 19,
+      "editableTextCount": 110,
+      "hasChineseText": false,
+      "bytes": 58206207,
+      "sha256": "89af0736f083646847b782e2b4dcce96a28cdbce742687f447bf196ca23c6374"
+    },
+    {
+      "path": "travel-vlog/projects/travel-vlog_zh-CN.cutvokepack",
+      "projectId": "p_89d1229c",
+      "name": "海岸快乐日记 | 旅拍 Vlog | 中文",
+      "revision": "6",
+      "crc": "passed",
+      "verifiedAssets": 19,
+      "editableTextCount": 110,
+      "hasChineseText": true,
+      "bytes": 58427359,
+      "sha256": "475e029127468bff5b1ee8dc0fbe78050fd4549aa62d0c8a2f71e14fbdc4f674"
+    }
+  ],
+  "sourceAssets": 19,
+  "files": [
+    {
+      "path": "projects/travel-vlog_en.cutvokepack",
+      "bytes": 58206207,
+      "sha256": "89af0736f083646847b782e2b4dcce96a28cdbce742687f447bf196ca23c6374"
+    },
+    {
+      "path": "projects/travel-vlog_zh-CN.cutvokepack",
+      "bytes": 58427359,
+      "sha256": "475e029127468bff5b1ee8dc0fbe78050fd4549aa62d0c8a2f71e14fbdc4f674"
+    },
+    {
+      "path": "videos/travel-vlog-case_en.mp4",
+      "bytes": 87152479,
+      "sha256": "a3d803d07876b39d4e7347b45c83402b463acd967a260ecdc496e69618afa60d"
+    },
+    {
+      "path": "videos/travel-vlog-case_zh-CN.mp4",
+      "bytes": 65743292,
+      "sha256": "28f464175549c85f784d8ada52dc63f916ee53d586b30e91ca4cb1a264f51fba"
+    },
+    {
+      "path": "videos/travel-vlog-film_en.mp4",
+      "bytes": 79531493,
+      "sha256": "fe3d1152972f30d5ca8d3978c62e62294e6e94e033cf080526059c5c0e4917fe"
+    },
+    {
+      "path": "videos/travel-vlog-film_zh-CN.mp4",
+      "bytes": 59874527,
+      "sha256": "d471ea6ad6830a504da1d74dbad560c94d8ed7fd19cbe4088460079451e45faf"
+    },
+    {
+      "path": "source-media/01-road.mp4",
+      "bytes": 7715822,
+      "sha256": "b5a0af7e83570d4da08b8cdc514dbc1aa9566061522fa1cc47762123217d5150"
+    },
+    {
+      "path": "source-media/012876621a680b2b465bcb0f568b0985ff993e2b0397d7471f4dee017c477818.wav",
+      "bytes": 123558,
+      "sha256": "012876621a680b2b465bcb0f568b0985ff993e2b0397d7471f4dee017c477818"
+    },
+    {
+      "path": "source-media/02-town.mp4",
+      "bytes": 9212299,
+      "sha256": "bd5a95889e422ee71e3cf88a2a742d0e7e963bf550709089bf85dd719ac4d71d"
+    },
+    {
+      "path": "source-media/03-coffee.mp4",
+      "bytes": 4585323,
+      "sha256": "2400ae3fcbf2d449cd9927cf9be4b241c3f18be0dac55f25d71caca3be6abf2b"
+    },
+    {
+      "path": "source-media/04-waves.mp4",
+      "bytes": 10243390,
+      "sha256": "db288014265982352f84ec31b9362157a004aa2385dbc28326ce45a1f7f2cf8f"
+    },
+    {
+      "path": "source-media/04cae2e5718c1860ee7fd2d41da28a9612cce5d5b883dfe3e55034b51a5ea783.wav",
+      "bytes": 44178,
+      "sha256": "04cae2e5718c1860ee7fd2d41da28a9612cce5d5b883dfe3e55034b51a5ea783"
+    },
+    {
+      "path": "source-media/05-friend-reaction.mp4",
+      "bytes": 6812752,
+      "sha256": "c2e56991b626fabc38842798f9c8c4ceebd55de62e128ccd61c2e29bfd2e3a8d"
+    },
+    {
+      "path": "source-media/06-selfie.mp4",
+      "bytes": 4587601,
+      "sha256": "6975a03fbb913ea57b99be42a2b669360c2d14d5db96dfaeaae28cf35d3f8fde"
+    },
+    {
+      "path": "source-media/1443bacebe5fd13bce83ad1c3ce1aeafbfe90788f31c7c2aa1d9f9caa3708a2b.png",
+      "bytes": 32667,
+      "sha256": "1443bacebe5fd13bce83ad1c3ce1aeafbfe90788f31c7c2aa1d9f9caa3708a2b"
+    },
+    {
+      "path": "source-media/16dc0a1e764bf27832c0681781e63ffdaeddac50b87d8669a92bd7ef95150d6c.wav",
+      "bytes": 44178,
+      "sha256": "16dc0a1e764bf27832c0681781e63ffdaeddac50b87d8669a92bd7ef95150d6c"
+    },
+    {
+      "path": "source-media/1a462dcf3332c949119db47a280e743b0059a2b48f1c128b7d238a0e7eb71220.wav",
+      "bytes": 21246,
+      "sha256": "1a462dcf3332c949119db47a280e743b0059a2b48f1c128b7d238a0e7eb71220"
+    },
+    {
+      "path": "source-media/1f4f616c729d67ac3ccfdd3c98c71faee7438e134309a445a7b34231e18cd1c6.wav",
+      "bytes": 15714092,
+      "sha256": "1f4f616c729d67ac3ccfdd3c98c71faee7438e134309a445a7b34231e18cd1c6"
+    },
+    {
+      "path": "source-media/1fae4288ded1edfb251f06844e87f5925534ef442205222177b3d8131818ff0f.png",
+      "bytes": 61260,
+      "sha256": "1fae4288ded1edfb251f06844e87f5925534ef442205222177b3d8131818ff0f"
+    },
+    {
+      "path": "source-media/32be584364636724f9f3cec5b00ed79669a86c4d02292e912c2690d87d018628.png",
+      "bytes": 29115,
+      "sha256": "32be584364636724f9f3cec5b00ed79669a86c4d02292e912c2690d87d018628"
+    },
+    {
+      "path": "source-media/48a1125da55d766efdf411efe874f96a9d2e97b449edc5d743ceee7a38024604.png",
+      "bytes": 21998,
+      "sha256": "48a1125da55d766efdf411efe874f96a9d2e97b449edc5d743ceee7a38024604"
+    },
+    {
+      "path": "source-media/9ff0cf6e730cbf5314f3728f5ab789175b11f998d737af17215ffa02cb8b25c4.png",
+      "bytes": 10480,
+      "sha256": "9ff0cf6e730cbf5314f3728f5ab789175b11f998d737af17215ffa02cb8b25c4"
+    },
+    {
+      "path": "source-media/b96bbf8772f199180b621a35ff14a6954ca14a4bacef666840e63df2a6c0209e.png",
+      "bytes": 37728,
+      "sha256": "b96bbf8772f199180b621a35ff14a6954ca14a4bacef666840e63df2a6c0209e"
+    },
+    {
+      "path": "source-media/f3aa80d39a38e0b09515a7d61721cbd82969bd2ded44ec4f0eae7319a6539715.png",
+      "bytes": 35283,
+      "sha256": "f3aa80d39a38e0b09515a7d61721cbd82969bd2ded44ec4f0eae7319a6539715"
+    },
+    {
+      "path": "source-media/f687aa5c3547fdeaec3b51cb556033772e4a0961f0e29511ddd3e445f491c3ac.png",
+      "bytes": 32950,
+      "sha256": "f687aa5c3547fdeaec3b51cb556033772e4a0961f0e29511ddd3e445f491c3ac"
+    },
+    {
+      "path": "source-media/index.json",
+      "bytes": 6633,
+      "sha256": "7c5bdc3bfa564eb94a39cd204bb147f258ac90cc5798d1e28181ed5058c7a0d4"
+    },
+    {
+      "path": "previews/travel-vlog-case_en.gif",
+      "bytes": 7219362,
+      "sha256": "92ff8ebba297381e33a505203ccdb50fa2424086b6eea25ad4ae006dd7a93324"
+    },
+    {
+      "path": "previews/travel-vlog-case_en.jpg",
+      "bytes": 64716,
+      "sha256": "095addd4849da8ad7cbd9d388f1589f0391e953cd5d060690fe999979cd80a9d"
+    },
+    {
+      "path": "previews/travel-vlog-case_zh-CN.gif",
+      "bytes": 7262446,
+      "sha256": "48d945fb0d1c2d144c0b025c82594ad6da3848eec64e3c657f1b386aa234a22a"
+    },
+    {
+      "path": "previews/travel-vlog-case_zh-CN.jpg",
+      "bytes": 63495,
+      "sha256": "bb89a9fe39e93e3abad9c92ca9bd444fcade65dcc94975d290fb263d4fa3b030"
+    }
+  ]
+}

@@ -1,4 +1,10 @@
 {
+  "外层描边宽度": "Outer rim width",
+  "外层描边颜色": "Outer rim color",
+  "错位投影水平距离": "Offset shadow X",
+  "错位投影垂直距离": "Offset shadow Y",
+  "错位投影颜色": "Offset shadow color",
+  "整词微浮动": "Gentle word float",
   " MB · SHA-256 已登记": " MB · SHA-256 registered",
   " {0}": " {0}",
   " · MagicTouch 点提示跟踪": " · MagicTouch point tracking",

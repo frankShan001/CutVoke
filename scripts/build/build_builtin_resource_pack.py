@@ -24,7 +24,7 @@ REPO = _TOOL_ROOT
 PACKAGE_ROOT = REPO / "src" / "cutvoke"
 MANIFEST_PATH = PACKAGE_ROOT / "core" / "builtin_resource_pack.json"
 PACK_ID = "cutvoke.builtin-resources"
-PACK_VERSION = "1.38.1"
+PACK_VERSION = "1.39.0"
 sys.path.insert(0, str(REPO / "src"))
 
 from cutvoke.core.builtin_stickers import load_builtin_stickers  # noqa: E402

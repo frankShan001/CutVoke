@@ -1,0 +1,12 @@
+{
+  "presetId": "cutvoke.preset.text.travel_sunshine",
+  "generator": "scripts/verify/verify_travel_title_presets.py",
+  "renderPath": "RenderService",
+  "coverSha256": "27d6beb4518712ec41c3bc9a22423a4e2aff68f43ae25be04c6c7601e03ff23c",
+  "previewSha256": "8c97ab197e5f26f76a893c97b6b5931e44fddfec91d19bf89d6e5c45487bb376",
+  "firstLastMeanRgbDifference": 3.2186,
+  "checks": [
+    "cover",
+    "motionPreview"
+  ]
+}

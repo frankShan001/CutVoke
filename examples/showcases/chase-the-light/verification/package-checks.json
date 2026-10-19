@@ -1,0 +1,50 @@
+[
+  {
+    "path": "chase-the-light/projects/motorcycle-case_en.cutvokepack",
+    "projectId": "p_10da22a4",
+    "name": "CHASE THE LIGHT | Source and Edit | EN",
+    "revision": "0",
+    "crc": "passed",
+    "verifiedAssets": 6,
+    "editableTextCount": 2,
+    "hasChineseText": false,
+    "bytes": 21918768,
+    "sha256": "45249908c1ed63058d1bbb99db621d440b3502f13e1906f8ac567d8560cddabc"
+  },
+  {
+    "path": "chase-the-light/projects/motorcycle-case_zh-CN.cutvokepack",
+    "projectId": "p_e24afad4",
+    "name": "逐光而行 | 原素材与剪辑效果 | 中文",
+    "revision": "2",
+    "crc": "passed",
+    "verifiedAssets": 6,
+    "editableTextCount": 2,
+    "hasChineseText": true,
+    "bytes": 42736463,
+    "sha256": "e95989aeb9daf9c454c2feb8fd7f907d9ed9731d072897557472389b51988db9"
+  },
+  {
+    "path": "chase-the-light/projects/motorcycle-edit_en.cutvokepack",
+    "projectId": "cutvoke-chase-light-vfx-v7-20261017",
+    "name": "CHASE THE LIGHT | SPECTRAL V7",
+    "revision": "23",
+    "crc": "passed",
+    "verifiedAssets": 14,
+    "editableTextCount": 23,
+    "hasChineseText": false,
+    "bytes": 216186353,
+    "sha256": "2f5639c51b43b06153525697b4b9b1f0ac483717af5c64192d54bcca0140747f"
+  },
+  {
+    "path": "chase-the-light/projects/motorcycle-edit_zh-CN.cutvokepack",
+    "projectId": "p_ca66dde4",
+    "name": "逐光而行 | 摩托短片 | 中文",
+    "revision": "1",
+    "crc": "passed",
+    "verifiedAssets": 14,
+    "editableTextCount": 23,
+    "hasChineseText": true,
+    "bytes": 216302294,
+    "sha256": "2325149c10d404dd1db41667ac3e3d8acc28cfc6db531d427455934cd8db3c03"
+  }
+]

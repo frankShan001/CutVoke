@@ -1,4 +1,10 @@
 {
+  "外层描边宽度": "Largeur du contour extérieur",
+  "外层描边颜色": "Couleur du contour extérieur",
+  "错位投影水平距离": "Décalage horizontal de l’ombre",
+  "错位投影垂直距离": "Décalage vertical de l’ombre",
+  "错位投影颜色": "Couleur de l’ombre décalée",
+  "整词微浮动": "Flottement doux du mot",
   " MB · SHA-256 已登记": " MB · SHA-256 enregistré",
   " {0}": " {0}",
   " · MagicTouch 点提示跟踪": " • Tracking du point MagicTouch",

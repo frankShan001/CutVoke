@@ -1,0 +1,23 @@
+{
+  "path": "chase-the-light/videos/motorcycle-case_zh-CN.mp4",
+  "width": 1024,
+  "height": 576,
+  "fps": 24.0,
+  "duration": 31.583333,
+  "frames": 758,
+  "hasAudio": true,
+  "samplePeakDbFS": -3.778,
+  "clippedSamples": 0,
+  "decodedAudioSamples": 3033088,
+  "blackFrameTimes": [
+    8.0,
+    8.0417,
+    8.0833,
+    9.2083,
+    9.25,
+    9.2917
+  ],
+  "sha256": "21f7e1eb5bcd6b9478e23d96a95df2bd5c9459e75283312357912dd46cee88d4",
+  "bytes": 42489225,
+  "scope": "Full decode, sample peaks and sampled visual frames; not a listening or true-peak claim."
+}

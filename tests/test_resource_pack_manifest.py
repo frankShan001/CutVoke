@@ -34,11 +34,11 @@ class ResourcePackManifestTests(unittest.TestCase):
         manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
         self.assertEqual(manifest, build_manifest())
         self.assertEqual(manifest["packId"], "cutvoke.builtin-resources")
-        self.assertEqual(manifest["version"], "1.38.1")
+        self.assertEqual(manifest["version"], "1.39.0")
         resources = manifest["resources"]
         presets = [item for item in resources if item["kind"] == "preset"]
-        self.assertEqual(len(presets), 189)
-        self.assertEqual(sum(item["qualified"] for item in presets), 189)
+        self.assertEqual(len(presets), 192)
+        self.assertEqual(sum(item["qualified"] for item in presets), 192)
         person_fx_presets = [item for item in presets if item["family"] == "personFx"]
         self.assertEqual(len(person_fx_presets), 24)
         self.assertTrue(all(item["status"] == "approved" and item["qualified"]
@@ -230,14 +230,14 @@ class ResourcePackManifestTests(unittest.TestCase):
 
     def test_api_summary_reports_current_pack_and_offline_media_state(self) -> None:
         summary = resource_pack_summary()
-        self.assertEqual(summary["version"], "1.38.1")
-        self.assertEqual(summary["resourceCount"], 843)
-        self.assertEqual(summary["presetCount"], 189)
+        self.assertEqual(summary["version"], "1.39.0")
+        self.assertEqual(summary["resourceCount"], 846)
+        self.assertEqual(summary["presetCount"], 192)
         self.assertEqual(summary["stickerCount"], 612)
         self.assertEqual(summary["backgroundCount"], 42)
-        self.assertEqual(summary["provenanceCoverage"]["licenseDeclaredCount"], 843)
-        self.assertEqual(summary["provenanceCoverage"]["sourceDeclaredCount"], 843)
-        self.assertEqual(summary["provenanceCoverage"]["completeCount"], 843)
+        self.assertEqual(summary["provenanceCoverage"]["licenseDeclaredCount"], 846)
+        self.assertEqual(summary["provenanceCoverage"]["sourceDeclaredCount"], 846)
+        self.assertEqual(summary["provenanceCoverage"]["completeCount"], 846)
         self.assertEqual(summary["provenanceCoverage"]["incompleteCount"], 0)
         self.assertTrue(summary["offlineAvailable"])
         self.assertEqual(summary["missingFiles"], [])
@@ -410,7 +410,7 @@ class ResourcePackManifestTests(unittest.TestCase):
             self.assertEqual(active_resource_pack_root(root / "media"), PACKAGE_ROOT)
             code, presets = api.handle("GET", "/api/v1/presets", {})
             self.assertEqual(code, 200)
-            self.assertEqual(presets["count"], 189)
+            self.assertEqual(presets["count"], 192)
 
             code, status = api.handle("POST", "/api/v1/resource-packs/rollback", {})
             self.assertEqual(code, 200)

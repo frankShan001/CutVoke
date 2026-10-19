@@ -12,3 +12,12 @@ src/cutvoke/assets/fonts/OFL-*.txt -text -whitespace
 examples/showcases/chase-the-light/*.mp4 filter=lfs diff=lfs merge=lfs -text
 examples/showcases/chase-the-light/*.cvkpkg filter=lfs diff=lfs merge=lfs -text
 examples/showcases/chase-the-light/*.zip filter=lfs diff=lfs merge=lfs -text
+
+# Bilingual examples include editable archives and their original media.
+examples/showcases/**/*.mp4 filter=lfs diff=lfs merge=lfs -text
+examples/showcases/**/*.mov filter=lfs diff=lfs merge=lfs -text
+examples/showcases/**/*.wav filter=lfs diff=lfs merge=lfs -text
+examples/showcases/**/*.cutvokepack filter=lfs diff=lfs merge=lfs -text
+examples/showcases/**/source-media/*.png filter=lfs diff=lfs merge=lfs -text
+# The bilingual manifests hash these indexes byte for byte.
+examples/showcases/**/source-media/*.json -text

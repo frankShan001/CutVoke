@@ -21,7 +21,7 @@ class BuiltinPresetCatalogTests(unittest.TestCase):
     def test_reviewed_presets_pass_the_qualification_gate(self) -> None:
         catalog = PresetCatalog.builtin()
         items = catalog.all()
-        self.assertEqual(len(items), 189)
+        self.assertEqual(len(items), 192)
         self.assertEqual(len({item.id for item in items}), len(items))
         self.assertTrue(all(item.source for item in items))
         self.assertTrue(all("builtin_presets.json" in item.source
@@ -30,11 +30,11 @@ class BuiltinPresetCatalogTests(unittest.TestCase):
                           for family in ("transition", "animation", "fx", "filter", "text",
                                          "personFx")},
                          {"transition": 41, "animation": 32, "fx": 36, "filter": 24,
-                          "text": 32, "personFx": 24})
+                          "text": 35, "personFx": 24})
         self.assertEqual({category: sum(item.family == "text" and item.subcategory == category
                                         for item in items)
                           for category in ("简约", "花字", "信息条", "文字动画")},
-                         {"简约": 8, "花字": 8, "信息条": 8, "文字动画": 8})
+                         {"简约": 8, "花字": 10, "信息条": 9, "文字动画": 8})
         self.assertEqual({slot: sum(item.family == "animation" and
                                     item.subcategory == slot for item in items)
                           for slot in ("入场", "出场", "循环", "组合")},
@@ -51,7 +51,7 @@ class BuiltinPresetCatalogTests(unittest.TestCase):
                             for item in items))
         self.assertTrue(all(item.checks["cover"] and item.checks["motionPreview"]
                             for item in items))
-        self.assertEqual(sum(item.qualified for item in items), 189)
+        self.assertEqual(sum(item.qualified for item in items), 192)
         person_fx = [item for item in items if item.family == "personFx"]
         self.assertEqual(len(person_fx), 24)
         self.assertTrue(all(item.status == "approved" and item.qualified
@@ -160,10 +160,10 @@ class BuiltinPresetCatalogTests(unittest.TestCase):
             try:
                 status, body = api.handle("GET", "/api/v1/presets", {})
                 self.assertEqual(status, 200)
-                self.assertEqual(body["count"], 189)
+                self.assertEqual(body["count"], 192)
                 self.assertEqual(body["candidateCount"], 0)
-                self.assertEqual(body["qualifiedCount"], 189)
-                self.assertEqual(body["resourcePack"]["version"], "1.38.1")
+                self.assertEqual(body["qualifiedCount"], 192)
+                self.assertEqual(body["resourcePack"]["version"], "1.39.0")
                 self.assertTrue(all(item["source"] for item in body["presets"]))
                 self.assertTrue(all("builtin_presets.json" in item["source"]
                                     for item in body["presets"]
@@ -184,7 +184,7 @@ class BuiltinPresetCatalogTests(unittest.TestCase):
                 self.assertEqual(status, 200)
                 self.assertEqual(person_fx["count"], 24)
                 self.assertEqual(person_fx["candidateCount"], 0)
-                self.assertEqual(person_fx["qualifiedCount"], 189)
+                self.assertEqual(person_fx["qualifiedCount"], 192)
                 self.assertEqual(sum(item["qualified"] for item in person_fx["presets"]), 24)
                 status, composition = api.handle("GET", "/api/v1/presets", {"family": "fx", "subcategory": "构图"})
                 self.assertEqual(status, 200)
@@ -194,15 +194,15 @@ class BuiltinPresetCatalogTests(unittest.TestCase):
                 self.assertEqual(filters["count"], 24)
                 status, titles = api.handle("GET", "/api/v1/presets", {"family": "text"})
                 self.assertEqual(status, 200)
-                self.assertEqual(titles["count"], 32)
+                self.assertEqual(titles["count"], 35)
                 status, title_motions = api.handle("GET", "/api/v1/presets", {"family": "text", "subcategory": "文字动画"})
                 self.assertEqual(status, 200)
                 self.assertEqual(title_motions["count"], 8)
                 self.assertEqual(sum(item["qualified"] for item in title_motions["presets"]), 8)
-                self.assertEqual(title_motions["qualifiedCount"], 189)
+                self.assertEqual(title_motions["qualifiedCount"], 192)
                 status, only = api.handle("GET", "/api/v1/presets", {"qualifiedOnly": "1"})
                 self.assertEqual(status, 200)
-                self.assertEqual(only["count"], 189)
+                self.assertEqual(only["count"], 192)
                 first = body["presets"][0]["presetId"]
                 status, cover = api.handle("GET", f"/api/v1/presets/{first}/cover", {})
                 self.assertEqual(status, 200)
