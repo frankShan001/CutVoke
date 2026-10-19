@@ -2293,7 +2293,7 @@ test("seam hotspot selects the incoming clip for transition preview, apply, repl
   await expect(page.getByText("转场将连接此前一段与当前片段")).toBeVisible();
 
   const options = page.locator(".transition-options .cv-chip");
-  await expect(options).toHaveCount(41);
+  await expect(options).toHaveCount(44);
   const currentOption = page.locator(".transition-options .cv-chip--on");
   const originalName = (await currentOption.innerText()).trim();
   await page.getByRole("button", { name: "预览当前转场" }).click();
