@@ -92,6 +92,42 @@ def test_moving_mask_is_not_baked_and_seeks_same_as_export(tmp_path, shape):
 
 
 @pytest.mark.skipif(not shutil.which('ffmpeg'), reason='FFmpeg required')
+@pytest.mark.parametrize('motion', ['none', 'linear'])
+@pytest.mark.parametrize('source_alpha', [128, 255])
+@pytest.mark.parametrize('tile_text', [False, True])
+def test_text_mask_coverage_and_inverse_preserve_source_alpha(
+        tmp_path, motion, source_alpha, tile_text):
+    source = tmp_path/'source.png'
+    Image.new('RGBA', (160, 96), (90, 180, 230, source_alpha)).save(source)
+    params = dict(shape='text', content='M', fontSize=.5, x=.3, y=.2,
+                  feather=0, tileText=tile_text, motion=motion,
+                  motionDuration=1, motionFromX=0, motionToX=.1)
+    project = EditService().create_project('text-alpha', width=160, height=96,
+                                         fps=R.of(24))
+    clip = Clip('c', AssetReference('a', str(source)), R.of(0), R.of(2), R.of(0),
+                effects=[dict(effectId='cutvoke.fx.mask', params=params)])
+    project.sequence.tracks = [Track('v', 'video', [clip])]
+    renderer = RenderService()
+    alphas = []
+    for invert in [False, True]:
+        params['invert'] = invert
+        path = tmp_path/f'invert-{invert}.png'
+        renderer.extract_still(project, .75, str(path), alpha=True)
+        alphas.append(np.asarray(Image.open(path).convert('RGBA'))[:, :, 3])
+    normal, inverse = alphas
+    # A large Regular M has opaque interiors and antialiased edges. Its
+    # coverage must multiply source alpha, not limited-range video luma.
+    assert abs(int(normal.max()) - source_alpha) <= 1
+    filled = normal == normal.max()
+    assert np.count_nonzero(filled) > 150
+    assert normal.min() == 0
+    assert np.count_nonzero((normal > 1) & (normal < source_alpha - 2)) > 20
+    assert inverse[filled].max() <= 1
+    # Inversion complements coverage, including edge pixels, within rounding.
+    assert np.abs(normal.astype(int) + inverse.astype(int) - source_alpha).max() <= 2
+
+
+@pytest.mark.skipif(not shutil.which('ffmpeg'), reason='FFmpeg required')
 def test_original_partial_alpha_and_inertial_rotating_matte(tmp_path):
     source=tmp_path/'half-alpha.png'
     Image.new('RGBA',(160,96),(90,180,230,128)).save(source)

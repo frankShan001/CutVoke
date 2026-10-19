@@ -4285,9 +4285,11 @@ class RenderService:
             sample = (f"if(gte({mx}\\,0)*lt({mx}\\,W)*gte({my}\\,0)*lt({my}\\,H)"
                       f"\\,lum({mx}\\,{my})\\,{base_luma})")
             motion = f",geq=lum='{initial}{sample}'"
+        # FFmpeg 6 drawtext uses limited-range gray (white=235, black=16).
+        # Draw in RGB first so matte coverage spans 0..255 on every version.
         parts.append(
-            f"[{matte}]format=gray,geq=lum='{base_luma}',{drawtext}{blur}{motion},"
-            f"format=gray[{mask}]")
+            f"[{matte}]format=rgb24,lutrgb=r={base_luma}:g={base_luma}:b={base_luma},"
+            f"{drawtext},format=gray{blur}{motion}[{mask}]")
         parts.append(
             f"[{original_alpha}][{mask}]blend=all_expr='A*B/255':shortest=1"
             f"[{combined_alpha}]")
