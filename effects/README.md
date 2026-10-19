@@ -2,7 +2,35 @@
 
 [中文贡献指南](../docs/user/effect-contributing.zh-CN.md) · [General contributing guide](../CONTRIBUTING.md)
 
-Help make the editor more expressive: contribute a useful transition, a thoughtful visual treatment, an audio effect, a readable text animation, or a reusable resource. Start with a GitHub PR and a small edit that shows why your contribution helps a creator.
+Useful effects can come from ordinary AI-assisted editing. Save reusable settings locally, try them in the current edit, and prepare a contribution only when you want to share.
+
+## Create while editing: no development setup
+
+With a connected AI editor, ask: **"Save this treatment as a reusable effect module. When finished, prepare a settings-only contribution package."** MCP onboarding and `editor_help(topic="sharing")` supply the workflow and mandatory privacy wording to the agent.
+
+1. `effect_module_list(includeSchemas=true)` discovers the exact content-free built-in schemas. `effect_module_save(recipe=...)` saves a reusable recipe beside the current database, without reading the project. There is no type-directory setting or restart.
+2. `command_preview` / `command_apply` with `type="effectModule.apply"`, `payload={clipId,moduleId}` applies it to an existing clip using the current revision and editing lease. It supports undo/redo and remains manually editable. `effects` combines existing operators; `motion` uses normalized clip time (`at=0..1`, x/y fractions of the canvas); `textStyle` preserves the title's existing text.
+3. `effect_module_export(moduleId=...)` writes a local ZIP, without uploading. `effect_module_import(path=...)` lets another installation reuse the exported recipe. Save a changed recipe to get a new content ID.
+
+Example `effect_module_save` arguments:
+
+```json
+{"recipe":{"effects":[{"effectId":"cutvoke.fx.vibrance","params":{"intensity":0.4}}],"motion":[{"param":"opacity","at":0,"value":0.2},{"param":"opacity","at":0.25,"value":1}]}}
+```
+
+**Privacy is enforced by the package format.** It permits only supported built-in effect IDs, validated numeric/boolean/enum/color parameters, normalized motion and a limited set of text style fields. It rejects free text, captions, media/resource paths, arbitrary code and unknown fields, including inside parameters. Some content-dependent effects are consequently unavailable in this format; consult the returned schemas. New algorithms still require an implementation PR.
+
+The exporter reconstructs exactly four files under `effects/recipes/<content-id>/`: `module.json`, generated `README.md`, MIT `LICENSE`, and `PRIVACY.txt`. It never packages a directory, project, source file or project preview. It revalidates stored settings and their content hash; importing also rejects added files or changed documentation. Local modules live in `effect-modules/` beside the database (the default is `~/.cutvoke/data/effect-modules/`). Modules are separate from project packages and remain available after a project is removed.
+
+Whenever an AI suggests sharing or delivers the package, it must append the returned notice verbatim in the user's language:
+
+> This effect package contains only effect settings and app-generated generic documentation. It contains no personal information, project videos, images, audio, text or captions, project files, file paths or editing history. Preparation is local; nothing has been uploaded. Public submission requires your explicit consent.
+
+This guarantee covers the **unmodified app-generated ZIP**. Do not add screenshots, renders, logs, prompts, original media, personal details or project archives to it or to a PR. Public submission is a separate action requiring explicit user consent. Extract the four generated files into the repository to propose a recipe contribution; run `python scripts/verify/validate_effect_contributions.py`. Review and rendering validation still apply: use synthetic media and fixed generic text for any evidence, never the user's project. A structurally valid package does not certify the visual result.
+
+## Develop new rendering behavior
+
+The following manifest workflow is for contributors extending engine behavior or its existing mappings. It does not apply to the settings-only module workflow above.
 
 The runnable starting point is [Soft Reveal](transitions/cutvoke.transition.community.soft-reveal/README.md), a restrained dissolve backed by the existing FFmpeg `fade` algorithm. It demonstrates author metadata, parameter validation, local discovery, actual preview and export. It is an example configuration of an existing algorithm, not a new renderer.
 
@@ -39,7 +67,7 @@ The contribution validator adds review requirements on top of the existing loade
 
 ## Develop and preview locally
 
-Install the source development environment described in [CONTRIBUTING.md](../CONTRIBUTING.md). From the checkout, enable a **category** directory before starting the editor and MCP engine:
+For manifest/core development, install the environment from [CONTRIBUTING.md](../CONTRIBUTING.md). From the checkout, enable a **category** directory before starting the editor and MCP engine:
 
 ```powershell
 # Windows PowerShell, with .venv activated

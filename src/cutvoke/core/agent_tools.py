@@ -16,6 +16,7 @@ from pathlib import Path
 
 from .protocol import ErrorCode
 from .service import EditError
+from .effect_modules import RECIPE_SCHEMA, PRIVACY
 
 
 def _tool(name, description, properties, required=()):
@@ -31,8 +32,16 @@ PROJECT = {"projectId": STRING}
 REVISION = {**PROJECT, "expectedRevision": STRING}
 AGENT_TOOLS = [
     _tool("editor_help", "START HERE if unfamiliar with CutVoke. Bundled workflow, units, recipes, command payload JSON schemas, effect schemas and error recovery; no external Skill/source-code access needed. Default {} returns a compact onboarding guide. Before editing, request topic=command with the command name; add effectId for exact effect params.",
-          {"topic": {"type": "string", "enum": ["overview", "time", "editing", "errors", "recipes", "command"], "default": "overview"},
+          {"topic": {"type": "string", "enum": ["overview", "time", "editing", "errors", "recipes", "command", "sharing"], "default": "overview"},
            "command": STRING, "effectId": STRING, "recipe": STRING}),
+    _tool("effect_module_save", "Save a content-free reusable effect recipe locally (MIT). No project/media/text inputs accepted. Discover allowed schemas with effect_module_list(includeSchemas=true). Return privacyNotice verbatim to the user when proposing sharing.",
+          {"recipe": RECIPE_SCHEMA}, ("recipe",)),
+    _tool("effect_module_list", "List local reusable effect modules, get one by moduleId, or discover safe creation schemas. No project content is read. Apply via command_preview/command_apply type=effectModule.apply, with revision/lease and one undo point.",
+          {"moduleId": STRING, "includeSchemas": {"type": "boolean", "default": False}, **PAGE}),
+    _tool("effect_module_export", "Create a local MIT contribution ZIP containing only validated settings and generated generic docs. No user videos/images/audio/text/captions/projects/paths/history; no upload. Show privacyNotice verbatim and request explicit user consent before any public submission. Never substitute project_package/project_archive or add project previews.",
+          {"moduleId": STRING, "outPath": STRING}, ("moduleId",)),
+    _tool("effect_module_import", "Import only the four exact generated files of a content-free effect ZIP; reject extra assets, custom text or code. Saves in the local library; no upload or project changes.",
+          {"path": STRING}, ("path",)),
     _tool("project_list", "分页查找已有工程，返回 ID、名称、revision。先查找再打开。",
           {"query": {"type": "string"}, **PAGE}),
     _tool("project_clone", "复制当前 revision 为新的可编辑工程；原工程不变，副本从 revision 0 开始。",
@@ -128,6 +137,24 @@ class AgentTools:
     def editor_help(self, a):
         from .editor_guide import EditorGuide
         return {"help": EditorGuide(self.service).help(a)}
+
+    def effect_module_save(self, a):
+        return self.service.effect_modules.save(a["recipe"])
+
+    def effect_module_list(self, a):
+        library = self.service.effect_modules
+        result = ({"moduleId": a["moduleId"], "module": library.load(a["moduleId"]),
+                   "privacyNotice": dict(PRIVACY), "uploaded": False} if a.get("moduleId")
+                  else library.list(a.get("offset", 0), a.get("limit", 20)))
+        if a.get("includeSchemas"):
+            result["creationSchemas"] = library.schemas()
+        return result
+
+    def effect_module_export(self, a):
+        return self.service.effect_modules.export(a["moduleId"], a.get("outPath"))
+
+    def effect_module_import(self, a):
+        return self.service.effect_modules.import_package(a["path"])
 
     def media_import(self, a):
         store = self.service.store

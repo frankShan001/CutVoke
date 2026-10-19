@@ -2,7 +2,35 @@
 
 [English](../../effects/README.md) · [通用贡献说明](../../CONTRIBUTING.md)
 
-欢迎把有用的转场、滤镜、声音处理、文字动画和可复用资源带进编辑器。以 GitHub PR 为入口，提供一个小工程，展示它帮助创作者解决什么问题。
+有用的特效可以来自一次普通的 AI 剪辑。先把效果保存为本地模块，用在当前作品里；需要分享时，再准备贡献包。
+
+## 边剪辑边创作：无需开发环境
+
+连接 AI 编辑器后，可以直接说：**“把这个效果保存成可复用特效模块。剪完后，准备一个只含效果配方的分享包。”** MCP 连接说明与 `editor_help(topic="sharing")` 会把创作约定和必需的隐私话术传递给 AI。
+
+1. `effect_module_list(includeSchemas=true)` 查询实际支持的安全参数；`effect_module_save(recipe=...)` 保存配方，不读取工程。不需要设置类型目录或重启程序。
+2. 通过 `command_preview` / `command_apply`，使用 `type="effectModule.apply"`、`payload={clipId,moduleId}` 和当前 revision、编辑租约应用到已有片段。支持撤销、重做和人工调整。`effects` 组合已有算子；`motion` 使用片段相对时间 `at=0..1`，x/y 为画布宽高比例；`textStyle` 只改变已有文字片段的样式，保留用户正文。
+3. `effect_module_export(moduleId=...)` 在本地生成 ZIP，不上传。其他用户可用 `effect_module_import(path=...)` 导入。修改后的配方另存为新内容 ID。
+
+`effect_module_save` 参数示例：
+
+```json
+{"recipe":{"effects":[{"effectId":"cutvoke.fx.vibrance","params":{"intensity":0.4}}],"motion":[{"param":"opacity","at":0,"value":0.2},{"param":"opacity","at":0.25,"value":1}]}}
+```
+
+**隐私限制由包格式强制执行。** 只接受内置白名单效果、经过校验的数值/布尔/枚举/颜色参数、相对时间关键帧和限定的文字样式字段。自由文字、字幕正文、素材或资源路径、任意代码、未知字段以及参数中夹带的内容都会被拒绝。因此依赖用户内容的部分效果不进入这种分享格式，以工具返回的 schema 为准。新增算法仍需代码实现 PR。
+
+导出器重新构造 `effects/recipes/<内容ID>/` 下的四个文件：`module.json`、程序生成的 `README.md`、MIT `LICENSE` 和 `PRIVACY.txt`。不会打包目录、工程、源文件或工程预览；每次导出重新校验配方与内容哈希，导入也会拒绝新增附件或修改过的说明。模块存于数据库旁的 `effect-modules/`（默认 `~/.cutvoke/data/effect-modules/`），独立于工程和工程包，删除工程不会删除模块。
+
+AI 每次建议分享或交付贡献包时，都必须原样追加工具返回的中文说明：
+
+> 准备分享的特效包仅包含效果配方、参数和程序生成的通用说明，不包含您的视频、图片、音频、文字或字幕正文，也不包含工程、个人信息、文件路径和编辑历史。当前仅在本地准备，尚未上传任何内容；公开提交需要您明确同意。
+
+此保证适用于**未经修改的程序导出 ZIP**。不得再添加用户工程的截图、成片、日志、提示词、原始素材、个人信息或工程包，也不得写进 PR 标题与说明。公开提交是单独一步，需要用户明确同意。把 ZIP 中的四个生成文件按原目录放进仓库即可准备配方 PR；运行 `python scripts/verify/validate_effect_contributions.py` 校验。实际效果仍须审核与渲染验证；需要证据时，只使用另外生成的合成素材和固定通用文字，不能使用用户工程。结构校验通过不代表画面质量已经验收。
+
+## 开发新的渲染行为
+
+下面的清单流程适用于扩展引擎行为或现有算法映射的开发者，不是上面“只分享配方”流程的前置条件。
 
 从 [柔和揭幕 Soft Reveal](../../effects/transitions/cutvoke.transition.community.soft-reveal/README.md) 开始：这是基于现有 FFmpeg `fade` 算法的克制叠化，包含作者、许可证、参数校验、本地发现、真实预览和导出示例。它是现有算法的配置示例，没有新增渲染算法。
 
@@ -38,7 +66,7 @@
 
 ## 本地预览和验证
 
-先按 [CONTRIBUTING.md](../../CONTRIBUTING.md) 安装开发环境。在仓库中已激活的环境，启动编辑器和 MCP 前指定**类型目录**：
+开发清单或核心算法时，先按 [CONTRIBUTING.md](../../CONTRIBUTING.md) 安装开发环境。在仓库中已激活的环境，启动编辑器和 MCP 前指定**类型目录**：
 
 ```powershell
 # Windows PowerShell

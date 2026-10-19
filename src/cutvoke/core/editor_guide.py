@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import json
+from .effect_modules import PRIVACY
 
 
 INSTRUCTIONS = (
@@ -14,18 +15,28 @@ INSTRUCTIONS = (
     "Batch edits use edit_lock, command_preview, then command_apply with the current expectedRevision, "
     "a stable commandId and editLeaseId. Read error.recovery after failure. Verify actual pictures with "
     "preview_frames, export asynchronously, and release the lease for human takeover. "
-    "Intelligence remains in your external agent; this application executes edits and returns evidence."
+    "Intelligence remains in your external agent; this application executes edits and returns evidence. "
+    "When inventing reusable effects during normal editing, read editor_help(topic='sharing'); "
+    "save a content-free recipe with effect_module_save and apply through effectModule.apply. "
+    "Never include user media, images, audio, text/captions, projects, personal information or paths in contributions. "
+    "Use only effect_module_export for sharing; never project_package/project_archive or project screenshots. "
+    "Whenever suggesting sharing, show the returned privacyNotice in the user's language verbatim. "
+    "Nothing is uploaded by these tools; obtain explicit user consent before public submission. "
+    "Required user-facing sharing notice (zh-CN): " + PRIVACY["zh-CN"] + " "
+    "Required user-facing sharing notice (en): " + PRIVACY["en"]
 )
 
 GUIDES = {
     "overview": {
         "title": "Start editing with CutVoke",
+        "privacyNotice": PRIVACY,
         "rules": [
             "Use only the connected tools. No shell, repository, external documentation or additional Skill is required for ordinary editing.",
             "The user supplies the intended edit and access to source media. If several projects fit the request, clarify the target; do not guess.",
             "IDs returned by queries are authoritative. Never infer a clip ID from its position or filename.",
             "All changes persist in the shared editable project. The desktop editor and MCP see the same database.",
-            "Inspect actual preview_frames images before claiming visual quality. A successful command or export alone is not visual acceptance."],
+            "Inspect actual preview_frames images before claiming visual quality. A successful command or export alone is not visual acceptance.",
+            "During normal editing, preserve useful new effects as content-free modules. See sharing help. Whenever suggesting sharing, append its privacyNotice verbatim; do not include user footage, images, audio, text/captions, personal information, project files or paths. Never upload without explicit consent."],
         "workflow": [
             {"tools": ["runtime", "project_list", "project_summary"], "purpose": "Check the connected data directory; locate the requested project and current revision. Use create_project for a new edit or project_clone for an alternate version."},
             {"tools": ["media_list", "media_import", "media_inspect", "preview_frames"], "purpose": "Locate/import local files, inspect source duration and actual pictures. Imported assetId can be used directly in clip.insert."},
@@ -35,8 +46,22 @@ GUIDES = {
             {"tools": ["command_apply", "export_job", "project_package", "edit_lock"], "purpose": "Run project.preflight, enqueue export, poll until succeeded, return result.output_path. Export uses the submitted snapshot; later edits do not change it. Package the editable project when requested. Release the lease in a finally step, including after failure."}],
         "help": {"conventions": {"topic": "time"}, "editing": {"topic": "editing"},
                  "recovery": {"topic": "errors"}, "examples": {"topic": "recipes"},
-                 "command": {"topic": "command", "command": "clip.insert"}},
+                 "command": {"topic": "command", "command": "clip.insert"},
+                 "sharing": {"topic": "sharing"}},
         "modelServices": False},
+    "sharing": {
+        "title": "Create reusable effects while editing; share settings only",
+        "privacyNotice": PRIVACY,
+        "rules": [
+            "Complete the user's intended edit first. When inventing useful reusable effects, save a small declarative module; do not turn every edit into a contribution task.",
+            "Call effect_module_list(includeSchemas=true) for the exact supported built-in schemas. Save recipe={effects:[{effectId,params}],motion:[{param,at,value,interpolation}],textStyle:{...}} with effect_module_save. Omit empty sections. Free-form names/descriptions, code, expressions, resources, paths and text/caption content are forbidden.",
+            "motion.at is 0..1 of the target clip duration; x/y values are fractions of canvas width/height. Other effect durations remain seconds. textStyle updates an existing editable title while keeping its private text in the project only.",
+            "Apply using command_preview then command_apply type=effectModule.apply payload={clipId,moduleId}, current expectedRevision, stable commandId and editLeaseId. It is one undo point. Only the recipe's effect IDs/animation slots and motion channels are replaced; unrelated settings remain. Inspect actual pictures locally.",
+            "Modules live beside the current database in effect-modules, independent of projects; no development setup, environment variable or process restart is needed. Save a new recipe to create a changed module; IDs are content hashes. Import a generated ZIP with effect_module_import.",
+            "When the edit is finished, mention worthwhile modules and offer sharing. EVERY sharing suggestion/delivery MUST append privacyNotice in the user's language verbatim. Explain that only the app-generated unmodified ZIP has this guarantee; do not make claims about files the agent adds separately.",
+            "Use effect_module_export only. It creates four allowlisted files: module.json, README.md, LICENSE (MIT), PRIVACY.txt. It never reads a project, captures a frame, scans a directory for attachments or uploads. Do not use project_package/project_archive for effects: those contain private user content.",
+            "Never attach project video, images, audio, title/subtitle text, screenshots, thumbnails, renders, prompts, logs, actor details, file paths or edit history to a contribution. Do not copy private details into settings, descriptions, PR titles/bodies or filenames. For visual evidence use separately generated synthetic media and fixed generic text, never derived from the user's project.",
+            "Local preparation does not authorize publication. Before submitting a PR or uploading any file, obtain explicit user consent. Do not upload the user's project content even if asked to share an effect. Maintainers still review behavior and compatibility; this package does not certify visual quality."]},
     "time": {
         "title": "Times, coordinates and units",
         "rules": [

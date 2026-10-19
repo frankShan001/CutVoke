@@ -8,6 +8,8 @@
 
 ## 本地环境
 
+如果只是分享 AI 剪辑中产生的效果配方，使用[本地特效模块流程](docs/user/effect-contributing.zh-CN.md#边剪辑边创作无需开发环境)，无需安装开发环境。导出 ZIP 排除所有用户工程内容；不要附加用户素材、文字、截图或工程包。以下步骤用于源码与引擎开发。
+
 后端需要 Python 3.10+、FFmpeg 和 ffprobe。Web 编辑器需要 Node.js 20+。
 
 ```bash

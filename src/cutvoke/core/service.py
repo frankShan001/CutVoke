@@ -281,7 +281,7 @@ _BATCH_EDIT_COMMANDS = frozenset({
     "clip.keyframe", "clip.group", "clip.ungroup", "clip.rippleDelete",
     "clip.closeGap", "clip.align", "clip.distribute", "asset.swap",
     "effect.add", "effect.remove", "effect.update", "effect.copyVisual", "effect.setAnimation",
-    "effect.setTransition", "effect.bypass",
+    "effect.setTransition", "effect.bypass", "effectModule.apply",
     "effect.reorder",
     "caption.add", "caption.bulkAdd", "caption.update", "caption.patch", "caption.remove",
     "caption.batchStyle", "caption.shift", "caption.splitByWords",
@@ -315,7 +315,7 @@ def _split_text_units(text: str, unit: str) -> list[str]:
 
 class EditService:
     def __init__(self, store: Optional["ProjectStore"] = None,
-                 registry: Optional[EffectRegistry] = None) -> None:
+                 registry: Optional[EffectRegistry] = None, *, effect_modules_dir=None) -> None:
         # project_id -> Project
         self._projects: dict[str, Project] = {}
         # project_id -> {command_id: CommandResult}  幂等记录
@@ -331,6 +331,13 @@ class EditService:
         self._store = store
         # 效果注册表（T05/T17）：effect.add 按清单校验 ID 与参数
         self._effects: EffectRegistry = registry or default_registry()
+        from pathlib import Path
+        from .effect_modules import EffectModuleLibrary
+        store_path = str(getattr(store, "path", ""))
+        module_root = (Path(store_path).resolve().parent / "effect-modules"
+                       if store_path and store_path != ":memory:" and not store_path.startswith("file:")
+                       else Path.home() / ".cutvoke" / "data" / "effect-modules")
+        self.effect_modules = EffectModuleLibrary(effect_modules_dir or module_root)
         # 导出队列单例（V02）：懒创建，见 _get_export_queue / close。
         self._export_queue: Optional["ExportQueue"] = None
         self._export_queue_lock = threading.Lock()
@@ -368,6 +375,7 @@ class EditService:
             "clip.group": self._h_clip_group,
             "clip.ungroup": self._h_clip_ungroup,
             "effect.add": self._h_effect_add,
+            "effectModule.apply": self._h_effect_module_apply,
             "effect.remove": self._h_effect_remove,
             "effect.copyVisual": self._h_effect_copy_visual,
             "effect.setAnimation": self._h_effect_set_animation,
@@ -780,6 +788,13 @@ class EditService:
                 {"name": "effectId", "description": "效果 ID", "required": True},
                 {"name": "params", "description": "效果参数对象（按清单校验）", "required": False},
                 {"name": "version", "description": "效果版本（缺省取注册表默认）", "required": False},
+            ],
+        },
+        "effectModule.apply": {
+            "description": "应用本地可分享特效模块；仅替换配方涉及的效果和关键帧通道，保留用户文字。一次撤销。",
+            "params": [
+                {"name": "clipId", "description": "目标片段 ID", "required": True},
+                {"name": "moduleId", "description": "effect_module_save/list/import 返回的内容 ID", "required": True},
             ],
         },
         "effect.remove": {
@@ -5049,6 +5064,44 @@ class EditService:
         return [{"type": "clip", "id": clip_id, "change": "ungrouped",
                  "trackId": src_track.id,
                  "restoredClipIds": [c.id for c in restored]}]
+
+    def _h_effect_module_apply(self, proj: Project, p: dict) -> list[dict]:
+        from .effect_modules import _object
+        _object(p, ("clipId", "moduleId"), ("clipId", "moduleId"))
+        recipe = self.effect_modules.load(p["moduleId"])["recipe"]
+        clip = self._clip_by_id(proj, p["clipId"])
+        if recipe["motion"] and not self._effect_target_types(proj, clip).intersection({"image", "video", "text"}):
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "Visual motion cannot be applied to audio clips")
+        for effect in recipe["effects"]:
+            eid = effect["effectId"]
+            trusted = self.effect_modules.builtins.get(eid)
+            actual = self._effects.find(eid)
+            if actual is None or (actual.parameters, actual.implementation, actual.version) != (
+                    trusted.parameters, trusted.implementation, trusted.version):
+                raise EditError(ErrorCode.EFFECT_UNAVAILABLE, "Module requires the unmodified built-in effect")
+            payload = {"clipId": clip.id, **copy.deepcopy(effect)}
+            if trusted.category == "transition":
+                self._h_effect_set_transition(proj, payload)
+            elif animation_slot(eid):
+                self._h_effect_set_animation(proj, payload)
+            else:
+                clip.effects = [item for item in clip.effects if item.get("effectId") != eid]
+                self._h_effect_add(proj, payload)
+        if recipe["textStyle"]:
+            if "text" not in self._effect_target_types(proj, clip):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, "Text style requires an existing editable title")
+            self._h_effect_update(proj, {"clipId": clip.id, "effectId": "cutvoke.text",
+                                        "params": recipe["textStyle"]})
+        for param in {frame["param"] for frame in recipe["motion"]}:
+            clip.keyframes.pop(param, None)
+        for frame in recipe["motion"]:
+            value = frame["value"]
+            if frame["param"] in ("x", "y"):
+                value *= proj.sequence.width if frame["param"] == "x" else proj.sequence.height
+            self._h_clip_keyframe(proj, {"clipId": clip.id, "param": frame["param"],
+                "time": (clip.duration * Rational.from_float(frame["at"])).to_json(),
+                "value": value, "interpolation": frame["interpolation"]})
+        return [{"type": "clip", "id": clip.id, "change": "effectModule.applied", "moduleId": p["moduleId"]}]
 
     def _h_effect_add(self, proj: Project, p: dict) -> list[dict]:
         """给片段加效果实例（effectId + version + params）。

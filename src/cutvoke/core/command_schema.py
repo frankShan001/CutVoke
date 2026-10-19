@@ -69,6 +69,11 @@ def normalize_schema(value):
 
 def payload_schema(command: str, params: list[dict], effects: dict | None = None) -> dict:
     """Derive public fields from the registered command catalog, not a tool copy."""
+    if command == "effectModule.apply":
+        return {"type": "object", "properties": {
+            "clipId": {"type": "string", "minLength": 1},
+            "moduleId": {"type": "string", "pattern": r"^cutvoke\.module\.[0-9a-f]{64}$"}},
+            "required": ["clipId", "moduleId"], "additionalProperties": False}
     effects = effects or {}
     properties, required = {}, []
     for param in params:

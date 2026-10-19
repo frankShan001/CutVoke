@@ -10,6 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 from cutvoke.core.effects import EffectRegistry, EffectSpec, ManifestInvalid, _builtin_specs
+from cutvoke.core.effect_modules import EffectModuleLibrary
 
 
 FAMILIES = {"transitions": "transition", "filters": "fx", "color": "fx", "video": "fx",
@@ -80,6 +81,7 @@ def validate_folder(folder: Path) -> list[str]:
 
 def validate_tree(root: Path) -> dict:
     manifests = sorted(root.glob("*/*/manifest.json"))
+    recipes = sorted((root / "recipes").iterdir()) if (root / "recipes").is_dir() else []
     failures = {}
     seen = set()
     for manifest in manifests:
@@ -93,7 +95,14 @@ def validate_tree(root: Path) -> dict:
             pass
         if errors:
             failures[str(manifest.relative_to(root))] = errors
-    return {"ok": bool(manifests) and not failures, "checked": len(manifests), "errors": failures}
+    library = EffectModuleLibrary(root / ".unused-library")
+    for recipe in recipes:
+        try:
+            library.validate_contribution(recipe)
+        except (ValueError, OSError) as error:
+            failures[str(recipe.relative_to(root))] = [str(error)]
+    return {"ok": bool(manifests or recipes) and not failures,
+            "checked": len(manifests) + len(recipes), "errors": failures}
 
 
 def main():

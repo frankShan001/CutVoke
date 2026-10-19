@@ -239,7 +239,7 @@ The skill is creative guidance. It does not install a model or guarantee a polis
 
 ## Build effects together
 
-Contribute useful transitions, filters, sound treatments, text animation and reusable resources. Start with a **GitHub PR** and an edit that others can preview and reproduce.
+Create reusable effects during ordinary AI-assisted editing: the agent can save a local module, apply it with undo/redo, and export a settings-only contribution ZIP. No development setup or category-directory configuration is needed for this route. The package excludes user videos, images, audio, text/captions, projects, paths and editing history. The agent must show the explicit privacy notice whenever suggesting sharing; preparing a ZIP uploads nothing, and public submission requires your consent. See the [workflow and exact privacy boundary](effects/README.md#create-while-editing-no-development-setup).
 
 [Contribution guide](effects/README.md) · [Runnable transition example](effects/transitions/cutvoke.transition.community.soft-reveal/README.md)
 

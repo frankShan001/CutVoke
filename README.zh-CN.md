@@ -239,7 +239,7 @@ MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错�
 
 ## 一起打造特效
 
-欢迎贡献有用的转场、滤镜、声音处理、文字动画和可复用资源。以 **GitHub PR** 为入口，把想法变成可预览、可复验的作品。
+正常使用 AI 剪辑时，就能把有用的效果保存为本地模块，应用、撤销/重做，再导出只含配方的贡献 ZIP。这条路径无需开发环境或类型目录设置。包内不包含用户视频、图片、音频、文字/字幕正文、工程、路径和编辑历史；AI 每次建议分享时必须明确说明隐私边界。本地准备不会上传，公开提交需要用户明确同意。见[具体流程与隐私约束](docs/user/effect-contributing.zh-CN.md#边剪辑边创作无需开发环境)。
 
 [中文贡献指南](docs/user/effect-contributing.zh-CN.md) · [可运行转场样例](effects/transitions/cutvoke.transition.community.soft-reveal/README.md)
 

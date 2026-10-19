@@ -8,6 +8,8 @@ Read [SECURITY.md](SECURITY.md) before reporting a vulnerability. Never put expl
 
 ## Development setup
 
+Only sharing reusable settings from an AI-assisted edit? Use the [local effect module workflow](effects/README.md#create-while-editing-no-development-setup), which needs no development environment. Its exported ZIP excludes all user project content; do not attach project media, text, screenshots or archives. The setup below is for source/engine development.
+
 Use Python 3.10+, Node.js 20+, FFmpeg and ffprobe. See [installation and tested environments](docs/user/installation.md) for runtime capabilities and troubleshooting.
 
 ```bash

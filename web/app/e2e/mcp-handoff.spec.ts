@@ -47,9 +47,11 @@ test("stdio MCP imports stay visible when a human edits, previews and exports", 
     return data;
   }
   let asset: { assetId: string; path: string; name: string };
+  let moduleId = "";
   try {
-    await rpc("initialize", { protocolVersion: "2024-11-05", capabilities: {},
+    const initialized = await rpc("initialize", { protocolVersion: "2024-11-05", capabilities: {},
       clientInfo: { name: "browser-handoff", version: "1.0.0" } });
+    expect(initialized.instructions).toContain("不包含您的视频、图片、音频、文字或字幕正文");
     asset = (await call("media_import", { paths: [image] })).assets[0];
     const repeat = (await call("media_import", { paths: [image] })).assets[0];
     expect(repeat.assetId).toBe(asset.assetId);
@@ -62,6 +64,15 @@ test("stdio MCP imports stay visible when a human edits, previews and exports", 
         { type: "caption.add", payload: { captionId: "agent-caption", text: "Agent 原字幕",
           start: { num: 0, den: 1 }, end: { num: 2, den: 1 } } },
       ] } });
+    const saved = await call("effect_module_save", { recipe: {
+      effects: [{ effectId: "cutvoke.fx.vibrance", params: { intensity: 0.4 } }],
+      motion: [{ param: "opacity", at: 0, value: 0.3 }, { param: "opacity", at: 0.25, value: 1 }],
+    } });
+    moduleId = saved.moduleId;
+    const applyModule = { projectId: id, expectedRevision: "1", type: "effectModule.apply",
+      payload: { clipId: "imported-shot", moduleId } };
+    await call("command_preview", applyModule);
+    await call("command_apply", { ...applyModule, editLeaseId: lease, commandId: `${id}-module` });
     await call("edit_lock", { projectId: id, action: "release", leaseId: lease });
   } finally {
     child.stdin.end();
@@ -92,11 +103,30 @@ test("stdio MCP imports stay visible when a human edits, previews and exports", 
   await page.getByRole("button", { name: "保存字幕文字与时间" }).click();
   await expect.poll(async () => (await (await request.get(`/api/v1/projects/${id}`)).json())
     .sequence.captions[0].text).toBe("人工接手修改");
+  const edited = (await (await request.get(`/api/v1/projects/${id}`)).json()).sequence;
+  expect(edited.tracks[0].clips[0].effects.find((effect: { effectId: string }) =>
+    effect.effectId === "cutvoke.fx.vibrance").params.intensity).toBe(0.4);
   await page.getByRole("button", { name: "播放", exact: true }).click();
   await expect.poll(() => page.locator("video").first().evaluate((v: HTMLVideoElement) => v.currentTime)).toBeGreaterThan(.1);
   await page.getByRole("button", { name: "暂停", exact: true }).click();
   const evidence = resolve("../../.artifacts/acceptance/repo-repair/handoff");
   mkdirSync(evidence, { recursive: true });
+  const shared = await (await request.post("/api/v1/agent/effect_module_export", { data: {
+    moduleId, outPath: resolve(evidence, `${id}-effect.zip`),
+  } })).json();
+  expect(shared.ok).toBe(true);
+  expect(shared.containsUserContent).toBe(false);
+  expect(shared.uploaded).toBe(false);
+  expect(shared.privacyNotice["zh-CN"]).toContain("不包含您的视频、图片、音频、文字或字幕正文");
+  // Inspect decompressed members, not raw ZIP bytes which could hide private text.
+  execFileSync(python, ["-c", [
+    "import sys,zipfile",
+    "z=zipfile.ZipFile(sys.argv[1])",
+    "assert len(z.namelist())==4",
+    "data=b''.join(z.read(n) for n in z.namelist())",
+    "assert all(s.encode('utf-8') not in data for s in sys.argv[2:])",
+  ].join(";"), shared.path, id, name, "Agent 原字幕", "人工接手修改", asset.path, asset.assetId],
+  { timeout: 30_000 });
   await page.screenshot({ path: resolve(evidence, "mcp-human-edit.png") });
   await page.getByRole("button", { name: "导出", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "导出成片" });
