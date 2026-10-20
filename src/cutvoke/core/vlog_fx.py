@@ -196,7 +196,8 @@ def transition_expr(pattern: str, params: dict, *, has_alpha=False) -> str:
             f"({a})*(1-ld(2))+({b})*ld(2)")
 
 
-def preview_time(spec, duration: float, overrides: dict | None = None) -> float | None:
+def preview_time(spec, duration: float, overrides: dict | None = None,
+                 *, fps: float = 30) -> float | None:
     """Show the authored action, even when the chosen clip is much longer."""
     key = spec.implementation.get("filter")
     params = {**spec.default_params(), **(overrides or {})}
@@ -206,4 +207,6 @@ def preview_time(spec, duration: float, overrides: dict | None = None) -> float 
         at = params["start"] + params["duration"] / 2
     else:
         return None
-    return min(at, duration / 2)
+    # The action can occur after the clip midpoint. Clamp only to a covered
+    # frame at the end; seeking to the end-exclusive boundary yields no image.
+    return min(at, max(0, duration - 1 / fps))

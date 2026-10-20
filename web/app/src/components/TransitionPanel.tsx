@@ -144,7 +144,6 @@ export function TransitionPanel() {
 
   const handleTrial = async () => {
     if (!state.currentId || !clipSel || !transitionId || !transitionTarget.valid) return;
-    const seconds = Number(duration);
     if (!validDuration) {
       setTrial({ loading: false, error: maxDuration === 5 ? tr("时长须在 0.1–5 秒之间") :
         `${tr("无效时长")} (${minDuration}–${maxDuration}s)` });
@@ -157,7 +156,7 @@ export function TransitionPanel() {
     trialRequest.current = controller;
     setTrial({ loading: true });
     const result = await fetchResourcePreview(state.currentId, clipSel, transitionId,
-                                              controller.signal, seconds, params);
+                                              controller.signal, effectiveDuration, params);
     if (controller.signal.aborted) {
       if (result.kind === "frame") URL.revokeObjectURL(result.url);
       return;

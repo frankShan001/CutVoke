@@ -1,6 +1,6 @@
 # Shadow Ink · optional contribution recipe
 
-[简体中文](README.zh-CN.md) · [Vlog effects and source evidence](../../../docs/user/vlog-effects.md)
+[简体中文](README.zh-CN.md) · [Contribution guide](../../README.md)
 
 Reveal the next shot through the outgoing picture's darker regions first. This manifest reuses **`cutvoke.transition.lumaReveal`'s original internal implementation** with `reverse:true` and `duration:0.8`. It is a reusable configuration, not a fifth renderer or a downloaded shader. The local preview comes from CutVoke rendering original procedural illustrations; no reference-film frame is included. Code, manifest and procedural illustration use the repository MIT license; FFmpeg is an independent external dependency.
 
@@ -15,6 +15,6 @@ python scripts/verify/validate_effect_contributions.py
 python -m pytest -q tests/test_effect_contributions.py tests/test_vlog_effects.py
 ```
 
-For the editable original-media sample and render/alpha/window tests, follow the [bilingual usage guide](../../../docs/user/vlog-effects.md#reproduce-and-contribute). The effect contract is the manifest schema and renderer, not a third-party SDK. Change parameters and metadata under a new contributor ID; do not supply executable code in a manifest.
+For an editable original-media sample, run [the isolated demo](../../../scripts/verify/demo_vlog_effects.py) with a new `--output` directory. The effect contract is the manifest schema and renderer, not a third-party SDK. Change parameters and metadata under a new contributor ID; do not supply executable code in a manifest.
 
 [Peter McKinnon's named Luma Fade tutorial](https://www.youtube.com/watch?v=1Qm1EGxdZ6E) motivated the technique. The research could verify source metadata and a named method, but main-film playback remained buffering. No exact shot, timestamp, asset or algorithm is claimed to have been copied. See the [reference record](../../../docs/user/vlog-effect-references.json). Translations are technical drafts without native-speaker review.

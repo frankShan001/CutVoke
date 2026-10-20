@@ -2164,8 +2164,13 @@ class HttpApi:
                 end = float(clip.timeline_end.to_fraction())
                 phase = spec.subcategory or spec.to_dict()["subcategory"]
                 if spec.category == "transition":
-                    t = start + min(float(params.get("duration", spec.default_params().get("duration", 0.5))) / 2,
-                                    (end - start) / 2)
+                    requested = float(params.get("duration", spec.default_params().get("duration", 0.5)))
+                    # Match the compositor's half-of-each-adjacent-clip cap
+                    # before choosing the midpoint, rather than sampling an
+                    # already-completed transition on short clips.
+                    effective = min(requested, (end - start) / 2,
+                                    float(adjacent[index - 1].duration.to_fraction()) / 2)
+                    t = start + effective / 2
                 elif spec.category == "animation" and phase == "出场":
                     t = end - min(0.25, (end - start) / 2)
                 elif spec.category == "animation" and phase in {"入场", "组合"}:
@@ -2173,7 +2178,8 @@ class HttpApi:
                 else:
                     t = start + (end - start) / 2
                     from .vlog_fx import preview_time
-                    action_time = preview_time(spec, end - start, params)
+                    action_time = preview_time(spec, end - start, params,
+                                               fps=float(preview.sequence.fps.to_fraction()))
                     if action_time is not None:
                         t = start + action_time
                 import tempfile

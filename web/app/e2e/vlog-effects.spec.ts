@@ -45,17 +45,20 @@ test("Vlog effects edit, preview, localize and retain authored transition parame
   await page.getByRole("checkbox", { name: "暗部优先", exact: true }).check();
   await page.getByRole("spinbutton", { name: "亮度软边", exact: true }).fill("0.14");
   await page.getByRole("combobox", { name: "亮度来源", exact: true }).selectOption("incoming");
+  // Two 3-second clips cap a requested 2-second transition at 1.5 seconds.
+  await page.getByRole("button", { name: "2s", exact: true }).click();
   const before = await current();
   const previewRequest = page.waitForRequest(req => new URL(req.url()).pathname.endsWith("resource-preview") &&
     new URL(req.url()).searchParams.has("params"));
   await page.getByRole("button", { name: "预览当前转场", exact: true }).click();
   const query = new URL((await previewRequest).url()).searchParams;
+  expect(Number(query.get("duration"))).toBe(1.5);
   expect(JSON.parse(query.get("params")!)).toMatchObject({ softness: .14, reverse: true, keySource: "incoming" });
   await expect(page.locator(".resource-preview img")).toBeVisible();
   expect(await current()).toEqual(before);
   await page.getByRole("button", { name: "应用转场", exact: true }).click();
   await expect.poll(async () => (await effect(1, "cutvoke.transition.lumaReveal"))?.params)
-    .toMatchObject({ softness: .14, reverse: true, keySource: "incoming" });
+    .toMatchObject({ softness: .14, reverse: true, keySource: "incoming", duration: 1.5 });
   await page.locator(".transition-options").getByRole("button", { name: "锚点匹配转场", exact: true }).click();
   await page.getByRole("spinbutton", { name: "前镜头锚点 X", exact: true }).fill("0.4");
   await page.getByRole("spinbutton", { name: "后镜头匹配角度", exact: true }).fill("-12");

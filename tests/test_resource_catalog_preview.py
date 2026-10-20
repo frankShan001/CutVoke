@@ -105,7 +105,9 @@ class ResourceCatalogPreviewTests(unittest.TestCase):
             self.assertEqual(status, 200, body)
             self.assertEqual(renderer.effect_ids, [["cutvoke.transition.slide"]])
             self.assertEqual(renderer.effect_params[0][0]["duration"], 1.6)
-            self.assertAlmostEqual(renderer.times[0], 2.8)
+            # The renderer caps 1.6s to half of each 2s clip (1s), so
+            # the trial frame must be at the effective transition midpoint.
+            self.assertAlmostEqual(renderer.times[0], 2.5)
             self.assertEqual(project.to_dict(), before)
             status, body = api.handle("GET", f"/api/v1/projects/{project.project_id}/resource-preview", {
                 "clipId": "clip-two", "effectId": "cutvoke.transition.slide",

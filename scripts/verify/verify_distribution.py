@@ -67,7 +67,7 @@ def verify(directory: Path) -> dict:
             "effects/transitions/cutvoke.transition.community.soft-reveal/manifest.json",
             "effects/transitions/cutvoke.transition.community.luma-ink/manifest.json",
             "effects/transitions/cutvoke.transition.community.luma-ink/LICENSE",
-            "docs/user/vlog-effects.md", "docs/user/vlog-effects.zh-CN.md",
+            "effects/README.md",
             "scripts/verify/demo_vlog_effects.py",
             "scripts/verify/check_layering.py", "scripts/verify/verify_distribution.py",
             "desktop/package.json", "desktop/engine.spec", ".github/workflows/ci.yml")])

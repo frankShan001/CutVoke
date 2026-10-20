@@ -19,7 +19,7 @@ from cutvoke.core.rational import Rational
 from cutvoke.core.render import RenderService
 from cutvoke.core.service import EditService
 from cutvoke.core.store import ProjectStore
-from cutvoke.core.vlog_fx import subject_lock_zoom, transition_expr
+from cutvoke.core.vlog_fx import preview_time, subject_lock_zoom, transition_expr
 
 
 IDS = ("cutvoke.fx.subjectLock", "cutvoke.fx.punchIn",
@@ -152,6 +152,64 @@ def test_mcp_http_preview_history_idempotency_and_reload(tmp_path):
     with ProjectStore(database) as reopened:
         effects = EditService(reopened).get_project("vlog").sequence.tracks[0].clips[1].effects
         assert {effect["effectId"] for effect in effects} == set(IDS[:2]) | {IDS[3]}
+
+
+@pytest.mark.parametrize("effect_id,params,expected_time", [
+    (IDS[0], {"start": 2.2, "duration": 1.2}, 2.8),
+    (IDS[1], {"start": 2.6, "enter": .2, "hold": .6, "leave": .2}, 3.1),
+])
+def test_late_geometry_preview_samples_the_authored_action(effect_id, params, expected_time):
+    spec = default_registry().get(effect_id)
+    assert preview_time(spec, 4, params) == pytest.approx(expected_time)
+    # A truncated action still needs a real, covered frame rather than the
+    # end-exclusive clip boundary. Keep the NTSC frame rate exact at the call site.
+    fps = 30000 / 1001
+    assert preview_time(spec, 1, params, fps=fps) == pytest.approx(1 - 1 / fps)
+
+
+@pytest.mark.parametrize("effect_id,params,expected_time", [
+    (IDS[0], {"start": 2.2, "duration": 1.2, "fromX": .3, "toX": .7}, 2.8),
+    (IDS[1], {"start": 2.6, "enter": .2, "hold": .6, "leave": .2, "zoom": 1.8}, 3.1),
+    (IDS[2], {"duration": 1}, .625),
+    (IDS[3], {"duration": 1}, .625),
+])
+def test_resource_preview_matches_actual_authored_geometry_or_short_transition(
+        tmp_path, effect_id, params, expected_time):
+    source = tmp_path / "pattern.png"
+    image = Image.new("RGB", (W, H), (25, 42, 65))
+    ImageDraw.Draw(image).rectangle((10, 15, 35, 50), fill="white")
+    image.save(source)
+    incoming = still(tmp_path, "incoming", "blue")
+    transition = ".transition." in effect_id
+    p = project([source, incoming] if transition else [source], [[], []] if transition else [[]])
+    if transition:
+        p.sequence.tracks[0].clips[0].timeline_end = rat(.5)
+        p.sequence.tracks[0].clips[1].timeline_start = rat(.5)
+        p.sequence.tracks[0].clips[1].timeline_end = rat(1)
+    else:
+        p.sequence.tracks[0].clips[0].timeline_end = rat(4)
+    with ProjectStore(str(tmp_path / "project.sqlite")) as store:
+        service = EditService(store)
+        service.import_project(p, project_id="preview-audit")
+        api = HttpApi(service, media_dir=str(tmp_path / "media"))
+        try:
+            before = service.get_project("preview-audit").to_dict()
+            status, body = api.handle("GET", "/api/v1/projects/preview-audit/resource-preview", {
+                "effectId": effect_id, "clipId": "1" if transition else "0",
+                "params": json.dumps(params)})
+            assert status == 200, body
+            candidate = copy.deepcopy(service.get_project("preview-audit"))
+            candidate.sequence.tracks[0].clips[1 if transition else 0].effects = [
+                {"effectId": effect_id, "params": default_registry().validate_params(effect_id, params)}]
+            expected_path = tmp_path / "expected.png"
+            RenderService().extract_frame(candidate, expected_time, str(expected_path),
+                                          size=(320, 180), include_captions=False)
+            actual = np.asarray(Image.open(io.BytesIO(body["__png__"]))).astype(int)
+            expected = np.asarray(Image.open(expected_path)).astype(int)
+            assert np.mean(abs(actual - expected)) < 1
+            assert service.get_project("preview-audit").to_dict() == before
+        finally:
+            api.close()
 
 
 def test_punch_in_holds_anchor_and_returns_without_retiming(tmp_path):
