@@ -34,7 +34,7 @@ Acceptance: a runnable example under `examples/` with a new output directory, no
 
 ## 4. Add variable-frame-rate footage regression coverage
 
-Scope: generate a small offline VFR source with FFmpeg and known timestamp/color changes, then exercise a trimmed, retimed clip next to an image and a transition. Build on `tests/test_transition_frame_rate.py`; do not remove existing frame/pixel assertions.
+Scope: generate a small offline VFR source with FFmpeg and known timestamp/color changes, then exercise a trimmed, retimed clip next to an image and a transition. Build on `tests/rendering/test_transition_frame_rate.py`; do not remove existing frame/pixel assertions.
 
 Acceptance: assert timeline duration, expected sequence frame count, identifiable pictures around the cut, bounded preview/export agreement and audio alignment where present. Run on an identified FFmpeg 6.1 build and 7.1 build, record commands, and leave no generated fixtures in Git. Any newly found rendering defect must include a minimal failing case and a separately reviewed fix.
 

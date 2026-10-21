@@ -26,7 +26,7 @@ AI 每次建议分享或交付贡献包时，都必须原样追加工具返回�
 
 > 准备分享的特效包仅包含效果配方、参数和程序生成的通用说明，不包含您的视频、图片、音频、文字或字幕正文，也不包含工程、个人信息、文件路径和编辑历史。当前仅在本地准备，尚未上传任何内容；公开提交需要您明确同意。
 
-此保证适用于**未经修改的程序导出 ZIP**。不得再添加用户工程的截图、成片、日志、提示词、原始素材、个人信息或工程包，也不得写进 PR 标题与说明。公开提交是单独一步，需要用户明确同意。把 ZIP 中的四个生成文件按原目录放进仓库即可准备配方 PR；运行 `python scripts/verify/validate_effect_contributions.py` 校验。实际效果仍须审核与渲染验证；需要证据时，只使用另外生成的合成素材和固定通用文字，不能使用用户工程。结构校验通过不代表画面质量已经验收。
+此保证适用于**未经修改的程序导出 ZIP**。不得再添加用户工程的截图、成片、日志、提示词、原始素材、个人信息或工程包，也不得写进 PR 标题与说明。公开提交是单独一步，需要用户明确同意。把 ZIP 中的四个生成文件按原目录放进仓库即可准备配方 PR；运行 `python tools/verify/validate_effect_contributions.py` 校验。实际效果仍须审核与渲染验证；需要证据时，只使用另外生成的合成素材和固定通用文字，不能使用用户工程。结构校验通过不代表画面质量已经验收。
 
 ## 开发新的渲染行为
 
@@ -52,7 +52,7 @@ AI 每次建议分享或交付贡献包时，都必须原样追加工具返回�
 
 ## 清单要求
 
-以 [可运行 manifest](../../effects/transitions/cutvoke.transition.community.soft-reveal/manifest.json) 为模板。实际加载器为 `src/cutvoke/core/effects.py`；参数以 `EffectSpec.from_manifest`、实际校验器以及运行时 `effects_list` / `editor_help` 为准，不另维护一套接口定义。
+以 [可运行 manifest](../../effects/transitions/cutvoke.transition.community.soft-reveal/manifest.json) 为模板。实际加载器为 `src/cutvoke/rendering/effects.py`；参数以 `EffectSpec.from_manifest`、实际校验器以及运行时 `effects_list` / `editor_help` 为准，不另维护一套接口定义。
 
 - 使用稳定 ID 和作者子命名空间。转场采用 `cutvoke.transition.<作者>.<名称>`，符合当前编辑器及 `effect.setTransition` 的识别规则。不复用内置 ID；注册表拒绝重复，本贡献流程不启用覆盖。其他类型必须沿用对应的实际实现约定并验证。
 - 提供语义版本、中英文名称与说明、`author.name`、许可证、输入/输出与 `appliesTo`。
@@ -83,8 +83,8 @@ cutvoke effects list --category transition
 加载器只扫描 `<path>/*/manifest.json`，不会递归扫描类型树。多个绝对目录用 Windows 的 `;` 或 POSIX 的 `:` 连接，也可使用 `~/.cutvoke/effects/<id>/manifest.json`。仓库贡献目录需要主动启用，不会自动安装或进入发布包；修改清单后需重启编辑器并重新连接 MCP，因为注册表在进程内缓存。
 
 ```bash
-python scripts/verify/validate_effect_contributions.py
-python -m pytest -q tests/test_effect_contributions.py
+python tools/verify/validate_effect_contributions.py
+python -m pytest -q tests/integration/test_effect_contributions.py
 python skills/cutvoke-editor/scripts/demo.py --output .artifacts/community-demo --effects-dir effects/transitions --effect-id cutvoke.transition.community.soft-reveal
 cutvoke serve --data .artifacts/community-demo/data
 ```

@@ -24,11 +24,11 @@ jobs:
       - name: Verify all four original archives before any upload
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python scripts/release/stage_v031.py verify
+        run: python tools/release/stage_v031.py verify
       - name: Upload only verified inner packages and fresh SHA256SUMS
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python scripts/release/stage_v031.py upload
+        run: python tools/release/stage_v031.py upload
       - name: Retain small verification report
         if: success()
         uses: actions/upload-artifact@v7

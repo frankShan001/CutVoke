@@ -21,7 +21,7 @@ python -m venv .venv
 # Windows PowerShell：.\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
 
-cd web/app
+cd apps/editor
 npm ci
 npm run build
 cd ../..
@@ -39,14 +39,14 @@ cutvoke doctor --json
 
 ```bash
 python -m compileall -q src
-python scripts/verify/check_layering.py
+python tools/verify/check_layering.py
 python -m pytest -q
 ```
 
 前端改动至少运行：
 
 ```bash
-cd web/app
+cd apps/editor
 npm run typecheck
 npm run test:i18n
 npm run build
@@ -55,7 +55,7 @@ npm run test:e2e
 
 浏览器测试会启动临时工程库并生成小型测试素材，不会读写个人工程。Windows 本地使用已安装的 Chrome；CI 会安装 Chromium。Linux 云环境可设置 `CUTVOKE_E2E_BROWSER=/usr/bin/chromium` 使用已有浏览器。只改后端且不影响编辑流程时，可以只运行后端检查。
 
-桌面打包依赖变更后，在 `desktop/` 中运行 `npm run test:build-deps`，验证下载器的代理接入仍然可用。打包工具的传递依赖覆盖集中在 `desktop/package.json` 的 `overrides`；调整覆盖时同时核对调用接口和安全审计。
+桌面打包依赖变更后，在 `apps/desktop/` 中运行 `npm run test:build-deps`，验证下载器的代理接入仍然可用。打包工具的传递依赖覆盖集中在 `apps/desktop/package.json` 的 `overrides`；调整覆盖时同时核对调用接口和安全审计。
 
 发布 Python wheel 前必须先运行 `npm run build`。打包脚本会把 `.artifacts/web` 放入安装包；若找不到已构建的页面，打包会报错，避免发布只有接口、没有编辑器的安装包。
 
@@ -72,7 +72,9 @@ CutVoke 有几条不能绕过的边界：
 5. 预览和导出应尽量复用同一套合成语义。新增效果时要同时考虑两条路径。
 6. Agent 批量修改应使用编辑租约；租约期间页面保持可观察，但人工操作只读。
 
-核心模块不能反向依赖 CLI、HTTP 或 MCP 接口层。`scripts/verify/check_layering.py` 会检查这条规则。
+核心模块不能反向依赖 CLI、HTTP 或 MCP 接口层。`tools/verify/check_layering.py` 会检查这条规则。
+
+源码入口见[目录地图](docs/development/project-layout.md)：编辑器与桌面壳分别位于 `apps/editor`、`apps/desktop`；Python 引擎按 `domain`、`editing`、`rendering`、`storage`、`interfaces` 分工；对应测试按同名目录组织。提交前运行 `python tools/verify/check_repository_layout.py`，避免重新引入旧路径或漏掉构建引用。
 
 ## 新增编辑命令
 
@@ -116,6 +118,8 @@ PR 请保持范围清楚，并包含：
 
 ## 文件存放
 
-遵守 [项目目录说明](docs/development/project-layout.md)。新增工具按用途放入 `scripts/` 的对应目录，临时渲染、日志和报告统一写入 `.artifacts/`。测试工程使用临时数据库；用户工程、原始素材与成片保存在源码仓库之外。
+遵守 [项目目录说明](docs/development/project-layout.md)。新增工具按用途放入 `tools/` 的对应目录，临时渲染、日志和报告统一写入 `.artifacts/`。测试工程使用临时数据库；用户工程、原始素材与成片保存在源码仓库之外。
+
+内置素材制作输入与来源记录放在 `resources/source/`，正式文档配图放在 `docs/images/`，必要的历史审核证据放在 `docs/history/reviews/YYYY-MM/`。源图、成品与审核记录各有用途；不要提交旧成品备份和重复裁切试验。提交前运行 `python tools/verify/check_asset_layout.py`。
 
 安装、已测版本与故障排查见[安装说明](docs/user/installation.md)；源码/wheel 的候选包校验与 Windows 验收边界见[预发布流程](docs/development/prerelease.md)。

@@ -11,10 +11,10 @@ Set `CUTVOKE_EFFECTS_PATH` to the absolute `effects/transitions` directory befor
 Choose adjacent image/video clips, attach `cutvoke.transition.community.luma-ink` to the incoming clip with `effect.setTransition`, or choose it in the editor transition panel. Tune `duration` (`0.05–2s`, editor minimum `0.1s`), `softness` (`0.005–0.35`), `reverse`, `keySource` (`outgoing`/`incoming`) and `curve` (`linear`/`smooth`). The preview and apply controls share these values. Identical or uniformly lit shots give little visible spatial structure; use distinct SDR pictures with readable highlights and shadows.
 
 ```bash
-python scripts/verify/validate_effect_contributions.py
-python -m pytest -q tests/test_effect_contributions.py tests/test_vlog_effects.py
+python tools/verify/validate_effect_contributions.py
+python -m pytest -q tests/integration/test_effect_contributions.py tests/rendering/test_vlog_effects.py
 ```
 
-For an editable original-media sample, run [the isolated demo](../../../scripts/verify/demo_vlog_effects.py) with a new `--output` directory. The effect contract is the manifest schema and renderer, not a third-party SDK. Change parameters and metadata under a new contributor ID; do not supply executable code in a manifest.
+For an editable original-media sample, run [the isolated demo](../../../tools/verify/demo_vlog_effects.py) with a new `--output` directory. The effect contract is the manifest schema and renderer, not a third-party SDK. Change parameters and metadata under a new contributor ID; do not supply executable code in a manifest.
 
 [Peter McKinnon's named Luma Fade tutorial](https://www.youtube.com/watch?v=1Qm1EGxdZ6E) motivated the technique. The research could verify source metadata and a named method, but main-film playback remained buffering. No exact shot, timestamp, asset or algorithm is claimed to have been copied. See the [reference record](../../../docs/user/vlog-effect-references.json). Translations are technical drafts without native-speaker review.

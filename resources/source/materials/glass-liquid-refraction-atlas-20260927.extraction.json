@@ -1,0 +1,480 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "layout": "4x4 equal square cells",
+  "source": "docs/assets/glass-liquid-refraction-atlas-20260927.png",
+  "sourceImageSize": [
+    1254,
+    1254
+  ],
+  "sourceSha256": "036658f2ec6642ed67cbc5321f0b91b7105e68c0dc63b11dc8b5d19e23dd8b88",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "cropCleanup": "alpha below 8 set transparent; clear 8px cell rim; preserve semi-transparent pixels; resize to 512x512",
+  "contactSheet": "docs/assets/glass-liquid-refraction-atlas-20260927-contact.png",
+  "items": [
+    {
+      "stem": "fxoverlay_refraction_caustics_turquoise",
+      "name": "青碧水纹焦散",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "水纹",
+        "焦散",
+        "青色"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 59895,
+      "sourceBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "39976c2ec259b50ba64c5009769734b784a38c2ed6102b07400c338036954dd7"
+    },
+    {
+      "stem": "fxoverlay_refraction_liquidglass_violet",
+      "name": "紫晶液态玻璃",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "液态玻璃",
+        "紫色",
+        "折射"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 40076,
+      "sourceBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "318aac75f19ba8606625417594cb32caf4de0b331d3e0615831308f3ae63bc4e"
+    },
+    {
+      "stem": "fxoverlay_refraction_oilslick_iridescent",
+      "name": "虹彩油膜折光",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "油膜",
+        "虹彩",
+        "折光"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 48547,
+      "sourceBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "c5c3e97c5d6f5d3cc5b4865123b7b6ac55b070c4b6ff78171f1490854e789a6f"
+    },
+    {
+      "stem": "fxoverlay_refraction_icefracture_cyan",
+      "name": "冰晶裂纹",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "冰晶",
+        "裂纹",
+        "冷色"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 43152,
+      "sourceBoundaryPixels": 257,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "640fcd1a90921eb66a1cef8fe4be2cef9c64107b40f44455052cabf9e763c337"
+    },
+    {
+      "stem": "fxoverlay_refraction_molten_amber",
+      "name": "琥珀熔璃纹路",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "熔璃",
+        "琥珀",
+        "金色"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 35250,
+      "sourceBoundaryPixels": 15,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "3831519bf8afd4e79851251b2ea892654ef6e27f4d8ff37aa9614e0f659d68bf"
+    },
+    {
+      "stem": "fxoverlay_refraction_pearl_sheen",
+      "name": "珍珠母贝虹光",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "珍珠",
+        "虹光",
+        "柔光"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 48299,
+      "sourceBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "27c8cb1a09f0caa5ee5b591b2a1464310374dd51439b549aef3f8e26c08a05b2"
+    },
+    {
+      "stem": "fxoverlay_refraction_prism_shards",
+      "name": "棱镜晶体碎光",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "棱镜",
+        "晶体",
+        "碎光"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 44384,
+      "sourceBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "240132c9c1f1da6af7edc011e729b7bc712543933aa9088fa8d7ad395827da13"
+    },
+    {
+      "stem": "fxoverlay_refraction_glass_ripples",
+      "name": "透明玻璃涟漪",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "玻璃",
+        "涟漪",
+        "圆环"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 51472,
+      "sourceBoundaryPixels": 105,
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "3bed47cce5977a885bd37876c0c1c5443ed0ee09dae2d43022d792e51c84305a"
+    },
+    {
+      "stem": "fxoverlay_refraction_underwater_blue",
+      "name": "深海蓝光焦散",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "深海",
+        "焦散",
+        "蓝色"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 73271,
+      "sourceBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "7feb6dbc1196044bd1678e22d71125381959ad840e10a7790d20e2b5d4247bb3"
+    },
+    {
+      "stem": "fxoverlay_refraction_holo_foil",
+      "name": "青紫全息箔褶",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "全息",
+        "箔片",
+        "青紫"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 63764,
+      "sourceBoundaryPixels": 95,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "2ef3b72dcad9135302279d12f9c53530c4460a85b8ddee9eae8d8435a1ac5bfb"
+    },
+    {
+      "stem": "fxoverlay_refraction_heat_haze",
+      "name": "橙色热浪折射",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "热浪",
+        "折射",
+        "橙色"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 61426,
+      "sourceBoundaryPixels": 253,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "7d60d6f6fd23e76e7f7d003bd9281a4cf1c6b150b796dd929e9a020939e366d1"
+    },
+    {
+      "stem": "fxoverlay_refraction_emerald_geode",
+      "name": "祖母绿晶簇闪光",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "祖母绿",
+        "晶簇",
+        "矿物"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 57548,
+      "sourceBoundaryPixels": 61,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "e1d5b916d3a4addca1314a20bf61c11765c54f5cf79cacd67c9b2c75a3bfd2d7"
+    },
+    {
+      "stem": "fxoverlay_refraction_brushed_silver",
+      "name": "银色流动拉丝",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "银色",
+        "金属",
+        "拉丝"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 61380,
+      "sourceBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "1e9a11d5291cf74b65d10f1b52926afeb0dfca3ad830a0d13acd7f78709b9e8f"
+    },
+    {
+      "stem": "fxoverlay_refraction_soapfilm_bubbles",
+      "name": "肥皂膜虹彩泡泡",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "泡泡",
+        "虹彩",
+        "透明"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 44272,
+      "sourceBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "sha256": "689644f92e671fa498237d0e2ca4d3d6892ca32917485428c704282e7e5596e1"
+    },
+    {
+      "stem": "fxoverlay_refraction_liquid_chrome_rose",
+      "name": "玫瑰金液态铬花",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "液态铬",
+        "玫瑰金",
+        "金属"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 39133,
+      "sourceBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "db03fe18bdc48763156133956b12cb276f525578273e130abcbb07275ee4db9e"
+    },
+    {
+      "stem": "fxoverlay_refraction_rainbow_caustics",
+      "name": "彩虹边缘焦散光",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "彩虹",
+        "边缘光",
+        "焦散"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "outputSize": [
+        512,
+        512
+      ],
+      "visiblePixelsBeforeCleanup": 54532,
+      "sourceBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "sha256": "4a6f26f15b1a50f6e2772ceaeee9b36868b4d2eb0595889735b00922458c1e25"
+    }
+  ]
+}

@@ -35,7 +35,7 @@ jobs:
         with:
           node-version: "24"
           cache: npm
-          cache-dependency-path: web/app/package-lock.json
+          cache-dependency-path: apps/editor/package-lock.json
 
       - name: Install FFmpeg
         run: |
@@ -48,12 +48,14 @@ jobs:
         run: |
           python -m pip install -e ".[dev]"
           python -m compileall -q src
-          python -c "import cutvoke; from cutvoke.core import model, protocol, rational, render, service, store"
-          python scripts/verify/check_layering.py
+          python -c "import cutvoke; from cutvoke.domain import model, protocol, rational; from cutvoke.rendering import render; from cutvoke.editing import service; from cutvoke.storage import store"
+          python tools/verify/check_layering.py
+          python tools/verify/check_asset_layout.py
+          python tools/verify/check_repository_layout.py
           python -m pytest -q
 
       - name: Build Web editor
-        working-directory: web/app
+        working-directory: apps/editor
         run: |
           npm ci
           npm run typecheck
@@ -63,7 +65,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip build
           python -m build --sdist --wheel --outdir dist
-          python scripts/verify/verify_distribution.py dist
+          python tools/verify/verify_distribution.py dist
           python -m pip install --force-reinstall --no-deps dist/*.whl
           cutvoke doctor --json
           python -c "from pathlib import Path; import cutvoke; assert (Path(cutvoke.__file__).parent / 'web' / 'index.html').is_file()"
@@ -81,10 +83,10 @@ jobs:
           node-version: "24"
           cache: npm
           cache-dependency-path: |
-            web/app/package-lock.json
-            desktop/package-lock.json
+            apps/editor/package-lock.json
+            apps/desktop/package-lock.json
       - name: Check desktop downloader dependencies
-        working-directory: desktop
+        working-directory: apps/desktop
         run: |
           npm ci --ignore-scripts
           npm run test:build-deps
@@ -94,7 +96,7 @@ jobs:
           sudo apt-get install -y ffmpeg
           python -m pip install -e ".[dev]"
       - name: Install browser and run editor scenarios
-        working-directory: web/app
+        working-directory: apps/editor
         run: |
           npm ci
           npx playwright install --with-deps chromium

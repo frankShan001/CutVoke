@@ -10,8 +10,8 @@ From an activated development environment with the Web editor already built:
 
 ```bash
 python -m pip install build
-python scripts/build/prepare_candidate.py --output dist/candidate-local
-python scripts/verify/verify_distribution.py dist/candidate-local
+python tools/build/prepare_candidate.py --output dist/candidate-local
+python tools/verify/verify_distribution.py dist/candidate-local
 ```
 
 Use a new output directory for each attempt. The script produces one `.tar.gz` source archive, one `py3-none-any.whl`, `VERIFICATION.json`, `BUILD-INFO.json`, a release-note draft and `SHA256SUMS`. The source includes the Web source/built editor, contribution/security docs, examples, AI Skill and build/verification tools. The wheel includes the built editor and runtime resources. Python, cryptography/fontTools and a compatible system FFmpeg/ffprobe remain required. The wheel tag alone is not proof of Windows/macOS acceptance.
@@ -63,7 +63,7 @@ native picker, GPU/audio and SmartScreen checks remain separate.
 
 ## Legacy Windows installer boundary
 
-The existing `scripts/build/build-cutvoke-desktop.cmd` builds a Windows x64 Electron/NSIS installer using a PyInstaller engine. It bundles the discovered FFmpeg/ffprobe binaries. Its config currently disables executable signing; a generated `.exe` must be described as unsigned until a verified signing process exists.
+The existing `tools/build/build-cutvoke-desktop.cmd` builds a Windows x64 Electron/NSIS installer using a PyInstaller engine. It bundles the discovered FFmpeg/ffprobe binaries. Its config currently disables executable signing; a generated `.exe` must be described as unsigned until a verified signing process exists.
 
 Before offering that installer target, use an actual Windows host to build, install under a normal user, start, import through MCP, hand off to the GUI, preview/edit/export, restart, uninstall and verify project preservation. Record the installer SHA, Windows version/architecture, FFmpeg build, signature status and actual results. Portable ZIP evidence does not claim installer/uninstaller acceptance.
 

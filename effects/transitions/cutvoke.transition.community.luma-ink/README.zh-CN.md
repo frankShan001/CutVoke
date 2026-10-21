@@ -11,10 +11,10 @@
 选择首尾相邻的图片或视频，把 `cutvoke.transition.community.luma-ink` 用 `effect.setTransition` 挂在后一段，或在编辑器转场面板选择。参数包括 `duration`（内核 `0.05–2 秒`，编辑器至少 `0.1 秒`）、`softness`（`0.005–0.35`）、`reverse`、`keySource`（`outgoing`/`incoming`）和 `curve`（`linear`/`smooth`）。预览与应用共用这些参数。同样或均匀照明的两镜头可能缺乏明显空间变化，应选择有明暗结构的不同 SDR 素材。
 
 ```bash
-python scripts/verify/validate_effect_contributions.py
-python -m pytest -q tests/test_effect_contributions.py tests/test_vlog_effects.py
+python tools/verify/validate_effect_contributions.py
+python -m pytest -q tests/integration/test_effect_contributions.py tests/rendering/test_vlog_effects.py
 ```
 
-需要可编辑原创样片时，用新的 `--output` 目录运行[隔离演示脚本](../../../scripts/verify/demo_vlog_effects.py)。扩展时沿用可支持映射，换成自己的贡献者 ID，并保留来源、许可、边界和实测证据；清单不能携带任意执行代码。
+需要可编辑原创样片时，用新的 `--output` 目录运行[隔离演示脚本](../../../tools/verify/demo_vlog_effects.py)。扩展时沿用可支持映射，换成自己的贡献者 ID，并保留来源、许可、边界和实测证据；清单不能携带任意执行代码。
 
 [Peter 的 Luma Fade 教程](https://www.youtube.com/watch?v=1Qm1EGxdZ6E)提供具名手法依据。研究核验了来源元数据和手法名称，但正片始终缓冲，没有复制具体镜头、时间点、素材或算法。完整限制见[来源记录](../../../docs/user/vlog-effect-references.json)。翻译是尚无母语审校的技术草稿。

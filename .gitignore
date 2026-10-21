@@ -34,11 +34,10 @@ media/
 .cutvoke/
 output/playwright/
 .playwright-cli/
-web/app/test-results/
-web/app/playwright-report/
+apps/editor/test-results/
+apps/editor/playwright-report/
 
 # Web dependencies and build output
-web/app/node_modules/
-desktop/node_modules/
-web/app/dist/
-web/dist/
+apps/editor/node_modules/
+apps/desktop/node_modules/
+apps/editor/dist/

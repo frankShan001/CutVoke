@@ -18,6 +18,14 @@ _freshness_lock = threading.Lock()
 _freshness_cache = {}
 
 
+def engine_source_files(package: Path) -> list[Path]:
+    """Include every engine area without scanning large bundled media trees."""
+    files = list(package.glob('*.py'))
+    for area in ('domain', 'editing', 'rendering', 'storage', 'interfaces'):
+        files += list((package / area).glob('*.py'))
+    return files + list((package / 'catalogs').glob('*.json'))
+
+
 def runtime_status(loaded: dict) -> dict:
     """Compare running code with disk; never advertise unloaded capabilities.
 
@@ -26,8 +34,7 @@ def runtime_status(loaded: dict) -> dict:
     services still need a restart. Python modules are never hot-reloaded.
     """
     package = Path(__file__).resolve().parent
-    files = list(package.glob('*.py')) + list((package / 'core').glob('*.py'))
-    files += list((package / 'core').glob('*.json'))
+    files = engine_source_files(package)
     web = web_directory()
     if web:
         files += [p for p in web.rglob('*') if p.is_file()]
@@ -64,8 +71,7 @@ def web_directory() -> Path | None:
 
 def source_fingerprint() -> str:
     package = Path(__file__).resolve().parent
-    files = list(package.glob('*.py')) + list((package / 'core').glob('*.py'))
-    files += list((package / 'core').glob('*.json'))
+    files = engine_source_files(package)
     digest = hashlib.sha256()
     if getattr(sys, "frozen", False):
         # PyInstaller stores compiled Python in the executable, not .py
@@ -88,7 +94,7 @@ def source_fingerprint() -> str:
 
 
 def runtime_identity(data_path: str | None = None) -> dict:
-    from . import __version__
+    from cutvoke import __version__
     package = Path(__file__).resolve().parent
     web = web_directory()
     result = {
@@ -141,10 +147,10 @@ def diagnose_environment() -> dict:
                    'message': 'Required for matching caption font weights in preview and export.'})
     checks.append({'name': 'web-editor', 'required': True,
                    'ok': web_directory() is not None,
-                   'message': 'For a source checkout, run npm ci and npm run build in web/app.'})
+                   'message': 'For a source checkout, run npm ci and npm run build in apps/editor.'})
     package = Path(__file__).resolve().parent
-    for relative in ('core/builtin_presets.json', 'core/builtin_stickers.json',
-                     'core/builtin_resource_pack.json'):
+    for relative in ('catalogs/builtin_presets.json', 'catalogs/builtin_stickers.json',
+                     'catalogs/builtin_resource_pack.json'):
         checks.append({'name': relative, 'required': True,
                        'ok': (package / relative).is_file()})
     return {

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/readme/banner.svg" alt="CutVoke — local video editor, shared editable timeline" width="960" />
+  <img src="docs/images/readme/banner.svg" alt="CutVoke — local video editor, shared editable timeline" width="960" />
 </p>
 
 <h3 align="center">Your footage. Your AI. Your editable timeline.</h3>
@@ -52,7 +52,7 @@ All timeline editing, compositing, mixing and MP4 exports were done in CutVoke. 
 
 ## Inside the editor
 
-![CutVoke English interface: media library, landscape preview and editable multitrack timeline](docs/assets/readme/en/editor-overview.png)
+![CutVoke English interface: media library, landscape preview and editable multitrack timeline](docs/images/readme/en/editor-overview.png)
 
 *Trail Notes in the actual local editor: three original illustrations, music, titles, captions, scale keyframes and transitions. The repository example creates it through real interfaces, with no video generation service. Captured with the interface set to English, with English demo titles and captions.*
 
@@ -99,7 +99,7 @@ The timeline supports multiple media tracks, text and captions, clip adjustments
 
 For the latest source build, see the [production workflow](docs/production-workflow.md): standalone titles, reusable attached layers, on-demand previews and production archives.
 
-![CutVoke English caption editor with selected text, start and end times, and the actual preview](docs/assets/readme/en/caption-editing.png)
+![CutVoke English caption editor with selected text, start and end times, and the actual preview](docs/images/readme/en/caption-editing.png)
 
 *English caption editing: the selected line, its 0–4 second interval and its editable preview overlay. Captions remain individual project objects you can refine.*
 
@@ -177,7 +177,7 @@ Then install and build the editor:
 
 ```bash
 python -m pip install -e .
-cd web/app
+cd apps/editor
 npm ci
 npm run build
 cd ../..
@@ -193,9 +193,9 @@ cutvoke serve --data .artifacts/first-edit/data
 
 Open **http://127.0.0.1:8787** and select **Trail Notes · editable demo**. Success looks like a playable 12-second project with three shots, music, titles and captions, plus `trail-notes.mp4`, `trail-notes.cvkpkg` and its editable database in the output directory. Use a new output directory for each run. Stop the server with Ctrl+C. If the port is occupied, use `serve --port 8798` and open that address.
 
-The example imports, edits and exports over real stdio MCP, then verifies that those same assets are available through the human editor API. New imports share the Web upload layout, and exact legacy MCP imports remain accessible. See [the demonstration and verification boundaries](docs/assets/readme/README.md).
+The example imports, edits and exports over real stdio MCP, then verifies that those same assets are available through the human editor API. New imports share the Web upload layout, and exact legacy MCP imports remain accessible. See [the demonstration and verification boundaries](docs/images/readme/README.md).
 
-The source workflow has been checked in the Linux cloud environment, including FFmpeg 7.1.5, and earlier on Windows. See [installation, tested versions and troubleshooting](docs/user/installation.md) for exact scope; the legacy Windows installer and human device acceptance still require their respective machines. On Windows, `start-cutvoke.cmd --web` also starts the browser editor using the default personal project library. For the desktop client and building an installer, see [local setup](docs/user/LOCAL_DELIVERY_MCP.md) and [the build entry point](scripts/build/build-cutvoke-desktop.cmd).
+The source workflow has been checked in the Linux cloud environment, including FFmpeg 7.1.5, and earlier on Windows. See [installation, tested versions and troubleshooting](docs/user/installation.md) for exact scope; the legacy Windows installer and human device acceptance still require their respective machines. On Windows, `start-cutvoke.cmd --web` also starts the browser editor using the default personal project library. For the desktop client and building an installer, see [local setup](docs/user/LOCAL_DELIVERY_MCP.md) and [the build entry point](tools/build/build-cutvoke-desktop.cmd).
 
 The service binds to local loopback by default. Source/CLI installs put default project data and media under the user's `.cutvoke` directory. The example above uses its own `.artifacts/first-edit/data` and does not open the default personal project library. The Windows portable edition uses its sibling `CutVoke Data` folder; native Mac/Linux desktop packages use the platform directories above.
 
@@ -246,7 +246,7 @@ Create reusable effects during ordinary AI-assisted editing: the agent can save 
 <details>
 <summary><strong>See the real transition example and contribution scope</strong></summary>
 
-![CutVoke English transition panel showing Soft Reveal at the 4-second cut and its effective 0.60-second duration](docs/assets/readme/en/community-transition.png)
+![CutVoke English transition panel showing Soft Reveal at the 4-second cut and its effective 0.60-second duration](docs/images/readme/en/community-transition.png)
 
 *Soft Reveal in the English interface: a contribution manifest loaded by the existing registry, previewed and exported through the existing FFmpeg dissolve algorithm.*
 
@@ -268,8 +268,8 @@ Declarative transitions can reuse supported FFmpeg mappings. Other families depe
 | Source conventions, layout and checks | [English](CONTRIBUTING.md) · [中文](CONTRIBUTING.zh-CN.md) · [Community tasks](docs/development/community-tasks.md) · [Project layout](docs/development/project-layout.md) |
 | Installation and candidate packages | [Install / troubleshoot](docs/user/installation.md) · [Candidate packaging](docs/development/prerelease.md) |
 | Security reports | [Security policy](SECURITY.md) |
-| Screenshot provenance and demonstration limits | [Capture and demo notes](docs/assets/readme/README.md) |
-| Official CV icon, platform assets and regeneration | [CutVoke brand assets](docs/assets/brand/README.md) |
+| Screenshot provenance and demonstration limits | [Capture and demo notes](docs/images/readme/README.md) |
+| Official CV icon, platform assets and regeneration | [CutVoke brand assets](resources/source/brand/README.md) |
 
 Treat CutVoke as an early-stage project: project formats and interfaces can change, complex first previews wait for FFmpeg, and optional speech/person processing needs additional dependencies/models. The sample does not establish large-project performance, every effect or every AI client's compatibility. Try a small copy before using it for important work.
 

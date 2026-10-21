@@ -32,20 +32,20 @@ person = ["mediapipe==1.0.1"]
 testpaths = ["tests"]
 
 [project.scripts]
-cutvoke = "cutvoke.main:main"
-cutvoke-mcp = "cutvoke.core.mcp_server:main"
-cutvoke-person-model = "cutvoke.core.person_model_setup:main"
-cutvoke-resource-pack = "cutvoke.core.resource_pack_signing:main"
+cutvoke = "cutvoke.interfaces.cli:main"
+cutvoke-mcp = "cutvoke.interfaces.mcp_server:main"
+cutvoke-person-model = "cutvoke.interfaces.person_model_setup:main"
+cutvoke-resource-pack = "cutvoke.storage.resource_pack_signing:main"
 
 # Built Web files are copied into the wheel by setup.py. Keep package data
 # explicit so local __pycache__ files never leak into distributables.
 [tool.setuptools]
 include-package-data = false
-packages = ["cutvoke", "cutvoke.core"]
+packages = ["cutvoke", "cutvoke.domain", "cutvoke.editing", "cutvoke.rendering", "cutvoke.storage", "cutvoke.interfaces"]
 package-dir = {"" = "src"}
 
 [tool.setuptools.package-data]
-cutvoke = ["assets/*/*.wav", "assets/*/*.png", "assets/*/*.jpg", "assets/*/*.mp4", "assets/*/*.json", "assets/*/*.cube", "assets/*/*.ttf", "assets/*/*.txt", "assets/*/*.md", "core/builtin_presets.json", "core/builtin_stickers.json", "core/builtin_resource_pack.json"]
+cutvoke = ["assets/*/*.wav", "assets/*/*.png", "assets/*/*.jpg", "assets/*/*.mp4", "assets/*/*.json", "assets/*/*.cube", "assets/*/*.ttf", "assets/*/*.txt", "assets/*/*.md", "catalogs/builtin_presets.json", "catalogs/builtin_stickers.json", "catalogs/builtin_resource_pack.json"]
 
 [tool.setuptools.exclude-package-data]
 cutvoke = [

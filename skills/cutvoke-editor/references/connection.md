@@ -42,7 +42,7 @@ When session-token protection is enabled, use the supplied `X-CutVoke-Token` loc
 | --- | --- |
 | CutVoke cannot start | In the checkout's activated Python 3.10+ environment, run `python -m pip install -e .`. A packaged Windows engine needs no separate Python install. |
 | FFmpeg/ffprobe missing or codec/filter unavailable | Install a suitable FFmpeg build, make both tools available on PATH, and rerun `cutvoke doctor --json`. The source renderer needs H.264/AAC, overlay, drawtext and subtitles support. |
-| Source checkout lacks Web editor | With Node.js 20+, run `npm ci` and `npm run build` in `web/app`, then rerun doctor. The built application serves its own editor. |
+| Source checkout lacks Web editor | With Node.js 20+, run `npm ci` and `npm run build` in `apps/editor`, then rerun doctor. The built application serves its own editor. |
 | Caption font preparation fails | Reinstall the project's `fontTools` dependency and inspect the reported cache permissions; do not substitute a different font silently. |
 | Optional local transcription is needed | Use the repository's `docs/user/LOCAL_ASR.md` setup, check the actual model, and run the supported command. Do not promise transcription from the base install. Downloads or use of another service need the user's requested scope. |
 | No local media access from a remote AI host | Explain the engine runs locally; use an authorized local connector or have the user select accessible material. Do not upload media implicitly. |

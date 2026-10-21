@@ -12,7 +12,7 @@ CutVoke 的 Web 编辑器和自有桌面壳层提供 `zh-CN`、`zh-TW`、`en`、
 
 ## 新增或修正文案
 
-词库位于 [`web/app/src/i18n/locales/`](../../web/app/src/i18n/locales/)，以源码中的简体中文文案作为消息键：
+词库位于 [`apps/editor/src/i18n/locales/`](../../apps/editor/src/i18n/locales)，以源码中的简体中文文案作为消息键：
 
 ```tsx
 tr("已导入 {0} 条字幕", count)
@@ -20,7 +20,7 @@ tr("已导入 {0} 条字幕", count)
 
 对应英文为 `"Imported {0} captions"`。每个数字占位符的拼写及出现次数必须与源消息一致，可按语法重排。用户内容只通过参数传入，**不能调用 `tr(project.name)` 或 `tr(caption.text)`**。新增文案优先使用完整句子，避免拼接翻译片段。
 
-修改源码后在 `web/app` 运行：
+修改源码后在 `apps/editor` 运行：
 
 ```bash
 npm run i18n:extract
@@ -44,7 +44,7 @@ npm run build
 
 桌面壳层在 Electron 用户数据目录的 `ui-language.json` 中仅保存 `{preference}`。预加载脚本在 Web 编辑器启动前提供该偏好，因此本地服务端口改变不会丢失选择；“跟随系统”读取 Electron 的系统语言偏好。语言 IPC 仅限本窗口主框架，写入时还校验本地加载页或服务来源。这些配置与工程数据分开保存。
 
-桌面词库位于 [`desktop/locales/`](../../desktop/locales/)，由 [`desktop/i18n.cjs`](../../desktop/i18n.cjs) 加载；各语言保持键及编号占位符一致。加载页、缓存目录标题和确认按钮、启动错误及服务退出摘要均使用这些词库。目前没有自有原生应用菜单；Web 工具栏和右键菜单使用 Web 词库。文件列表、系统提供的取消按钮等原生控件跟随操作系统语言。
+桌面词库位于 [`apps/desktop/locales/`](../../apps/desktop/locales)，由 [`apps/desktop/i18n.cjs`](../../apps/desktop/i18n.cjs) 加载；各语言保持键及编号占位符一致。加载页、缓存目录标题和确认按钮、启动错误及服务退出摘要均使用这些词库。目前没有自有原生应用菜单；Web 工具栏和右键菜单使用 Web 词库。文件列表、系统提供的取消按钮等原生控件跟随操作系统语言。
 
 ## 效果与资源
 
@@ -68,6 +68,6 @@ npm run build
 npm run test:e2e -- e2e/i18n.spec.ts
 ```
 
-在 `desktop/` 中运行 `npm run test:i18n`，检查所有壳层词库、占位符、持久偏好及原生弹窗参数。Windows 已安装桌面依赖和仓库 Python 环境时，`npm run test:i18n:electron` 运行真实壳层，覆盖德语/阿语加载页、所有语言选择、新端口重启保留偏好、拒绝外来 IPC、真实启动失败及自有服务退出。测试使用独立工程和配置目录，不打开个人工程。QA 专用渲染和运行时选项不改变正常打包启动。
+在 `apps/desktop/` 中运行 `npm run test:i18n`，检查所有壳层词库、占位符、持久偏好及原生弹窗参数。Windows 已安装桌面依赖和仓库 Python 环境时，`npm run test:i18n:electron` 运行真实壳层，覆盖德语/阿语加载页、所有语言选择、新端口重启保留偏好、拒绝外来 IPC、真实启动失败及自有服务退出。测试使用独立工程和配置目录，不打开个人工程。QA 专用渲染和运行时选项不改变正常打包启动。
 
 测试使用隔离工程，覆盖系统匹配与刷新保留偏好、所有语言反复切换、工程数据不变，以及中文、英文、德文、阿拉伯语的菜单、弹窗、草稿保留和溢出。新增工作流补充针对性用例；人工检查也应包括较窄窗口、校验与错误、长说明、弹窗内切换、效果元数据回退。不要使用私人工程或未经授权上传截图。

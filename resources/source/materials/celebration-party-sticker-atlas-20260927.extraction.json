@@ -1,0 +1,571 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "layout": "4x4 round-proportioned square cells",
+  "subcategory": "庆祝派对",
+  "source": "docs/assets/celebration-party-sticker-atlas-20260927.png",
+  "sourceSha256": "c29d8eacef2e4aad3416c98068bf4417957c9046d1bcef582436a14712b5cac5",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "items": [
+    {
+      "stem": "party_balloon_bouquet",
+      "name": "派对气球束",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "派对",
+        "气球",
+        "生日"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "sourceCellSize": [
+        314,
+        314
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 34395,
+      "removedTinyComponents": 12,
+      "boundaryPixelsInFourPixelMargin": 40,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "3364dfb56b8f7b9d91365aaa2c7b000cf41f89583619600bd6c6e450e7c72379"
+    },
+    {
+      "stem": "party_confetti_popper",
+      "name": "彩纸礼花筒",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "派对",
+        "礼花",
+        "彩纸"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "sourceCellSize": [
+        313,
+        314
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 30537,
+      "removedTinyComponents": 7,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "fca73fac504c44e051d6f4d2a5930a7bc73256a596e5d3d9e13a47543d353222"
+    },
+    {
+      "stem": "party_candle_cake",
+      "name": "蜡烛庆祝蛋糕",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "生日",
+        "蛋糕",
+        "蜡烛"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "sourceCellSize": [
+        313,
+        314
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 32661,
+      "removedTinyComponents": 15,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "75b66c7df5b026865f75536af8be4bbd07a0872ee9aa855a55daa6bf2ca7b86f"
+    },
+    {
+      "stem": "party_gift_box",
+      "name": "彩带礼物盒",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "礼物",
+        "派对",
+        "礼盒"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "sourceCellSize": [
+        314,
+        314
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 37230,
+      "removedTinyComponents": 9,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "ca776060840b0a23d3267e38cfa80a937f1ed62ec5b608f72c75a2c1dc96f8a0"
+    },
+    {
+      "stem": "party_cone_hat",
+      "name": "条纹派对帽",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "派对",
+        "帽子",
+        "生日"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "sourceCellSize": [
+        314,
+        313
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 26742,
+      "removedTinyComponents": 7,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "304b4c58653175959c608a112d6db38752360a52d2dd100efd9be08a93f168e6"
+    },
+    {
+      "stem": "party_curled_streamer",
+      "name": "卷曲庆祝彩带",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "派对",
+        "彩带",
+        "装饰"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "sourceCellSize": [
+        313,
+        313
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 20235,
+      "removedTinyComponents": 6,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "65dbac48f50bcc66e8b83d0ee3a5cf8b83a4af3af2f5b5411fadc6fa886616e2"
+    },
+    {
+      "stem": "party_starburst",
+      "name": "星芒庆祝闪光",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "闪光",
+        "星芒",
+        "装饰"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "sourceCellSize": [
+        313,
+        313
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 17959,
+      "removedTinyComponents": 34,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "6190a9c37f510b60d88d25bb9f52f4c4ec08e31bf4361d52e19b4e00c076e587"
+    },
+    {
+      "stem": "party_juice_cheers",
+      "name": "碰杯果汁杯",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "碰杯",
+        "果汁",
+        "派对"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "sourceCellSize": [
+        314,
+        313
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 31355,
+      "removedTinyComponents": 21,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "79be302297827228093e777d4ad9ee3b7ef55b5bf77e19bb215e8b111742750f"
+    },
+    {
+      "stem": "party_rosette_badge",
+      "name": "粉色庆祝绶带",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "绶带",
+        "奖章",
+        "派对"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "sourceCellSize": [
+        314,
+        313
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 36170,
+      "removedTinyComponents": 20,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "6bd1f4d2c7acdf4799a31539f0f9efce38a96b01d14bbc8a3f01b746d5d2760d"
+    },
+    {
+      "stem": "party_paper_crown",
+      "name": "彩钻派对皇冠",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "皇冠",
+        "派对",
+        "生日"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "sourceCellSize": [
+        313,
+        313
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 29202,
+      "removedTinyComponents": 9,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "17ab39be47d9a96ea37f95d8d99d979823c9b547f6bd7ee10d20e379d97d061a"
+    },
+    {
+      "stem": "party_cupcake",
+      "name": "奶油庆祝纸杯蛋糕",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "纸杯蛋糕",
+        "甜点",
+        "生日"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "sourceCellSize": [
+        313,
+        313
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 28893,
+      "removedTinyComponents": 13,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "e72de5be7174ea88388860613a433419f66e216abf57f43dbbde9be5ac58452c"
+    },
+    {
+      "stem": "party_horn",
+      "name": "派对吹龙",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "派对",
+        "吹龙",
+        "彩带"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "sourceCellSize": [
+        314,
+        313
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 17814,
+      "removedTinyComponents": 10,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4e5bd6ecfb68fad84cc468d030b8dff0a9a3b997f1d8e7de6ffe064593be7c05"
+    },
+    {
+      "stem": "party_fireworks",
+      "name": "彩色烟花绽放",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "烟花",
+        "派对",
+        "节日"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "sourceCellSize": [
+        314,
+        314
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 37537,
+      "removedTinyComponents": 10,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "df45368ca177de8134389041011b17fbb78cfbc333212506eb2eba5082b1f22f"
+    },
+    {
+      "stem": "party_bunting_garland",
+      "name": "三角旗派对拉旗",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "派对",
+        "拉旗",
+        "装饰"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "sourceCellSize": [
+        313,
+        314
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 16704,
+      "removedTinyComponents": 2,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "147aa8b081b4efc955a64b5ba0d9e6c6414ea6dea0d057be66b3e2308fbbb2f7"
+    },
+    {
+      "stem": "party_confetti_cluster",
+      "name": "彩纸碎片",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "彩纸",
+        "派对",
+        "装饰"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "sourceCellSize": [
+        313,
+        314
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 23071,
+      "removedTinyComponents": 22,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "2cb6b6aaf14b586987bf92bede4e73a1df2f981920265030be467c84bcba239f"
+    },
+    {
+      "stem": "party_sparklers",
+      "name": "双支庆祝仙女棒",
+      "subcategory": "庆祝派对",
+      "keywords": [
+        "庆祝",
+        "仙女棒",
+        "派对",
+        "闪光"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "sourceCellSize": [
+        314,
+        314
+      ],
+      "outputSize": [
+        314,
+        314
+      ],
+      "visiblePixels": 23058,
+      "removedTinyComponents": 11,
+      "boundaryPixelsInFourPixelMargin": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "57dad9539785c892dbc54c20773c4a3c08cb0f9b9bc25786b1c263040770540d"
+    }
+  ]
+}

@@ -1,0 +1,698 @@
+{
+  "generator": "OpenAI ImageGen",
+  "layout": "4x4",
+  "source": "docs/assets/music-rhythm-overlay-atlas-20260926.png",
+  "sourceSha256": "c3a16d9338391128cba5c7a6f3bdcdf2a83152ed295e33c452cea31d54301d27",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "sourceAlphaExtrema": [
+    0,
+    254
+  ],
+  "cellCropMargin": 16,
+  "outputSize": [
+    320,
+    320
+  ],
+  "padding": 32,
+  "subcategory": "音乐节奏",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "contactSheet": "docs/assets/music-rhythm-overlay-contact-20260926.png",
+  "items": [
+    {
+      "index": 1,
+      "stem": "audiofx_waveform_cyan_coral",
+      "name": "青珊瑚波形光带",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "波形",
+        "节奏",
+        "青色",
+        "珊瑚"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "cropBox": [
+        38,
+        114,
+        297,
+        259
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        48,
+        104,
+        272,
+        216
+      ],
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "visiblePixelsAtAlpha32": 17083,
+      "sha256": "8861bce21af1dcb174902beb3e9e46c1367a86a74a3e9c834b9c3be714c682e3"
+    },
+    {
+      "index": 2,
+      "stem": "audiofx_bass_pulse_violet",
+      "name": "紫色低音脉冲环",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "低音",
+        "脉冲",
+        "紫色"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "cropBox": [
+        365,
+        68,
+        591,
+        293
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        63,
+        63,
+        257,
+        256
+      ],
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "visiblePixelsAtAlpha32": 29168,
+      "sha256": "e198cd803d46d7e61bcc8f6f62934d0692c2b259885d7d12e7ecf78efd12f74e"
+    },
+    {
+      "index": 3,
+      "stem": "audiofx_equalizer_arc_gold",
+      "name": "金色弧形均衡器",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "均衡器",
+        "频谱",
+        "金色"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "cropBox": [
+        651,
+        92,
+        906,
+        273
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        48,
+        85,
+        271,
+        234
+      ],
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "visiblePixelsAtAlpha32": 19634,
+      "sha256": "c3c05fb12ce648235b834775461ee5605b38e2254fd40bf26d699fb6656922db"
+    },
+    {
+      "index": 4,
+      "stem": "audiofx_music_notes_neon",
+      "name": "霓虹音符轨迹",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "音符",
+        "霓虹",
+        "轨迹"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "cropBox": [
+        974,
+        77,
+        1210,
+        284
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        58,
+        72,
+        262,
+        247
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "visiblePixelsAtAlpha32": 22609,
+      "sha256": "386c55d1d612715faa77fa8d96c322aa6edcf26ed8e3d475aa9296a81417c7e3"
+    },
+    {
+      "index": 5,
+      "stem": "audiofx_spectrum_halo_rainbow",
+      "name": "彩虹频谱光环",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "频谱",
+        "光环",
+        "彩虹"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "cropBox": [
+        47,
+        367,
+        284,
+        602
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        57,
+        58,
+        262,
+        261
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "visiblePixelsAtAlpha32": 22678,
+      "sha256": "e272f30cb4db647d38b1696a1c1a4a8cff8ff6562ac5fcef4dc2cf2c6735b0c7"
+    },
+    {
+      "index": 6,
+      "stem": "audiofx_soundwave_dots_aqua",
+      "name": "青色点阵声波",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "声波",
+        "点阵",
+        "青色"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "cropBox": [
+        347,
+        403,
+        597,
+        552
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        51,
+        101,
+        269,
+        218
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "visiblePixelsAtAlpha32": 13464,
+      "sha256": "61bf7f24563a2a834c57205196ce3dfab9fa37a48895e6d280543693cebc7336"
+    },
+    {
+      "index": 7,
+      "stem": "audiofx_rhythm_pulse_coral",
+      "name": "珊瑚节奏波形",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "节拍",
+        "波形",
+        "珊瑚"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "cropBox": [
+        650,
+        414,
+        911,
+        569
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        48,
+        100,
+        272,
+        220
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "visiblePixelsAtAlpha32": 12809,
+      "sha256": "bb562ceb54ae897a0bd86df4118f32dd106b2a33320d14e8c476e5c8f8d3bf52"
+    },
+    {
+      "index": 8,
+      "stem": "audiofx_acoustic_arcs_pearl",
+      "name": "珍珠声波弧线",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "声波",
+        "弧线",
+        "珍珠"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "cropBox": [
+        973,
+        394,
+        1221,
+        576
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        52,
+        85,
+        268,
+        235
+      ],
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "visiblePixelsAtAlpha32": 22216,
+      "sha256": "d0f55b250ddb6dafce333826c9945ebc7fbd9132d6d533ba28332e220a6a8641"
+    },
+    {
+      "index": 9,
+      "stem": "audiofx_beat_burst_mint",
+      "name": "薄荷节拍光束",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "节拍",
+        "光束",
+        "薄荷"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "cropBox": [
+        50,
+        664,
+        278,
+        900
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        62,
+        58,
+        258,
+        262
+      ],
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "visiblePixelsAtAlpha32": 28581,
+      "sha256": "f6e0cf9b6bcb1200d64b01195b53f4547d2f56096da7a91e6176a5e9705486e3"
+    },
+    {
+      "index": 10,
+      "stem": "audiofx_frequency_badge_violet",
+      "name": "蓝紫频谱徽章",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "频谱",
+        "圆形",
+        "蓝紫"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "cropBox": [
+        366,
+        674,
+        586,
+        891
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        66,
+        67,
+        254,
+        252
+      ],
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "visiblePixelsAtAlpha32": 26327,
+      "sha256": "c67434e0302dd149cd65cab82c5723b043fb5fa051a012291424eb93527f3d05"
+    },
+    {
+      "index": 11,
+      "stem": "audiofx_vinyl_orbit_amber",
+      "name": "琥珀唱片光环",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "唱片",
+        "环绕",
+        "琥珀"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "cropBox": [
+        655,
+        695,
+        911,
+        882
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        48,
+        82,
+        272,
+        237
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "visiblePixelsAtAlpha32": 24022,
+      "sha256": "d87b42e82bc910900a1e0d024d583e08718441cfd813a3213445724fd9509d5f"
+    },
+    {
+      "index": 12,
+      "stem": "audiofx_mic_aura_magenta",
+      "name": "洋红麦克风光晕",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "麦克风",
+        "光晕",
+        "洋红"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "cropBox": [
+        1012,
+        651,
+        1190,
+        905
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        87,
+        49,
+        233,
+        271
+      ],
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "visiblePixelsAtAlpha32": 20361,
+      "sha256": "5579ad8188dedd2521f461acc6582ef0ab9ce2fe6e0afb009fa20e5b6da656fe"
+    },
+    {
+      "index": 13,
+      "stem": "audiofx_beat_stars_cyan",
+      "name": "星光节奏曲线",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "星光",
+        "节拍",
+        "曲线"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "cropBox": [
+        39,
+        996,
+        289,
+        1154
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        51,
+        97,
+        269,
+        223
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "visiblePixelsAtAlpha32": 16126,
+      "sha256": "e2f379b1aa0ebd33fae3ce6880c2e57f05b32258bd3a1b42d7997c5457013c85"
+    },
+    {
+      "index": 14,
+      "stem": "audiofx_lyric_spotlight_peach",
+      "name": "蜜桃歌词聚光",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "歌词",
+        "聚光",
+        "蜜桃"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "cropBox": [
+        349,
+        980,
+        607,
+        1165
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        48,
+        84,
+        272,
+        236
+      ],
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "visiblePixelsAtAlpha32": 23290,
+      "sha256": "aada8eeb32d44ab5fc8d50277ad4d4383d44a6e93085992ef82f8bce83a2a4d9"
+    },
+    {
+      "index": 15,
+      "stem": "audiofx_energy_spiral_teal",
+      "name": "青金声能螺旋",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "声能",
+        "螺旋",
+        "青金"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "cropBox": [
+        675,
+        952,
+        885,
+        1187
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        70,
+        58,
+        248,
+        261
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "visiblePixelsAtAlpha32": 26677,
+      "sha256": "282af72eb57415ee720cc0ee649760a2493892e6511d230392c98400c275781a"
+    },
+    {
+      "index": 16,
+      "stem": "audiofx_stereo_waveform_rainbow",
+      "name": "彩虹立体声波形",
+      "subcategory": "音乐节奏",
+      "keywords": [
+        "音乐",
+        "立体声",
+        "波形",
+        "彩虹"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "cropBox": [
+        977,
+        966,
+        1214,
+        1182
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        57,
+        67,
+        262,
+        251
+      ],
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "visiblePixelsAtAlpha32": 19745,
+      "sha256": "f4711d404306b4747f89d618c9cdbf40ed80a6b55c79a0eb729e279542295021"
+    }
+  ]
+}

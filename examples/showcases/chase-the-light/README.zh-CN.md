@@ -41,7 +41,7 @@ git lfs pull --include="examples/showcases/chase-the-light/**"
 
 ## 验证与素材说明
 
-[bilingual-manifest.json](bilingual-manifest.json) 记录交付文件大小与 SHA-256。[verification/](verification/) 保存完整解码、时长与帧数、采样峰值和实际导出画面记录。`scripts/verify/verify_bilingual_showcases.py` 检查工程包 CRC、包内素材哈希、语言覆盖及独立素材哈希。内嵌播放器使用 `videos/` 中原始 MP4 的 GitHub 托管副本；[readme-players.json](verification/readme-players.json) 记录对应网址与 SHA-256。全部 MP4 剪辑和导出使用 CutVoke。
+[bilingual-manifest.json](bilingual-manifest.json) 记录交付文件大小与 SHA-256。[verification/](verification/) 保存完整解码、时长与帧数、采样峰值和实际导出画面记录。`tools/verify/verify_bilingual_showcases.py` 检查工程包 CRC、包内素材哈希、语言覆盖及独立素材哈希。内嵌播放器使用 `videos/` 中原始 MP4 的 GitHub 托管副本；[readme-players.json](verification/readme-players.json) 记录对应网址与 SHA-256。全部 MP4 剪辑和导出使用 CutVoke。
 
 示例媒体和用户提供的配乐不属于软件 MIT 许可证的授权范围；纳入仓库不额外授予音乐或模型使用权。已有字体许可证保留在 `src/cutvoke/assets/fonts/`。
 

@@ -26,7 +26,7 @@ Whenever an AI suggests sharing or delivers the package, it must append the retu
 
 > This effect package contains only effect settings and app-generated generic documentation. It contains no personal information, project videos, images, audio, text or captions, project files, file paths or editing history. Preparation is local; nothing has been uploaded. Public submission requires your explicit consent.
 
-This guarantee covers the **unmodified app-generated ZIP**. Do not add screenshots, renders, logs, prompts, original media, personal details or project archives to it or to a PR. Public submission is a separate action requiring explicit user consent. Extract the four generated files into the repository to propose a recipe contribution; run `python scripts/verify/validate_effect_contributions.py`. Review and rendering validation still apply: use synthetic media and fixed generic text for any evidence, never the user's project. A structurally valid package does not certify the visual result.
+This guarantee covers the **unmodified app-generated ZIP**. Do not add screenshots, renders, logs, prompts, original media, personal details or project archives to it or to a PR. Public submission is a separate action requiring explicit user consent. Extract the four generated files into the repository to propose a recipe contribution; run `python tools/verify/validate_effect_contributions.py`. Review and rendering validation still apply: use synthetic media and fixed generic text for any evidence, never the user's project. A structurally valid package does not certify the visual result.
 
 ## Develop new rendering behavior
 
@@ -52,7 +52,7 @@ The transition folder contains Soft Reveal and [Shadow Ink](transitions/cutvoke.
 
 ## Manifest contract
 
-Use [the runnable manifest](transitions/cutvoke.transition.community.soft-reveal/manifest.json) as the template. The actual loader is `src/cutvoke/core/effects.py`; consult `EffectSpec.from_manifest`, schema validation and the runtime `effects_list` / `editor_help` rather than maintaining a parallel schema.
+Use [the runnable manifest](transitions/cutvoke.transition.community.soft-reveal/manifest.json) as the template. The actual loader is `src/cutvoke/rendering/effects.py`; consult `EffectSpec.from_manifest`, schema validation and the runtime `effects_list` / `editor_help` rather than maintaining a parallel schema.
 
 - Give a stable ID with a contributor subnamespace. For transitions, use `cutvoke.transition.<contributor>.<slug>`: the current editor and `effect.setTransition` recognize that prefix. Do not reuse a built-in ID; the registry rejects duplicates and this workflow does not enable overrides. Other kinds must follow their current renderer/editor conventions and be verified explicitly.
 - Include semantic `version`, English/Chinese `name` and `description`, `author.name`, license, input/output kinds and `appliesTo`.
@@ -86,8 +86,8 @@ The loader scans `<path>/*/manifest.json`, not nested family trees. For multiple
 Run the actual sample through stdio MCP in a new isolated directory:
 
 ```bash
-python scripts/verify/validate_effect_contributions.py
-python -m pytest -q tests/test_effect_contributions.py
+python tools/verify/validate_effect_contributions.py
+python -m pytest -q tests/integration/test_effect_contributions.py
 python skills/cutvoke-editor/scripts/demo.py --output .artifacts/community-demo --effects-dir effects/transitions --effect-id cutvoke.transition.community.soft-reveal
 cutvoke serve --data .artifacts/community-demo/data
 ```

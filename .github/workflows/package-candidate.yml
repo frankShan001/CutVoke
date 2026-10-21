@@ -19,21 +19,21 @@ jobs:
         with:
           node-version: "24"
           cache: npm
-          cache-dependency-path: web/app/package-lock.json
+          cache-dependency-path: apps/editor/package-lock.json
       - name: Install build requirements
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
           python -m pip install build
       - name: Build browser editor
-        working-directory: web/app
+        working-directory: apps/editor
         run: |
           npm ci
           npm run typecheck
           npm run build
       - name: Prepare candidate and inspect archives
         run: |
-          python scripts/build/prepare_candidate.py --output dist/candidate
+          python tools/build/prepare_candidate.py --output dist/candidate
           cd dist/candidate
           sha256sum -c SHA256SUMS
       - name: Rebuild wheel from source archive

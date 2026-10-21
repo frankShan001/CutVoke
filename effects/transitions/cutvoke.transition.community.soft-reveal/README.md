@@ -19,8 +19,8 @@ A restrained dissolve for calm travel, portfolio and product edits. This is a co
 From the checkout's activated Python environment:
 
 ```bash
-python scripts/verify/validate_effect_contributions.py
-python -m pytest -q tests/test_effect_contributions.py
+python tools/verify/validate_effect_contributions.py
+python -m pytest -q tests/integration/test_effect_contributions.py
 python skills/cutvoke-editor/scripts/demo.py --output .artifacts/soft-reveal-demo --effects-dir effects/transitions --effect-id cutvoke.transition.community.soft-reveal
 ```
 

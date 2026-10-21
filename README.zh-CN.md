@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/readme/banner.svg" alt="CutVoke — 本地视频编辑器，共享可编辑时间线" width="960" />
+  <img src="docs/images/readme/banner.svg" alt="CutVoke — 本地视频编辑器，共享可编辑时间线" width="960" />
 </p>
 
 <h3 align="center">你的素材，你的 AI，同一条可编辑时间线。</h3>
@@ -52,7 +52,7 @@ https://github.com/user-attachments/assets/1210c3ae-eb37-47db-b1c7-1598f4e7b136
 
 ## 在编辑器里，继续你的创作
 
-![CutVoke 简体中文界面：素材库、风景短片预览和多轨可编辑时间线](docs/assets/readme/zh-CN/editor-overview.png)
+![CutVoke 简体中文界面：素材库、风景短片预览和多轨可编辑时间线](docs/images/readme/zh-CN/editor-overview.png)
 
 *真实本机编辑器中的「山野手记」演示：三张原创插画、音乐、标题、字幕、缩放关键帧和转场。由仓库示例通过真实接口创建；没有生成视频服务。界面、演示标题与字幕均使用简体中文。*
 
@@ -99,7 +99,7 @@ flowchart LR
 
 最新源码版的[制作工作流](docs/production-workflow.md)还支持纯文字标题卡、绑定图层整组复用、按需预览和制作归档。
 
-![CutVoke 简体中文字幕编辑：选中文字与 0–4 秒起止时间，并在真实预览中检查](docs/assets/readme/zh-CN/caption-editing.png)
+![CutVoke 简体中文字幕编辑：选中文字与 0–4 秒起止时间，并在真实预览中检查](docs/images/readme/zh-CN/caption-editing.png)
 
 *简体中文界面中的字幕编辑：选中「暂别喧嚣。」，查看 0–4 秒区间及可编辑画面叠层，继续精修同一工程。*
 
@@ -177,7 +177,7 @@ source .venv/bin/activate
 
 ```bash
 python -m pip install -e .
-cd web/app
+cd apps/editor
 npm ci
 npm run build
 cd ../..
@@ -193,9 +193,9 @@ cutvoke serve --data .artifacts/first-edit/data
 
 打开 **http://127.0.0.1:8787**，选择 **Trail Notes · editable demo**。成功标志：你可以播放 12 秒短片，看到三段画面、音乐、标题和字幕；目录中已有 `trail-notes.mp4`、`trail-notes.cvkpkg` 和可编辑数据库。每次复验用新的输出目录；退出服务时按 Ctrl+C。若端口占用，用 `serve --port 8798` 并打开对应地址。
 
-示例默认通过真实 stdio MCP 导入、编辑与导出，再从人工编辑器接口检查同一批素材可用。新导入与 Web 上传共用标准存储路径，旧 MCP 导入也按严格路径规则保持可用，详见 [演示与验证边界](docs/assets/readme/README.md)。
+示例默认通过真实 stdio MCP 导入、编辑与导出，再从人工编辑器接口检查同一批素材可用。新导入与 Web 上传共用标准存储路径，旧 MCP 导入也按严格路径规则保持可用，详见 [演示与验证边界](docs/images/readme/README.md)。
 
-源码流程已在云 Linux（含 FFmpeg 7.1.5）实测，之前也检查过 Windows 源码路径。准确范围见[安装、已测版本与排障](docs/user/installation.md)；旧 Windows 安装包与人工设备体验仍需分别验收。Windows 也可以用 `start-cutvoke.cmd --web` 启动浏览器编辑器，默认使用个人工程库。想运行桌面客户端或构建安装包，见 [本地使用说明](docs/user/LOCAL_DELIVERY_MCP.md) 与 [构建入口](scripts/build/build-cutvoke-desktop.cmd)。
+源码流程已在云 Linux（含 FFmpeg 7.1.5）实测，之前也检查过 Windows 源码路径。准确范围见[安装、已测版本与排障](docs/user/installation.md)；旧 Windows 安装包与人工设备体验仍需分别验收。Windows 也可以用 `start-cutvoke.cmd --web` 启动浏览器编辑器，默认使用个人工程库。想运行桌面客户端或构建安装包，见 [本地使用说明](docs/user/LOCAL_DELIVERY_MCP.md) 与 [构建入口](tools/build/build-cutvoke-desktop.cmd)。
 
 默认服务只监听本机回环地址。源码/CLI 版的默认数据库和素材放在用户目录 `.cutvoke`；上面的示例使用独立 `.artifacts/first-edit/data`，不会打开默认个人工程库。Windows 便携版使用 exe 旁的 `CutVoke Data`，Mac/Linux 桌面包使用上方平台数据目录。
 
@@ -246,7 +246,7 @@ MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错�
 <details>
 <summary><strong>查看真实转场示例与贡献边界</strong></summary>
 
-![CutVoke 简体中文转场面板：4 秒切点上的柔和揭幕转场与实际生效的 0.60 秒时长](docs/assets/readme/zh-CN/community-transition.png)
+![CutVoke 简体中文转场面板：4 秒切点上的柔和揭幕转场与实际生效的 0.60 秒时长](docs/images/readme/zh-CN/community-transition.png)
 
 *简体中文界面中的「柔和揭幕」（Soft Reveal）：按现有注册表加载贡献清单，并通过现有 FFmpeg 叠化算法预览与导出。*
 
@@ -268,8 +268,8 @@ MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错�
 | 源码、目录规范与提交检查 | [中文贡献指南](CONTRIBUTING.zh-CN.md) · [English](CONTRIBUTING.md) · [可认领任务](docs/development/community-tasks.md) · [目录说明](docs/development/project-layout.md) |
 | 安装与候选包 | [安装排障](docs/user/installation.md) · [预发布流程](docs/development/prerelease.md) |
 | 安全报告 | [安全报告说明](SECURITY.md) |
-| 截图来源与演示验证边界 | [截图与演示记录](docs/assets/readme/README.md) |
-| 正式 CV 图标、平台资源与重新生成 | [CutVoke 品牌资源](docs/assets/brand/README.md) |
+| 截图来源与演示验证边界 | [截图与演示记录](docs/images/readme/README.md) |
+| 正式 CV 图标、平台资源与重新生成 | [CutVoke 品牌资源](resources/source/brand/README.md) |
 
 目前应将 CutVoke 视为早期项目：工程格式和接口可能调整，首次复杂预览需要等待 FFmpeg，可选语音识别与人物处理另需依赖/模型。示例不能代表长工程性能、所有效果或所有 AI 客户端兼容性。请先在小型副本中试用，再用于重要项目。
 

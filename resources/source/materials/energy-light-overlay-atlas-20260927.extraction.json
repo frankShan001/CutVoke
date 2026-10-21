@@ -1,0 +1,760 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "source": "docs/assets/energy-light-overlay-atlas-20260927.png",
+  "sourceSha256": "23394d62c1b80284f83a0841d1bd96305ae905da9965c77524ed99867ee5738f",
+  "sourceSize": [
+    1326,
+    1186
+  ],
+  "layout": "4x4 proportional cells; each source cell normalized to a square transparent PNG",
+  "subcategory": "能量光效",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "extraction": "proportional cell crop; alpha below 8 cleared; 3px cell edge cleared; content cropped to its visible bounds with 2px source margin, then centered on 512px transparent PNG with 18px guaranteed safety padding",
+  "contactSheets": [
+    "docs/assets/energy-light-overlay-atlas-20260927-contact-dark.png",
+    "docs/assets/energy-light-overlay-atlas-20260927-contact-light.png"
+  ],
+  "contactSheetSha256": {
+    "energy-light-overlay-atlas-20260927-contact-dark.png": "be00cf720b7889e0d8cbc782d7b5d05fa0ce9caa4a7e4c782d8113f9e8359492",
+    "energy-light-overlay-atlas-20260927-contact-light.png": "cde75955a24fc7b26e5d01bb54fb5a0d7bb3e17ca8e51bc7920b6db23299f666"
+  },
+  "items": [
+    {
+      "index": 1,
+      "stem": "energy_arc_cyan",
+      "name": "青色电弧",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "电弧",
+        "青色"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        332,
+        296
+      ],
+      "contentCropWithinCell": [
+        109,
+        75,
+        274,
+        272
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 15451,
+      "removedLowAlphaPixels": 80316,
+      "alphaBounds": [
+        179,
+        163,
+        332,
+        348
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "7e52dd1d21b26389479e4e02c2c4a07019f030fe7e0c2ee12b869dcc323a2f4b"
+    },
+    {
+      "index": 2,
+      "stem": "energy_ribbon_violet",
+      "name": "紫色等离子飘带",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "紫色",
+        "飘带"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        332,
+        0,
+        663,
+        296
+      ],
+      "contentCropWithinCell": [
+        95,
+        63,
+        260,
+        273
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 18223,
+      "removedLowAlphaPixels": 77204,
+      "alphaBounds": [
+        178,
+        155,
+        333,
+        355
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "55d1012d1828ba946521199e3d9ff3fe6241e99b0d7381322f46df498ff40151"
+    },
+    {
+      "index": 3,
+      "stem": "energy_trail_gold",
+      "name": "香槟金火花轨迹",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "金色",
+        "火花"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        663,
+        0,
+        994,
+        296
+      ],
+      "contentCropWithinCell": [
+        78,
+        94,
+        251,
+        251
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 11223,
+      "removedLowAlphaPixels": 84886,
+      "alphaBounds": [
+        173,
+        181,
+        336,
+        328
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "bdc4ef9c14f2c4dec643d65e16ddb43af09db12cd783244ee3ec7404929b5d99"
+    },
+    {
+      "index": 4,
+      "stem": "energy_prism_flare_magenta",
+      "name": "洋红棱镜星芒",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "棱镜",
+        "洋红"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        994,
+        0,
+        1326,
+        296
+      ],
+      "contentCropWithinCell": [
+        44,
+        65,
+        245,
+        273
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 10538,
+      "removedLowAlphaPixels": 85687,
+      "alphaBounds": [
+        161,
+        158,
+        350,
+        356
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "824fbeca7dd5796520ea5992ff1aa078fd7a0181dea8e91a9fa161e4cf35f30a"
+    },
+    {
+      "index": 5,
+      "stem": "energy_aurora_emerald",
+      "name": "翡翠极光弧",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "极光",
+        "绿色"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        296,
+        332,
+        593
+      ],
+      "contentCropWithinCell": [
+        101,
+        66,
+        279,
+        261
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 18424,
+      "removedLowAlphaPixels": 78022,
+      "alphaBounds": [
+        172,
+        164,
+        341,
+        348
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "2d22bba1ce0f641987be4f939591aa72f37b48f62a606e33f30426a69c839396"
+    },
+    {
+      "index": 6,
+      "stem": "energy_burst_cobalt",
+      "name": "钴蓝放射光束",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "放射",
+        "蓝色"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        332,
+        296,
+        663,
+        593
+      ],
+      "contentCropWithinCell": [
+        74,
+        66,
+        266,
+        257
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 20372,
+      "removedLowAlphaPixels": 75847,
+      "alphaBounds": [
+        164,
+        165,
+        348,
+        347
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "b063bfde9f5aaf7c46d79e9e2a1f94ac4ae48531481de39285e0bb33e697a798"
+    },
+    {
+      "index": 7,
+      "stem": "energy_rainbow_arc",
+      "name": "彩虹折射弧",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "彩虹",
+        "折射"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        663,
+        296,
+        994,
+        593
+      ],
+      "contentCropWithinCell": [
+        65,
+        116,
+        261,
+        221
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 7811,
+      "removedLowAlphaPixels": 89467,
+      "alphaBounds": [
+        163,
+        207,
+        350,
+        302
+      ],
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "0ebbb81f7ad18b29e8f6183a56f21c8500d604b329cff66773419ac0f20e9615"
+    },
+    {
+      "index": 8,
+      "stem": "energy_halo_pearl",
+      "name": "珍珠光环",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "光环",
+        "珍珠白"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        994,
+        296,
+        1326,
+        593
+      ],
+      "contentCropWithinCell": [
+        55,
+        73,
+        241,
+        255
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 13443,
+      "removedLowAlphaPixels": 83097,
+      "alphaBounds": [
+        167,
+        169,
+        344,
+        342
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "cbf343d0681579e507b5d66ab96d5a40125d1fdf4595947c1acc357de203c91e"
+    },
+    {
+      "index": 9,
+      "stem": "energy_orbs_multicolor",
+      "name": "多彩能量光球",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "光球",
+        "多彩"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        593,
+        332,
+        890
+      ],
+      "contentCropWithinCell": [
+        102,
+        54,
+        280,
+        232
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 17278,
+      "removedLowAlphaPixels": 79605,
+      "alphaBounds": [
+        171,
+        172,
+        342,
+        340
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "8d330bb21b273ea2adf5c58eedc1ad7b672b1b385c3fc34ea387fb915c60bd20"
+    },
+    {
+      "index": 10,
+      "stem": "energy_shards_crystal",
+      "name": "水晶碎片爆发",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "水晶",
+        "碎片"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        332,
+        593,
+        663,
+        890
+      ],
+      "contentCropWithinCell": [
+        86,
+        45,
+        263,
+        234
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 17301,
+      "removedLowAlphaPixels": 79247,
+      "alphaBounds": [
+        171,
+        165,
+        339,
+        346
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "b9921866876bea12ad9ce04ef225ee6bf969802ab7dc3265580b376781595b79"
+    },
+    {
+      "index": 11,
+      "stem": "energy_ribbons_dual",
+      "name": "青紫双层能量带",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "飘带",
+        "青紫"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        663,
+        593,
+        994,
+        890
+      ],
+      "contentCropWithinCell": [
+        77,
+        79,
+        253,
+        219
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 14153,
+      "removedLowAlphaPixels": 82320,
+      "alphaBounds": [
+        172,
+        191,
+        339,
+        322
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "c9d2feb6b1baddefe40a3f85de6811e1500831d1615bf2724fd766ba3d3fc98c"
+    },
+    {
+      "index": 12,
+      "stem": "energy_loop_golden",
+      "name": "金色光迹环",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "金色",
+        "光迹"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        994,
+        593,
+        1326,
+        890
+      ],
+      "contentCropWithinCell": [
+        59,
+        49,
+        240,
+        225
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 8873,
+      "removedLowAlphaPixels": 87888,
+      "alphaBounds": [
+        168,
+        174,
+        342,
+        340
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "2f09f74d83187ce37cc9b9c1a20360ab9259b68d82c6f3fb6061865769f85926"
+    },
+    {
+      "index": 13,
+      "stem": "energy_stars_falling",
+      "name": "星点垂落",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "星点",
+        "垂落"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        890,
+        332,
+        1186
+      ],
+      "contentCropWithinCell": [
+        125,
+        40,
+        261,
+        217
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 7370,
+      "removedLowAlphaPixels": 88868,
+      "alphaBounds": [
+        192,
+        173,
+        320,
+        340
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "c8384b8f15569b5673439cd421b400e522a43725b9a0d2d814ab7349f55ca6e2"
+    },
+    {
+      "index": 14,
+      "stem": "energy_curtain_violet",
+      "name": "紫青光幕",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "光幕",
+        "紫青"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        332,
+        890,
+        663,
+        1186
+      ],
+      "contentCropWithinCell": [
+        92,
+        32,
+        245,
+        232
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 23000,
+      "removedLowAlphaPixels": 72975,
+      "alphaBounds": [
+        185,
+        162,
+        327,
+        351
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "e07e059e0205210f8683b9da5e05047c68344eb14e9d2fdbc9e9818ff080ebf7"
+    },
+    {
+      "index": 15,
+      "stem": "energy_wave_coral",
+      "name": "珊瑚色脉冲波形",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "脉冲",
+        "珊瑚色"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        663,
+        890,
+        994,
+        1186
+      ],
+      "contentCropWithinCell": [
+        62,
+        47,
+        267,
+        221
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 12633,
+      "removedLowAlphaPixels": 83115,
+      "alphaBounds": [
+        158,
+        176,
+        353,
+        336
+      ],
+      "alphaExtrema": [
+        0,
+        248
+      ],
+      "sha256": "d43a68726129ba46fcd34f82a8dbc84085104deca1a09edf65941c53d824beac"
+    },
+    {
+      "index": 16,
+      "stem": "energy_zigzag_gold",
+      "name": "金色电光折线",
+      "subcategory": "能量光效",
+      "keywords": [
+        "能量",
+        "电光",
+        "金色"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        994,
+        890,
+        1326,
+        1186
+      ],
+      "contentCropWithinCell": [
+        58,
+        54,
+        236,
+        216
+      ],
+      "sourceSize": [
+        1326,
+        1186
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 9795,
+      "removedLowAlphaPixels": 86660,
+      "alphaBounds": [
+        172,
+        180,
+        339,
+        331
+      ],
+      "alphaExtrema": [
+        0,
+        250
+      ],
+      "sha256": "8e699c1af5c2e4197e4fc0ed987b3d454757601c0469d8b1b20ee5a608218560"
+    }
+  ]
+}

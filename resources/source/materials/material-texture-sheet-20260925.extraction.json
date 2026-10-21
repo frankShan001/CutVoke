@@ -1,0 +1,686 @@
+{
+  "schemaVersion": 1,
+  "source": "material-texture-sheet-20260925.png",
+  "sourceSha256": "902793ae14fd74e68b49dde7a8b38e60bd0a35fabae7264367921eaa888d5a95",
+  "sourceSize": [
+    1278,
+    1230
+  ],
+  "layout": "4x4",
+  "extraction": "centered square crop at 82% of each proportional cell; 32px transparent padding",
+  "contactSheet": "material-texture-contact-sheet-20260925.png",
+  "items": [
+    {
+      "index": 1,
+      "stem": "material_rice_paper",
+      "name": "手工米纸",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "纸张",
+        "纤维",
+        "手工"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        320,
+        308
+      ],
+      "cropBox": [
+        33,
+        27,
+        286,
+        280
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        61,
+        51,
+        288,
+        288
+      ],
+      "visiblePixels": 49597,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "30376f9ed5ae8f4cf50318c75de6ac5915f0b1ab0c590fa5eb1d35a2f2572b7e"
+    },
+    {
+      "index": 2,
+      "stem": "material_vellum",
+      "name": "半透描图纸",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "纸张",
+        "半透明",
+        "描图"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        320,
+        0,
+        639,
+        308
+      ],
+      "cropBox": [
+        353,
+        27,
+        606,
+        280
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        55,
+        53,
+        288,
+        288
+      ],
+      "visiblePixels": 50821,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "e201491773b23317f90b8be6462bcdf576fd143200a6f5ab549c9010f3dae752"
+    },
+    {
+      "index": 3,
+      "stem": "material_kraft",
+      "name": "压纹牛皮纸",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "纸张",
+        "牛皮纸",
+        "压纹"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        639,
+        0,
+        958,
+        308
+      ],
+      "cropBox": [
+        672,
+        27,
+        925,
+        280
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        50,
+        281,
+        288
+      ],
+      "visiblePixels": 54702,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "a0e01b6a94d67bd3fe46cfe0efecdb1af87e49fbe0dc3f2e6d3920afd79d035b"
+    },
+    {
+      "index": 4,
+      "stem": "material_watercolor_paper",
+      "name": "水彩纸面",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "纸张",
+        "水彩",
+        "冷压"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        958,
+        0,
+        1278,
+        308
+      ],
+      "cropBox": [
+        991,
+        27,
+        1244,
+        280
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        52,
+        269,
+        288
+      ],
+      "visiblePixels": 52825,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "bbf2829953d693c9a4053cab010bf16ea7d085e7ad79cf56c6584b4e6bea5a7b"
+    },
+    {
+      "index": 5,
+      "stem": "material_linen",
+      "name": "天然亚麻",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "织物",
+        "亚麻",
+        "编织"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        308,
+        320,
+        615
+      ],
+      "cropBox": [
+        34,
+        335,
+        286,
+        587
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        47,
+        32,
+        288,
+        274
+      ],
+      "visiblePixels": 52480,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "ced6baec6e2fa1c283ce882689fd0f36cf2e81681c251a6e9cb2835285380b18"
+    },
+    {
+      "index": 6,
+      "stem": "material_denim",
+      "name": "靛蓝丹宁",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "织物",
+        "丹宁",
+        "靛蓝"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        320,
+        308,
+        639,
+        615
+      ],
+      "cropBox": [
+        353,
+        335,
+        605,
+        587
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        34,
+        32,
+        288,
+        279
+      ],
+      "visiblePixels": 53766,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "fa8e8e646e57f3e682bc25fc3cec43e26024e00bc7fcf4f43c11493d091931c0"
+    },
+    {
+      "index": 7,
+      "stem": "material_velvet",
+      "name": "酒红绒布",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "织物",
+        "天鹅绒",
+        "酒红"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        639,
+        308,
+        958,
+        615
+      ],
+      "cropBox": [
+        672,
+        335,
+        924,
+        587
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        285,
+        271
+      ],
+      "visiblePixels": 56651,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "534736d9fab06356202cea0b1efe8f84744a2985c6290000cecc065f5156cfef"
+    },
+    {
+      "index": 8,
+      "stem": "material_wool_felt",
+      "name": "浅色羊毛毡",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "织物",
+        "羊毛",
+        "毛毡"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        958,
+        308,
+        1278,
+        615
+      ],
+      "cropBox": [
+        992,
+        335,
+        1244,
+        587
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        269,
+        266
+      ],
+      "visiblePixels": 52067,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "97a0ec7ae7385a7ac6489180e0f969f6a06848657d6264a66076cd7f681dab8b"
+    },
+    {
+      "index": 9,
+      "stem": "material_cork",
+      "name": "天然软木",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "软木",
+        "木质",
+        "颗粒"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        615,
+        320,
+        922
+      ],
+      "cropBox": [
+        34,
+        642,
+        286,
+        894
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        60,
+        32,
+        288,
+        262
+      ],
+      "visiblePixels": 48704,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "6e8f6e86bdbf9b78447e9b937157bb8aa487e0bb9611e86757f310047e47ebc8"
+    },
+    {
+      "index": 10,
+      "stem": "material_pebbled_leather",
+      "name": "深棕荔枝皮",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "皮革",
+        "深棕",
+        "荔枝纹"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        320,
+        615,
+        639,
+        922
+      ],
+      "cropBox": [
+        353,
+        642,
+        605,
+        894
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        48,
+        32,
+        288,
+        261
+      ],
+      "visiblePixels": 50821,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "9c33cb5ea39c934809c86f959a86267ff17e2815617488de83cffdd63b7a38aa"
+    },
+    {
+      "index": 11,
+      "stem": "material_walnut",
+      "name": "胡桃木皮",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "木纹",
+        "胡桃木",
+        "暖色"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        639,
+        615,
+        958,
+        922
+      ],
+      "cropBox": [
+        672,
+        642,
+        924,
+        894
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        286,
+        261
+      ],
+      "visiblePixels": 53916,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "87554286121a0e275bc9d55cfccdc2f751552f54a71ce26c397441a87ef49864"
+    },
+    {
+      "index": 12,
+      "stem": "material_terrazzo",
+      "name": "浅色水磨石",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "石材",
+        "水磨石",
+        "碎石"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        958,
+        615,
+        1278,
+        922
+      ],
+      "cropBox": [
+        992,
+        642,
+        1244,
+        894
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        272,
+        259
+      ],
+      "visiblePixels": 51310,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "10e10469a4b870b556b95bbda4ff3226b365521e2fd547d36d0bc79679f33a37"
+    },
+    {
+      "index": 13,
+      "stem": "material_aluminum",
+      "name": "拉丝铝",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "金属",
+        "铝",
+        "拉丝"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        922,
+        320,
+        1230
+      ],
+      "cropBox": [
+        33,
+        949,
+        286,
+        1202
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        61,
+        32,
+        288,
+        249
+      ],
+      "visiblePixels": 46349,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "87c9d97e68b85fd9ac53f75367caeffb60dc8ce8ab086a70854d1058b03ff4c9"
+    },
+    {
+      "index": 14,
+      "stem": "material_copper",
+      "name": "锤纹铜箔",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "金属",
+        "铜",
+        "锤纹"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        320,
+        922,
+        639,
+        1230
+      ],
+      "cropBox": [
+        353,
+        949,
+        606,
+        1202
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        48,
+        32,
+        288,
+        248
+      ],
+      "visiblePixels": 47926,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "75348930ade9e2aca0ab88277478efadff851119adf2e70fdbf1303c89bc478e"
+    },
+    {
+      "index": 15,
+      "stem": "material_holographic_foil",
+      "name": "虹彩镭射箔",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "金属",
+        "虹彩",
+        "镭射"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        639,
+        922,
+        958,
+        1230
+      ],
+      "cropBox": [
+        672,
+        949,
+        925,
+        1202
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        281,
+        246
+      ],
+      "visiblePixels": 49431,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "41428648e740389d25719a28386cb325babad917f63f0579a969211844d232bf"
+    },
+    {
+      "index": 16,
+      "stem": "material_frosted_glass",
+      "name": "磨砂玻璃",
+      "subcategory": "材质纹理",
+      "keywords": [
+        "材质",
+        "玻璃",
+        "磨砂",
+        "半透明"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        958,
+        922,
+        1278,
+        1230
+      ],
+      "cropBox": [
+        991,
+        949,
+        1244,
+        1202
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        32,
+        32,
+        272,
+        245
+      ],
+      "visiblePixels": 48231,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4d9267d5bcd7bf3e42e0f0885ea000f5102c72bc6cde8641ee4b89036e1002b9"
+    }
+  ]
+}

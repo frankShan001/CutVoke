@@ -1,0 +1,550 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "source": "weather-atmosphere-overlay-atlas-20260926.png",
+  "sourceSha256": "fa4888ff8cd6f092018216dc430dde9589e63516a4cf57c7141f4818d020051f",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4",
+  "extraction": "equal proportional cell crops; original generated RGBA alpha preserved; centered on 320x320 transparent canvas",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "subcategory": "特效贴图",
+  "items": [
+    {
+      "stem": "weatherfx_light_rain",
+      "name": "细雨斜线",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "天气",
+        "细雨",
+        "雨丝"
+      ],
+      "row": 0,
+      "column": 0,
+      "cell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        317,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 44382,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        98
+      ],
+      "sha256": "4339aaef3b1e9e508f3e9c65bbecac1102cd7467a3e353c2309c2d00c9026ccd"
+    },
+    {
+      "stem": "weatherfx_heavy_rain",
+      "name": "密集雨幕",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "天气",
+        "暴雨",
+        "雨幕"
+      ],
+      "row": 0,
+      "column": 1,
+      "cell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 60188,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        232
+      ],
+      "sha256": "0fdd979f961ac84310684be862d5993d02bec86b3d09013a16f972fc7a8d351b"
+    },
+    {
+      "stem": "weatherfx_lens_raindrops",
+      "name": "镜头水滴",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "天气",
+        "水滴",
+        "镜头"
+      ],
+      "row": 0,
+      "column": 2,
+      "cell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 11681,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        239
+      ],
+      "sha256": "364d736db0e50cb3df74bdd8820d7da9e550f12c6b5f9fa2de581914b4c7170f"
+    },
+    {
+      "stem": "weatherfx_soft_snow",
+      "name": "柔和飘雪",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "天气",
+        "飘雪",
+        "冬日"
+      ],
+      "row": 0,
+      "column": 3,
+      "cell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        317,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 9847,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        247
+      ],
+      "sha256": "0f0d092decea1790798648f452d29ab75bb9f17038234182feeb9c9d97830392"
+    },
+    {
+      "stem": "weatherfx_snowflakes",
+      "name": "晶亮雪花",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "天气",
+        "雪花",
+        "冰晶"
+      ],
+      "row": 1,
+      "column": 0,
+      "cell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        317,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 48196,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        234
+      ],
+      "sha256": "0572bbd3c47526276e20faa8d8f30f711a0f54cb462ea512652b76f212b68881"
+    },
+    {
+      "stem": "weatherfx_ground_fog",
+      "name": "低空薄雾",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "氛围",
+        "薄雾",
+        "地面"
+      ],
+      "row": 1,
+      "column": 1,
+      "cell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 54980,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "54e1b3f393330641dde83f5674692565a9a1d40e7a821ae9670d62ae2b158d2c"
+    },
+    {
+      "stem": "weatherfx_sunrays",
+      "name": "体积阳光",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "氛围",
+        "阳光",
+        "光束"
+      ],
+      "row": 1,
+      "column": 2,
+      "cell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 57240,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        241
+      ],
+      "sha256": "ec9da99a8d603fb9e38d070e8d075270732a329f9941151cb219fe51fa3349ed"
+    },
+    {
+      "stem": "weatherfx_window_lightleak",
+      "name": "暖色窗光漏光",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "氛围",
+        "窗光",
+        "漏光"
+      ],
+      "row": 1,
+      "column": 3,
+      "cell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        317,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 54643,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "cef3086020b1ae9e7077d1f28ae78c2b7f3f359f86bdb46d4c702c4bb2e25b77"
+    },
+    {
+      "stem": "weatherfx_dust_motes",
+      "name": "漂浮尘埃",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "氛围",
+        "尘埃",
+        "微粒"
+      ],
+      "row": 2,
+      "column": 0,
+      "cell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        317,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 11200,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        165
+      ],
+      "sha256": "5868c18a0fadc992aacad25174bf3a751833e71b4beab7e87ed42a9a07315021"
+    },
+    {
+      "stem": "weatherfx_cherry_petals",
+      "name": "樱花花瓣",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "天气",
+        "花瓣",
+        "春日"
+      ],
+      "row": 2,
+      "column": 1,
+      "cell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 11760,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "ddf62a00bb80a2303bf0fa071ea39b470380b5d2d7a115294afeac8be4222333"
+    },
+    {
+      "stem": "weatherfx_autumn_leaves",
+      "name": "秋叶飘落",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "天气",
+        "秋叶",
+        "落叶"
+      ],
+      "row": 2,
+      "column": 2,
+      "cell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 12806,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "354a5ab880261f6beea0ccd18b5619a675f344084eb20ea5a904db929d5aaf03"
+    },
+    {
+      "stem": "weatherfx_fireflies",
+      "name": "萤火微光",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "氛围",
+        "萤火",
+        "微光"
+      ],
+      "row": 2,
+      "column": 3,
+      "cell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        317,
+        316
+      ],
+      "visiblePixelsAlphaAtLeast16": 15051,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        239
+      ],
+      "sha256": "59992634f5587a7761c2b3284b92e85e8e118b11ebf1d5c759be81021744ce43"
+    },
+    {
+      "stem": "weatherfx_soap_bubbles",
+      "name": "彩虹泡泡",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "氛围",
+        "泡泡",
+        "虹彩"
+      ],
+      "row": 3,
+      "column": 0,
+      "cell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        317,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 18582,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        246
+      ],
+      "sha256": "0b657a391c134b9e043d08cf5021c0aa10cc39d7b014a51b1eda4c0f623fa785"
+    },
+    {
+      "stem": "weatherfx_embers",
+      "name": "橙色余烬",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "氛围",
+        "余烬",
+        "火星"
+      ],
+      "row": 3,
+      "column": 1,
+      "cell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 18489,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        245
+      ],
+      "sha256": "3bc6b823db6e3fd2ec587d2a865dedb779ee3c0e0d5caf056658cbea054d4a36"
+    },
+    {
+      "stem": "weatherfx_wind_seeds",
+      "name": "风中草籽",
+      "subcategory": "特效贴图",
+      "keywords": [
+        "天气",
+        "风",
+        "草籽"
+      ],
+      "row": 3,
+      "column": 2,
+      "cell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        3,
+        3,
+        316,
+        317
+      ],
+      "visiblePixelsAlphaAtLeast16": 10526,
+      "visiblePixelsWithin8pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        239
+      ],
+      "sha256": "327f0eeb99fefc9a55331f7ef81482d4e5b7e4b9405d55c97d1ee5dea6228adb"
+    }
+  ],
+  "rejectedCells": [
+    {
+      "row": 3,
+      "column": 3,
+      "reason": "broad opaque teal panel; unsuitable over live footage"
+    }
+  ],
+  "contactSheet": "weather-atmosphere-overlay-contact-20260926.png",
+  "generationPrompt": "Use case: production-ready video editor overlay texture atlas.\nAsset type: one square 4 by 4 atlas of sixteen independent transparent RGBA overlay textures for compositing over live-action footage.\nPrimary request: create exactly sixteen distinct weather and atmosphere effects, one per equal-sized grid cell, in this fixed row-major order: 1 fine diagonal rain streaks, 2 dense rain streaks, 3 scattered large lens raindrops, 4 soft falling snow, 5 tiny sparkling snowflakes, 6 low drifting ground fog, 7 soft volumetric sun rays, 8 warm window light leak, 9 floating dust motes, 10 pink cherry blossom petals, 11 golden autumn leaves, 12 glowing fireflies, 13 tiny soap bubbles, 14 orange embers, 15 wind-swept pale grass seeds, 16 blue-green underwater suspended particles.\nStyle/medium: polished realistic compositing assets, restrained cinematic colors, detailed but clean edges.\nComposition/framing: exact square 4x4 grid, identical cells, generous empty transparent padding inside every cell, each effect centered within its own cell and fully contained; no effect may cross a cell boundary; uniform visual density and useful alpha falloff.\nLighting/mood: varied to match each named weather effect, visually distinct and readable when composited over varied footage.\nMaterials/textures: genuinely transparent background (alpha channel), each cell contains only the named floating overlay elements and their faint local glow; suitable for normal/additive compositing, no solid plates.\nConstraints: no visible grid lines, no borders, no cell backgrounds, no checkerboard, no shadows outside the effects, no labels, no symbols, no text, no numbers, no watermark. Maintain the exact 4x4 regular layout."
+}

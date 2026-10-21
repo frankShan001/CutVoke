@@ -21,12 +21,12 @@ may be required). A failed acceptance does not upload a user download.
 - Electron 44.5.1 is verified against the checksum shipped by its official npm
   package. Desktop/frontend npm trees use their committed integrity lockfiles.
 - Python 3.13.16 is provided by `actions/setup-python`. The isolated backend
-  environment uses `desktop/requirements-build.lock` with fixed versions,
+  environment uses `apps/desktop/requirements-build.lock` with fixed versions,
   SHA256 hashes and binary-only installs. Build tools and optional AI packages
   are not copied into the product folder.
 - FFmpeg 7.1.5 is built from exact upstream source commits in
-  `desktop/ffmpeg-sources.json`. Every input archive has a pinned SHA256.
-  `scripts/build/build_ffmpeg_windows.sh` cross-compiles Windows x64 static
+  `apps/desktop/ffmpeg-sources.json`. Every input archive has a pinned SHA256.
+  `tools/build/build_ffmpeg_windows.sh` cross-compiles Windows x64 static
   FFmpeg/ffprobe with libx264, libass, FreeType, HarfBuzz, FriBidi and zlib.
   It excludes nonfree options. The resulting standalone tools use GPLv3;
   CutVoke invokes them as separate processes.
@@ -90,8 +90,8 @@ machines remains separate from that evidence.
 ## Local maintainer commands (Windows)
 
 Use the exact Python/Node versions and verified FFmpeg output from the workflow.
-Build `web/app`, freeze `desktop/engine.spec` with `CUTVOKE_FFMPEG_DIR` pointing
+Build `apps/editor`, freeze `apps/desktop/engine.spec` with `CUTVOKE_FFMPEG_DIR` pointing
 to the verified tool folder, run `prepare_desktop_tools.ps1 -Portable`, then
 `npm run portable` in `desktop`. Run `assemble_portable.py` using the isolated
-backend Python and `node scripts/verify/verify_portable_windows.cjs` from the
+backend Python and `node tools/verify/verify_portable_windows.cjs` from the
 repository root. NSIS remains an independent legacy `npm run dist` target.

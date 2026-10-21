@@ -5,13 +5,13 @@ on:
   push:
     branches: [main]
     paths:
-      - desktop/**
+      - apps/desktop/**
       - src/**
-      - web/app/**
-      - scripts/build/**
-      - scripts/verify/verify_portable_unix.cjs
-      - scripts/verify/verify_unix_*
-      - scripts/verify/verify_linux_dialog.py
+      - apps/editor/**
+      - tools/build/**
+      - tools/verify/verify_portable_unix.cjs
+      - tools/verify/verify_unix_*
+      - tools/verify/verify_linux_dialog.py
       - .github/workflows/unix-packages.yml
       - .gitattributes
 
@@ -48,8 +48,8 @@ jobs:
           node-version: '24.15.0'
           cache: npm
           cache-dependency-path: |
-            desktop/package-lock.json
-            web/app/package-lock.json
+            apps/desktop/package-lock.json
+            apps/editor/package-lock.json
       - name: Install Linux build and desktop test tools
         if: runner.os == 'Linux'
         run: |
@@ -63,12 +63,12 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .artifacts/portable-ffmpeg
-          key: ffmpeg-${{ matrix.target }}-${{ hashFiles('desktop/ffmpeg-sources.json', 'scripts/build/build_ffmpeg_unix.sh', 'scripts/build/prepare_ffmpeg_sources.py') }}
+          key: ffmpeg-${{ matrix.target }}-${{ hashFiles('apps/desktop/ffmpeg-sources.json', 'tools/build/build_ffmpeg_unix.sh', 'tools/build/prepare_ffmpeg_sources.py') }}
       - name: Build FFmpeg from pinned sources with corresponding source
         if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
         run: |
           python -m pip install meson==1.10.0
-          bash scripts/build/build_ffmpeg_unix.sh
+          bash tools/build/build_ffmpeg_unix.sh
       - name: Verify native FFmpeg integrity
         run: |
           python - <<'PY'
@@ -95,10 +95,10 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .artifacts/intel-crypto
-          key: crypto-macos-x64-python313-${{ hashFiles('desktop/intel-crypto-sources.json', 'desktop/requirements-intel-crypto.lock', 'desktop/requirements-build.lock', 'scripts/build/build_macos_intel_crypto.py') }}
+          key: crypto-macos-x64-python313-${{ hashFiles('apps/desktop/intel-crypto-sources.json', 'apps/desktop/requirements-intel-crypto.lock', 'apps/desktop/requirements-build.lock', 'tools/build/build_macos_intel_crypto.py') }}
       - name: Build current cryptography for Intel from pinned source and static OpenSSL
         if: matrix.target == 'macos-x64'
-        run: .artifacts/venv-portable/bin/python scripts/build/build_macos_intel_crypto.py
+        run: .artifacts/venv-portable/bin/python tools/build/build_macos_intel_crypto.py
       - name: Cache verified Intel cryptography before application acceptance
         if: matrix.target == 'macos-x64' && steps.intel-crypto-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v5
@@ -108,9 +108,9 @@ jobs:
       - name: Install locked binary backend dependencies
         if: matrix.target != 'macos-x64'
         run: |
-          .artifacts/venv-portable/bin/python -m pip install --require-hashes --only-binary=:all: -r desktop/requirements-build.lock
+          .artifacts/venv-portable/bin/python -m pip install --require-hashes --only-binary=:all: -r apps/desktop/requirements-build.lock
       - name: Build Web editor
-        working-directory: web/app
+        working-directory: apps/editor
         run: |
           npm ci
           npm run typecheck
@@ -118,23 +118,23 @@ jobs:
       - name: Freeze native backend with bundled media tools
         run: |
           export CUTVOKE_FFMPEG_DIR="$GITHUB_WORKSPACE/.artifacts/portable-ffmpeg/bin"
-          .artifacts/venv-portable/bin/python -m PyInstaller --noconfirm --distpath .artifacts/build/desktop-engine --workpath .artifacts/build/desktop-work desktop/engine.spec
+          .artifacts/venv-portable/bin/python -m PyInstaller --noconfirm --distpath .artifacts/build/desktop-engine --workpath .artifacts/build/desktop-work apps/desktop/engine.spec
       - name: Verify Electron and package native app
         run: |
           npm ci --prefix desktop
           npm run test:build-deps --prefix desktop
           npm run test:i18n --prefix desktop
           npm run test:storage --prefix desktop
-          python scripts/build/prepare_desktop_unix.py
+          python tools/build/prepare_desktop_unix.py
           npm run package:unix --prefix desktop -- ${{ matrix.builder }}
       - name: Assemble distribution preserving executable modes and symlinks
-        run: .artifacts/venv-portable/bin/python scripts/build/assemble_portable.py
+        run: .artifacts/venv-portable/bin/python tools/build/assemble_portable.py
       - name: Extract shipped archive and accept real macOS app
         if: runner.os == 'macOS'
         timeout-minutes: 12
         run: |
           export CUTVOKE_VERIFY_PYTHON="$GITHUB_WORKSPACE/.artifacts/venv-portable/bin/python"
-          node scripts/verify/verify_portable_unix.cjs
+          node tools/verify/verify_portable_unix.cjs
       - name: Extract shipped archive and accept real Linux app with sandbox
         if: runner.os == 'Linux'
         timeout-minutes: 12
@@ -142,7 +142,7 @@ jobs:
           export CUTVOKE_VERIFY_PYTHON="$GITHUB_WORKSPACE/.artifacts/venv-portable/bin/python"
           dbus-run-session -- xvfb-run -a bash -e -c '
             openbox > /tmp/cutvoke-openbox.log 2>&1 &
-            node scripts/verify/verify_portable_unix.cjs
+            node tools/verify/verify_portable_unix.cjs
           '
       - name: Upload verified download
         uses: actions/upload-artifact@v7

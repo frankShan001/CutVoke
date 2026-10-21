@@ -1,0 +1,570 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "source": "manga-motion-atlas-v2-20260926.png",
+  "sourceSha256": "18ff71a52781b36e52df25d36af5dfae04309ebb2d1ed40d7b747452437fb54c",
+  "layout": "4x4",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "items": [
+    {
+      "stem": "manga_v2_bw_speed_burst",
+      "name": "黑白放射冲击线",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "放射",
+        "冲击"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBounds": [
+        25,
+        37,
+        288,
+        298
+      ],
+      "visiblePixels": 43518,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        249
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "d695d9b64a806517c18d0eae37c7c0c3dd293cbbe4e5169fce8024d0c83f24cf"
+    },
+    {
+      "stem": "manga_v2_coral_impact_crack",
+      "name": "珊瑚红排线裂纹",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "裂纹",
+        "冲击"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "visibleBounds": [
+        24,
+        40,
+        287,
+        294
+      ],
+      "visiblePixels": 19668,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "0a77d67b06c6330f095406e1acaa0ce3774e1b9bc8ab5395f060e9fc9f6a7c52"
+    },
+    {
+      "stem": "manga_v2_lime_spiral_motion",
+      "name": "青柠螺旋动线",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "螺旋",
+        "动势"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "visibleBounds": [
+        35,
+        33,
+        285,
+        291
+      ],
+      "visiblePixels": 36179,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "3347e906cde7e8ecf6c9454342275256cd24b07d558c5e673fc20f6a7cf58730"
+    },
+    {
+      "stem": "manga_v2_ink_smoke_wipe",
+      "name": "象牙白墨烟擦拭",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "墨烟",
+        "擦拭"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "visibleBounds": [
+        40,
+        28,
+        292,
+        300
+      ],
+      "visiblePixels": 38272,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "40914a86f9bc3c314d020291c4902f9484f21a933c928537db62ea889e3af01e"
+    },
+    {
+      "stem": "manga_v2_cobalt_accel_arcs",
+      "name": "钴蓝弧形加速线",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "加速线",
+        "钴蓝"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "visibleBounds": [
+        26,
+        22,
+        295,
+        284
+      ],
+      "visiblePixels": 25366,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "cce58df16467fa666ec585d79399a3577ca6c42b2367567211186a6545689dd2"
+    },
+    {
+      "stem": "manga_v2_violet_star_shards",
+      "name": "紫罗兰星屑旋涡",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "星屑",
+        "旋涡"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "visibleBounds": [
+        27,
+        14,
+        288,
+        296
+      ],
+      "visiblePixels": 34873,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "f7eeed1f9e511a4f64cf67bac3fe84de1bb3da3950d62e32ca70889650a39e85"
+    },
+    {
+      "stem": "manga_v2_teal_pulse_rings",
+      "name": "青绿双环脉冲",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "脉冲",
+        "光环"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "visibleBounds": [
+        21,
+        23,
+        305,
+        289
+      ],
+      "visiblePixels": 35237,
+      "trimmedBoundaryPixels": 1,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "93f9409e68d3fc9f7648d8127c9b93e1803fd5e4660a99b19cf265839a52cf48"
+    },
+    {
+      "stem": "manga_v2_magenta_afterimages",
+      "name": "洋红错位残影",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "残影",
+        "洋红"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "visibleBounds": [
+        23,
+        59,
+        296,
+        275
+      ],
+      "visiblePixels": 38703,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "ec6bab2638bb70e951bed01fec2f36396ce106cbad7525efc48f7fd7dc6fc3a8"
+    },
+    {
+      "stem": "manga_v2_amber_impact_cloud",
+      "name": "琥珀尘爆云团",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "尘爆",
+        "琥珀"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "visibleBounds": [
+        22,
+        31,
+        303,
+        295
+      ],
+      "visiblePixels": 49068,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "f147741846f828461457ba7fcbcd4c60157f9cd56455dfbb8b6c083c059898fb"
+    },
+    {
+      "stem": "manga_v2_cyan_wind_tunnel",
+      "name": "冰青风洞旋线",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "风洞",
+        "冰青"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "visibleBounds": [
+        23,
+        18,
+        295,
+        290
+      ],
+      "visiblePixels": 44458,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "d899d1da401194f8305bcabf19a9fb9832a3282cf2c956bf6be5615c584aa73e"
+    },
+    {
+      "stem": "manga_v2_pearl_fracture_fan",
+      "name": "珍珠碎光扇束",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "碎光",
+        "放射"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "visibleBounds": [
+        34,
+        30,
+        292,
+        284
+      ],
+      "visiblePixels": 36559,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "size": [
+        313,
+        313
+      ],
+      "sha256": "e15b9200ab6870c7b14eb1f2cf80161d883403830997eac4a490dc7e2a35cbac"
+    },
+    {
+      "stem": "manga_v2_lime_electric_zaps",
+      "name": "青柠电光折线",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "电光",
+        "折线"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "visibleBounds": [
+        14,
+        9,
+        296,
+        305
+      ],
+      "visiblePixels": 30296,
+      "trimmedBoundaryPixels": 7,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "0b01cd54184f5d1fba940d102c7ffaa655f92f23b21fdcdcb623b46283d55c18"
+    },
+    {
+      "stem": "manga_v2_violet_halftone_wave",
+      "name": "紫色半调浪花",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "半调",
+        "浪花"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "visibleBounds": [
+        24,
+        34,
+        288,
+        272
+      ],
+      "visiblePixels": 35315,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "e89d7f72a952abf6fe46bbefb92d9443c02a973be5337a4a259d5b7c79297be3"
+    },
+    {
+      "stem": "manga_v2_vermilion_slashes",
+      "name": "朱红斩击弧线",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "斩击",
+        "朱红"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "visibleBounds": [
+        31,
+        12,
+        288,
+        278
+      ],
+      "visiblePixels": 23596,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "ee6ebcef0f2a58e6c6ad87bcb8a5062001ab60bbd3b1c1ab9bddbd15bfcab616"
+    },
+    {
+      "stem": "manga_v2_gold_spark_curve",
+      "name": "金色火花轨迹",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "火花",
+        "轨迹"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "visibleBounds": [
+        18,
+        26,
+        304,
+        271
+      ],
+      "visiblePixels": 24986,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "e0d0c91f0a699586c5843e3a0c70750a58fc6020c51ae728a9ae57ed4132dde2"
+    },
+    {
+      "stem": "manga_v2_blue_coral_ink_burst",
+      "name": "蓝珊瑚水墨爆发",
+      "subcategory": "漫画动感",
+      "keywords": [
+        "漫画",
+        "水墨",
+        "爆发"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "visibleBounds": [
+        27,
+        18,
+        296,
+        287
+      ],
+      "visiblePixels": 31798,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "size": [
+        314,
+        314
+      ],
+      "sha256": "f2605d1e1a4a1b64c8386deffc34caddfcfe65552e1e97ea02f5f5fac44e9ced"
+    }
+  ]
+}

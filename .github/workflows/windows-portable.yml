@@ -5,11 +5,11 @@ on:
   push:
     branches: [main]
     paths:
-      - desktop/**
+      - apps/desktop/**
       - src/**
-      - web/app/**
-      - scripts/build/**
-      - scripts/verify/verify_portable_windows.*
+      - apps/editor/**
+      - tools/build/**
+      - tools/verify/verify_portable_windows.*
       - .github/workflows/windows-portable.yml
       - .gitattributes
 
@@ -32,7 +32,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: .artifacts/portable-ffmpeg
-          key: ffmpeg-win64-${{ runner.os }}-${{ hashFiles('desktop/ffmpeg-sources.json', 'scripts/build/build_ffmpeg_windows.sh', 'scripts/build/prepare_ffmpeg_sources.py') }}
+          key: ffmpeg-win64-${{ runner.os }}-${{ hashFiles('apps/desktop/ffmpeg-sources.json', 'tools/build/build_ffmpeg_windows.sh', 'tools/build/prepare_ffmpeg_sources.py') }}
       - name: Install cross compiler and build tools
         if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
         run: |
@@ -41,7 +41,7 @@ jobs:
           python3 -m pip install meson==1.10.0
       - name: Build exact upstream sources and retain corresponding source
         if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
-        run: bash scripts/build/build_ffmpeg_windows.sh
+        run: bash tools/build/build_ffmpeg_windows.sh
       - uses: actions/upload-artifact@v7
         with:
           name: ffmpeg-win64-build
@@ -67,8 +67,8 @@ jobs:
           node-version: '24.15.0'
           cache: npm
           cache-dependency-path: |
-            desktop/package-lock.json
-            web/app/package-lock.json
+            apps/desktop/package-lock.json
+            apps/editor/package-lock.json
       - uses: actions/download-artifact@v8
         with:
           name: ffmpeg-win64-build
@@ -84,9 +84,9 @@ jobs:
       - name: Prepare isolated frozen-backend environment
         run: |
           python -m venv .artifacts/venv-portable
-          .artifacts/venv-portable/Scripts/python.exe -m pip install --require-hashes --only-binary=:all: -r desktop/requirements-build.lock
+          .artifacts/venv-portable/Scripts/python.exe -m pip install --require-hashes --only-binary=:all: -r apps/desktop/requirements-build.lock
       - name: Build Web editor
-        working-directory: web/app
+        working-directory: apps/editor
         run: |
           npm ci
           npm run typecheck
@@ -94,7 +94,7 @@ jobs:
       - name: Freeze backend with bundled FFmpeg and product assets
         run: |
           $env:CUTVOKE_FFMPEG_DIR = (Resolve-Path .artifacts/portable-ffmpeg/bin).Path
-          .artifacts/venv-portable/Scripts/python.exe -m PyInstaller --noconfirm --distpath .artifacts/build/desktop-engine --workpath .artifacts/build/desktop-work desktop/engine.spec
+          .artifacts/venv-portable/Scripts/python.exe -m PyInstaller --noconfirm --distpath .artifacts/build/desktop-engine --workpath .artifacts/build/desktop-work apps/desktop/engine.spec
       - name: Prepare verified Electron and build portable folder
         run: |
           Push-Location desktop
@@ -103,14 +103,14 @@ jobs:
           npm run test:i18n
           npm run test:storage
           Pop-Location
-          ./scripts/build/prepare_desktop_tools.ps1 -Portable
+          ./tools/build/prepare_desktop_tools.ps1 -Portable
           Push-Location desktop
           npm run portable
           Pop-Location
       - name: Assemble portable ZIP, licenses and file hashes
-        run: .artifacts/venv-portable/Scripts/python.exe scripts/build/assemble_portable.py
+        run: .artifacts/venv-portable/Scripts/python.exe tools/build/assemble_portable.py
       - name: Extract shipped ZIP and test real packaged application
-        run: node scripts/verify/verify_portable_windows.cjs
+        run: node tools/verify/verify_portable_windows.cjs
       - name: Upload verified portable download
         uses: actions/upload-artifact@v7
         with:

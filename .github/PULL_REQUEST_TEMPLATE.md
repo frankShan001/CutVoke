@@ -21,7 +21,7 @@ result
 ## Checklist / 检查项
 
 - [ ] The change is limited to the problem described above.
-- [ ] Backend changes pass `python -m compileall -q src` and `python scripts/verify/check_layering.py`.
-- [ ] Frontend changes pass `npm run typecheck` and `npm run build` in `web/app`.
+- [ ] Backend changes pass `python -m compileall -q src` and `python tools/verify/check_layering.py`.
+- [ ] Frontend changes pass `npm run typecheck` and `npm run build` in `apps/editor`.
 - [ ] Rendering changes were checked with real media.
 - [ ] User-facing behavior is reflected in the documentation or command schema.

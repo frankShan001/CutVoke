@@ -6,15 +6,15 @@ if /i "%~1"=="--web" goto :web
 if /i "%~1"=="--mcp" goto :mcp
 if /i "%~1"=="--help" goto :help
 if not "%~1"=="" goto :help
-call scripts\dev\start-cutvoke-web.cmd --prepare
+call tools\dev\start-cutvoke-web.cmd --prepare
 if errorlevel 1 exit /b 1
-call scripts\dev\start-cutvoke-desktop.cmd
+call tools\dev\start-cutvoke-desktop.cmd
 exit /b %errorlevel%
 :web
-call scripts\dev\start-cutvoke-web.cmd
+call tools\dev\start-cutvoke-web.cmd
 exit /b %errorlevel%
 :mcp
-call scripts\dev\start-cutvoke-mcp.cmd
+call tools\dev\start-cutvoke-mcp.cmd
 exit /b %errorlevel%
 :help
  echo Usage: start-cutvoke.cmd [--web ^| --mcp ^| --help]

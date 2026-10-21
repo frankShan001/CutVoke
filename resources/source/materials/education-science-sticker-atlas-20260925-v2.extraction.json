@@ -1,0 +1,783 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "source": "education-science-sticker-atlas-20260925-v2.png",
+  "sourceSha256": "b28be7348dcc5c3a038bfc83380e64c7bfab9c2577b2ca0c5e736312b8355304",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4",
+  "extraction": "proportional cell crop, center square normalization, remove detached alpha islands below 32 pixels and small remote specks; keep only the connected primary artwork in single-object pencil, stationery and DNA cells; resize to 256px with 32px transparent padding",
+  "contactSheet": "education-science-sticker-contact-sheet-20260925-v2.png",
+  "items": [
+    {
+      "index": 1,
+      "stem": "learn_open_book",
+      "name": "打开的书",
+      "subcategory": "学习科普",
+      "keywords": [
+        "学习",
+        "阅读",
+        "知识"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "artBoundsInCell": [
+        37,
+        100,
+        297,
+        265
+      ],
+      "normalizationCrop": [
+        21,
+        22,
+        313,
+        314
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        46,
+        101,
+        274,
+        245
+      ],
+      "visiblePixels": 25826,
+      "removedIsolatedPixels": 20,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "d44b1bbc32db069a0c64984d224d677a4c48f7f7a8d1c653235a0f2125eeeccc"
+    },
+    {
+      "index": 2,
+      "stem": "learn_book_stack",
+      "name": "书本叠放",
+      "subcategory": "学习科普",
+      "keywords": [
+        "学习",
+        "书籍",
+        "阅读"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "artBoundsInCell": [
+        48,
+        82,
+        281,
+        276
+      ],
+      "normalizationCrop": [
+        348,
+        49,
+        609,
+        310
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        46,
+        64,
+        275,
+        255
+      ],
+      "visiblePixels": 35315,
+      "removedIsolatedPixels": 12,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "70192721dbfbe67ccb13fcfdd70f6b0dab126be211ddc9e47bb48448c62575eb"
+    },
+    {
+      "index": 3,
+      "stem": "learn_stationery_cup",
+      "name": "文具笔筒",
+      "subcategory": "学习科普",
+      "keywords": [
+        "学习",
+        "文具",
+        "笔筒"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "artBoundsInCell": [
+        66,
+        43,
+        261,
+        293
+      ],
+      "normalizationCrop": [
+        650,
+        28,
+        930,
+        308
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        71,
+        46,
+        250,
+        274
+      ],
+      "visiblePixels": 23900,
+      "removedIsolatedPixels": 48,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "5cecc39a3fbcb5ce9ff53b2ecd0b46bbf7240ee9fadc30346cb0fa4457e71025"
+    },
+    {
+      "index": 4,
+      "stem": "learn_pencil",
+      "name": "木质铅笔",
+      "subcategory": "学习科普",
+      "keywords": [
+        "学习",
+        "铅笔",
+        "书写"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "artBoundsInCell": [
+        73,
+        61,
+        238,
+        277
+      ],
+      "normalizationCrop": [
+        974,
+        48,
+        1216,
+        290
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        73,
+        45,
+        248,
+        274
+      ],
+      "visiblePixels": 10440,
+      "removedIsolatedPixels": 1,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "c903282d9e431d0a8cec4b2bb479f36ca8010d96e779338cc267757b5462e25d"
+    },
+    {
+      "index": 5,
+      "stem": "learn_globe",
+      "name": "地球仪",
+      "subcategory": "学习科普",
+      "keywords": [
+        "科普",
+        "地理",
+        "地球"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "artBoundsInCell": [
+        61,
+        31,
+        253,
+        293
+      ],
+      "normalizationCrop": [
+        10,
+        329,
+        304,
+        623
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        76,
+        46,
+        244,
+        275
+      ],
+      "visiblePixels": 25333,
+      "removedIsolatedPixels": 19,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "aafff573b5db46258417cb2112637c149c1c8a047090eb47198ae716be3b7ee7"
+    },
+    {
+      "index": 6,
+      "stem": "learn_microscope",
+      "name": "显微镜",
+      "subcategory": "学习科普",
+      "keywords": [
+        "科普",
+        "实验",
+        "观察"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "artBoundsInCell": [
+        85,
+        19,
+        252,
+        299
+      ],
+      "normalizationCrop": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        101,
+        48,
+        238,
+        276
+      ],
+      "visiblePixels": 17776,
+      "removedIsolatedPixels": 27,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "41c8481156972827c1c4f01893215a3717950e55020dd45a5200c3f09d546ac0"
+    },
+    {
+      "index": 7,
+      "stem": "learn_flask",
+      "name": "蓝色实验烧瓶",
+      "subcategory": "学习科普",
+      "keywords": [
+        "科普",
+        "化学",
+        "实验"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "artBoundsInCell": [
+        73,
+        55,
+        239,
+        287
+      ],
+      "normalizationCrop": [
+        653,
+        355,
+        913,
+        615
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        78,
+        46,
+        241,
+        274
+      ],
+      "visiblePixels": 23136,
+      "removedIsolatedPixels": 10,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "707480d0c27b7ffc707de238200dcde02b667356f9fa0d6bbceb1cdfbeb5a61c"
+    },
+    {
+      "index": 8,
+      "stem": "learn_telescope",
+      "name": "天文望远镜",
+      "subcategory": "学习科普",
+      "keywords": [
+        "科普",
+        "天文",
+        "观测"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "artBoundsInCell": [
+        42,
+        28,
+        263,
+        290
+      ],
+      "normalizationCrop": [
+        945,
+        326,
+        1239,
+        620
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        64,
+        46,
+        257,
+        274
+      ],
+      "visiblePixels": 15698,
+      "removedIsolatedPixels": 11,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "fc13d642085a7d718c6e34205736a9211c15533136c832c8636001527fc88642"
+    },
+    {
+      "index": 9,
+      "stem": "learn_dna",
+      "name": "DNA 双螺旋",
+      "subcategory": "学习科普",
+      "keywords": [
+        "科普",
+        "生物",
+        "基因"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "artBoundsInCell": [
+        92,
+        23,
+        228,
+        278
+      ],
+      "normalizationCrop": [
+        18,
+        635,
+        303,
+        920
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        98,
+        45,
+        221,
+        274
+      ],
+      "visiblePixels": 15671,
+      "removedIsolatedPixels": 37,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "4dd41b9cc66d2c895a93773e8c242f7b18b2f90d266b5918a03bbdf2753b7ecc"
+    },
+    {
+      "index": 10,
+      "stem": "learn_atom",
+      "name": "原子模型",
+      "subcategory": "学习科普",
+      "keywords": [
+        "科普",
+        "物理",
+        "原子"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "artBoundsInCell": [
+        63,
+        41,
+        281,
+        271
+      ],
+      "normalizationCrop": [
+        357,
+        654,
+        615,
+        912
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        52,
+        46,
+        268,
+        274
+      ],
+      "visiblePixels": 16913,
+      "removedIsolatedPixels": 70,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "e86ac331288cd8a08e150a40278164eaddb030a4d98b072b50a5d330acf7eef8"
+    },
+    {
+      "index": 11,
+      "stem": "learn_brain",
+      "name": "脑部模型",
+      "subcategory": "学习科普",
+      "keywords": [
+        "科普",
+        "大脑",
+        "神经"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "artBoundsInCell": [
+        48,
+        57,
+        276,
+        258
+      ],
+      "normalizationCrop": [
+        661,
+        656,
+        917,
+        912
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        46,
+        60,
+        274,
+        261
+      ],
+      "visiblePixels": 30976,
+      "removedIsolatedPixels": 8,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "05c25780d17077424ef4caf63f47719cfb81f104cf41a4b35aa1d35c7412f168"
+    },
+    {
+      "index": 12,
+      "stem": "learn_calculator",
+      "name": "计算器",
+      "subcategory": "学习科普",
+      "keywords": [
+        "学习",
+        "数学",
+        "计算"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "artBoundsInCell": [
+        65,
+        37,
+        255,
+        273
+      ],
+      "normalizationCrop": [
+        968,
+        650,
+        1232,
+        914
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        68,
+        45,
+        252,
+        274
+      ],
+      "visiblePixels": 37838,
+      "removedIsolatedPixels": 25,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "d3593610bb108795a0bc9e3b3e9b6ad8681727154ff71c4c3632568415188a26"
+    },
+    {
+      "index": 13,
+      "stem": "learn_geometry_set",
+      "name": "圆规与直尺",
+      "subcategory": "学习科普",
+      "keywords": [
+        "学习",
+        "几何",
+        "绘图"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "artBoundsInCell": [
+        53,
+        7,
+        282,
+        253
+      ],
+      "normalizationCrop": [
+        29,
+        940,
+        305,
+        1216
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        54,
+        38,
+        266,
+        266
+      ],
+      "visiblePixels": 16673,
+      "removedIsolatedPixels": 13,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "77f5407ea363ae464a748b76dc273d0e5ae98ecf0f0d364c41be95601c90d4fd"
+    },
+    {
+      "index": 14,
+      "stem": "learn_graduation_cap",
+      "name": "学士帽",
+      "subcategory": "学习科普",
+      "keywords": [
+        "学习",
+        "毕业",
+        "教育"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "artBoundsInCell": [
+        27,
+        50,
+        306,
+        228
+      ],
+      "normalizationCrop": [
+        314,
+        940,
+        627,
+        1253
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        54,
+        73,
+        282,
+        219
+      ],
+      "visiblePixels": 20588,
+      "removedIsolatedPixels": 25,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "18e842fe7be136f8328f45f6636f5f52ad80cf05baed967d3d249634eb74f07d"
+    },
+    {
+      "index": 15,
+      "stem": "learn_idea_bulb",
+      "name": "发光灯泡",
+      "subcategory": "学习科普",
+      "keywords": [
+        "学习",
+        "灵感",
+        "点子"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "artBoundsInCell": [
+        88,
+        17,
+        237,
+        255
+      ],
+      "normalizationCrop": [
+        656,
+        943,
+        922,
+        1209
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        89,
+        46,
+        232,
+        275
+      ],
+      "visiblePixels": 21746,
+      "removedIsolatedPixels": 3,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "765e42a451c8fd34a756fd4cd23210bd6b3613d6975a8002023f904b723b5cc6"
+    },
+    {
+      "index": 16,
+      "stem": "learn_robot",
+      "name": "阅读机器人",
+      "subcategory": "学习科普",
+      "keywords": [
+        "科普",
+        "机器人",
+        "阅读"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "artBoundsInCell": [
+        74,
+        12,
+        255,
+        260
+      ],
+      "normalizationCrop": [
+        965,
+        940,
+        1243,
+        1218
+      ],
+      "size": [
+        320,
+        320
+      ],
+      "alphaBounds": [
+        77,
+        43,
+        244,
+        272
+      ],
+      "visiblePixels": 26954,
+      "removedIsolatedPixels": 14,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "d43d14d1fa9f497a784c129dae8d131e98f030c4b3477916d224863079ffeccc"
+    }
+  ]
+}

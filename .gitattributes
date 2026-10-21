@@ -1,14 +1,19 @@
 # These are exact upstream notice bytes with pinned SHA256 provenance.
 # Windows checkouts must not convert their line endings.
-desktop/licenses/* -text
+apps/desktop/licenses/* -text
 # Generated brand checksums include these exact UTF-8/LF bytes on every platform.
-docs/assets/brand/*.json text eol=lf
-docs/assets/readme/banner.svg text eol=lf
+resources/source/brand/*.json text eol=lf
+docs/images/readme/banner.svg text eol=lf
+# Relocated historical provenance remains byte-identical on Windows and Linux.
+resources/source/materials/*.json -text whitespace=cr-at-eol
+docs/history/reviews/**/*.json -text whitespace=cr-at-eol
+docs/images/readme/*.json -text whitespace=cr-at-eol
+docs/development/asset-relocations.json text eol=lf
 # Approved resource hashes cover the original bytes, including CRLF sidecars.
 # Preserve those bytes on every OS; never rewrite an approval to hide a mismatch.
 src/cutvoke/assets/**/*.json -text
-src/cutvoke/core/builtin_presets.json -text
-src/cutvoke/core/builtin_stickers.json -text
+src/cutvoke/catalogs/builtin_presets.json -text
+src/cutvoke/catalogs/builtin_stickers.json -text
 src/cutvoke/assets/fonts/OFL-*.txt -text -whitespace
 
 # Versioned showcase packages and finished videos are deliberate project assets.

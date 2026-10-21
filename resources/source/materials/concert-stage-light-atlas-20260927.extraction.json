@@ -1,0 +1,700 @@
+{
+  "schemaVersion": 1,
+  "generator": "OpenAI ImageGen",
+  "source": "docs/assets/concert-stage-light-atlas-20260927.png",
+  "sourceSha256": "1524cf92579a123dbcb881c3bdeeb96cd1b58f7f99681baf9dea32402a4e5f64",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4 equal square cells",
+  "subcategory": "舞台灯光",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "extraction": "proportional cell crop, alpha below 8 cleared, 2px cell edge cleared, centered on transparent 512px PNG with 14px padding",
+  "contactSheets": [
+    "docs/assets/concert-stage-light-atlas-20260927-contact-dark.png",
+    "docs/assets/concert-stage-light-atlas-20260927-contact-light.png"
+  ],
+  "contactSheetSha256": {
+    "concert-stage-light-atlas-20260927-contact-dark.png": "81e1523c076cf37cbc17d099231cf9c8a1906c23b2b730187c60d2ab87928a7d",
+    "concert-stage-light-atlas-20260927-contact-light.png": "8792ef1c6b2991ff3c92b7910e10659e6ec97ef84b49935192b52bca99b60276"
+  },
+  "items": [
+    {
+      "index": 1,
+      "stem": "stage_light_laser_fan_cyan",
+      "name": "青紫激光扇",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "激光",
+        "青色",
+        "紫色"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "normalizationCrop": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 54807,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        113,
+        130,
+        411,
+        402
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "5be68efe9ac61efca85d421dbfa216bc42f259e82f9743d0ad601c55c6b89b2e"
+    },
+    {
+      "index": 2,
+      "stem": "stage_light_spotlight_pair_amber",
+      "name": "琥珀双聚光灯",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "聚光灯",
+        "琥珀色"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "normalizationCrop": [
+        314,
+        0,
+        627,
+        313
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 55637,
+      "removedDetachedRemnantPixels": 3352,
+      "alphaBounds": [
+        149,
+        132,
+        410,
+        402
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "de1727185cf9fc896cc01074e00e9fbe34b05ecd0ce5e80e4ff5af27076ebd74"
+    },
+    {
+      "index": 3,
+      "stem": "stage_light_moving_head_magenta",
+      "name": "洋红环形摇头灯",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "摇头灯",
+        "洋红"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "normalizationCrop": [
+        627,
+        0,
+        940,
+        313
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 48302,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        118,
+        134,
+        410,
+        393
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "262cf35f6aaf2d20a318e7b499e8565e1f0b8d0ae8208a5f1756b364908a008d"
+    },
+    {
+      "index": 4,
+      "stem": "stage_light_beam_columns_blue",
+      "name": "蓝色体积光柱",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "光柱",
+        "蓝色"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "normalizationCrop": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 61123,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        101,
+        131,
+        391,
+        401
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "bda7394df599e6a2cdc5b28c44fabd5f8f89be6749e27d2262cc0098ddcea8e7"
+    },
+    {
+      "index": 5,
+      "stem": "stage_light_prism_flare_rainbow",
+      "name": "彩虹棱镜光晕",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "棱镜",
+        "彩虹",
+        "镜头光效"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "normalizationCrop": [
+        0,
+        314,
+        313,
+        627
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 57684,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        113,
+        116,
+        410,
+        397
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "64ce0770ab7742e071df4ae9a02a17f5d7a7f9179337f38ae766ec51d3729bf2"
+    },
+    {
+      "index": 6,
+      "stem": "stage_light_crossing_lasers",
+      "name": "青粉交叉激光",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "激光",
+        "交叉光束"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "normalizationCrop": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 50045,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        116,
+        118,
+        404,
+        395
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "a9e328ad507b5f3ef361afbc3964615c16f6079fffe24cdc339b3decfa47edf4"
+    },
+    {
+      "index": 7,
+      "stem": "stage_light_anamorphic_flare_pearl",
+      "name": "珍珠白变形宽银幕光",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "宽银幕光",
+        "珍珠白"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "normalizationCrop": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 39594,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        101,
+        143,
+        410,
+        377
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "f2cd348c94f1872d144532c562d3b9fd2b0f6bd0bffa1312afbc050f6a7358f6"
+    },
+    {
+      "index": 8,
+      "stem": "stage_light_starburst_ultraviolet",
+      "name": "紫外星芒光束",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "星芒",
+        "紫色"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "normalizationCrop": [
+        940,
+        314,
+        1253,
+        627
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 59054,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        101,
+        124,
+        393,
+        393
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "0d0fe2f3809fff158e3d511f036fd6613072e96cf728e4d2e93ae7e2ccb53422"
+    },
+    {
+      "index": 9,
+      "stem": "stage_light_haze_ribbons_amber_rose",
+      "name": "琥珀玫瑰雾光丝带",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "雾光",
+        "暖色"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "normalizationCrop": [
+        0,
+        627,
+        313,
+        940
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 62153,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        118,
+        115,
+        403,
+        410
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "d7f322661e4ee2d6f8d117a9d42fb59e429984662d404f4cd7081e3a0388ef58"
+    },
+    {
+      "index": 10,
+      "stem": "stage_light_tunnel_cyan",
+      "name": "青色光环隧道",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "光环",
+        "青色"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "normalizationCrop": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 60093,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        121,
+        116,
+        405,
+        410
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "33bd82c56d6fd0413a12d5889984058444005dc35a78989b8d189f6068623023"
+    },
+    {
+      "index": 11,
+      "stem": "stage_light_disco_facets_emerald_violet",
+      "name": "翡翠紫色镜面光斑",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "镜面反射",
+        "翡翠色"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "normalizationCrop": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 63799,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        114,
+        123,
+        401,
+        410
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "6b88e5ffd3475925d288e43b6c3bb1c9596cd0999aadbddb4d62a4f2a42913da"
+    },
+    {
+      "index": 12,
+      "stem": "stage_light_sweep_beams_red_blue",
+      "name": "红蓝横扫光束",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "横扫",
+        "红色",
+        "蓝色"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "normalizationCrop": [
+        940,
+        627,
+        1253,
+        940
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 62707,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        106,
+        124,
+        404,
+        373
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "4030792374561228c3b34f76f529ccaa1c92be4233d51569abad4a05e8a6d1e5"
+    },
+    {
+      "index": 13,
+      "stem": "stage_light_spotlight_bloom_gold",
+      "name": "金色聚光灯晕",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "聚光灯",
+        "金色"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "normalizationCrop": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 49236,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        146,
+        101,
+        407,
+        395
+      ],
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "aa600002d7d2e79dd3b7b037b4d4d7f302c4d661316f26b274dd268cceb4c213"
+    },
+    {
+      "index": 14,
+      "stem": "stage_light_curtain_magenta_cyan",
+      "name": "洋红青色叠层光幕",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "光幕",
+        "洋红",
+        "青色"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "normalizationCrop": [
+        314,
+        940,
+        627,
+        1253
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 73813,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        114,
+        101,
+        407,
+        388
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "73f5b689b0fab449eb0bb58f55710134e569a5a91dd4d556d335cc71c00f8162"
+    },
+    {
+      "index": 15,
+      "stem": "stage_light_beam_spotlight_coolwhite",
+      "name": "冷白舞台追光",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "追光",
+        "冷白"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "normalizationCrop": [
+        627,
+        940,
+        940,
+        1253
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 58186,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        136,
+        101,
+        410,
+        402
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "c7f09da143f25c8fb7b2c0a62eb5eb83114723d7b92ad80f0af4f3bbe67c13e6"
+    },
+    {
+      "index": 16,
+      "stem": "stage_light_prism_beam_fan",
+      "name": "彩色棱镜扇形光束",
+      "subcategory": "舞台灯光",
+      "keywords": [
+        "舞台灯光",
+        "棱镜",
+        "彩色光束"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "normalizationCrop": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 54229,
+      "removedDetachedRemnantPixels": 0,
+      "alphaBounds": [
+        101,
+        111,
+        380,
+        379
+      ],
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "2c56325c5aec8b6fc649e6d65f17a82afeb60b30b8e04176f4a186b3cdd75b93"
+    }
+  ]
+}

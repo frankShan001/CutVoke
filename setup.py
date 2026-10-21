@@ -28,7 +28,7 @@ class BuildWithEditor(build_py):
         if not (source / "index.html").is_file():
             raise RuntimeError(
                 "Web editor is missing: run `npm ci` and `npm run build` "
-                "in web/app before building a CutVoke wheel"
+                "in apps/editor before building a CutVoke wheel"
             )
         target = Path(self.build_lib) / "cutvoke" / "web"
         if target.exists():

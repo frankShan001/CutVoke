@@ -1,0 +1,592 @@
+{
+  "generator": "OpenAI ImageGen",
+  "source": "natural-light-shadow-overlay-atlas-20260927.png",
+  "sourceSha256": "e1395dd3c0824fcff72d15618baf3aed43dfe0e874de8093ffe5e1451aec43de",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "layout": "4x4 equal square cells",
+  "subcategory": "自然光影",
+  "license": "Project-internal original (AI-generated); not separately licensed for redistribution",
+  "alphaThreshold": 8,
+  "safetyGutterPixels": 8,
+  "items": [
+    {
+      "stem": "natural_light_window_beams",
+      "name": "金色窗光光束",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "窗光",
+        "光束",
+        "实拍"
+      ],
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        314,
+        314
+      ],
+      "visibleBounds": [
+        24,
+        26,
+        494,
+        498
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 153107,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "674351e800acffada34e667c5c7bb98c60064b20a38d33fd4f02662aba5e1dc7"
+    },
+    {
+      "stem": "natural_light_foliage_dapple",
+      "name": "树叶斑驳光影",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "树影",
+        "斑驳",
+        "实拍"
+      ],
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        314,
+        0,
+        627,
+        314
+      ],
+      "visibleBounds": [
+        23,
+        29,
+        497,
+        498
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 154621,
+      "trimmedBoundaryPixels": 18,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "090eb84c4a02fdc65bd660f91f90a2f568b2e03d11a0293285faa6c91900d346"
+    },
+    {
+      "stem": "natural_light_pool_caustics",
+      "name": "泳池水纹焦散",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "水纹",
+        "焦散",
+        "实拍"
+      ],
+      "row": 0,
+      "column": 2,
+      "sourceCell": [
+        627,
+        0,
+        940,
+        314
+      ],
+      "visibleBounds": [
+        16,
+        49,
+        497,
+        499
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 189819,
+      "trimmedBoundaryPixels": 12,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "c9bb039256f811af2f5618e04e604e7867ac77fc2fdc163fae4c7ddc5d8cc079"
+    },
+    {
+      "stem": "natural_light_candle_bloom",
+      "name": "暖烛柔光",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "暖光",
+        "烛光",
+        "实拍"
+      ],
+      "row": 0,
+      "column": 3,
+      "sourceCell": [
+        940,
+        0,
+        1254,
+        314
+      ],
+      "visibleBounds": [
+        18,
+        54,
+        491,
+        498
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 154155,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "ff910b8d59af08c45414ce66cefbe8ed74f33285dc762082521a893d28082101"
+    },
+    {
+      "stem": "natural_light_sunrise_cloud_glow",
+      "name": "日出云隙辉光",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "日出",
+        "云隙光",
+        "实拍"
+      ],
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        314,
+        314,
+        627
+      ],
+      "visibleBounds": [
+        13,
+        38,
+        499,
+        497
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 167263,
+      "trimmedBoundaryPixels": 186,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "10307478bb6c9af6cf2199ae1a1f816488328026bba00bc591a1903b8af9a08e"
+    },
+    {
+      "stem": "natural_light_window_blind_bands",
+      "name": "百叶窗光带",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "窗光",
+        "条纹",
+        "实拍"
+      ],
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        314,
+        314,
+        627,
+        627
+      ],
+      "visibleBounds": [
+        58,
+        26,
+        485,
+        499
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 102938,
+      "trimmedBoundaryPixels": 149,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "837c87f5837ad932598b7f9e8ab8d43585c6aa8850b11a042375003773767004"
+    },
+    {
+      "stem": "natural_light_moonlit_water",
+      "name": "月光水面微闪",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "月光",
+        "水面",
+        "实拍"
+      ],
+      "row": 1,
+      "column": 2,
+      "sourceCell": [
+        627,
+        314,
+        940,
+        627
+      ],
+      "visibleBounds": [
+        14,
+        37,
+        499,
+        499
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 203280,
+      "trimmedBoundaryPixels": 542,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "5c82ca2e388f0e2ba9ea647f1e1c93fd6720262edd7575e04dbd801fbb309da6"
+    },
+    {
+      "stem": "natural_light_peach_haze",
+      "name": "桃色柔雾",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "柔雾",
+        "桃色",
+        "实拍"
+      ],
+      "row": 1,
+      "column": 3,
+      "sourceCell": [
+        940,
+        314,
+        1254,
+        627
+      ],
+      "visibleBounds": [
+        13,
+        28,
+        499,
+        498
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 184413,
+      "trimmedBoundaryPixels": 1130,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "0b35ccfdb31e97994e32691733084846589615611c53dbda627aba628987972e"
+    },
+    {
+      "stem": "natural_light_forest_rays",
+      "name": "青绿森林体积光",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "森林",
+        "体积光",
+        "实拍"
+      ],
+      "row": 2,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        314,
+        940
+      ],
+      "visibleBounds": [
+        24,
+        13,
+        499,
+        498
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 207823,
+      "trimmedBoundaryPixels": 1293,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "08b41c4a190ce25a8e478e696531150a47d4373b7a21faa9e89b556b18be3dce"
+    },
+    {
+      "stem": "natural_light_snow_glints",
+      "name": "雪面反光星点",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "雪景",
+        "反光",
+        "实拍"
+      ],
+      "row": 2,
+      "column": 1,
+      "sourceCell": [
+        314,
+        627,
+        627,
+        940
+      ],
+      "visibleBounds": [
+        14,
+        44,
+        499,
+        499
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 194983,
+      "trimmedBoundaryPixels": 429,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "b9096a403635ed372e6af53e7c6fe1e1614fbabd58950141b7730a93efa9721d"
+    },
+    {
+      "stem": "natural_light_prism_arc",
+      "name": "柔彩棱镜折射弧",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "棱镜",
+        "折射",
+        "实拍"
+      ],
+      "row": 2,
+      "column": 2,
+      "sourceCell": [
+        627,
+        627,
+        940,
+        940
+      ],
+      "visibleBounds": [
+        26,
+        18,
+        499,
+        499
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 139998,
+      "trimmedBoundaryPixels": 304,
+      "alphaExtrema": [
+        0,
+        251
+      ],
+      "sha256": "904292eb3a1c7f5b69b3931e15b7f306d2a8a8262c8bf9e5a73bb39a7a08eb87"
+    },
+    {
+      "stem": "natural_light_storm_flash",
+      "name": "冷蓝风暴闪光",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "风暴",
+        "冷蓝",
+        "实拍"
+      ],
+      "row": 2,
+      "column": 3,
+      "sourceCell": [
+        940,
+        627,
+        1254,
+        940
+      ],
+      "visibleBounds": [
+        13,
+        17,
+        499,
+        498
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 203056,
+      "trimmedBoundaryPixels": 705,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "22e45ca14d1ff6d248b18658dda9672fb1b5869d8ac7c68df5af98370b48f992"
+    },
+    {
+      "stem": "natural_light_golden_dust_beam",
+      "name": "黄金时刻尘光",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "金色时刻",
+        "尘光",
+        "实拍"
+      ],
+      "row": 3,
+      "column": 0,
+      "sourceCell": [
+        0,
+        940,
+        314,
+        1254
+      ],
+      "visibleBounds": [
+        42,
+        12,
+        499,
+        493
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 171445,
+      "trimmedBoundaryPixels": 614,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "b74ccabcea5219d753d1dc69ae4b8be6762752f8de972df9b8cea56403ab18f5"
+    },
+    {
+      "stem": "natural_light_cloud_shadow_wisps",
+      "name": "流云阴影薄雾",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "流云",
+        "薄雾",
+        "实拍"
+      ],
+      "row": 3,
+      "column": 1,
+      "sourceCell": [
+        314,
+        940,
+        627,
+        1254
+      ],
+      "visibleBounds": [
+        16,
+        18,
+        497,
+        492
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 195953,
+      "trimmedBoundaryPixels": 178,
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "sha256": "00b63e9e418545b95941f368641e0d6f20f0585aae47843f5536cc43f143b460"
+    },
+    {
+      "stem": "natural_light_aurora_ribbons",
+      "name": "极光柔带",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "极光",
+        "柔光",
+        "实拍"
+      ],
+      "row": 3,
+      "column": 2,
+      "sourceCell": [
+        627,
+        940,
+        940,
+        1254
+      ],
+      "visibleBounds": [
+        54,
+        13,
+        497,
+        489
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 152215,
+      "trimmedBoundaryPixels": 371,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "95abe4b0ff1841efbb711710475c20f56a9c6bee43bedf3091a0dd6f3f92d330"
+    },
+    {
+      "stem": "natural_light_firelight_reflection",
+      "name": "暖橙反射火光",
+      "subcategory": "自然光影",
+      "keywords": [
+        "自然光影",
+        "火光",
+        "暖橙",
+        "实拍"
+      ],
+      "row": 3,
+      "column": 3,
+      "sourceCell": [
+        940,
+        940,
+        1254,
+        1254
+      ],
+      "visibleBounds": [
+        26,
+        34,
+        484,
+        485
+      ],
+      "size": [
+        512,
+        512
+      ],
+      "visiblePixels": 172836,
+      "trimmedBoundaryPixels": 0,
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "sha256": "0b8ad5fa52df3d5c1dfda2936906418fd89a176737de2689ba26e2048cf087be"
+    }
+  ]
+}

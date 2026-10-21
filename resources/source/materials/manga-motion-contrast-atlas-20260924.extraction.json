@@ -1,0 +1,130 @@
+{
+  "source": "manga-motion-contrast-atlas-20260924.png",
+  "sourceSha256": "6a99149af1494ffb9bb854ae0db43a029e47fe4c767377e3742a8215b39a8d14",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "normalizationCrop": [
+    0,
+    0,
+    627,
+    627
+  ],
+  "layout": "2x2",
+  "extraction": "proportional cell crops, centered square padding, alpha preserved",
+  "items": [
+    {
+      "stem": "manga_ink_splatter_v2",
+      "row": 0,
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        627,
+        627
+      ],
+      "visibleBounds": [
+        64,
+        39,
+        596,
+        578
+      ],
+      "size": [
+        627,
+        627
+      ],
+      "visiblePixels": 134020,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "8f4709a81fc54067afbcf85ef5719d8de9d325bdfc63e76278331758823fc1f3"
+    },
+    {
+      "stem": "manga_motion_arc_v2",
+      "row": 0,
+      "column": 1,
+      "sourceCell": [
+        627,
+        0,
+        1254,
+        627
+      ],
+      "visibleBounds": [
+        52,
+        79,
+        584,
+        551
+      ],
+      "size": [
+        627,
+        627
+      ],
+      "visiblePixels": 91267,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "e4da0169c4add10c6cd90a690a9bb59c4affa269c52780d40974ba5f2460a59a"
+    },
+    {
+      "stem": "manga_crosshatch_burst_v2",
+      "row": 1,
+      "column": 0,
+      "sourceCell": [
+        0,
+        627,
+        627,
+        1254
+      ],
+      "visibleBounds": [
+        54,
+        29,
+        597,
+        567
+      ],
+      "size": [
+        627,
+        627
+      ],
+      "visiblePixels": 119940,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "93770b9bc3738cec9c2cc1578c55090c73aa80c840ad055c130c075d8a6f711d"
+    },
+    {
+      "stem": "manga_speed_impact",
+      "row": 1,
+      "column": 1,
+      "sourceCell": [
+        627,
+        627,
+        1254,
+        1254
+      ],
+      "visibleBounds": [
+        50,
+        26,
+        578,
+        561
+      ],
+      "size": [
+        627,
+        627
+      ],
+      "visiblePixels": 75614,
+      "visiblePixelsWithin12pxBoundary": 0,
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "sha256": "33bf5a23d866da7c65bd9b3307ead20e11f4546db7f60aafd84e1d1ee7a1b822"
+    }
+  ]
+}

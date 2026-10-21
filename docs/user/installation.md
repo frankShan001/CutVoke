@@ -10,7 +10,7 @@
 
 Current builds use the approved blue, cyan and orange CV film-ribbon icon for the
 desktop application, Windows installer, shortcuts, startup screen and Web editor.
-The [brand assets](../assets/brand/README.md) include the original artwork,
+The [brand assets](../../resources/source/brand/README.md) include the original artwork,
 platform formats and regeneration command. Published release archives listed
 above retain the icons and contents of their original build.
 
@@ -158,7 +158,7 @@ Activate with `source .venv/bin/activate` on Linux/macOS, or `.\.venv\Scripts\Ac
 
 ```bash
 python -m pip install -e .
-cd web/app
+cd apps/editor
 npm ci
 npm run build
 cd ../..
@@ -195,9 +195,9 @@ The editor opens after the current composed frame is ready and prepares continuo
 | Agent-imported media missing in Web | Update the code and restart the Web service on the same database. The current standard MCP launcher activates healthy engine updates automatically; an older launcher needs one initial reconnect. New imports use `media/<assetId>.<ext>`; exact legacy `media/imports/<sha256>.<ext>` entries remain accessible without moving files. Truly missing media still needs relinking to the intended source. |
 | `xfade` says `1/0` is invalid | Restart the updated service, then reproduce with the same project and identify the FFmpeg build. The known `setpts`/CFR issue is fixed in the renderer. Report a small reproducer if the updated graph still fails; do not swap binaries without recording that difference. |
 | `npm ci` downloads fail | The lockfiles use npm's official registry and preserve package integrity hashes. Check the failing URL, proxy and network access; do not disable TLS or discard the lockfile to obtain a different dependency graph. |
-| Blank editor or doctor reports missing Web assets | Run `npm ci && npm run build` inside `web/app`, then restart the service. Wheels include the built editor; Node is needed to build from source, not to run the installed wheel. |
+| Blank editor or doctor reports missing Web assets | Run `npm ci && npm run build` inside `apps/editor`, then restart the service. Wheels include the built editor; Node is needed to build from source, not to run the installed wheel. |
 | Port occupied or an old build still responds | Use `cutvoke doctor --json` and `/api/v1/runtime`; stop only the service launched for that workspace, or select another `serve --port`. Rebuild/restart after code changes. |
-| Browser-test download blocked | With a trusted installed browser, set `CUTVOKE_E2E_BROWSER=/usr/bin/chromium` and keep the Python environment on PATH. Otherwise install Chromium with Playwright in `web/app`. |
+| Browser-test download blocked | With a trusted installed browser, set `CUTVOKE_E2E_BROWSER=/usr/bin/chromium` and keep the Python environment on PATH. Otherwise install Chromium with Playwright in `apps/editor`. |
 | Optional speech/person processing unavailable | Follow [ASR setup](LOCAL_ASR.md) or [local setup](LOCAL_DELIVERY_MCP.md); model downloads and their licenses are separate from the basic install. |
 
 ## 简体中文
