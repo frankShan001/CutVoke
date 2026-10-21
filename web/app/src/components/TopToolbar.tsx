@@ -58,7 +58,7 @@ export function TopToolbar({
 
   return (
     <header className="topbar">
-      <h1 className="topbar__title">{tr("CutVoke 编辑器")}</h1>
+      <h1 className="topbar__title"><img src="/brand/icon-64.png" width="24" height="24" alt="" aria-hidden="true" draggable={false} />{tr("CutVoke 编辑器")}</h1>
       <span className="topbar__tag">{tr("本地 · 人工与 Agent 共用")}</span>
       <ToolbarTools />
       <Button

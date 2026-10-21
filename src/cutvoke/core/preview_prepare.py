@@ -237,9 +237,9 @@ class PreviewPreparation:
         job = self.get(job_id)
         duration, total = job["duration"], job["totalWindows"]
         seq = project.sequence
-        scale = min(1.0, 960 / max(seq.width, seq.height))
-        width = max(2, int(seq.width * scale) // 2 * 2)
-        height = max(2, int(seq.height * scale) // 2 * 2)
+        from .preview_quality import snapshot as preview_snapshot
+        preview_seq=preview_snapshot(project)[0].sequence
+        width,height=preview_seq.width,preview_seq.height
         self._update(job_id, state="running", phase="checking")
         metadata = {"width": width, "height": height, "duration": duration}
         if output.is_file():
@@ -302,7 +302,7 @@ class PreviewPreparation:
             result = work / "complete.mp4"
             # The editor normally displays a smaller canvas. Bound decode cost too;
             # export retains the original resolution and rendering graph.
-            video_options = ["-c:v", "copy"] if (width, height) == (seq.width, seq.height) else [
+            video_options = ["-c:v", "copy"] if (width, height) == (info.get('width'), info.get('height')) else [
                 "-vf", f"scale={width}:{height}", "-c:v", "libx264",
                 "-preset", "veryfast", "-crf", "25", "-pix_fmt", "yuv420p"]
             self._command([

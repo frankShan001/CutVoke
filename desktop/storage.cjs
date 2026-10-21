@@ -10,7 +10,8 @@ function storagePlan({ packaged, executable, appData, home, env = process.env, p
     : platform === "win32" ? null : path.resolve(env.CUTVOKE_HOME || personal);
   const profile = env.CUTVOKE_DESKTOP_QA === "1" && env.CUTVOKE_DESKTOP_QA_HOME
     ? path.resolve(env.CUTVOKE_DESKTOP_QA_HOME) : base ? path.join(base, "profile") : path.join(appData, "CutVoke");
-  const data = path.resolve(env.CUTVOKE_DATA || (base ? path.join(base, "data") : path.join(home, ".cutvoke", "data")));
+  const data = path.resolve(env.CUTVOKE_DATA || (env.CUTVOKE_DESKTOP_QA === "1" && env.CUTVOKE_DESKTOP_QA_HOME
+    ? path.join(profile, "data") : base ? path.join(base, "data") : path.join(home, ".cutvoke", "data")));
   return { portable, base, profile, dataPath: /\.sqlite$/i.test(data) ? data : path.join(data, "projects.sqlite") };
 }
 

@@ -190,16 +190,16 @@ test("effect metadata requests follow the locale and keep registry IDs stable", 
   await expect(page.locator(".timeline")).toBeVisible({ timeout: 75_000 });
   const before = await current(request, item.id);
   await page.locator("#transition-tab").click();
-  await page.locator("#creative-domain-effects").click();
+  await page.locator("#creative-domain-transition").click();
   for (const locale of ["en", "ar", "zh-CN"]) {
     await switchTo(page, locale);
     await expect.poll(() => requests.has(`effects:${locale}`) && requests.has(`resources:${locale}`)).toBeTruthy();
     const response = await request.get(`/api/v1/effects?lang=${locale}`);
     const catalog = await response.json();
     const effect = catalog.effects.find((entry: { effectId: string }) => entry.effectId === "cutvoke.transition.crossfade");
-    const button = page.locator(".transition-options").getByRole("button", { name: effect.name, exact: true });
-    await expect(button).toBeVisible();
-    await expect(button).toHaveAttribute("title", effect.description);
+    const card = page.locator(".resource-effect-library:visible .resource-card").filter({ has: page.getByText(effect.name, { exact: true }) });
+    await expect(card).toBeVisible();
+    await expect(card.locator(".resource-card__desc")).toHaveText(effect.description);
   }
   expect(await current(request, item.id)).toEqual(before);
 });

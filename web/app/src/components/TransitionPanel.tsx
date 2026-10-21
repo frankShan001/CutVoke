@@ -15,7 +15,6 @@ import {
   effectsByCategory,
   fetchResourcePreview,
   getEffectCatalog,
-  iconForCategory,
   type EffectSpec,
 } from "../lib/effects";
 import { ApiFailure } from "../lib/api";
@@ -68,6 +67,8 @@ export function TransitionPanel() {
         setTrackSel(tr.id);
         setClipSel(selectedClipId);
       }
+    } else {
+      setClipSel(""); setTrackSel("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClipId]);
@@ -215,7 +216,9 @@ export function TransitionPanel() {
   };
 
   return (
-    <Panel title={tr("转场")} subtitle={tr("挂在后一段片段上")}>
+    <Panel title={tr("转场参数")} subtitle={tr("调整当前片段的转场时长与参数")}>
+      <Button full onClick={() => window.dispatchEvent(new CustomEvent("cutvoke:open-creative-domain", { detail: "transition" }))}>
+        {tr("到左侧选择转场")}</Button>
       {readOnly ? (
         <p className="cv-hint" role="status">
           {state.editLock ? tr("Agent 正在编辑，转场暂不可修改。") : tr("目标片段所在轨道已锁定，解锁后可编辑转场。")}
@@ -278,30 +281,7 @@ export function TransitionPanel() {
         </p>
       ) : null}
 
-      <div style={{ marginTop: 8 }}>
-        <span className="cv-field__label">{tr("转场类型")}</span>
-        <div className="transition-options">
-          {transitions.map((t) => {
-            const Icon = iconForCategory(t.category);
-            return (
-              <button
-                key={t.effectId}
-                className={`cv-chip ${transitionId === t.effectId ? "cv-chip--on" : ""}`}
-                style={{ justifyContent: "flex-start", width: "100%" }}
-                onClick={() => setTransitionId(t.effectId)}
-                title={t.description}
-              >
-                <Icon size={11} />
-                {t.name}
-              </button>
-            );
-          })}
-          {transitions.length === 0 ? (
-            <span className="cv-empty cv-empty--tight">{tr("转场清单加载中…")}</span>
-          ) : null}
-        </div>
-      </div>
-
+      {currentFx ? <>
       <div style={{ marginTop: 8 }}>
         <span className="cv-field__label">{tr("时长（秒）")}</span>
         <div style={{ display: "flex", gap: 4, marginTop: 4, alignItems: "center" }}>
@@ -354,9 +334,10 @@ export function TransitionPanel() {
         style={{ marginTop: 10 }}
       >
         <Film size={14} />
-        {busy ? tr("应用中…") : currentFx ? tr("切换转场") : tr("应用转场")}
+        {busy ? tr("应用中…") : tr("保存转场参数")}
       </Button>
       <p className="cv-hint">{tr("转场挂在这段上与它前一相邻片段之间。切换转场是一次操作，可以一步撤销。")}</p>
+      </> : <p className="cv-hint">{tr("当前片段还没有转场，请先在左侧转场库选择并应用。")}</p>}
     </Panel>
   );
 }

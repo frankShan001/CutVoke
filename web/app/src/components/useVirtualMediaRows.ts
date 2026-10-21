@@ -1,10 +1,10 @@
 import { useLayoutEffect, useRef, useState } from "react";
 
 export const MEDIA_ROW_HEIGHT = 52;
-const STRIDE = MEDIA_ROW_HEIGHT + 6;
 
 /** Virtualize in the existing sidebar scroller, keeping one continuous list. */
-export function useVirtualMediaRows(count: number, active: boolean) {
+export function useVirtualMediaRows(count: number, active: boolean, rowHeight = MEDIA_ROW_HEIGHT) {
+  const stride = rowHeight + 6;
   const ref = useRef<HTMLDivElement>(null);
   const [range, setRange] = useState({ start: 0, end: 20 });
   const virtual = count > 100;
@@ -16,8 +16,8 @@ export function useVirtualMediaRows(count: number, active: boolean) {
     const update = () => {
       frame = 0;
       const top = scroller.getBoundingClientRect().top - list.getBoundingClientRect().top;
-      const start = Math.max(0, Math.min(count - 1, Math.floor(top / STRIDE) - 5));
-      const end = Math.min(count, Math.max(start + 1, Math.ceil((top + scroller.clientHeight) / STRIDE) + 5));
+      const start = Math.max(0, Math.min(count - 1, Math.floor(top / stride) - 5));
+      const end = Math.min(count, Math.max(start + 1, Math.ceil((top + scroller.clientHeight) / stride) + 5));
       setRange((current) => current.start === start && current.end === end ? current : { start, end });
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
@@ -27,8 +27,8 @@ export function useVirtualMediaRows(count: number, active: boolean) {
     scroller.addEventListener("scroll", schedule, { passive: true });
     update();
     return () => { cancelAnimationFrame(frame); resize.disconnect(); scroller.removeEventListener("scroll", schedule); };
-  }, [count, active, virtual]);
+  }, [count, active, virtual, stride]);
   const start = virtual ? Math.min(range.start, Math.max(0, count - 1)) : 0;
   const end = virtual ? Math.min(count, Math.max(start + 1, range.end)) : count;
-  return { ref, virtual, start, end, before: start * STRIDE, after: (count - end) * STRIDE };
+  return { ref, virtual, start, end, before: start * stride, after: (count - end) * stride };
 }

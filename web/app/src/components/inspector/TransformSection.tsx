@@ -123,7 +123,7 @@ export function TransformSection({ clip }: { clip: Clip }) {
   ];
 
   return (
-    <section className="inspector__transform" aria-label={tr("画面变换")}>
+    <section className="inspector__transform" data-effect-id={BUILTIN_TRANSFORM_ID} aria-label={tr("画面变换")}>
       <div className="inspector__subrow"><strong>{tr("画面变换")}</strong>
         <span className="cv-hint">{exists ? tr("画布拖动与数值同步") : tr("应用后可在画布拖动")}</span>
       </div>

@@ -171,7 +171,7 @@ export function TitleEditor({ clip }: { clip: Clip }) {
   };
 
   return (
-    <section className="title-editor" aria-label={tr("文字标题属性")}>
+    <section className="title-editor" data-effect-id="cutvoke.text" aria-label={tr("文字标题属性")}>
       <strong>{tr("文字标题")}</strong>
       <div className="title-editor__actions" aria-label={tr("动效组合")}>
         <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary" onClick={() => setForm(old => ({ ...old,

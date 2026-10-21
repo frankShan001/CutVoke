@@ -8,7 +8,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRightLeft, Film, Music, Type, Lock, Unlock, Volume2, VolumeX, Eye, EyeOff, Trash2, Link2 } from "lucide-react";
 import type { Clip, Track } from "../../types/api";
 import { useEditor } from "../../store/editor";
-import { getLatestState } from "../../store/actions";
+import { getLatestState, runCommand } from "../../store/actions";
 import { applyTransition, closeGapBeforeClip, trimClip, insertClipAutoTrack, insertClipFromDrop, moveClip, removeEffect, resolveInsertStart, splitClip, updateTrack } from "../../store/clipEdit";
 import { ClipContextMenu, type CtxTarget } from "../ClipContextMenu";
 import {
@@ -27,6 +27,8 @@ import { assetDisplayName, getSessionAssets, inferKind, useSessionAssets, type S
 import { probeMedia } from "../../lib/mediaApi";
 import { effectLabel, type EffectSpec } from "../../lib/effects";
 import { isTransitionEffectId, transitionDurationSecs, TRANSITION_DND_TYPE } from "../../lib/transitions";
+import { EFFECT_DND_TYPE, getEffectDrag, setEffectDrag, clipAcceptsEffect, type EffectDragResource } from "../../lib/effectDrag";
+import { applyResourceToClip } from "../../store/resourceEdit";
 import type { TimelineDragApi } from "./useTimelineDrag";
 import type { TimelineViewport } from "./useTimelineViewport";
 
@@ -109,6 +111,7 @@ export const TrackRow = memo(function TrackRow({
   const [dropAt, setDropAt] = useState<number | null>(null);
   const [sourceDurations, setSourceDurations] = useState<Record<string, number | null>>({});
   const [transitionDropAt, setTransitionDropAt] = useState<string | null>(null);
+  const [effectDropAt, setEffectDropAt] = useState<{ clipId: string; allowed: boolean } | null>(null);
   const [transitionResize, setTransitionResize] = useState<{ clipId: string; duration: number } | null>(null);
   const transitionResizeRef = useRef<{
     pointerId: number;
@@ -213,11 +216,39 @@ export const TrackRow = memo(function TrackRow({
     if (!locked && !agentLocked) setTransitionDropAt(clipId);
   };
 
+  const onEffectDragOver = (event: React.DragEvent<HTMLElement>, clip: Clip) => {
+    const transition = event.dataTransfer.types.includes(TRANSITION_DND_TYPE);
+    if (!transition && !event.dataTransfer.types.includes(EFFECT_DND_TYPE)) return;
+    event.preventDefault(); event.stopPropagation();
+    const resource = getEffectDrag();
+    const allowed = !transition && !locked && !agentLocked && (!resource || clipAcceptsEffect(resource, track, clip));
+    event.dataTransfer.dropEffect = allowed ? "copy" : "none";
+    setEffectDropAt(previous => previous?.clipId === clip.id && previous.allowed === allowed ? previous : { clipId: clip.id, allowed });
+  };
+  const onEffectDrop = (event: React.DragEvent<HTMLElement>, clip: Clip) => {
+    const transition = event.dataTransfer.types.includes(TRANSITION_DND_TYPE);
+    if (!transition && !event.dataTransfer.types.includes(EFFECT_DND_TYPE)) return;
+    event.preventDefault(); event.stopPropagation(); setEffectDropAt(null); setEffectDrag(null);
+    if (transition) {
+      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("转场请拖到两个片段之间的接缝") }); return;
+    }
+    try {
+      const payload = JSON.parse(event.dataTransfer.getData(EFFECT_DND_TYPE)) as EffectDragResource;
+      const effect = effectSpecs.find(e => e.effectId === payload.effectId);
+      if (!effect || effect.category === "transition" || !Array.isArray(payload.appliesTo)
+        || (payload.presetId !== undefined && typeof payload.presetId !== "string")) throw new Error(tr("无效效果资源"));
+      void applyResourceToClip(dispatch, getLatestState() || state, payload, effect, clip.id);
+    } catch (error) {
+      dispatch({ type: "STATUS_SET", severity: "warn", text: error instanceof Error ? error.message : msg("无效效果资源") });
+    }
+  };
+
   const onTransitionDrop = (event: React.DragEvent<HTMLElement>, clip: Clip, previous: Clip | undefined) => {
     if (!event.dataTransfer.types.includes(TRANSITION_DND_TYPE)) return;
     event.preventDefault();
     event.stopPropagation();
     setTransitionDropAt(null);
+    setEffectDrag(null);
     if (locked || agentLocked) {
       dispatch({ type: "STATUS_SET", severity: "warn", text: msg("轨道已锁定或 Agent 正在编辑，不能应用转场") });
       return;
@@ -227,7 +258,7 @@ export const TrackRow = memo(function TrackRow({
       return;
     }
     try {
-      const payload = JSON.parse(event.dataTransfer.getData(TRANSITION_DND_TYPE)) as { effectId?: string; duration?: number };
+      const payload = JSON.parse(event.dataTransfer.getData(TRANSITION_DND_TYPE)) as { effectId?: string; duration?: number; presetId?: string };
       if (!payload.effectId || !isTransitionEffectId(payload.effectId)) throw new Error(tr("无效转场资源"));
       const maxDuration = Math.min(5,
         (clipEndSecs(previous) - clipStartSecs(previous)) / 2,
@@ -237,13 +268,17 @@ export const TrackRow = memo(function TrackRow({
         ? payload.duration : 1;
       const duration = Math.round(Math.min(maxDuration, Math.max(0.1, requested)) * 1000) / 1000;
       const latest = getLatestState() || state;
-      void applyTransition(dispatch, latest, { clipId: clip.id, effectId: payload.effectId, duration })
+      const operation = typeof payload.presetId === "string"
+        ? runCommand(dispatch, latest, "builtinPreset.apply", { clipId: clip.id, presetId: payload.presetId, duration })
+        : applyTransition(dispatch, latest, { clipId: clip.id, effectId: payload.effectId, duration });
+      void operation
         .then((result) => {
           if (!result.ok) return;
           dispatch({ type: "SELECTION_SET", selection: { trackId: track.id, clipId: clip.id,
             effectId: payload.effectId, effectKind: "transition" } });
           dispatch({ type: "PLAYHEAD_SET", t: clipStartSecs(clip) });
           window.dispatchEvent(new Event("cutvoke:open-transition"));
+          window.dispatchEvent(new CustomEvent("cutvoke:edit-effect", { detail: { effectId: payload.effectId, category: "transition" } }));
         });
     } catch (error) {
       dispatch({ type: "STATUS_SET", severity: "warn", text: error instanceof Error ? error.message : msg("无效转场资源") });
@@ -657,6 +692,10 @@ export const TrackRow = memo(function TrackRow({
             locked={locked}
             selected={state.selection?.clipId === clip.id && state.selection?.trackId === track.id && !state.selection?.effectId}
             trimOverlay={trimShape?.clipId === clip.id ? trimShape.shape : undefined}
+            effectDropState={effectDropAt?.clipId === clip.id ? (effectDropAt.allowed ? "allowed" : "denied") : undefined}
+            onEffectDragOver={event => onEffectDragOver(event, clip)}
+            onEffectDragLeave={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setEffectDropAt(null); }}
+            onEffectDrop={event => onEffectDrop(event, clip)}
             onDragStart={(e, mode) => {
               if (mode === "move") {
                 if (state.toolMode !== "cut") dragApi.begin(e, clip, track, "move", pxPerSec);
@@ -837,6 +876,10 @@ function ClipBlock({
   onContextMenu,
   onCutClick,
   onNudge,
+  effectDropState,
+  onEffectDragOver,
+  onEffectDragLeave,
+  onEffectDrop,
 }: {
   clip: Clip;
   isAudio: boolean;
@@ -850,6 +893,10 @@ function ClipBlock({
   onContextMenu: (e: React.MouseEvent) => void;
   onCutClick: (e: React.MouseEvent | React.KeyboardEvent) => void;
   onNudge: (direction: -1 | 1) => void;
+  effectDropState?: "allowed" | "denied";
+  onEffectDragOver: (e: React.DragEvent<HTMLElement>) => void;
+  onEffectDragLeave: (e: React.DragEvent<HTMLElement>) => void;
+  onEffectDrop: (e: React.DragEvent<HTMLElement>) => void;
 }) {
   useLocale();
   const baseLeft = toPx(clipStartSecs(clip), pxPerSec);
@@ -862,12 +909,14 @@ function ClipBlock({
 
   return (
     <div
-      className={`clip-block clip-block--${isAudio ? "audio" : isText ? "text" : "video"} ${selected ? "clip-block--selected" : ""}`}
+      className={`clip-block clip-block--${isAudio ? "audio" : isText ? "text" : "video"} ${selected ? "clip-block--selected" : ""}${effectDropState ? ` clip-block--effect-${effectDropState}` : ""}`}
+      data-clip-id={clip.id}
       role="button"
       tabIndex={0}
       aria-pressed={selected}
       aria-label={tr("{0}，{1} 秒，开始于 {2} 秒{3}{4}{5}；Alt 加左右方向键可与相邻片段交换顺序", name, durSecs.toFixed(1), clipStartSecs(clip).toFixed(3), clip.attachedToClipId ? tr("，跟随视频移动") : "", attachedCount ? tr("，有 {0} 个关联片段", attachedCount) : "", selected ? tr("，已选中") : "")}
       style={{ left, width }}
+      onDragOver={onEffectDragOver} onDragLeave={onEffectDragLeave} onDrop={onEffectDrop}
       onClick={(e) => {
         e.stopPropagation();
         onCutClick(e);
@@ -893,6 +942,7 @@ function ClipBlock({
       <div className="clip-block__name">{name}</div>
       {clip.attachedToClipId || attachedCount ? <span className="clip-block__meta" aria-hidden="true"><Link2 size={11} />{attachedCount || ""}</span> : null}
       <div className="clip-block__meta">{durSecs.toFixed(1)}s</div>
+      {effectDropState ? <span className="clip-block__effect-drop" aria-hidden="true">{effectDropState === "allowed" ? tr("松开应用效果") : tr("不能应用到此片段")}</span> : null}
       <span
         className="clip-block__drag clip-block__drag--l"
         onPointerDown={(e) => {

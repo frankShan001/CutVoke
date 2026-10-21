@@ -27,8 +27,9 @@ function TimelineClock({ end, revealTime }: { end: number; revealTime: (time: nu
   useLayoutEffect(() => {
     if (Math.abs(previous.current - state.playhead) < 0.0001) return;
     previous.current = state.playhead;
+    if (state.scrubbing) return;
     revealTime(state.playhead);
-  }, [state.playhead, revealTime]);
+  }, [state.playhead, state.scrubbing, revealTime]);
   return <span className="cv-mono">{fmtTimePrecise(state.playhead)} / {fmtTime(end)}</span>;
 }
 
@@ -112,11 +113,32 @@ export function Timeline() {
     if (!axis) return;
     const { scroller, axisStart } = axis;
     const x = axisStart + Math.max(0, time) * pxPerSec;
-    const margin = Math.min(72, scroller.clientWidth * 0.15);
-    if (force || x < scroller.scrollLeft + margin || x > scroller.scrollLeft + scroller.clientWidth - margin) {
-      scroller.scrollLeft = Math.max(0, x - scroller.clientWidth * 0.4);
-    }
+    const visibleWidth = Math.max(1, scroller.clientWidth - axisStart);
+    const margin = Math.min(48, visibleWidth * 0.12);
+    const start = scroller.scrollLeft + axisStart + margin;
+    const end = scroller.scrollLeft + scroller.clientWidth - margin;
+    if (force) scroller.scrollLeft = Math.max(0, x - axisStart - visibleWidth * 0.4);
+    else if (x < start) scroller.scrollLeft = Math.max(0, x - axisStart - margin);
+    else if (x > end) scroller.scrollLeft += x - end;
   }, [getAxis, pxPerSec]);
+
+  useEffect(() => {
+    const locate = (event: Event) => {
+      const target = (event as CustomEvent<{ trackId: string; time: number }>).detail;
+      if (!target || !Number.isFinite(target.time)) return;
+      requestAnimationFrame(() => {
+        revealTime(target.time, true);
+        const axis = getAxis();
+        const lane = scrollerRef.current?.querySelector<HTMLElement>(`.timeline-track__lane[data-track-id="${CSS.escape(target.trackId)}"]`);
+        if (!axis || !lane) return;
+        const row = lane.getBoundingClientRect(), view = axis.scroller.getBoundingClientRect();
+        if (row.top < view.top + 40) axis.scroller.scrollTop -= view.top + 40 - row.top;
+        else if (row.bottom > view.bottom - 12) axis.scroller.scrollTop += row.bottom - view.bottom + 12;
+      });
+    };
+    window.addEventListener("cutvoke:locate-clip", locate);
+    return () => window.removeEventListener("cutvoke:locate-clip", locate);
+  }, [getAxis, revealTime]);
 
   // A zoom click keeps the current frame under the same point in the viewport.
   // This makes close frame edits possible even deep in a long sequence.
@@ -272,6 +294,7 @@ export function Timeline() {
               width: `calc(${widthPx + 80}px + var(--track-label-w) + var(--space-2) + var(--timeline-content-inset-x) + var(--timeline-content-inset-x))`,
             }}
           >
+            <div className="timeline__ruler-gutter" aria-hidden="true" />
             <Ruler lengthSecs={lengthSecs} maxSeekSecs={playableEndSecs} pxPerSec={pxPerSec} />
             <Playhead pxPerSec={pxPerSec} maxSecs={playableEndSecs} />
             {tracks.length === 0 ? (
@@ -287,7 +310,7 @@ export function Timeline() {
               </div>
             ) : (
               tracks.map((t) => (
-                <Fragment key={t.id}>
+                <Fragment key={`${state.currentId}:${t.id}`}>
                   <TrackRow
                     track={t}
                     displayName={displayNames.get(t.id) || tr("轨道")}

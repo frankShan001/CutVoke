@@ -8,20 +8,19 @@ import { tr, useLocale } from "../i18n";
 import { useEffect, useState } from "react";
 import { useEditor, selectors } from "../store/editor";
 import { getLatestState, runCommand } from "../store/actions";
-import { removeClip, setClipSpeed } from "../store/clipEdit";
+import { removeClip } from "../store/clipEdit";
 import { addEffectToClip, updateEffect } from "../store/effectEdit";
-import { rationalText, rationalToSecs, secsToRational } from "../lib/rational";
+import { rationalText, rationalToSecs } from "../lib/rational";
 import { sourcePathShort } from "../lib/media";
 import { Badge } from "./ui";
 import { AudioSection } from "./inspector/AudioSection";
 import { KeyframeSection } from "./inspector/KeyframeSection";
 import { AnimationSection } from "./inspector/AnimationSection";
 import { FxSection } from "./inspector/FxSection";
-import { EffChip } from "./inspector/parts";
 import { TitleEditor } from "./inspector/TitleEditor";
 import { TransformSection } from "./inspector/TransformSection";
 import { assetDisplayName, inferKind, useSessionAssets } from "../lib/assetStore";
-import { BUILTIN_TRANSFORM_ID, BUILTIN_COLOR_ID, BUILTIN_CROSSFADE_ID } from "../lib/effects";
+import { BUILTIN_TRANSFORM_ID } from "../lib/effects";
 import type { Clip } from "../types/api";
 
 export function Inspector() {
@@ -29,16 +28,6 @@ export function Inspector() {
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   useSessionAssets();
   const { project, selection } = state;
-  const [speedInput, setSpeedInput] = useState("1");
-
-  // 切换片段或保存速度后，同步输入框与片段的实际倍速。
-  useEffect(() => {
-    const clip = project?.sequence.tracks
-      .flatMap((track) => track.clips)
-      .find((item) => item.id === selection?.clipId);
-    setSpeedInput(String(clip?.speed ? rationalToSecs(clip.speed) : 1));
-  }, [project, selection?.clipId]);
-
   if (!project) {
     return (
       <section className="inspector">
@@ -60,7 +49,6 @@ export function Inspector() {
       const dur = tlEnd - tlStart;
       const srcEnd = srcStart + dur; // 近似（未考虑 speed，仅展示）
       const speed = clip.speed ? rationalText(clip.speed) : "1/1";
-      const fxCount = clip.effects?.length || 0;
       const isSticker = clip.role === "sticker" || track?.role === "sticker";
       const isText = track?.kind === "text";
       const isAudio = track?.kind === "audio";
@@ -76,14 +64,6 @@ export function Inspector() {
         .flatMap((item) => item.clips)
         .find((item) => item.attachedToClipId === clip.id &&
           item.assetRef.sourcePath === clip.assetRef.sourcePath)?.id;
-
-      const applySpeed = () => {
-        if (clipReadOnly) return;
-        const v = parseFloat(speedInput);
-        if (isNaN(v) || !v) return;
-        const ctx = getLatestState() || state;
-        void setClipSpeed(dispatch, ctx, { clipId: clip.id, speed: secsToRational(v) });
-      };
 
       return (
         <section className="inspector">
@@ -123,20 +103,6 @@ export function Inspector() {
               </select>
             </label> : null}
             {clip.attachedToClipId ? <p className="cv-hint">{tr("移动关联视频时此片段同步移动；按住 Alt 拖动视频可临时保持此片段原位。")}</p> : null}
-            {!isSticker && !isText ? <div className="inspector__subrow">
-              <span className="inspector__key">{tr("调速")}</span>
-              <input
-                type="number"
-                step="0.1"
-                value={speedInput}
-                onChange={(e) => setSpeedInput(e.target.value)}
-                className="cv-input"
-                style={{ width: 80, height: 26 }}
-                aria-label={tr("调速倍率")}
-              />
-              <button className="cv-btn cv-btn--sm cv-btn--secondary" onClick={applySpeed}>{tr("应用")}</button>
-            </div> : null}
-
             {/* ---- 音频 / 关键帧 / 动画 / 画面特效 小节（J01 拆分）---- */}
             <div className="inspector__sep" />
             {isText ? <TitleEditor clip={clip} /> : <>
@@ -150,14 +116,7 @@ export function Inspector() {
               <FxSection clip={clip} trackKind={track!.kind} />
             </>}
 
-            {!isText && !isAudio ? <><div className="inspector__sep" />
-            <div className="inspector__subrow">
-              <span className="inspector__key">{tr("效果 (")}{fxCount})</span>
-              <div style={{ display: "flex", gap: 4 }}>
-                <EffChip label={tr("调色")} effectId={BUILTIN_COLOR_ID} clipId={clip.id} />
-                <EffChip label={tr("叠化")} effectId={BUILTIN_CROSSFADE_ID} clipId={clip.id} />
-              </div>
-            </div></> : null}
+
             <div className="inspector__subrow">
               <span className="inspector__key">{tr("删除")}</span>
               <button

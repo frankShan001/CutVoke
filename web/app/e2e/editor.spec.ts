@@ -139,6 +139,10 @@ async function openProject(page: Page, name: string, repair = false): Promise<vo
   await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible({ timeout: 30_000 });
 }
 
+async function openEffectLibrary(page: Page): Promise<void> {
+  await expect(page.locator(".resource-effect-library:visible")).toBeVisible();
+}
+
 async function clipOrder(request: APIRequestContext, id: string): Promise<string[]> {
   const project = await readProject(request, id);
   return [...project.sequence.tracks[0].clips]
@@ -302,82 +306,64 @@ test("agent edit lease keeps the browser read-only while showing agent edits, th
   await expect.poll(async () => (await readProject(request, id)).revision).not.toBe(agentRevision);
 });
 
-test("resource thumbnails show session cache, retry preview errors, and cancel pending renders", async ({ page, request }) => {
-  const { name } = await createProject(request);
+test("resource covers never render the project while browsing; explicit previews retry and cancel", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
   await openProject(page, name);
-
-  let targetEffectId: string | null = null;
-  let failNextPreview = false;
+  let previewRequests = 0;
+  let failNextPreview = true;
   let delayNextPreview = false;
   let delayedPreviewStarted = false;
-  let releaseDelayedPreview: (() => void) | undefined;
-  const delayedPreview = new Promise<void>((resolve) => { releaseDelayedPreview = resolve; });
+  let releaseDelayedPreview!: () => void;
+  const delayedPreview = new Promise<void>(resolve => { releaseDelayedPreview = resolve; });
   const previewImage = readFileSync(imageFixture);
-  const errorBody = JSON.stringify({ error: { message: "模拟预览失败" } });
-
   const previewRoute = /\/resource-preview\?/;
-  await page.route(previewRoute, async (route) => {
-    const effectId = new URL(route.request().url()).searchParams.get("effectId");
-    if (!effectId) {
-      await route.continue();
-      return;
-    }
-    if (targetEffectId === null) {
-      targetEffectId = effectId;
-      await route.fulfill({ status: 500, contentType: "application/json", body: errorBody });
-      return;
-    }
-    if (effectId === targetEffectId && failNextPreview) {
+  await page.route(previewRoute, async route => {
+    previewRequests++;
+    if (failNextPreview) {
       failNextPreview = false;
-      await route.fulfill({ status: 500, contentType: "application/json", body: errorBody });
+      await route.fulfill({ status: 500, json: { error: { message: "模拟预览失败" } } });
       return;
     }
-    if (effectId === targetEffectId && delayNextPreview) {
+    if (delayNextPreview) {
       delayNextPreview = false;
       delayedPreviewStarted = true;
       await delayedPreview;
-      try {
-        await route.fulfill({ status: 200, contentType: "image/png", body: previewImage });
-      } catch {
-        // Closing the preview aborts this routed browser request.
-      }
+      try { await route.fulfill({ status: 200, contentType: "image/png", body: previewImage }); }
+      catch { /* The user cancelled the request. */ }
       return;
     }
     await route.fulfill({ status: 200, contentType: "image/png", body: previewImage });
   });
-
-  const creativeTabs = page.getByRole("tablist", { name: "创作域" });
-  await creativeTabs.getByRole("tab", { name: "特效" }).click();
-  await expect(page.getByText(`资源包 v${await getBuiltinPackVersion(request)} · 离线可用`)).toBeVisible();
-  const packScreenshotPath = resolve(process.cwd(), "../../.artifacts/playwright/resource-pack-offline-status-20260924.png");
-  mkdirSync(dirname(packScreenshotPath), { recursive: true });
-  await page.screenshot({ path: packScreenshotPath, fullPage: false });
-  const firstEffectCard = page.locator(".resource-grid:not(.resource-preset-grid) .resource-card").first();
-  await firstEffectCard.scrollIntoViewIfNeeded();
-  const thumbnailRetry = firstEffectCard.getByRole("button", { name: /^重试.*封面$/ });
-  await expect(thumbnailRetry).toBeVisible({ timeout: 15_000 });
-  const card = firstEffectCard;
-  expect(targetEffectId).toBeTruthy();
-  await thumbnailRetry.click();
-  await expect(card.locator(".resource-card__thumbnail-cache")).toHaveText("已缓存");
-
-  failNextPreview = true;
-  await card.getByRole("button", { name: "预览", exact: true }).click();
+  const tabs = page.getByRole("tablist", { name: "创作域" });
+  await tabs.getByRole("tab", { name: "转场", exact: true }).click();
+  await expect(page.locator(".resource-effect-card:visible").first()).toBeVisible();
+  await openEffectLibrary(page);
+  const cards = page.locator(".resource-effect-grid:visible .resource-card");
+  const card = cards.first();
+  await card.scrollIntoViewIfNeeded();
+  await expect(card.locator(".resource-card__thumbnail img")).toBeVisible();
+  await expect.poll(() => card.locator(".resource-card__thumbnail img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+  await cards.last().scrollIntoViewIfNeeded();
+  await page.locator(".clip-block").filter({ hasText: "green.mp4" }).click();
+  await apply(request, id, "caption.update", { captionId: "caption-one", text: "封面不应重绘" });
+  await expect(page.getByRole("button", { name: /^字幕：封面不应重绘/ })).toBeVisible();
+  await card.scrollIntoViewIfNeeded();
+  expect(previewRequests).toBe(0);
+  await expect(page.getByText("封面生成中", { exact: false })).toHaveCount(0);
+  await card.locator(".resource-card__style select").selectOption("");
+  await card.locator(".resource-card__thumbnail").click();
   await expect(page.locator(".resource-preview__failure")).toContainText("模拟预览失败");
+  expect(previewRequests).toBe(1);
   await page.getByRole("button", { name: "重试预览" }).click();
   await expect(page.locator(".resource-preview img")).toBeVisible();
-  const screenshotPath = resolve(process.cwd(), "../../.artifacts/playwright/resource-preview-cache-retry-20260924.png");
-  mkdirSync(dirname(screenshotPath), { recursive: true });
-  await page.screenshot({ path: screenshotPath, fullPage: false });
-
+  expect(previewRequests).toBe(2);
   delayNextPreview = true;
-  await card.getByRole("button", { name: "预览", exact: true }).click();
+  await card.locator(".resource-card__style select").selectOption("");
+  await card.locator(".resource-card__thumbnail").click();
   await expect.poll(() => delayedPreviewStarted).toBe(true);
-  const cancelPreview = page.getByRole("button", { name: "取消效果预览" });
-  await expect(cancelPreview).toBeVisible();
-  await cancelPreview.click();
+  await page.getByRole("button", { name: "取消效果预览" }).click();
   await expect(page.locator(".resource-preview")).toHaveCount(0);
-  releaseDelayedPreview?.();
+  releaseDelayedPreview();
   await page.unroute(previewRoute);
 });
 
@@ -407,16 +393,16 @@ test("resource catalog load failures show the cause and can be retried", async (
   await expect(page.locator(".cv-empty:visible")).toHaveCount(0);
 
   await failure.getByRole("button", { name: "重试资源库" }).click();
-  await expect(page.locator(".resource-grid:not(.resource-preset-grid) .resource-card").first())
+  await openEffectLibrary(page);
+  await expect(page.locator(".resource-effect-grid .resource-card").first())
     .toBeVisible();
   await expect(page.locator(".resource-preview__failure:visible")).toHaveCount(0);
-  await expect(page.locator(".resource-context:visible"))
-    .toContainText("可先浏览工程示例封面；应用前请选中目标片段");
-  const samplePreset = page.locator(".resource-preset-card").first();
-  await expect(samplePreset.getByRole("button", { name: /播放.*动态样片/ })).toBeEnabled();
-  const applyPreset = samplePreset.getByRole("button", { name: "应用" });
-  await expect(applyPreset).toBeDisabled();
-  await expect(applyPreset).toHaveAttribute("title", "请先选中片段；样片仍可播放");
+  await expect(page.locator(".resource-library-help:visible"))
+    .toContainText("悬停预览");
+  const samplePreset = page.locator(".resource-effect-card").first();
+  await expect(samplePreset.getByRole("button", { name: /^预览.*效果$/ })).toBeEnabled();
+  await expect(samplePreset).toHaveAttribute("draggable", "true");
+  await expect(samplePreset.locator(".resource-card__apply")).toHaveCount(0);
   await page.unroute("**/resources?*");
 });
 
@@ -589,12 +575,13 @@ test("built-in preset status failure leaves effects available and can be retried
     .filter({ hasText: "内置预设审核状态读取失败" });
   await expect(presetFailure).toContainText("模拟预设审核服务暂时不可用");
   await expect(presetFailure.getByRole("button", { name: "重试内置预设" })).toBeVisible();
-  await expect(page.locator(".resource-grid:not(.resource-preset-grid) .resource-card").first())
+  await openEffectLibrary(page);
+  await expect(page.locator(".resource-effect-grid .resource-card").first())
     .toBeVisible();
-  await expect(page.locator(".resource-preset-card")).toHaveCount(0);
+  await expect(page.locator(".resource-effect-card:visible select").first().locator("option")).toHaveCount(1);
 
   await presetFailure.getByRole("button", { name: "重试内置预设" }).click();
-  await expect(page.locator(".resource-preset-card").first()).toBeVisible();
+  await expect(page.locator(".resource-effect-card:visible").first()).toBeVisible();
   await expect(page.getByRole("alert").filter({ hasText: "内置预设审核状态读取失败" })).toHaveCount(0);
   await page.unroute("**/api/v1/presets");
 });
@@ -707,14 +694,7 @@ test("six resource services can fail together and recover independently across d
   const projectMediaName = sources[0].split(/[\\/]/).pop() || sources[0];
   await expect(page.locator(".media-item").filter({ hasText: projectMediaName }).first()).toBeVisible();
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "特效" }).click();
-  const manager = page.locator(".resource-pack-manager:visible").first();
-  await manager.locator("summary").click();
-  const registry = manager.locator(".resource-registry");
-  await expect(manager.getByRole("status").filter({ hasText: "正在读取本机资源包状态" })).toBeVisible();
-  await expect(registry.getByRole("status").filter({ hasText: "正在读取在线资源目录" })).toBeVisible();
-  await expect(page.getByRole("status").filter({ hasText: "正在读取内置预设审核状态" })).toBeVisible();
-  await expect(registry.getByText("尚未添加在线资源目录。")).toHaveCount(0);
-
+  await expect(page.getByRole("status").filter({ hasText: "加载中" })).toBeVisible();
   releaseAssetFailure();
   releaseStickerFailure();
   releaseEffectFailure();
@@ -723,18 +703,11 @@ test("six resource services can fail together and recover independently across d
   releasePresetFailure();
   const effectFailure = page.locator(".resource-preview__failure:visible")
     .filter({ hasText: "效果清单加载失败" });
-  const packFailure = manager.getByRole("alert").filter({ hasText: "资源包状态读取失败" });
-  const registryFailure = registry.getByRole("alert").filter({ hasText: "在线资源目录读取失败" });
   const presetFailure = page.getByRole("alert").filter({ hasText: "内置预设审核状态读取失败" });
   await expect(effectFailure).toContainText("模拟效果目录暂时不可用");
   await expect(effectFailure.getByRole("button", { name: "重试资源库" })).toBeVisible();
-  await expect(packFailure).toContainText("模拟资源包状态暂时不可用");
-  await expect(packFailure.getByRole("button", { name: "重试资源包状态" })).toBeVisible();
-  await expect(registryFailure).toContainText("模拟在线目录读取暂时不可用");
-  await expect(registryFailure.getByRole("button", { name: "重试资源目录" })).toBeVisible();
   await expect(presetFailure).toContainText("模拟预设审核服务暂时不可用");
   await expect(presetFailure.getByRole("button", { name: "重试内置预设" })).toBeVisible();
-  await expect(registry.getByText("尚未添加在线资源目录。")).toHaveCount(0);
   const statusScreenshot = resolve(process.cwd(), "../../.artifacts/playwright/resource-recovery-states-20260926.png");
   mkdirSync(dirname(statusScreenshot), { recursive: true });
   await page.screenshot({ path: statusScreenshot });
@@ -763,24 +736,28 @@ test("six resource services can fail together and recover independently across d
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "特效" }).click();
   await expect(effectFailure).toContainText("模拟效果目录暂时不可用");
   await expect(presetFailure).toContainText("模拟预设审核服务暂时不可用");
-  await expect(packFailure).toContainText("模拟资源包状态暂时不可用");
-  await expect(registryFailure).toContainText("模拟在线目录读取暂时不可用");
   effectsAvailable = true;
   await effectFailure.getByRole("button", { name: "重试资源库" }).click();
-  await expect(page.locator(".resource-grid:not(.resource-preset-grid) .resource-card").first())
+  await openEffectLibrary(page);
+  await expect(page.locator(".resource-effect-grid .resource-card").first())
     .toBeVisible();
-
-  packAvailable = true;
-  await packFailure.getByRole("button", { name: "重试资源包状态" }).click();
-  await expect(manager.locator(".resource-pack-manager__list")).toContainText("内置资源");
-  await expect(registry.getByRole("alert").filter({ hasText: "在线资源目录读取失败" })).toBeVisible();
-  await expect(presetFailure).toBeVisible();
 
   presetAvailable = true;
   await presetFailure.getByRole("button", { name: "重试内置预设" }).click();
-  await expect(page.locator(".resource-preset-card").first()).toBeVisible();
-  await expect(registry.getByRole("alert").filter({ hasText: "在线资源目录读取失败" })).toBeVisible();
+  await expect(page.locator(".resource-effect-card:visible").first()).toBeVisible();
 
+  await page.getByRole("button", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "资源管理", exact: true }).click();
+  const manager = page.locator(".resource-pack-manager:visible").first();
+  const registry = manager.locator(".resource-registry");
+  const packFailure = manager.getByRole("alert").filter({ hasText: "资源包状态读取失败" });
+  const registryFailure = registry.getByRole("alert").filter({ hasText: "在线资源目录读取失败" });
+  await expect(packFailure).toContainText("模拟资源包状态暂时不可用");
+  await expect(registryFailure).toContainText("模拟在线目录读取暂时不可用");
+  packAvailable = true;
+  await packFailure.getByRole("button", { name: "重试资源包状态" }).click();
+
+  await expect(manager.locator(".resource-pack-manager__list")).toContainText("内置资源");
   registryAvailable = true;
   await registryFailure.getByRole("button", { name: "重试资源目录" }).click();
   await expect(registry.getByText("尚未添加在线资源目录。")).toBeVisible();
@@ -844,19 +821,21 @@ for (const target of isolatedResourceFailures) {
         .filter({ hasText: "效果清单加载失败" });
       await expect(failure).toContainText(target.message);
     } else {
-      await expect(page.locator(".resource-grid:not(.resource-preset-grid) .resource-card").first())
+      await openEffectLibrary(page);
+      await expect(page.locator(".resource-effect-grid .resource-card").first())
         .toBeVisible();
     }
     const presetFailure = page.getByRole("alert").filter({ hasText: "内置预设审核状态读取失败" });
     if (target.id === "presets") {
       await expect(presetFailure).toContainText(target.message);
     } else {
-      await expect(page.locator(".resource-preset-card").first()).toBeVisible();
+  await expect(page.locator(".resource-effect-card:visible").first()).toBeVisible();
     }
 
-    const manager = page.locator(".resource-pack-manager:visible").first();
-    await manager.locator("summary").click();
-    const registry = manager.locator(".resource-registry");
+    await page.getByRole("button", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "资源管理", exact: true }).click();
+  const manager = page.locator(".resource-pack-manager:visible").first();
+      const registry = manager.locator(".resource-registry");
     const packFailure = manager.getByRole("alert").filter({ hasText: "资源包状态读取失败" });
     const registryFailure = registry.getByRole("alert").filter({ hasText: "在线资源目录读取失败" });
     if (target.id === "packs") {
@@ -870,6 +849,7 @@ for (const target of isolatedResourceFailures) {
       await expect(registry.getByText("尚未添加在线资源目录。")).toBeVisible();
     }
 
+    if (target.id !== "packs" && target.id !== "registries") await page.getByRole("button", { name: "关闭设置", exact: true }).click();
     targetAvailable = true;
     if (target.id === "assets") {
       await assetTab.click();
@@ -889,7 +869,8 @@ for (const target of isolatedResourceFailures) {
       const failure = page.locator(".resource-preview__failure:visible")
         .filter({ hasText: "效果清单加载失败" });
       await failure.getByRole("button", { name: "重试资源库" }).click();
-      await expect(page.locator(".resource-grid:not(.resource-preset-grid) .resource-card").first())
+      await openEffectLibrary(page);
+      await expect(page.locator(".resource-effect-grid .resource-card").first())
         .toBeVisible();
     } else if (target.id === "packs") {
       await packFailure.getByRole("button", { name: "重试资源包状态" }).click();
@@ -899,7 +880,7 @@ for (const target of isolatedResourceFailures) {
       await expect(registry.getByText("尚未添加在线资源目录。")).toBeVisible();
     } else {
       await presetFailure.getByRole("button", { name: "重试内置预设" }).click();
-      await expect(page.locator(".resource-preset-card").first()).toBeVisible();
+  await expect(page.locator(".resource-effect-card:visible").first()).toBeVisible();
     }
 
     await page.unroute(target.route);
@@ -930,8 +911,9 @@ test("resource category keeps target, filters, search, and scroll across panel c
 
   await creativeTabs.getByRole("tab", { name: "特效" }).click();
 
+  await openEffectLibrary(page);
   const filterTab = page.getByRole("tablist", { name: "效果分类" })
-    .getByRole("tab", { name: /滤镜/ });
+    .getByRole("tab", { name: /画面特效/ });
   await expect(filterTab).toBeVisible();
   const categoryTabs = page.getByRole("tablist", { name: "效果分类" }).getByRole("tab");
   const allCategoryTab = categoryTabs.first();
@@ -947,16 +929,20 @@ test("resource category keeps target, filters, search, and scroll across panel c
   await filterTab.click();
   const search = page.getByRole("searchbox", { name: "搜索预设和效果" });
   await search.fill("cutvoke.fx");
-  const cards = page.locator(".resource-grid:not(.resource-preset-grid) .resource-card");
+  await openEffectLibrary(page);
+  const cards = page.locator(".resource-effect-grid .resource-card");
   await expect(cards.first()).toBeVisible();
-  const applyEffect = cards.first().getByRole("button", { name: "应用到选中片段" });
+  const applyEffect = cards.first();
   await apply(request, id, "track.update", { trackId: "v1", locked: true });
-  await expect(page.getByRole("status")
-    .filter({ hasText: "所选片段所在轨道已锁定，解锁后可应用效果" }).first()).toBeVisible();
-  await expect(applyEffect).toBeDisabled();
-  await expect(applyEffect).toHaveAttribute("title", "所选片段所在轨道已锁定，解锁后可应用效果");
+  await expect(page.getByRole("button", { name: "解锁轨道 v1", exact: true })).toBeVisible();
+  const lockedBefore = await readProject(request, id);
+  await applyEffect.press("Enter");
+  await expect(page.getByText("所选片段所在轨道已锁定，解锁后可应用效果", {exact:true})).toBeVisible();
+  expect((await readProject(request, id)).revision).toBe(lockedBefore.revision);
+  await expect(applyEffect).toHaveAttribute("draggable", "true");
   await apply(request, id, "track.update", { trackId: "v1", locked: false });
-  await expect(applyEffect).toBeEnabled();
+  await expect(page.getByRole("button", { name: "锁定轨道 v1", exact: true })).toBeVisible();
+  await expect(applyEffect).toHaveAttribute("draggable", "true");
 
   const panel = page.locator(".zone-left__scroll");
   await panel.evaluate((element) => { element.scrollTop = element.scrollHeight; });
@@ -971,11 +957,17 @@ test("resource category keeps target, filters, search, and scroll across panel c
   await creativeTabs.getByRole("tab", { name: "特效" }).click();
   await expect(search).toHaveValue("cutvoke.fx");
   await expect(filterTab).toHaveAttribute("aria-selected", "true");
-  await expect(page.locator(".resource-context:visible")).toContainText("视频片段");
-  await expect.poll(() => panel.evaluate((element) => element.scrollTop)).toBe(savedScroll);
+  await expect(page.locator(".resource-browser:visible")).toHaveAttribute("data-resource-family", "fx");
+  await expect.poll(() => panel.evaluate((element, saved) =>
+    Math.abs(element.scrollTop - Math.min(saved, element.scrollHeight - element.clientHeight)), savedScroll)).toBeLessThan(2);
 
-  await applyEffect.click();
+  await cards.first().locator(".resource-card__style select").selectOption("");
+  await applyEffect.focus();
+  await applyEffect.press("Enter");
   await expect.poll(effectCount).toBe(before + 1);
+  await expect(page.locator(".timeline-track__label--effects")).toHaveAttribute("aria-expanded", "true");
+  await page.locator(".timeline-track__label--effects").click();
+  await expect(page.locator(".timeline-track__label--effects")).toHaveAttribute("aria-expanded", "false");
 });
 
 test("eight creative domains share keyboard navigation and preserve the selected edit target", async ({ page, request }) => {
@@ -1027,11 +1019,10 @@ test("eight creative domains share keyboard navigation and preserve the selected
     await domain.verify();
     await expect(inspectorTab).toHaveAttribute("aria-selected", "true");
   }
-  // Domain switches must share pending audits rather than queueing one
-  // expensive scan per panel and starving unrelated catalog requests.
-  await expect.poll(() => auditRequests).toEqual({ packs: 1, presets: 1 });
+  // Browsing does not load package administration; pending preset scans are shared.
+  await expect.poll(() => auditRequests).toEqual({ packs: 0, presets: 1 });
   finishAudit();
-  await expect(page.getByRole("region", { name: "内置预设库" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "效果库", exact: true })).toBeVisible();
 
   await current.press("Home");
   current = creativeTabs.getByRole("tab", { name: "素材" });
@@ -1042,7 +1033,8 @@ test("eight creative domains share keyboard navigation and preserve the selected
   await creativeTabs.getByRole("tab", { name: "特效" }).click();
   const effectSearch = page.getByRole("searchbox", { name: "搜索预设和效果" });
   await effectSearch.fill("cutvoke.fx");
-  await expect(page.locator(".resource-grid:visible:not(.resource-preset-grid) .resource-card").first()).toBeVisible();
+  await openEffectLibrary(page);
+  await expect(page.locator(".resource-effect-grid:visible .resource-card").first()).toBeVisible();
   const leftScroll = page.locator(".zone-left__scroll");
   await leftScroll.evaluate((element) => { element.scrollTop = element.scrollHeight; });
   const effectScroll = await leftScroll.evaluate((element) => element.scrollTop);
@@ -1062,12 +1054,14 @@ test("eight creative domains share keyboard navigation and preserve the selected
   await creativeTabs.getByRole("tab", { name: "转场" }).click();
   await creativeTabs.getByRole("tab", { name: "特效" }).click();
   await expect.poll(() => refreshRequests).toBeGreaterThan(0);
-  await expect(page.locator(".resource-grid:visible:not(.resource-preset-grid) .resource-card").first()).toBeVisible();
+  await openEffectLibrary(page);
+  await expect(page.locator(".resource-effect-grid:visible .resource-card").first()).toBeVisible();
   await expect(effectSearch).toHaveValue("cutvoke.fx");
   await expect.poll(() => leftScroll.evaluate((element) => element.scrollTop)).toBe(effectScroll);
-  await expect(page.locator(".resource-context:visible")).toContainText("视频片段");
+  await expect(page.locator(".resource-browser:visible")).toHaveAttribute("data-resource-family", "fx");
   finishRefresh();
-  await expect(page.locator(".resource-grid:visible:not(.resource-preset-grid)")
+  await openEffectLibrary(page);
+  await expect(page.locator(".resource-effect-grid:visible")
     .getByText("Fresh catalog proof", { exact: true })).toBeVisible();
   await page.unroute(/\/api\/v1\/projects\/[^/]+\/resources(?:\?.*)?$/);
   const pending: Array<{ release: () => void; done: Promise<void> }> = [];
@@ -1091,7 +1085,8 @@ test("eight creative domains share keyboard navigation and preserve the selected
   await apply(request, id, "caption.update", { captionId: "caption-one", text: "refresh two" });
   await expect.poll(() => pending.length).toBe(2);
   pending[1].release();
-  const grid = page.locator(".resource-grid:visible:not(.resource-preset-grid)");
+  await openEffectLibrary(page);
+  const grid = page.locator(".resource-effect-grid:visible");
   await expect(grid.getByText("Catalog generation 1", { exact: true })).toBeVisible();
   const olderResponse = page.waitForResponse((response) => new URL(response.url()).pathname === `${apiPath(id)}/resources`);
   pending[0].release();
@@ -1153,9 +1148,10 @@ test("offline resource pack manager installs, activates, and rolls back a versio
 
   await openProject(page, name);
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "特效" }).click();
+  await page.getByRole("button", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "资源管理", exact: true }).click();
   const manager = page.locator(".resource-pack-manager:visible").first();
   await expect(manager.getByText("离线资源包管理 · 当前 v1.9.0")).toBeVisible();
-  await manager.locator("summary").click();
   await expect(manager.getByRole("list", { name: "已安装资源包版本" }))
     .toContainText("授权元数据：许可证 442/442 · 来源 64/442 · 字段待补 378");
   await manager.getByLabel("安装离线资源包 ZIP").setInputFiles({
@@ -1183,8 +1179,9 @@ test("offline resource pack manager reports a corrupt ZIP and remains usable", a
   const { name } = await createProject(request);
   await openProject(page, name);
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "特效" }).click();
+  await page.getByRole("button", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "资源管理", exact: true }).click();
   const manager = page.locator(".resource-pack-manager:visible").first();
-  await manager.locator("summary").click();
   await expect(manager.getByText(`离线资源包管理 · 当前 v${await getBuiltinPackVersion(request)}`)).toBeVisible();
 
   await manager.getByLabel("安装离线资源包 ZIP").setInputFiles({
@@ -1260,8 +1257,9 @@ test("signed resource registry can be added, trusted, downloaded, and removed", 
 
   await openProject(page, name);
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "特效" }).click();
+  await page.getByRole("button", { name: "设置", exact: true }).click();
+  await page.getByRole("button", { name: "资源管理", exact: true }).click();
   const manager = page.locator(".resource-pack-manager:visible").first();
-  await manager.locator("summary").click();
   await manager.getByLabel("签名目录 HTTPS 地址").fill("https://example.com/resources.json");
   await manager.getByRole("button", { name: "添加", exact: true }).click();
   const source = manager.locator(".resource-registry__list > li");
@@ -1354,7 +1352,7 @@ test("music library classifies imported audio as background music or sound effec
   });
   await openProject(page, name);
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "音乐" }).click();
-
+  await page.getByRole("group", { name: "使用状态过滤" }).getByRole("button", { name: /当前工程未用/ }).click();
   await page.getByRole("button", { name: "试听 field-recording.wav" }).click();
   const auditionError = page.getByRole("alert").filter({ hasText: "音频无法播放" });
   await expect(auditionError).toBeVisible();
@@ -1377,6 +1375,7 @@ test("music library classifies imported audio as background music or sound effec
   await page.reload();
   await openProject(page, name);
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "音乐" }).click();
+  await page.getByRole("group", { name: "使用状态过滤" }).getByRole("button", { name: /当前工程未用/ }).click();
   await expect(page.getByRole("combobox", { name: "音频用途 field-recording.wav" }))
     .toHaveValue("sound_effect");
   const sourceTabs = page.getByRole("tablist", { name: "素材来源" });
@@ -1397,8 +1396,9 @@ test("preset motion sample explains preview failure and retries the bundled vide
   const { name } = await createProject(request);
   await openProject(page, name);
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "特效" }).click();
-  const previewButton = page.locator(".resource-preset-card__preview").first();
+  const previewButton = page.locator(".resource-card__thumbnail").first();
   await expect(previewButton).toBeVisible();
+  await expect.poll(() => page.locator(".resource-effect-card:visible select").first().locator("option").count()).toBeGreaterThan(1);
   const previewRoute = "**/api/v1/presets/*/preview";
   await page.route(previewRoute, (route) => route.abort());
   await previewButton.click();
@@ -1452,7 +1452,8 @@ test("botanical sticker atlas category previews and inserts a saved overlay", as
   await page.screenshot({ path: stickerScreenshot, fullPage: false });
   const preview = card.locator("video");
   await expect(preview).toBeVisible();
-  await preview.hover();
+  await expect(card.locator(".sticker-thumbnail img")).toBeVisible();
+  await card.locator(".sticker-thumbnail").hover();
   await expect.poll(() => preview.evaluate((element) => (element as HTMLVideoElement).currentTime))
     .toBeGreaterThan(0.1);
 
@@ -1482,7 +1483,8 @@ test("travel-vlog sticker atlas previews and inserts a saved overlay", async ({ 
   await expect(card.locator("small")).toContainText("合格");
   const preview = card.locator("video");
   await expect(preview).toBeVisible();
-  await preview.hover();
+  await expect(card.locator(".sticker-thumbnail img")).toBeVisible();
+  await card.locator(".sticker-thumbnail").hover();
   await expect.poll(() => preview.evaluate((element) => (element as HTMLVideoElement).currentTime))
     .toBeGreaterThan(0.1);
 
@@ -1511,7 +1513,8 @@ test("food-and-drink sticker category previews and inserts a saved overlay", asy
   await expect(card).toHaveCount(1);
   const preview = card.locator("video");
   await expect(preview).toBeVisible();
-  await preview.hover();
+  await expect(card.locator(".sticker-thumbnail img")).toBeVisible();
+  await card.locator(".sticker-thumbnail").hover();
   await expect.poll(() => preview.evaluate((element) => (element as HTMLVideoElement).currentTime))
     .toBeGreaterThan(0.1);
 
@@ -1906,7 +1909,22 @@ test("six-clip high-density timeline locates a seam and trims to an exact frame"
   const caption = page.getByTestId("caption-timeline-clip");
   await expect(mainLane.locator(".clip-block")).toHaveCount(6);
   await expect(musicLane.locator(".clip-block")).toHaveCount(1);
+  const collapsedEffects = page.locator(".timeline-track--effects-collapsed");
+  await expect(collapsedEffects).toHaveCount(1);
+  expect((await collapsedEffects.boundingBox())!.height).toBe(16);
+  await expect(collapsedEffects.locator(".effect-overview__line")).toHaveCount(1);
+  await expect(page.getByTestId("effect-segment")).toHaveCount(0);
+  const beforeDisclosure = await readProject(request, id);
+  const disclosure = collapsedEffects.locator(".timeline-track__label--effects");
+  await disclosure.focus();
+  await disclosure.press("Enter");
+  await expect(page.locator(".timeline-track__label--effects")).toHaveAttribute("aria-expanded", "true");
   await expect(page.getByTestId("effect-segment")).toBeVisible();
+  await page.locator(".timeline-track__label--effects").press("Space");
+  await expect(collapsedEffects).toHaveCount(1);
+  await collapsedEffects.locator(".effect-overview").click({ position: { x: 90, y: 7 } });
+  await expect(page.getByTestId("effect-segment")).toBeVisible();
+  expect(await readProject(request, id)).toEqual(beforeDisclosure);
   await expect(captionLane).toBeVisible();
   await expect(caption).toContainText("第三段字幕");
   await caption.click();
@@ -1974,6 +1992,41 @@ test("six-clip high-density timeline locates a seam and trims to an exact frame"
   await expect(trimReadout).toHaveAttribute("data-duration-frames", "24");
   await page.mouse.up();
   await expect.poll(async () => seconds(await shotEnd())).toBeCloseTo(84 / 15, 6);
+
+
+  // Scrubbing near an edge must not fight automatic playhead following.
+  while (await page.locator(".timeline__zoom-val").textContent() !== "80px/s") {
+    const value = Number((await page.locator(".timeline__zoom-val").textContent())!.split("px")[0]);
+    await page.locator(`.timeline__zoom button[aria-label='${value < 80 ? "放大" : "缩小"}']`).click();
+  }
+  await ruler.focus();
+  await page.keyboard.press("Home");
+  const scroller = page.locator(".timeline__scroller");
+  await scroller.evaluate((element) => { element.scrollLeft = 0; });
+  const head = (await page.locator(".timeline-playhead__drag").boundingBox())!;
+  const scrollBox = (await scroller.boundingBox())!;
+  const beforeScrub = await readProject(request, id);
+  await page.mouse.move(head.x + head.width / 2, head.y + 8);
+  await page.mouse.down();
+  await page.mouse.move(scrollBox.x + scrollBox.width - 18, head.y + 8, { steps: 8 });
+  await page.waitForTimeout(200);
+  const firstScroll = await scroller.evaluate((element) => element.scrollLeft);
+  expect(firstScroll).toBeGreaterThan(0);
+  expect(firstScroll).toBeLessThan(90);
+  expect(Number(await ruler.getAttribute("aria-valuenow"))).toBeLessThan(11);
+  await page.waitForTimeout(200);
+  const secondScroll = await scroller.evaluate((element) => element.scrollLeft);
+  expect(secondScroll).toBeGreaterThan(firstScroll);
+  expect(secondScroll - firstScroll).toBeLessThan(90);
+  await page.mouse.up();
+  const released = await scroller.evaluate((element) => element.scrollLeft);
+  await page.waitForTimeout(150);
+  expect(await scroller.evaluate((element) => element.scrollLeft)).toBe(released);
+  expect(await readProject(request, id)).toEqual(beforeScrub);
+  expect(await mainLane.locator("..").locator(".timeline-track__label").evaluate((label) => {
+    const rect = label.getBoundingClientRect();
+    return !!document.elementFromPoint(rect.right - 12, rect.y + rect.height / 2)?.closest(".timeline-track__label");
+  })).toBe(true);
 });
 
 test("dropping library media over a clip inserts at its boundary without splitting it", async ({ page, request }) => {
@@ -2001,6 +2054,144 @@ test("dropping library media over a clip inserts at its boundary without splitti
   expect(greenAfter.timelineStart).toEqual({ num: "5", den: "1" });
   expect(greenAfter.timelineEnd).toEqual({ num: "10", den: "1" });
   expect(blueAfter.timelineStart).toEqual({ num: "15", den: "1" });
+});
+
+test("first ready window opens editing while continuous preparation keeps running", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  let firstReady = false;
+  let polls = 0;
+  let cancels = 0;
+  const job = () => ({ jobId: "progressive-opening", state: "running", phase: "rendering",
+    completedWindows: firstReady ? 1 : 0, totalWindows: 4, progress: firstReady ? 25 : 0,
+    cached: false, currentWindow: firstReady ? 2 : 1, windowStart: firstReady ? 2 : 0,
+    windowEnd: firstReady ? 4 : 2, elapsedSeconds: 1 });
+  await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({
+    contentType: "application/json", body: JSON.stringify(job()),
+  }));
+  await page.route("**/preview-jobs/progressive-opening", route => {
+    polls += 1;
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify(job()) });
+  });
+  await page.route("**/preview-jobs/progressive-opening/cancel", route => {
+    cancels += 1;
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify(job()) });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: `打开工程 ${name}` }).click();
+  await expect(page.locator(".project-loading")).toBeVisible();
+  firstReady = true;
+  await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible();
+  await expect(page.locator(".project-loading")).toBeHidden();
+  const before = polls;
+  await expect.poll(() => polls).toBeGreaterThan(before + 1);
+  expect(cancels).toBe(0);
+  const video = page.locator("video.player__video");
+  await expect.poll(() => video.evaluate(element => (element as HTMLVideoElement).videoWidth)).toBeGreaterThan(0);
+  const ruler = page.getByRole("slider", { name: "时间线播放头" });
+  const bounds = await ruler.boundingBox();
+  await page.mouse.click(bounds!.x + 6.5 * 40, bounds!.y + bounds!.height / 2);
+  await expect.poll(() => video.evaluate(element => (element as HTMLVideoElement).currentTime)).toBeCloseTo(.5, 0);
+  expect(cancels).toBe(0);
+});
+
+test("first composed frame opens editing before any playback window finishes", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  let polls = 0;
+  let completedFrames=0;
+  let windowRequests=0;
+  await page.route(`**/projects/${id}/preview-frame?*`,async route => {
+    const response=await route.fetch();
+    completedFrames+=1;
+    await route.fulfill({response});
+  });
+  await page.route(`**/projects/${id}/preview-window?*`,async route => {
+    // The paused player must show its frame before a video encode can occupy
+    // the render slot. Reuse of an existing video remains independently cached.
+    expect(completedFrames).toBeGreaterThanOrEqual(2);
+    windowRequests+=1;
+    await route.continue();
+  });
+  const job = { jobId: "frame-first-opening", state: "running", phase: "rendering",
+    completedWindows: 0, totalWindows: 4, progress: 0, cached: false,
+    currentWindow: 1, windowStart: 0, windowEnd: 2, elapsedSeconds: 1 };
+  await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({
+    contentType: "application/json", body: JSON.stringify(job),
+  }));
+  await page.route("**/preview-jobs/frame-first-opening", route => {
+    polls += 1;
+    return route.fulfill({ contentType: "application/json", body: JSON.stringify(job) });
+  });
+  await page.route("**/preview-jobs/frame-first-opening/cancel", route => route.fulfill({
+    contentType: "application/json", body: JSON.stringify(job),
+  }));
+  await page.goto("/");
+  await page.getByRole("button", { name: `打开工程 ${name}` }).click();
+  await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible();
+  await expect(page.locator(".project-loading")).toBeHidden();
+  const before=polls;
+  await expect.poll(() => polls).toBeGreaterThan(before+1);
+  await expect.poll(() => windowRequests).toBeGreaterThan(0);
+});
+
+test("uncached ruler dragging updates a composed frame before pointer release", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  const frames: Array<{ time: number; size: string | null }> = [];
+  await page.route(`**/projects/${id}/preview-frame?*`, async route => {
+    const url = new URL(route.request().url());
+    frames.push({ time: Number(url.searchParams.get("t")), size: url.searchParams.get("size") });
+    await new Promise(resolve => setTimeout(resolve, 120));
+    await route.fulfill({ contentType: "image/png", body: readFileSync(imageFixture) });
+  });
+  const job = { jobId: "drag-frames", state: "running", phase: "rendering", completedWindows: 0,
+    totalWindows: 4, progress: 0, cached: false, currentWindow: 1, windowStart: 0, windowEnd: 2 };
+  await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({ json: job }));
+  await page.route("**/preview-jobs/drag-frames", route => route.fulfill({ json: job }));
+  await page.route("**/preview-jobs/drag-frames/cancel", route => route.fulfill({ json: job }));
+  await page.goto("/");
+  await page.getByRole("button", { name: `打开工程 ${name}` }).click();
+  await expect(page.locator(".project-loading")).toBeHidden();
+  const ruler = page.locator(".timeline-ruler");
+  await expect(ruler).toBeVisible();
+  const geometry = await ruler.evaluate(element => {
+    const box = element.getBoundingClientRect();
+    const ticks = Array.from(element.querySelectorAll<HTMLElement>(".timeline-ruler__tick"))
+      .filter(t => t.querySelector(".timeline-ruler__label")).slice(0, 2);
+    return { x: box.x, y: box.y + box.height / 2,
+      scale: parseFloat(ticks[1].style.left) - parseFloat(ticks[0].style.left) };
+  });
+  // Tick labels are two seconds apart at the default zoom.
+  await page.mouse.move(geometry.x + geometry.scale * 2.25, geometry.y);
+  await page.mouse.down();
+  try {
+    await expect.poll(() => frames.filter(f => f.size === "320x180" && f.time > 4).length).toBeGreaterThan(0);
+    await expect(page.locator(".player__poster")).toBeVisible();
+    const before = frames.length;
+    await page.mouse.move(geometry.x + geometry.scale * 2.75, geometry.y);
+    await expect.poll(() => frames.length).toBeGreaterThan(before);
+    await expect.poll(() => frames.at(-1)?.time || 0).toBeGreaterThan(5);
+    await expect.poll(async () => Number(await page.locator(".player__poster").getAttribute("data-preview-time"))).toBeGreaterThan(5);
+  } finally { await page.mouse.up(); }
+  await expect.poll(() => frames.filter(f => f.size === "640x360" && f.time > 5).length).toBeGreaterThan(0);
+});
+
+test("effect numeric edits request a fresh composed preview after commit", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  const clipId = (await readProject(request, id)).sequence.tracks[0].clips[0].id;
+  await apply(request, id, "effect.add", { clipId, effectId: "cutvoke.fx.glow", params: { intensity: 0.25 } });
+  let frames = 0;
+  page.on("request", r => { if (r.url().includes(`/projects/${id}/preview-frame?`)) frames += 1; });
+  await openProject(page, name);
+  await page.locator(`[data-clip-id="${clipId}"]`).first().click();
+  const effect = page.locator('details.inspector__effect-params[data-effect-id="cutvoke.fx.glow"]');
+  await expect(effect).toBeVisible();
+  if (!await effect.evaluate(e => (e as HTMLDetailsElement).open)) await effect.locator("summary").click();
+  const before = frames;
+  const intensity = effect.locator('input[type="number"]').first();
+  await intensity.fill("0.65");
+  await intensity.press("Tab");
+  await expect.poll(async () => (await readProject(request, id)).sequence.tracks.flatMap(t => t.clips)
+    .find(c => c.id === clipId)?.effects.find(e => e.effectId === "cutvoke.fx.glow")?.params?.intensity).toBe(0.65);
+  await expect.poll(() => frames).toBeGreaterThan(before);
 });
 
 test("buffering keeps the video position and size fixed", async ({ page, request }) => {
@@ -2258,11 +2449,15 @@ test("effects and transitions are timeline objects that can be selected, deleted
     clipId: "color-2", effectId: "cutvoke.transition.crossfade", params: { duration: 0.5 },
   });
   await openProject(page, name);
+  await page.locator(".timeline-track__label--effects").click();
   const effect = page.getByRole("button", { name: /自然增色.*位于/ });
   await expect(effect).toBeVisible();
+  await page.getByRole("tablist", { name: "工程编辑面板" }).getByRole("tab", { name: "变速" }).click();
   await effect.click();
+  await expect(page.getByRole("tablist", { name: "工程编辑面板" }).getByRole("tab", { name: "片段属性" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator('details.inspector__effect-params[data-effect-id="cutvoke.fx.vibrance"]')).toHaveAttribute("open", "");
   await expect(effect).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: /删除效果 自然增色/ }).click();
+  await page.locator(".timeline-track--effects").getByRole("button", { name: /删除效果 自然增色/ }).click();
   await expect.poll(async () => (await readProject(request, id)).sequence.tracks[0].clips[1].effects.length).toBe(0);
   await page.getByRole("button", { name: "撤销" }).click();
   await expect(effect).toBeVisible();
@@ -2278,6 +2473,7 @@ test("effects and transitions are timeline objects that can be selected, deleted
   await page.reload();
   await openProject(page, name);
   await expect(page.getByRole("button", { name: /转场，位于/ })).toBeVisible();
+  await page.locator(".timeline-track__label--effects").click();
   await expect(page.getByRole("button", { name: /自然增色.*位于/ })).toBeVisible();
 });
 
@@ -2286,34 +2482,31 @@ test("seam hotspot selects the incoming clip for transition preview, apply, repl
   await openProject(page, name);
 
   await page.getByRole("button", { name: "在 5.00 秒的片段接缝添加转场" }).click();
-  await expect(page.getByRole("tablist", { name: "工程编辑面板" }).getByRole("tab", { name: "转场" }))
+  await expect(page.getByRole("tablist", { name: "工程编辑面板" }).getByRole("tab", { name: "转场参数" }))
     .toHaveAttribute("aria-selected", "true");
   const target = page.getByLabel("后一段片段（转场挂此段）");
   await expect(target).toHaveValue("color-1");
   await expect(page.getByText("转场将连接此前一段与当前片段")).toBeVisible();
 
-  const options = page.locator(".transition-options .cv-chip");
+  await page.getByRole("button", { name: "到左侧选择转场", exact: true }).click();
+  await openEffectLibrary(page);
+  const options = page.locator(".resource-effect-library:visible .resource-card");
   const catalog = await (await request.get("/api/v1/effects?category=transition&lang=zh-CN")).json();
   expect(catalog.effects.length).toBeGreaterThan(1);
-  await expect(options).toHaveText(catalog.effects.map((effect: { name: string }) => effect.name));
-  const currentOption = page.locator(".transition-options .cv-chip--on");
-  const originalName = (await currentOption.innerText()).trim();
-  await page.getByRole("button", { name: "预览当前转场" }).click();
-  await expect(page.locator('.resource-preview img[alt="当前转场与时长在两段片段之间的真实预览帧"]'))
-    .toBeVisible({ timeout: 20_000 });
+  await expect(options).toHaveCount(catalog.effects.length);
 
   const transitionOfIncoming = async () => (await readProject(request, id)).sequence.tracks
     .find((track) => track.id === "v1")!.clips.find((clip) => clip.id === "color-1")!.effects
     .find((effect) => effect.effectId.startsWith("cutvoke.transition."));
-  await page.getByRole("button", { name: "应用转场" }).click();
+  await options.first().press("Enter");
   await expect.poll(async () => (await transitionOfIncoming())?.effectId)
     .toMatch(/^cutvoke\.transition\./);
   const firstId = (await transitionOfIncoming())!.effectId;
+  await page.getByRole("button", { name: "预览当前转场" }).click();
+  await expect(page.locator('.resource-preview img[alt="当前转场与时长在两段片段之间的真实预览帧"]'))
+    .toBeVisible({ timeout: 20_000 });
 
-  await options.nth(1).click();
-  const replacementName = (await page.locator(".transition-options .cv-chip--on").innerText()).trim();
-  expect(replacementName).not.toBe(originalName);
-  await page.getByRole("button", { name: "切换转场" }).click();
+  await options.nth(1).press("Enter");
   await expect.poll(async () => (await transitionOfIncoming())?.effectId)
     .not.toBe(firstId);
   const replacementId = (await transitionOfIncoming())!.effectId;
@@ -2323,7 +2516,7 @@ test("seam hotspot selects the incoming clip for transition preview, apply, repl
   await page.getByRole("button", { name: "重做" }).click();
   await expect.poll(async () => (await transitionOfIncoming())?.effectId).toBe(replacementId);
 
-  await page.locator(".cv-panel .cv-btn--danger").click();
+  await page.locator(".zone-right .cv-btn--danger").click();
   await expect.poll(transitionOfIncoming).toBeUndefined();
 });
 
@@ -2332,6 +2525,9 @@ test("visual effects move and resize independently with undo and redo", async ({
   await apply(request, id, "effect.add", {
     clipId: "color-1", effectId: "cutvoke.fx.grayscale",
   });
+  await apply(request, id, "effect.add", {
+    clipId: "color-1", effectId: "cutvoke.fx.vibrance", params: { intensity: 0.35 },
+  });
   await openProject(page, name);
 
   const range = async () => {
@@ -2339,8 +2535,13 @@ test("visual effects move and resize independently with undo and redo", async ({
     const effect = clip.effects.find((item) => item.effectId === "cutvoke.fx.grayscale")!;
     return effect.range ? [seconds(effect.range.start), seconds(effect.range.end)] : undefined;
   };
+  await page.locator(".timeline-track__label--effects").click();
   const segment = page.locator('[data-testid="effect-segment"][data-effect-id="cutvoke.fx.grayscale"]');
   await expect(segment).toBeVisible();
+  const otherEffect = page.locator('[data-testid="effect-segment"][data-effect-id="cutvoke.fx.vibrance"]');
+  const firstBounds = (await segment.boundingBox())!;
+  const secondBounds = (await otherEffect.boundingBox())!;
+  expect(secondBounds.y).toBeGreaterThanOrEqual(firstBounds.y + firstBounds.height);
   await segment.hover();
   const endHandle = segment.locator(".effect-segment__resize--end");
   const endBox = await endHandle.boundingBox();
@@ -2350,6 +2551,8 @@ test("visual effects move and resize independently with undo and redo", async ({
   await page.mouse.move(endBox!.x + endBox!.width / 2 - 80, endBox!.y + endBox!.height / 2, { steps: 8 });
   await page.mouse.up();
   await expect.poll(range).toEqual([0, 3]);
+  // The command may commit before React replaces the temporary range geometry.
+  await expect(segment).toHaveCSS("width", "120px");
 
   const segmentBox = await segment.boundingBox();
   expect(segmentBox).toBeTruthy();
@@ -2382,6 +2585,7 @@ test("crop effect ranges can be edited, undone and restored after reload", async
     const effect = clip.effects.find((item) => item.effectId === "cutvoke.fx.crop")!;
     return effect.range ? [seconds(effect.range.start), seconds(effect.range.end)] : undefined;
   };
+  await page.locator(".timeline-track__label--effects").click();
   const segment = page.locator('[data-testid="effect-segment"][data-effect-id="cutvoke.fx.crop"]');
   await expect(segment).toBeVisible();
   await segment.hover();
@@ -2393,6 +2597,8 @@ test("crop effect ranges can be edited, undone and restored after reload", async
   await page.mouse.move(endBox!.x + endBox!.width / 2 - 80, endBox!.y + endBox!.height / 2, { steps: 8 });
   await page.mouse.up();
   await expect.poll(range).toEqual([0, 3]);
+  // The command may commit before React replaces the temporary range geometry.
+  await expect(segment).toHaveCSS("width", "120px");
 
   const segmentBox = await segment.boundingBox();
   expect(segmentBox).toBeTruthy();
@@ -2963,7 +3169,42 @@ test("timeline range export is queued and reports the selected duration", async 
   const completed = jobs.find((job) => job.outPath === outputPath);
   expect(completed?.status).toBe("succeeded");
   expect(completed?.result?.duration).toBeCloseTo(1.4, 1);
+  await dialog.getByRole("button", { name: "关闭导出" }).click();
+  await page.getByRole("button", { name: "导出", exact: true }).click();
+  await expect(dialog.getByText("导出完成", { exact: false })).toBeVisible();
+  await expect(dialog.getByLabel("输出文件路径")).toHaveValue(outputPath);
   unlinkSync(outputPath);
+});
+
+test("long export stays running beyond three minutes and recovers after closing the panel", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await openProject(page, name);
+  const job = { jobId: "long-export", projectId: id, revision: "0", quality: "high",
+    outPath: "long-export.mp4", status: "running", result: null, error: null, createdAt: Date.now() / 1000 - 190 };
+  let offline = false;
+  await page.route(`**/projects/${id}/exports`, async route => {
+    if (offline) return route.abort();
+    await route.fulfill({ json: { jobs: [job] } });
+  });
+  await page.getByRole("button", { name: "导出", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "导出成片" });
+  await expect(dialog.getByText("导出进行中", { exact: false })).toBeVisible();
+  await expect(dialog.getByText(/已用时 3:/)).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "开始导出" })).toBeDisabled();
+  offline = true;
+  await expect(dialog.getByText("正在重新连接导出任务…")).toBeVisible();
+  offline = false;
+  await dialog.getByRole("button", { name: "后台导出" }).click();
+  await expect(dialog).not.toBeVisible();
+  await page.getByRole("button", { name: "导出", exact: true }).click();
+  await expect(dialog.getByText("导出进行中", { exact: false })).toBeVisible();
+  await expect(dialog.getByLabel("输出文件路径")).toHaveValue("long-export.mp4");
+  job.status = "failed";
+  const error = page.getByRole("alertdialog", { name: "操作未完成" });
+  await expect(error).toBeVisible();
+  await error.getByRole("button", { name: "关闭", exact: true }).click();
+  await expect(error).not.toBeVisible();
+  await expect(dialog).toBeVisible();
 });
 
 test("slow-motion interpolation can be enabled, undone, redone, and reopened", async ({ page, request }) => {
@@ -3305,7 +3546,8 @@ test("material texture atlas previews and adds a saved overlay sticker", async (
   await expect(card.locator("small")).toContainText("合格");
   const preview = card.locator("video");
   await expect(preview).toBeVisible();
-  await preview.hover();
+  await expect(card.locator(".sticker-thumbnail img")).toBeVisible();
+  await card.locator(".sticker-thumbnail").hover();
   await expect.poll(() => preview.evaluate((element) => (element as HTMLVideoElement).currentTime))
     .toBeGreaterThan(0.1);
 
@@ -3337,7 +3579,8 @@ test("person atmosphere overlays preview as approved and survive reopening", asy
   await expect(card.locator("small")).toContainText("合格");
   const preview = card.locator("video");
   await expect(preview).toBeVisible();
-  await preview.hover();
+  await expect(card.locator(".sticker-thumbnail img")).toBeVisible();
+  await card.locator(".sticker-thumbnail").hover();
   await expect.poll(() => preview.evaluate((element) => (element as HTMLVideoElement).currentTime))
     .toBeGreaterThan(0.1);
 
@@ -3366,7 +3609,8 @@ test("generated hand-drawn marker stickers preview as approved and survive reope
   await expect(card.locator("small")).toContainText("合格");
   const preview = card.locator("video");
   await expect(preview).toBeVisible();
-  await preview.hover();
+  await expect(card.locator(".sticker-thumbnail img")).toBeVisible();
+  await card.locator(".sticker-thumbnail").hover();
   await expect.poll(() => preview.evaluate((element) => (element as HTMLVideoElement).currentTime))
     .toBeGreaterThan(0.1);
   await card.getByRole("button", { name: "添加贴纸 手绘圈选" }).click();
@@ -3423,7 +3667,8 @@ test("generated educational stickers preview, apply and survive reopening", asyn
   await expect(card.locator("small")).toContainText("合格");
   const preview = card.locator("video");
   await expect(preview).toBeVisible();
-  await preview.hover();
+  await expect(card.locator(".sticker-thumbnail img")).toBeVisible();
+  await card.locator(".sticker-thumbnail").hover();
   await expect.poll(() => preview.evaluate((element) => (element as HTMLVideoElement).currentTime))
     .toBeGreaterThan(0.1);
   await card.getByRole("button", { name: "添加贴纸 显微镜" }).click();
@@ -3443,11 +3688,19 @@ test("mirror and flip presets expose editable axis controls that survive undo an
   await openProject(page, name);
   await page.locator(".clip-block").filter({ hasText: "red.mp4" }).click();
 
-  const effectPicker = page.locator("details.inspector__fx-picker");
-  await expect(effectPicker).toBeVisible();
-  await effectPicker.locator("summary").click();
-  await page.getByRole("button", { name: "水平镜像" }).click();
+  await expect(page.locator("details.inspector__fx-picker")).toHaveCount(0);
+  await page.getByRole("button", { name: "从效果库添加", exact: true }).click();
+  const mirrorCard = page.locator(".resource-effect-library:visible .resource-card")
+    .filter({ has: page.getByText("水平镜像", { exact: true }) });
+  await mirrorCard.locator(".resource-card__style select").selectOption("");
+  await mirrorCard.press("Enter");
 
+  const enabled = page.getByRole("checkbox", { name: "启用效果 水平镜像" });
+  await expect(enabled).toBeChecked();
+  await enabled.uncheck();
+  await expect.poll(async () => (await readProject(request, id)).sequence.tracks[0].clips[0].effects
+    .find((effect) => effect.effectId === "cutvoke.fx.mirror")!.enabled).toBe(false);
+  await enabled.check();
   const axis = page.getByLabel("翻转轴向");
   await expect(axis).toHaveValue("horizontal");
   await expect(axis.locator("option")).toHaveText(["水平", "垂直", "水平 + 垂直"]);

@@ -11,13 +11,15 @@ import { useEditor } from "../store/editor";
 import { sourceBasename } from "../lib/media";
 import { getSessionAssets, subscribeAssets, hydrateAssets, updateSessionAssetAudioRole } from "../lib/assetStore";
 import { mediaFitsTrack, uploadFiles } from "../lib/importMedia";
-import { listAssets, listBuiltinStickers, stickerPreviewUrl, assetThumbnailUrl, assetMediaUrl, assetWaveformUrl, relinkAsset, updateAssetAudioRole, type AudioRole, type BuiltinSticker } from "../lib/mediaApi";
+import { listAssets, listBuiltinStickers, assetThumbnailUrl, assetMediaUrl, assetWaveformUrl, relinkAsset, updateAssetAudioRole, type AudioRole, type BuiltinSticker } from "../lib/mediaApi";
 import { insertClipAutoTrack, swapClipAsset } from "../store/clipEdit";
 import { getLatestState } from "../store/actions";
 import { setFavorite } from "../store/effectEdit";
 import { TitleLibrary } from "./TitleLibrary";
 import { ResourcePanel } from "./ResourcePanel";
 import { CaptionPanel } from "./CaptionPanel";
+import { AssetPreview, type PreviewAsset } from "./AssetPreview";
+import { StickerThumbnail } from "./StickerThumbnail";
 import { MEDIA_ROW_HEIGHT, useVirtualMediaRows } from "./useVirtualMediaRows";
 import { LOCATE_PREFLIGHT_ISSUE, type LocatePreflightIssueEvent } from "../lib/preflight";
 
@@ -84,7 +86,9 @@ export function MediaPanel() {
   const [savingStickerFavorite, setSavingStickerFavorite] = useState<string | null>(null);
   const [stickerError, setStickerError] = useState("");
   const [addingSticker, setAddingSticker] = useState<string | null>(null);
-  const [usageFilter, setUsageFilter] = useState<UsageFilter>("all");
+  const [usageFilter, setUsageFilter] = useState<UsageFilter>("used");
+  const [assetPreview, setAssetPreview] = useState<PreviewAsset | null>(null);
+  useEffect(() => { setUsageFilter("used"); setAssetPreview(null); setAudition(null); }, [state.currentId]);
   const [audioRoleFilter, setAudioRoleFilter] = useState<"all" | AudioRole>("all");
   const [savingAudioRole, setSavingAudioRole] = useState<string | null>(null);
   const [audition, setAudition] = useState<{ assetId: string; name: string } | null>(null);
@@ -112,10 +116,12 @@ export function MediaPanel() {
     }
     setAuditionError("");
     setWaveformError(false);
+    window.dispatchEvent(new Event("cutvoke:pause-play"));
     player.load();
     void player.play().catch(() => {
       // Browser autoplay policy can require the user to press the native control.
     });
+    return () => player.pause();
   }, [audition, auditionAttempt]);
 
   useEffect(() => {
@@ -223,6 +229,18 @@ export function MediaPanel() {
     setDomain(next);
   };
 
+  useEffect(() => {
+    const open = (event: Event) => {
+      const next = (event as CustomEvent<CreativeDomain>).detail;
+      if (CREATIVE_DOMAINS.some(item => item.id === next)) {
+        selectDomain(next);
+        requestAnimationFrame(() => { domainTabRefs.current.get(next)?.scrollIntoView({ block: "nearest" }); domainTabRefs.current.get(next)?.focus(); });
+      }
+    };
+    window.addEventListener("cutvoke:open-creative-domain", open);
+    return () => window.removeEventListener("cutvoke:open-creative-domain", open);
+  }, [domain]);
+
   const onDomainTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
     const key = readingOrderKey(event.key, locale);
     let nextIndex: number | null = null;
@@ -256,8 +274,9 @@ export function MediaPanel() {
   // 工程 clips 提取的源文件（复用已有素材）
   const clipAssets = useMemo<ClipAsset[]>(() => {
     const map = new Map<string, ClipAsset>();
-    const tracks = state.project?.sequence.tracks || [];
+    const tracks = [state.project?.sequence, ...(state.project?.sequences || [])].flatMap(sequence => sequence?.tracks || []);
     for (const t of tracks) {
+      if (t.kind === "text") continue;
       for (const c of t.clips || []) {
         const p = c.assetRef?.sourcePath;
         if (!p) continue;
@@ -269,6 +288,18 @@ export function MediaPanel() {
     }
     return [...map.values()];
   }, [state.project, locale]);
+
+  const timelineUses = useMemo(() => {
+    const locations = new Map<string, { trackId: string; clipId: string; time: number }[]>();
+    for (const track of state.project?.sequence.tracks || []) for (const clip of track.clips) {
+      const use = { trackId: track.id, clipId: clip.id, time: Number(clip.timelineStart.num) / Number(clip.timelineStart.den) };
+      for (const key of [`path:${clip.assetRef.sourcePath}`, ...(clip.assetRef.assetId ? [`id:${clip.assetRef.assetId}`] : [])]) {
+        const list = locations.get(key) || []; list.push(use); locations.set(key, list);
+      }
+    }
+    for (const list of locations.values()) list.sort((a, b) => a.time - b.time);
+    return locations;
+  }, [state.project]);
 
   const sessionAssets = getSessionAssets();
   const assets: { path: string; name: string; kind: ClipAsset["kind"]; duration: number | null; assetId?: string; builtIn: boolean; available?: boolean; audioRole?: AudioRole }[] = useMemo(() => {
@@ -319,7 +350,7 @@ export function MediaPanel() {
   const usedRefs = useMemo(() => {
     const paths = new Set<string>();
     const ids = new Set<string>();
-    for (const t of state.project?.sequence.tracks || []) {
+    for (const t of [state.project?.sequence, ...(state.project?.sequences || [])].flatMap(sequence => sequence?.tracks || [])) {
       for (const c of t.clips || []) {
         if (c.assetRef?.sourcePath) paths.add(c.assetRef.sourcePath);
         if (c.assetRef?.assetId) ids.add(c.assetRef.assetId);
@@ -343,8 +374,8 @@ export function MediaPanel() {
         if (domain === "media" && kindFilter !== "all" && a.kind !== kindFilter) return false;
         if (domain === "music" && audioRoleFilter !== "all" &&
             (a.audioRole || "unclassified") !== audioRoleFilter) return false;
-        if (usageFilter === "used" && !a.used) return false;
-        if (usageFilter === "unused" && a.used) return false;
+        if (sourceFilter === "mine" && usageFilter === "used" && !a.used) return false;
+        if (sourceFilter === "mine" && usageFilter === "unused" && a.used) return false;
         return true;
       });
   }, [assets, query, kindFilter, sourceFilter, usageFilter, usedRefs, domain, audioRoleFilter, locale]);
@@ -353,8 +384,8 @@ export function MediaPanel() {
     () => filtered.filter((asset) => domain === "music" ? asset.kind === "audio" : asset.kind !== "audio"),
     [filtered, domain, locale],
   );
-  const domainLabel = CREATIVE_DOMAINS.find((item) => item.id === domain)?.label || tr("素材");
-  const mediaRows = useVirtualMediaRows(domainAssets.length, domain === "media" || domain === "music");
+  const mediaRowHeight = domain === "music" ? 90 : MEDIA_ROW_HEIGHT;
+  const mediaRows = useVirtualMediaRows(domainAssets.length, domain === "media" || domain === "music", mediaRowHeight);
 
   const handleFiles = async (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
@@ -377,7 +408,10 @@ export function MediaPanel() {
         (progress) => setImportProgress({ ...progress, done: false }),
       );
       setImportProgress((progress) => progress ? { ...progress, done: true } : null);
-      if (ok > 0) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已导入 {0} 个素材", ok) });
+      if (ok > 0) {
+        setSourceFilter("mine"); setUsageFilter("unused"); setKindFilter("all"); setQuery("");
+        dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已导入 {0} 个素材", ok) });
+      }
     } catch (error) {
       setImportProgress((progress) => progress ? { ...progress, done: true, failed: progress.failed + 1 } : null);
       setImportFailures((failures) => [...failures, {
@@ -536,7 +570,7 @@ export function MediaPanel() {
   };
 
   return (
-    <Panel title={tr("创作资源")} subtitle={tr("当前领域：{0}", domainLabel)}>
+    <Panel title={tr("创作资源")}>
       <div className="media-domain-tabs" role="tablist" aria-label={tr("创作域")}>
         {CREATIVE_DOMAINS.map((item, index) => (
           <button key={item.id} type="button" role="tab"
@@ -675,7 +709,7 @@ export function MediaPanel() {
           ))}
           </div>
         </> : null}
-        <div className="media-filter__kinds" role="group" aria-label={tr("使用状态过滤")}>
+        {sourceFilter === "mine" && <div className="media-filter__kinds media-filter__usage" role="group" aria-label={tr("使用状态过滤")}>
           {(["all", "used", "unused"] as const).map((value) => (
             <button
               key={value}
@@ -684,10 +718,12 @@ export function MediaPanel() {
               aria-pressed={usageFilter === value}
               onClick={() => setUsageFilter(value)}
             >
-              {{ all: tr("全部"), used: tr("已用"), unused: tr("未用") }[value]}
+              {{ all: tr("全部素材"), used: tr("当前工程已用"), unused: tr("当前工程未用") }[value]}
+              <span> {sourceAssetsForDomain.filter(asset => !asset.builtIn && (value === "all" ||
+                (usedRefs.paths.has(asset.path) || !!asset.assetId && usedRefs.ids.has(asset.assetId)) === (value === "used"))).length}</span>
             </button>
           ))}
-        </div>
+        </div>}
         {domain === "music" ? (
           <div className="media-filter__kinds" role="group" aria-label={tr("音频用途过滤")}>
             {([
@@ -753,13 +789,7 @@ export function MediaPanel() {
                       ? { effectId: sticker.effectId, params: sticker.params } : undefined })}
                   onDragEnd={endDrag}>
                   <div className="sticker-card__preview">
-                    {available && sticker.previewAvailable
-                      ? <video src={stickerPreviewUrl(sticker.stickerId)} poster={assetMediaUrl(sticker.assetId)}
-                          muted loop playsInline preload="none"
-                          onMouseEnter={(event) => { void event.currentTarget.play().catch(() => {}); }}
-                          onMouseLeave={(event) => { event.currentTarget.pause(); event.currentTarget.currentTime = 0; }}
-                          aria-label={tr("{0} 成片预览，悬停播放", sticker.name)} />
-                      : available ? <img src={assetMediaUrl(sticker.assetId)} alt="" loading="lazy" />
+                    {available ? <StickerThumbnail sticker={sticker} />
                         : <span>{sticker.availabilityMessage || tr("资源不可用，可恢复资源包或选择其他贴纸。")}</span>}
                     <button type="button" className="sticker-card__favorite"
                       aria-label={tr("{0}贴纸 {1}", state.project?.favorites?.includes(sticker.stickerId) ? tr("取消收藏") : tr("收藏"), sticker.name)}
@@ -805,22 +835,35 @@ export function MediaPanel() {
               ? tr("没有匹配的音乐或音效。试试调整搜索词或使用状态筛选。")
               : tr("没有匹配的视频或图片。试试调整搜索词、类型或使用状态筛选。")}
           </p>
+          <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary" onClick={() => {
+            setQuery(""); setKindFilter("all"); setAudioRoleFilter("all");
+            setUsageFilter(sourceFilter === "mine" && usageFilter === "used" && !query.trim() ? "unused" : "all");
+          }}>{sourceFilter === "mine" && usageFilter === "used" && !query.trim()
+            ? tr("查看未使用素材") : tr("清除筛选")}</button>
         </div>
         ) : (
         <div className="media-panel" ref={mediaRows.ref}>
           {mediaRows.before > 0 ? <div aria-hidden="true" style={{ height: mediaRows.before - 6, flexShrink: 0 }} /> : null}
           {domainAssets.slice(mediaRows.start, mediaRows.end).map((a) => {
             const disabledReason = swapDisabledReason(a.kind, a.available !== false);
+            const locations = timelineUses.get(`path:${a.path}`) || timelineUses.get(`id:${a.assetId}`) || [];
             return (
             <div
               key={a.path + a.name}
-              style={mediaRows.virtual ? { height: MEDIA_ROW_HEIGHT, boxSizing: "border-box", flexShrink: 0 } : undefined}
+              style={mediaRows.virtual ? { height: mediaRowHeight, boxSizing: "border-box", flexShrink: 0 } : undefined}
               className={`media-item ${dragging === a.path ? "media-item--dragging" : ""} ${a.available === false ? "media-item--missing" : ""}`}
               draggable={!editLocked && a.available !== false}
               onDragStart={(e) => startDrag(e, { sourcePath: a.path, assetId: a.assetId, kind: a.kind })}
               onDragEnd={endDrag}
               title={`${a.name}\n${a.path}${disabledReason && selectedClipId ? `\n${disabledReason}` : ""}`}
             >
+              <button type="button" className="media-item__open" disabled={a.available === false || a.kind === "unknown"}
+                aria-label={tr("预览素材 {0}", a.name)}
+                onClick={() => {
+                  setAudition(null);
+                  setAssetPreview({ name: a.name, kind: a.kind, url: a.assetId ? assetMediaUrl(a.assetId)
+                    : `/api/v1/projects/${encodeURIComponent(state.currentId!)}/source-media?${new URLSearchParams({ path: a.path })}` });
+                }}>
               {a.assetId && a.available !== false && (a.kind === "image" || a.kind === "video") ? (
                 <img
                   className="media-item__thumb"
@@ -851,7 +894,19 @@ export function MediaPanel() {
                     title={tr("来源：CutVoke 内置 FFmpeg lavfi 合成脚本；授权：MIT（仓库 LICENSE）")}>{tr("来源 CutVoke 合成 · MIT")}</span>
                 ) : null}
               </div>
-              {a.used ? <span className="media-badge" aria-label={tr("已用")}>{tr("已用")}</span> : null}
+              </button>
+              {a.used ? <button type="button" className="media-badge media-badge--locate"
+                aria-label={tr("定位素材 {0}", a.name)} disabled={!locations.length}
+                title={locations.length ? tr("点击定位素材，再次点击跳到下一处使用位置") : tr("当前时间线未使用此素材")}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  const selected = locations.findIndex((item) => item.clipId === state.selection?.clipId);
+                  const next = locations[(selected + 1) % locations.length];
+                  if (!next) return;
+                  dispatch({ type: "SELECTION_SET", selection: { trackId: next.trackId, clipId: next.clipId } });
+                  dispatch({ type: "PLAYHEAD_SET", t: next.time });
+                  window.dispatchEvent(new CustomEvent("cutvoke:locate-clip", { detail: next }));
+                }}>{tr("已用")}{locations.length > 1 ? ` ×${locations.length}` : ""}</button> : null}
               {a.available === false ? <span className="media-badge media-badge--missing">{tr("丢失")}</span> : null}
               {domain === "music" && a.assetId ? (
                 <select
@@ -907,7 +962,7 @@ export function MediaPanel() {
                 aria-label={disabledReason || tr("替换选中片段")}
                 title={disabledReason || tr("替换素材，保留片段的时长与效果")}
                 onMouseDown={(e) => e.stopPropagation()}
-                onClick={() => handleSwap(a)}
+                  onClick={(event) => { event.stopPropagation(); void handleSwap(a); }}
               >
                 {swappingPath === a.path ? (
                   <Loader2 size={14} className="cv-spin" />
@@ -923,13 +978,14 @@ export function MediaPanel() {
         )
       ) : null}
       <div hidden={domain !== "effects"}>
-        <ResourcePanel active={domain === "effects"} defaultFamily="fx" />
+        <ResourcePanel active={domain === "effects"} family="fx" />
       </div>
+      {assetPreview && <AssetPreview key={`${state.currentId}:${assetPreview.url}`} asset={assetPreview} onClose={() => setAssetPreview(null)} />}
       <div hidden={domain !== "transition"}>
-        <ResourcePanel active={domain === "transition"} defaultFamily="transition" />
+        <ResourcePanel active={domain === "transition"} family="transition" />
       </div>
       <div hidden={domain !== "filter"}>
-        <ResourcePanel active={domain === "filter"} defaultFamily="filter" />
+        <ResourcePanel active={domain === "filter"} family="filter" />
       </div>
       <div hidden={domain !== "caption"}>
         <CaptionPanel />

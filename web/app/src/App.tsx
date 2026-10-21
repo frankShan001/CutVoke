@@ -55,6 +55,19 @@ function AppShell() {
     typeof window === "undefined" || panelModeForWidth(window.innerWidth) !== "compact",
   );
   const panelPreferencesRef = useRef({ left: true, right: true });
+  useEffect(() => {
+    const open = () => setLeftPanelOpen(true);
+    window.addEventListener("cutvoke:open-creative-domain", open);
+    return () => window.removeEventListener("cutvoke:open-creative-domain", open);
+  }, []);
+  useEffect(() => {
+    const open = () => {
+      panelPreferencesRef.current.right = true;
+      setRightPanelOpen(true);
+    };
+    window.addEventListener("cutvoke:edit-effect", open);
+    return () => window.removeEventListener("cutvoke:edit-effect", open);
+  }, []);
 
   useEffect(() => {
     const locate = (event: Event) => {

@@ -134,7 +134,7 @@
   padding: 12px 14px;
   max-height: calc(100vh - var(--toolbar-h) - 24px);
   overflow: auto;
-  z-index: 50;
+  z-index: 3000;
   box-shadow: 0 10px 40px var(--overlay-strong);
 }
 .error-modal__message {

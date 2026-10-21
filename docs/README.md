@@ -5,6 +5,7 @@
 - [AI 剪辑技能安装与使用](user/agent-skill.zh-CN.md) / [English](user/agent-skill.md)
 - [社区特效贡献](user/effect-contributing.zh-CN.md) / [English](../effects/README.md)
 - [真实演示截图与验证边界](assets/readme/README.md)
+- [CutVoke 图标与品牌资源](assets/brand/README.md)
 - [本地语音识别](user/LOCAL_ASR.md)
 - [资源包发布](user/resource-pack-registry.md)
 - [项目目录和数据位置](development/project-layout.md)

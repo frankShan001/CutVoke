@@ -1,6 +1,6 @@
 import { tr } from "../../i18n";
-import { memo, useRef, useState } from "react";
-import { Sparkles, Trash2 } from "lucide-react";
+import { memo, useEffect, useId, useRef, useState } from "react";
+import { ChevronDown, ChevronRight, Sparkles, Trash2 } from "lucide-react";
 import type { EffectInstance, Track } from "../../types/api";
 import { useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
@@ -51,6 +51,22 @@ export const EffectTrackRow = memo(function EffectTrackRow({
 }) {
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const locked = !!track.locked || !!state.editLock;
+  const [expanded, setExpanded] = useState(false);
+  const laneId = useId();
+  const disclosure = useRef<HTMLButtonElement | null>(null);
+  const selectedEffect = state.selection?.trackId === track.id && state.selection?.effectKind === "effect"
+    ? `${state.selection.clipId}:${state.selection.effectId}:${state.selection.effectIndex ?? ""}` : null;
+  useEffect(() => {
+    if (selectedEffect) setExpanded(true);
+  }, [selectedEffect]);
+  useEffect(() => {
+    const editAppliedEffect = (event: Event) => {
+      const target = (event as CustomEvent<{ trackId?: string; category?: string }>).detail;
+      if (target?.trackId === track.id && target.category !== "transition") setExpanded(true);
+    };
+    window.addEventListener("cutvoke:edit-effect", editAppliedEffect);
+    return () => window.removeEventListener("cutvoke:edit-effect", editAppliedEffect);
+  }, [track.id]);
   const [rangeDraft, setRangeDraft] = useState<{ key: string; start: number; end: number } | null>(null);
   const rangeDrag = useRef<RangeDrag | null>(null);
   const fpsValue = state.project?.sequence.fps;
@@ -85,7 +101,10 @@ export const EffectTrackRow = memo(function EffectTrackRow({
     grouped.set(segment.clipId, list);
   }
 
-  const selectEffect = (segment: EffectSegment) => {
+  const rowCount = Math.max(1, ...[...grouped.values()].map((items) => items.length));
+  const rowHeight = expanded ? rowCount * 26 + 6 : 16;
+
+  const selectEffect = (segment: EffectSegment, reveal = false) => {
     dispatch({
       type: "SELECTION_SET",
       selection: {
@@ -97,6 +116,9 @@ export const EffectTrackRow = memo(function EffectTrackRow({
       },
     });
     dispatch({ type: "PLAYHEAD_SET", t: segment.clipStart + segment.localStart });
+    if (reveal) window.dispatchEvent(new CustomEvent("cutvoke:edit-effect", { detail: {
+      effectId: String(segment.effect.effectId), category: "fx", trackId: track.id, clipId: segment.clipId,
+    } }));
   };
 
   const deleteEffect = async (segment: EffectSegment) => {
@@ -169,17 +191,67 @@ export const EffectTrackRow = memo(function EffectTrackRow({
     });
   };
 
+  if (segments.length === 0) return null;
+
   return (
-    <div className={`timeline-track timeline-track--effects${locked ? " timeline-track--locked" : ""}`}>
-      <div className="timeline-track__label timeline-track__label--effects" title={tr("{0}（跟随上方视频轨）", displayName)}>
+    <div className={`timeline-track timeline-track--effects${expanded ? "" : " timeline-track--effects-collapsed"}${locked ? " timeline-track--locked" : ""}`} style={{ height: rowHeight }}>
+      <button
+        ref={disclosure}
+        type="button"
+        className="timeline-track__label timeline-track__label--effects"
+        aria-expanded={expanded}
+        aria-controls={laneId}
+        aria-label={expanded ? tr("收起{0}", displayName) : tr("展开{0}", displayName)}
+        title={`${expanded ? tr("收起{0}", displayName) : tr("展开{0}", displayName)} · ${segments.length}${tr(" 个效果")}`}
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
         <span className="timeline-track__kind timeline-track__kind--effect"><Sparkles size={11} /></span>
         <span className="timeline-track__name">{displayName}</span>
-      </div>
+        <span className="timeline-track__effect-count">{segments.length}</span>
+      </button>
       <div
+        id={laneId}
         className="timeline-track__lane timeline-track__lane--effects"
-        onClick={() => dispatch({ type: "SELECTION_SET", selection: { trackId: track.id } })}
+        style={{ height: rowHeight }}
+        onClick={() => { if (expanded) dispatch({ type: "SELECTION_SET", selection: { trackId: track.id } }); }}
       >
-        {segments.length === 0 ? <span className="timeline-track__lane-empty">{tr("暂无效果")}</span> : null}
+        {!expanded ? (
+          <button
+            type="button"
+            className="effect-overview"
+            aria-label={tr("展开{0}", displayName)}
+            aria-expanded={false}
+            aria-controls={laneId}
+            tabIndex={-1}
+            onClick={(event) => {
+              event.stopPropagation();
+              setExpanded(true);
+              disclosure.current?.focus({ preventScroll: true });
+            }}
+          >
+            {[...grouped.entries()].filter(([, items]) =>
+              items[0].clipStart + items[0].clipDuration >= viewport.start && items[0].clipStart <= viewport.end,
+            ).map(([clipId, items]) => {
+              const ranges: { start: number; end: number }[] = [];
+              for (const segment of [...items].sort((a, b) => a.localStart - b.localStart)) {
+                const previous = ranges[ranges.length - 1];
+                if (previous && segment.localStart <= previous.end) previous.end = Math.max(previous.end, segment.localEnd);
+                else ranges.push({ start: segment.localStart, end: segment.localEnd });
+              }
+              return ranges.map((range, index) => (
+                <span
+                  key={`${clipId}:${index}`}
+                  className={`effect-overview__line${selectedEffect && state.selection?.clipId === clipId ? " effect-overview__line--selected" : ""}`}
+                  style={{ left: toPx(items[0].clipStart + range.start, pxPerSec), width: Math.max(1, toPx(range.end - range.start, pxPerSec)) }}
+                  title={items.map((segment) => effectLabel(effectSpecs, String(segment.effect.effectId))).join(" · ")}
+                  aria-hidden="true"
+                />
+              ));
+            })}
+          </button>
+        ) : (
+          <>
         {[...grouped.entries()].filter(([clipId, items]) => track.clips.length <= 100 || clipId === state.selection?.clipId || rangeDraft?.key.startsWith(`${clipId}:`) ||
           (items[0].clipStart + items[0].clipDuration >= viewport.start && items[0].clipStart <= viewport.end)).map(([clipId, items]) => {
           const clipStart = items[0].clipStart;
@@ -188,9 +260,9 @@ export const EffectTrackRow = memo(function EffectTrackRow({
             <div
               key={clipId}
               className="effect-segment-group"
-              style={{ left: toPx(clipStart, pxPerSec), width: Math.max(12, toPx(clipDuration, pxPerSec)) }}
+              style={{ left: toPx(clipStart, pxPerSec), width: Math.max(1, toPx(clipDuration, pxPerSec)) }}
             >
-              {items.map((segment) => {
+              {items.map((segment, row) => {
                 const id = String(segment.effect.effectId);
                 const label = effectLabel(effectSpecs, id);
                 const key = segmentKey(segment);
@@ -203,7 +275,6 @@ export const EffectTrackRow = memo(function EffectTrackRow({
                   state.selection?.effectId === id &&
                   (state.selection?.effectIndex === undefined || state.selection?.effectIndex === segment.index) &&
                   state.selection?.effectKind === "effect";
-                const stackOffset = Math.min(3, segment.index) * 3;
                 const absoluteStart = segment.clipStart + localStart;
                 const absoluteEnd = segment.clipStart + localEnd;
                 return (
@@ -215,10 +286,9 @@ export const EffectTrackRow = memo(function EffectTrackRow({
                     className={`effect-segment${selected ? " effect-segment--selected" : ""}${segment.editableRange ? " effect-segment--range-editable" : ""}`}
                     style={{
                       left: toPx(localStart, pxPerSec),
-                      width: Math.max(18, toPx(localEnd - localStart, pxPerSec)),
-                      top: stackOffset,
-                      bottom: stackOffset,
-                      zIndex: segment.index + 1,
+                      width: Math.max(1, toPx(localEnd - localStart, pxPerSec)),
+                      top: row * 26,
+                      height: 24,
                     }}
                     title={segment.editableRange
                       ? tr("{0} · 拖动调整区间，拖动两侧手柄缩放区间", label)
@@ -227,7 +297,7 @@ export const EffectTrackRow = memo(function EffectTrackRow({
                     aria-label={tr("{0}，位于 {1} 到 {2} 秒", label, absoluteStart.toFixed(2), absoluteEnd.toFixed(2))}
                     onClick={(event) => {
                       event.stopPropagation();
-                      selectEffect(segment);
+                      selectEffect(segment, true);
                     }}
                     onPointerDown={(event) => beginRangeDrag(event, segment)}
                     onPointerMove={moveRangeDrag}
@@ -242,7 +312,7 @@ export const EffectTrackRow = memo(function EffectTrackRow({
                       aria-label={tr("{0}，位于 {1} 到 {2} 秒", label, absoluteStart.toFixed(2), absoluteEnd.toFixed(2))}
                       onClick={(event) => {
                         event.stopPropagation();
-                        selectEffect(segment);
+                        selectEffect(segment, true);
                       }}
                     >
                       <span className="effect-segment__name">{label}</span>
@@ -268,6 +338,8 @@ export const EffectTrackRow = memo(function EffectTrackRow({
             </div>
           );
         })}
+          </>
+        )}
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from cutvoke.core.httpapi import HttpApi
 from cutvoke.core.model import AssetReference, Caption, Clip, Track
@@ -52,6 +53,48 @@ class RecordingRenderer:
 
 
 class PreviewWindowTests(unittest.TestCase):
+    def setUp(self):
+        # These regression fixtures deliberately place their cuts at 8 seconds.
+        # Keep exercising that window size; the production 4-second contract
+        # and its real audio/video boundary are covered separately below.
+        legacy_window = patch('cutvoke.core.httpapi.PREVIEW_WINDOW_SECONDS', 8)
+        legacy_window.start()
+        self.addCleanup(legacy_window.stop)
+
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "FFmpeg required")
+    def test_empty_video_window_renders_canvas_without_rejecting_project(self) -> None:
+        with tempfile.TemporaryDirectory() as media_dir:
+            source = os.path.join(media_dir, "source.mp4")
+            subprocess.run([
+                "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+                "-f", "lavfi", "-i", "color=c=red:s=160x90:r=15:d=2",
+                "-c:v", "libx264", "-pix_fmt", "yuv420p", source,
+            ], check=True, capture_output=True)
+            service = EditService()
+            project = service.create_project("video-gap", width=160, height=90, fps=r(15))
+            project.sequence.background_color = "#1a5b9a"
+            project.sequence.tracks = [Track("video", "video", [
+                Clip("first", AssetReference("source", source), r(0), r(2), r(0)),
+                Clip("last", AssetReference("source", source), r(18), r(20), r(0)),
+            ])]
+            before = project.to_dict()
+            api = HttpApi(service, RenderService(), media_dir=media_dir)
+            try:
+                path, _, duration = api._preview_window_file(project, 1)
+                self.assertEqual(duration, 8)
+                info = api.render.probe_media(path)
+                self.assertAlmostEqual(info["duration"], 8, delta=0.1)
+                frame = subprocess.run([
+                    "ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", "4", "-i", path,
+                    "-frames:v", "1", "-vf", "scale=1:1", "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1",
+                ], check=True, capture_output=True).stdout
+                self.assertEqual(len(frame), 3)
+                for actual, expected in zip(frame, (26, 91, 154)):
+                    self.assertAlmostEqual(actual, expected, delta=6)
+                self.assertEqual(project.to_dict(), before)
+            finally:
+                api.close()
+
     def test_late_obsolete_window_does_not_cancel_the_current_render(self) -> None:
         class BlockingRenderer(RecordingRenderer):
             def render(self, project, out_path, **kwargs):
@@ -94,13 +137,13 @@ class PreviewWindowTests(unittest.TestCase):
             api = HttpApi(service, renderer, media_dir=media_dir)
             try:
                 with ThreadPoolExecutor(2) as workers:
-                    with api._preview_scheduler.slot(threading.Event()):
+                    with api._preview_scheduler.slot(threading.Event()), api._frame_scheduler.slot(threading.Event()):
                         window = workers.submit(api._preview_window_file, old, 0)
                         frame = workers.submit(api._preview_frame_file, old, 0, None)
                         deadline = time.monotonic() + 2
-                        while len(api._preview_scheduler.queue) < 2 and time.monotonic() < deadline:
+                        while len(api._preview_scheduler.queue)+len(api._frame_scheduler.queue) < 2 and time.monotonic() < deadline:
                             time.sleep(.005)
-                        self.assertEqual(len(api._preview_scheduler.queue), 2)
+                        self.assertEqual(len(api._preview_scheduler.queue)+len(api._frame_scheduler.queue), 2)
                         project.sequence.background_color = "#ffffff"
                     for request in (window, frame):
                         with self.assertRaises(RenderCancelled):

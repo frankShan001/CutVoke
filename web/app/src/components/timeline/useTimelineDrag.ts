@@ -68,6 +68,14 @@ export function useTimelineDrag(): TimelineDragApi {
   const pxPerSecRef = useRef(40);
   const activeRef = useRef<ActiveDrag | null>(null);
   const dropRef = useRef<DropTarget | null>(null);
+  const scrollFrame = useRef<number | null>(null);
+  const pointer = useRef<{ x: number; y: number; scroller: HTMLElement } | null>(null);
+  const stopScroll = useCallback(() => {
+    if (scrollFrame.current !== null) cancelAnimationFrame(scrollFrame.current);
+    scrollFrame.current = null;
+    pointer.current = null;
+  }, []);
+  useEffect(() => stopScroll, [stopScroll]);
 
   /** 计算指针下的目标（轨道 id + start 秒 + 幽灵定位），返回 null 表示不在轨道 lane 上。 */
   const computeDrop = useCallback((clientX: number, clientY: number): DropTarget | null => {
@@ -210,6 +218,33 @@ export function useTimelineDrag(): TimelineDragApi {
     };
   }, []);
 
+  const startScroll = useCallback(() => {
+    if (scrollFrame.current !== null) return;
+    let previous = performance.now();
+    const tick = (now: number) => {
+      const position = pointer.current;
+      if (!position || activeRef.current?.mode !== "move") { scrollFrame.current = null; return; }
+      const { scroller, x, y } = position;
+      const rect = scroller.getBoundingClientRect();
+      const label = scroller.querySelector(".timeline-track__label")?.getBoundingClientRect();
+      const left = label ? label.right + 8 : rect.left;
+      const right = rect.left + scroller.clientWidth;
+      const zone = Math.min(56, (right - left) / 4);
+      const dt = Math.min(32, now - previous) / 1000; previous = now;
+      if (zone > 0 && y >= rect.top && y < rect.bottom) {
+        const velocity = x > right - zone ? Math.min(1, (x - right + zone) / zone)
+          : x < left + zone ? -Math.min(1, (left + zone - x) / zone) : 0;
+        const before = scroller.scrollLeft;
+        if (velocity) scroller.scrollLeft = Math.max(0, before + velocity * 180 * dt);
+        if (before !== scroller.scrollLeft) {
+          const next = computeDrop(x, y); dropRef.current = next; setDrop(next);
+        }
+      }
+      scrollFrame.current = requestAnimationFrame(tick);
+    };
+    scrollFrame.current = requestAnimationFrame(tick);
+  }, [computeDrop]);
+
   const begin = useCallback(
     (e: React.PointerEvent, clip: Clip, track: Track, mode: DragMode, pxPerSec: number) => {
       if (state.editLock) return;
@@ -217,6 +252,9 @@ export function useTimelineDrag(): TimelineDragApi {
       e.stopPropagation();
       pxPerSecRef.current = pxPerSec;
       const clipRect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      stopScroll();
+      const scroller = (e.currentTarget as HTMLElement).closest<HTMLElement>(".timeline__scroller");
+      if (scroller) pointer.current = { x: e.clientX, y: e.clientY, scroller };
       const inferredKind = inferKind(clip.assetRef.sourcePath, false, false);
       const stateObj: ActiveDrag = {
         mode,
@@ -248,12 +286,13 @@ export function useTimelineDrag(): TimelineDragApi {
         setDrop(d0);
       }
     },
-    [computeDrop, state.editLock],
+    [computeDrop, state.editLock, stopScroll],
   );
 
   const move = useCallback(
     (e: React.PointerEvent) => {
       if (pointerIdRef.current !== e.pointerId) return;
+      if (pointer.current) { pointer.current.x = e.clientX; pointer.current.y = e.clientY; }
       const pending = pendingRef.current;
       if (pending?.pointerId === e.pointerId) {
         if (Math.hypot(e.clientX - pending.startX, e.clientY - pending.startY) < 6) return;
@@ -263,16 +302,19 @@ export function useTimelineDrag(): TimelineDragApi {
       }
       const drag = activeRef.current;
       if (!drag || drag.mode !== "move") return; // trim 仍走本地 overlay（不跨轨）
+      startScroll();
       e.preventDefault();
       const d = computeDrop(e.clientX, e.clientY);
       dropRef.current = d;
       setDrop(d);
     },
-    [computeDrop],
+    [computeDrop, startScroll],
   );
 
   const finish = useCallback(
     (e: React.PointerEvent) => {
+      if (pointerIdRef.current !== e.pointerId) return;
+      stopScroll();
       if (state.editLock) {
         pendingRef.current = null;
         pointerIdRef.current = null;
@@ -338,17 +380,18 @@ export function useTimelineDrag(): TimelineDragApi {
           : {}),
       });
     },
-    [dispatch, computeDrop, state.editLock],
+    [dispatch, computeDrop, state.editLock, stopScroll],
   );
 
   const cancel = useCallback(() => {
+    stopScroll();
     pendingRef.current = null;
     pointerIdRef.current = null;
     activeRef.current = null;
     dropRef.current = null;
     setActive(null);
     setDrop(null);
-  }, []);
+  }, [stopScroll]);
 
   // If an Agent acquires the project lease mid-gesture, drop the pointer-captured
   // operation locally. The pointer-up must not send a command under the new lease.

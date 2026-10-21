@@ -5,7 +5,7 @@ import { getLocale } from "../i18n/locale";
     不用 history 路由（vite.config.ts:10），靠 store.view 状态切换视图。 */
 
 import { useEffect, useState } from "react";
-import { Clapperboard, Plus, FolderOpen, Pencil, Check, X, RefreshCw, PackageOpen, LayoutTemplate } from "lucide-react";
+import { Plus, FolderOpen, Pencil, Check, X, RefreshCw, PackageOpen, LayoutTemplate } from "lucide-react";
 import { useEditor, showError } from "../store/editor";
 import { createProject, loadProjects, renameProject, selectProject } from "../store/actions";
 import { openPackage } from "../lib/api";
@@ -120,7 +120,7 @@ export function HomeView() {
     <div className="home">
       <header className="home__hero">
         <div className="home__brand">
-          <Clapperboard size={22} />
+          <img src="/brand/icon-128.png" width="36" height="36" alt="" aria-hidden="true" draggable={false} />
           <span className="home__brand-name">CutVoke</span>
           <CacheSettings />
           <LanguageSelect />

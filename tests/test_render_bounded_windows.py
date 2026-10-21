@@ -310,7 +310,9 @@ class RealWindowRendering(unittest.TestCase):
             with patch("cutvoke.core.render.subprocess.Popen",side_effect=start_then_cancel):
                 with self.assertRaises(RenderCancelled):
                     RenderService().render(project,str(target),overwrite=True,cancel_event=event)
-            self.assertEqual(running,[True])
+            self.assertTrue(running)
+            self.assertTrue(all(running))
+            self.assertLessEqual(len(running),2)
             self.assertEqual(target.read_bytes(),b"original-target")
             self.assertEqual(list(root.glob("cutvoke-export-windows-*")),[])
 

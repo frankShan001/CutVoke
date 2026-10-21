@@ -1,6 +1,9 @@
 # These are exact upstream notice bytes with pinned SHA256 provenance.
 # Windows checkouts must not convert their line endings.
 desktop/licenses/* -text
+# Generated brand checksums include these exact UTF-8/LF bytes on every platform.
+docs/assets/brand/*.json text eol=lf
+docs/assets/readme/banner.svg text eol=lf
 # Approved resource hashes cover the original bytes, including CRLF sidecars.
 # Preserve those bytes on every OS; never rewrite an approval to hide a mismatch.
 src/cutvoke/assets/**/*.json -text

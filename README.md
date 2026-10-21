@@ -269,6 +269,7 @@ Declarative transitions can reuse supported FFmpeg mappings. Other families depe
 | Installation and candidate packages | [Install / troubleshoot](docs/user/installation.md) · [Candidate packaging](docs/development/prerelease.md) |
 | Security reports | [Security policy](SECURITY.md) |
 | Screenshot provenance and demonstration limits | [Capture and demo notes](docs/assets/readme/README.md) |
+| Official CV icon, platform assets and regeneration | [CutVoke brand assets](docs/assets/brand/README.md) |
 
 Treat CutVoke as an early-stage project: project formats and interfaces can change, complex first previews wait for FFmpeg, and optional speech/person processing needs additional dependencies/models. The sample does not establish large-project performance, every effect or every AI client's compatibility. Try a small copy before using it for important work.
 

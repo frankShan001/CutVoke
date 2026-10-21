@@ -113,7 +113,10 @@ def cmd_serve(args) -> int:
     logger.info("serve.boot", detail={"data": db_path, "restored": loaded})
     # 素材落盘目录（WP-03/A07）：与数据库同级，保证自定义 --db 时数据与素材同处一地
     media_dir = os.path.join(os.path.dirname(os.path.abspath(db_path)), "media")
-    api = HttpApi(service, RenderService(), logger=logger, session=session,
+    renderer = RenderService()
+    from .core.gpu_effects import warmup
+    warmup(renderer.ffmpeg)
+    api = HttpApi(service, renderer, logger=logger, session=session,
                   media_dir=media_dir)
     from datetime import datetime, timezone
     from .runtime import runtime_identity
@@ -659,10 +662,27 @@ def cmd_mcp(args) -> int:
 # 参数解析
 # ---------------------------------------------------------------------------
 
+def cmd_storage_migrate(args) -> int:
+    from .core.storage_migration import migrate_library
+    try:
+        _json_out({"ok": True, "dataPath": migrate_library(
+            args.source, args.destination, cache_directory=args.cache_directory, cache_bytes=args.cache_bytes)})
+        return 0
+    except Exception as error:
+        return _json_err("STORAGE_MIGRATION_FAILED", str(error), 1)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="cutvoke", description="CutVoke: agent-first, local-first video editing.")
     p.add_argument("--json", action="store_true", help="machine-readable JSON output")
     sub = p.add_subparsers(dest="cmd", required=True)
+
+    migration = sub.add_parser("storage-migrate", help="copy a stopped desktop project library")
+    migration.add_argument("--source", required=True)
+    migration.add_argument("--destination", required=True)
+    migration.add_argument("--cache-directory")
+    migration.add_argument("--cache-bytes", type=int)
+    migration.set_defaults(func=cmd_storage_migrate)
 
     p_mcp = sub.add_parser("mcp", help="start MCP server (stdio) for AI agents")
     p_mcp.add_argument("--data", help="SQLite store path（与 serve 共用同一工程库）")

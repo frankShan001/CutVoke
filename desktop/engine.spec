@@ -2,9 +2,20 @@ from pathlib import Path
 import shutil
 import os
 import json
+import importlib
 from PyInstaller.utils.hooks import collect_submodules
 
 root = Path(SPECPATH).parent
+# PyInstaller treats unavailable optional imports as warnings. These modules are
+# required for real projects (titles, masks, optical effects and image assets),
+# so reject a minimal build environment instead of shipping a broken renderer.
+runtime_modules = ['PIL.Image', 'PIL.ImageDraw', 'PIL.ImageFont', 'numpy', 'cv2', 'fontTools.ttLib', 'cryptography']
+for module in runtime_modules:
+    try:
+        importlib.import_module(module)
+    except ImportError as error:
+        raise SystemExit(f'Desktop renderer dependency unavailable: {module}. '
+                         'Install desktop/requirements-build.lock before freezing.') from error
 tools = Path(os.environ['CUTVOKE_FFMPEG_DIR']) if os.environ.get('CUTVOKE_FFMPEG_DIR') else None
 suffix = '.exe' if os.name == 'nt' else ''
 ffmpeg = (tools / f'ffmpeg{suffix}' if tools else Path(shutil.which('ffmpeg'))).resolve()
@@ -26,7 +37,7 @@ analysis = Analysis([str(root / 'desktop' / 'engine_entry.py')], pathex=[str(roo
     datas=[*asset_data,
            (str(root / '.artifacts' / 'web'), 'cutvoke/web'),
            *[(str(p), 'cutvoke/core') for p in (root / 'src' / 'cutvoke' / 'core').glob('*.json')]],
-    hiddenimports=collect_submodules('cutvoke'), excludes=['tkinter', 'pytest'],
+    hiddenimports=collect_submodules('cutvoke') + runtime_modules, excludes=['tkinter', 'pytest'],
     noarchive=False)
 pyz = PYZ(analysis.pure)
 exe = EXE(pyz, analysis.scripts, [], exclude_binaries=True, name='cutvoke-engine',

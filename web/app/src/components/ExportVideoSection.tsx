@@ -3,7 +3,7 @@ import { msg, tr, useLocale } from "../i18n";
     后端无百分比进度字段，按 GET /exports 任务状态轮询；202 in_flight 时进入轮询。 */
 
 import { useEffect, useRef, useState } from "react";
-import { Upload, Copy, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Upload, Copy, FolderOpen, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Button, Field, Select, TextInput, Badge } from "./ui";
 import { useEditor, showError } from "../store/editor";
 import { doExport, getLatestState } from "../store/actions";
@@ -29,6 +29,10 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
   const [checkError, setCheckError] = useState<string | null>(null);
   const [jobError, setJobError] = useState<ApiFailure | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
+  const [restoring, setRestoring] = useState(true);
+  const [reconnecting, setReconnecting] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const startedRef = useRef(Date.now());
   const projectDuration = (state.project?.sequence.tracks || []).reduce(
     (duration, track) => Math.max(
       duration,
@@ -54,24 +58,57 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
-  /** 轮询导出任务直到终态（后端无百分比进度，仅 running/succeeded/failed）。
-      仅在 202 in_flight 或网络抖动时调用；同步 200 直接走 done 分支。 */
-  const pollJob = async (id: string) => {
-    const deadline = Date.now() + 180_000;
-    while (aliveRef.current && Date.now() < deadline) {
-      await new Promise((r) => setTimeout(r, 1500));
-      if (!aliveRef.current || !state.currentId) return;
-      let jobs: ExportJob[] = [];
+  // Persisted jobs survive closing the panel. Slow rendering is not a failure.
+  useEffect(() => {
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const restore = async () => {
       try {
-        jobs = await listExportJobs(state.currentId);
+        const jobs = state.currentId ? await listExportJobs(state.currentId) : [];
+        if (stopped) return;
+        const job = jobs.find(item => ["queued", "running"].includes(item.status)) || jobs[0];
+        if (job) {
+          setOutPath(job.outPath);
+          if (["high", "low"].includes(job.quality)) setQuality(job.quality as ExportQuality);
+          const created = Number(job.createdAt);
+          startedRef.current = Number.isFinite(created) && created > 0 ? created * 1000 : Date.now();
+          if (["queued", "running"].includes(job.status)) {
+            setBusy(true);
+            setPhase("running");
+            setElapsed(Math.max(0, Math.floor((Date.now() - startedRef.current) / 1000)));
+          }
+          setJobId(job.jobId);
+        }
+        setReconnecting(false);
+        setRestoring(false);
       } catch {
-        /* 轮询失败则继续，直到超时 */
+        if (!stopped) { setReconnecting(true); timer = setTimeout(restore, 1500); }
       }
-      const job = jobs.find((j) => j.jobId === id);
-      if (!job) continue;
+    };
+    void restore();
+    return () => { stopped = true; clearTimeout(timer); };
+  }, [state.currentId]);
+
+  useEffect(() => {
+    if (!jobId || !state.currentId) return;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const projectId = state.currentId;
+    const poll = async () => {
+      let job: ExportJob | undefined;
+      try {
+        job = (await listExportJobs(projectId)).find(item => item.jobId === jobId);
+        if (stopped) return;
+        setReconnecting(!job);
+      } catch {
+        if (stopped) return;
+        setReconnecting(true);
+      }
+      if (!job) { timer = setTimeout(poll, 1500); return; }
       if (job.status === "succeeded") {
         setResult(job.result);
         setPhase("done");
+        setBusy(false);
         dispatch({ type: "STATUS_SET", severity: "ok", text: msg("导出完成（见结果面板）") });
         return;
       }
@@ -83,16 +120,18 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
         });
         setJobError(err);
         setPhase("error");
+        setBusy(false);
         showError(dispatch, err);
         return;
       }
-    }
-    if (!aliveRef.current) return;
-    const to = new ApiFailure({ status: 0, code: "POLL_TIMEOUT", message: tr("轮询导出状态超时，可重新打开导出抽屉查看结果") });
-    setJobError(to);
-    setPhase("error");
-    showError(dispatch, to);
-  };
+      setBusy(true);
+      setPhase("running");
+      setElapsed(Math.max(0, Math.floor((Date.now() - startedRef.current) / 1000)));
+      timer = setTimeout(poll, 1500);
+    };
+    void poll();
+    return () => { stopped = true; clearTimeout(timer); };
+  }, [jobId, state.currentId, dispatch]);
 
   const handleExport = async () => {
     if (!state.currentId) {
@@ -125,6 +164,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
     setJobError(null);
     setResult(null);
     setJobId(null);
+    let queued = false;
     try {
       const current = getLatestState() || state;
       const report = await preflightProject(state.currentId, current.revision, range);
@@ -138,8 +178,10 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       setPhase("running");
       const out = await doExport(dispatch, getLatestState() || state, outPath.trim(), quality, range);
       if (out.inFlight && out.jobId) {
+        queued = true;
+        startedRef.current = Date.now();
+        setElapsed(0);
         setJobId(out.jobId);
-        await pollJob(out.jobId);
       } else if (out.ok && out.result) {
         setResult(out.result);
         setPhase("done");
@@ -152,7 +194,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       setCheckError(error instanceof Error ? error.message : String(error));
       setPhase("blocked");
     } finally {
-      if (aliveRef.current) setBusy(false);
+      if (aliveRef.current && !queued) setBusy(false);
     }
   };
 
@@ -180,9 +222,18 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
 
   const durStr = result && !isNaN(result.duration) ? tr("{0} 秒", result.duration.toFixed(2)) : "—";
 
+  const chooseFile = async () => {
+    try {
+      const name = (state.projects.find(project => project.id === state.currentId)?.name || "CutVoke").replace(/[<>:"/\\|?*\x00-\x1f]/g, "_");
+      const path = await window.cutvokeDesktop?.chooseExportFile(outPath || `${name}.mp4`);
+      if (path) setOutPath(path);
+    } catch (error) { showError(dispatch, error); }
+  };
+
   return (
     <>
       <Field label={tr("保存位置")}>
+        <div style={{ display: "flex", gap: 8 }}>
         <TextInput
           value={outPath}
           disabled={busy}
@@ -190,6 +241,9 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
           placeholder={tr("如：D:\\视频\\我的成片.mp4")}
           aria-label={tr("输出文件路径")}
         />
+        {window.cutvokeDesktop?.chooseExportFile ? <Button variant="secondary" disabled={busy || restoring} onClick={() => void chooseFile()}>
+          <FolderOpen size={14} />{tr("选择保存位置")}</Button> : null}
+        </div>
       </Field>
       <Field label={tr("画质")}>
         <Select value={quality} disabled={busy} onChange={(e) => setQuality(e.target.value as ExportQuality)} aria-label={tr("画质")}>
@@ -241,8 +295,8 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       ) : null}
 
       <div className="export-dialog__actions">
-        <Button variant="secondary" onClick={onClose} disabled={busy}>{tr("取消")}</Button>
-        <Button variant="primary" onClick={handleExport} disabled={busy} aria-label={tr("开始导出")}>
+        <Button variant="secondary" onClick={onClose}>{phase === "running" ? tr("后台导出") : tr("取消")}</Button>
+        <Button variant="primary" onClick={handleExport} disabled={busy || restoring} aria-label={tr("开始导出")}>
           <Upload size={14} />
           {phase === "checking" ? tr("检查素材中…") : busy ? tr("导出中…") : phase === "blocked" ? tr("重新检查并导出") : tr("开始导出")}
         </Button>
@@ -292,7 +346,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
           <div className="export-dialog__result-head">
             <Loader2 size={14} className="cv-spin" />{tr(" 导出进行中")}<Badge tone="info">{tr("进行中")}</Badge>
           </div>
-          <p className="cv-hint" style={{ marginTop: 6 }}>{tr("导出任务在后台串行处理，按任务状态轮询；完成后自动更新结果。")}</p>
+          <p className="cv-hint" style={{ marginTop: 6 }}>{tr("已用时 {0}。可以关闭此面板继续编辑，重新打开可查看结果；请保持软件运行。", `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, "0")}`)}</p>
           {jobId ? (
             <div className="inspector__row">
               <span className="inspector__key">{tr("任务")}</span>
@@ -301,6 +355,8 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
           ) : null}
         </div>
       ) : null}
+
+      {reconnecting ? <p className="cv-hint" role="status">{tr("正在重新连接导出任务…")}</p> : null}
 
       {phase === "error" && jobError ? (
         <div className="export-dialog__result export-dialog__result--error">
@@ -323,6 +379,9 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
             <span className="inspector__val cv-mono">{result.output_path}</span>
           </div>
           <div className="export-dialog__actions" style={{ marginTop: 6 }}>
+            {window.cutvokeDesktop?.revealExport && jobId && state.currentId ? <Button variant="secondary" size="sm" onClick={() => {
+              void window.cutvokeDesktop!.revealExport(state.currentId!, jobId).catch(error => showError(dispatch, error));
+            }}><FolderOpen size={13} />{tr("在文件夹中显示")}</Button> : null}
             <Button variant="secondary" size="sm" onClick={() => copyPath(result.output_path)} aria-label={tr("复制输出路径")}>
               <Copy size={13} />{tr(" 复制路径")}</Button>
           </div>
@@ -347,7 +406,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
               {result.warnings.join("\n")}
             </pre>
           )}
-          <p className="cv-hint" style={{ marginTop: 6 }}>{tr("Web 端暂无法直接打开资源管理器，已提供“复制路径”，可在文件管理器中粘贴定位。")}</p>
+          {!window.cutvokeDesktop ? <p className="cv-hint" style={{ marginTop: 6 }}>{tr("Web 端暂无法直接打开资源管理器，已提供“复制路径”，可在文件管理器中粘贴定位。")}</p> : null}
         </div>
       ) : null}
     </>

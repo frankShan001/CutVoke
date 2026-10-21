@@ -172,15 +172,27 @@ def frame(params,width,height,time):
     return out
 
 
-def cached_source(params,width,height,fps,duration,ffmpeg='ffmpeg',cancelled=None,*,renderer=None,kind='light'):
+def cached_source(params,width,height,fps,duration,ffmpeg='ffmpeg',cancelled=None,*,renderer=None,kind='light',prefix_duration=None,transient_directory=None,start_time=0.):
     """Create an atomic, lossless disposable source; no pixels enter project JSON."""
     identity=[VERSION,params,width,height,str(fps),round(duration,9)]
+    if start_time:
+        identity.insert(0,round(start_time,12))
     if kind!='light':identity.insert(0,kind)
     key=hashlib.sha256(json.dumps(identity,
                                 sort_keys=True,separators=(',',':')).encode()).hexdigest()
     directory=Path(tempfile.gettempdir())/'cutvoke-light-cache-v1';directory.mkdir(exist_ok=True)
+    if transient_directory is not None and start_time:
+        directory=Path(transient_directory)
     target=directory/(key+'.mkv')
     if target.is_file() and target.stat().st_size>256:return str(target)
+    if prefix_duration is not None and prefix_duration < duration:
+        if transient_directory is not None:
+            directory=Path(transient_directory)
+        duration=max(1/float(fps),math.ceil(prefix_duration*float(fps)-1e-7)/float(fps))
+        identity[-1]=round(duration,9)
+        key=hashlib.sha256(json.dumps(identity,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        target=directory/(key+'.mkv')
+        if target.is_file() and target.stat().st_size>256:return str(target)
     temporary=directory/(key+'-'+uuid.uuid4().hex+'.mkv')
     command=[ffmpeg,'-v','error','-y','-f','rawvideo','-pixel_format','rgba','-video_size',f'{width}x{height}',
              '-framerate',str(fps),'-i','pipe:0','-an','-c:v','ffv1','-level','3','-pix_fmt','bgra','-threads','2',str(temporary)]
@@ -189,7 +201,7 @@ def cached_source(params,width,height,fps,duration,ffmpeg='ffmpeg',cancelled=Non
         try:
             for i in range(max(1,math.ceil(duration*float(fps)-1e-7))):
                 if cancelled and cancelled():raise RuntimeError('light render cancelled')
-                process.stdin.write((renderer or frame)(params,width,height,i/float(fps)).tobytes())
+                process.stdin.write((renderer or frame)(params,width,height,start_time+i/float(fps)).tobytes())
             process.stdin.close()
             if process.wait(timeout=120):
                 errors.seek(0);raise RuntimeError(errors.read().decode('utf-8','replace')[-1000:])

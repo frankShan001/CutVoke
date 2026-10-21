@@ -193,6 +193,10 @@ async function main() {
           { type: "clip.insert", payload: { trackId: "video", createTrackKind: "video", clipId: "shot", assetId: asset.assetId,
             timelineStart: { num: 0, den: 1 }, timelineEnd: { num: 3, den: 1 } } },
           { type: "caption.add", payload: { captionId: "caption", text: "便携版 Windows 实际验收 / Offline edit", start: { num: 0, den: 1 }, end: { num: 3, den: 1 } } },
+          // Exercise the frozen Pillow/font renderer, not just FFmpeg video.
+          { type: "clip.insert", payload: { trackId: "title-track", createTrackKind: "text", clipId: "title-clip",
+            text: { content: "OFFLINE TITLE / 离线标题", fontSize: 40, color: "#ffffff", x: .5, y: .3 },
+            timelineStart: { num: 0, den: 1 }, timelineEnd: { num: 3, den: 1 } } },
         ] } });
       await client.call("edit_lock", { projectId, action: "release", leaseId: lease });
     } finally { await client.close(); }

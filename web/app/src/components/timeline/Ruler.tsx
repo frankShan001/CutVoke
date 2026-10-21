@@ -1,7 +1,7 @@
 import { tr, useLocale } from "../../i18n";
 /** 时间线标尺：秒刻度 + 主/次刻度分级。 */
 
-import { useEffect, useRef } from "react";
+import { useTimelineScrub } from "./useTimelineScrub";
 import { useEditor } from "../../store/editor";
 import { fmtTime, ticksForRange, toPx, type Tick } from "./util";
 import { rationalToSecs } from "../../lib/rational";
@@ -19,42 +19,11 @@ export function Ruler({
 }) {
   useLocale();
   const { state, dispatch } = useEditor();
-  const pointerId = useRef<number | null>(null);
-  useEffect(() => () => {
-    if (pointerId.current != null) dispatch({ type: "SCRUBBING_SET", active: false });
-  }, [dispatch]);
+  const scrub = useTimelineScrub(pxPerSec, maxSeekSecs);
   const ticks = ticksForRange(lengthSecs, pxPerSec);
 
   const seekTo = (time: number) => {
     dispatch({ type: "PLAYHEAD_SET", t: Math.max(0, Math.min(maxSeekSecs, time)) });
-  };
-  const seekAt = (clientX: number, el: HTMLDivElement) => {
-    const rect = el.getBoundingClientRect();
-    if (rect.width <= 0) return;
-    seekTo((clientX - rect.left) / pxPerSec);
-  };
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
-    e.preventDefault();
-    pointerId.current = e.pointerId;
-    dispatch({ type: "SCRUBBING_SET", active: true });
-    // preventDefault 阻止浏览器自动聚焦；显式聚焦后，方向键才可逐帧调整。
-    e.currentTarget.focus();
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {
-      /* ignore */
-    }
-    seekAt(e.clientX, e.currentTarget);
-  };
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (pointerId.current === e.pointerId) seekAt(e.clientX, e.currentTarget);
-  };
-  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (pointerId.current !== e.pointerId) return;
-    if (e.type === "pointerup") seekAt(e.clientX, e.currentTarget);
-    pointerId.current = null;
-    dispatch({ type: "SCRUBBING_SET", active: false });
   };
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const fps = state.project?.sequence.fps;
@@ -92,11 +61,7 @@ export function Ruler({
       title={tr("单击或拖动定位；方向键逐帧；End 到内容末尾（标尺尾部空白不可播放）")}
       aria-keyshortcuts="ArrowLeft ArrowDown ArrowRight ArrowUp PageUp PageDown Home End"
       tabIndex={0}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-      onLostPointerCapture={onPointerUp}
+      {...scrub}
       onKeyDown={onKeyDown}
     >
       {ticks.map((t) => (

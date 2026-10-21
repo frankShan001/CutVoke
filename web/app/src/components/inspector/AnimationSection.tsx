@@ -138,7 +138,7 @@ export function AnimationSection({ clip }: { clip: Clip }) {
         const spec = specsBySlot[slot].find((item) => item.effectId === draft.id);
         const controls = spec ? paramControls(spec, draft.params) : [];
         return (
-          <div key={slot} className="inspector__animation-lane">
+          <div key={slot} className="inspector__animation-lane" data-effect-id={draft.id || undefined}>
             <label className="inspector__key" htmlFor={`animation-${slot}`}>{subcategoryLabel(slot)}</label>
             <select
               id={`animation-${slot}`}

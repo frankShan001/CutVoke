@@ -5,6 +5,7 @@ import { useEditor } from "../store/editor";
 import { refreshProject } from "../store/actions";
 import { ApiFailure } from "../lib/api";
 import { previewContentKey, previewRequest, type PreviewJob } from "../lib/previewPreparation";
+import { fetchPreviewFrame } from "../lib/mediaApi";
 
 const pause = (signal: AbortSignal) => new Promise<void>((resolve, reject) => {
   const abort = () => { clearTimeout(timer); reject(new DOMException("Cancelled", "AbortError")); };
@@ -23,6 +24,12 @@ export function useProjectPreparation() {
   const contentKey = useMemo(() => previewContentKey(state.project), [state.project]);
   const projectRef = useRef(state.project);
   projectRef.current = state.project;
+  const openingRef = useRef(state.opening);
+  openingRef.current = state.opening;
+  const decodeTimerRef = useRef(0);
+  useEffect(() => {
+    if (!state.opening) clearTimeout(decodeTimerRef.current);
+  }, [state.opening]);
 
   useEffect(() => {
     const match = state.preparedPreview?.url.match(/\/preview-jobs\/([^/]+)\/media$/);
@@ -45,7 +52,7 @@ export function useProjectPreparation() {
     const controller = new AbortController();
     const { signal } = controller;
     let jobId: string | undefined;
-    let decodeTimer = 0;
+    let enteredEditor = false;
     setError(null); setJob(null); setProgress(0); setPhase("checking");
     dispatch({ type: "PREPARED_PREVIEW_SET", preview: null });
     const renderable = project.sequence.tracks.some((track) => track.visible !== false &&
@@ -57,11 +64,26 @@ export function useProjectPreparation() {
     }
     const failedDecode = (event: Event) => {
       if ((event as CustomEvent).detail?.projectId === projectId) {
-        clearTimeout(decodeTimer);
+        clearTimeout(decodeTimerRef.current);
         setError(tr("连续预览无法解码，请重试加载。"));
       }
     };
     window.addEventListener("cutvoke:prepared-preview-error", failedDecode);
+    // Editing needs the current composed frame, not several seconds of video.
+    // Request it before queuing background windows so it gets first admission.
+    void fetchPreviewFrame({ projectId, t: 0, width: 640, height: 360, signal }).then(async (result) => {
+      if (result.kind === "error" || result.kind === "cancelled") return;
+      if (result.kind === "frame") {
+        try {
+          const image = new Image();
+          image.src = result.url;
+          await image.decode();
+        } finally { URL.revokeObjectURL(result.url); }
+      }
+      if (signal.aborted) return;
+      enteredEditor = true;
+      dispatch({ type: "PROJECT_OPEN_READY", projectId });
+    }).catch(() => { /* The window preparation below reports actionable errors. */ });
     void (async () => {
       let current = await previewRequest<PreviewJob>(
         `projects/${encodeURIComponent(projectId)}/preview-jobs`, undefined, { revision: project.revision });
@@ -73,6 +95,10 @@ export function useProjectPreparation() {
           throw new Error(current.error || tr("预览准备已取消，请重试。"));
         }
         if (current.state === "completed") break;
+        if (!enteredEditor && current.completedWindows > 0) {
+          enteredEditor = true;
+          dispatch({ type: "PROJECT_OPEN_READY", projectId });
+        }
         await pause(signal);
         current = await previewRequest<PreviewJob>(`preview-jobs/${jobId}`, signal);
       }
@@ -83,7 +109,8 @@ export function useProjectPreparation() {
       const url = `/api/v1/preview-jobs/${jobId}/media`;
       setPhase("decoding"); setProgress(98);
       dispatch({ type: "PREPARED_PREVIEW_SET", preview: { projectId, contentKey, url } });
-      decodeTimer = window.setTimeout(() => setError(tr("首帧解码超时，请重试加载。")), 15000);
+      if (openingRef.current) decodeTimerRef.current = window.setTimeout(
+        () => setError(tr("首帧解码超时，请重试加载。")), 15000);
     })().catch((failure: unknown) => {
       if (!signal.aborted && !jobId && failure instanceof ApiFailure && failure.status === 404) {
         dispatch({ type: "PROJECT_OPEN_READY", projectId });
@@ -91,17 +118,24 @@ export function useProjectPreparation() {
           text: msg("重启 CutVoke 服务后可启用完整预览加载，当前使用分段预览") });
         return;
       }
-      if (!signal.aborted) setError(failure instanceof Error ? failure.message : tr("预览准备失败"));
+      if (!signal.aborted) {
+        const message = failure instanceof Error ? failure.message : tr("预览准备失败");
+        if (openingRef.current) setError(message);
+        else dispatch({ type: "STATUS_SET", severity: "warn", text: message });
+      }
     }).finally(() => {
       // Let submission return its ID even after navigation so cancellation owns the right job.
       if (signal.aborted && jobId) void previewRequest(`preview-jobs/${jobId}/cancel`, undefined, {}).catch(() => {});
     });
     return () => {
-      controller.abort(); clearTimeout(decodeTimer);
+      controller.abort(); clearTimeout(decodeTimerRef.current);
       window.removeEventListener("cutvoke:prepared-preview-error", failedDecode);
       if (jobId) void previewRequest(`preview-jobs/${jobId}/cancel`, undefined, {}).catch(() => {});
     };
-  }, [state.opening, state.currentId, contentKey, retry, dispatch]);
+    // Opening ends when the first frame/window is ready. Keep this worker/poll alive
+    // until the continuous preview completes; navigation or a visual edit owns
+    // cancellation. An opening-state change alone must not cancel the job.
+  }, [state.currentId, contentKey, retry, dispatch]);
 
   return {
     progress: state.project ? progress : 0,
@@ -129,7 +163,7 @@ export function ProjectLoading({ preparation }: { preparation: ReturnType<typeof
     ? tr("素材文件不存在：{0}。恢复文件后可重试，或进入工程重新链接素材。", missingSource[1]) : error;
   const titles: Record<string, string> = {
     reading: tr("正在读取工程"), checking: tr("正在检查预览缓存"), queued: tr("等待预览准备"),
-    rendering: tr("正在准备完整预览"), assembling: tr("正在合成连续预览"),
+    rendering: tr("正在准备首段预览"), assembling: tr("正在合成连续预览"),
     verifying: tr("正在检查预览结果"), ready: tr("预览准备完成"),
     loading: tr("正在加载连续预览"), decoding: tr("正在显示首帧"),
   };
@@ -166,7 +200,7 @@ export function ProjectLoading({ preparation }: { preparation: ReturnType<typeof
                 </li>
               ))}
             </ol>
-            <p className="project-loading__hint">{tr("首次打开需要生成完整预览，复杂工程准备时间会更长。完成后可直接播放，再次打开会复用缓存。")}</p>
+            <p className="project-loading__hint">{tr("首帧显示后即可进入编辑，连续预览会在后台继续准备。")}</p>
           </>
         )}
         <div className="project-loading__actions">

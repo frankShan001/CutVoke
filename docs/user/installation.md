@@ -6,6 +6,66 @@
 
 ## Windows portable (x64)
 
+### Application icon (current source)
+
+Current builds use the approved blue, cyan and orange CV film-ribbon icon for the
+desktop application, Windows installer, shortcuts, startup screen and Web editor.
+The [brand assets](../assets/brand/README.md) include the original artwork,
+platform formats and regeneration command. Published release archives listed
+above retain the icons and contents of their original build.
+
+### First launch and settings (current source)
+
+New desktop builds show a first-launch setup dialog for interface language, project
+library folder, preview-cache folder and capacity (0.25–1024 GiB). Save to start;
+the completed setup is remembered in `profile/settings.json`. Existing libraries
+are detected and retained. The **Settings** button on the home screen and editor
+reopens the same controls. Language changes apply immediately.
+
+The editor's resource browser has one primary type selector. Search and the
+subcategory selector filter that type directly. Hover over an effect card to
+preview its selected style, and click its cover for a larger preview.
+Package versions, offline ZIP installation, online registries and rollback are
+available under **Settings → Resource management**.
+The unified effect library shows each effect once. Choose a preset style (or
+the default style) on its card, then drag it onto the target timeline clip.
+Drag transitions onto the cut between two clips. The drop target determines
+which clip changes, regardless of the previous selection. Focus a card and press
+Enter to apply to the selected clip with the keyboard. Applying opens the matching controls on the right, where every style remains
+editable. Combination styles retain all their component effects and parameters.
+Covers are static images; hovering plays only the current card's muted MP4
+example. Leaving the card stops playback. Reduced-motion preferences disable
+automatic playback; clicking still opens the preview.
+Styles without a bundled example show a project still frame after a deliberate
+hover. Quickly passing over a card or leaving it cancels that request. Loading
+the list does not render the project.
+
+Changing the project library copies its database, history and managed media to a
+separate empty folder, retains the original, and reopens the app. Finish background
+jobs and stop external Agent/editor services first. Afterwards, update those
+clients using the regenerated MCP configuration in Settings. Existing external
+media references remain external. Cache changes keep the old cache directory.
+If `CUTVOKE_DATA` explicitly controls the library, change that launch configuration
+instead. Browser clients can change language/cache; library relocation requires
+the desktop app or a service restart with a new `--data` argument.
+
+**中文：**新桌面构建首次打开会显示语言、工程库位置、缓存位置和容量向导。
+保存后不再自动弹出，首页和编辑器顶部的“设置”可随时打开。工程迁移要求
+目标为空目录，复制数据库、历史和受管理素材，保留原目录并重新打开应用。
+先完成后台任务并停止外部 Agent/编辑服务；迁移后使用设置中生成的新 MCP
+配置重新连接。外部引用素材仍保留原引用。此说明针对当前源码，以上旧版
+Release 的二进制不会自动包含这些变更。
+
+资源区只在顶部选择素材、音乐、贴纸、特效、转场、滤镜等类型，下方直接
+搜索、筛选细分类和浏览卡片。悬停自动预览，移开即停止，点击封面可放大。
+资源包版本、离线 ZIP 安装、在线目录和回滚统一在“设置 → 资源管理”中。
+统一效果库中每个效果只出现一次，在卡片内选择“预设样式”或“默认样式”，
+将效果拖到目标片段，转场拖到两个片段之间的接缝；无需预先选中目标。
+键盘可聚焦效果卡片后按 Enter 应用到选中片段。应用后自动打开右侧对应参数，
+所有样式均可继续调整，组合样式保留全部组成效果和参数。悬停只播放当前
+卡片的静音 MP4 示例；没有内置示例的样式会在停留后显示工程静态预览，
+快速划过或移开会取消请求。加载列表不渲染工程；启用减少动态效果时不自动播放。
+
 **[Download 0.3.1 portable](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/CutVoke-0.3.1-windows-x64-portable.zip)** · [successful Windows run](https://github.com/frankShan001/CutVoke/actions/runs/38845496400) · [screenshots and test evidence](https://github.com/frankShan001/CutVoke/actions/runs/38845496400/artifacts/12023445833)
 
 The Release download is `CutVoke-0.3.1-windows-x64-portable.zip`; download `SHA256SUMS` separately for verification. Extract the ZIP completely to a writable folder and double-click **CutVoke.exe**. No installer, administrator permission, Python, Node.js or system FFmpeg configuration is needed. The original Actions wrapper and runner evidence remain provenance records with their own retention limits.
@@ -124,6 +184,8 @@ FFmpeg 6.1 remains part of the existing Ubuntu regression path. FFmpeg 7.1's `se
 The project version is aligned at **0.3.1** in Python, MCP and desktop metadata. The four original desktop archives above are published in the [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1). Wheel/source candidates are developer distributions that still need Python and FFmpeg; they are not substitutes for the self-contained portable ZIP. See [candidate packaging](../development/prerelease.md).
 
 ## Troubleshooting
+
+The editor opens after the current composed frame is ready and prepares continuous playback in the background. Supported timelines use short, reduced-resolution playback previews; explicit full-resolution frame computation, still export and video export retain the project settings. GPU acceleration is selected automatically for supported complex effects, with CPU fallback. A new complex interval can still require preparation. See the [local rendering performance record](../development/render-performance-20261021.md) for the measured scope and limitations.
 
 | Symptom | Check and action |
 | --- | --- |

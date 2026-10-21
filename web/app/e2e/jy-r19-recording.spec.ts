@@ -362,13 +362,12 @@ test("JY-R19 records a six-clip editing, save, preview, export, and package work
   const videoClips = page.locator('.timeline-track__lane[data-track-id="v1"] .clip-block');
   await videoClips.nth(0).click();
   await creativeTabs.getByRole("tab", { name: "滤镜" }).click();
-  const presetLibrary = page.getByRole("region", { name: "内置预设库" });
-  const presetTypes = presetLibrary.getByRole("group", { name: "预设类型" });
-  await presetTypes.getByRole("button", { name: /滤镜/ }).click();
-  const presetCard = presetLibrary.locator(".resource-preset-card").first();
+  const presetLibrary = page.getByRole("region", { name: "效果库", exact: true });
+  await expect(presetLibrary.getByRole("group", { name: "预设类型" })).toHaveCount(0);
+  const presetCard = presetLibrary.locator(".resource-effect-card").first();
   await expect(presetCard).toBeVisible();
   const filterPresetName = (await presetCard.locator(".resource-card__name").innerText()).trim();
-  await presetCard.getByRole("button", { name: "应用" }).click();
+  await presetCard.press("Enter");
   await expect.poll(async () => {
     const project = await readProject(request, id);
     const clip = project.sequence.tracks.find((track) => track.id === "v1")!.clips[0];
@@ -388,12 +387,15 @@ test("JY-R19 records a six-clip editing, save, preview, export, and package work
 
   // Use the seam affordance to target the incoming shot, preview, and apply a transition.
   await page.getByRole("button", { name: "在 2.00 秒的片段接缝添加转场" }).click();
-  await expect(editorTabs.getByRole("tab", { name: "转场" })).toHaveAttribute("aria-selected", "true");
+  await expect(editorTabs.getByRole("tab", { name: "转场参数" })).toHaveAttribute("aria-selected", "true");
   await expect(page.getByLabel("后一段片段（转场挂此段）")).toHaveValue("shot-2");
+  await page.getByRole("button", { name: "到左侧选择转场", exact: true }).click();
+  const transitionCard = page.locator(".resource-effect-card:visible").first();
+  await transitionCard.press("Enter");
   await page.getByRole("button", { name: "预览当前转场" }).click();
   const transitionPreview = page.locator('.resource-preview img[alt="当前转场与时长在两段片段之间的真实预览帧"]');
   await expect(transitionPreview).toBeVisible({ timeout: 30_000 });
-  await page.getByRole("button", { name: "应用转场" }).click();
+  await page.getByRole("button", { name: "保存转场参数" }).click();
   await expect.poll(async () => {
     const project = await readProject(request, id);
     const incoming = project.sequence.tracks.find((track) => track.id === "v1")!.clips[1];

@@ -12,6 +12,8 @@
     "unpacked": "electron-builder --win --x64 --dir --config.directories.output=../.artifacts/desktop",
     "portable": "electron-builder --config portable-builder.cjs --win --x64 --dir --config.directories.output=../.artifacts/desktop",
     "test:storage": "node --test storage.test.cjs",
+    "test:settings": "node --test settings.test.cjs",
+    "test:settings:electron": "node --test settings.electron.test.cjs",
     "test:build-deps": "node --test build-dependencies.test.cjs",
     "test:i18n": "node --test i18n.test.cjs",
     "test:i18n:electron": "node --test i18n.electron.test.cjs",
@@ -34,9 +36,11 @@
       "preload.cjs",
       "i18n.cjs",
       "storage.cjs",
+      "settings.cjs",
       "locales/*.json",
       "loading.html",
       "loading.js",
+      "assets/brand/icon-256.png",
       "package.json"
     ],
     "extraResources": [
@@ -47,10 +51,14 @@
     ],
     "win": {
       "target": "nsis",
-      "signAndEditExecutable": false,
+      "icon": "assets/brand/cutvoke.ico",
+      "signExecutable": false,
       "artifactName": "CutVoke-Setup-${version}-${arch}.${ext}"
     },
     "nsis": {
+      "installerIcon": "assets/brand/cutvoke.ico",
+      "uninstallerIcon": "assets/brand/cutvoke.ico",
+      "installerHeaderIcon": "assets/brand/cutvoke.ico",
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,

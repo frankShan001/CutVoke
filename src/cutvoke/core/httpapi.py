@@ -75,14 +75,16 @@ from .luts import CubeInvalid, MAX_CUBE_BYTES, validate_cube
 
 # Bump when preview rendering changes so neither disk cache nor browser ETag can
 # treat media produced by an older renderer as current for the same project data.
-PREVIEW_RENDER_CACHE_VERSION = 23
-PREVIEW_WINDOW_SECONDS = 8
+PREVIEW_RENDER_CACHE_VERSION = 28
+# Keep first playback and local edits bounded even on dense effect timelines.
+PREVIEW_WINDOW_SECONDS = 2
 ASSET_MEDIA_TYPES = {
     ".mp3": "audio/mpeg", ".wav": "audio/wav", ".flac": "audio/flac",
     ".aac": "audio/aac", ".m4a": "audio/mp4", ".ogg": "audio/ogg",
     ".opus": "audio/ogg", ".mp4": "video/mp4", ".m4v": "video/mp4",
     ".webm": "video/webm", ".mov": "video/quicktime",
     ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif",
+    ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".bmp": "image/bmp", ".avif": "image/avif",
 }
 
 
@@ -121,6 +123,9 @@ class HttpApi:
         self._preview_lock = threading.RLock()
         self.preview_cache = PreviewDiskCache(self.media_dir)
         self._preview_scheduler = PreviewRenderScheduler()
+        # Interactive stills must never wait for an MP4/background encode.
+        self._frame_scheduler = PreviewRenderScheduler()
+        self._frame_active_jobs = {}
         self._preview_jobs_lock = threading.Lock()
         self._preview_active_jobs: dict[str, tuple[str, threading.Event]] = {}
         self._preview_preparation = PreviewPreparation(
@@ -174,7 +179,7 @@ class HttpApi:
         """停掉异步导出队列的后台线程（复用实例 / 测试收尾时必须调用）。"""
         self._preview_preparation.close()
         with self._preview_jobs_lock:
-            for _identity, event in self._preview_active_jobs.values():
+            for _identity, event in [*self._preview_active_jobs.values(),*self._frame_active_jobs.values()]:
                 event.set()
         self._asr_jobs.close()
         self._person_cutout_jobs.close()
@@ -208,7 +213,7 @@ class HttpApi:
         cached = self.preview_cache.get(name, metadata)
         if cached:
             return cached, digest, metadata.get("duration")
-        with self._preview_scheduler.slot(threading.Event()):
+        with self._preview_scheduler.slot(threading.Event(), priority=-10):
             metadata = self.preview_cache.metadata(name)
             cached = self.preview_cache.get(name, metadata)
             if cached:
@@ -393,6 +398,11 @@ class HttpApi:
             clip.timeline_end = new_end - render_start
 
         sliced.sequence.tracks = [track for track in sliced.sequence.tracks if track.clips]
+        if not sliced.sequence.tracks:
+            # A gap inside a nonempty project is a valid canvas interval. Keep
+            # the full snapshot so render_preview_window can validate the
+            # original timeline and compile its configured background fill.
+            return None
         return sliced, float((start - render_start).to_fraction()), render_modes
 
     def _preview_window_file(self, project, index: int,
@@ -415,6 +425,9 @@ class HttpApi:
             raise EditError(ErrorCode.INVALID_ARGUMENT, "preview window is past the media end")
         stop = min(start + Rational.of(PREVIEW_WINDOW_SECONDS), timeline_end)
         duration = float((stop - start).to_fraction())
+        from .preview_quality import snapshot as preview_snapshot
+        preview_seq=preview_snapshot(project)[0].sequence if isinstance(self.render,RenderService) else seq
+        preview_width,preview_height=preview_seq.width,preview_seq.height
         preview_project = copy.deepcopy(project)
         for sequence in preview_project.sequences:
             sequence.captions = []
@@ -559,7 +572,7 @@ class HttpApi:
             digest_project.sequence.tracks = [track for track in digest_tracks if track.clips]
 
         render_project = preview_project
-        render_window_start = float(start.to_fraction())
+        render_window_start = 0.0 if local else float(start.to_fraction())
         render_modes_for_preview = None
         if not local:
             sliced = self._slice_preview_window_project(project, start, stop)
@@ -601,8 +614,8 @@ class HttpApi:
                                        info.get("duration") or 0.0)
                 return (
                     bool(info.get("has_video")) and
-                    int(info.get("width", 0)) == seq.width and
-                    int(info.get("height", 0)) == seq.height and
+                    int(info.get("width", 0)) == preview_width and
+                    int(info.get("height", 0)) == preview_height and
                     abs(video_duration - duration) <= 0.1
                 )
             except Exception:  # noqa: BLE001 — an unreadable cache is regenerated
@@ -626,7 +639,7 @@ class HttpApi:
             if active and active[0] != visual_identity:
                 active[1].set()
         name = f"window_{digest}.mp4"
-        metadata = {"width": seq.width, "height": seq.height, "duration": duration}
+        metadata = {"width": preview_width, "height": preview_height, "duration": duration}
         cached = self.preview_cache.get(name, metadata, cached_window_is_valid)
         if cached:
             return cached, digest, duration
@@ -644,7 +657,7 @@ class HttpApi:
             with self._preview_jobs_lock:
                 self._preview_active_jobs[project_key] = (visual_identity, preview_cancel)
             try:
-                if local:
+                if local and (preview_width,preview_height)==(seq.width,seq.height):
                     options = {"cancel_event": preview_cancel} if isinstance(self.render, RenderService) else {}
                     self.render.render(preview_project, temp_path, quality="low", overwrite=True, **options)
                 else:
@@ -700,22 +713,46 @@ class HttpApi:
         name = f"frame_{digest}.png"
         metadata = {"frame": frame, "size": size}
         cached = self.preview_cache.get(name, metadata, lambda path: Path(path).stat().st_size > 0)
+        project_key=str(project.project_id)
         if cached:
+            with self._preview_jobs_lock:
+                active=self._frame_active_jobs.get(project_key)
+                if active and active[0]!=digest:
+                    active[1].set()
             return cached
-        with self._preview_scheduler.slot(threading.Event()):
-            self._require_current_preview(project, visual_identity)
-            cached = self.preview_cache.get(name, metadata, lambda path: Path(path).stat().st_size > 0)
-            if cached:
-                return cached
-            temporary = str(self.preview_cache.path(name)) + "." + uuid.uuid4().hex + ".png"
-            try:
-                result = self.render.extract_frame(project, at, temporary, size=size, include_captions=False)
-                if result is None:
-                    return None
-                return self.preview_cache.publish(name, temporary, metadata)
-            finally:
-                with contextlib.suppress(OSError):
-                    os.remove(temporary)
+        cancel=threading.Event()
+        with self._preview_jobs_lock:
+            previous=self._frame_active_jobs.get(project_key)
+            if previous and previous[0]==digest:
+                cancel=previous[1]
+            elif previous:
+                previous[1].set()
+            self._frame_active_jobs[project_key]=(digest,cancel)
+        try:
+            with self._frame_scheduler.slot(cancel, priority=-10):
+                self._require_current_preview(project, visual_identity)
+                cached = self.preview_cache.get(name, metadata, lambda path: Path(path).stat().st_size > 0)
+                if cached:
+                    return cached
+                temporary = str(self.preview_cache.path(name)) + "." + uuid.uuid4().hex + ".png"
+                try:
+                    options={"cancel_event":cancel} if isinstance(self.render,RenderService) else {}
+                    result = self.render.extract_frame(project, at, temporary, size=size,
+                                                       include_captions=False,**options)
+                    if result is None:
+                        return None
+                    if cancel.is_set():
+                        from .render import RenderCancelled
+                        raise RenderCancelled("preview frame superseded")
+                    return self.preview_cache.publish(name, temporary, metadata)
+                finally:
+                    with contextlib.suppress(OSError):
+                        os.remove(temporary)
+        finally:
+            with self._preview_jobs_lock:
+                current=self._frame_active_jobs.get(project_key)
+                if current and current[1] is cancel:
+                    self._frame_active_jobs.pop(project_key,None)
 
     def save_asset(self, asset_id: str, filename: str, raw: bytes) -> str:
         """把上传的素材字节落到媒体目录，返回落盘绝对路径。
@@ -1026,6 +1063,17 @@ class HttpApi:
             if not expected or not isinstance(supplied, str) or not hmac.compare_digest(expected, supplied) or stop is None:
                 return 403, {"error": {"code": "FORBIDDEN", "message": "此服务不属于当前客户端"}}
             threading.Thread(target=stop, name="desktop-shutdown", daemon=True).start()
+            return 200, {"ok": True}
+
+        if method == "GET" and parts == ["api", "v1", "settings", "preflight"]:
+            queue = self.service._export_queue
+            busy = (self._preview_scheduler.active or self._preview_scheduler.queue or
+                    self._preview_preparation.busy() or (queue and queue.reload_status()["busy"]))
+            for manager in (self._asr_jobs, self._person_cutout_jobs):
+                with manager._lock:
+                    busy = busy or any(thread.is_alive() for thread in manager._threads.values())
+            if busy:
+                return 409, {"error": {"code": "SETTINGS_BUSY", "message": "请等待预览、导出和后台任务完成后再修改工程位置"}}
             return 200, {"ok": True}
 
         if parts == ["api", "v1", "preview-cache"]:
@@ -1355,6 +1403,26 @@ class HttpApi:
                 })
             return 200, {"stickers": items, "count": len(items),
                          "qualifiedCount": sum(item["qualified"] for item in items)}
+
+        if (method == "GET" and len(parts) == 5 and parts[:3] == ["api", "v1", "projects"]
+                and parts[4] == "source-media"):
+            project = self.service.get_project(parts[3])
+            requested = body.get("path")
+            references = {clip.asset_ref.source_path
+                          for sequence in [project.sequence, *project.sequences]
+                          for track in sequence.tracks if track.kind != "text"
+                          for clip in track.clips if clip.asset_ref}
+            if not isinstance(requested, str) or requested not in references:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "source is not referenced by this project"}}
+            source = Path(requested)
+            media_type = ASSET_MEDIA_TYPES.get(source.suffix.lower())
+            if not media_type:
+                return 415, {"error": {"code": "UNSUPPORTED_MEDIA", "message": "source format cannot be previewed in browser"}}
+            if not source.is_file():
+                return 404, {"error": {"code": "NOT_FOUND", "message": "source media not found"}}
+            info = source.stat()
+            return 200, {"__media_path__": str(source), "__media_type__": media_type,
+                         "__media_etag__": f"{info.st_size}-{info.st_mtime_ns}"}
 
         if (method == "GET" and len(parts) == 5 and
                 parts[:3] == ["api", "v1", "stickers"] and parts[4] == "preview"):
@@ -2596,6 +2664,7 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                     ".mjs": "application/javascript",
                     ".css": "text/css",
                     ".json": "application/json",
+                    ".webmanifest": "application/manifest+json",
                     ".svg": "image/svg+xml",
                     ".png": "image/png",
                     ".jpg": "image/jpeg",

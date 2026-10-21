@@ -92,7 +92,7 @@ def build(params, cur, parts, counter, width, height):
         f=f'(1-({phase("t")}))'
         out=f'{stem}_mix{i}'
         parts.append(f"[{canvas}][{tile}]overlay=x='{x0}+({dx:.6f})*{f}':"
-                     f"y='{y0}+({dy:.6f})*{f}-35*{f}*{f}':"
+                     f"y='{y0}+({dy:.6f})*{f}-{35*params.get('_previewScale',1):.6f}*{f}*{f}':"
                      f'eval=frame:shortest=1:eof_action=pass:format=auto[{out}]')
         canvas=out
     output=f'{stem}_out'

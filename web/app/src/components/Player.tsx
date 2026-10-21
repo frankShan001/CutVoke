@@ -30,7 +30,7 @@ import { previewContentKey as projectPreviewKey } from "../lib/previewPreparatio
 const FIT = "fit" as const;
 type ZoomMode = typeof FIT | number;
 type PlayMode = "video" | "image";
-const PREVIEW_WINDOW_SECONDS = 8;
+const PREVIEW_WINDOW_SECONDS = 2;
 
 function contentToken(value: string): string {
   let hash = 2166136261;
@@ -68,6 +68,7 @@ export function Player() {
   const [ratio, setRatio] = useState<[number, number]>([16, 9]);
   const [buffering, setBuffering] = useState(false);
   const [readyVideoUrl, setReadyVideoUrl] = useState<string | null>(null);
+  const [frameGate, setFrameGate] = useState("");
   const [stageSize, setStageSize] = useState({ width: 640, height: 360 });
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [showTitleSafeArea, setShowTitleSafeArea] = useState(false);
@@ -143,7 +144,8 @@ export function Player() {
       : "";
   const previewIdentity = `${currentId}:${previewTimelineToken}:${sourceRestoreRevision}`;
   const cacheScope = `${currentId}:${previewContentKey}:${sourceRestoreRevision}`;
-  const segments = usePreviewSegments(cacheScope, videoUrl, mode === "video" && !usePrepared);
+  const segments = usePreviewSegments(cacheScope, videoUrl, mode === "video" && !usePrepared,
+    state.scrubbing || (hasVideoMedia && !playing && frameGate !== videoUrl));
   const mediaUrl = usePrepared ? videoUrl : segments.media?.url || "";
   const videoReady = readyVideoUrl === videoUrl;
   const preparing = !!videoUrl && mode === "video" && !videoReady;
@@ -188,10 +190,13 @@ export function Player() {
     selectedTrackVisible && selectedHasColor &&
     previewTime >= rationalSeconds(selectedClip.timelineStart) &&
     previewTime < rationalSeconds(selectedClip.timelineEnd);
-  const posterUrl = usePreviewPoster({
-    projectId: currentId, identity: videoUrl, time: decodePlayhead,
-    enabled: preparing && hasVideoMedia && !holding && !state.opening,
+  const poster = usePreviewPoster({
+    projectId: currentId, identity: videoUrl, scope: previewIdentity, time: playhead,
+    enabled: (preparing || state.scrubbing) && !usePrepared && hasVideoMedia && !state.opening,
+    draft: state.scrubbing,
+    onSettled: setFrameGate,
   });
+  const posterUrl = poster?.url;
   useLayoutEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
@@ -535,8 +540,13 @@ export function Player() {
   const togglePlayRef = useRef<() => void>(() => {});
   useEffect(() => {
     const onToggle = () => togglePlayRef.current();
+    const onPause = () => { if (playingRef.current) togglePlayRef.current(); };
     window.addEventListener("cutvoke:toggle-play", onToggle);
-    return () => window.removeEventListener("cutvoke:toggle-play", onToggle);
+    window.addEventListener("cutvoke:pause-play", onPause);
+    return () => {
+      window.removeEventListener("cutvoke:toggle-play", onToggle);
+      window.removeEventListener("cutvoke:pause-play", onPause);
+    };
   }, []);
 
   // 切工程：重置状态与 video
@@ -669,7 +679,7 @@ export function Player() {
     if (!clip) return;
     const cs = rationalSeconds(clip.timelineStart);
     const ce = rationalSeconds(clip.timelineEnd);
-    const at = mode === "video" ? videoTime : playhead;
+    const at = previewTime;
     if (at > cs + 0.01 && at < ce - 0.01) {
       void splitClip(dispatch, state, { clipId, time: secsToRational(at) });
     } else {
@@ -690,7 +700,7 @@ export function Player() {
       ? { width: fittedWidth, height: fittedWidth * ratio[1] / ratio[0] }
       : { width: `${640 * zoom}px`, height: `${360 * zoom}px`, aspectRatio: "auto" };
 
-  const shownTime = mode === "video" ? videoTime : playhead;
+  const shownTime = previewTime;
   const totalDisplay = mediaEndSecs;
   const ratioLabel = PLAYER_RATIOS.find((x) => x.wh[0] === ratio[0] && x.wh[1] === ratio[1])?.label || "16:9";
   const canvasWidth = project?.sequence.width || 1920;
@@ -734,8 +744,8 @@ export function Player() {
                   onTimeUpdate, onPlay, onPlaying, onPause, onEnded: onVideoEnded,
                   onWaiting, onCanPlay, onSeeked: onVideoLoaded,
                   onError: event => onVideoError(event.currentTarget) }} />
-              {preparing && posterUrl ? (
-                <img className="player__poster" src={posterUrl} alt={tr("预览首帧")} draggable={false} />
+              {(preparing || state.scrubbing) && posterUrl ? (
+                <img className="player__poster" data-preview-time={poster?.time} src={posterUrl} alt={tr("预览首帧")} draggable={false} />
               ) : null}
               {!hasVideoMedia ? <div className="player__placeholder">{tr("仅音频工程 · 画面为空")}</div> : null}
               {showLoadingNotice ? (
@@ -893,6 +903,10 @@ export function Player() {
           <Scissors size={15} />
         </button>
         <span style={{ flex: 1 }} />
+        {Math.max(canvasWidth, canvasHeight) > 640 ? (
+          <span className="player__zoom-val player-controls__view"
+            title={tr("预览降低分辨率以加快响应，导出保留原画质。")}>{tr("流畅预览")}</span>
+        ) : null}
         <button type="button"
           className={`player__safe-toggle ${showColorBefore ? "player__safe-toggle--on" : ""}`}
           onClick={() => {

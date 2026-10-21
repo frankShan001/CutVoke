@@ -25,3 +25,16 @@
 .cache-settings__actions { display:flex; gap:8px; flex-wrap:wrap; }
 .cache-settings footer { border-top:1px solid #373e48; margin-top:22px; padding-top:18px; font-size:13px; }
 .cache-settings__error { color:#ffb4a8; }.cache-settings__success { color:#7de1bc; }
+.cache-settings select { display:block; width:100%; margin-top:8px; padding:9px 10px; border:1px solid #454d59; border-radius:6px; background:#11151b; color:#e5e7eb; }
+.cache-settings select:focus-visible { outline:2px solid #4ecdc4; outline-offset:2px; }
+.settings-section { margin-top:20px; border-top:1px solid #373e48; padding-top:16px; }
+.settings-section h3 { margin:0 0 8px; font-size:15px; }
+.settings-save { position:sticky; bottom:-24px; margin:16px -24px -8px; padding:14px 24px; background:#171a20; border-top:1px solid #373e48; display:flex; justify-content:flex-end; }
+.cache-settings label.settings-confirm { display:flex; gap:10px; align-items:flex-start; line-height:1.6; }
+.settings-confirm input { width:16px; flex:none; margin-top:3px; }
+.cache-settings [role=alert] { overflow-wrap:anywhere; }
+.settings-navigation { display:flex; gap:8px; margin:16px 0; }
+.settings-navigation .tool-btn[aria-pressed=true] { border-color:var(--accent); color:var(--accent-text); background:var(--accent-soft-6); }
+.cache-settings .resource-pack-manager { margin:0; background:transparent; border:0; }
+.cache-settings .resource-pack-manager > summary { padding:8px 0 16px; }
+.cache-settings .resource-pack-manager__body { padding:0; }

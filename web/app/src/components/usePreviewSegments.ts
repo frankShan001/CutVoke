@@ -2,7 +2,7 @@ import { tr } from "../i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PreviewSegmentCache, type CachedPreviewSegment } from "../lib/previewSegmentCache";
 
-export function usePreviewSegments(scope: string, source: string, enabled: boolean) {
+export function usePreviewSegments(scope: string, source: string, enabled: boolean, deferLoading = false) {
   const cache = useMemo(() => new PreviewSegmentCache(), [scope]);
   const lifetimes = useRef(new WeakMap<PreviewSegmentCache, object>());
   const [result, setResult] = useState<{ cache: PreviewSegmentCache; source: string;
@@ -17,6 +17,9 @@ export function usePreviewSegments(scope: string, source: string, enabled: boole
   }, [cache]);
   useEffect(() => {
     if (!enabled || !source) return;
+    // Paused edits/seeks show a composed frame before starting an uncached
+    // video render. Cached windows remain instant, including while scrubbing.
+    if (deferLoading && !cache.peek(source)) return;
     let alive = true;
     const lease = cache.acquire(source);
     void lease.promise.then(media => {
@@ -27,7 +30,7 @@ export function usePreviewSegments(scope: string, source: string, enabled: boole
       }
     });
     return () => { alive = false; lease.release(); };
-  }, [cache, source, enabled]);
+  }, [cache, source, enabled, deferLoading]);
   const current = result?.cache === cache && result.source === source ? result : null;
   return { cache, media: enabled ? cache.peek(source) || current?.media || null : null,
     error: enabled ? current?.error || null : null };

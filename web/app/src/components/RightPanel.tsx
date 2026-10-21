@@ -28,6 +28,7 @@ export function RightPanel() {
   const panelScroll = useRef<HTMLDivElement>(null);
   const tabRefs = useRef(new Map<Tab, HTMLButtonElement>());
   const scrollByTab = useRef(new Map<Tab, number>());
+  const [effectToEdit, setEffectToEdit] = useState<{ effectId: string; category: string } | null>(null);
   const switchTab = (next: Tab) => {
     if (next === tab) return;
     if (panelScroll.current) scrollByTab.current.set(tab, panelScroll.current.scrollTop);
@@ -40,23 +41,52 @@ export function RightPanel() {
   }, [tab]);
   useEffect(() => {
     const openTransition = () => switchTab("transition");
+    const editEffect = (event: Event) => {
+      const target = (event as CustomEvent<{ effectId: string; category: string }>).detail;
+      if (!target || typeof target.effectId !== "string" || typeof target.category !== "string") return;
+      switchTab(target.category === "transition" ? "transition" : "inspect");
+      setEffectToEdit(target);
+    };
     const locateIssue = (event: Event) => {
       if ((event as LocatePreflightIssueEvent).detail.resourceKind !== "media") switchTab("inspect");
     };
     window.addEventListener("cutvoke:open-transition", openTransition);
+    window.addEventListener("cutvoke:edit-effect", editEffect);
     window.addEventListener(LOCATE_PREFLIGHT_ISSUE, locateIssue);
     return () => {
       window.removeEventListener("cutvoke:open-transition", openTransition);
+      window.removeEventListener("cutvoke:edit-effect", editEffect);
       window.removeEventListener(LOCATE_PREFLIGHT_ISSUE, locateIssue);
     };
   }, [tab]);
+  useEffect(() => {
+    const panel = panelScroll.current;
+    if (!effectToEdit || !panel) return;
+    const locate = () => {
+      if (effectToEdit.category === "transition") {
+        panel.scrollTop = 0; setEffectToEdit(null); return;
+      }
+      const target = [...panel.querySelectorAll<HTMLElement>("[data-effect-id]")]
+        .find(node => node.dataset.effectId === effectToEdit.effectId && node.getClientRects().length);
+      if (target) {
+        if (target instanceof HTMLDetailsElement && !target.open) target.open = true;
+        panel.scrollTop += target.getBoundingClientRect().top - panel.getBoundingClientRect().top - 12;
+        setEffectToEdit(null);
+      }
+    };
+    const observer = new MutationObserver(locate);
+    observer.observe(panel, { childList: true, subtree: true, attributes: true, attributeFilter: ["open"] });
+    const timer = window.setTimeout(() => setEffectToEdit(null), 5000);
+    locate();
+    return () => { observer.disconnect(); window.clearTimeout(timer); };
+  }, [effectToEdit, tab, state.project?.revision]);
   const hasClip = !!state.selection?.clipId;
   const hasTrack = !!state.selection?.trackId && !state.selection?.clipId;
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode; always?: boolean }[] = [
     { id: "inspect", label: hasClip ? tr("片段属性") : hasTrack ? tr("轨道属性") : tr("工程信息"), icon: <SlidersHorizontal size={13} /> },
     { id: "speed", label: tr("变速"), icon: <Gauge size={13} /> },
-    { id: "transition", label: tr("转场"), icon: <ArrowRightLeft size={13} /> },
+    { id: "transition", label: tr("转场参数"), icon: <ArrowRightLeft size={13} /> },
     { id: "stack", label: tr("效果条"), icon: <ListOrdered size={13} />, always: true },
     { id: "audio", label: tr("音频分析"), icon: <AudioLines size={13} />, always: true },
   ];

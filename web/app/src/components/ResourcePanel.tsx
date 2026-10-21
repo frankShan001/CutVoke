@@ -1,4 +1,4 @@
-import { msg, tr, useLocale } from "../i18n";
+import { tr, useLocale } from "../i18n";
 import { readingOrderKey } from "../i18n/navigation";
 import { subcategoryLabel } from "../i18n/resourceLabels";
 /** 资源库面板（J01）：分类 tab / 搜索 / 收藏/最近筛选 / 效果卡片 / 应用到选中片段。
@@ -8,29 +8,13 @@ import { subcategoryLabel } from "../i18n/resourceLabels";
  * 既有刷新机制；请求失败显式 showError，不静默降级。
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Search, Star, Loader2, CheckSquare2, Layers, Eye, Play, X } from "lucide-react";
-import { Panel } from "./ui";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { Search, Star, Loader2, Layers, GripVertical, X } from "lucide-react";
 import { useEditor, showError } from "../store/editor";
-import {
-  activateResourcePack,
-  addResourceRegistry,
-  downloadResourceRegistryPackage,
-  getResourcePackManagerStatus,
-  installResourcePack,
-  listResourceRegistries,
-  refreshResourceRegistries,
-  removeResourceRegistry,
-  rollbackResourcePack,
-  trustResourcePackPublisher,
-  type ResourcePackEntry,
-  type ResourcePackManagerStatus,
-  type ResourceRegistry,
-} from "../lib/api";
-import { getLatestState, runCommand } from "../store/actions";
-import { addEffectToClip, setFavorite } from "../store/effectEdit";
-import { applyAnimation } from "../store/clipEdit";
-import { applyTransition } from "../store/clipEdit";
+import { getLatestState } from "../store/actions";
+import { setFavorite } from "../store/effectEdit";
+import { applyResourceToClip } from "../store/resourceEdit";
+import { EFFECT_DND_TYPE, setEffectDrag, clipAcceptsEffect, type EffectDragResource } from "../lib/effectDrag";
 import { rationalToSecs } from "../lib/rational";
 import { TRANSITION_DND_TYPE } from "../lib/transitions";
 import {
@@ -38,6 +22,7 @@ import {
   builtinPresetMediaUrl,
   fetchResourcePreview,
   iconForCategory,
+  getEffectCatalog,
   listBuiltinPresets,
   listProjectResources,
   sortCategories,
@@ -49,103 +34,86 @@ import {
 
 interface Props {
   active: boolean;
-  defaultFamily?: string;
+  family: "fx" | "transition" | "filter";
 }
 
-// 每张封面都走同一渲染接口；串行按需加载，避免滚动时同时启动大量 FFmpeg 进程。
-let thumbnailQueue: Promise<void> = Promise.resolve();
-
-function ResourceThumbnail({
-  active, projectId, clipId, effectId, name, revision, sample, cache,
-}: {
-  active: boolean;
-  projectId: string;
-  clipId: string;
-  effectId: string;
-  name: string;
-  revision: string;
+// Prefer bundled videos; missing examples render one frame after a deliberate hover.
+function ResourceThumbnail({ effect, coverId, sample, playing, disabled, projectId, revision, previewClipId, onPreview }: {
+  effect: ProjectResource;
+  coverId?: string;
   sample: boolean;
-  cache: Map<string, string>;
+  playing: boolean;
+  disabled: boolean;
+  projectId: string | null;
+  revision: string | undefined;
+  previewClipId: string | null;
+  onPreview: (button: HTMLButtonElement) => void;
 }) {
   useLocale();
-  const holder = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  const [url, setUrl] = useState<string | null>(null);
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  const key = `${projectId}:${revision}:${clipId}:${effectId}`;
-
+  const [failed, setFailed] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [hoverFrame, setHoverFrame] = useState<string | null>(null);
+  const [frameLoading, setFrameLoading] = useState(false);
+  const [frameFailed, setFrameFailed] = useState(false);
+  useEffect(() => setFailed(false), [coverId]);
+  useEffect(() => { setVideoFailed(false); setVideoReady(false); }, [coverId, playing]);
   useEffect(() => {
-    if (!active || !holder.current) return;
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        setVisible(true);
-        observer.disconnect();
-      }
-    }, { rootMargin: "80px" });
-    observer.observe(holder.current);
-    return () => observer.disconnect();
-  }, [active]);
-
+    const video = videoRef.current;
+    if (!video) return;
+    const stopWhenHidden = () => {
+      if (document.hidden) video.pause();
+      else if (playing) void video.play().catch(() => setVideoFailed(true));
+    };
+    void video.play().catch(() => setVideoFailed(true));
+    document.addEventListener("visibilitychange", stopWhenHidden);
+    return () => { document.removeEventListener("visibilitychange", stopWhenHidden); video.pause(); };
+  }, [coverId, playing]);
   useEffect(() => {
-    if (!active || !visible) return;
-    const cached = cache.get(key);
-    if (cached) {
-      setUrl(cached);
-      setError(false);
-      setLoading(false);
-      return;
-    }
-    setUrl(null);
-    setError(false);
-    setLoading(true);
+    setHoverFrame(null); setFrameFailed(false); setFrameLoading(false);
+    if (!playing || sample || !projectId || !previewClipId) return;
     const controller = new AbortController();
-    thumbnailQueue = thumbnailQueue.then(async () => {
-      if (controller.signal.aborted) return;
-      const result = await fetchResourcePreview(projectId, clipId, effectId, controller.signal);
-      if (controller.signal.aborted) {
-        if (result.kind === "frame") URL.revokeObjectURL(result.url);
-        return;
-      }
-      if (result.kind === "frame") {
-        cache.set(key, result.url);
-        setUrl(result.url);
-        setLoading(false);
-      } else {
-        setError(true);
-        setLoading(false);
-      }
-    }).catch(() => {
-      if (!controller.signal.aborted) {
-        setError(true);
-        setLoading(false);
-      }
-    });
-    return () => controller.abort();
-  }, [active, visible, projectId, clipId, effectId, key, cache, attempt]);
-
-  return (
-    <div ref={holder} className={`resource-card__thumbnail${error ? " resource-card__thumbnail--error" : ""}`}>
-      {url ? <>
-        <img src={url} alt={tr("{0}在{1}上的预览帧", name, sample ? tr("工程示例片段") : tr("选中片段"))} />
-        <span className="resource-card__thumbnail-cache" title={tr("缩略图已缓存在当前编辑会话")}>{tr("已缓存")}</span>
-      </> : error ? <div className="resource-card__thumbnail-error" role="status">
-        <span>{tr("封面生成失败")}</span>
-        <button type="button" className="resource-card__thumbnail-retry"
-          aria-label={tr("重试{0}封面", name)} onClick={(event) => {
-            event.stopPropagation();
-            setAttempt((current) => current + 1);
-          }}>{tr("重试封面")}</button>
-      </div> : <span role="status">
-        {loading ? <><Loader2 size={12} className="cv-spin" />{tr(" 封面生成中…")}</> : tr("滚动到此处生成封面")}
-      </span>}
-    </div>
-  );
+    let url: string | null = null;
+    // Missing examples render only after a deliberate hover, never while the
+    // list loads or while the pointer quickly passes over several cards.
+    const timer = setTimeout(() => {
+      setFrameLoading(true);
+      void fetchResourcePreview(projectId, previewClipId, effect.effectId, controller.signal).then(result => {
+        if (result.kind === "frame") {
+          if (controller.signal.aborted) { URL.revokeObjectURL(result.url); return; }
+          url = result.url; setHoverFrame(url);
+        } else if (!controller.signal.aborted) setFrameFailed(true);
+      }).catch(() => { if (!controller.signal.aborted) setFrameFailed(true); })
+        .finally(() => { if (!controller.signal.aborted) setFrameLoading(false); });
+    }, 400);
+    return () => { clearTimeout(timer); controller.abort(); if (url) URL.revokeObjectURL(url); };
+  }, [playing, sample, projectId, revision, previewClipId, effect.effectId]);
+  const Icon = iconForCategory(effect.category);
+  return <button type="button" className="resource-card__thumbnail resource-card__thumbnail-button"
+    disabled={disabled} onClick={event => onPreview(event.currentTarget)} aria-label={tr("预览{0}效果", effect.name)}
+    title={sample ? tr("悬停预览，点击放大") : tr("预览默认样式的工程画面")}>
+    {coverId && !failed ? <img loading="lazy" decoding="async" draggable={false}
+      src={builtinPresetMediaUrl(coverId, "cover")} alt={tr("{0}效果示例", effect.name)}
+      onError={() => setFailed(true)} /> : <span className="resource-card__thumbnail-placeholder">
+      <Icon size={28} aria-hidden="true" /><span>{tr("点击预览查看效果")}</span>
+    </span>}
+    {playing && sample && coverId && !videoFailed ? <video ref={videoRef} key={coverId}
+      className={`resource-card__hover-video${videoReady ? " resource-card__hover-video--ready" : ""}`}
+      src={builtinPresetMediaUrl(coverId, "preview")} muted loop playsInline autoPlay preload="auto"
+      aria-label={tr("{0}效果示例", effect.name)} onCanPlay={() => setVideoReady(true)}
+      onError={() => setVideoFailed(true)} /> : null}
+    {playing && videoFailed ? <span className="resource-card__preview-status">{tr("预览暂不可用，点击重试")}</span> : null}
+    {playing && hoverFrame ? <img className="resource-card__hover-frame" src={hoverFrame} draggable={false}
+      alt={tr("{0}应用在选中片段上的效果", effect.name)} /> : null}
+    {playing && frameLoading ? <span className="resource-card__preview-status"><Loader2 size={12} className="cv-spin" />{tr(" 正在渲染选中片段…")}</span> : null}
+    {playing && frameFailed ? <span className="resource-card__preview-status">{tr("预览暂不可用，点击重试")}</span> : null}
+  </button>;
 }
 
-export function ResourcePanel({ active, defaultFamily = "" }: Props) {
+export function ResourcePanel({ active, family }: Props) {
   const locale = useLocale();
+  const dragHelpId = useId();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const pid = state.currentId;
 
@@ -157,8 +125,7 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
   const [builtinPresets, setBuiltinPresets] = useState<BuiltinPresetCatalog | null>(null);
   const [presetLoading, setPresetLoading] = useState(false);
   const [presetLoadError, setPresetLoadError] = useState<string | null>(null);
-  const [presetFamily, setPresetFamily] = useState(defaultFamily);
-  const [presetSubcategory, setPresetSubcategory] = useState("");
+  const [selectedStyles, setSelectedStyles] = useState<Record<string, string>>({});
   const [samplePreset, setSamplePreset] = useState<BuiltinPresetSummary | null>(null);
   const [sampleVideoError, setSampleVideoError] = useState(false);
   const [sampleVideoAttempt, setSampleVideoAttempt] = useState(0);
@@ -172,68 +139,37 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
   const [favOnly, setFavOnly] = useState(false);
   const [recOnly, setRecOnly] = useState(false);
   const [applying, setApplying] = useState<string | null>(null);
+  const [previewingId, setPreviewingId] = useState<string | null>(null);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const stopHover = useCallback(() => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    hoverTimer.current = null; setPreviewingId(null);
+  }, []);
+  const startHover = (effectId: string) => {
+    stopHover();
+    if (!reducedMotion) hoverTimer.current = setTimeout(() => setPreviewingId(effectId), 180);
+  };
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const changed = () => { setReducedMotion(query.matches); stopHover(); };
+    query.addEventListener("change", changed);
+    return () => { query.removeEventListener("change", changed); if (hoverTimer.current) clearTimeout(hoverTimer.current); };
+  }, [stopHover]);
+  useEffect(() => { stopHover(); }, [active, family, q, cat, subcategory, samplePreset, stopHover]);
   const [preview, setPreview] = useState<{ effectId: string; clipId: string; name: string; sample: boolean; url?: string; error?: string; loading: boolean } | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const previewRequest = useRef<AbortController | null>(null);
   const previewUrl = useRef<string | null>(null);
-  const thumbnailUrls = useRef(new Map<string, string>());
   const categoryTabRefs = useRef(new Map<string, HTMLButtonElement>());
-  const [packManager, setPackManager] = useState<ResourcePackManagerStatus | null>(null);
-  const [packManagerError, setPackManagerError] = useState<string | null>(null);
-  const [packManagerMessage, setPackManagerMessage] = useState<string | null>(null);
-  const [packManagerBusy, setPackManagerBusy] = useState(false);
-  const [packManagerStatusLoading, setPackManagerStatusLoading] = useState(false);
-  const [packManagerStatusError, setPackManagerStatusError] = useState<string | null>(null);
-  const [trustTarget, setTrustTarget] = useState<ResourcePackEntry | null>(null);
-  const [registries, setRegistries] = useState<ResourceRegistry[]>([]);
-  const [registryLoading, setRegistryLoading] = useState(false);
-  const [registryLoadError, setRegistryLoadError] = useState<string | null>(null);
-  const [registryError, setRegistryError] = useState<string | null>(null);
-  const [registryUrl, setRegistryUrl] = useState("");
-  const [registryTrustTarget, setRegistryTrustTarget] = useState<ResourceRegistry | null>(null);
-  const [trustFingerprint, setTrustFingerprint] = useState("");
-  const [trustPublicKeyPem, setTrustPublicKeyPem] = useState("");
-
-  const refreshPackManager = useCallback(async () => {
-    setPackManagerStatusLoading(true);
-    setPackManagerStatusError(null);
-    try {
-      setPackManager(await getResourcePackManagerStatus());
-      setPackManagerError(null);
-    } catch (error) {
-      setPackManagerStatusError(error instanceof Error ? error.message : tr("资源包状态读取失败"));
-    } finally {
-      setPackManagerStatusLoading(false);
-    }
-  }, []);
-
-  const loadRegistries = useCallback(async () => {
-    setRegistryLoading(true);
-    setRegistryLoadError(null);
-    try {
-      const result = await listResourceRegistries();
-      setRegistries(result.registries);
-    } catch (error) {
-      setRegistryLoadError(error instanceof Error ? error.message : tr("资源目录读取失败"));
-    } finally {
-      setRegistryLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (active) {
-      void refreshPackManager();
-      void loadRegistries();
-    }
-  }, [active, refreshPackManager, loadRegistries]);
-
   const selectedClipId = state.selection?.clipId ?? null;
-  const selectedTrackLocked = !!state.project?.sequence.tracks.find((track) =>
-    track.clips.some((clip) => clip.id === selectedClipId),
-  )?.locked;
-  const selectedClipReadOnly = selectedTrackLocked || !!state.editLock;
+  const selectedPreviewTarget = useMemo(() => {
+    const track = state.project?.sequence.tracks.find(t => t.clips.some(c => c.id === selectedClipId));
+    const clip = track?.clips.find(c => c.id === selectedClipId);
+    return track && clip ? { track, clip } : null;
+  }, [state.project, selectedClipId]);
 
-  // 尚未选片段时，使用工程里已有画面做资源封面；用户仍需明确选目标才能应用。
+  // 没有视频示例的默认样式仅在用户明确点击时渲染一张工程预览帧。
   const sampleTargets = useMemo(() => {
     const tracks = state.project?.sequence.tracks.filter((track) => track.kind === "video") || [];
     const first = tracks.flatMap((track) => track.clips)[0]?.id || null;
@@ -250,46 +186,6 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
     }
     return { first, transition };
   }, [state.project, locale]);
-
-  // 与服务端同一语义：静态图片只接受视觉效果；视频片段同时可处理画面与原声。
-  // 资源面板先隐藏不相关的卡片，服务端仍会二次校验，保证 Agent 与人工操作一致。
-  const selectedTargetTypes = useMemo(() => {
-    if (!selectedClipId) return [] as string[];
-    const track = state.project?.sequence.tracks.find((item) =>
-      item.clips.some((clip) => clip.id === selectedClipId),
-    );
-    if (!track) return [] as string[];
-    if (track.kind === "audio") return ["audio"];
-    if (track.kind === "text") return ["text"];
-    const clip = track.clips.find((item) => item.id === selectedClipId);
-    const source = (clip?.assetRef.sourcePath || "").split("?", 1)[0].toLowerCase();
-    if (/\.(avif|bmp|gif|heic|jpe?g|png|tiff?|webp)$/.test(source)) return ["image"];
-    return ["video", "audio"];
-  }, [selectedClipId, state.project, locale]);
-
-  // 转场不是单片段滤镜：它挂在「后一段」上，并且只对紧邻的前一段有语义。
-  // 把约束提前到资源库，避免用户点完才遇到无画面变化或后端错误。
-  const transitionTarget = useMemo(() => {
-    if (!selectedClipId) return { valid: false, reason: tr("请先选中转场后的片段"), maxDuration: 0 };
-    const track = state.project?.sequence.tracks.find((item) =>
-      item.clips.some((clip) => clip.id === selectedClipId),
-    );
-    if (!track || track.kind !== "video") return { valid: false, reason: tr("转场只能用于视频轨道"), maxDuration: 0 };
-    const clips = [...track.clips].sort(
-      (a, b) => rationalToSecs(a.timelineStart) - rationalToSecs(b.timelineStart),
-    );
-    const index = clips.findIndex((clip) => clip.id === selectedClipId);
-    if (index <= 0) return { valid: false, reason: tr("首个片段前没有可连接的片段"), maxDuration: 0 };
-    const previous = clips[index - 1];
-    const current = clips[index];
-    const gap = rationalToSecs(current.timelineStart) - rationalToSecs(previous.timelineEnd);
-    if (Math.abs(gap) > 0.001) return { valid: false, reason: tr("转场两侧需要首尾相接；请先关闭中间空隙"), maxDuration: 0 };
-    const previousDuration = rationalToSecs(previous.timelineEnd) - rationalToSecs(previous.timelineStart);
-    const currentDuration = rationalToSecs(current.timelineEnd) - rationalToSecs(current.timelineStart);
-    const maxDuration = Math.min(5, previousDuration / 2, currentDuration / 2);
-    if (maxDuration < 0.1) return { valid: false, reason: tr("相邻片段过短，无法形成转场"), maxDuration };
-    return { valid: true, reason: tr("将连接前一段与当前片段"), maxDuration };
-  }, [selectedClipId, state.project, locale]);
 
   const load = useCallback(
     async () => {
@@ -315,7 +211,12 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
       } catch (err) {
         if (!isCurrent()) return;
         resourcesProject.current = pid;
-        setResources([]);
+        try {
+          const fallback = await getEffectCatalog();
+          if (!isCurrent()) return;
+          setResources(fallback.map(effect => ({ ...effect, favorite: false, recent: false })));
+        } catch { if (isCurrent()) setResources([]); }
+        if (!isCurrent()) return;
         setFavIds([]);
         setLoadError(err instanceof Error && err.message ? err.message : tr("请检查服务连接后重试。"));
         showError(dispatch, err);
@@ -368,14 +269,6 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
   }, [pid, selectedClipId, state.project?.revision]);
 
   useEffect(() => {
-    const urls = thumbnailUrls.current;
-    return () => {
-      for (const url of urls.values()) URL.revokeObjectURL(url);
-      urls.clear();
-    };
-  }, [pid, selectedClipId, state.project?.revision]);
-
-  useEffect(() => {
     if (!samplePreset) return;
     sampleCloseButton.current?.focus();
     const onEscape = (event: KeyboardEvent) => {
@@ -393,10 +286,12 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
     setSampleVideoAttempt(0);
   }, [samplePreset?.presetId]);
 
+  const inDomain = (candidate: string) => family === "fx"
+    ? candidate !== "transition" && candidate !== "filter" && candidate !== "sticker"
+    : candidate === family;
   const available = useMemo(
-    () => resources.filter((e) => selectedTargetTypes.length === 0 ||
-      e.appliesTo.some((type) => selectedTargetTypes.includes(type))),
-    [resources, selectedTargetTypes, locale],
+    () => [...new Map(resources.map(effect => [effect.effectId, effect])).values()].filter(e => inDomain(e.browseCategory)),
+    [resources, family, locale],
   );
   const categories = useMemo(() => sortCategories(available.map((e) => e.browseCategory)), [available, locale]);
   const categoryTabOrder = useMemo(() => ["", ...categories], [categories, locale]);
@@ -432,34 +327,38 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
     requestAnimationFrame(() => categoryTabRefs.current.get(next)?.focus());
   };
 
-  const filtered = useMemo(
-    () => available.filter((e) => {
-      if ((favOnly && !e.favorite) || (recOnly && !e.recent)) return false;
-      if (cat && e.browseCategory !== cat) return false;
-      if (subcategory && (e.subcategory || "基础") !== subcategory) return false;
-      const needle = q.trim().toLocaleLowerCase();
-      return !needle || [e.name, e.description, e.effectId, categoryLabelOf(e.browseCategory),
-        e.subcategory, ...e.keywords]
-        .some((part) => part.toLocaleLowerCase().includes(needle));
-    }),
-    [available, favOnly, recOnly, cat, subcategory, q, locale],
-  );
-
-  const catalogPresets = useMemo(() =>
-    (builtinPresets?.presets || []).filter((preset) => preset.status !== "retired"),
-  [builtinPresets, locale]);
-  const presetFamilies = useMemo(() =>
-    [...new Set(catalogPresets.map((preset) => preset.family))], [catalogPresets, locale]);
-  const presetSubcategories = useMemo(() =>
-    [...new Set(catalogPresets.filter((preset) => !presetFamily || preset.family === presetFamily)
-      .map((preset) => preset.subcategory))], [catalogPresets, presetFamily, locale]);
-  const visiblePresets = useMemo(() => catalogPresets.filter((preset) => {
-    if (presetFamily && preset.family !== presetFamily) return false;
-    if (presetSubcategory && preset.subcategory !== presetSubcategory) return false;
+  const stylesByEffect = useMemo(() => {
+    const groups = new Map<string, BuiltinPresetSummary[]>();
+    for (const preset of builtinPresets?.presets || []) {
+      if (preset.status === "retired") continue;
+      const styles = groups.get(preset.effectId) || [];
+      styles.push(preset); groups.set(preset.effectId, styles);
+    }
+    return groups;
+  }, [builtinPresets]);
+  const styleReady = (style: BuiltinPresetSummary) => style.downloadState === "bundled" && style.mediaAvailable;
+  const selectedStyle = (effectId: string) => {
+    const styles = stylesByEffect.get(effectId) || [];
+    const saved = selectedStyles[effectId];
+    if (saved !== undefined) return styles.find(style => style.presetId === saved);
     const needle = q.trim().toLocaleLowerCase();
-    return !needle || [preset.name, preset.presetId, preset.subcategory, preset.effectId]
-      .some((part) => part.toLocaleLowerCase().includes(needle));
-  }), [catalogPresets, presetFamily, presetSubcategory, q, locale]);
+    return styles.find(style => styleReady(style) && needle && style.name.toLocaleLowerCase().includes(needle))
+      || styles.find(style => styleReady(style));
+  };
+  const filtered = useMemo(() => available.filter(effect => {
+    if ((favOnly && !effect.favorite) || (recOnly && !effect.recent)) return false;
+    if (cat && effect.browseCategory !== cat) return false;
+    if (subcategory && (effect.subcategory || "基础") !== subcategory) return false;
+    const needle = q.trim().toLocaleLowerCase();
+    return !needle || [effect.name, effect.description, effect.effectId, categoryLabelOf(effect.browseCategory),
+      effect.subcategory, ...effect.keywords, ...(stylesByEffect.get(effect.effectId) || []).flatMap(style => [style.name, style.presetId])]
+      .some(part => part.toLocaleLowerCase().includes(needle));
+  }), [available, favOnly, recOnly, cat, subcategory, q, locale, stylesByEffect]);
+
+  const openSample = (preset: BuiltinPresetSummary, button: HTMLButtonElement) => {
+    sampleOpener.current = button;
+    setSampleVideoError(false); setSampleVideoAttempt(0); setSamplePreset(preset);
+  };
 
   const showPreview = async (effect: ProjectResource, clipId: string) => {
     if (!pid) return;
@@ -492,80 +391,16 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
     }
   };
 
-  const selectionContext = useMemo(() => {
-    if (!selectedClipId) return tr("可先浏览工程示例封面；应用前请选中目标片段");
-    if (selectedTargetTypes.includes("image")) return tr("图片片段：仅显示视觉效果");
-    if (selectedTargetTypes.includes("text")) return tr("文字片段：仅显示文字效果");
-    if (selectedTargetTypes.includes("audio") && !selectedTargetTypes.includes("video")) {
-      return tr("音频片段：仅显示音频效果");
-    }
-    return tr("视频片段：显示画面与声音效果");
-  }, [selectedClipId, selectedTargetTypes, locale]);
-
-  const applyToSelected = async (effect: ProjectResource) => {
-    if (!selectedClipId || selectedClipReadOnly) return;
-    if (effect.category === "transition" && !transitionTarget.valid) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("无法应用转场：{0}", transitionTarget.reason) });
-      return;
-    }
-    if (applying) return;
+  const dragResource = (effect: ProjectResource, style?: BuiltinPresetSummary): EffectDragResource => ({
+    effectId: effect.effectId, category: effect.category, appliesTo: style?.appliesTo || effect.appliesTo,
+    duration: typeof (style?.params || effect.defaults).duration === "number" ? Number((style?.params || effect.defaults).duration) : 1,
+    ...(style ? { presetId: style.presetId } : {}),
+  });
+  const applyWithKeyboard = async (effect: ProjectResource, style?: BuiltinPresetSummary) => {
+    if (applying || (style && !styleReady(style))) return;
     setApplying(effect.effectId);
-    const st = getLatestState() || state;
-    const res = effect.category === "transition"
-      ? await applyTransition(dispatch, st, {
-          clipId: selectedClipId,
-          effectId: effect.effectId,
-          duration: Math.round(Math.min(
-            typeof effect.defaults.duration === "number" ? effect.defaults.duration : 1,
-            transitionTarget.maxDuration,
-          ) * 1000) / 1000,
-        })
-      : effect.category === "animation"
-      ? await applyAnimation(dispatch, st, {
-          clipId: selectedClipId,
-          animationId: effect.effectId,
-          duration: typeof effect.defaults.duration === "number" ? effect.defaults.duration : 1,
-          params: effect.defaults,
-        })
-      : await addEffectToClip(dispatch, st, {
-          clipId: selectedClipId,
-          effectId: effect.effectId,
-          params: undefined, // 后端按默认值补齐
-        });
-    setApplying(null);
-    if (res.ok) {
-      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已应用「{0}」到选中片段", effect.name) });
-    }
-  };
-
-  const applyPreset = async (preset: BuiltinPresetSummary) => {
-    if (!selectedClipId || selectedClipReadOnly || applying) return;
-    if (preset.downloadState !== "bundled" || !preset.mediaAvailable) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("此预设资源尚不可用") });
-      return;
-    }
-    if (preset.family === "transition" && !transitionTarget.valid) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("无法应用转场：{0}", transitionTarget.reason) });
-      return;
-    }
-    if (!preset.appliesTo.some((type) => selectedTargetTypes.includes(type))) {
-      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("此预设不适用于当前片段") });
-      return;
-    }
-    setApplying(preset.presetId);
-    const latest = getLatestState() || state;
-    const payload: Record<string, unknown> = {
-      clipId: selectedClipId, presetId: preset.presetId,
-    };
-    if (preset.family === "transition") {
-      payload.duration = Math.round(Math.min(
-        typeof preset.params.duration === "number" ? preset.params.duration : 1,
-        transitionTarget.maxDuration,
-      ) * 1000) / 1000;
-    }
-    const result = await runCommand(dispatch, latest, "builtinPreset.apply", payload);
-    setApplying(null);
-    if (result.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已应用预设「{0}」", preset.name) });
+    try { await applyResourceToClip(dispatch, state, dragResource(effect, style), effect, selectedClipId || ""); }
+    finally { setApplying(null); }
   };
 
   const toggleFav = async (effect: ProjectResource) => {
@@ -577,389 +412,14 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
     refresh();
   };
 
-  const importResourcePack = async (file: File | null) => {
-    if (!file) return;
-    setPackManagerBusy(true);
-    setPackManagerError(null);
-    setPackManagerMessage(null);
-    try {
-      const installed = await installResourcePack(file);
-      await refreshPackManager();
-      setPackManagerMessage(tr("已安装 v{0}，可在下方列表中启用。", installed.version));
-    } catch (error) {
-      setPackManagerError(error instanceof Error ? error.message : tr("资源包安装失败"));
-    } finally {
-      setPackManagerBusy(false);
-    }
-  };
-
-  const activatePack = async (packId: string, version: string) => {
-    setPackManagerBusy(true);
-    setPackManagerError(null);
-    setPackManagerMessage(null);
-    try {
-      setPackManager(await activateResourcePack(packId, version));
-      setPackManagerMessage(tr("资源包已启用；刷新页面后加载新的预设和贴纸目录。"));
-    } catch (error) {
-      setPackManagerError(error instanceof Error ? error.message : tr("资源包启用失败"));
-    } finally {
-      setPackManagerBusy(false);
-    }
-  };
-
-  const rollbackPack = async () => {
-    setPackManagerBusy(true);
-    setPackManagerError(null);
-    setPackManagerMessage(null);
-    try {
-      setPackManager(await rollbackResourcePack());
-      setPackManagerMessage(tr("已回滚资源包；刷新页面后加载回滚版本的目录。"));
-    } catch (error) {
-      setPackManagerError(error instanceof Error ? error.message : tr("资源包回滚失败"));
-    } finally {
-      setPackManagerBusy(false);
-    }
-  };
-
-  const addRegistry = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const url = registryUrl.trim();
-    if (!url) return;
-    setPackManagerBusy(true);
-    setRegistryError(null);
-    setPackManagerMessage(null);
-    try {
-      const added = await addResourceRegistry(url);
-      setRegistries((current) => [...current.filter((item) => item.url !== added.url), added]);
-      setRegistryUrl("");
-      setPackManagerMessage(tr("已添加资源目录「{0}」。", added.displayName || added.url));
-    } catch (error) {
-      setRegistryError(error instanceof Error ? error.message : tr("添加资源目录失败"));
-    } finally {
-      setPackManagerBusy(false);
-    }
-  };
-
-  const refreshRegistries = async (url?: string) => {
-    setPackManagerBusy(true);
-    setRegistryError(null);
-    try {
-      const result = await refreshResourceRegistries(url);
-      if (url) {
-        setRegistries((current) => current.map((item) =>
-          item.url === url ? result.registries[0] ?? item : item));
-      } else {
-        setRegistries(result.registries);
-      }
-    } catch (error) {
-      setRegistryError(error instanceof Error ? error.message : tr("刷新资源目录失败"));
-    } finally {
-      setPackManagerBusy(false);
-    }
-  };
-
-  const removeRegistry = async (url: string) => {
-    setPackManagerBusy(true);
-    setRegistryError(null);
-    try {
-      const result = await removeResourceRegistry(url);
-      setRegistries(result.registries);
-      setPackManagerMessage(tr("已移除资源目录；已安装的包不会被删除。"));
-    } catch (error) {
-      setRegistryError(error instanceof Error ? error.message : tr("移除资源目录失败"));
-    } finally {
-      setPackManagerBusy(false);
-    }
-  };
-
-  const downloadRegistryPackage = async (registry: ResourceRegistry, packId: string, version: string) => {
-    setPackManagerBusy(true);
-    setRegistryError(null);
-    setPackManagerMessage(tr("正在下载并校验；如果连接中断，再点一次会从已下载位置续传。"));
-    try {
-      const result = await downloadResourceRegistryPackage(registry.url, packId, version);
-      await Promise.all([refreshPackManager(), loadRegistries()]);
-      setPackManagerMessage(tr("已下载并安装「{0}」v{1}；可在已安装列表中手动启用。", result.installed.packId, result.installed.version));
-    } catch (error) {
-      setRegistryError(error instanceof Error ? error.message : tr("下载资源包失败；可以重试并续传。"));
-      setPackManagerMessage(null);
-    } finally {
-      setPackManagerBusy(false);
-    }
-  };
-
-  const trustRegistry = async () => {
-    if (!registryTrustTarget?.publisherId || !trustPublicKeyPem || !trustFingerprint.trim()) return;
-    setPackManagerBusy(true);
-    setRegistryError(null);
-    setPackManagerMessage(null);
-    try {
-      const status = await trustResourcePackPublisher(
-        registryTrustTarget.publisherId, trustPublicKeyPem, trustFingerprint.trim(),
-      );
-      setPackManager(status);
-      setRegistryTrustTarget(null);
-      const refreshed = await refreshResourceRegistries();
-      setRegistries(refreshed.registries);
-      setPackManagerMessage(tr("发布者「{0}」的密钥已核对并加入本机信任列表。", registryTrustTarget.publisherId));
-    } catch (error) {
-      setRegistryError(error instanceof Error ? error.message : tr("发布者密钥验证失败"));
-    } finally {
-      setPackManagerBusy(false);
-    }
-  };
-
-  const beginTrustPublisher = (item: ResourcePackEntry) => {
-    setRegistryTrustTarget(null);
-    setTrustTarget(item);
-    setTrustFingerprint("");
-    setTrustPublicKeyPem("");
-    setPackManagerError(null);
-    setPackManagerMessage(null);
-  };
-
-  const beginTrustRegistry = (registry: ResourceRegistry) => {
-    setTrustTarget(null);
-    setRegistryTrustTarget(registry);
-    setTrustFingerprint("");
-    setTrustPublicKeyPem("");
-    setRegistryError(null);
-    setPackManagerMessage(null);
-  };
-
-  const trustPublisher = async () => {
-    if (!trustTarget || !trustPublicKeyPem || !trustFingerprint.trim()) return;
-    setPackManagerBusy(true);
-    setPackManagerError(null);
-    setPackManagerMessage(null);
-    try {
-      const status = await trustResourcePackPublisher(
-        trustTarget.publisherId, trustPublicKeyPem, trustFingerprint.trim(),
-      );
-      setPackManager(status);
-      setTrustTarget(null);
-      setPackManagerMessage(tr("发布者「{0}」的密钥已核对并加入本机信任列表。", trustTarget.publisherId));
-    } catch (error) {
-      setPackManagerError(error instanceof Error ? error.message : tr("发布者密钥验证失败"));
-    } finally {
-      setPackManagerBusy(false);
-    }
-  };
-
   return (
-    <Panel title={tr("资源库")} subtitle={tr("按类型与细分类浏览真实效果")}>
-      {selectedClipReadOnly ? (
+    <div className="resource-browser" data-resource-family={family}>
+      <p className="cv-hint resource-library-help">{tr("悬停预览；选择样式后拖到片段上，转场拖到接缝。应用后可在右侧调整。")}</p>
+      {state.editLock ? (
         <p className="cv-hint" role="status">
-          {state.editLock ? tr("Agent 正在编辑，效果暂不可应用。") : tr("所选片段所在轨道已锁定，解锁后可应用效果。")}
+          {tr("Agent 正在编辑，效果暂不可应用。")}
         </p>
       ) : null}
-      <p className="resource-context" role="status">
-        <span>{selectionContext}</span>
-        <span>{filtered.length} / {available.length}{tr(" 个效果")}</span>
-      </p>
-      {builtinPresets ? (
-        <p className="cv-hint resource-catalog-status" title={tr("效果规格、候选预设与经完整工作流验收的预设分开计数；资源包清单含版本、许可证与媒体 SHA-256")}>{tr("已注册效果 ")}{resources.length}{tr(" · 内置候选预设 ")}{builtinPresets.candidateCount}{tr(" · 合格预设 ")}{builtinPresets.qualifiedCount}
-          {builtinPresets.resourcePack ? tr(" · 资源包 v{0} · {1}", builtinPresets.resourcePack.version, builtinPresets.resourcePack.offlineAvailable ? tr("离线可用") : tr("异常 {0} 个文件", builtinPresets.resourcePack.missingFiles.length + (builtinPresets.resourcePack.invalidFiles?.length ?? 0))) : ""}
-        </p>
-      ) : presetLoading ? (
-        <p className="cv-hint" role="status">{tr("正在读取内置预设审核状态；效果清单可继续浏览。")}</p>
-      ) : presetLoadError ? (
-        <p className="resource-pack-manager__error" role="alert">
-          <span>{tr("内置预设审核状态读取失败：")}{presetLoadError}{tr("；效果清单仍可浏览。")}</span>
-          <button type="button" className="cv-button cv-button--small"
-            disabled={presetLoading} onClick={() => void loadBuiltinPresets()}>{tr("重试内置预设")}</button>
-        </p>
-      ) : null}
-      <details className="resource-pack-manager">
-        <summary>{tr("离线资源包管理")}{packManager ? tr(" · 当前 v{0}", packManager.active.version) : ""}</summary>
-        <div className="resource-pack-manager__body">
-          <label className="resource-pack-manager__import">{tr("安装离线 ZIP")}<input type="file" accept=".zip,application/zip" aria-label={tr("安装离线资源包 ZIP")}
-              disabled={packManagerBusy}
-              onChange={(event) => {
-                const file = event.currentTarget.files?.[0] ?? null;
-                void importResourcePack(file);
-                event.currentTarget.value = "";
-              }} />
-          </label>
-          {packManagerBusy ? <span role="status">{tr("正在处理资源目录或资源包…")}</span> : null}
-          {packManagerError ? <p className="resource-pack-manager__error" role="alert">{packManagerError}</p> : null}
-          {packManagerStatusLoading ? <p role="status">{tr("正在读取本机资源包状态…")}</p> : null}
-          {packManagerStatusError ? (
-            <p className="resource-pack-manager__error" role="alert">
-              <span>{tr("资源包状态读取失败：")}{packManagerStatusError}</span>
-              <button type="button" className="cv-button cv-button--small"
-                disabled={packManagerStatusLoading}
-                onClick={() => void refreshPackManager()}>{tr("重试资源包状态")}</button>
-            </p>
-          ) : null}
-          {packManagerMessage ? <p className="resource-pack-manager__message" role="status">{packManagerMessage}</p> : null}
-          <section className="resource-registry" aria-label={tr("在线资源目录")}>
-            <div className="resource-registry__heading">
-              <strong>{tr("在线资源目录")}</strong>
-              <button type="button" className="cv-button cv-button--small"
-                disabled={packManagerBusy || registryLoading} onClick={() => void refreshRegistries()}>{tr("刷新全部")}</button>
-            </div>
-            <form className="resource-registry__add" onSubmit={(event) => void addRegistry(event)}>
-              <label htmlFor="resource-registry-url">{tr("签名目录 HTTPS 地址")}</label>
-              <div>
-                <input id="resource-registry-url" type="url" value={registryUrl}
-                  onChange={(event) => setRegistryUrl(event.currentTarget.value)}
-                  placeholder="https://example.com/resources.json" required />
-                <button type="submit" className="cv-button cv-button--small"
-                  disabled={packManagerBusy || !registryUrl.trim()}>{tr("添加")}</button>
-              </div>
-              <small>{tr("目录与资源包都需由发布者签名并校验 SHA-256；开发用本机回环地址也可使用 HTTP。")}</small>
-            </form>
-    {registryLoading ? <p className="cv-hint" role="status">{tr("正在读取在线资源目录…")}</p> : null}
-            {registryLoadError ? (
-              <p className="resource-pack-manager__error" role="alert">
-                <span>{tr("在线资源目录读取失败：")}{registryLoadError}</span>
-                <button type="button" className="cv-button cv-button--small"
-                  disabled={registryLoading}
-                  onClick={() => void loadRegistries()}>{tr("重试资源目录")}</button>
-              </p>
-            ) : null}
-            {registryError ? <p className="resource-pack-manager__error" role="alert">{tr("在线资源目录操作失败：")}{registryError}
-            </p> : null}
-            {!registryLoading && !registryLoadError && registries.length === 0
-              ? <p className="cv-hint">{tr("尚未添加在线资源目录。")}</p> : null}
-            <ul className="resource-registry__list" aria-label={tr("在线资源目录列表")}>
-              {registries.map((registry) => (
-                <li key={registry.url}>
-                  <div className="resource-registry__source">
-                    <strong>{registry.displayName || registry.registryId || registry.url}</strong>
-                    <small>{registry.signatureStatus === "verified"
-                      ? tr("目录签名已验证 · {0}", registry.publisherId)
-                      : registry.signatureStatus === "unknown_publisher"
-                      ? tr("目录发布者未受信任 · {0}", registry.publisherId)
-                      : tr("目录暂不可用，保留上次成功读取内容")}</small>
-                    {registry.fingerprint ? <code>SHA-256：{registry.fingerprint}</code> : null}
-                    {registry.lastError ? <small className="resource-registry__error">{tr("刷新失败：")}{registry.lastError}</small> : null}
-                  </div>
-                  <div className="resource-registry__actions">
-                    {registry.signatureStatus === "unknown_publisher" ? <button type="button"
-                      className="cv-button cv-button--small" disabled={packManagerBusy}
-                      onClick={() => beginTrustRegistry(registry)}>{tr("核对并信任目录发布者")}</button> : null}
-                    <button type="button" className="cv-button cv-button--small"
-                      disabled={packManagerBusy} onClick={() => void refreshRegistries(registry.url)}>{tr("刷新")}</button>
-                    <button type="button" className="cv-button cv-button--small"
-                      disabled={packManagerBusy} onClick={() => void removeRegistry(registry.url)}>{tr("移除")}</button>
-                  </div>
-                  {registryTrustTarget?.url === registry.url ? (
-                    <form className="resource-pack-manager__trust" onSubmit={(event) => {
-                      event.preventDefault();
-                      void trustRegistry();
-                    }}>
-                      <strong>{tr("核对 ")}{registry.publisherId}{tr(" 的目录签名密钥")}</strong>
-                      <span>{tr("从可信渠道确认此 SHA-256 指纹，再导入发布者提供的 Ed25519 公钥。")}</span>
-                      <code>{registry.fingerprint || registry.keyId}</code>
-                      <label>{tr("可信渠道给出的 SHA-256 指纹")}<input type="text" value={trustFingerprint}
-                          onChange={(event) => setTrustFingerprint(event.currentTarget.value)}
-                          autoComplete="off" spellCheck={false} required />
-                      </label>
-                      <label>{tr("Ed25519 公钥 PEM 文件")}<input type="file" accept=".pem,.pub,text/plain" required
-                          onChange={(event) => {
-                            const file = event.currentTarget.files?.[0];
-                            setTrustPublicKeyPem("");
-                            if (file) void file.text().then(setTrustPublicKeyPem).catch(() =>
-                              setRegistryError(tr("公钥文件读取失败")));
-                          }} />
-                      </label>
-                      <div>
-                        <button type="submit" className="cv-button cv-button--small"
-                          disabled={packManagerBusy || !trustFingerprint.trim() || !trustPublicKeyPem}>
-                          {packManagerBusy ? tr("验证中…") : tr("验证指纹并信任目录发布者")}
-                        </button>
-                        <button type="button" className="cv-button cv-button--small"
-                          onClick={() => setRegistryTrustTarget(null)}>{tr("取消")}</button>
-                      </div>
-                    </form>
-                  ) : null}
-                  {(registry.packages?.length ?? 0) > 0 ? (
-                    <ul className="resource-registry__packages" aria-label={tr("{0}中的资源包", registry.displayName || "资源目录")}>
-                      {registry.packages?.map((item) => (
-                        <li key={`${item.packId}:${item.version}`}>
-                          <span><strong>{item.name}</strong> v{item.version}
-                            <small>{item.packId} · {(item.sizeBytes / (1024 * 1024)).toFixed(1)}{tr(" MB · SHA-256 已登记")}</small>
-                          </span>
-                          <button type="button" className="cv-button cv-button--small"
-                            disabled={packManagerBusy}
-                            onClick={() => void downloadRegistryPackage(registry, item.packId, item.version)}>
-                            {packManagerBusy ? tr("处理中…") : tr("下载并安装")}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          </section>
-          {packManager ? <>
-            <ul className="resource-pack-manager__list" aria-label={tr("已安装资源包版本")}>
-              {packManager.installed.map((item) => (
-                <li key={`${item.packId}:${item.version}`}>
-                  <span>
-                    <strong>{item.builtin ? tr("内置资源") : item.packId}</strong> v{item.version}
-                    <small>{item.presetCount}{tr(" 个预设 · ")}{item.stickerCount}{tr(" 个贴纸 · ")}{item.fileCount}{tr(" 个文件")}{!item.offlineAvailable ? tr(" · 校验异常") : ""}
-                      {item.provenanceCoverage ? <><br /><span title={tr("此处只统计资源清单中是否填写许可证与来源字段，不表示法律审核或授权已核实。")}>{tr("授权元数据：许可证 ")}{item.provenanceCoverage.licenseDeclaredCount}/{item.provenanceCoverage.resourceCount}{tr(" · 来源 ")}{item.provenanceCoverage.sourceDeclaredCount}/{item.provenanceCoverage.resourceCount}{tr(" · 字段待补 ")}{item.provenanceCoverage.incompleteCount}</span></> : null}
-                      <br />{item.signatureStatus === "bundled" ? tr("应用内置资源") :
-                        item.signatureStatus === "verified" ? tr("发布者已验证 · {0}", item.publisherId) :
-                        item.signatureStatus === "unknown_publisher" ? tr("发布者未受信任 · {0}", item.publisherId) : tr("未签名 · 发布者未验证")}
-                      {item.signatureStatus === "unknown_publisher" ? <><br />{tr("SHA-256 指纹：")}{item.fingerprint || item.keyId}</> : null}
-                    </small>
-                  </span>
-                  {item.signatureStatus === "unknown_publisher" ? (
-                    <button type="button" className="cv-button cv-button--small"
-                      disabled={packManagerBusy}
-                      onClick={() => beginTrustPublisher(item)}>{tr("核对并信任")}</button>
-                  ) : null}
-                  <button type="button" className="cv-button cv-button--small"
-                    disabled={packManagerBusy || item.active || !item.offlineAvailable}
-                    onClick={() => void activatePack(item.packId, item.version)}>
-                    {item.active ? tr("当前启用") :
-                      item.signatureStatus === "unsigned" || item.signatureStatus === "unknown_publisher" ? tr("启用未验证包") : tr("启用")}
-                  </button>
-                  {trustTarget?.keyId === item.keyId ? (
-                    <form className="resource-pack-manager__trust" onSubmit={(event) => {
-                      event.preventDefault();
-                      void trustPublisher();
-                    }}>
-                      <strong>{tr("核对 ")}{item.publisherId}{tr(" 的发布者密钥")}</strong>
-                      <span>{tr("先从可信渠道确认该 SHA-256 指纹，再填写并导入发布者提供的 Ed25519 公钥 PEM。")}</span>
-                      <code>{item.fingerprint || item.keyId}</code>
-                      <label>{tr("可信渠道给出的 SHA-256 指纹")}<input type="text" value={trustFingerprint}
-                          onChange={(event) => setTrustFingerprint(event.currentTarget.value)}
-                          autoComplete="off" spellCheck={false} required />
-                      </label>
-                      <label>{tr("Ed25519 公钥 PEM 文件")}<input type="file" accept=".pem,.pub,text/plain" required
-                          onChange={(event) => {
-                            const file = event.currentTarget.files?.[0];
-                            setTrustPublicKeyPem("");
-                            if (file) void file.text().then(setTrustPublicKeyPem).catch(() =>
-                              setPackManagerError(tr("公钥文件读取失败")));
-                          }} />
-                      </label>
-                      <div>
-                        <button type="submit" className="cv-button cv-button--small"
-                          disabled={packManagerBusy || !trustFingerprint.trim() || !trustPublicKeyPem}>
-                          {packManagerBusy ? tr("验证中…") : tr("验证指纹并信任")}
-                        </button>
-                        <button type="button" className="cv-button cv-button--small"
-                          disabled={packManagerBusy}
-                          onClick={() => setTrustTarget(null)}>{tr("取消")}</button>
-                      </div>
-                    </form>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-            <button type="button" className="cv-button cv-button--small"
-              disabled={packManagerBusy || !packManager.canRollback}
-              onClick={() => void rollbackPack()}>{tr("回滚上一版本")}</button>
-          </> : null}
-        </div>
-      </details>
       <div className="media-filter">
         <label className="media-filter__search">
           <Search size={14} aria-hidden="true" />
@@ -972,101 +432,14 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
           />
         </label>
       </div>
-      {catalogPresets.length > 0 ? (
-        <section className="resource-preset-library" aria-label={tr("内置预设库")}>
-          <div className="resource-preset-library__head">
-            <strong>{tr("内置预设 · 动态样片")}</strong>
-            <span>{visiblePresets.length} / {catalogPresets.length}{tr(" 项")}</span>
-          </div>
-          <p className="cv-hint">{tr("预设卡按稳定预设 ID 管理；候选项可试用，完整视觉与工程审核前不计入合格数量。")}</p>
-          {presetFamily === "personFx" ? (
-            <p className="cv-hint" role="note">{tr("人物特效适用于人物抠像生成并保留 Alpha 通道的视频层。先完成人物抠像，再选中时间线上生成的人物层。")}</p>
-          ) : null}
-          <div className="resource-subcategories resource-preset-families" role="group" aria-label={tr("预设类型")}>
-            <button type="button" className={`resource-subcategories__btn${!presetFamily ? " resource-subcategories__btn--active" : ""}`}
-              aria-pressed={!presetFamily} onClick={() => { setPresetFamily(""); setPresetSubcategory(""); }}>{tr("全部")}</button>
-            {presetFamilies.map((family) => (
-              <button key={family} type="button"
-                className={`resource-subcategories__btn${presetFamily === family ? " resource-subcategories__btn--active" : ""}`}
-                aria-pressed={presetFamily === family}
-                onClick={() => { setPresetFamily(family); setPresetSubcategory(""); }}>
-                {family === "sticker" ? tr("贴纸") : categoryLabelOf(family as EffectCategory)}
-                <span>{catalogPresets.filter((preset) => preset.family === family).length}</span>
-              </button>
-            ))}
-          </div>
-          {presetSubcategories.length > 1 ? (
-            <div className="resource-subcategories" role="group" aria-label={tr("预设细分类")}>
-              <button type="button" className={`resource-subcategories__btn${!presetSubcategory ? " resource-subcategories__btn--active" : ""}`}
-                aria-pressed={!presetSubcategory} onClick={() => setPresetSubcategory("")}>{tr("全部")}</button>
-              {presetSubcategories.map((subcategory) => (
-                <button key={subcategory} type="button"
-                  className={`resource-subcategories__btn${presetSubcategory === subcategory ? " resource-subcategories__btn--active" : ""}`}
-                  aria-pressed={presetSubcategory === subcategory} onClick={() => setPresetSubcategory(subcategory)}>
-                  {subcategoryLabel(subcategory)}
-                </button>
-              ))}
-            </div>
-          ) : null}
-          {visiblePresets.length ? (
-            <div className="resource-grid resource-preset-grid">
-              {visiblePresets.map((preset) => {
-                const isTransition = preset.family === "transition";
-                const applicable = preset.appliesTo.some((type) => selectedTargetTypes.includes(type));
-                const availableMedia = preset.downloadState === "bundled" && preset.mediaAvailable;
-                const disabled = !selectedClipId || selectedClipReadOnly || !applicable ||
-                  !availableMedia || (isTransition && !transitionTarget.valid);
-                return (
-                  <div key={preset.presetId} className="resource-card resource-preset-card"
-                    draggable={isTransition && availableMedia && !state.editLock}
-                    onDragStart={(event) => {
-                      if (!isTransition || !availableMedia || state.editLock) return;
-                      event.dataTransfer.effectAllowed = "copy";
-                      event.dataTransfer.setData(TRANSITION_DND_TYPE, JSON.stringify({
-                        effectId: preset.effectId,
-                        duration: typeof preset.params.duration === "number" ? preset.params.duration : 1,
-                      }));
-                    }}>
-                    {availableMedia ? (
-                      <button type="button" className="resource-preset-card__preview"
-                        aria-label={tr("播放{0}动态样片", preset.name)}
-                        onClick={(event) => {
-                          sampleOpener.current = event.currentTarget;
-                          setSampleVideoError(false);
-                          setSampleVideoAttempt(0);
-                          setSamplePreset(preset);
-                        }}>
-                        <img loading="lazy" src={builtinPresetMediaUrl(preset.presetId, "cover")} alt="" />
-                        <span className="resource-preset-card__play" aria-hidden="true"><Play size={18} fill="currentColor" /></span>
-                      </button>
-                    ) : <span className="resource-card__thumbnail">
-                      {preset.downloadState === "available" ? tr("待下载") : tr("样片不可用")}
-                    </span>}
-                    <div className="resource-card__head">
-                      <strong className="resource-card__name" title={preset.presetId}>{preset.name}</strong>
-                      <span className="resource-card__tag">
-                        {!availableMedia ? preset.downloadState === "available" ? tr("待下载") : tr("不可用") :
-                          preset.qualified ? tr("合格") : tr("候选")}
-                      </span>
-                    </div>
-                    <span className="resource-card__group"
-                      title={tr("{0} · 来源：{1} · v{2}", preset.license, preset.source || "未记录", preset.version)}>
-                      {subcategoryLabel(preset.subcategory)} · v{preset.version}
-                    </span>
-                    <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary resource-card__apply"
-                      disabled={disabled || applying === preset.presetId}
-                      title={!availableMedia ? tr("资源包未下载或样片文件缺失") :
-                        isTransition && !transitionTarget.valid ? transitionTarget.reason :
-                        !selectedClipId ? tr("请先选中片段；样片仍可播放") : !applicable ? tr("不适用于当前片段") : tr("应用预设参数")}
-                      onClick={() => void applyPreset(preset)}>
-                      {applying === preset.presetId ? <Loader2 size={12} className="cv-spin" /> : <CheckSquare2 size={12} />}{tr("应用")}</button>
-                  </div>
-                );
-              })}
-            </div>
-          ) : <p className="cv-empty">{tr("该预设分类暂无匹配内容。")}</p>}
-        </section>
-      ) : null}
+      {presetLoading && !builtinPresets ? <p className="cv-loading" role="status">{tr(" 加载中…")}</p> : null}
+      {presetLoadError ? <div className="resource-preview__failure" role="alert">
+        <p>{tr("内置预设审核状态读取失败：")}{presetLoadError}</p><button type="button" className="cv-button cv-button--small" onClick={() => void loadBuiltinPresets()}>{tr("重试内置预设")}</button>
+      </div> : null}
+      {loadError ? <div className="resource-preview__failure" role="alert">
+        <p>{tr("效果清单加载失败：")}{loadError}</p>
+        <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary" onClick={refresh}>{tr("重试资源库")}</button>
+      </div> : null}
       {samplePreset ? (
         <div className="resource-sample-overlay"
           onMouseDown={(event) => {
@@ -1124,10 +497,11 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
           </section>
         </div>
       ) : null}
-      <h3 className="resource-operator-heading">{tr("效果规格 · 手工调参")}</h3>
-
+      <section className="resource-effect-library" aria-label={tr("效果库")}>
+      <p id={dragHelpId} className="sr-only">{tr("拖到目标片段；键盘可选中效果卡片后按 Enter 应用到选中片段")}</p>
+      <p className="resource-library-count" role="status">{filtered.length}{tr(" 个效果")}</p>
       {/* 分类 tab：由 category 枚举派生 */}
-      <div className="resource-tabs" role="tablist" aria-label={tr("效果分类")}>
+      {categories.length > 1 && <div className="resource-tabs" role="tablist" aria-label={tr("效果分类")}>
         <button
           type="button"
           role="tab"
@@ -1159,7 +533,7 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
             {categoryLabelOf(c)} <span className="resource-tabs__count">{available.filter((e) => e.browseCategory === c).length}</span>
           </button>
         ))}
-      </div>
+      </div>}
 
       {cat && subcategories.length > 1 ? (
         <div className="resource-subcategories" role="group" aria-label={tr("{0}细分类", categoryLabelOf(cat))}>
@@ -1232,54 +606,61 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
       {(pid && resourcesProject.current !== pid) || (loading && resources.length === 0) ? (
         <div className="cv-loading" role="status">
           <Loader2 size={13} className="cv-spin" />{tr(" 加载中…")}</div>
-      ) : loadError ? (
-        <div className="resource-preview__failure" role="alert">
-          <p>{tr("效果清单加载失败：")}{loadError}</p>
-          <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary"
-            onClick={refresh}>{tr("重试资源库")}</button>
-        </div>
-      ) : resources.length === 0 ? (
+      ) : loadError && resources.length === 0 ? null : resources.length === 0 ? (
         <p className="cv-empty">
           {pid ? tr("没有匹配的效果。试试调整搜索词或分类。") : tr("请先创建或打开一个工程。")}
         </p>
       ) : filtered.length === 0 ? (
         <p className="cv-empty">{tr("当前素材类型和筛选条件下没有可用效果。")}</p>
       ) : (
-        <div className="resource-grid">
+        <div className="resource-grid resource-effect-grid">
           {filtered.map((e) => {
             const Icon = iconForCategory(e.category);
             const fav = favIds.includes(e.effectId) || e.favorite;
+            const styles = stylesByEffect.get(e.effectId) || [];
+            const style = selectedStyle(e.effectId);
+            const sample = !!style && styleReady(style);
             const isTransition = e.category === "transition";
+            const compatibleSelection = selectedPreviewTarget && clipAcceptsEffect(e, selectedPreviewTarget.track, selectedPreviewTarget.clip)
+              ? selectedClipId : null;
             const previewClipId = isTransition
-              ? (transitionTarget.valid ? selectedClipId : sampleTargets.transition)
-              : (selectedClipId || (e.appliesTo.includes("video") || e.appliesTo.includes("image")
+              ? (compatibleSelection && selectedPreviewTarget?.track.kind === "video" && compatibleSelection !== sampleTargets.first ? compatibleSelection : sampleTargets.transition)
+              : (compatibleSelection || (e.appliesTo.includes("video") || e.appliesTo.includes("image")
                 ? sampleTargets.first : null));
-            const disabled = !selectedClipId || selectedClipReadOnly || (isTransition && !transitionTarget.valid);
-            const applyTitle = state.editLock
-              ? tr("Agent 正在编辑，暂不可应用效果")
-              : selectedTrackLocked
-                ? tr("所选片段所在轨道已锁定，解锁后可应用效果")
-                : isTransition && !transitionTarget.valid
-                  ? transitionTarget.reason
-                : tr("请先在时间线选中一个片段");
+            const dragDisabled = !!state.editLock || (!!style && !styleReady(style));
             return (
-              <div key={e.effectId} className="resource-card"
-                draggable={isTransition && !state.editLock}
+              <div key={e.effectId} className="resource-card resource-effect-card" data-effect-id={e.effectId}
+                role="group" tabIndex={0} aria-label={tr("{0}效果卡片", e.name)}
+                aria-describedby={dragHelpId}
+                draggable={!dragDisabled}
+                onMouseEnter={() => startHover(e.effectId)} onMouseLeave={stopHover}
+                onFocus={event => { if (!event.currentTarget.contains(event.relatedTarget as Node) && event.target.matches(":focus-visible")) startHover(e.effectId); }}
+                onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget as Node)) stopHover(); }}
+                onKeyDown={event => {
+                  if (event.target === event.currentTarget && !event.repeat && event.key === "Enter") {
+                    event.preventDefault(); void applyWithKeyboard(e, style);
+                  }
+                }}
                 onDragStart={(event) => {
-                  if (!isTransition || state.editLock) return;
+                  if (dragDisabled || (event.target as HTMLElement).closest("select,option,input")) { event.preventDefault(); return; }
+                  stopHover();
+                  const resource = dragResource(e, style);
+                  setEffectDrag(resource);
                   event.dataTransfer.effectAllowed = "copy";
-                  event.dataTransfer.setData(TRANSITION_DND_TYPE, JSON.stringify({
-                    effectId: e.effectId,
-                    duration: typeof e.defaults.duration === "number" ? e.defaults.duration : 1,
-                  }));
+                  event.dataTransfer.setData(isTransition ? TRANSITION_DND_TYPE : EFFECT_DND_TYPE, JSON.stringify(resource));
                   event.dataTransfer.setData("text/plain", e.name);
                 }}
-                title={isTransition ? tr("拖到视频片段接缝可直接应用或替换转场") : undefined}>
-                {pid && previewClipId && e.browseCategory !== "audio" ? (
-                  <ResourceThumbnail active={active} projectId={pid} clipId={previewClipId}
-                    effectId={e.effectId} name={e.name} revision={String(state.project?.revision || "")}
-                    sample={previewClipId !== selectedClipId}
-                    cache={thumbnailUrls.current} />
+                onDragEnd={() => setEffectDrag(null)}
+                title={tr("拖到目标片段；键盘可选中效果卡片后按 Enter 应用到选中片段")}>
+                {e.browseCategory !== "audio" ? (
+                  <ResourceThumbnail effect={e} sample={sample} playing={active && previewingId === e.effectId && !samplePreset && !reducedMotion}
+                    coverId={style?.presetId || styles.find(styleReady)?.presetId}
+                    projectId={pid} revision={state.project?.revision} previewClipId={previewClipId}
+                    disabled={!sample && !previewClipId} onPreview={button => {
+                      stopHover();
+                      if (style && sample) openSample(style, button);
+                      else if (previewClipId) void showPreview(e, previewClipId);
+                    }} />
                 ) : null}
                 <div className="resource-card__head">
                   <span className="resource-card__icon">
@@ -1300,45 +681,35 @@ export function ResourcePanel({ active, defaultFamily = "" }: Props) {
                   </button>
                 </div>
                 <p className="resource-card__desc">{e.description || tr("（无描述）")}</p>
-                <span className="resource-card__group">
-                  {subcategoryLabel(e.subcategory || "基础")} · {e.appliesTo.join(" / ")}
-                  {typeof e.defaults.duration === "number" ? ` · ${e.defaults.duration}s` : ""}
-                  {e.source === "builtin" ? tr(" · 内置") : tr(" · 外部效果")}
-                  {e.license ? ` · ${e.license}` : ""}
+                <label className="resource-card__style">{tr("预设样式")}
+                  <select aria-label={tr("{0}的预设样式", e.name)} value={style?.presetId || ""}
+                    onChange={event => {
+                      if (event.currentTarget.closest(".resource-card")?.matches(":hover")) startHover(e.effectId);
+                      else stopHover();
+                      setSelectedStyles(current => ({ ...current, [e.effectId]: event.target.value }));
+                      previewRequest.current?.abort();
+                      if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
+                      previewUrl.current = null; setPreview(null);
+                    }}>
+                    <option value="">{tr("默认样式")}</option>
+                    {styles.map(item => <option key={item.presetId} value={item.presetId}
+                      disabled={!styleReady(item)}>
+                      {item.effects.length > 1 ? tr("{0}（组合样式）", item.name) : item.name}
+                      {!styleReady(item) ? tr("（暂不可用）") : ""}
+                    </option>)}
+                  </select>
+                </label>
+                <span className="resource-card__drag-hint"><GripVertical size={12} aria-hidden="true" />
+                  {isTransition ? tr("拖到接缝") : tr("拖到片段")}
                 </span>
-                {e.dependencies.length > 0 ? (
-                  <span className="resource-card__tag" title={tr("依赖：{0}", e.dependencies.join("、"))}>{tr("依赖资源")}</span>
-                ) : null}
-                {e.recent ? <span className="resource-card__tag">{tr("最近")}</span> : null}
-                {isTransition ? (
-                  <span className="resource-card__tag" title={tr("转场挂在选中片段上，并连接它前面的连续片段")}>{tr("两段之间 · 可拖入接缝")}</span>
-                ) : null}
-                <div className="resource-card__actions">
-                <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary"
-                  disabled={!previewClipId || e.browseCategory === "audio"}
-                  onClick={() => { if (previewClipId) void showPreview(e, previewClipId); }}
-                  title={e.browseCategory === "audio" ? tr("音频效果需试听，当前仅提供画面帧试用") : !previewClipId ? tr("工程里没有可供展示的画面片段") : previewClipId !== selectedClipId ? tr("在工程示例片段上试用，不修改工程") : tr("在当前片段上试用默认参数，不修改工程")}>
-                  <Eye size={12} />{tr(" 预览")}</button>
-                <button
-                  type="button"
-                  className="cv-btn cv-btn--sm cv-btn--secondary resource-card__apply"
-                  disabled={disabled || applying === e.effectId}
-                  onClick={() => void applyToSelected(e)}
-                  title={disabled ? applyTitle : tr("应用到选中片段")}
-                >
-                  {applying === e.effectId ? (
-                    <Loader2 size={12} className="cv-spin" />
-                  ) : (
-                    <CheckSquare2 size={12} />
-                  )}{tr("应用到选中片段")}</button>
-                </div>
               </div>
             );
           })}
         </div>
       )}
 
-      <p className="cv-hint" style={{ marginTop: 8 }}>{tr("效果栈可在右侧「效果条」里重排顺序与旁路，顺序即渲染合成顺序。")}</p>
-    </Panel>
+
+      </section>
+    </div>
   );
 }

@@ -25,8 +25,14 @@ test("Vlog effects edit, preview, localize and retain authored transition parame
   await page.goto("/");
   await page.getByRole("button", { name: `打开工程 ${name}`, exact: true }).click();
   await page.locator(".clip-block").filter({ hasText: "red.mp4" }).click();
-  await page.locator(".inspector__fx-picker summary").click();
-  await page.getByRole("button", { name: "强调推近并返回", exact: true }).click();
+  const addFromLibrary = async (name: string, action: string) => {
+    await page.getByRole("button", { name: action, exact: true }).click();
+    const card = page.locator(".resource-effect-library:visible .resource-card")
+      .filter({ has: page.getByText(name, { exact: true }) });
+    await card.locator(".resource-card__style select").selectOption("");
+    await card.press("Enter");
+  };
+  await addFromLibrary("强调推近并返回", "从效果库添加");
   const zoom = page.getByRole("spinbutton", { name: "推近倍率", exact: true });
   await expect(zoom).toHaveAttribute("max", "2.5");
   await zoom.fill("1.6"); await zoom.blur();
@@ -35,13 +41,20 @@ test("Vlog effects edit, preview, localize and retain authored transition parame
   await expect.poll(async () => (await effect(0, "cutvoke.fx.punchIn"))?.params.zoom).toBe(1.6);
   await page.getByTestId("language-select").selectOption("en");
   await expect(page.getByRole("spinbutton", { name: "Punch zoom", exact: true })).toHaveValue("1.6");
-  await page.getByRole("button", { name: "Manual subject lock", exact: true }).click();
+  await addFromLibrary("Manual subject lock", "Add from effect library");
   const from = page.getByRole("spinbutton", { name: "Start X", exact: true });
   await from.fill("0.3"); await from.blur();
   await expect.poll(async () => (await effect(0, "cutvoke.fx.subjectLock"))?.params.fromX).toBe(.3);
   await page.getByTestId("language-select").selectOption("zh-CN");
   await page.getByRole("button", { name: "在 3.00 秒的片段接缝添加转场" }).click();
-  await page.locator(".transition-options").getByRole("button", { name: "内容亮度揭示", exact: true }).click();
+  const chooseTransition = async (name: string) => {
+    await page.getByRole("button", { name: "到左侧选择转场", exact: true }).click();
+    const operators = page.locator(".resource-effect-library:visible");
+    const card = operators.locator(".resource-card").filter({ has: page.getByText(name, { exact: true }) });
+    await card.locator(".resource-card__style select").selectOption("");
+    await card.press("Enter");
+  };
+  await chooseTransition("内容亮度揭示");
   await page.getByRole("checkbox", { name: "暗部优先", exact: true }).check();
   await page.getByRole("spinbutton", { name: "亮度软边", exact: true }).fill("0.14");
   await page.getByRole("combobox", { name: "亮度来源", exact: true }).selectOption("incoming");
@@ -56,15 +69,17 @@ test("Vlog effects edit, preview, localize and retain authored transition parame
   expect(JSON.parse(query.get("params")!)).toMatchObject({ softness: .14, reverse: true, keySource: "incoming" });
   await expect(page.locator(".resource-preview img")).toBeVisible();
   expect(await current()).toEqual(before);
-  await page.getByRole("button", { name: "应用转场", exact: true }).click();
+  await page.getByRole("button", { name: "保存转场参数", exact: true }).click();
   await expect.poll(async () => (await effect(1, "cutvoke.transition.lumaReveal"))?.params)
     .toMatchObject({ softness: .14, reverse: true, keySource: "incoming", duration: 1.5 });
-  await page.locator(".transition-options").getByRole("button", { name: "锚点匹配转场", exact: true }).click();
+  await chooseTransition("锚点匹配转场");
   await page.getByRole("spinbutton", { name: "前镜头锚点 X", exact: true }).fill("0.4");
   await page.getByRole("spinbutton", { name: "后镜头匹配角度", exact: true }).fill("-12");
-  await page.getByRole("button", { name: "切换转场", exact: true }).click();
+  await page.getByRole("button", { name: "保存转场参数", exact: true }).click();
   await expect.poll(async () => (await effect(1, "cutvoke.transition.matchAlign"))?.params)
     .toMatchObject({ aX: .4, bAngle: -12 });
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect.poll(async () => (await effect(1, "cutvoke.transition.matchAlign"))?.params.aX).not.toBe(.4);
   await page.getByRole("button", { name: "撤销", exact: true }).click();
   await expect.poll(async () => (await effect(1, "cutvoke.transition.lumaReveal"))?.params.reverse).toBe(true);
   for (const lang of ["en", "de", "ar", "zh-CN"]) {
