@@ -1,10 +1,9 @@
 # Windows x64 portable build
 
-The current Windows ZIP is published in the [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1), built from `fdec479c4acbc3c685a5c8adbe8ec91621a7c194`; its hash is recorded in the Release's [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS).
+The current Windows ZIP is published in the [v0.3.2 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.2), rebuilt from its tagged source commit. Exact source and acceptance runs are recorded in [BUILD-INFO.json](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/BUILD-INFO.json), with archive hashes in [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/SHA256SUMS).
 
-For the current cross-platform delivery and newer Windows regression download,
-see the [native package verification record](native-packages-verification.json)
-and [installation guide](../user/installation.md). The record below preserves
+For the current cross-platform delivery, see the release metadata above and
+the [installation guide](../user/installation.md). The record below preserves
 the original Windows baseline rather than replacing its historical evidence.
 
 The historical [0.3.1 candidate download](https://github.com/frankShan001/CutVoke/actions/runs/38788916823/artifacts/11999831137) is available from successful Windows run **38788916823**, built from **1fd2f1fcb48c2c9af54555c558e40354812fc786**. See the [durable verification record](windows-portable-verification.json) and [user download/storage guide](../user/installation.md#windows-portable-x64). This is an unsigned Actions candidate, not a formal Release/tag.

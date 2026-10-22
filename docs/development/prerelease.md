@@ -1,8 +1,8 @@
 # Candidate packaging / 预发布准备
 
-This workflow prepares inspectable artifacts. It does not create a tag, GitHub Release, upload public binaries, deploy or publish to PyPI. A maintainer must approve an actual artifact set and its supported platforms before publication.
+Native package workflows build and accept inspectable artifacts. The [verified release workflow](../../.github/workflows/release.yml), added for v0.3.2, publishes a fresh prerelease only after the tagged main commit passes CI and all four native acceptances. It verifies embedded provenance, uploaded hashes and public download bytes; existing releases/assets are never replaced. Tagging is an explicitly authorized maintainer action.
 
-The approved four original desktop archives are published in [v0.3.1](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1), with a freshly computed [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS). The fixed, manual-only [staging workflow](../../.github/workflows/release-v0.3.1.yml) verifies every archive before uploading to the task-owned draft. Only its staging job has `actions: read` and `contents: write`; repository default permissions remain read-only. It does not execute artifact contents or rebuild products. Final publication uses the maintainer's existing local login.
+Historically, the four original desktop archives were published in [v0.3.1](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1), with a freshly computed [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS). The fixed, manual-only [staging workflow](../../.github/workflows/release-v0.3.1.yml) verifies every archive before uploading to the task-owned draft. Only its staging job has `actions: read` and `contents: write`; repository default permissions remain read-only. It does not execute artifact contents or rebuild products. Final publication uses the maintainer's existing local login.
 
 ## Source and wheel candidate
 

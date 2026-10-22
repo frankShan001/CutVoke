@@ -2,7 +2,16 @@
 
 [English README](../../README.md) · [中文 README](../../README.zh-CN.md) · [Contributing](../../CONTRIBUTING.md)
 
-**[v0.3.1 prerelease / 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1)** · [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.1/SHA256SUMS). Release assets are the actual archives, ready to extract. The tag is `58f890090463300c007f541ac36be8bca71bb4e9`; binaries remain the original `fdec479c4acbc3c685a5c8adbe8ec91621a7c194` build. 标签对应文档最终提交，二进制未重建；本页保留原始 runner 证据。
+**[v0.3.2 prerelease / 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.2)** · [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/SHA256SUMS) · [BUILD-INFO.json](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/BUILD-INFO.json). All four archives are rebuilt from the tagged source commit and gated by same-commit CI and native acceptance. 四平台均从标签提交重新构建；来源、大小、哈希与验收运行见发布元数据。仍为未签名/未公证的预发布。
+
+| Platform | Current archive |
+| --- | --- |
+| Windows x64 | [Portable ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/CutVoke-0.3.2-windows-x64-portable.zip) |
+| macOS arm64 | [Apple Silicon ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/CutVoke-0.3.2-macos-arm64.zip) |
+| macOS x64 | [Intel ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/CutVoke-0.3.2-macos-x64.zip) |
+| Linux x64 | [tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/CutVoke-0.3.2-linux-x64.tar.gz) |
+
+Download the matching archive and SHA256SUMS. Preserve existing project/data folders when replacing the application. The older 0.3.1 tables and runner records below are historical evidence, not hashes for 0.3.2. 下载后核对同版本 SHA256；替换应用时保留工程数据。下方 0.3.1 表格及日志仅为历史证据，不适用于校验新版。
 
 ## Windows portable (x64)
 
