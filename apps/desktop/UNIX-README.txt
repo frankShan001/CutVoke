@@ -1,4 +1,7 @@
-CutVoke 0.3.1 — macOS / Linux candidate / 候选发行包
+CutVoke — macOS / Linux prerelease / 预发布包
+
+Exact version and source commit: build-info.json beside this file.
+准确版本与来源提交见本文件旁的 build-info.json。
 
 No Python, Node.js or system FFmpeg installation is needed for basic local
 import, editing, preview and H.264/AAC MP4 export. Keep the entire distribution.
