@@ -222,7 +222,18 @@ async function main() {
     await page.getByRole("button", { name: `打开工程 ${projectId}`, exact: true }).click();
     await page.getByRole("heading", { name: "时间线", exact: true }).waitFor();
     await page.getByRole("button", { name: "播放", exact: true }).click();
-    await expect.poll(() => page.locator("video").first().evaluate(v => v.currentTime), { timeout: 90_000 }).toBeGreaterThan(.25);
+    // The decoder pool retains hidden, paused videos. Only the active player
+    // proves visible playback; DOM order is not the playback identity.
+    const previewVideo = page.locator("video.player__video");
+    await expect(previewVideo).toBeVisible({ timeout: 90_000 });
+    await expect.poll(() => previewVideo.evaluate(v => v.currentTime), { timeout: 90_000 }).toBeGreaterThan(.25)
+      .catch(async error => {
+        report.previewVideos = await page.locator("video").evaluateAll(videos => videos.map(v => ({
+          className: v.className, hidden: v.hidden, currentTime: v.currentTime,
+          paused: v.paused, readyState: v.readyState, error: v.error?.message, src: v.currentSrc,
+        })));
+        save(); throw error;
+      });
     await page.getByRole("button", { name: "暂停", exact: true }).click();
     report.checks.actualPreviewPlayback = true;
     await page.screenshot({ path: path.join(out, "02-chinese-import-preview.png") });
