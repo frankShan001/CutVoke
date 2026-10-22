@@ -1,0 +1,85 @@
+CutVoke YouTube launch film | English voiceover v1
+2026-10-22 | Script only; not recorded
+Read the spoken lines only. Do not read bracketed shot IDs, timings, or directions.
+Timings are edit targets. Use natural delivery; adjust screen-recording segments after the read-through.
+
+[S01 | 0–4 seconds]
+Meet CutVoke, a new open-source video editor.
+
+[S02 | 4–9 seconds]
+With powerful AI and so many editors, why another one?
+
+[S03 | 9–14 seconds]
+Your AI-made video looks great. You just need to change a few words.
+
+[S04 | 14–20 seconds]
+But rewriting and rendering again means more waiting, more tokens. And tokens cost money.
+
+[S05 | 20–25 seconds]
+In CutVoke, open the project and edit the text.
+
+[S06 | 25–31 seconds]
+Or ask AI to find and change it. Check the result right in the editor.
+
+[S07 | 31–36 seconds]
+What can you make with it? Watch this film, edited in CutVoke.
+
+[S08 | 36–58.333 seconds]
+[No voiceover. Play CHASE THE LIGHT in full, with its original soundtrack.]
+
+[S09 | 58.333–62.333 seconds]
+Behind that film is a project you can keep editing.
+
+[S10 | 62.333–66.333 seconds]
+Footage, text, effects, and sound—all on the timeline.
+
+[S11 | 66.333–72.333 seconds]
+Need a text change? Select it, edit it, and check it in the editor.
+
+[S12 | 72.333–77.333 seconds]
+Prefer AI? Tell it which words to change, and what to use instead.
+
+[S13 | 77.333–82.333 seconds]
+It can read just the relevant details and make that change.
+
+[S14 | 82.333–86.333 seconds]
+No full-video export just to check a few words.
+
+[S15 | 86.333–92.333 seconds]
+More importantly, AI gives you an editable project.
+
+[S16 | 92.333–98.333 seconds]
+See how it's put together, and review what changed in the editing history.
+
+[S17 | 98.333–104.333 seconds]
+Want a different position or color? Adjust it yourself.
+
+[S18 | 104.333–111.333 seconds]
+AI can read your changes and pick up from there. This time, just shorten the title.
+
+[S19 | 111.333–116.333 seconds]
+Your position and color stay. The wording gets shorter.
+
+[S20 | 116.333–121.333 seconds]
+Happy with an effect? Save it to your local library.
+
+[S21 | 121.333–126.333 seconds]
+Use it on another clip, and adjust it for your next edit.
+
+[S22 | 126.333–132.333 seconds]
+Edit by edit, build a library of effects that work for you.
+
+[S23 | 132.333–138.333 seconds]
+Share your effects with others—the recipes, without your personal media.
+
+[S24 | 138.333–146.333 seconds]
+Add effects shared by other creators to your own library, then use and customize them.
+
+[S25 | 146.333–152.333 seconds]
+This video was edited in CutVoke, too.
+
+[S26 | 152.333–157.333 seconds]
+It's open source. Find the link below, try an edit, and share your effects.
+
+[S27 | 157.333–162.333 seconds]
+[No voiceover. Hold the end card and resolve the music.]
