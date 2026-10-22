@@ -1037,6 +1037,10 @@ test("eight creative domains share keyboard navigation and preserve the selected
   await openEffectLibrary(page);
   await expect(page.locator(".resource-effect-grid:visible .resource-card").first()).toBeVisible();
   const leftScroll = page.locator(".zone-left__scroll");
+  // Effects and preset qualification load independently. Measure the saved
+  // position after both initial loads: removing the preset loading row changes
+  // the scroll range, so a transient bottom offset cannot be restored later.
+  await expect(page.locator(".resource-browser:visible .cv-loading")).toHaveCount(0);
   await leftScroll.evaluate((element) => { element.scrollTop = element.scrollHeight; });
   const effectScroll = await leftScroll.evaluate((element) => element.scrollTop);
   expect(effectScroll).toBeGreaterThan(0);

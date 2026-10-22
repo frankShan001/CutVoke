@@ -146,6 +146,9 @@ async function main() {
       if (["127.0.0.1", "localhost"].includes(url.hostname) || url.protocol === "data:") return route.continue();
       (report.blockedExternalRequests ||= []).push(url.origin); return route.abort();
     });
+    // Fresh profiles follow the runner's system language. Choose Chinese via
+    // the visible setup control before using localized accessibility names.
+    await page.locator("dialog.cache-settings").getByRole("combobox").selectOption("zh-CN");
     const setup = page.getByRole("dialog", { name: "欢迎使用 CutVoke" });
     await expect(setup).toBeVisible();
     await setup.getByRole("button", { name: "保存并开始使用", exact: true }).click();

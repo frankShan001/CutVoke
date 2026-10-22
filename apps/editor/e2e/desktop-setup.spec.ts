@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test('desktop first-run setup must be saved before creating a project', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 600 });
   await page.addInitScript(() => {
-    const language = { preference: 'zh-CN', locale: 'zh-CN', systemLanguages: ['zh-CN'] } as const;
+    const language = { preference: 'en', locale: 'en', systemLanguages: ['en-US'] } as const;
     let setupComplete = false;
     window.cutvokeDesktop = {
       initialLanguage: language,
@@ -14,6 +14,8 @@ test('desktop first-run setup must be saved before creating a project', async ({
     } as NonNullable<Window['cutvokeDesktop']>;
   });
   await page.goto('/');
+  await expect(page.getByRole('dialog', { name: 'Welcome to CutVoke' })).toBeVisible();
+  await page.locator('dialog.cache-settings').getByRole('combobox').selectOption('zh-CN');
   const setup = page.getByRole('dialog', { name: '欢迎使用 CutVoke' });
   await expect(setup).toBeVisible();
   await expect(page.getByRole('button', { name: '关闭设置', exact: true })).toHaveCount(0);
