@@ -23,7 +23,9 @@ def test_lut_matches_per_pixel_opacity_and_keeps_chroma(tmp_path, fps, easing):
     clip = Clip('c', AssetReference('a', ''), R.of(0), R.of(6, 5), R.of(0),
                 keyframes={'opacity': lane})
     opacity = expression(lane, f'(N*{fps.denominator}/{fps.numerator})', 1)
-    reference = ("geq=lum='p(X,Y)':cb='p(X,Y)':cr='p(X,Y)':"
+    # FFmpeg 6's bilinear geq clamps even integer coordinates to W-2/H-2.
+    # Nearest samples the actual boundary pixels, as this identity oracle needs.
+    reference = ("geq=interpolation=nearest:lum='p(X,Y)':cb='p(X,Y)':cr='p(X,Y)':"
                  f"a='alpha(X,Y)*clip({opacity},0,1)'")
     accelerated = RenderService._opacity_filter(clip, fps, 'test')
     # Full-range chroma catches the LUT default's hidden 16..240 clipping;
@@ -42,6 +44,8 @@ def test_lut_matches_per_pixel_opacity_and_keeps_chroma(tmp_path, fps, easing):
             input=source * 36, capture_output=True, check=True)
         outputs.append(np.frombuffer(result.stdout, dtype=np.uint8).reshape(36, 4, 16, 24))
     np.testing.assert_array_equal(outputs[0][:, :3], outputs[1][:, :3])
+    original = np.frombuffer(source, dtype=np.uint8).reshape(4, 16, 24)
+    np.testing.assert_array_equal(outputs[1][:, :3], np.broadcast_to(original[:3], (36, 3, 16, 24)))
     # The Python and libav expression evaluators can straddle an integer floor
     # by one alpha unit; there must be no frame-delay or larger alpha error.
     assert np.max(np.abs(outputs[0][:, 3].astype(int) - outputs[1][:, 3])) <= 1

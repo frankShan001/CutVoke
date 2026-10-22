@@ -12,6 +12,12 @@
   background: var(--bg);
 }
 
+/* A short desktop window must scroll the page, not compress its sections
+   until the language/cache controls overlap the create-project button. */
+.home > * {
+  flex-shrink: 0;
+}
+
 /* ---- Hero ---- */
 .home__hero {
   width: 100%;
