@@ -59,6 +59,8 @@ export interface Clip {
   sourceStart: Rational;
   speed?: Rational;
   speedCurve?: SpeedCurve | null;
+  freezeAt?: Rational | null;
+  nested?: unknown;
   /** Slow-motion frame synthesis; missing fields in older projects mean none. */
   frameInterpolation?: FrameInterpolation;
   /** 变速后是否保持源音频音高；旧工程缺省为 true。 */
@@ -94,6 +96,7 @@ export interface Sequence {
   /** Opaque canvas fill shown through transparent pixels and uncovered regions. */
   backgroundColor?: string;
   audioSampleRate?: number;
+  multicam?: { activeTrackId?: string } | null;
   tracks: Track[];
   captions?: Caption[];
   markers?: Marker[];

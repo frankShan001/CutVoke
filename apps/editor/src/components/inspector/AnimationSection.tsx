@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { showError, useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
+import { stageEffect, releaseEdit } from "../../store/interactive";
 import { applyAnimation } from "../../store/clipEdit";
 import {
   effectsByCategory,
@@ -116,12 +117,12 @@ export function AnimationSection({ clip }: { clip: Clip }) {
   };
 
   const changeParam = (slot: Slot, name: string, value: unknown) => {
-    setDrafts((current) => {
-      const params = { ...current[slot].params };
-      if (value === undefined) delete params[name];
-      else params[name] = value;
-      return { ...current, [slot]: { ...current[slot], params } };
-    });
+    const draft = drafts[slot], params = { ...draft.params, [name]: value };
+    setDrafts(current => ({ ...current, [slot]: { ...draft, params } }));
+    const control = specsBySlot[slot].find(s => s.effectId === draft.id);
+    const schema = control?.parameters.properties?.[name];
+    if (value !== undefined && (typeof value !== "number" || Number.isFinite(value) && (schema?.minimum === undefined || value >= Number(schema.minimum)) && (schema?.maximum === undefined || value <= Number(schema.maximum))))
+      stageEffect(dispatch, clip, draft.id, params);
   };
 
   return (
@@ -158,16 +159,7 @@ export function AnimationSection({ clip }: { clip: Clip }) {
               <ParamControls
                 controls={controls}
                 onChange={(name, value) => changeParam(slot, name, value)}
-                onCommit={(change) => {
-                  const next = { ...draft.params };
-                  if (change) {
-                    if (change.value === undefined) delete next[change.name];
-                    else next[change.name] = change.value;
-                  }
-                  const existing = clip.effects?.find((effect) => effect.effectId === draft.id);
-                  if (existing && JSON.stringify(existing.params || {}) === JSON.stringify(next)) return;
-                  void apply(slot, draft.id, next);
-                }}
+                onCommit={() => releaseEdit(`${clip.id}:${draft.id}`)}
               />
             ) : null}
           </div>

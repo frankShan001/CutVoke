@@ -227,7 +227,7 @@ class PreviewWindowTests(unittest.TestCase):
             renderer = RenderService()
             exported = os.path.join(media_dir, "export.mp4")
             preview = os.path.join(media_dir, "preview.mp4")
-            renderer.render(project, exported, quality="low", overwrite=True)
+            renderer.render(project, exported, quality="high", overwrite=True)
             renderer.render_preview_window(project, preview, 0.6, 0.9)
 
             def frame(path: str, at: float) -> bytes:
@@ -727,5 +727,99 @@ class PreviewWindowTests(unittest.TestCase):
                            for channel in range(3)) > 16
                 )
                 self.assertGreater(changed_caption_pixels, 20)
+            finally:
+                api.close()
+
+
+@unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "FFmpeg required")
+class InteractiveDraftPreviewTests(unittest.TestCase):
+    def test_draft_frame_has_real_pixels_and_alpha_without_saving(self):
+        import io
+        from PIL import Image
+        from cutvoke.domain.protocol import Command
+        with tempfile.TemporaryDirectory() as root:
+            source = os.path.join(root, "source.png")
+            Image.new("RGBA", (160, 90), (255, 0, 0, 255)).save(source)
+            service = EditService()
+            project = service.create_project("interactive", width=160, height=90, fps=r(15))
+            project.sequence.tracks = [Track("v1", "video", [Clip("clip", AssetReference("source", source), r(0), r(4), r(0))])]
+            api = HttpApi(service, RenderService(), media_dir=root)
+            before = copy.deepcopy(project.to_dict())
+            try:
+                status, result = api._dispatch("POST", "/api/v1/projects/interactive/interactive-frame", {
+                    "clipId": "clip", "t": 1,
+                    "commands": [{"type": "effect.add", "payload": {"clipId": "clip", "effectId": "cutvoke.fx.mask", "params": {"shape": "rect", "x": 0, "y": 0, "w": .5, "h": 1, "feather": 0}}}]})
+                self.assertEqual(status, 200)
+                image = Image.open(io.BytesIO(result["__png__"])).convert("RGBA")
+                self.assertGreater(image.getpixel((40, 40))[0], 230)
+                self.assertLess(image.getpixel((120, 40))[3], 5)
+                self.assertEqual(service.get_project("interactive").to_dict(), before)
+                # Validate geometry batching without mutating the canonical timeline.
+                candidate = service.preview_command(Command(type="edit.batch", project_id="interactive", expected_revision=project.revision,
+                    payload={"commands": [{"type": "effect.add", "payload": {"clipId": "clip", "effectId": "cutvoke.transform", "params": {"scale": .5}}},
+                    {"type": "clip.keyframe", "payload": {"clipId": "clip", "action": "batch", "keyframes": [{"param": "x", "time": {"num": "1", "den": "1"}, "value": 12, "interpolation": "linear"}]}}]}), include_project=True)["project"]
+                self.assertEqual(candidate.sequence.tracks[0].clips[0].keyframes["x"][0].value, 12)
+                self.assertEqual(service.get_project("interactive").to_dict(), before)
+                with self.assertRaises(Exception):
+                    api._dispatch("POST", "/api/v1/projects/interactive/interactive-frame", {"commands": [{"type": "clip.remove", "payload": {"clipId": "clip"}}]})
+                self.assertEqual(service.get_project("interactive").to_dict(), before)
+            finally:
+                api.close()
+
+
+    def test_newer_interactive_request_cancels_old_work_and_rejects_reordered_requests(self):
+        from PIL import Image
+        with tempfile.TemporaryDirectory() as root:
+            source = os.path.join(root, "source.png")
+            Image.new("RGB", (160, 90), "red").save(source)
+            service = EditService()
+            project = service.create_project("latest", width=160, height=90, fps=r(15))
+            project.sequence.tracks = [Track("v1", "video", [Clip("clip", AssetReference("source", source), r(0), r(4), r(0))])]
+            started = threading.Event()
+            class SlowFirst(RenderService):
+                def extract_frame(self, project, at, out, **kwargs):
+                    if at == 0:
+                        started.set()
+                        self_cancel = kwargs["cancel_event"]
+                        if not self_cancel.wait(3):
+                            raise AssertionError("obsolete renderer was not cancelled")
+                        raise RenderCancelled("superseded")
+                    return super().extract_frame(project, at, out, **kwargs)
+            api = HttpApi(service, SlowFirst(), media_dir=root)
+            try:
+                with ThreadPoolExecutor(2) as executor:
+                    first = executor.submit(api._dispatch, "POST", "/api/v1/projects/latest/interactive-frame", {"t": 0, "client": "preview:clip", "serial": 1})
+                    self.assertTrue(started.wait(3))
+                    second = executor.submit(api._dispatch, "POST", "/api/v1/projects/latest/interactive-frame", {"t": 1, "client": "preview:clip", "serial": 2})
+                    with self.assertRaises(RenderCancelled): first.result(timeout=5)
+                    self.assertEqual(second.result(timeout=5)[0], 200)
+                    with self.assertRaises(RenderCancelled):
+                        api._dispatch("POST", "/api/v1/projects/latest/interactive-frame", {"t": 0, "client": "preview:clip", "serial": 1})
+            finally:
+                api.close()
+
+
+    def test_audio_effect_preview_uses_real_sound_and_does_not_save_gain(self):
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as root:
+            source = os.path.join(root, "source.wav")
+            subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "sine=frequency=440:duration=2", source], check=True, capture_output=True)
+            service = EditService()
+            project = service.create_project("audio-live", width=1920, height=1080)
+            project.sequence.tracks = [Track("a1", "audio", [Clip("sound", AssetReference("source", source), r(3), r(5), r(0))])]
+            api = HttpApi(service, RenderService(), media_dir=root)
+            before = copy.deepcopy(project.to_dict())
+            try:
+                status, result = api._dispatch("POST", "/api/v1/projects/audio-live/interactive-audio", {"clipId": "sound", "commands": [{"type": "effect.add", "payload": {"clipId": "sound", "effectId": "cutvoke.fx.equalizer", "params": {"frequency": 440, "gainDb": 6}}}]})
+                self.assertEqual(status, 200)
+                output = os.path.join(root, "preview.m4a")
+                Path(output).write_bytes(result["__audio__"])
+                info = api.render.probe_media(output)
+                self.assertTrue(info["has_audio"])
+                self.assertAlmostEqual(info["duration"], 2, delta=.1)
+                data = subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-i", output, "-f", "s16le", "-ac", "1", "pipe:1"], capture_output=True, check=True).stdout
+                samples = array("h"); samples.frombytes(data)
+                self.assertGreater(max(abs(n) for n in samples), 1000)
+                self.assertEqual(service.get_project("audio-live").to_dict(), before)
             finally:
                 api.close()

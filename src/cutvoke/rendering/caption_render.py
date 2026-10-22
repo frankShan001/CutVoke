@@ -454,7 +454,7 @@ def build_ass(captions: List[Caption], width: int, height: int,
             # same ASS preview/export path and retain their existing size.
             selected_family = cap.fontFamily or font_family
             selected_path = None
-            if css_metrics and css_font_files:
+            if css_font_files:
                 selected_family, selected_path = css_font_files[(selected_family, cap.bold)]
             fs = (_css_font_size_to_ass(css_size, cap.fontFamily or font_family, selected_path)
                   if css_metrics else css_size)
@@ -713,13 +713,12 @@ def prepare_caption_render(captions: List[Caption], width: int, height: int, *,
     try:
         css_fonts = {
             (cap.fontFamily, cap.bold): _caption_font_instance(cap.fontFamily, cap.bold)
-            for cap in captions if ((css_caption_ids is not None and cap.id in css_caption_ids)
-                                    or bool(title_motion and cap.id in title_motion))
+            for cap in captions
         }
         with open(ass_path, "w", encoding="utf-8", newline="\n") as f:
             f.write(build_ass(captions, width, height, css_caption_ids=css_caption_ids,
                               css_font_files=css_fonts, title_motion=title_motion))
-        # Title fonts retain the original VF; caption aliases select real weights.
+        # Static aliases select the same real 400/700 weights as browser text.
         for family, font in fonts.items():
             target = "cutvoke_serif.ttf" if family == "Noto Serif SC" else "cutvoke_sans.ttf"
             shutil.copyfile(font, os.path.join(cwd, target))

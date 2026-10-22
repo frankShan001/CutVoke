@@ -1,3 +1,4 @@
+import { flushPendingEdits } from "../lib/pendingEdits";
 import { msg, tr } from "../i18n";
 /** 领域动作：封装 API 调用 + 状态派发。组件只调用这些动作，不含业务逻辑。 */
 
@@ -51,6 +52,7 @@ export async function selectProject(
   projectId: string,
   name?: string,
 ): Promise<boolean> {
+  if (!await flushPendingEdits()) return false;
   dispatch({ type: "PROJECT_SELECTED", projectId, name: name ?? projectId });
   return refreshProject(dispatch, projectId);
 }
@@ -311,6 +313,8 @@ export async function insertClip(
 }
 
 export async function undo(dispatch: Dispatch<EditorAction>, state: EditorState) {
+  if (!await flushPendingEdits()) return { ok: false };
+  state = getLatestState() || state;
   const res = await runCommand(dispatch, state, "history.undo", {}, { autoShow: false });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
@@ -327,6 +331,8 @@ export async function undo(dispatch: Dispatch<EditorAction>, state: EditorState)
 }
 
 export async function redo(dispatch: Dispatch<EditorAction>, state: EditorState) {
+  if (!await flushPendingEdits()) return { ok: false };
+  state = getLatestState() || state;
   const res = await runCommand(dispatch, state, "history.redo", {}, { autoShow: false });
   if (res.ok) {
     dispatch({ type: "REDO_SET", blocked: false });
@@ -363,6 +369,7 @@ export async function doExport(
     return { ok: false, error: err };
   }
   try {
+    if (!await flushPendingEdits()) throw new ApiFailure({ status: 409, code: "UNSAVED_EDITS", message: tr("保存失败，请重试") });
     const job = await apiEnqueueExport(state.currentId, outPath, quality, range);
     dispatch({ type: "STATUS_SET", severity: "ok", text: msg("导出任务已加入队列，正在等待成片…") });
     return { ok: true, inFlight: true, jobId: job.jobId };

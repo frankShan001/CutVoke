@@ -1,3 +1,4 @@
+import { flushPendingEdits } from "../lib/pendingEdits";
 import { msg, tr, useLocale } from "../i18n";
 /** 当前工程面板（左区）：显示/重命名当前工程 + 返回工程首页。
     工程的创建、列表、打开已移到首页（HomeView）；此处不再直显 projectId。 */
@@ -68,7 +69,7 @@ export function ProjectPanel() {
         <Button
           variant="ghost"
           full
-          onClick={() => dispatch({ type: "VIEW_SET", view: "home" })}
+          onClick={async () => { if (await flushPendingEdits()) dispatch({ type: "VIEW_SET", view: "home" }); }}
           aria-label={tr("返回工程列表")}
         >
           <ArrowLeft size={14} />{tr("返回工程列表")}</Button>

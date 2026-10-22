@@ -1,3 +1,4 @@
+import { useInteractionProject, stageCaption, releaseEdit } from "../store/interactive";
 import { tr, useLocale } from "../i18n";
 /** 画布字幕叠层（H01）：在预览画面（player__canvas-frame 内）上渲染当前播放头可见的字幕，
     支持直接拖拽改 x/y、角柄缩放、顶柄旋转。拖动中只做本地预览，松手才提交 caption.update。
@@ -7,7 +8,6 @@ import { tr, useLocale } from "../i18n";
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useEditor } from "../store/editor";
-import { updateCaption } from "../store/clipEdit";
 import { rationalToSecs } from "../lib/rational";
 import type { Caption } from "../types/api";
 
@@ -92,7 +92,7 @@ const norm = (c: Caption): Geom => ({
 export function CaptionCanvasOverlay() {
   useLocale();
   const { state, dispatch } = useEditor();
-  const project = state.project;
+  const project = useInteractionProject(state.project);
   const draft = !state.editLock && state.captionDraftPreview?.projectId === project?.projectId
     ? state.captionDraftPreview
     : null;
@@ -145,27 +145,19 @@ export function CaptionCanvasOverlay() {
       ? Math.min(1, Math.max(0, ((now - start) * 1000) / c.animIn))
       : 1;
     const fadeOut = c.animOut ? Math.min(1, Math.max(0, ((end - now) * 1000) / c.animOut)) : 1;
-    return Math.min(fadeIn, fadeOut);
-  };
-
-  const commit = async (id: string, g: Geom) => {
-    const caption = captions.find((item) => item.id === id);
-    if (!caption) return;
-    const current = norm(caption);
-    const update: Parameters<typeof updateCaption>[2] = { captionId: id };
-    if (g.x !== current.x) update.x = g.x;
-    if (g.y !== current.y) update.y = g.y;
-    if (g.scale !== current.scale) update.scale = g.scale;
-    if (g.rotation !== current.rotation) update.rotation = g.rotation;
-    if (Object.keys(update).length > 1) await updateCaption(dispatch, state, update);
+    const loopStart = start + Math.max(0, c.animIn || 0) / 1000;
+    const loopEnd = end - Math.max(0, c.animOut || 0) / 1000;
+    const cycle = Math.max(.3, Math.min(3, (c.animLoopMs || 1000) / 1000));
+    const elapsed = Math.max(0, now - loopStart), phase = (elapsed % cycle) / cycle;
+    const loop = c.animLoopStyle === "blink" && now >= loopStart && loopStart + (Math.floor(elapsed / cycle) + 1) * cycle <= loopEnd
+      ? 1 - (187 / 255) * (1 - Math.abs(2 * phase - 1)) : 1;
+    return Math.min(fadeIn, fadeOut) * loop;
   };
 
   const requestSelection = (captionId: string) => {
-    const dirtyCaptionId = state.captionDraftPreview?.captionId;
-    const blocked = dirtyCaptionId === state.selectedCaptionId
-      && !!dirtyCaptionId && captionId !== state.selectedCaptionId;
     dispatch({ type: "CAPTION_SELECTION_SET", captionId });
-    return !blocked;
+    window.dispatchEvent(new CustomEvent("cutvoke:open-creative-domain", { detail: "caption" }));
+    return true;
   };
 
   const beginMove = (e: ReactPointerEvent, c: Caption) => {
@@ -229,15 +221,16 @@ export function CaptionCanvasOverlay() {
       }
       const dx = (e.clientX - gesture.startCX) / gesture.rectW;
       const dy = (e.clientY - gesture.startCY) / gesture.rectH;
-      setPreview((p) => (p ? { ...p, x: gesture.startNX + dx, y: gesture.startNY + dy } : p));
+      const next = { ...norm(captions.find(c => c.id === gesture.id)!), x: Math.max(0, Math.min(1, gesture.startNX + dx)), y: Math.max(0, Math.min(1, gesture.startNY + dy)) };
+      setPreview(next); stageCaption(dispatch, gesture.id, next, true);
     } else if (gesture.mode === "scale") {
       const dist = Math.hypot(e.clientX - gesture.cx, e.clientY - gesture.cy);
-      const scale = gesture.startScale * (dist / gesture.startDist);
-      setPreview((p) => (p ? { ...p, scale } : p));
+      const scale = Math.max(.1, Math.min(5, gesture.startScale * (dist / gesture.startDist)));
+      if (preview) { const next = { ...preview, scale }; setPreview(next); stageCaption(dispatch, gesture.id, next, true); }
     } else {
       const ang = (Math.atan2(e.clientY - gesture.cy, e.clientX - gesture.cx) * 180) / Math.PI;
-      const rotation = gesture.startRot + (ang - gesture.startAngle);
-      setPreview((p) => (p ? { ...p, rotation } : p));
+      const rotation = ((gesture.startRot + ang - gesture.startAngle + 540) % 360) - 180;
+      if (preview) { const next = { ...preview, rotation }; setPreview(next); stageCaption(dispatch, gesture.id, next, true); }
     }
   };
 
@@ -245,10 +238,9 @@ export function CaptionCanvasOverlay() {
     if (!gesture) return;
     if (moveStartRef.current?.pointerId === e.pointerId) moveStartRef.current = null;
     const id = gesture.id;
-    const g = preview;
+    releaseEdit(`caption:${id}`);
     setGesture(null);
     setPreview(null);
-    if (g) void commit(id, g);
   };
 
   if (!state.currentId) return null;
@@ -256,7 +248,11 @@ export function CaptionCanvasOverlay() {
   return (
     <div className="caption-overlay" ref={overlayRef}>
       {visible.map((c) => {
-        const g = geomOf(c);
+        const g = { ...geomOf(c) };
+        const loopStart = rationalToSecs(c.start) + (c.animIn || 0) / 1000;
+        const cycle = Math.max(.3, Math.min(3, (c.animLoopMs || 1000) / 1000));
+        const elapsed = Math.max(0, state.playhead - loopStart), phase = (elapsed % cycle) / cycle;
+        if (c.animLoopStyle === "pulse" && state.playhead >= loopStart && loopStart + (Math.floor(elapsed / cycle) + 1) * cycle <= rationalToSecs(c.end) - (c.animOut || 0) / 1000) g.scale *= 1 + .22 * (1 - Math.abs(2 * phase - 1));
         const canvasScale = frameSize.height / projH || frameSize.width / projW || 1;
         // ASS 先按 sequence 高度把字号从 1080p 基准缩放并取整，再随画布显示比例缩放。
         const renderFontSize = Math.max(8, Math.round((c.fontSize ?? 32) * projH / 1080));
@@ -295,6 +291,7 @@ export function CaptionCanvasOverlay() {
             onPointerDown={state.editLock ? undefined : (e) => beginMove(e, c)}
             onPointerMove={state.editLock ? undefined : onMove}
             onPointerUp={state.editLock ? undefined : onUp}
+            onPointerCancel={state.editLock ? undefined : onUp}
             onClick={() => requestSelection(c.id)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {

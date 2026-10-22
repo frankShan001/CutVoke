@@ -1,3 +1,4 @@
+import { cancelInteractions } from "../store/interactive";
 /** 装配桥：绑定最新状态 + 驱动 3s 事件轮询（检测 Agent 外部修改并自动刷新）。
     纯装配，无业务逻辑。挂载时只加载工程列表（首页展示），不自动进入编辑器。 */
 
@@ -19,6 +20,8 @@ export function EditorBridge() {
   useEffect(() => {
     void loadProjects(dispatch);
   }, [dispatch]);
+
+  useEffect(() => { if (state.editLock && state.currentId) cancelInteractions(state.currentId); }, [state.editLock, state.currentId]);
 
   // Agent 编辑租约轮询：工程内容仍由 events 轮询刷新，锁只负责把工作区切为只读。
   useEffect(() => {

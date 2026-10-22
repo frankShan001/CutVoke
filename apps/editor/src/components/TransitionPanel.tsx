@@ -1,4 +1,4 @@
-import { msg, tr, useLocale } from "../i18n";
+import { tr, useLocale } from "../i18n";
 /** 转场面板：选片段 → 选转场 + 时长 → 应用/切换；已有转场可移除。
  *  转场语义：挂在「后一段」片段上，做它与前一段之间的过渡。
  *  J01：转场类型从效果注册表派生（GET /effects?category=transition），不再硬编码清单。 */
@@ -7,8 +7,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Eye, Film, Trash2 } from "lucide-react";
 import { Button, Field, Panel, Select, TextInput, Badge } from "./ui";
 import { useEditor, showError, selectors } from "../store/editor";
+import { stageEffect, releaseEdit, useInteractionProject } from "../store/interactive";
 import { getLatestState } from "../store/actions";
-import { applyTransition, removeEffect } from "../store/clipEdit";
+import { removeEffect } from "../store/clipEdit";
 import { rationalToSecs } from "../lib/rational";
 import { findTransitionOnClip, transitionDurationSecs } from "../lib/transitions";
 import {
@@ -17,7 +18,6 @@ import {
   getEffectCatalog,
   type EffectSpec,
 } from "../lib/effects";
-import { ApiFailure } from "../lib/api";
 import { paramControls } from "../lib/effectControls";
 import { ParamControls } from "./inspector/ParamControls";
 import type { Clip } from "../types/api";
@@ -27,7 +27,8 @@ const DURATION_PRESETS = [0.5, 1.0, 1.5, 2.0];
 export function TransitionPanel() {
   const locale = useLocale();
   const { state, dispatch } = useEditor();
-  const tracks = state.project?.sequence.tracks || [];
+  const project = useInteractionProject(state.project);
+  const tracks = project?.sequence.tracks || [];
   const selectedClipId = state.selection?.clipId ?? null;
 
   const [trackSel, setTrackSel] = useState("");
@@ -36,7 +37,7 @@ export function TransitionPanel() {
   const [transitionId, setTransitionId] = useState("");
   const [duration, setDuration] = useState("1.0");
   const [params, setParams] = useState<Record<string, unknown>>({});
-  const [busy, setBusy] = useState(false);
+  const busy = false;
   const [trial, setTrial] = useState<{ loading: boolean; url?: string; error?: string } | null>(null);
   const trialRequest = useRef<AbortController | null>(null);
   const trialUrl = useRef<string | null>(null);
@@ -73,7 +74,7 @@ export function TransitionPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedClipId]);
 
-  const trackOptions = selectors.videoTracks(state.project);
+  const trackOptions = selectors.videoTracks(project);
   const clipOptions = useMemo(() => {
     const track = trackOptions.find((t) => t.id === trackSel);
     return track
@@ -140,8 +141,13 @@ export function TransitionPanel() {
       String(currentFx.effectId)
     : "";
 
-  const invalid = (message: string) =>
-    new ApiFailure({ status: 400, code: "INVALID_ARGUMENT", message });
+  const previewParams = (next: Record<string, unknown>, nextDuration = duration) => {
+    if (!currentClip || !currentFx || readOnly) return;
+    const d = Number(nextDuration);
+    if (Number.isFinite(d) && d >= minDuration && d <= maxDuration && Object.values(next).every(v => v !== undefined && (typeof v !== "number" || Number.isFinite(v))))
+      stageEffect(dispatch, currentClip, currentFxId, { ...next, duration: d });
+  };
+  const changeDuration = (value: string) => { setDuration(value); previewParams(params, value); };
 
   const handleTrial = async () => {
     if (!state.currentId || !clipSel || !transitionId || !transitionTarget.valid) return;
@@ -168,44 +174,6 @@ export function TransitionPanel() {
     } else {
       setTrial({ loading: false,
         error: result.kind === "empty" ? tr("接缝处无画面") : result.message });
-    }
-  };
-
-  const handleApply = async () => {
-    if (readOnly) return;
-    if (!state.currentId) {
-      showError(dispatch, invalid(tr("请先选择工程")));
-      return;
-    }
-    if (!clipSel) {
-      showError(dispatch, invalid(tr("请选择要添加转场的「后一段」片段")));
-      return;
-    }
-    if (!transitionTarget.valid) {
-      showError(dispatch, invalid(transitionTarget.reason));
-      return;
-    }
-    if (!transitionId) {
-      showError(dispatch, invalid(tr("转场清单尚未就绪，请稍候重试")));
-      return;
-    }
-    if (!validDuration) {
-      showError(dispatch, invalid(maxDuration === 5 ? tr("转场时长须在 0.1–5 秒之间") :
-        `${tr("无效时长")} (${minDuration}–${maxDuration}s)`));
-      return;
-    }
-    setBusy(true);
-    const st = getLatestState() || state;
-    const res = await applyTransition(dispatch, st, {
-      clipId: clipSel,
-      effectId: transitionId,
-      duration: Math.round(effectiveDuration * 1000) / 1000,
-      params,
-    });
-    setBusy(false);
-    if (res.ok && currentFx) {
-      const name = transitions.find((s) => s.effectId === transitionId)?.name || transitionId;
-      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已切换转场为 {0}", name) });
     }
   };
 
@@ -289,7 +257,7 @@ export function TransitionPanel() {
             <button
               key={d}
               className={`cv-chip ${duration === String(d) ? "cv-chip--on" : ""}`}
-              onClick={() => setDuration(String(d))}
+              onClick={() => changeDuration(String(d))}
               disabled={d < minDuration || d > maxDuration}
             >
               {d}s
@@ -297,7 +265,7 @@ export function TransitionPanel() {
           ))}
         </div>
         <div style={{ marginTop: 6 }}>
-          <TextInput type="number" step="0.1" min={minDuration} max={maxDuration} value={duration} onChange={(e) => setDuration(e.target.value)} />
+          <TextInput type="number" step="0.1" min={minDuration} max={maxDuration} value={duration} onChange={(e) => changeDuration(e.target.value)} />
         </div>
         {transitionTarget.valid ? (
           <p className="cv-hint" role="status">{tr("最长可生效 ")}{transitionTarget.maxDuration.toFixed(2)}{tr("s；当前填写 ")}{validDuration ? tr("{0}s，实际 {1}s", requestedDuration.toFixed(2), effectiveDuration.toFixed(2)) : tr("无效时长")}{tr("。 转场从切点开始，不压短时间线；前段末帧作为过渡把手，不额外读取源素材。")}</p>
@@ -306,12 +274,9 @@ export function TransitionPanel() {
 
       {parameterControls.length ? <fieldset disabled={readOnly || busy}
         aria-label={selectedSpec?.name} style={{ border: 0, padding: 0, margin: "10px 0" }}>
-        <ParamControls controls={parameterControls} onChange={(name, value) => setParams((previous) => {
-          const next = { ...previous };
-          if (value === undefined) delete next[name];
-          else next[name] = value;
-          return next;
-        })} />
+        <ParamControls controls={parameterControls} onChange={(name, value) => {
+          const next = { ...params, [name]: value }; setParams(next); previewParams(next);
+        }} onCommit={() => releaseEdit(`${clipSel}:${currentFxId}`)} />
       </fieldset> : null}
 
       <Button full onClick={() => void handleTrial()}
@@ -329,7 +294,7 @@ export function TransitionPanel() {
       <Button
         variant="primary"
         full
-        onClick={handleApply}
+        onClick={() => { releaseEdit(`${clipSel}:${currentFxId}`); }}
         disabled={busy || readOnly || !clipSel || !transitionId || !transitionTarget.valid || !validDuration}
         style={{ marginTop: 10 }}
       >

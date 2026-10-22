@@ -126,7 +126,9 @@ class ExportRangeTests(unittest.TestCase):
             ranged = os.path.join(media_dir, "ranged.mp4")
             preview = os.path.join(media_dir, "preview.mp4")
             result = renderer.render(
-                project, ranged, quality="low", overwrite=True,
+                # Compare timing with the same encoder quality as playback.
+                # Different CRFs can exceed the pixel tolerance on glitch noise.
+                project, ranged, quality="preview", overwrite=True,
                 output_start=0.5, output_duration=1.0)
             renderer.render_preview_window(project, preview, 0.5, 1.0)
 

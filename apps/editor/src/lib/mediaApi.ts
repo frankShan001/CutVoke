@@ -235,6 +235,7 @@ export type PreviewFrameResult =
 export async function fetchPreviewFrame(spec: PreviewFrameSpec): Promise<PreviewFrameResult> {
   const q = new URLSearchParams();
   q.set("t", String(spec.t));
+  q.set("editorTitles", "1");
   if (spec.width && spec.height) q.set("size", `${spec.width}x${spec.height}`);
   if (spec.compareClipId) q.set("compareClipId", spec.compareClipId);
   const url = `/api/v1/projects/${encodeURIComponent(spec.projectId)}/preview-frame?${q.toString()}`;

@@ -2,8 +2,8 @@ import { tr, useLocale } from "../i18n";
 /** Direct manipulation for a selected clip's normalized crop rectangle. */
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { useEditor } from "../store/editor";
-import { getLatestState } from "../store/actions";
-import { updateEffect } from "../store/effectEdit";
+
+import { stageEffect, releaseEdit, useInteractionProject } from "../store/interactive";
 import { rationalToSecs } from "../lib/rational";
 
 type Corner = "nw" | "ne" | "sw" | "se";
@@ -35,12 +35,12 @@ function geometry(params: Record<string, unknown>): Geometry {
 export function CropCanvasOverlay() {
   useLocale();
   const { state, dispatch } = useEditor();
-  const project = state.project;
+  const project = useInteractionProject(state.project);
   const track = project?.sequence.tracks.find((item) => item.id === state.selection?.trackId);
   const clip = track?.clips.find((item) => item.id === state.selection?.clipId);
   const effect = clip?.effects?.find((item) => item.effectId === CROP && item.enabled !== false);
   const params = (effect?.params || {}) as Record<string, unknown>;
-  const paramsKey = JSON.stringify(params);
+  const paramsKey = JSON.stringify(state.project?.sequence.tracks.flatMap(t => t.clips).find(c => c.id === clip?.id)?.effects?.find(e => e.effectId === CROP)?.params || {});
   const width = project?.sequence.width || 1920;
   const height = project?.sequence.height || 1080;
   const svgRef = useRef<SVGSVGElement>(null);
@@ -69,17 +69,12 @@ export function CropCanvasOverlay() {
     const local = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
     return { x: local.x / width, y: local.y / height };
   };
-  const commit = async (next: Geometry) => {
+  const commit = (next: Geometry, held = false) => {
     if (!editable) return;
     const before = geometry(params);
     if ((["x", "y", "w", "h"] as const).every((key) =>
       rounded(next[key]) === rounded(before[key]))) return;
-    await updateEffect(dispatch, getLatestState() || state, {
-      clipId: clip.id,
-      effectId: CROP,
-      params: { x: rounded(next.x), y: rounded(next.y),
-                w: rounded(next.w), h: rounded(next.h) },
-    });
+    stageEffect(dispatch, clip, CROP, { x: rounded(next.x), y: rounded(next.y), w: rounded(next.w), h: rounded(next.h) }, held);
   };
   const begin = (event: PointerEvent<SVGElement>, mode: Gesture["mode"]) => {
     if (!editable) return;
@@ -121,7 +116,7 @@ export function CropCanvasOverlay() {
         w: rounded(right - left), h: rounded(bottom - top) };
     }
     previewRef.current = next;
-    setPreview(next);
+    setPreview(next); commit(next, true);
   };
   const finish = (event: PointerEvent<SVGSVGElement>) => {
     if (gestureRef.current?.pointerId !== event.pointerId) return;
@@ -131,9 +126,10 @@ export function CropCanvasOverlay() {
     const next = previewRef.current;
     previewRef.current = null;
     setPreview(null);
-    if (next) void commit(next);
+    if (next) releaseEdit(`${clip.id}:${CROP}`);
   };
   const cancel = () => {
+    releaseEdit(`${clip.id}:${CROP}`);
     gestureRef.current = null;
     previewRef.current = null;
     setDragging(false);

@@ -41,6 +41,27 @@ whole timeline is already ready for uninterrupted playback.
 Appending unrelated future clips preserves the current window's cache identity,
 including animated shots that require full-clock compilation.
 
+Video, images and stickers can be selected directly in the preview. Their native
+layers update during transform gestures; releasing the pointer saves one undoable
+edit. Captions and effect inputs preview valid drafts while autosaving; Chinese
+IME composition waits for completion before saving. Volume and fades update a
+per-clip Web Audio mix during playback. Failed saves retain the draft and offer
+Retry; undo, export and project switching flush pending edits first.
+
+Complex visual effects use cancellable, latest-request-only frames from the same
+renderer as export. Geometry reuses the processed transparent layer. Transitions
+and nested compositions render the complete scene so neighboring layers remain
+correct. Editing a complex visual effect pauses playback at the current frame;
+its calculation still has a measurable cost. Audio effects use isolated sound
+previews and do not block the visual-frame queue. Independent pitch and pitch
+preservation changes refresh those previews. Projects with sidechain ducking
+retain the complete server mix so the other clips remain available as key inputs.
+
+视频、图片、贴纸可在画面中点击选中；拖动、缩放时实际图层同步变化，松手自动保存，
+一次手势可一步撤销。字幕支持中文输入法，文字和样式自动保存；音量与淡入淡出可边播
+边调。保存失败保留草稿并提供重试；撤销、导出和切换工程前先保存待提交修改。
+复杂视觉效果复用导出渲染器，只计算最新请求；调整时暂停在当前帧，计算本身仍有耗时。
+
 ## Production archive / 制作归档
 
 Open **Agent activity → Production archive**, or call `project_archive` with

@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { useEditor, selectors } from "../store/editor";
 import { getLatestState, runCommand } from "../store/actions";
 import { removeClip } from "../store/clipEdit";
-import { addEffectToClip, updateEffect } from "../store/effectEdit";
+import { stageEffect, useInteractionProject } from "../store/interactive";
 import { rationalText, rationalToSecs } from "../lib/rational";
 import { sourcePathShort } from "../lib/media";
 import { Badge } from "./ui";
@@ -27,7 +27,8 @@ export function Inspector() {
   useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   useSessionAssets();
-  const { project, selection } = state;
+  const { selection } = state;
+  const project = useInteractionProject(state.project);
   if (!project) {
     return (
       <section className="inspector">
@@ -105,7 +106,7 @@ export function Inspector() {
             {clip.attachedToClipId ? <p className="cv-hint">{tr("移动关联视频时此片段同步移动；按住 Alt 拖动视频可临时保持此片段原位。")}</p> : null}
             {/* ---- 音频 / 关键帧 / 动画 / 画面特效 小节（J01 拆分）---- */}
             <div className="inspector__sep" />
-            {isText ? <TitleEditor clip={clip} /> : <>
+            {isText ? <TitleEditor key={clip.id} clip={clip} /> : <>
               {isSticker ? <StickerTransformSection clip={clip} /> : isVisualClip ? <>
                 {isImage ? null : <AudioSection clip={clip} canDetach
                   detachedAudioClipId={detachedAudioClipId} />}
@@ -203,7 +204,7 @@ function Row({ k, v, mono }: { k: string; v: string; mono?: boolean }) {
 
 function StickerTransformSection({ clip }: { clip: Clip }) {
   useLocale();
-  const { state, dispatch } = useEditor({ subscribeToClock: false });
+  const { dispatch } = useEditor({ subscribeToClock: false });
   const existingTransform = clip.effects?.find((effect) => effect.effectId === BUILTIN_TRANSFORM_ID);
   const params = existingTransform?.params;
   const position = params?.position as { x?: number; y?: number } | undefined;
@@ -211,7 +212,6 @@ function StickerTransformSection({ clip }: { clip: Clip }) {
     params?.rotation ?? 0, params?.opacity ?? 1].map(String);
   const savedKey = saved.join("|");
   const [values, setValues] = useState(saved);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => setValues(savedKey.split("|")), [clip.id, savedKey]);
 
@@ -245,34 +245,17 @@ function StickerTransformSection({ clip }: { clip: Clip }) {
             type="number"
             step={field.step}
             value={values[index]}
-            onChange={(event) => setValues((old) => old.map((value, i) => i === index ? event.target.value : value))}
+            onChange={(event) => {
+              const next = values.map((value, i) => i === index ? event.target.value : value);
+              setValues(next);
+              const n = next.map(Number);
+              if (next.every(v => v.trim() !== "") && n.every(Number.isFinite) && Number.isInteger(n[0]) && Number.isInteger(n[1]) && n[2] > 0 && n[2] <= 5 && Math.abs(n[3]) <= 180 && n[4] >= 0 && n[4] <= 1)
+                stageEffect(dispatch, clip, BUILTIN_TRANSFORM_ID, { position: { x: n[0], y: n[1] }, scale: n[2], rotation: n[3], opacity: n[4] });
+            }}
             style={{ width: 86, height: 26 }}
           />
         </label>
       ))}
-      <button
-        type="button"
-        className="cv-btn cv-btn--sm cv-btn--secondary"
-        disabled={!valid || saving}
-        aria-describedby={validationMessageId}
-        onClick={async () => {
-          setSaving(true);
-          try {
-            const input = {
-              clipId: clip.id,
-              effectId: BUILTIN_TRANSFORM_ID,
-              params: {
-                position: { x: numbers[0], y: numbers[1] },
-                scale: numbers[2], rotation: numbers[3], opacity: numbers[4],
-              },
-            };
-            if (existingTransform) await updateEffect(dispatch, getLatestState() || state, input);
-            else await addEffectToClip(dispatch, getLatestState() || state, input);
-          } finally {
-            setSaving(false);
-          }
-        }}
-      >{saving ? tr("应用中…") : tr("应用贴纸变换")}</button>
     </section>
   );
 }

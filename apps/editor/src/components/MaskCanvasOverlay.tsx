@@ -3,8 +3,8 @@ import { tr, useLocale } from "../i18n";
 
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { useEditor } from "../store/editor";
-import { getLatestState } from "../store/actions";
-import { updateEffect } from "../store/effectEdit";
+
+import { stageEffect, releaseEdit, useInteractionProject } from "../store/interactive";
 import { rationalToSecs } from "../lib/rational";
 
 type Shape = "rect" | "circle" | "freehand" | "text";
@@ -241,12 +241,12 @@ function adjust(start: Geometry, mode: Gesture["mode"], dx: number, dy: number,
 export function MaskCanvasOverlay() {
   useLocale();
   const { state, dispatch } = useEditor();
-  const project = state.project;
+  const project = useInteractionProject(state.project);
   const track = project?.sequence.tracks.find((item) => item.id === state.selection?.trackId);
   const clip = track?.clips.find((item) => item.id === state.selection?.clipId);
   const mask = clip?.effects?.find((effect) => effect.effectId === "cutvoke.fx.mask" && effect.enabled !== false);
   const params = mask?.params || {};
-  const paramsKey = JSON.stringify(params);
+  const paramsKey = JSON.stringify(state.project?.sequence.tracks.flatMap(t => t.clips).find(c => c.id === clip?.id)?.effects?.find(e => e.effectId === "cutvoke.fx.mask")?.params || {});
   const svgRef = useRef<SVGSVGElement>(null);
   const gestureRef = useRef<Gesture | null>(null);
   const previewRef = useRef<Geometry | null>(null);
@@ -292,7 +292,7 @@ export function MaskCanvasOverlay() {
     return { x: clamp(local.x / width, 0, 1), y: clamp(local.y / height, 0, 1) };
   };
 
-  const commit = async (next: Geometry) => {
+  const commit = (next: Geometry, held = false) => {
     if (!editable) return;
     const before = geometry(params, width, height);
     const geometryChanged = (["x", "y"] as const).some((key) => rounded(next[key]) !== rounded(before[key])) ||
@@ -314,9 +314,7 @@ export function MaskCanvasOverlay() {
       }));
       nextParams.pathMode = next.pathMode;
     }
-    await updateEffect(dispatch, getLatestState() || state, {
-      clipId: clip.id, effectId: "cutvoke.fx.mask", params: nextParams,
-    });
+    stageEffect(dispatch, clip, "cutvoke.fx.mask", nextParams, held);
   };
 
   const begin = (event: PointerEvent<SVGElement>, mode: Gesture["mode"], pointIndex?: number,
@@ -342,7 +340,7 @@ export function MaskCanvasOverlay() {
     const next = adjust(gesture.initial, gesture.mode,
       at.x - gesture.startX, at.y - gesture.startY, gesture.pointIndex, gesture.handleKind);
     previewRef.current = next;
-    setPreview(next);
+    setPreview(next); commit(next, true);
   };
 
   const finish = (event: PointerEvent<SVGSVGElement>) => {
@@ -353,7 +351,7 @@ export function MaskCanvasOverlay() {
     const next = previewRef.current;
     previewRef.current = null;
     setPreview(null);
-    if (next) void commit(next);
+    if (next) releaseEdit(`${clip.id}:${"cutvoke.fx.mask"}`);
   };
 
   const appendDrawPoint = (event: PointerEvent<SVGSVGElement>) => {
@@ -400,6 +398,7 @@ export function MaskCanvasOverlay() {
   };
 
   const cancelGesture = () => {
+    releaseEdit(`${clip.id}:cutvoke.fx.mask`);
     gestureRef.current = null;
     previewRef.current = null;
     drawPointerId.current = null;

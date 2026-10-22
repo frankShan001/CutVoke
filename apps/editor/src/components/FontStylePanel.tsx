@@ -6,7 +6,7 @@ import { tr, useLocale } from "../i18n";
 import { Sparkles, Eraser } from "lucide-react";
 import { Button, Row } from "./ui";
 import { useEditor } from "../store/editor";
-import { updateCaption } from "../store/clipEdit";
+import { stageCaption, releaseEdit } from "../store/interactive";
 import {
   FONT_STYLE_PRESETS,
   CLEAR_CAPTION_STYLE,
@@ -15,16 +15,16 @@ import {
 
 export function FontStylePanel({ captionId, disabled = false }: { captionId: string | null; disabled?: boolean }) {
   useLocale();
-  const { state, dispatch } = useEditor();
+  const { dispatch } = useEditor();
 
   const applyPreset = (preset: FontStylePreset) => {
     if (!captionId) return;
-    void updateCaption(dispatch, state, { captionId, ...preset.style });
+    stageCaption(dispatch, captionId, { ...preset.style }); releaseEdit(`caption:${captionId}`);
   };
 
   const clearStyle = () => {
     if (!captionId) return;
-    void updateCaption(dispatch, state, { captionId, ...CLEAR_CAPTION_STYLE });
+    stageCaption(dispatch, captionId, { ...CLEAR_CAPTION_STYLE }); releaseEdit(`caption:${captionId}`);
   };
 
   if (!captionId) {

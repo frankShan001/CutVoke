@@ -1814,7 +1814,7 @@ class EditService:
                     f"track {track.id} is locked; unlock it before editing its clips",
                 )
 
-    def preview_command(self, command: Command) -> dict:
+    def preview_command(self, command: Command, *, include_project: bool = False) -> dict:
         """试算一个编辑命令（P4 AI 接续）：在候选副本上执行 handler 并校验，
         但**不提交、不持久化、不提 revision**，返回「会发生什么」。
 
@@ -1878,8 +1878,10 @@ class EditService:
                 if before is not None or after is not None:
                     enriched["timelineRange"] = {"before": before, "after": after}
             impact.append(enriched)
-        return {"valid": True, "changedEntities": impact,
-                "commandType": command.type}
+        result = {"valid": True, "changedEntities": impact, "commandType": command.type}
+        if include_project:
+            result["project"] = candidate
+        return result
 
     def machine_schema(self, lang: str = "zh-CN") -> dict:
         """机器可读 schema（P4 SDK）：命令目录 + 效果的 JSON Schema 形态。

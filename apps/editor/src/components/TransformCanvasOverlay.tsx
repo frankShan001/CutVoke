@@ -2,9 +2,7 @@ import { tr, useLocale } from "../i18n";
 /** 普通视频/图片的画布变换框；指针手势只在结束时提交一次命令。 */
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { useEditor } from "../store/editor";
-import { getLatestState } from "../store/actions";
-import { updateEffect } from "../store/effectEdit";
-import { addKeyframes } from "../store/clipEdit";
+import { stageTransform, releaseEdit, useInteractionProject } from "../store/interactive";
 import { BUILTIN_TRANSFORM_ID } from "../lib/effects";
 import { rationalToSecs } from "../lib/rational";
 import { evaluateKeyframes } from "../lib/keyframes";
@@ -18,11 +16,11 @@ const angle = (value: number) => Math.round(value * 10) / 10;
 export function TransformCanvasOverlay() {
   useLocale();
   const { state, dispatch } = useEditor();
-  const project = state.project;
+  const project = useInteractionProject(state.project);
   const track = project?.sequence.tracks.find((item) => item.id === state.selection?.trackId);
   const clip = track?.clips.find((item) => item.id === state.selection?.clipId);
   const effect = clip?.effects?.find((item) => item.effectId === BUILTIN_TRANSFORM_ID && item.enabled !== false);
-  const paramsKey = JSON.stringify(effect?.params || {});
+  const paramsKey = JSON.stringify(state.project?.sequence.tracks.flatMap(t => t.clips).find(c => c.id === clip?.id)?.effects?.find(e => e.effectId === BUILTIN_TRANSFORM_ID)?.params || {});
   const width = project?.sequence.width || 1920;
   const height = project?.sequence.height || 1080;
   const params = effect?.params || {};
@@ -51,7 +49,6 @@ export function TransformCanvasOverlay() {
   }, [clip?.id, paramsKey, state.editLock, state.playhead]);
 
   if (!project || !clip || !track || track.kind !== "video" || track.role === "sticker" ||
-      !effect ||
       track.visible === false || clip.hidden ||
       rationalToSecs(clip.timelineStart) > state.playhead || rationalToSecs(clip.timelineEnd) <= state.playhead ||
       clip.effects?.some((item) => item.enabled !== false && /(?:crop|mask)/i.test(item.effectId))) return null;
@@ -76,37 +73,9 @@ export function TransformCanvasOverlay() {
     const local = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
     return { x: local.x, y: local.y };
   };
-  const commit = async (next: Geometry) => {
+  const commit = (next: Geometry, held = false) => {
     if (!editable) return;
-    const moved = Math.round(next.x) !== Math.round(saved.x) || Math.round(next.y) !== Math.round(saved.y);
-    const resized = Math.round(next.scale * 10000) !== Math.round(saved.scale * 10000);
-    const rotated = angle(next.rotation) !== angle(saved.rotation);
-    if (!moved && !resized && !rotated) return;
-    const ctx = getLatestState() || state;
-    const frames: { param: string; time: number; value: number; interpolation: "linear" }[] = [];
-    const changedBase: Record<string, unknown> = {};
-    if (moved && (clip.keyframes?.x?.length || clip.keyframes?.y?.length)) {
-      frames.push({ param: "x", time: localTime, value: Math.round(next.x), interpolation: "linear" });
-      frames.push({ param: "y", time: localTime, value: Math.round(next.y), interpolation: "linear" });
-    } else if (moved) {
-      changedBase.position = { x: Math.round(next.x), y: Math.round(next.y) };
-    }
-    if (resized && clip.keyframes?.scale?.length) {
-      frames.push({ param: "scale", time: localTime, value: clamp(next.scale, 0.05, 5), interpolation: "linear" });
-    } else if (resized) {
-      changedBase.scale = clamp(next.scale, 0.05, 5);
-    }
-    if (rotated && clip.keyframes?.rotation?.length) {
-      frames.push({ param: "rotation", time: localTime, value: clamp(angle(next.rotation), -180, 180), interpolation: "linear" });
-    } else if (rotated) {
-      changedBase.rotation = clamp(angle(next.rotation), -180, 180);
-    }
-    if (Object.keys(changedBase).length) {
-      await updateEffect(dispatch, ctx, { clipId: clip.id, effectId: BUILTIN_TRANSFORM_ID, params: changedBase });
-    }
-    if (frames.length) {
-      await addKeyframes(dispatch, getLatestState() || ctx, { clipId: clip.id, keyframes: frames });
-    }
+    stageTransform(dispatch, clip, next, localTime, held);
   };
   const begin = (event: PointerEvent<SVGElement>, mode: Mode) => {
     if (!editable) return;
@@ -139,7 +108,7 @@ export function TransformCanvasOverlay() {
       const raw = gesture.initial.rotation + delta * 180 / Math.PI;
       next = { ...gesture.initial, rotation: event.shiftKey ? Math.round(raw / 15) * 15 : angle(raw) };
     }
-    previewRef.current = next; setPreview(next);
+    previewRef.current = next; setPreview(next); commit(next, true);
   };
   const finish = (event: PointerEvent<SVGSVGElement>) => {
     const gesture = gestureRef.current;
@@ -148,9 +117,9 @@ export function TransformCanvasOverlay() {
     gestureRef.current = null;
     const next = previewRef.current;
     previewRef.current = null; setPreview(null);
-    if (next) void commit(next);
+    if (next) releaseEdit(`${clip.id}:${BUILTIN_TRANSFORM_ID}`);
   };
-  const cancel = () => { gestureRef.current = null; previewRef.current = null; setPreview(null); };
+  const cancel = () => { releaseEdit(`${clip.id}:${BUILTIN_TRANSFORM_ID}`); gestureRef.current = null; previewRef.current = null; setPreview(null); };
   const keyMove = (event: React.KeyboardEvent<SVGElement>, mode: Mode) => {
     if (!editable) return;
     const step = event.shiftKey ? 10 : 1;

@@ -4,8 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, SlidersHorizontal } from "lucide-react";
 import { showError, useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
+import { stageEdit, releaseEdit } from "../../store/interactive";
 import { removeEffect } from "../../store/clipEdit";
-import { bypassEffect, updateEffect } from "../../store/effectEdit";
+import { bypassEffect } from "../../store/effectEdit";
 import {
   effectsByCategory,
   getEffectCatalog,
@@ -72,15 +73,10 @@ export function FxSection({ clip, trackKind }: { clip: Clip; trackKind: string }
     setBusy(false);
   };
 
-  const setParams = async (spec: EffectSpec, params: Record<string, unknown>): Promise<boolean> => {
+  const setParams = async (spec: EffectSpec, params: Record<string, unknown>, held = false): Promise<boolean> => {
     if (busy) return false;
-    setBusy(true);
-    const ctx = getLatestState() || state;
-    const result = await updateEffect(dispatch, ctx, {
-      clipId: clip.id, effectId: spec.effectId, params,
-    });
-    setBusy(false);
-    return result.ok;
+    stageEdit(dispatch, `${clip.id}:${spec.effectId}`, [{ type: "effect.update", payload: { clipId: clip.id, effectId: spec.effectId, params } }], held);
+    return true;
   };
 
   const activeSpecs = specs.filter((s) => isActive(s.effectId));
@@ -112,7 +108,7 @@ export function FxSection({ clip, trackKind }: { clip: Clip; trackKind: string }
           }}
           spec={s}
           params={paramsOf(s.effectId)}
-          onCommit={(p) => setParams(s, p)}
+          onCommit={(p, held) => setParams(s, p, held)}
         />
       ))}
     </>
@@ -134,7 +130,7 @@ function FxParams({
   onEnabled(enabled: boolean): Promise<boolean>;
   spec: EffectSpec;
   params: Record<string, unknown>;
-  onCommit: (next: Record<string, unknown>) => Promise<boolean>;
+  onCommit: (next: Record<string, unknown>, held?: boolean) => Promise<boolean>;
 }) {
   const locale = useLocale();
   const [expanded, setExpanded] = useState(initiallyOpen);
@@ -181,9 +177,9 @@ function FxParams({
     return true;
   }), [spec, local, locale]);
 
-  const commitLocal = (next: Record<string, unknown>) => {
+  const commitLocal = (next: Record<string, unknown>, held = false) => {
     if (JSON.stringify(next) === JSON.stringify(params)) return;
-    void onCommit(next).then((ok) => {
+    void onCommit(next, held).then((ok) => {
       if (!ok) setLocal(params);
     });
   };
@@ -191,27 +187,17 @@ function FxParams({
   const numericControls = (
     <ParamControls
       controls={controls}
-      onChange={(name, value) => {
+      onChange={(name, value, held = false) => {
         const next = { ...local };
         if (value === undefined) delete next[name];
         else next[name] = value;
+        if (spec.effectId === "cutvoke.fx.mask" && name === "shape") Object.assign(next, preserveMaskBoundsOnShapeChange(local, next));
+        if (isLut && name === "preset") { next.file = ""; next.name = ""; }
         setLocal(next);
+        const control = controls.find(c => c.name === name);
+        if (value !== undefined && (control?.kind !== "number" || typeof value === "number" && Number.isFinite(value) && (control.min === undefined || value >= control.min) && (control.max === undefined || value <= control.max))) commitLocal(next, held);
       }}
-      onCommit={(change) => {
-        let next = { ...local };
-        if (change) {
-          if (change.value === undefined) delete next[change.name];
-          else next[change.name] = change.value;
-          if (spec.effectId === "cutvoke.fx.mask" && change.name === "shape") {
-            next = preserveMaskBoundsOnShapeChange(params, next);
-          }
-          if (isLut && change.name === "preset") {
-            next.file = "";
-            next.name = "";
-          }
-        }
-        commitLocal(next);
-      }}
+      onCommit={() => releaseEdit(`${clipId}:${spec.effectId}`)}
     />
   );
 
@@ -229,7 +215,7 @@ function FxParams({
       </div>
       {isColorBalance ? (
         <>
-          <ColorWheels params={local} onPreview={setLocal} onCommit={commitLocal} />
+          <ColorWheels params={local} onPreview={(next) => { setLocal(next); commitLocal(next, true); }} onCommit={() => releaseEdit(`${clipId}:${spec.effectId}`)} />
           <details className="inspector__adv color-wheels__numeric">
             <summary>{tr("RGB 数值微调")}</summary>
             {numericControls}

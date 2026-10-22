@@ -1,3 +1,4 @@
+import { getLatestState } from "../../store/actions";
 import { tr, useLocale } from "../../i18n";
 import { useMemo } from "react";
 import { Captions } from "lucide-react";
@@ -67,7 +68,14 @@ export function CaptionTrackRow({
               onClick={(event) => {
                 event.stopPropagation();
                 dispatch({ type: "CAPTION_SELECTION_SET", captionId: caption.id });
-                dispatch({ type: "PLAYHEAD_SET", t: start });
+                  window.dispatchEvent(new CustomEvent("cutvoke:open-creative-domain", { detail: "caption" }));
+                const now = getLatestState()?.playhead || 0;
+                if (now < start || now >= end) {
+                  const offset = event.detail ? (event.clientX - event.currentTarget.getBoundingClientRect().left) / pxPerSec : 0;
+                  const fps = getLatestState()?.project?.sequence.fps;
+                  const rate = fps ? Number(fps.num) / Number(fps.den) : 30;
+                  dispatch({ type: "PLAYHEAD_SET", t: Math.max(start, Math.floor(Math.min(end - 1 / rate, start + Math.max(0, offset)) * rate) / rate) });
+                }
               }}
             >
               <span>{caption.text || tr("（空字幕）")}</span>

@@ -3,8 +3,8 @@ import { tr, useLocale } from "../../i18n";
 import { useEffect, useState } from "react";
 import { useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
-import { addEffect, addKeyframe, removeKeyframe } from "../../store/clipEdit";
-import { updateEffect } from "../../store/effectEdit";
+import { addKeyframe, removeKeyframe } from "../../store/clipEdit";
+import { stageTransform } from "../../store/interactive";
 import { BUILTIN_TRANSFORM_ID } from "../../lib/effects";
 import { evaluateKeyframes } from "../../lib/keyframes";
 import { rationalToSecs } from "../../lib/rational";
@@ -47,7 +47,6 @@ export function TransformSection({ clip }: { clip: Clip }) {
   const savedKey = JSON.stringify(saved);
   const [values, setValues] = useState(saved);
   const [saving, setSaving] = useState(false);
-  const exists = clip.effects?.some((effect) => effect.effectId === BUILTIN_TRANSFORM_ID) ?? false;
   const opacityKeyframeCount = clip.keyframes?.opacity?.length ?? 0;
   const playheadInsideClip = state.playhead >= clipStart - 1e-4 && state.playhead <= clipEnd + 1e-4;
   useEffect(() => setValues(JSON.parse(savedKey) as TransformValues), [clip.id, savedKey]);
@@ -64,29 +63,13 @@ export function TransformSection({ clip }: { clip: Clip }) {
       : "";
   const keyframeDisabledReasonId = keyframeDisabledReason
     ? `transform-keyframe-disabled-${clip.id}` : undefined;
-  const commit = async (next: TransformValues) => {
-    if (!isValid(next) || saving) return;
-    setSaving(true);
-    const params = {
-      position: { x: Math.round(next.x), y: Math.round(next.y) },
-      scale: next.scale,
-      rotation: next.rotation,
-      opacity: next.opacity,
-    };
-    try {
-      const ctx = getLatestState() || state;
-      if (exists) {
-        await updateEffect(dispatch, ctx, { clipId: clip.id, effectId: BUILTIN_TRANSFORM_ID, params });
-      } else {
-        await addEffect(dispatch, ctx, { clipId: clip.id, effectId: BUILTIN_TRANSFORM_ID, params });
-      }
-    } finally {
-      setSaving(false);
-    }
+  const commit = (next: TransformValues) => {
+    if (isValid(next)) stageTransform(dispatch, clip, next, Math.max(0, keyframeTime));
   };
   const update = (key: keyof TransformValues, value: string) => {
     const number = value === "" ? Number.NaN : Number(value);
-    setValues((current) => ({ ...current, [key]: number }));
+    const next = { ...values, [key]: number };
+    setValues(next); commit(next);
   };
 
   const recordTransformKeyframe = async (param: TransformKeyframeParam) => {
@@ -125,7 +108,7 @@ export function TransformSection({ clip }: { clip: Clip }) {
   return (
     <section className="inspector__transform" data-effect-id={BUILTIN_TRANSFORM_ID} aria-label={tr("画面变换")}>
       <div className="inspector__subrow"><strong>{tr("画面变换")}</strong>
-        <span className="cv-hint">{exists ? tr("画布拖动与数值同步") : tr("应用后可在画布拖动")}</span>
+        <span className="cv-hint">{tr("画布拖动与数值同步")}</span>
       </div>
       {keyframeDisabledReason ? <p id={keyframeDisabledReasonId} className="cv-hint" role="status">
         {keyframeDisabledReason}
@@ -199,13 +182,8 @@ export function TransformSection({ clip }: { clip: Clip }) {
         <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary"
           disabled={saving || JSON.stringify(values) === JSON.stringify(DEFAULTS)}
           onClick={() => { setValues(DEFAULTS); void commit(DEFAULTS); }}>{tr("复位")}</button>
-        <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary"
-          disabled={saving || !valid || JSON.stringify(values) === JSON.stringify(saved)}
-          onClick={() => void commit(values)}>
-          {saving ? tr("应用中…") : tr("应用变换")}
-        </button>
       </div>
-      <p className="cv-hint">{tr("位置以画布中心为原点；缩放和基础不透明度作用于整个片段。每次应用可撤销。")}</p>
+      <p className="cv-hint">{tr("位置以画布中心为原点；修改即时预览并自动保存，一次调整可以一步撤销。")}</p>
     </section>
   );
 }

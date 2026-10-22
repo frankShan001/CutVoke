@@ -1,5 +1,5 @@
 import { tr, useLocale } from "../i18n";
-import { msg, type UiMessage } from "../i18n/messages";
+import { type UiMessage } from "../i18n/messages";
 /** 编辑器全局状态（Context + useReducer）。UI 组件只消费状态与动作。 */
 
 import {
@@ -100,6 +100,7 @@ export interface EditorState {
   editLock: EditLease | null;
   /** CaptionPanel 的临时画布预览态；保存/放弃/锁定后清空。 */
   captionDraftPreview: CaptionDraftPreview | null;
+  titleDrafts: Record<string, { projectId: string; version: string; params: Record<string, unknown> }>;
 }
 
 export type EditorAction =
@@ -132,6 +133,7 @@ export type EditorAction =
   | { type: "TEMPLATE_OPEN_SET"; open: boolean }
   | { type: "EDIT_LOCK_SET"; lease: EditLease | null }
   | { type: "CAPTION_DRAFT_PREVIEW_SET"; preview: CaptionDraftPreview | null }
+  | { type: "TITLE_DRAFT_SET"; clipId: string; projectId: string; version: string; params: Record<string, unknown> | null }
   | { type: "CAPTION_SELECTION_SET"; captionId: string | null };
 
 const initialState: EditorState = {
@@ -163,6 +165,7 @@ const initialState: EditorState = {
   templateOpen: false,
   editLock: null,
   captionDraftPreview: null,
+  titleDrafts: {},
 };
 
 function sameLeaseIdentity(current: EditLease | null, next: EditLease | null): boolean {
@@ -214,6 +217,7 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
         selectedCaptionId: null,
         editLock: null,
         captionDraftPreview: null,
+        titleDrafts: {},
       };
     case "PROJECT_LOADED":
       if (action.project.projectId !== state.currentId) return state;
@@ -251,7 +255,7 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
     case "STATUS_SET":
       return { ...state, status: { severity: action.severity, text: action.text } };
     case "SELECTION_SET":
-      return { ...state, selection: action.selection };
+      return { ...state, selection: action.selection, selectedCaptionId: action.selection ? null : state.selectedCaptionId };
     case "SYNC":
       return { ...state, lastSync: Date.now() };
     case "PLAYHEAD_SET":
@@ -283,19 +287,19 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
         ...state,
         editLock: action.lease,
         captionDraftPreview: action.lease ? null : state.captionDraftPreview,
+        titleDrafts: action.lease ? {} : state.titleDrafts,
       };
+    case "TITLE_DRAFT_SET": {
+      if (action.projectId !== state.currentId) return state;
+      const titleDrafts = { ...state.titleDrafts };
+      if (action.params) titleDrafts[action.clipId] = { projectId: action.projectId, version: action.version, params: action.params };
+      else if (titleDrafts[action.clipId]?.version === action.version) delete titleDrafts[action.clipId];
+      return { ...state, titleDrafts };
+    }
     case "CAPTION_DRAFT_PREVIEW_SET":
       return { ...state, captionDraftPreview: action.preview };
     case "CAPTION_SELECTION_SET": {
-      const draftCaptionId = state.captionDraftPreview?.captionId;
-      if (draftCaptionId && draftCaptionId === state.selectedCaptionId
-          && action.captionId !== state.selectedCaptionId) {
-        return {
-          ...state,
-          status: { severity: "warn", text: msg("当前字幕有未保存的文字或时间修改，请先保存或放弃") },
-        };
-      }
-      return { ...state, selectedCaptionId: action.captionId };
+      return { ...state, selectedCaptionId: action.captionId, selection: action.captionId ? null : state.selection };
     }
     case "RESET_SELECTION_FOR":
       if (!action.trackId) {

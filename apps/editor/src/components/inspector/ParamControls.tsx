@@ -1,5 +1,6 @@
 /** 通用参数控件渲染器（J01）：把 effects.ts 的 ParamControl[] 渲染成表单。
  *  数据驱动——新增效果只要后端声明 parameters，前端无需改代码。 */
+import { useRef } from "react";
 import type { ParamControl } from "../../lib/effectControls";
 
 export function ParamControls({
@@ -8,10 +9,11 @@ export function ParamControls({
   onCommit,
 }: {
   controls: ParamControl[];
-  onChange: (name: string, value: unknown) => void;
+  onChange: (name: string, value: unknown, held?: boolean) => void;
   /** 数值输入失焦时提交（枚举/布尔即时提交）。 */
   onCommit?: (change?: { name: string; value: unknown }) => void;
 }) {
+  const composing = useRef(false);
   if (controls.length === 0) return null;
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
@@ -76,7 +78,9 @@ export function ParamControls({
               aria-label={c.label}
               aria-description={c.description}
               value={String(c.value ?? "")}
-              onChange={(e) => onChange(c.name, e.target.value)}
+              onCompositionStart={() => { composing.current = true; }}
+              onCompositionEnd={(e) => { composing.current = false; onChange(c.name, e.currentTarget.value, false); }}
+              onChange={(e) => onChange(c.name, e.target.value, composing.current)}
               onBlur={() => onCommit?.()}
             />
           )}

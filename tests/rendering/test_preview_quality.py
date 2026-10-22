@@ -27,13 +27,13 @@ def test_preview_resamples_before_effects_and_preserves_canvas_geometry(tmp_path
     clip.keyframes={'x':[Keyframe('a',R.of(0),71),Keyframe('b',R.of(1),81)]}
     project.sequence.tracks=[Track('v','video',[clip])]
     original=copy.deepcopy(project.to_dict())
-    preview,scale=snapshot(project)
+    preview,scale=snapshot(project,maximum=640)
     assert scale==.625
     assert preview.sequence.width==640
     assert preview.sequence.tracks[0].clips[0].keyframes['x'][0].value==44.375
     renderer=RenderService(gpu_effects=False)
     result=renderer.render_preview_window(project,str(tmp_path/'draft.mp4'),0,1)
-    assert (result['width'],result['height'])==(640,360)
+    assert (result['width'],result['height'])==(1024,576)
     full=renderer.render(project,str(tmp_path/'full.mp4'),quality='high')
     assert (full['width'],full['height'])==(1024,576)
     frames=[]
@@ -71,7 +71,7 @@ def test_draft_preserves_title_size_and_pixel_effects_without_mutating_authority
     # already converts them to pixels; rescaling them here would shrink twice.
     assert effects[0]['params']['fontSize']==90
     assert effects[0]['params']['x']==.2
-    assert effects[1]['params']['offset']==2
+    assert effects[1]['params']['offset']==4
     assert effects[2]['params']['_previewScale']==ratio
     assert project.to_dict()==original
 
@@ -111,11 +111,44 @@ def test_large_single_clip_late_window_uses_its_rebased_source_interval(tmp_path
     try:
         path,_,duration=api._preview_window_file(project,1)
         info=renderer.probe_media(path)
-        assert duration==2 and (info['width'],info['height'])==(640,360)
+        assert duration==2 and (info['width'],info['height'])==(1024,576)
         for at,channel in [('0.5',0),('1.5',2)]:
             raw=subprocess.run(['ffmpeg','-v','error','-ss',at,'-i',path,'-frames:v','1',
                 '-f','rawvideo','-pix_fmt','rgb24','pipe:1'],capture_output=True,check=True).stdout
             color=np.frombuffer(raw,np.uint8).reshape(-1,3).mean(axis=0)
             assert color[channel]>240 and np.delete(color,channel).max()<10
+    finally:
+        api.close()
+
+
+def test_browser_title_snapshot_preserves_duration_and_export_authority(tmp_path):
+    from cutvoke.rendering.editor_preview import browser_titles
+    from cutvoke.rendering.preview_prepare import preview_identity
+    service = EditService()
+    project = service.create_project('live-title', width=1920, height=1080)
+    title = Clip('title', AssetReference('', ''), R.of(0), R.of(1), R.of(0), effects=[
+        dict(effectId='cutvoke.text', params=dict(content='LIVE', fontSize=120, bold=True,
+            fontFamily='Barlow Condensed', color='#ffffff', strokeWidth=0, shadow=0))])
+    project.sequence.tracks = [Track('t', 'text', [title])]
+    original = copy.deepcopy(project.to_dict())
+    base = browser_titles(project)
+    assert base.sequence.tracks[0].clips[0].timeline_end == R.of(1)
+    assert base.sequence.tracks[0].clips[0].effects[0]['params']['content'] == ''
+    from cutvoke.interfaces.httpapi import PREVIEW_RENDER_CACHE_VERSION
+    first_key = preview_identity(base, PREVIEW_RENDER_CACHE_VERSION)
+    title.effects[0]['params']['content'] = 'EDITED'
+    assert preview_identity(browser_titles(project), PREVIEW_RENDER_CACHE_VERSION) == first_key
+    title.effects[0]['params']['content'] = 'LIVE'
+    renderer = RenderService(gpu_effects=False)
+    api = HttpApi(service, renderer, media_dir=str(tmp_path/'cache'))
+    try:
+        api._require_current_preview(base, first_key)
+        renderer.extract_still(base, .5, str(tmp_path/'base.png'))
+        renderer.extract_still(project, .5, str(tmp_path/'export.png'))
+        assert np.asarray(Image.open(tmp_path/'base.png').convert('RGB')).max() == 0
+        assert np.count_nonzero(np.asarray(Image.open(tmp_path/'export.png').convert('RGB')) > 200) > 500
+        assert project.to_dict() == original
+        result = renderer.render_preview_window(base, str(tmp_path/'base.mp4'), 0, .5)
+        assert (result['width'], result['height']) == (1280, 720)
     finally:
         api.close()

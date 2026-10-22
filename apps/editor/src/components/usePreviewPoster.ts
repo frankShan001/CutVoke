@@ -9,6 +9,7 @@ export function usePreviewPoster(opts: {
   time: number;
   enabled: boolean;
   draft?: boolean;
+  aspect?: number;
   onSettled?: (identity: string) => void;
 }) {
   const latest = useRef(opts);
@@ -29,8 +30,12 @@ export function usePreviewPoster(opts: {
       if (key !== completed) {
         completed = key;
         try {
+          const maximum = target.draft ? 960 : 1920;
+          const aspect = target.aspect || 16 / 9;
+          const width = Math.max(2, Math.round((aspect >= 1 ? maximum : maximum * aspect) / 2) * 2);
+          const height = Math.max(2, Math.round((aspect >= 1 ? maximum / aspect : maximum) / 2) * 2);
           const result = await fetchPreviewFrame({ projectId: target.projectId!, t: target.time,
-            width: target.draft ? 320 : 640, height: target.draft ? 180 : 360, signal: controller.signal });
+            width, height, signal: controller.signal });
           if (result.kind === "frame") {
             if (!alive) { URL.revokeObjectURL(result.url); return; }
             const previous = url;

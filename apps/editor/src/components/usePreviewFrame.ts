@@ -7,11 +7,10 @@ import type { EditorAction } from "../store/editor";
 
 export type FrameState = "loading" | "ok" | "empty" | "error";
 
-const PREVIEW_W = 640;
-const PREVIEW_H = 360;
 
 export function usePreviewFrame(opts: {
   projectId: string | null;
+  aspect?: number;
   active: boolean;
   playing: boolean;
   totalSecs: number;
@@ -74,7 +73,8 @@ export function usePreviewFrame(opts: {
     setFrameState((previous) => previous === "error" || previous === "empty"
       ? "loading" : previous);
     setFrameError(null);
-    void fetchPreviewFrame({ projectId: pid, t, width: PREVIEW_W, height: PREVIEW_H,
+    void fetchPreviewFrame({ projectId: pid, t, width: Math.max(2, Math.round((!opts.aspect || opts.aspect >= 1 ? 1280 : 1280 * opts.aspect) / 2) * 2),
+      height: Math.max(2, Math.round((!opts.aspect ? 720 : opts.aspect >= 1 ? 1280 / opts.aspect : 1280) / 2) * 2),
       signal: controller.signal }).then((res) => {
       const next = queuedTargetRef.current;
       const outdated = !!next && (next.pid !== pid || Math.abs(next.t - t) > 0.001);

@@ -93,7 +93,7 @@ export function useProjectPreparation() {
     }).catch(() => { /* The window preparation below reports actionable errors. */ });
     void (async () => {
       let current = await previewRequest<PreviewJob>(
-        `projects/${encodeURIComponent(projectId)}/preview-jobs`, undefined, { revision: project.revision });
+        `projects/${encodeURIComponent(projectId)}/preview-jobs`, undefined, { revision: project.revision, editorTitles: true });
       jobId = current.jobId;
       while (true) {
         if (signal.aborted) return;

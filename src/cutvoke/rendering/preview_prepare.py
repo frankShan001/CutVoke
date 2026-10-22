@@ -304,7 +304,7 @@ class PreviewPreparation:
             # export retains the original resolution and rendering graph.
             video_options = ["-c:v", "copy"] if (width, height) == (info.get('width'), info.get('height')) else [
                 "-vf", f"scale={width}:{height}", "-c:v", "libx264",
-                "-preset", "veryfast", "-crf", "25", "-pix_fmt", "yuv420p"]
+                "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p"]
             self._command([
                 self.render.ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
                 "-copyts", "-f", "concat", "-safe", "1", "-i", "parts.txt",

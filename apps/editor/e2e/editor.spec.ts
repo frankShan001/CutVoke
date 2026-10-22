@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, statSync, unlinkSync } from "node:fs";
+import { mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { getBuiltinPackVersion } from "./resourcePackHelpers";
@@ -20,6 +20,7 @@ type Project = {
       };
       timelineStart: { num: string; den: string };
       timelineEnd: { num: string; den: string };
+      volume?: { num: string; den: string };
       speed?: { num: string; den: string };
       speedCurve?: {
         sourceDuration: { num: string; den: string };
@@ -36,6 +37,7 @@ type Project = {
     captions: Array<{
       id: string;
       text: string;
+      align?: string;
       animInStyle?: "fade" | "scale" | "typewriter" | "none";
       wordHighlightColor?: string;
       words?: Array<{ text: string; start: { num: string; den: string }; end: { num: string; den: string } }>;
@@ -116,7 +118,7 @@ async function createProject(
   const response = await request.post("/api/v1/projects", {
     data: { projectId: id, name, width, height, fps: 15 },
   });
-  expect(response.status()).toBe(201);
+  expect(response.status(), await response.text()).toBe(201);
   await apply(request, id, "track.add", { trackId: "v1", kind: "video" });
   for (const [index, sourcePath] of sources.entries()) {
     await apply(request, id, "clip.insert", {
@@ -471,7 +473,7 @@ test("caption SRT import errors can be dismissed and retried", async ({ page, re
 });
 
 test("caption save and SRT export failures preserve state and can be retried", async ({ page, request }) => {
-  const { name } = await createProject(request);
+  const { id, name } = await createProject(request);
   let failCaptionSave = true;
   let failSrtExport = true;
   await page.route("**/api/v1/projects/*/commands", async (route) => {
@@ -501,13 +503,12 @@ test("caption save and SRT export failures preserve state and can be retried", a
   await page.getByRole("button", { name: "选择字幕 caption-one" }).click();
   const captionText = page.getByRole("textbox", { name: "编辑字幕文字" });
   await captionText.fill("恢复后字幕");
-  await page.getByRole("button", { name: "保存字幕文字与时间" }).click();
   const saveError = page.getByRole("alertdialog", { name: "操作未完成" });
   await expect(saveError).toContainText("模拟字幕保存服务暂时不可用");
   await saveError.getByRole("button", { name: "关闭" }).click();
   await expect(captionText).toHaveValue("恢复后字幕");
-  await expect(originalCaption).toBeVisible();
-  await page.getByRole("button", { name: "保存字幕文字与时间" }).click();
+  await page.locator(".player__edit-status").getByRole("button", { name: "重试", exact: true }).click();
+  await expect.poll(async () => (await readProject(request, id)).sequence.captions[0].text).toBe("恢复后字幕");
   await expect(page.locator(".cv-caption-row__text").filter({ hasText: "恢复后字幕" })).toBeVisible();
 
   await page.getByRole("button", { name: "导出SRT" }).click();
@@ -546,7 +547,7 @@ test("caption style and batch save failures can be retried", async ({ page, requ
   const styleError = page.getByRole("alertdialog", { name: "操作未完成" });
   await expect(styleError).toContainText("模拟字幕样式服务暂时不可用");
   await styleError.getByRole("button", { name: "关闭" }).click();
-  await page.getByRole("button", { name: "右对齐" }).click();
+  await page.locator(".player__edit-status").getByRole("button", { name: "重试", exact: true }).click();
   await expect.poll(async () => (await readProject(request, id)).sequence.captions
     .find((caption) => caption.id === "caption-one")?.align).toBe("right");
 
@@ -1544,9 +1545,7 @@ test("food-and-drink sticker category previews and inserts a saved overlay", asy
   await openProject(page, name);
   await page.locator(".clip-block").filter({ hasText: "草莓奶油蛋糕" }).click();
   const stickerTransform = page.getByRole("region", { name: "贴纸变换" });
-  await expect(stickerTransform.getByRole("button", { name: "应用贴纸变换" })).toBeEnabled();
   await stickerTransform.getByRole("spinbutton", { name: "缩放倍率" }).fill("0.42");
-  await stickerTransform.getByRole("button", { name: "应用贴纸变换" }).click();
   await expect.poll(async () => {
     const updated = (await readProject(request, id)).sequence.tracks
       .find((track) => track.role === "sticker")?.clips
@@ -2168,7 +2167,7 @@ test("uncached ruler dragging updates a composed frame before pointer release", 
   await page.mouse.move(geometry.x + geometry.scale * 2.25, geometry.y);
   await page.mouse.down();
   try {
-    await expect.poll(() => frames.filter(f => f.size === "320x180" && f.time > 4).length).toBeGreaterThan(0);
+    await expect.poll(() => frames.filter(f => f.size === "960x540" && f.time > 4).length).toBeGreaterThan(0);
     await expect(page.locator(".player__poster")).toBeVisible();
     const before = frames.length;
     await page.mouse.move(geometry.x + geometry.scale * 2.75, geometry.y);
@@ -2176,7 +2175,7 @@ test("uncached ruler dragging updates a composed frame before pointer release", 
     await expect.poll(() => frames.at(-1)?.time || 0).toBeGreaterThan(5);
     await expect.poll(async () => Number(await page.locator(".player__poster").getAttribute("data-preview-time"))).toBeGreaterThan(5);
   } finally { await page.mouse.up(); }
-  await expect.poll(() => frames.filter(f => f.size === "640x360" && f.time > 5).length).toBeGreaterThan(0);
+  await expect.poll(() => frames.filter(f => f.size === "1920x1080" && f.time > 5).length).toBeGreaterThan(0);
 });
 
 test("effect numeric edits request a fresh composed preview after commit", async ({ page, request }) => {
@@ -2648,7 +2647,6 @@ test("video transforms stay in sync between canvas and inspector while audio hid
   await expect(keyframeEditor).toBeInViewport();
   await expect(keyframeEditor).toContainText("不透明度关键帧");
   await page.getByRole("spinbutton", { name: "水平位置 X" }).fill("12");
-  await page.getByRole("button", { name: "应用变换" }).click();
   const readTransform = async () => {
     const clip = (await readProject(request, id)).sequence.tracks[0].clips.find((item) => item.id === "color-0")!;
     return clip.effects.find((item) => item.effectId === "cutvoke.transform")?.params as {
@@ -2718,8 +2716,7 @@ test("video transforms stay in sync between canvas and inspector while audio hid
   await expect(page.getByRole("spinbutton", { name: "旋转" })).toHaveValue("0");
   await page.locator(".clip-block").filter({ hasText: "green.mp4" }).click();
   const transform = page.getByRole("region", { name: "画面变换" });
-  await expect(transform.getByRole("button", { name: "记录水平位置 X关键帧" })).toBeDisabled();
-  await expect(transform.getByRole("status")).toContainText("播放头位于片段外");
+  await expect(transform.getByRole("button", { name: "记录水平位置 X关键帧" })).toBeEnabled();
 });
 
 test("video audio controls explain unavailable source audio and allow probe retry", async ({ page, request }) => {
@@ -2761,6 +2758,79 @@ test("video audio controls explain unavailable source audio and allow probe retr
   expect(probeAttempts).toBeGreaterThanOrEqual(2);
 });
 
+test("title edits preview immediately, save without applying, and share canvas selection", async ({ page, request }) => {
+  const { id, name } = await createProject(request, 1920, 1080);
+  await apply(request, id, "clip.insert", {
+    trackId: "live-title-track", createTrackKind: "text", clipId: "live-title",
+    text: { content: "追逐夜色", fontSize: 100, bold: true, x: .4, y: .7, animIn: 0, animOut: 0 },
+    timelineStart: { num: 4, den: 1 }, timelineEnd: { num: 8, den: 1 },
+  });
+  await openProject(page, name);
+  const block = page.locator('[data-clip-id="live-title"]');
+  const bounds = await block.boundingBox();
+  expect(bounds).not.toBeNull();
+  // Current playhead is 0: clicking 1.5 seconds into a later title must seek there.
+  await block.click({ position: { x: bounds!.width * .375, y: bounds!.height / 2 } });
+  await expect.poll(async () => Number((await page.locator(".player-controls__time").innerText()).match(/0:(\d+\.\d+)/)![1])).toBeGreaterThan(5.35);
+  await expect.poll(async () => Number((await page.locator(".player-controls__time").innerText()).match(/0:(\d+\.\d+)/)![1])).toBeLessThan(5.65);
+  const layer = page.locator('[data-title-clip-id="live-title"]');
+  await expect(layer).toHaveAttribute("data-selected", "true");
+  await expect(layer.locator(".player__title-selection")).toHaveCount(1);
+  await page.locator('[data-clip-id="color-1"]').click();
+  await expect(layer).toHaveAttribute("data-selected", "false");
+  await layer.click();
+  await expect(block).toHaveAttribute("aria-pressed", "true");
+  const title = page.getByRole("region", { name: "文字标题属性" });
+  const input = title.getByRole("textbox", { name: "编辑标题内容" });
+  let titleSaves = 0, held = false;
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route(`**/projects/${id}/commands`, async route => {
+    const command = route.request().postDataJSON();
+    if (command.type === "effect.update" && command.payload.effectId === "cutvoke.text") {
+      titleSaves++;
+      if (!held) { held = true; await gate; }
+    }
+    await route.continue();
+  });
+  await input.fill("追逐梦想");
+  await expect(layer.locator("text").last()).toHaveText("追逐梦想");
+  await expect.poll(() => titleSaves).toBe(1);
+  expect((await readProject(request, id)).sequence.tracks.flatMap(t => t.clips)
+    .find(c => c.id === "live-title")!.effects[0].params!.content).toBe("追逐夜色");
+  // A newer draft must survive the older command response.
+  await input.fill("追逐梦想，一路向前");
+  await expect(layer.locator("text").last()).toHaveText("追逐梦想，一路向前");
+  release();
+  await expect.poll(async () => (await readProject(request, id)).sequence.tracks.flatMap(t => t.clips)
+    .find(c => c.id === "live-title")!.effects[0].params!.content).toBe("追逐梦想，一路向前");
+  await expect(input).toHaveValue("追逐梦想，一路向前");
+  await expect(title.getByText("已自动保存", { exact: true })).toBeVisible();
+  const source = await page.locator("video").first().getAttribute("data-preview-source");
+  await input.fill("马上撤销");
+  await expect(layer.locator("text").last()).toHaveText("马上撤销");
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(input).toHaveValue("追逐梦想，一路向前");
+  await expect(layer.locator("text").last()).toHaveText("追逐梦想，一路向前");
+  expect(await page.locator("video").first().getAttribute("data-preview-source")).toBe(source);
+  const savesBeforeComposition = titleSaves;
+  await input.dispatchEvent("compositionstart");
+  await input.fill("中文输入中的文字");
+  await expect(layer.locator("text").last()).toHaveText("中文输入中的文字");
+  await page.waitForTimeout(450);
+  expect(titleSaves).toBe(savesBeforeComposition);
+  await input.dispatchEvent("compositionend");
+  await expect.poll(async () => (await readProject(request, id)).sequence.tracks.flatMap(t => t.clips)
+    .find(c => c.id === "live-title")!.effects[0].params!.content).toBe("中文输入中的文字");
+  await input.fill("追逐梦想，一路向前");
+  await expect(title.getByText("已自动保存", { exact: true })).toBeVisible();
+  await page.screenshot({ path: "../../.artifacts/title-live-edit.png" });
+  await page.locator(".player__canvas-frame").screenshot({ path: "../../.artifacts/title-live-canvas.png" });
+  const frame = await request.get(`${apiPath(id)}/preview-frame?t=5.466667&size=1920x1080`);
+  expect(frame.ok()).toBeTruthy();
+  writeFileSync("../../.artifacts/title-render-reference.png", await frame.body());
+});
+
 test("title inspector explains why invalid title settings cannot be applied", async ({ page, request }) => {
   const { id, name } = await createProject(request);
   await apply(request, id, "clip.insert", {
@@ -2774,8 +2844,8 @@ test("title inspector explains why invalid title settings cannot be applied", as
   const title = page.getByRole("region", { name: "文字标题属性" });
   await expect(title).toBeVisible();
   await title.getByRole("spinbutton", { name: "标题字号" }).fill("7");
-  await expect(title.getByRole("button", { name: "应用标题属性" })).toBeDisabled();
-  await expect(title.getByRole("status")).toContainText("字号需在 8–200 范围内");
+  await expect(title.getByRole("button", { name: "立即保存" })).toBeDisabled();
+  await expect(title.getByRole("status").filter({ hasText: "字号需在 8–200 范围内" })).toBeVisible();
 });
 
 test("keyframed transform bounds follow the playhead and canvas drag records both position axes in one undo", async ({ page, request }) => {
@@ -4093,4 +4163,235 @@ test("product-promo atlas previews, exposes provenance, and inserts a sticker", 
   await page.reload();
   await openProject(page, name);
   expect(await stickerClip()).toBeTruthy();
+});
+
+
+test("live media pixels move before release and a mixed transform gesture undoes once", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await apply(request, id, "effect.add", { clipId: "color-0", effectId: "cutvoke.transform", params: { scale: .5 } });
+  await openProject(page, name);
+  const canvas = page.locator("canvas.player__interactive-scene");
+  await expect(canvas).toHaveAttribute("data-ready", "true");
+  const pixel = (x: number) => canvas.evaluate((element, x) => [...(element as HTMLCanvasElement).getContext("2d")!.getImageData(x, 45, 1, 1).data], x);
+  await expect.poll(async () => (await pixel(45))[0]).toBeGreaterThan(230);
+  const bounds = await canvas.boundingBox();
+  await canvas.click({ position: { x: bounds!.width / 2, y: bounds!.height / 2 } });
+  await expect(page.locator('[data-clip-id="color-0"]')).toHaveAttribute("aria-pressed", "true");
+  const before = await readProject(request, id);
+  const center = page.getByRole("button", { name: "拖动画面位置" });
+  const handle = await center.boundingBox();
+  await page.mouse.move(handle!.x + handle!.width / 2, handle!.y + handle!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(handle!.x + handle!.width / 2 + bounds!.width / 4, handle!.y + handle!.height / 2, { steps: 5 });
+  await expect.poll(async () => (await pixel(45))[0]).toBeLessThan(5);
+  await expect.poll(async () => (await pixel(130))[0]).toBeGreaterThan(230);
+  await page.waitForTimeout(650);
+  expect((await readProject(request, id)).revision).toBe(before.revision);
+  await page.mouse.up();
+  await expect.poll(async () => (await readProject(request, id)).sequence.tracks[0].clips[0].effects.find(e => e.effectId === "cutvoke.transform")?.params?.position).toEqual({ x: 40, y: 0 });
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect.poll(async () => (await pixel(45))[0]).toBeGreaterThan(230);
+  await expect.poll(async () => (await pixel(130))[0]).toBeLessThan(5);
+  // A numeric edit previews and saves without an Apply button, with one undo.
+  await page.getByRole("spinbutton", { name: "水平位置 X", exact: true }).fill("20");
+  await expect.poll(async () => (await pixel(45))[0]).toBeLessThan(5);
+  await expect.poll(async () => (await readProject(request, id)).sequence.tracks[0].clips[0].effects.find(e => e.effectId === "cutvoke.transform")?.params?.position).toEqual({ x: 20, y: 0 });
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect.poll(async () => (await pixel(45))[0]).toBeGreaterThan(230);
+  await page.screenshot({ path: "../../.artifacts/live-media-interaction.png" });
+});
+
+test("live effect pixels update during held input and caption IME autosaves without losing a newer draft", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await apply(request, id, "effect.add", { clipId: "color-0", effectId: "cutvoke.color" });
+  await openProject(page, name);
+  await page.locator('[data-clip-id="color-0"]').click();
+  const canvas = page.locator("canvas.player__interactive-scene");
+  await expect(canvas).toHaveAttribute("data-ready", "true");
+  const green = () => canvas.evaluate(e => (e as HTMLCanvasElement).getContext("2d")!.getImageData(80, 45, 1, 1).data[1]);
+  const brightness = page.locator('details[data-effect-id="cutvoke.color"]').getByRole("spinbutton", { name: "亮度" });
+  await expect(brightness).toBeVisible();
+  const original = await readProject(request, id);
+  await brightness.dispatchEvent("pointerdown");
+  await brightness.fill("0.5");
+  await expect.poll(green).toBeGreaterThan(80);
+  await page.waitForTimeout(550);
+  expect((await readProject(request, id)).revision).toBe(original.revision);
+  await brightness.dispatchEvent("pointerup");
+  await expect.poll(async () => (await readProject(request, id)).sequence.tracks[0].clips[0].effects.find(e => e.effectId === "cutvoke.color")?.params?.brightness).toBe(.5);
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect.poll(green).toBeLessThan(10);
+  await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "字幕" }).click();
+  await page.getByRole("button", { name: "选择字幕 caption-one", exact: true }).click();
+  const input = page.getByRole("textbox", { name: "编辑字幕文字" });
+  const caption = page.locator(".caption-overlay__text");
+  const baseline = (await readProject(request, id)).revision;
+  await input.dispatchEvent("compositionstart");
+  await input.fill("正在输入中文");
+  await expect(caption).toHaveText("正在输入中文");
+  await page.waitForTimeout(600);
+  expect((await readProject(request, id)).revision).toBe(baseline);
+  await input.dispatchEvent("compositionend");
+  await expect.poll(async () => (await readProject(request, id)).sequence.captions[0].text).toBe("正在输入中文");
+  let release!: () => void;
+  const gate = new Promise<void>(r => { release = r; });
+  let count = 0;
+  await page.route(`**/projects/${id}/commands`, async route => {
+    if (route.request().postDataJSON().type === "caption.update" && ++count === 1) await gate;
+    await route.continue();
+  });
+  await input.fill("第一版");
+  await expect.poll(() => count).toBe(1);
+  await input.fill("第二版实时字幕");
+  release();
+  await expect(input).toHaveValue("第二版实时字幕");
+  await expect.poll(async () => (await readProject(request, id)).sequence.captions[0].text).toBe("第二版实时字幕");
+  await page.getByRole("spinbutton", { name: "字幕X坐标" }).fill("0.3");
+  await expect(page.locator(".caption-overlay__box")).toHaveCSS("left", /px$/);
+  await expect.poll(async () => Number(await page.getByRole("spinbutton", { name: "字幕X坐标" }).inputValue())).toBe(.3);
+  await page.screenshot({ path: "../../.artifacts/live-effect-caption.png" });
+});
+
+test("live audio gain is audible before release and saves as one undo without restarting playback", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await openProject(page, name);
+  await page.locator('[data-clip-id="color-0"]').click();
+  const meter = page.getByTestId("live-audio-meter");
+  await expect(meter).toHaveAttribute("data-ready", "true");
+  await page.getByRole("button", { name: "播放", exact: true }).click();
+  await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeGreaterThan(.02);
+  const volume = page.getByRole("slider", { name: "片段音量" });
+  const box = await volume.boundingBox();
+  const baseline = (await readProject(request, id)).revision;
+  const source = await page.locator("video.player__video").getAttribute("src");
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box!.x + 1, box!.y + box!.height / 2, { steps: 3 });
+  await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeLessThan(.001);
+  await page.waitForTimeout(600);
+  expect((await readProject(request, id)).revision).toBe(baseline);
+  await page.mouse.up();
+  await expect.poll(async () => seconds((await readProject(request, id)).sequence.tracks[0].clips[0].volume!)).toBe(0);
+  expect(await page.locator("video.player__video").getAttribute("src")).toBe(source);
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeGreaterThan(.02);
+  await page.getByRole("button", { name: "暂停", exact: true }).click();
+});
+
+
+test("live audio preserves independent pitch and refreshes prepared audio when pitch settings change", async ({ page, request }) => {
+  test.setTimeout(90_000);
+  const { id, name } = await createProject(request);
+  await apply(request, id, "clip.audio", { clipId: "color-0", pitch: 2 });
+  await apply(request, id, "clip.speed", { clipId: "color-0", speed: 2, preservePitch: true });
+  await page.addInitScript(() => {
+    const analysers: AnalyserNode[] = [];
+    (window as typeof window & { testAudioAnalysers: AnalyserNode[] }).testAudioAnalysers = analysers;
+    const create = AudioContext.prototype.createAnalyser;
+    AudioContext.prototype.createAnalyser = function () {
+      const analyser = create.call(this);
+      analysers.push(analyser);
+      return analyser;
+    };
+  });
+  let preparedRequests = 0;
+  page.on("request", outgoing => {
+    if (outgoing.url().endsWith(`/projects/${id}/interactive-audio`) && outgoing.postDataJSON().clipId === "color-0") preparedRequests++;
+  });
+  await openProject(page, name);
+  const meter = page.getByTestId("live-audio-meter");
+  const frequency = () => page.evaluate(() => {
+    const analyser = (window as typeof window & { testAudioAnalysers: AnalyserNode[] }).testAudioAnalysers.at(-1);
+    if (!analyser) return 0;
+    analyser.fftSize = 8192;
+    const values = new Float32Array(analyser.frequencyBinCount);
+    analyser.getFloatFrequencyData(values);
+    let strongest = -Infinity, bin = 0;
+    for (let index = 1; index < values.length; index++) if (values[index] > strongest) {
+      strongest = values[index]; bin = index;
+    }
+    return bin * analyser.context.sampleRate / analyser.fftSize;
+  });
+  const listen = async (expected: number) => {
+    await expect(meter).toHaveAttribute("data-ready", "true");
+    await page.getByRole("button", { name: "播放", exact: true }).click();
+    await expect.poll(frequency).toBeGreaterThan(expected - 35);
+    await expect.poll(frequency).toBeLessThan(expected + 35);
+    await expect.poll(() => page.locator("video.player__video").evaluate(video => (video as HTMLVideoElement).muted)).toBe(true);
+    await page.getByRole("button", { name: "暂停", exact: true }).click();
+    await page.locator(".timeline-ruler").press("Home");
+  };
+  await expect.poll(() => preparedRequests).toBeGreaterThan(0);
+  await listen(880); // 440 Hz source: 2x independent pitch, speed pitch preserved.
+  let previousRequests = preparedRequests;
+  await apply(request, id, "clip.speed", { clipId: "color-0", speed: 2, preservePitch: false });
+  await expect.poll(() => preparedRequests, { timeout: 15_000 }).toBeGreaterThan(previousRequests);
+  await listen(1760); // Turning off pitch preservation adds the 2x speed shift.
+  previousRequests = preparedRequests;
+  await apply(request, id, "clip.audio", { clipId: "color-0", pitch: 1.5 });
+  await expect.poll(() => preparedRequests, { timeout: 15_000 }).toBeGreaterThan(previousRequests);
+  await listen(1320);
+});
+
+test("live audio sidechain projects keep the complete server mix audible", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await apply(request, id, "clip.insert", {
+    trackId: "duck-music", createTrackKind: "audio", clipId: "duck-target", sourcePath: bgmFixture,
+    timelineStart: { num: 0, den: 1 }, timelineEnd: { num: 5, den: 1 },
+  });
+  await apply(request, id, "effect.add", {
+    clipId: "duck-target", effectId: "cutvoke.fx.sidechainDuck", params: { keyClipIds: ["color-0"] },
+  });
+  let isolatedAudioRequests = 0;
+  page.on("request", outgoing => {
+    if (outgoing.url().endsWith(`/projects/${id}/interactive-audio`)) isolatedAudioRequests++;
+  });
+  await openProject(page, name);
+  const meter = page.getByTestId("live-audio-meter"), video = page.locator("video.player__video");
+  await expect(meter).toHaveAttribute("data-ready", "false");
+  await page.getByRole("button", { name: "播放", exact: true }).click();
+  await expect.poll(() => video.evaluate(element => (element as HTMLVideoElement).currentTime), { timeout: 30_000 }).toBeGreaterThan(.25);
+  await expect.poll(() => video.evaluate(element => (element as HTMLVideoElement).muted)).toBe(false);
+  await expect(meter).toHaveAttribute("data-ready", "false");
+  expect(isolatedAudioRequests).toBe(0);
+  await page.getByRole("button", { name: "暂停", exact: true }).click();
+});
+
+test("live image and sticker picking respects transparent pixels and composition matches export renderer", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await apply(request, id, "track.add", { trackId: "image", kind: "video" });
+  await apply(request, id, "clip.insert", { trackId: "image", clipId: "live-image", sourcePath: imageFixture,
+    timelineStart: { num: 0, den: 1 }, timelineEnd: { num: 5, den: 1 } });
+  await apply(request, id, "effect.add", { clipId: "live-image", effectId: "cutvoke.transform", params: { position: { x: -20, y: 0 }, scale: .5 } });
+  await apply(request, id, "track.add", { trackId: "sticker", kind: "video", role: "sticker" });
+  await apply(request, id, "clip.insert", { trackId: "sticker", clipId: "live-sticker", role: "sticker", sourcePath: imageFixture,
+    timelineStart: { num: 0, den: 1 }, timelineEnd: { num: 5, den: 1 } });
+  await apply(request, id, "effect.update", { clipId: "live-sticker", effectId: "cutvoke.transform", params: { position: { x: 100, y: 30 }, scale: .4 } });
+  await openProject(page, name);
+  const canvas = page.locator("canvas.player__interactive-scene");
+  await expect(canvas).toHaveAttribute("data-ready", "true");
+  const box = await canvas.boundingBox();
+  await canvas.click({ position: { x: box!.width * 60 / 160, y: box!.height / 2 } });
+  await expect(page.locator('[data-clip-id="live-image"]')).toHaveAttribute("aria-pressed", "true");
+  await canvas.click({ position: { x: box!.width * 118 / 160, y: box!.height * 48 / 90 } });
+  await expect(page.locator('[data-clip-id="live-sticker"]')).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("spinbutton", { name: "水平位置 X（像素）" }).fill("110");
+  await expect.poll(async () => (await readProject(request, id)).sequence.tracks.flatMap(t => t.clips).find(c => c.id === "live-sticker")!.effects[0].params?.position).toEqual({ x: 110, y: 30 });
+  const reference = await request.post(`${apiPath(id)}/interactive-frame`, { data: { t: 0, maximum: 1920 } });
+  expect(reference.ok(), await reference.text()).toBeTruthy();
+  const encoded = (await reference.body()).toString("base64");
+  const difference = await canvas.evaluate(async (element, encoded) => {
+    const native = element as HTMLCanvasElement;
+    const image = new Image(); image.src = `data:image/png;base64,${encoded}`; await image.decode();
+    const reference = document.createElement("canvas"); reference.width = native.width; reference.height = native.height;
+    const context = reference.getContext("2d")!; context.drawImage(image, 0, 0, native.width, native.height);
+    const a = native.getContext("2d")!.getImageData(0, 0, native.width, native.height).data;
+    const b = context.getImageData(0, 0, native.width, native.height).data;
+    let delta = 0; for (let i = 0; i < a.length; i++) if (i % 4 < 3) delta += Math.abs(a[i] - b[i]);
+    return delta / (native.width * native.height * 3);
+  }, encoded);
+  expect(difference).toBeLessThan(8);
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect(page.getByRole("spinbutton", { name: "水平位置 X（像素）" })).toHaveValue("100");
+  await page.screenshot({ path: "../../.artifacts/live-image-sticker-composition.png" });
 });

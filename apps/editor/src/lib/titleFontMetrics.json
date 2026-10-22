@@ -1,0 +1,32 @@
+{
+  "Noto Sans SC": {
+    "height": 1.448,
+    "ascent": 1.16,
+    "descent": 0.288
+  },
+  "Noto Serif SC": {
+    "height": 1.437,
+    "ascent": 1.151,
+    "descent": 0.286
+  },
+  "Barlow Condensed": {
+    "height": 1.349,
+    "ascent": 1.075,
+    "descent": 0.274
+  },
+  "Space Grotesk": {
+    "height": 1.442,
+    "ascent": 1.15,
+    "descent": 0.292
+  },
+  "Cormorant Garamond": {
+    "height": 1.38,
+    "ascent": 1.097,
+    "descent": 0.283
+  },
+  "IBM Plex Mono": {
+    "height": 1.3,
+    "ascent": 1.025,
+    "descent": 0.275
+  }
+}

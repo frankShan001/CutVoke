@@ -1,8 +1,9 @@
+import { registerPendingEdit } from "../../lib/pendingEdits";
 import { FONT_FAMILIES } from "../../lib/fontFamilies";
 import { tr, useLocale } from "../../i18n";
 /** 独立标题片段的内容、排版与动画参数，写回同一 cutvoke.text 效果。 */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Clip } from "../../types/api";
 import { useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
@@ -63,12 +64,32 @@ function fromParams(params: Record<string, unknown>): Form {
 
 export function TitleEditor({ clip }: { clip: Clip }) {
   useLocale();
-  const { state, dispatch } = useEditor();
+  const { state, dispatch } = useEditor({ subscribeToClock: false });
   const params = clip.effects?.find((effect) => effect.effectId === "cutvoke.text")?.params || {};
   const paramsKey = JSON.stringify(params);
-  const [form, setForm] = useState<Form>(() => fromParams(params));
+  const [form, setForm] = useState<Form>(() => fromParams(state.titleDrafts[clip.id]?.params || params));
   const [saving, setSaving] = useState(false);
-  useEffect(() => setForm(fromParams(params)), [clip.id, paramsKey]);
+  const formKey = JSON.stringify(form);
+  const baseline = useRef(JSON.stringify(fromParams(params)));
+  const incoming = useRef(paramsKey);
+  const dirty = formKey !== baseline.current;
+  const [composing, setComposing] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
+  const inFlight = useRef<Promise<boolean> | null>(null);
+  const mounted = useRef(true);
+  useEffect(() => {
+    if (incoming.current === paramsKey) return;
+    if (dirty || inFlight.current) return;
+    incoming.current = paramsKey;
+    baseline.current = JSON.stringify(fromParams(params));
+    setForm(fromParams(params));
+  }, [paramsKey, dirty]);
+
+  useEffect(() => {
+    if (!state.editLock) return;
+    baseline.current = JSON.stringify(fromParams(params));
+    setForm(fromParams(params));
+  }, [state.editLock]);
 
   const set = (key: keyof Form, value: string | boolean) => setForm((old) => ({ ...old, [key]: value }));
   const number = (key: keyof Form) => Number(form[key]);
@@ -141,13 +162,7 @@ export function TitleEditor({ clip }: { clip: Clip }) {
           : "";
   const validationMessageId = validationMessage ? `title-validation-${clip.id}` : undefined;
 
-  const apply = async () => {
-    if (!valid || saving) return;
-    setSaving(true);
-    try {
-      await updateEffect(dispatch, getLatestState() || state, {
-        clipId: clip.id, effectId: "cutvoke.text",
-        params: {
+  const convertedParams: Record<string, unknown> = {
           content: form.content.trim(), fontSize: number("fontSize"),
           fontFamily: form.fontFamily, lineSpacing: number("lineSpacing"), color: form.color,
           strokeColor: form.strokeColor, strokeWidth: number("strokeWidth"),
@@ -163,16 +178,77 @@ export function TitleEditor({ clip }: { clip: Clip }) {
           animLoopStyle: form.animLoopStyle, animLoopMs: number("animLoopMs"),
           animStrength: number("animStrength"), animStaggerMs: number("animStaggerMs"),
           animGlow: number("animGlow"), animColor: form.animColor,
-        },
-      });
-    } finally {
-      setSaving(false);
-    }
+        };
+  const sourceForm = JSON.parse(baseline.current) as Form;
+  const draftParams = Object.fromEntries((Object.keys(form) as (keyof Form)[])
+    .filter(key => form[key] !== sourceForm[key])
+    .map(key => [key, convertedParams[key]]));
+  // Keep incomplete content visible locally. Invalid numeric fields retain the
+  // last valid geometry rather than leaking NaN into the canvas.
+  const lastValid = useRef<Record<string, unknown>>(params);
+  if (valid) lastValid.current = { ...params, ...draftParams };
+  const previewParams = { ...lastValid.current, content: form.content };
+  const projectId = state.currentId!;
+  const latest = useRef({ dirty, valid, composing, formKey, draftParams, state });
+  latest.current = { dirty, valid, composing, formKey, draftParams, state };
+  const save = async (): Promise<boolean> => {
+    if (inFlight.current) return inFlight.current;
+    const task = async () => {
+      while (latest.current.dirty) {
+        const current = latest.current;
+        if (Object.keys(current.draftParams).length === 0) {
+          baseline.current = current.formKey;
+          latest.current.dirty = false;
+          dispatch({ type: "TITLE_DRAFT_SET", clipId: clip.id, projectId, version: current.formKey, params: null });
+          return true;
+        }
+        if (!current.valid || current.composing) return false;
+        const context = getLatestState() || current.state;
+        if (context.currentId !== projectId || context.editLock ||
+            context.project?.sequence.tracks.some(track => track.locked && track.clips.some(item => item.id === clip.id))) return false;
+        if (mounted.current) { setSaving(true); setSaveFailed(false); }
+        const result = await updateEffect(dispatch, context, {
+          clipId: clip.id, effectId: "cutvoke.text", params: current.draftParams,
+        });
+        if (!result.ok) {
+          if (mounted.current) setSaveFailed(true);
+          return false;
+        }
+        baseline.current = current.formKey;
+        if (latest.current.formKey === current.formKey) {
+          latest.current.dirty = false;
+          dispatch({ type: "TITLE_DRAFT_SET", clipId: clip.id, projectId, version: current.formKey, params: null });
+        }
+      }
+      return true;
+    };
+    inFlight.current = task().finally(() => {
+      inFlight.current = null;
+      if (mounted.current) setSaving(false);
+    });
+    return inFlight.current;
   };
+  const saveRef = useRef(save);
+  saveRef.current = save;
+  useEffect(() => {
+    if ((dirty || inFlight.current) && !state.editLock) dispatch({ type: "TITLE_DRAFT_SET", clipId: clip.id, projectId, version: formKey, params: previewParams });
+  }, [formKey, dirty, state.editLock]);
+  useEffect(() => setSaveFailed(false), [formKey]);
+  useEffect(() => {
+    if (!dirty || !valid || composing || saveFailed) return;
+    const timer = window.setTimeout(() => void saveRef.current(), 350);
+    return () => window.clearTimeout(timer);
+  }, [formKey, dirty, valid, composing, saveFailed]);
+  useEffect(() => {
+    mounted.current = true;
+    const remove = registerPendingEdit(`${projectId}:${clip.id}`, () => saveRef.current());
+    return () => { mounted.current = false; void saveRef.current().then(ok => { if (ok) remove(); }); };
+  }, [projectId, clip.id]);
 
   return (
-    <section className="title-editor" data-effect-id="cutvoke.text" aria-label={tr("文字标题属性")}>
+    <section className="title-editor" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) void saveRef.current(); }} data-effect-id="cutvoke.text" aria-label={tr("文字标题属性")}>
       <strong>{tr("文字标题")}</strong>
+      <span className="cv-hint" role="status">{saveFailed ? tr("保存失败，请重试") : saving ? tr("保存中…") : dirty ? tr("正在编辑…") : tr("已自动保存")}</span>
       <div className="title-editor__actions" aria-label={tr("动效组合")}>
         <button type="button" className="cv-btn cv-btn--sm cv-btn--secondary" onClick={() => setForm(old => ({ ...old,
           bold: true, animInStyle: "impact", animIn: "350", animOutStyle: "zoom-through", animOut: "300",
@@ -185,7 +261,8 @@ export function TitleEditor({ clip }: { clip: Clip }) {
           animLoopStyle: "none", animGlow: "6", animStrength: "1", animColor: "#b8ff39" }))}>{tr("翻转飞出")}</button>
       </div>
       <label>{tr("内容")}<textarea className="cv-input" rows={3} maxLength={180} aria-label={tr("编辑标题内容")}
-          value={form.content} onChange={(event) => set("content", event.target.value)} />
+          value={form.content} onChange={(event) => set("content", event.target.value)}
+          onCompositionStart={() => setComposing(true)} onCompositionEnd={() => setComposing(false)} />
       </label>
       <label>{tr("字体")}<select className="cv-input" aria-label={tr("标题字体")} value={form.fontFamily}
           onChange={(event) => set("fontFamily", event.target.value)}>
@@ -272,12 +349,12 @@ export function TitleEditor({ clip }: { clip: Clip }) {
           onClick={() => setForm({ ...defaults, content: form.content })}>{tr("复位样式")}</button>
         <button type="button" className="cv-btn cv-btn--sm" disabled={!valid || saving}
           aria-describedby={validationMessageId}
-          onClick={() => void apply()}>{saving ? tr("保存中…") : tr("应用标题属性")}</button>
+          onClick={() => void saveRef.current()}>{saving ? tr("保存中…") : saveFailed ? tr("重试保存") : tr("立即保存")}</button>
       </div>
       {anchorOutsideSafeArea ? (
         <p className="cv-hint" role="status">{tr("标题锚点超出四边 10% 参考安全区；预览栏可打开“安全区”检查完整文字。")}</p>
       ) : null}
-      <p className="cv-hint">{tr("数值写入工程后可撤销；画面以连续预览和导出结果为准。")}</p>
+      <p className="cv-hint">{tr("修改实时显示，停止输入后自动保存，可撤销。")}</p>
     </section>
   );
 }

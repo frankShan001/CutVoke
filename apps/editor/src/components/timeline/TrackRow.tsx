@@ -190,6 +190,15 @@ export const TrackRow = memo(function TrackRow({
       }
     } else {
       dispatch({ type: "SELECTION_SET", selection: { trackId: track.id, clipId: clip.id } });
+      const start = rationalToSecs(clip.timelineStart);
+      const end = rationalToSecs(clip.timelineEnd);
+      const playhead = (getLatestState() || state).playhead;
+      if (playhead < start || playhead >= end) {
+        const offset = "clientX" in e && e.detail !== 0
+          ? Math.max(0, e.clientX - e.currentTarget.getBoundingClientRect().left) / pxPerSec : 0;
+        const time = Math.min(Math.max(start, end - frameDuration), start + offset);
+        dispatch({ type: "PLAYHEAD_SET", t: Math.max(start, Math.floor((time + 1e-7) / frameDuration) * frameDuration) });
+      }
     }
   };
 

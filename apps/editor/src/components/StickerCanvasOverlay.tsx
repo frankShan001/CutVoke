@@ -4,8 +4,7 @@ import { tr, useLocale } from "../i18n";
  */
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { useEditor } from "../store/editor";
-import { getLatestState } from "../store/actions";
-import { updateEffect } from "../store/effectEdit";
+import { stageEffect, releaseEdit, useInteractionProject } from "../store/interactive";
 import { rationalToSecs } from "../lib/rational";
 
 type Geometry = { x: number; y: number; size: number; rotation: number };
@@ -19,17 +18,17 @@ type Gesture = {
 
 const TRANSFORM = "cutvoke.transform";
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
-const roundAngle = (value: number) => Math.round(value * 10) / 10;
+const roundAngle = (value: number) => Math.round((((value + 540) % 360) - 180) * 10) / 10;
 
 export function StickerCanvasOverlay() {
   useLocale();
   const { state, dispatch } = useEditor();
-  const project = state.project;
+  const project = useInteractionProject(state.project);
   const track = project?.sequence.tracks.find((item) => item.id === state.selection?.trackId);
   const clip = track?.clips.find((item) => item.id === state.selection?.clipId);
   const transform = clip?.effects?.find((effect) => effect.effectId === TRANSFORM && effect.enabled !== false);
   const params = transform?.params || {};
-  const paramsKey = JSON.stringify(params);
+  const paramsKey = JSON.stringify(state.project?.sequence.tracks.flatMap(t => t.clips).find(c => c.id === clip?.id)?.effects?.find(e => e.effectId === TRANSFORM)?.params || {});
   const width = project?.sequence.width || 1920;
   const height = project?.sequence.height || 1080;
   const unit = Math.min(width, height);
@@ -51,7 +50,7 @@ export function StickerCanvasOverlay() {
     setPreview(null);
   }, [clip?.id, paramsKey, state.editLock]);
 
-  if (!project || !clip || !transform || track?.role !== "sticker" ||
+  if (!project || !clip || track?.role !== "sticker" ||
       track.visible === false || clip.hidden ||
       rationalToSecs(clip.timelineStart) > state.playhead ||
       rationalToSecs(clip.timelineEnd) <= state.playhead) return null;
@@ -72,20 +71,9 @@ export function StickerCanvasOverlay() {
     const local = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
     return { x: local.x, y: local.y };
   };
-  const commit = async (next: Geometry) => {
+  const commit = (next: Geometry, held = false) => {
     if (!editable) return;
-    const positionX = Math.round(next.x);
-    const positionY = Math.round(next.y);
-    const scale = Math.round((next.size / unit) * 10000) / 10000;
-    const rotation = roundAngle(next.rotation);
-    if (positionX === Math.round(saved.x) && positionY === Math.round(saved.y) &&
-        scale === Math.round(Number(params.scale ?? 0.28) * 10000) / 10000 &&
-        rotation === roundAngle(Number(params.rotation ?? 0))) return;
-    await updateEffect(dispatch, getLatestState() || state, {
-      clipId: clip.id,
-      effectId: TRANSFORM,
-      params: { position: { x: positionX, y: positionY }, scale, rotation },
-    });
+    stageEffect(dispatch, clip, TRANSFORM, { position: { x: Math.round(next.x), y: Math.round(next.y) }, scale: Math.round(next.size / unit * 10000) / 10000, rotation: roundAngle(next.rotation) }, held);
   };
   const begin = (event: PointerEvent<SVGElement>, mode: Gesture["mode"]) => {
     if (!editable) return;
@@ -124,7 +112,7 @@ export function StickerCanvasOverlay() {
         ? Math.round(rawRotation / 15) * 15 : roundAngle(rawRotation) };
     }
     previewRef.current = next;
-    setPreview(next);
+    setPreview(next); commit(next, true);
   };
   const finish = (event: PointerEvent<SVGSVGElement>) => {
     const gesture = gestureRef.current;
@@ -136,9 +124,10 @@ export function StickerCanvasOverlay() {
     const next = previewRef.current;
     previewRef.current = null;
     setPreview(null);
-    if (next) void commit(next);
+    if (next) releaseEdit(`${clip.id}:${TRANSFORM}`);
   };
   const cancel = () => {
+    releaseEdit(`${clip.id}:${TRANSFORM}`);
     gestureRef.current = null;
     previewRef.current = null;
     setPreview(null);
@@ -173,7 +162,7 @@ export function StickerCanvasOverlay() {
       aria-label={tr("画布贴纸控件")} onPointerMove={move} onPointerUp={finish}
       onPointerCancel={cancel}>
       <rect className="player__sticker-outline" x={current.x} y={current.y}
-        width={current.size} height={current.size}
+        width={current.size} height={current.size} transform={`rotate(${current.rotation} ${centerX} ${centerY})`}
         pointerEvents={editable ? "all" : "none"}
         tabIndex={editable ? 0 : -1} role="button" aria-label={tr("移动贴纸")}
         onPointerDown={(event) => begin(event, "move")}

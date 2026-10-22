@@ -41,6 +41,7 @@ export function RightPanel() {
   }, [tab]);
   useEffect(() => {
     const openTransition = () => switchTab("transition");
+    const selectVisual = () => switchTab("inspect");
     const editEffect = (event: Event) => {
       const target = (event as CustomEvent<{ effectId: string; category: string }>).detail;
       if (!target || typeof target.effectId !== "string" || typeof target.category !== "string") return;
@@ -50,10 +51,12 @@ export function RightPanel() {
     const locateIssue = (event: Event) => {
       if ((event as LocatePreflightIssueEvent).detail.resourceKind !== "media") switchTab("inspect");
     };
+    window.addEventListener("cutvoke:select-visual", selectVisual);
     window.addEventListener("cutvoke:open-transition", openTransition);
     window.addEventListener("cutvoke:edit-effect", editEffect);
     window.addEventListener(LOCATE_PREFLIGHT_ISSUE, locateIssue);
     return () => {
+      window.removeEventListener("cutvoke:select-visual", selectVisual);
       window.removeEventListener("cutvoke:open-transition", openTransition);
       window.removeEventListener("cutvoke:edit-effect", editEffect);
       window.removeEventListener(LOCATE_PREFLIGHT_ISSUE, locateIssue);

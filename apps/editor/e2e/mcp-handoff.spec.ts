@@ -100,7 +100,6 @@ test("stdio MCP imports stay visible when a human edits, previews and exports", 
   await page.getByRole("button", { name: "选择字幕 agent-caption", exact: true }).click();
   const field = page.getByRole("textbox", { name: "编辑字幕文字" });
   await field.fill("人工接手修改");
-  await page.getByRole("button", { name: "保存字幕文字与时间" }).click();
   await expect.poll(async () => (await (await request.get(`/api/v1/projects/${id}`)).json())
     .sequence.captions[0].text).toBe("人工接手修改");
   const edited = (await (await request.get(`/api/v1/projects/${id}`)).json()).sequence;

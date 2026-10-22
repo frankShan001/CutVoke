@@ -1,11 +1,11 @@
 import { msg, tr, useLocale } from "../../i18n";
 /** 片段音频小节（J01 拆分自 Inspector.tsx）：音量 / 淡入 / 淡出。
  *  拖动/输入只改本地态，提交时才发命令，避免命令风暴刷爆 revision。 */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Volume2 } from "lucide-react";
 import { useEditor } from "../../store/editor";
 import { getLatestState, runCommand } from "../../store/actions";
-import { setClipAudio } from "../../store/clipEdit";
+import { stageEdit, releaseEdit } from "../../store/interactive";
 import { probeMedia } from "../../lib/mediaApi";
 import { rationalToSecs } from "../../lib/rational";
 import type { Clip, Rational } from "../../types/api";
@@ -19,6 +19,7 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
 }) {
   useLocale();
   const { state, dispatch } = useEditor();
+  const holding = useRef(false);
   const [volPct, setVolPct] = useState(100);
   const [fadeInSec, setFadeInSec] = useState(0);
   const [fadeOutSec, setFadeOutSec] = useState(0);
@@ -71,13 +72,8 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
     if (Math.abs(volume - valueOrDefault(clip.volume, 1)) < 0.0001 &&
         Math.abs(fadeIn - valueOrDefault(clip.fadeIn, 0)) < 0.0001 &&
         Math.abs(fadeOut - valueOrDefault(clip.fadeOut, 0)) < 0.0001) return;
-    const ctx = getLatestState() || state;
-    void setClipAudio(dispatch, ctx, {
-      clipId: clip.id,
-      volume,
-      fadeIn,
-      fadeOut,
-    });
+    if (![volume, fadeIn, fadeOut].every(Number.isFinite) || volume < 0 || fadeIn < 0 || fadeOut < 0) return;
+    stageEdit(dispatch, `audio:${clip.id}`, [{ type: "clip.audio", payload: { clipId: clip.id, volume, fadeIn, fadeOut } }], holding.current);
   };
 
   const detachAudio = async () => {
@@ -125,13 +121,15 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
           aria-describedby={audioStatusId}
           className="cv-range"
           disabled={audioControlsDisabled}
-          onChange={(e) => setVolPct(Number(e.target.value))}
-          onPointerUp={() => commitAudio()}
+          onPointerDown={() => { holding.current = true; }}
+          onChange={(e) => { const n = Number(e.target.value); setVolPct(n); commitAudio(n / 100); }}
+          onPointerUp={() => { holding.current = false; releaseEdit(`audio:${clip.id}`); }}
+          onPointerCancel={() => { holding.current = false; releaseEdit(`audio:${clip.id}`); }}
           onKeyUp={(e) => {
             if (
               ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(e.key)
             ) {
-              commitAudio();
+              releaseEdit(`audio:${clip.id}`);
             }
           }}
         />
@@ -162,8 +160,9 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
             const raw = e.target.value;
             const v = parseFloat(raw);
             setFadeInSec(raw === "" || isNaN(v) ? 0 : v);
+            if (raw !== "") commitAudio(undefined, v);
           }}
-          onBlur={() => commitAudio(undefined, fadeInSec, undefined)}
+          onBlur={() => releaseEdit(`audio:${clip.id}`)}
         />
         <span className="inspector__unit">{tr("秒")}</span>
           <span className="inspector__key">{tr("淡出")}</span>
@@ -181,8 +180,9 @@ export function AudioSection({ clip, canDetach = false, detachedAudioClipId }: {
             const raw = e.target.value;
             const v = parseFloat(raw);
             setFadeOutSec(raw === "" || isNaN(v) ? 0 : v);
+            if (raw !== "") commitAudio(undefined, undefined, v);
           }}
-          onBlur={() => commitAudio(undefined, undefined, fadeOutSec)}
+          onBlur={() => releaseEdit(`audio:${clip.id}`)}
         />
         <span className="inspector__unit">{tr("秒")}</span>
       </div>

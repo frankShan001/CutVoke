@@ -7,10 +7,10 @@ import { tr, useLocale } from "../i18n";
  *  animIn/animOut 字段表达。预设为「淡入/淡出时长组合」，是数据驱动的本地常量
  *  （非硬编码效果 ID 数组），并随后端动画能力可扩展。 */
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Sparkles } from "lucide-react";
-import { useEditor, showError } from "../store/editor";
-import { updateCaption } from "../store/clipEdit";
+import { useEditor } from "../store/editor";
+import { stageCaption, releaseEdit } from "../store/interactive";
 import type { Caption } from "../types/api";
 
 /** 入出场动画预设：入场 animIn / 出场 animOut（毫秒）。0=无。 */
@@ -48,10 +48,10 @@ function presetIdOf(animIn: number, animOut: number, animInStyle: string): strin
 
 export function CaptionAnimationSection({ caption, disabled = false }: { caption: Caption; disabled?: boolean }) {
   const locale = useLocale();
-  const { state, dispatch } = useEditor();
+  const { dispatch } = useEditor();
   const currentIn = caption.animIn ?? 0;
   const currentOut = caption.animOut ?? 0;
-  const [busy, setBusy] = useState(false);
+  const busy = false;
 
   const currentInStyle = caption.animInStyle ?? "fade";
   const currentLoopStyle = caption.animLoopStyle ?? "none";
@@ -61,30 +61,12 @@ export function CaptionAnimationSection({ caption, disabled = false }: { caption
     [currentIn, currentOut, currentInStyle, locale],
   );
 
-  const apply = async (preset: AnimPreset) => {
-    if (busy) return;
-    setBusy(true);
-    const res = await updateCaption(dispatch, state, {
-      captionId: caption.id,
-      animIn: preset.animIn,
-      animOut: preset.animOut,
-      animInStyle: preset.animInStyle,
-    });
-    if (!res.ok) {
-      showError(dispatch, res.error ?? new Error(tr("字幕动画更新失败")));
-    }
-    setBusy(false);
+  const apply = (preset: AnimPreset) => {
+    stageCaption(dispatch, caption.id, { animIn: preset.animIn, animOut: preset.animOut, animInStyle: preset.animInStyle });
+    releaseEdit(`caption:${caption.id}`);
   };
-
-  const applyLoop = async (animLoopStyle: NonNullable<Caption["animLoopStyle"]>,
-                           animLoopMs = currentLoopMs) => {
-    if (busy) return;
-    setBusy(true);
-    const res = await updateCaption(dispatch, state, {
-      captionId: caption.id, animLoopStyle, animLoopMs,
-    });
-    if (!res.ok) showError(dispatch, res.error ?? new Error(tr("字幕循环动画更新失败")));
-    setBusy(false);
+  const applyLoop = (animLoopStyle: NonNullable<Caption["animLoopStyle"]>, animLoopMs = currentLoopMs) => {
+    stageCaption(dispatch, caption.id, { animLoopStyle, animLoopMs }); releaseEdit(`caption:${caption.id}`);
   };
 
   return (

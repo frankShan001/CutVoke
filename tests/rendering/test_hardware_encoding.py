@@ -54,9 +54,12 @@ def test_lost_gpu_retries_same_color_managed_range_on_cpu(tmp_path):
     assert result['duration'] == pytest.approx(1, abs=.05)
     assert result['color_primaries'] == 'bt709'
     assert len(commands) == 2
+    graphs = [command[command.index('-filter_complex') + 1] for command in commands]
+    assert graphs[0] == graphs[1]  # GPU failure must retain the same bounded graph.
+    first = round((.5 - renderer._render_ctx.compile_origin) * 24)
     for command in commands:
         assert '-ss' not in command and '-t' not in command
-        assert 'trim=start_frame=12:end_frame=36' in command[command.index('-filter_complex') + 1]
+        assert f'trim=start_frame={first}:end_frame={first+24}' in command[command.index('-filter_complex') + 1]
     assert not list(tmp_path.glob('*.tmp.mp4'))
     subprocess.run(['ffmpeg', '-v', 'error', '-i', str(output), '-f', 'null', '-'],
                    check=True, capture_output=True)

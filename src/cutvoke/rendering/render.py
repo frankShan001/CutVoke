@@ -50,6 +50,7 @@ from cutvoke.rendering.effects import (EffectRegistry, default_registry, find_tr
 from cutvoke.rendering.caption_render import (prepare_caption_render, CaptionFontError,
                              _caption_font_instance)
 from cutvoke.rendering import gpu_effects
+from cutvoke.rendering.render_memo import RenderMemo, file_identity
 
 # subprocess resolves these names through PATH. Deployments that need a fixed
 # binary can pass an explicit path to RenderService.
@@ -75,6 +76,7 @@ QUALITY_PRESETS: dict[str, dict[str, str]] = {
     "high": {"crf": "18", "preset": "slow"},
     "medium": {"crf": "23", "preset": "medium"},
     "low": {"crf": "28", "preset": "veryfast"},
+    "preview": {"crf": "20", "preset": "veryfast"},
 }
 
 # Windows CreateProcess caps the full command line at 32,767 UTF-16 code
@@ -1219,8 +1221,8 @@ def _prepare_static_masks(method):
         preview_scale=1.0
         if method.__name__=='render_preview_window':
             from cutvoke.rendering.preview_quality import snapshot
-            project,preview_scale=snapshot(project,values.get('preview_max_dimension',640))
-        elif method.__name__=='extract_frame' and values.get('size') and max(values['size']) in {320,640}:
+            project,preview_scale=snapshot(project,values.get('preview_max_dimension',1280))
+        elif method.__name__=='extract_frame' and values.get('size') and max(values['size']) in {320,640,960,1280,1920}:
             # The editor's quick poster is a display preview too. Scaling only
             # its final PNG still pays full-resolution effect cost on every seek.
             # Explicit full-size frames and still-image export retain authority.
@@ -1238,21 +1240,35 @@ def _prepare_static_masks(method):
             window = (start, start + values["output_duration"])
         previous_clocks=getattr(self._render_ctx,'clip_clocks',{})
         previous_origin=getattr(self._render_ctx,'bounded_origin',None)
+        previous_audio_sequence=getattr(self._render_ctx,'export_audio_sequence',None)
+        previous_audio_delta=getattr(self._render_ctx,'audio_origin_delta',0.)
+        previous_verified=getattr(self._render_ctx,'verified_input_paths',set())
+        self._render_ctx.export_audio_sequence=project.sequence if method.__name__=='render' else None
+        self._render_ctx.audio_origin_delta=0.
+        self._render_ctx.verified_input_paths=set()
         self._render_ctx.clip_clocks={}
         self._render_ctx.bounded_origin=None
-        if method.__name__ in {'extract_frame','render_preview_window'}:
+        if (method.__name__ in {'extract_frame','render_preview_window'} or
+                (method.__name__=='render' and window is not None and window[1]-window[0] <= 8)):
             from cutvoke.rendering.preview_window import bounded
             project,clocks,origin=bounded(project,window,self)
             self._render_ctx.clip_clocks=clocks
             self._render_ctx.bounded_origin=origin
+            self._render_ctx.verified_input_paths={os.path.normcase(os.path.abspath(c.asset_ref.source_path))
+                for t in project.sequence.tracks for c in t.clips if c.id in clocks}
         previous = getattr(self._render_ctx, 'gpu', None)
         previous_pixel=getattr(self._render_ctx,'pixel_gpu',None)
         previous_clips=getattr(self._render_ctx,'gpu_clips',{})
         needed=self._preparation_clip_ids(project.sequence,window)
+        self._render_ctx.verified_input_paths.difference_update(
+            os.path.normcase(os.path.abspath(c.asset_ref.source_path))
+            for t in project.sequence.tracks if t.visible and t.kind=='video'
+            for c in t.clips if c.id in needed and c.id not in self._render_ctx.clip_clocks)
         use_gpu=any(self._gpu_candidate(effect) for track in project.sequence.tracks if track.visible
                     for clip in track.clips if clip.id in needed and not clip.hidden
                     for effect in self._enabled_fx(clip))
-        if getattr(self._render_ctx,'bounded_origin',None) is not None:
+        if (method.__name__ in {'extract_frame','render_preview_window'} and
+                getattr(self._render_ctx,'bounded_origin',None) is not None):
             layers=sum(1 for t in project.sequence.tracks if t.kind=='video' and t.visible
                        and any(c.id in needed and not c.hidden for c in t.clips))
             use_gpu=use_gpu or layers>1 or any(
@@ -1290,6 +1306,9 @@ def _prepare_static_masks(method):
             self._render_ctx.preview_scale=previous_scale
             self._render_ctx.clip_clocks=previous_clocks
             self._render_ctx.bounded_origin=previous_origin
+            self._render_ctx.export_audio_sequence=previous_audio_sequence
+            self._render_ctx.audio_origin_delta=previous_audio_delta
+            self._render_ctx.verified_input_paths=previous_verified
     return prepared
 
 
@@ -1309,8 +1328,13 @@ class RenderService:
         self._render_ctx = threading.local()
         self.gpu_effects = gpu_effects
         self._gpu_failed = False
-        self._probe_cache = {}
-        self._clock_cache = {}
+        self._probe_cache = RenderMemo()
+        self._clock_cache = RenderMemo()
+        # Compressed RGBA stills only; no live textures or temporary paths survive
+        # their request. Metadata and pixels have separate bounded LRU budgets.
+        self._graphic_cache = RenderMemo(max_entries=128, max_bytes=64 * 1024**2)
+        self._procedural_cache = RenderMemo(max_entries=32, max_bytes=64 * 1024**2)
+        self._procedural_item_bytes = 16 * 1024**2
 
     def _gpu_arguments(self, graph):
         gpu = getattr(self._render_ctx, 'gpu', None)
@@ -1357,8 +1381,7 @@ class RenderService:
             return self._render_ctx.gpu if cache[key] else None
         info=self.probe_media(clip.asset_ref.source_path)
         if info.get('avg_frame_rate')==str(fps) and info.get('r_frame_rate')==str(fps):
-            from cutvoke.rendering.vfx_matte import regular_timestamps
-            cache[key]=regular_timestamps(self.ffprobe,clip.asset_ref.source_path,
+            cache[key]=self._regular_timestamps(clip.asset_ref.source_path,
                     float(clip.source_start.to_fraction()),float(clip.duration.to_fraction()),fps)
             if cache[key]:
                 return self._render_ctx.gpu
@@ -1368,13 +1391,19 @@ class RenderService:
     @contextlib.contextmanager
     def _raster_mask_sources(self, project, cancel_event=None, window=None):
         """Share vectorized ink mattes only within this immutable render request."""
-        from cutvoke.rendering.vfx_matte import regular_timestamps, supports, write_source
+        from cutvoke.rendering.vfx_matte import supports, write_source
         if (getattr(self._render_ctx,'bounded_origin',None) is not None
                 and getattr(self._render_ctx,'gpu',None) is not None):
             yield project
             return
-        snapshot = copy.deepcopy(project)
         needed = self._preparation_clip_ids(project.sequence, window)
+        if not any(e.get('effectId') == 'cutvoke.fx.mask' and supports(e.get('params', {}))
+                   for t in project.sequence.tracks if t.visible and t.kind == 'video'
+                   for c in t.clips if c.id in needed and not c.hidden
+                   for e in self._enabled_fx(c)):
+            yield project
+            return
+        snapshot = copy.deepcopy(project)
         fps = project.sequence.fps.to_fraction()
         probes, sources, clocks = {}, {}, {}
         with tempfile.TemporaryDirectory(prefix='cutvoke-ink-mattes-') as directory:
@@ -1412,7 +1441,7 @@ class RenderService:
                         if not _is_image_src(source):
                             clock = (source, float(clip.source_start.to_fraction()), duration)
                             if clock not in clocks:
-                                clocks[clock] = regular_timestamps(self.ffprobe, *clock, fps)
+                                clocks[clock] = self._regular_timestamps(*clock, fps)
                             if not clocks[clock]:
                                 continue
                         identity = json.dumps([params, width, height, str(fps), duration], sort_keys=True)
@@ -1481,6 +1510,8 @@ class RenderService:
             index,task=index_task
             clip,effect,params=task
             try:
+                if cancel_event and cancel_event.is_set():
+                    raise RenderCancelled('light layer preparation cancelled')
                 extra={}
                 if effect.get('effectId')=='cutvoke.fx.opticalField':
                     from cutvoke.rendering.vfx_optics import frame as optical_frame, VERSION as optical_version
@@ -1493,10 +1524,46 @@ class RenderService:
                     extra['prefix_duration']=max(2/float(project.sequence.fps.to_fraction()),
                         render_window[1]-float(clip.timeline_start.to_fraction())+
                         2/float(project.sequence.fps.to_fraction()))
-                params['_renderedLightPath']=cached_source(
-                    params,project.sequence.width,project.sequence.height,
-                    project.sequence.fps.to_fraction(),float(clip.duration.to_fraction()),
-                    self.ffmpeg,lambda:bool(cancel_event and cancel_event.is_set()),**extra)
+                identity=(self.ffmpeg, json.dumps(params, sort_keys=True),
+                    project.sequence.width, project.sequence.height,
+                    str(project.sequence.fps.to_fraction()), str(clip.duration),
+                    extra.get('kind','light'), extra.get('start_time',0.),
+                    extra.get('prefix_duration'))
+                generated=[]
+                def generate():
+                    path=cached_source(
+                        params,project.sequence.width,project.sequence.height,
+                        project.sequence.fps.to_fraction(),float(clip.duration.to_fraction()),
+                        self.ffmpeg,lambda:bool(cancel_event and cancel_event.is_set()),**extra)
+                    generated.append(path)
+                    if Path(path).stat().st_size > self._procedural_item_bytes:
+                        return RenderMemo.UNCACHED
+                    return Path(path).read_bytes()
+                cancelled=lambda:bool(cancel_event and cancel_event.is_set())
+                try:
+                    media=self._procedural_cache.get_or_compute(identity,generate,cancelled=cancelled)
+                except RuntimeError as exc:
+                    # A superseded producer may have shared this key with the
+                    # current seek. Retry locally unless this request is stale too.
+                    if 'cancelled' not in str(exc) or cancelled():
+                        raise
+                    media=self._procedural_cache.get_or_compute(identity,generate,cancelled=cancelled)
+                if cancel_event and cancel_event.is_set():
+                    raise RenderCancelled('light layer preparation cancelled')
+                if media is RenderMemo.UNCACHED and not generated:
+                    # Oversized results remain on disk and cannot share the
+                    # producer's temporary path with another request's lifetime.
+                    generate()
+                # Keep the producer's existing file on a miss; a cache hit gets
+                # its own request-owned file, so cancellation/cleanup stay local.
+                if generated:
+                    params['_renderedLightPath']=generated[0]
+                else:
+                    path=Path(source_directory.name)/f'reused-{index}.mkv'
+                    path.write_bytes(media)
+                    params['_renderedLightPath']=str(path)
+            except InterruptedError as exc:
+                raise RenderCancelled(str(exc)) from exc
             except RuntimeError as exc:
                 if cancel_event and cancel_event.is_set():raise RenderCancelled(str(exc)) from exc
                 raise RenderError('light layer preparation failed: '+str(exc)) from exc
@@ -1592,20 +1659,26 @@ class RenderService:
                             filter_key, params = self._fx_key_params(effect)
                             current = self._fx_one(filter_key, params, current, parts, counter, 0)
                         parts.append(f"[{current}]format=rgba[staticgraphic]")
-                        filter_args, filter_file = _filter_graph_arguments(self.ffmpeg, ';'.join(parts), directory)
-                        command = [self.ffmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
-                                   "-filter_threads", "2", "-filter_complex_threads", "2", "-threads", "2", "-i", source,
-                                   *filter_args, "-map", "[staticgraphic]", "-frames:v", "1",
-                                   "-threads", "2", "-pix_fmt", "rgba", output]
-                        try:
-                            result = subprocess.run(command, stdin=subprocess.DEVNULL,
-                                                    capture_output=True, timeout=30)
-                        finally:
-                            if filter_file:
-                                with contextlib.suppress(OSError):
-                                    os.remove(filter_file)
-                        if result.returncode:
-                            raise RenderError("static mask preparation failed: " + result.stderr.decode("utf-8", "replace")[-800:])
+                        graph = ';'.join(parts)
+                        identity = (self.ffmpeg, file_identity(source), graph)
+                        def render_graphic():
+                            filter_args, filter_file = _filter_graph_arguments(self.ffmpeg, graph, directory)
+                            command = [self.ffmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
+                                       "-filter_threads", "2", "-filter_complex_threads", "2", "-threads", "2", "-i", source,
+                                       *filter_args, "-map", "[staticgraphic]", "-frames:v", "1",
+                                       "-threads", "2", "-pix_fmt", "rgba", output]
+                            try:
+                                result = subprocess.run(command, stdin=subprocess.DEVNULL,
+                                                        capture_output=True, timeout=30)
+                            finally:
+                                if filter_file:
+                                    with contextlib.suppress(OSError):
+                                        os.remove(filter_file)
+                            if result.returncode:
+                                raise RenderError("static mask preparation failed: " + result.stderr.decode("utf-8", "replace")[-800:])
+                            return Path(output).read_bytes()
+                        pixels = self._graphic_cache.get_or_compute(identity, render_graphic)
+                        Path(output).write_bytes(pixels)
                         prepared[key] = output
                     clip.asset_ref.source_path = prepared[key]
                     clip.effects = [e for e in clip.effects if not any(e is folded for folded in effects)]
@@ -1941,7 +2014,7 @@ class RenderService:
                               start: float, duration: float,
                               render_modes: Optional[list[dict[str, Any]]] = None,
                               cancel_event: Optional[threading.Event] = None,
-                              preview_max_dimension: Optional[int] = 640
+                              preview_max_dimension: Optional[int] = 1280
                               ) -> dict[str, Any]:
         """Encode only the requested timeline interval for interactive playback.
 
@@ -1965,7 +2038,7 @@ class RenderService:
         temp_path = out_path + ".tmp.mp4"
         try:
             self._run_ffmpeg(
-                seq, graph, inputs, temp_path, "low", cancel_event, has_audio,
+                seq, graph, inputs, temp_path, "preview", cancel_event, has_audio,
                 caption_cwd=caption_cwd, output_start=start - self._render_ctx.compile_origin,
                 output_duration=actual_duration,
                 preview_source_duration=expected,
@@ -2035,7 +2108,21 @@ class RenderService:
             proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL,
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                     cwd=caption_cwd if caption_cwd else None)
-            _, err = proc.communicate()
+            try:
+                while True:
+                    if cancel_event is not None and cancel_event.is_set():
+                        raise RenderCancelled("audio preview superseded")
+                    try:
+                        _, err = proc.communicate(timeout=.05)
+                        break
+                    except subprocess.TimeoutExpired:
+                        continue
+            finally:
+                if proc.poll() is None:
+                    proc.kill()
+                    proc.communicate(timeout=10)
+                    with contextlib.suppress(OSError):
+                        os.remove(tmp_path)
         finally:
             if filter_script_path:
                 with contextlib.suppress(OSError):
@@ -2064,7 +2151,8 @@ class RenderService:
                       out_png: str, size: Optional[tuple[int, int]] = None,
                       timeout: float = 30.0,
                       include_captions: bool = True,
-                      cancel_event: Optional[threading.Event] = None) -> Optional[str]:
+                      cancel_event: Optional[threading.Event] = None,
+                      alpha: bool = False) -> Optional[str]:
         """抽取工程在 timeline_time 时刻的预览帧（PNG）。
 
         与导出同语义（A05 / 指导 4.2 第一步）：
@@ -2134,16 +2222,19 @@ class RenderService:
                 track.visible=False
         frame_time, frame_duration = self._static_frame_time(seq, timeline_time)
         graph, input_paths, _expected, has_audio, _warnings, caption_cwd = (
-            self._compile(seq, (0, 0), render_window=(frame_time,
+            self._compile(seq, (0, 0), alpha=alpha, render_window=(frame_time,
                 frame_time + 2 * frame_duration)))
         frame_offset = frame_time - self._render_ctx.compile_origin
         first_frame=round(frame_offset*float(seq.fps.to_fraction()))
         graph += f";[outv]trim=start_frame={first_frame},setpts=PTS-STARTPTS[previewbase]"
         video_label = "[previewbase]"
+        if alpha:
+            graph += ";[previewbase]format=rgba[previewalpha]"
+            video_label = "[previewalpha]"
         filter_script_path = None
         try:
             if size is not None:
-                graph = (graph + f";[previewbase]scale={size[0]}:{size[1]}:"
+                graph = (graph + f";{video_label}scale={size[0]}:{size[1]}:"
                          f"force_original_aspect_ratio=decrease[previewv]")
                 video_label = "[previewv]"
             cmd: list[str] = [self.ffmpeg, "-y", "-nostdin",
@@ -2644,6 +2735,14 @@ class RenderService:
             rate = float(seq.fps.to_fraction())
             origin = math.floor(origin * rate + 1e-7) / rate
         self._render_ctx.compile_origin = origin
+        audio_sequence=getattr(self._render_ctx,'export_audio_sequence',None)
+        audio_origin=origin
+        if audio_sequence is not None and bounded_origin is not None:
+            active_ids={c.id for _track, clips in track_clips for c in clips}
+            audio_origin=min(render_window[0], min((float(c.timeline_start.to_fraction())
+                for t in audio_sequence.tracks for c in t.clips if c.id in active_ids),
+                default=render_window[0]))
+        self._render_ctx.audio_origin_delta=origin-audio_origin
 
         parts: list[str] = []
 
@@ -2846,7 +2945,7 @@ class RenderService:
                 audio_groups.append(segs)
 
         # 视频轨：默认提取嵌入音轨
-        for t in seq.tracks:
+        for t in (audio_sequence or seq).tracks:
             if t.kind != "video" or not t.visible or t.muted:
                 continue
             segs = _collect_audio_segs([c for c in t.clips if not c.hidden])
@@ -2934,7 +3033,7 @@ class RenderService:
                         fn = _AUDIO_FX_STEPS.get(key)
                         if fn is not None:
                             audio_fx += "," + fn(params)
-                    relative_start = float(timeline_start.to_fraction()) - origin
+                    relative_start = float(timeline_start.to_fraction()) - audio_origin
                     if relative_start < 0:
                         # Run original fades/pitch/temporal audio FX before the
                         # crop, preserving a long music clip's phase/history.
@@ -2957,12 +3056,12 @@ class RenderService:
                 # 空白是静音，不能被 concat 吞掉。
                 audio_expected = max(
                     audio_expected,
-                    max(float(s[10].to_fraction()) - origin + effective_audio_dur(s)
+                    max(float(s[10].to_fraction()) - audio_origin + effective_audio_dur(s)
                         for s in segs))
 
             from cutvoke.rendering.travel_fx import build_sidechain_ducks
             has_ducking = build_sidechain_ducks(audio_group_labels, audio_labels_by_clip,
-                                               duck_requests, parts, canvas_dur)
+                                               duck_requests, parts, canvas_dur + origin - audio_origin)
             # 多条音轨 amix；单条直接透传 [outa]
             if len(substreams) == 1:
                 parts.append(f"[{substreams[0]}]anull[outa]")
@@ -2980,11 +3079,11 @@ class RenderService:
                 "audio track(s) present but no decodable audio stream found in "
                 "their source files; output is silent (no audio mixed)")
 
-        if audio_expected > video_expected + 1e-6:
+        if audio_expected - (origin-audio_origin) > video_expected + 1e-6:
             # Keep a real black picture stream while audio continues after the
             # last visual clip. A frozen last frame would imply a clip still
             # exists, and short preview windows need decodable video here.
-            tail = audio_expected - video_expected
+            tail = audio_expected - (origin-audio_origin) - video_expected
             color = "black@0.0" if alpha else "black"
             parts.append(
                 f"[outv]tpad=stop_mode=add:stop_duration={tail:.6f}:"
@@ -3007,12 +3106,12 @@ class RenderService:
             clock = "" if _setpts_clears_frame_rate(self.ffmpeg) else ",setpts=PTS-STARTPTS"
             parts.append(f"[outv]trim=end={local_end:.9f}{clock}[outv]")
             if has_audio:
-                parts.append(f"[outa]apad=whole_dur={local_end:.9f},"
-                             f"atrim=end={local_end:.9f},asetpts=PTS-STARTPTS[outa]")
+                audio_end=render_window[1]-audio_origin
+                parts.append(f"[outa]apad=whole_dur={audio_end:.9f},"
+                             f"atrim=end={audio_end:.9f},asetpts=PTS-STARTPTS[outa]")
 
         graph = ";".join(parts)
-        if getattr(self._render_ctx, 'bounded_origin', None) is not None:
-            graph = self._preview_seek_inputs(graph, input_paths, seq.fps.to_fraction())
+        graph = self._preview_seek_inputs(graph, input_paths, seq.fps.to_fraction())
         # 期望总时长取视频主轴与音频最长轨的较大者；amix duration=longest 与之对齐
         expected = max(video_expected, audio_expected)
         if render_window is not None:
@@ -3022,11 +3121,12 @@ class RenderService:
     def _preview_seek_inputs(self, graph, paths, fps):
         """Skip irrelevant decoding without changing clip/effect clocks.
 
-        Only verified CFR bounded previews use this path. Every use of an input
+        Only verified CFR sources use this path. Every use of an input
         must begin with a trim; shared audio/video reads choose the earliest
         trim. Leave one second of decoder preroll and retain the exact residual
         trim, including audio sample alignment. Unusual stream origins keep the
-        original path. Export graphs never enter here.
+        original path. Trimming precedes every effect, so decoder preroll cannot
+        skip effect history, including in exports and animated preview graphs.
         """
         import re
         if fps.denominator != 1:
@@ -3047,6 +3147,19 @@ class RenderService:
                 continue
             seek = max(0, math.floor(min(float(m[3]) for m in uses)) - 1)
             if seek <= 0:
+                continue
+            video_uses=[m for m in uses if m[1]=='v']
+            if not video_uses:
+                continue
+            first=min(float(m[3]) for m in video_uses)
+            ends=[]
+            for use in video_uses:
+                length=re.match(r':duration=([0-9.eE+\-]+)', graph[use.end():])
+                ends.append(float(use[3])+float(length[1]) if length else
+                            float(info.get('video_duration') or info.get('duration') or 0.))
+            duration=max(ends)-first
+            verified=os.path.normcase(os.path.abspath(path)) in getattr(self._render_ctx,'verified_input_paths',set())
+            if duration <= 0 or (not verified and not self._regular_timestamps(path, first, duration, fps)):
                 continue
             graph = trim.sub(lambda m: f'[{index}:{m[1]}]{m[2]}=start={float(m[3])-seek:.12f}', graph)
             seeks[os.path.abspath(path)] = seek
@@ -5000,7 +5113,21 @@ class RenderService:
     # ------------------------------------------------------------------
     # 素材探测（T04 / 导入 UX：拿到真实时长替代「默认 10 秒」）
     # ------------------------------------------------------------------
-    def probe_media(self, src: str,
+    def _regular_timestamps(self, source, start, duration, fps):
+        from cutvoke.rendering.vfx_matte import regular_timestamps
+        identity = (self.ffprobe, file_identity(source), start, duration, str(fps))
+        return self._clock_cache.get_or_compute(identity, lambda: regular_timestamps(
+            self.ffprobe, source, start, duration, fps, exact_interval=True))
+
+    def probe_media(self, src: str, timeout: float = 30.0) -> dict[str, Any]:
+        """Probe current source metadata once, sharing concurrent reads safely."""
+        if not os.path.isfile(src):
+            raise RenderError(f"media file not found: {src!r}")
+        identity = (self.ffprobe, file_identity(src))
+        return dict(self._probe_cache.get_or_compute(
+            identity, lambda: self._probe_media_uncached(src, timeout)))
+
+    def _probe_media_uncached(self, src: str,
                     timeout: float = 30.0) -> dict[str, Any]:
         """用 ffprobe 读取素材真实信息。
 
@@ -5011,11 +5138,6 @@ class RenderService:
         import os as _os
         if not _os.path.isfile(src):
             raise RenderError(f"media file not found: {src!r}")
-        stat=_os.stat(src)
-        identity=(_os.path.abspath(src),stat.st_mtime_ns,stat.st_size)
-        cached=self._probe_cache.get(identity)
-        if cached is not None:
-            return dict(cached)
         cmd = [
             self.ffprobe, "-v", "error",
             "-show_entries", "format=duration,format_name",
@@ -5079,9 +5201,6 @@ class RenderService:
             # V03：静帧/透明导出要判 alpha 是否真的在（PNG 常被判成 rgba/rgb24）
             "pix_fmt": v.get("pix_fmt") if v else None,
         }
-        if len(self._probe_cache)>=256:
-            self._probe_cache.clear()
-        self._probe_cache[identity]=dict(result)
         return result
 
     def thumbnail_media(self, src: str, out_png: str, *,
@@ -5202,7 +5321,8 @@ class RenderService:
                 graph = graph.replace("setpts=PTS-STARTPTS[boundedv]",
                     f"setpts=PTS-STARTPTS,fps={fps.numerator}/{fps.denominator}[boundedv]")
             if has_audio:
-                graph += (f";[outa]atrim=start={start:.9f}:end={end:.9f},"
+                audio_offset=getattr(self._render_ctx,'audio_origin_delta',0.)
+                graph += (f";[outa]atrim=start={start+audio_offset:.9f}:end={end+audio_offset:.9f},"
                           "asetpts=PTS-STARTPTS[boundeda]")
                 audio_label = "[boundeda]"
 
@@ -5271,7 +5391,7 @@ class RenderService:
             ]
             # V01 导出预设：给 video_bitrate_kbps 用 -b:v 目标码率，否则走 crf 画质档
             if use_nvenc:
-                cmd += ["-preset", {"high":"p6", "medium":"p4", "low":"p1"}[quality],
+                cmd += ["-preset", {"high":"p6", "medium":"p4", "low":"p1", "preview":"p1"}[quality],
                         "-tune", "hq", "-rc", "vbr", "-spatial-aq", "1"]
                 if video_bitrate_kbps:
                     cmd += ["-b:v", f"{video_bitrate_kbps}k"]

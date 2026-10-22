@@ -5,6 +5,7 @@ import math
 import json
 import subprocess
 import tempfile
+from fractions import Fraction
 from pathlib import Path
 
 import numpy as np
@@ -21,15 +22,25 @@ def regular_timestamps(ffprobe: str, source: str, start: float, duration: float,
             # counts from that keyframe and can stop before the requested start.
             (f'{start:.9f}%{start + duration + 1:.9f}' if exact_interval
              else f'{start:.9f}%+{duration + 1:.9f}'), '-show_frames',
-            '-show_entries', 'frame=best_effort_timestamp_time', '-of', 'json', source],
+            '-show_entries', 'frame=best_effort_timestamp_time:stream=time_base', '-of', 'json', source],
             check=True, capture_output=True, timeout=10)
+        data = json.loads(result.stdout)
         times = [float(frame['best_effort_timestamp_time'])
-                 for frame in json.loads(result.stdout)['frames']
+                 for frame in data['frames']
                  if 'best_effort_timestamp_time' in frame]
         selected = [t for t in times if start-1e-6 <= t <= start+duration+1/float(fps)]
+        # WebM commonly stores a 30fps clock in millisecond ticks: adjacent
+        # steps alternate 33/34ms. Verify the whole frame lattice within that
+        # quantization, rather than misclassifying it as variable frame rate.
+        streams=data.get('streams', [])
+        tick=float(Fraction(streams[0].get('time_base','0'))) if streams else 0.
+        step=1/float(fps)
+        if not math.isfinite(tick) or tick < 0 or tick >= step/4:
+            return False
+        tolerance=max(2e-6, tick+1e-6)
         return len(selected) >= 2 and all(
-            abs(b-a-1/float(fps)) < 2e-6 for a,b in zip(selected, selected[1:]))
-    except (OSError, ValueError, KeyError, subprocess.SubprocessError):
+            abs(t-selected[0]-index*step) <= tolerance for index,t in enumerate(selected))
+    except (OSError, TypeError, ValueError, ZeroDivisionError, KeyError, subprocess.SubprocessError):
         return False
 
 

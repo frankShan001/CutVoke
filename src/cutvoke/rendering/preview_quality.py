@@ -2,7 +2,7 @@
 import copy
 
 
-MAX_DIMENSION = 640
+MAX_DIMENSION = 1280
 SUPPORTED_FX={'gblur','grayscale','chromatic','rgbsplit','invert','sepia','vintage',
               'posterize','mirror','vignette','chromakey','lut3d','curves','crop',
               'trail','hsl','colorbalance','mask','glow','vibrance','colorize','lens',

@@ -82,18 +82,10 @@ def bounded(project, window, renderer):
                 fps = str(project.sequence.fps.to_fraction())
                 if info.get("avg_frame_rate") != fps or info.get("r_frame_rate") != fps:
                     return project, {}, None
-                import os
-                from cutvoke.rendering.vfx_matte import regular_timestamps
                 path=clip.asset_ref.source_path
-                stat=os.stat(path)
-                clock=(path,stat.st_size,stat.st_mtime_ns,str(clip.source_start),str(clip.duration),fps)
-                if clock not in renderer._clock_cache:
-                    if len(renderer._clock_cache)>=256:
-                        renderer._clock_cache.clear()
-                    renderer._clock_cache[clock]=regular_timestamps(renderer.ffprobe,path,
+                if not renderer._regular_timestamps(path,
                         float(clip.source_start.to_fraction()),float(clip.duration.to_fraction()),
-                        project.sequence.fps.to_fraction(), exact_interval=True)
-                if not renderer._clock_cache[clock]:
+                        project.sequence.fps.to_fraction()):
                     return project, {}, None
     fps = project.sequence.fps.to_fraction()
     origin_frame = max(0, math.floor(start * float(fps) + 1e-7) - history)

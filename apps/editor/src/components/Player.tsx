@@ -1,3 +1,6 @@
+import { InteractionStatus } from "./InteractionStatus";
+import { InteractiveScene } from "./InteractiveScene";
+import { InteractiveAudio } from "./InteractiveAudio";
 import { msg, tr, useLocale } from "../i18n";
 /** 播放器/预览面板（中区）：按需播放短时间窗 + 图片轮询降级。
     主路径：<video src=/api/v1/projects/{id}/preview-window>（含音频、空白、效果）。
@@ -9,6 +12,7 @@ import { Play, Pause, Square, SkipBack, ZoomIn, ZoomOut, ChevronLeft, ChevronRig
 import { useEditor } from "../store/editor";
 import { getLatestState, runCommand } from "../store/actions";
 import { splitClip } from "../store/clipEdit";
+import { TitleCanvasOverlay } from "./TitleCanvasOverlay";
 import { CaptionCanvasOverlay } from "./CaptionCanvasOverlay";
 import { MaskCanvasOverlay } from "./MaskCanvasOverlay";
 import { CropCanvasOverlay } from "./CropCanvasOverlay";
@@ -62,6 +66,10 @@ export function Player() {
   const { state, dispatch } = useEditor();
   const { project, currentId, playhead } = state;
   const [mode, setMode] = useState<PlayMode>("video");
+  const [nativeReady, setNativeReady] = useState(false);
+  const [nativeAudioReady, setNativeAudioReady] = useState(false);
+  const nativeAudioRef = useRef(false);
+  nativeAudioRef.current = nativeAudioReady;
   const [playing, setPlaying] = useState(false);
   const [videoTime, setVideoTime] = useState(0);
   const [zoom, setZoom] = useState<ZoomMode>(FIT);
@@ -106,9 +114,17 @@ export function Player() {
   const mediaEndSecs = useMemo(() => playbackEndSecs(tracks), [tracks, locale]);
   // 基础预览视频不包含字幕：字幕修改只更新 Canvas 叠层，不能因 revision
   // 改变而重新挂载 <video>、打断当前播放。画面/音频轨道变化才换 key 重载视频。
+  const priorPreviewKey = useRef<{ visual: string; key: string } | null>(null);
   const previewContentKey = useMemo(() => {
-    return projectPreviewKey(project);
-  }, [project, locale]);
+    if (!project) return projectPreviewKey(project);
+    const base = structuredClone(project);
+    for (const sequence of [base.sequence, ...(base.sequences || [])]) for (const track of sequence.tracks)
+      for (const clip of track.clips) { clip.volume = { num: "1", den: "1" }; clip.fadeIn = clip.fadeOut = { num: "0", den: "1" }; }
+    const visual = projectPreviewKey(base), actual = projectPreviewKey(project);
+    const key = nativeAudioReady && priorPreviewKey.current?.visual === visual ? priorPreviewKey.current.key : actual;
+    priorPreviewKey.current = { visual, key };
+    return key;
+  }, [project, locale, nativeAudioReady]);
   const previewTimelineToken = useMemo(() => contentToken(previewContentKey), [previewContentKey, locale]);
   const prepared = state.preparedPreview;
   const usePrepared = !!prepared && prepared.projectId === currentId &&
@@ -140,7 +156,7 @@ export function Player() {
   const hasRenderable = hasVideoMedia || hasAudioMedia;
   const videoUrl =
     usePrepared ? prepared.url : !state.opening && currentId && state.revision && hasRenderable
-      ? `/api/v1/projects/${encodeURIComponent(currentId)}/preview-window?index=${windowIndex}&timeline=${previewTimelineToken}&restore=${sourceRestoreRevision}`
+      ? `/api/v1/projects/${encodeURIComponent(currentId)}/preview-window?editorTitles=1&index=${windowIndex}&timeline=${previewTimelineToken}&restore=${sourceRestoreRevision}`
       : "";
   const previewIdentity = `${currentId}:${previewTimelineToken}:${sourceRestoreRevision}`;
   const cacheScope = `${currentId}:${previewContentKey}:${sourceRestoreRevision}`;
@@ -156,7 +172,7 @@ export function Player() {
     const timer = window.setTimeout(() => setLoadingNotice(noticeToken), 200);
     return () => window.clearTimeout(timer);
   }, [preparing, buffering, noticeToken]);
-  const showLoadingNotice = (preparing || buffering) && loadingNotice === noticeToken;
+  const showLoadingNotice = !nativeReady && (preparing || buffering) && loadingNotice === noticeToken;
   const { canvasRef: handoffCanvasRef, bindVideo, confirmFrame, holding } = useVideoHandoff({
     videoRef, identity: previewIdentity,
     source: videoUrl, active: mode === "video", playing,
@@ -171,6 +187,7 @@ export function Player() {
   const windowBoundsRef = useRef({ start: windowStart, end: windowEnd });
   windowBoundsRef.current = { start: windowStart, end: windowEnd };
   const bindPreviewVideo = useCallback((video: HTMLVideoElement | null) => {
+    if (video) video.muted = nativeAudioRef.current;
     if (video && video.readyState >= 1) {
       const { start, end } = windowBoundsRef.current;
       const target = Math.min(end, Math.max(start, decodePlayheadRef.current));
@@ -179,6 +196,12 @@ export function Player() {
     }
     bindVideo(video);
   }, [bindVideo]);
+  useEffect(() => { if (videoRef.current) videoRef.current.muted = nativeAudioReady; }, [nativeAudioReady]);
+  useEffect(() => {
+    const pause = () => { playingRef.current = false; setPlaying(false); videoRef.current?.pause(); };
+    window.addEventListener("cutvoke:pause-for-edit", pause);
+    return () => window.removeEventListener("cutvoke:pause-for-edit", pause);
+  }, []);
   const previewTime = mode === "video" && playing && videoReady ? videoTime : playhead;
   const hasVideoCoverage = hasVideoCoverageAt(tracks, previewTime);
   const selectedClip = state.selection?.clipId ? findClipById(state, state.selection.clipId) : null;
@@ -192,6 +215,7 @@ export function Player() {
     previewTime < rationalSeconds(selectedClip.timelineEnd);
   const poster = usePreviewPoster({
     projectId: currentId, identity: videoUrl, scope: previewIdentity, time: playhead,
+    aspect: (project?.sequence.width || 1920) / (project?.sequence.height || 1080),
     enabled: (preparing || state.scrubbing) && !usePrepared && hasVideoMedia && !state.opening,
     draft: state.scrubbing,
     onSettled: setFrameGate,
@@ -233,6 +257,7 @@ export function Player() {
   }, []);
 
   const { frameUrl, frameState, frameError, scheduleFrame, reset: resetFrames } = usePreviewFrame({
+    aspect: (project?.sequence.width || 1920) / (project?.sequence.height || 1080),
     projectId: currentId,
     active: mode === "image",
     playing: playing && !state.scrubbing,
@@ -729,7 +754,7 @@ export function Player() {
   };
 
   return (
-    <section className="player">
+    <section className="player" data-native-preview={nativeReady}>
       <div className="player__stage" ref={stageRef}>
         <div className="player__canvas-frame" style={{ ...frameStyle, backgroundColor: canvasBackground }} aria-label={tr("预览画面")} aria-busy={preparing || buffering}>
           <canvas ref={handoffCanvasRef} className="player__continuity-frame" aria-hidden="true" />
@@ -807,10 +832,14 @@ export function Player() {
           {showColorBefore && colorBeforeState === "loading" ? (
             <span className="player__compare-label">{tr("正在生成调色前画面…")}</span>
           ) : null}
+          {!state.opening && currentId && !showColorBefore ? <InteractiveScene playing={playing} onReady={setNativeReady} /> : null}
+          {!state.opening && currentId ? <InteractiveAudio playing={playing} onReady={setNativeAudioReady} /> : null}
+          <InteractionStatus />
           <TransformCanvasOverlay />
           <MaskCanvasOverlay />
           <StickerCanvasOverlay />
           <CropCanvasOverlay />
+          <TitleCanvasOverlay />
           <CaptionCanvasOverlay />
           {showTitleSafeArea && currentId ? (
             <svg className="player__title-safe-area" viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
@@ -905,7 +934,7 @@ export function Player() {
         <span style={{ flex: 1 }} />
         {Math.max(canvasWidth, canvasHeight) > 640 ? (
           <span className="player__zoom-val player-controls__view"
-            title={tr("预览降低分辨率以加快响应，导出保留原画质。")}>{tr("流畅预览")}</span>
+            title={tr("高清预览，文字随编辑实时更新。")}>{tr("高清预览")}</span>
         ) : null}
         <button type="button"
           className={`player__safe-toggle ${showColorBefore ? "player__safe-toggle--on" : ""}`}

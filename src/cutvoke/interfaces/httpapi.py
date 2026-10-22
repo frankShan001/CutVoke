@@ -54,6 +54,7 @@ from cutvoke.domain.rational import Rational
 from cutvoke.rendering.effects import find_transition
 from cutvoke.rendering.render import RenderService, _TRANSITION_HANDLE_STATIC_FX
 from cutvoke.rendering.preview_prepare import PreviewPreparation
+from cutvoke.rendering.editor_preview import browser_titles
 from cutvoke.storage.preview_cache import PreviewDiskCache, PreviewRenderScheduler
 from cutvoke.storage.projectpack import (
     pack_project, unpack_project, inspect_package, ProjectPackError,
@@ -75,7 +76,7 @@ from cutvoke.storage.luts import CubeInvalid, MAX_CUBE_BYTES, validate_cube
 
 # Bump when preview rendering changes so neither disk cache nor browser ETag can
 # treat media produced by an older renderer as current for the same project data.
-PREVIEW_RENDER_CACHE_VERSION = 28
+PREVIEW_RENDER_CACHE_VERSION = 30
 # Keep first playback and local edits bounded even on dense effect timelines.
 PREVIEW_WINDOW_SECONDS = 2
 ASSET_MEDIA_TYPES = {
@@ -125,7 +126,9 @@ class HttpApi:
         self._preview_scheduler = PreviewRenderScheduler()
         # Interactive stills must never wait for an MP4/background encode.
         self._frame_scheduler = PreviewRenderScheduler()
+        self._audio_scheduler = PreviewRenderScheduler()
         self._frame_active_jobs = {}
+        self._interactive_frame_jobs = {}
         self._preview_jobs_lock = threading.Lock()
         self._preview_active_jobs: dict[str, tuple[str, threading.Event]] = {}
         self._preview_preparation = PreviewPreparation(
@@ -179,7 +182,7 @@ class HttpApi:
         """停掉异步导出队列的后台线程（复用实例 / 测试收尾时必须调用）。"""
         self._preview_preparation.close()
         with self._preview_jobs_lock:
-            for _identity, event in [*self._preview_active_jobs.values(),*self._frame_active_jobs.values()]:
+            for _identity, event in [*self._preview_active_jobs.values(),*self._frame_active_jobs.values(),*self._interactive_frame_jobs.values()]:
                 event.set()
         self._asr_jobs.close()
         self._person_cutout_jobs.close()
@@ -222,7 +225,7 @@ class HttpApi:
             tmp_path = out_path + "." + uuid.uuid4().hex + ".building.mp4"
             try:
                 result = self.render.render(
-                    preview_project, tmp_path, quality="low", overwrite=True)
+                    preview_project, tmp_path, quality="preview", overwrite=True)
                 if not os.path.isfile(tmp_path):
                     raise RuntimeError("preview renderer returned without an output file")
                 out_path = self.preview_cache.publish(name, tmp_path, {"duration": result.get("duration")})
@@ -445,7 +448,10 @@ class HttpApi:
         active_text_tracks = [track for track in seq.tracks
                               if track.kind == "text" and track.visible and
                               any(not clip.hidden and clip.timeline_start < stop and
-                                  clip.timeline_end > start for clip in track.clips)]
+                                  clip.timeline_end > start and
+                                  any(effect.get("effectId") == "cutvoke.text" and
+                                      effect.get("params", {}).get("content")
+                                      for effect in clip.effects) for clip in track.clips)]
         local = False
         if (len(active_video_tracks) == 1 and not active_audio_tracks and
                 not active_text_tracks and not seq.multicam):
@@ -659,7 +665,7 @@ class HttpApi:
             try:
                 if local and (preview_width,preview_height)==(seq.width,seq.height):
                     options = {"cancel_event": preview_cancel} if isinstance(self.render, RenderService) else {}
-                    self.render.render(preview_project, temp_path, quality="low", overwrite=True, **options)
+                    self.render.render(preview_project, temp_path, quality="preview", overwrite=True, **options)
                 else:
                     options = {"cancel_event": preview_cancel} if isinstance(self.render, RenderService) else {}
                     self.render.render_preview_window(
@@ -688,8 +694,31 @@ class HttpApi:
         from cutvoke.rendering.preview_prepare import preview_identity
         from cutvoke.rendering.render import RenderCancelled
         current = self.service.get_project(str(project.project_id))
+        if getattr(project, "_browser_titles", False):
+            current = browser_titles(current)
         if preview_identity(current, PREVIEW_RENDER_CACHE_VERSION) != visual_identity:
             raise RenderCancelled("preview superseded by a newer edit")
+
+    def _interactive_request_cancel(self, project_id: str, body: dict) -> threading.Event:
+        cancel = threading.Event()
+        client, serial = body.get("client"), body.get("serial")
+        if client is not None:
+            if not isinstance(client, str) or not re.fullmatch(r"[a-zA-Z0-9:_-]{1,128}", client) or not isinstance(serial, int):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, "invalid interactive request identity")
+            key = (project_id, client)
+            with self._preview_jobs_lock:
+                previous = self._interactive_frame_jobs.get(key)
+                if previous and serial <= previous[0]:
+                    from cutvoke.rendering.render import RenderCancelled
+                    raise RenderCancelled("interactive preview superseded")
+                if previous:
+                    previous[1].set()
+                self._interactive_frame_jobs.pop(key, None)
+                self._interactive_frame_jobs[key] = (serial, cancel)
+                while len(self._interactive_frame_jobs) > 512:
+                    oldest = next(iter(self._interactive_frame_jobs))
+                    self._interactive_frame_jobs.pop(oldest)[1].set()
+        return cancel
 
     def _preview_frame_file(self, project, at: float, size,
                             *, visual_identity: Optional[str] = None) -> Optional[str]:
@@ -1118,7 +1147,8 @@ class HttpApi:
                 raise EditError(ErrorCode.REVISION_CONFLICT,
                                 "工程已更新，请重新加载", retryable=True)
             try:
-                return 202, self._preview_preparation.submit(project)
+                return 202, self._preview_preparation.submit(
+                    browser_titles(project) if body.get("editorTitles") else project)
             except Exception as error:
                 return 422, {"error": {"code": "PREVIEW_FAILED", "message": str(error)}}
 
@@ -1403,6 +1433,113 @@ class HttpApi:
                 })
             return 200, {"stickers": items, "count": len(items),
                          "qualifiedCount": sum(item["qualified"] for item in items)}
+
+        if (method == "POST" and len(parts) == 5 and parts[:3] == ["api", "v1", "projects"]
+                and parts[4] == "interactive-audio"):
+            project = self.service.get_project(parts[3])
+            edits = body.get("commands", [])
+            allowed = {"effect.update", "effect.add", "effect.bypass", "clip.audio"}
+            if (not isinstance(edits, list) or len(edits) > 32 or
+                    any(not isinstance(e, dict) or e.get("type") not in allowed for e in edits)):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, "invalid audio preview commands")
+            if edits:
+                self.service.assert_editable(project.project_id)
+                project = self.service.preview_command(Command(type="edit.batch", payload={"commands": edits},
+                    project_id=project.project_id, expected_revision=project.revision), include_project=True)["project"]
+            project = copy.deepcopy(project)
+            clip = next((c for t in project.sequence.tracks for c in t.clips if c.id == body.get("clipId")), None)
+            if clip is None:
+                raise EditError(ErrorCode.INVALID_ARGUMENT, "unknown audio clip")
+            from cutvoke.domain.model import Track
+            clip.timeline_end = clip.duration
+            clip.timeline_start = Rational.of(0)
+            clip.volume = Rational.of(1)
+            clip.fade_in = clip.fade_out = Rational.of(0)
+            project.sequence.tracks = [Track("interactive-audio", "audio", [clip])]
+            # Audio processing must not generate a full-size dummy video canvas.
+            project.sequence.width = project.sequence.height = 2
+            project.sequence.fps = Rational.of(1)
+            cancel = self._interactive_request_cancel(project.project_id, body)
+            project.sequence.captions = []
+            from cutvoke.rendering.preview_prepare import preview_identity
+            name = "proxy_" + preview_identity(project, PREVIEW_RENDER_CACHE_VERSION) + ".mp4"
+            cached = self.preview_cache.get(name, {}, lambda p: Path(p).stat().st_size > 0)
+            if not cached:
+                with self._audio_scheduler.slot(cancel, priority=-20):
+                    temporary = str(self.preview_cache.path(name)) + "." + uuid.uuid4().hex + ".m4a"
+                    try:
+                        self.render.render_audio_only(project, temporary, overwrite=True, cancel_event=cancel)
+                        cached = self.preview_cache.publish(name, temporary, {})
+                    finally:
+                        with contextlib.suppress(OSError):
+                            os.remove(temporary)
+            with self.preview_cache.pin(cached), open(cached, "rb") as audio:
+                return 200, {"__audio__": audio.read()}
+
+        if (method == "POST" and len(parts) == 5 and parts[:3] == ["api", "v1", "projects"]
+                and parts[4] == "interactive-frame"):
+            project = self.service.get_project(parts[3])
+            edits = body.get("commands", [])
+            allowed = {"effect.update", "effect.add", "effect.bypass", "clip.keyframe", "clip.audio", "caption.update"}
+            if (not isinstance(edits, list) or len(edits) > 32 or
+                    any(not isinstance(edit, dict) or edit.get("type") not in allowed for edit in edits)):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, "invalid interactive preview commands")
+            if edits:
+                self.service.assert_editable(project.project_id)
+                command = Command(type="edit.batch", payload={"commands": edits},
+                                  project_id=project.project_id, expected_revision=project.revision)
+                project = self.service.preview_command(command, include_project=True)["project"]
+            preview = browser_titles(project)
+            clip_id = body.get("clipId")
+            if clip_id:
+                track = next((t for t in preview.sequence.tracks if
+                              any(c.id == clip_id for c in t.clips)), None)
+                if track is None or track.kind != "video":
+                    raise EditError(ErrorCode.INVALID_ARGUMENT, "unknown visual clip")
+                track.clips = [c for c in track.clips if c.id == clip_id]
+                preview.sequence.tracks = [track]
+                clip = track.clips[0]
+                # Native compositor applies transform/keyframe geometry to this
+                # alpha layer; every other effect retains the export pipeline.
+                clip.effects = [e for e in clip.effects if e.get("effectId") != "cutvoke.transform"]
+                clip.effects.append({"effectId": "cutvoke.transform", "params": {
+                    "position": {"x": 0, "y": 0}, "scale": 1, "rotation": 0, "opacity": 1}})
+                clip.keyframes = {k: v for k, v in clip.keyframes.items() if k not in {"x", "y", "scale", "rotation", "opacity"}}
+            try:
+                at = float(body.get("t", 0))
+                maximum = min(1920, max(640, int(body.get("maximum", 1280))))
+                from math import isfinite as finite_preview_time
+                if not finite_preview_time(at) or at < 0:
+                    raise ValueError("invalid time")
+            except (ValueError, TypeError, OverflowError) as error:
+                raise EditError(ErrorCode.INVALID_ARGUMENT, "preview requires finite time >= 0 and a numeric size") from error
+            cancel = self._interactive_request_cancel(project.project_id, body)
+            from cutvoke.rendering.preview_quality import dimensions
+            size = dimensions(preview.sequence, maximum)
+            from cutvoke.rendering.preview_prepare import preview_identity
+            fps = float(preview.sequence.fps.to_fraction())
+            identity = preview_identity(preview, PREVIEW_RENDER_CACHE_VERSION)
+            digest = hashlib.sha256(json.dumps([identity, int(at * fps), size, bool(clip_id)]).encode()).hexdigest()[:32]
+            name = f"frame_{digest}.png"
+            metadata = {"size": size, "alpha": bool(clip_id)}
+            cached = self.preview_cache.get(name, metadata, lambda p: Path(p).stat().st_size > 0)
+            if not cached:
+                with self._frame_scheduler.slot(cancel, priority=-20):
+                    temporary = str(self.preview_cache.path(name)) + "." + uuid.uuid4().hex + ".png"
+                    try:
+                        result = self.render.extract_frame(preview, at, temporary, size=size,
+                                                           include_captions=False, alpha=bool(clip_id), cancel_event=cancel)
+                        if result is None:
+                            return 204, {}
+                        if cancel.is_set():
+                            from cutvoke.rendering.render import RenderCancelled
+                            raise RenderCancelled("interactive preview superseded")
+                        cached = self.preview_cache.publish(name, temporary, metadata)
+                    finally:
+                        with contextlib.suppress(OSError):
+                            os.remove(temporary)
+            with self.preview_cache.pin(cached), open(cached, "rb") as frame:
+                return 200, {"__png__": frame.read()}
 
         if (method == "GET" and len(parts) == 5 and parts[:3] == ["api", "v1", "projects"]
                 and parts[4] == "source-media"):
@@ -2300,6 +2437,8 @@ class HttpApi:
                 try:
                     proj = self.service.get_project(pid)
                     from cutvoke.rendering.preview_prepare import preview_identity
+                    if body.get("editorTitles") == "1":
+                        proj = browser_titles(proj)
                     visual_identity = preview_identity(proj, PREVIEW_RENDER_CACHE_VERSION)
                     compare_clip_id = body.get("compareClipId")
                     if compare_clip_id is not None:
@@ -2369,6 +2508,8 @@ class HttpApi:
                 from cutvoke.rendering.render import RenderError as _RE
                 try:
                     proj = self.service.get_project(pid)
+                    if body.get("editorTitles") == "1":
+                        proj = browser_titles(proj)
                     path, etag, duration = self._preview_window_file(proj, index)
                     result = {"__video_path__": path, "__video_etag__": etag,
                               "duration": duration,
@@ -2773,7 +2914,7 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             for key in ("category", "subcategory", "family", "qualifiedOnly", "effectId", "clipId", "duration", "lang", "path", "w",
                         "q", "appliesTo", "favoritesOnly", "recentOnly", "rev",
                         "entityType", "entityId", "textContains", "atSeconds", "compareClipId",
-                        "fromSeconds", "toSeconds", "fields", "limit", "index"):
+                        "fromSeconds", "toSeconds", "fields", "limit", "index", "editorTitles"):
                 if key in qs:
                     body[key] = qs[key][0]
             # Like built Web files, these two public font assets need no session
@@ -2889,6 +3030,12 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                 self._respond(413, {"error": {"code": e.code, "message": str(e)}})
                 return
             status, data = api.handle("POST", parsed.path, body)
+            if isinstance(data, dict) and "__audio__" in data:
+                self._respond_bytes(status, data["__audio__"], "audio/mp4")
+                return
+            if isinstance(data, dict) and "__png__" in data:
+                self._respond_bytes(status, data["__png__"], "image/png")
+                return
             self._respond(status, data)
 
         def do_PATCH(self):

@@ -1,3 +1,11 @@
+import type { Sequence } from "../types/api";
+
+function baseSequence(sequence: Sequence) {
+  return { ...sequence, captions: [], tracks: sequence.tracks.map(track => track.kind !== "text" ? track :
+    { ...track, clips: track.clips.map(clip => ({ ...clip, keyframes: {},
+      effects: [{ effectId: "cutvoke.text", params: { content: "" } }] })) }) };
+}
+
 import { tr } from "../i18n";
 import type { Project } from "../types/api";
 import { ApiFailure } from "./api";
@@ -5,8 +13,8 @@ import { ApiFailure } from "./api";
 export function previewContentKey(project: Project | null): string {
   if (!project) return "";
   return JSON.stringify({
-    sequence: { ...project.sequence, captions: [] },
-    sequences: project.sequences?.map((sequence) => ({ ...sequence, captions: [] })),
+    sequence: baseSequence(project.sequence),
+    sequences: project.sequences?.map((sequence) => sequence.id === project.sequence.id ? baseSequence(sequence) : ({ ...sequence, captions: [] })),
   });
 }
 

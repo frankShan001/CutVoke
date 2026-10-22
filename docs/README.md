@@ -9,6 +9,7 @@
 - [本地语音识别](user/LOCAL_ASR.md)
 - [资源包发布](user/resource-pack-registry.md)
 - [项目目录和数据位置](development/project-layout.md)
+- [渲染结果复用与性能验证](development/render-performance.md)
 - [公开仓库收录范围](development/repository-content.md)
 - [旅行花字与手记标题](user/travel-titles.md)
 - [界面翻译贡献](development/translations.zh-CN.md) / [English](development/translations.md)

@@ -1,3 +1,5 @@
+import { stageCaption, releaseEdit, useInteractionProject } from "../store/interactive";
+import { flushPendingEdits } from "../lib/pendingEdits";
 import { FONT_FAMILIES } from "../lib/fontFamilies";
 import { msg, tr, useLocale } from "../i18n";
 /** 字幕面板：添加（文本 + 起止秒→rational）、列出当前字幕、删除、样式编辑、SRT 导入/导出。
@@ -7,7 +9,7 @@ import { msg, tr, useLocale } from "../i18n";
 import { useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
 import { Captions, Plus, Trash2, Upload, Download, AlignLeft, AlignCenter, AlignRight, Bold } from "lucide-react";
 import { Button, Field, Panel, Row, TextInput } from "./ui";
-import { useEditor, showError, type CaptionDraftPreview } from "../store/editor";
+import { useEditor, showError } from "../store/editor";
 import { addCaption, removeCaption, updateCaption } from "../store/clipEdit";
 import { getLatestState, refreshProject, runCommand } from "../store/actions";
 import { trySecsToRational, rationalText, rationalToSecs } from "../lib/rational";
@@ -38,7 +40,9 @@ interface CaptionDraft {
 export function CaptionPanel() {
   useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
-  const captions = state.project?.sequence.captions || [];
+  const previewProject = useInteractionProject(state.project);
+  const captions = previewProject?.sequence.captions || [];
+  const composing = useRef(false);
   const readOnly = Boolean(state.editLock);
   const [text, setText] = useState("");
   const [start, setStart] = useState("0");
@@ -62,173 +66,35 @@ export function CaptionPanel() {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const selectedCaptionSnapshot = useRef<string | null>(null);
-  const selectedCaptionDraftSnapshot = useRef<string | null>(null);
-  const captionDraftPreviewRef = useRef<CaptionDraftPreview | null>(null);
-
-  const invalid = (message: string) =>
-    new ApiFailure({ status: 400, code: "INVALID_ARGUMENT", message });
-
-  // 选中字幕切换或服务端实际改动当前字幕时，同步编辑表单。与“每次工程刷新
-  // 都覆盖草稿”不同：不相关字幕的更新不会打断输入；但外部 Agent 改了当前字幕
-  // 时，旧的人工草稿必须失效，不能在解锁后反向覆盖 Agent 的结果。
+  const invalid = (message: string) => new ApiFailure({ status: 400, code: "INVALID_ARGUMENT", message });
+  const selected = selectedId ? captions.find(c => c.id === selectedId) || null : null;
   useEffect(() => {
-    if (!selectedId) {
-      selectedCaptionSnapshot.current = null;
-      selectedCaptionDraftSnapshot.current = null;
-      captionDraftPreviewRef.current = null;
-      dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-      return;
-    }
-    const c = captions.find((x) => x.id === selectedId);
-    if (!c) {
-      selectedCaptionSnapshot.current = null;
-      selectedCaptionDraftSnapshot.current = null;
-      captionDraftPreviewRef.current = null;
-      dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-      dispatch({ type: "CAPTION_SELECTION_SET", captionId: null });
-      return;
-    }
-    const snapshot = JSON.stringify(c);
-    if (selectedCaptionSnapshot.current === snapshot) return;
-    const draftSnapshot = JSON.stringify([c.id, c.text, c.start, c.end]);
-    setForm({
-      fontSize: c.fontSize != null ? String(c.fontSize) : "",
-      fontFamily: FONT_FAMILIES.includes(c.fontFamily as StyleForm["fontFamily"]) ? c.fontFamily as StyleForm["fontFamily"] : "Noto Sans SC",
-      color: c.color || "#ffffff",
-      wordHighlightColor: c.wordHighlightColor || "#FFD54A",
-      strokeWidth: c.strokeWidth != null ? String(c.strokeWidth) : "",
-      align: c.align || "center",
-      bold: c.bold || false,
-    });
-    // 样式/位置更新不应冲掉仍在编辑的文字草稿；仅当文本或时码真的变更
-    // （例如 Agent 改了同一条字幕）时，才用工程值替换本地草稿。
-    if (selectedCaptionDraftSnapshot.current !== draftSnapshot) {
-      captionDraftPreviewRef.current = null;
-      dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-      setCaptionDraft({
-        text: c.text,
-        start: String(rationalToSecs(c.start)),
-        end: String(rationalToSecs(c.end)),
-      });
-      selectedCaptionDraftSnapshot.current = draftSnapshot;
-    }
+    if (!selected) { selectedCaptionSnapshot.current = null; return; }
+    const snapshot = JSON.stringify(selected);
+    if (snapshot === selectedCaptionSnapshot.current) return;
     selectedCaptionSnapshot.current = snapshot;
-  }, [captions, selectedId, dispatch]);
-
-  useEffect(() => () => {
-    captionDraftPreviewRef.current = null;
-    dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-  }, [dispatch]);
-
-  const selected = selectedId ? captions.find((c) => c.id === selectedId) || null : null;
-  const captionDraftChanged = selected != null && (
-    captionDraft.text.trim() !== selected.text
-    || captionDraft.start !== String(rationalToSecs(selected.start))
-    || captionDraft.end !== String(rationalToSecs(selected.end))
-  );
-
+    setCaptionDraft({ text: selected.text, start: String(rationalToSecs(selected.start)), end: String(rationalToSecs(selected.end)) });
+    setForm({ fontSize: selected.fontSize != null ? String(selected.fontSize) : "",
+      fontFamily: FONT_FAMILIES.includes(selected.fontFamily as StyleForm["fontFamily"]) ? selected.fontFamily as StyleForm["fontFamily"] : "Noto Sans SC",
+      color: selected.color || "#ffffff", wordHighlightColor: selected.wordHighlightColor || "#FFD54A",
+      strokeWidth: selected.strokeWidth != null ? String(selected.strokeWidth) : "", align: selected.align || "center", bold: selected.bold || false });
+  }, [selected]);
   const updateCaptionDraft = (next: CaptionDraft) => {
     setCaptionDraft(next);
-    if (!selected || !state.currentId || readOnly) {
-      captionDraftPreviewRef.current = null;
-      dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-      return;
-    }
-    const changed = next.text.trim() !== selected.text
-      || next.start !== String(rationalToSecs(selected.start))
-      || next.end !== String(rationalToSecs(selected.end));
-    if (!changed) {
-      captionDraftPreviewRef.current = null;
-      dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-      return;
-    }
-    const previewStart = trySecsToRational(next.start);
-    const previewEnd = trySecsToRational(next.end);
-    const rangeValid = previewStart && previewEnd
-      && rationalToSecs(previewEnd) > rationalToSecs(previewStart);
-    const preview: CaptionDraftPreview = {
-      projectId: state.currentId,
-      captionId: selected.id,
-      text: next.text,
-      start: rangeValid ? previewStart : selected.start,
-      end: rangeValid ? previewEnd : selected.end,
-    };
-    captionDraftPreviewRef.current = preview;
-    dispatch({
-      type: "CAPTION_DRAFT_PREVIEW_SET",
-      preview,
-    });
+    if (!selected || readOnly) return;
+    const start = trySecsToRational(next.start), end = trySecsToRational(next.end);
+    if (start && end && rationalToSecs(start) >= 0 && rationalToSecs(end) > rationalToSecs(start) && next.text.trim())
+      stageCaption(dispatch, selected.id, { text: next.text, start, end }, composing.current);
   };
-
-  // 租约结束后恢复仍然有效的本地草稿预览；若 Agent 改过这条字幕，上面的
-  // 工程同步 effect 已清空草稿与 ref，不会把旧文本重新盖回画布。
-  useEffect(() => {
-    const preview = captionDraftPreviewRef.current;
-    if (!readOnly && preview?.projectId === state.currentId) {
-      dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview });
-    }
-  }, [readOnly, state.currentId, dispatch]);
-
   const selectCaption = (captionId: string) => {
-    if (selected?.id === captionId) {
-      // 重复点当前项只回到字幕起点，不清掉正在预览的本地草稿。
-      const start = captionDraftChanged
-        ? trySecsToRational(captionDraft.start) || selected.start
-        : selected.start;
-      dispatch({ type: "PLAYHEAD_SET", t: rationalToSecs(start) });
-      return;
-    }
-    if (selected && selected.id !== captionId && captionDraftChanged) {
-      dispatch({
-        type: "STATUS_SET",
-        severity: "warn",
-        text: msg("当前字幕有未保存的文字或时间修改，请先保存"),
-      });
-      return;
-    }
-    const caption = captions.find((item) => item.id === captionId);
+    const caption = captions.find(c => c.id === captionId);
     if (!caption) return;
-    const draftSnapshot = JSON.stringify([
-      caption.id,
-      caption.text,
-      caption.start,
-      caption.end,
-    ]);
-    selectedCaptionSnapshot.current = JSON.stringify(caption);
-    selectedCaptionDraftSnapshot.current = draftSnapshot;
-    setForm({
-      fontSize: caption.fontSize != null ? String(caption.fontSize) : "",
-      fontFamily: FONT_FAMILIES.includes(caption.fontFamily as StyleForm["fontFamily"]) ? caption.fontFamily as StyleForm["fontFamily"] : "Noto Sans SC",
-      color: caption.color || "#ffffff",
-      wordHighlightColor: caption.wordHighlightColor || "#FFD54A",
-      strokeWidth: caption.strokeWidth != null ? String(caption.strokeWidth) : "",
-      align: caption.align || "center",
-      bold: caption.bold || false,
-    });
-    setCaptionDraft({
-      text: caption.text,
-      start: String(rationalToSecs(caption.start)),
-      end: String(rationalToSecs(caption.end)),
-    });
-    captionDraftPreviewRef.current = null;
-    dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-    dispatch({ type: "PLAYHEAD_SET", t: rationalToSecs(caption.start) });
     dispatch({ type: "CAPTION_SELECTION_SET", captionId });
+    const time = getLatestState()?.playhead || 0;
+    if (time < rationalToSecs(caption.start) || time >= rationalToSecs(caption.end))
+      dispatch({ type: "PLAYHEAD_SET", t: rationalToSecs(caption.start) });
   };
-
-  const beginNewCaption = () => {
-    if (captionDraftChanged) {
-      dispatch({
-        type: "STATUS_SET",
-        severity: "warn",
-        text: msg("当前字幕有未保存的修改，请先保存或放弃后再新建"),
-      });
-      return;
-    }
-    captionDraftPreviewRef.current = null;
-    dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-    dispatch({ type: "CAPTION_SELECTION_SET", captionId: null });
-  };
+  const beginNewCaption = () => dispatch({ type: "CAPTION_SELECTION_SET", captionId: null });
 
   const handleAdd = () => {
     if (!state.currentId) {
@@ -260,8 +126,6 @@ export function CaptionPanel() {
 
   const handleRemove = (id: string) => {
     if (selectedId === id) {
-      captionDraftPreviewRef.current = null;
-      dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
     }
     void removeCaption(dispatch, state, id).then((res) => {
       if (res.ok && selectedId === id) {
@@ -302,11 +166,11 @@ export function CaptionPanel() {
     if (patch.bold !== undefined && next.bold !== Boolean(caption.bold)) {
       update.bold = next.bold;
     }
-    if (Object.keys(update).length > 1) void updateCaption(dispatch, state, update);
+    if (Object.keys(update).length > 1 && Object.values(update).every(v => typeof v !== "number" || Number.isFinite(v)) && (update.fontSize === undefined || update.fontSize >= 1) && (update.strokeWidth === undefined || update.strokeWidth >= 0)) stageCaption(dispatch, caption.id, update);
   };
 
   const setStyleField = (patch: Partial<StyleForm>) => {
-    setForm((current) => ({ ...current, ...patch }));
+    commitStyle(patch);
   };
 
   const commitStyleOnEnter = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -316,70 +180,7 @@ export function CaptionPanel() {
     }
   };
 
-  /** 把文字与起止时间合并成一次 caption.update，避免微调产生多条版本历史。 */
-  const commitCaptionDraft = () => {
-    if (!selected) return;
-    const nextText = captionDraft.text.trim();
-    if (!nextText) {
-      showError(dispatch, invalid(tr("字幕文本不能为空")));
-      return;
-    }
-    const nextStart = trySecsToRational(captionDraft.start);
-    const nextEnd = trySecsToRational(captionDraft.end);
-    if (!nextStart || !nextEnd) {
-      showError(dispatch, invalid(tr("起止时间须为秒数字，如 1.5 / 3")));
-      return;
-    }
-    if (rationalToSecs(nextEnd) <= rationalToSecs(nextStart)) {
-      showError(dispatch, invalid(tr("结束时间必须大于开始时间")));
-      return;
-    }
-
-    const update: Parameters<typeof updateCaption>[2] = { captionId: selected.id };
-    if (nextText !== selected.text) update.text = nextText;
-    if (nextStart.num !== selected.start.num || nextStart.den !== selected.start.den) {
-      update.start = nextStart;
-    }
-    if (nextEnd.num !== selected.end.num || nextEnd.den !== selected.end.den) {
-      update.end = nextEnd;
-    }
-    if (Object.keys(update).length === 1) {
-      // 例如只输入后又删回原值、或只留下首尾空格：没有工程改动，
-      // 但本地草稿仍应回到规范形，不能继续阻止用户切换字幕。
-      setCaptionDraft({
-        text: nextText,
-        start: String(rationalToSecs(nextStart)),
-        end: String(rationalToSecs(nextEnd)),
-      });
-      captionDraftPreviewRef.current = null;
-      dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("字幕没有改动") });
-      return;
-    }
-    void updateCaption(dispatch, state, update).then((res) => {
-      if (res.ok) {
-        captionDraftPreviewRef.current = null;
-        dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-        setCaptionDraft({
-          text: nextText,
-          start: String(rationalToSecs(nextStart)),
-          end: String(rationalToSecs(nextEnd)),
-        });
-      }
-    });
-  };
-
-  const discardCaptionDraft = () => {
-    if (!selected) return;
-    captionDraftPreviewRef.current = null;
-    dispatch({ type: "CAPTION_DRAFT_PREVIEW_SET", preview: null });
-    setCaptionDraft({
-      text: selected.text,
-      start: String(rationalToSecs(selected.start)),
-      end: String(rationalToSecs(selected.end)),
-    });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已放弃未保存的字幕修改") });
-  };
+  const commitCaptionDraft = () => { if (selected) releaseEdit(`caption:${selected.id}`); };
 
   // ---- SRT 导入/导出 ----
   const rejectWhileAgentEditing = () => {
@@ -445,6 +246,7 @@ export function CaptionPanel() {
   };
 
   const handleExport = async () => {
+    if (!await flushPendingEdits()) return;
     if (!state.currentId) {
       showError(dispatch, invalid(tr("请先选择工程")));
       return;
@@ -618,6 +420,8 @@ export function CaptionPanel() {
               value={captionDraft.text}
               aria-label={tr("编辑字幕文字")}
               disabled={readOnly}
+              onCompositionStart={() => { composing.current = true; }}
+              onCompositionEnd={(e) => { composing.current = false; updateCaptionDraft({ ...captionDraft, text: e.currentTarget.value }); }}
               onChange={(e) => updateCaptionDraft({ ...captionDraft, text: e.target.value })}
               onKeyDown={(e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
@@ -649,17 +453,6 @@ export function CaptionPanel() {
               />
             </Field>
           </Row>
-          <Button variant="primary" size="sm" full onClick={commitCaptionDraft} disabled={readOnly}>{tr("保存字幕文字与时间")}</Button>
-          {captionDraftChanged ? (
-            <Button variant="secondary" size="sm" full onClick={discardCaptionDraft}>{tr("放弃未保存修改")}</Button>
-          ) : null}
-          <span className="cv-hint">
-            {readOnly && captionDraftChanged
-              ? tr("Agent 编辑中，画布显示工程版本；未保存草稿已保留，解锁后继续预览。")
-              : captionDraftChanged
-                ? tr("画布正在预览未保存草稿；保存后写入工程。")
-                : tr("可一次改文字和时码；文字框按 Ctrl/⌘ + Enter 也可保存。")}
-          </span>
           <CaptionGeometryEditor caption={selected} disabled={readOnly} />
           <Field label={tr("字体")}>
             <select className="cv-select" aria-label={tr("字幕字体")} value={form.fontFamily}

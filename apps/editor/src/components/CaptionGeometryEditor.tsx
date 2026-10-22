@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Move, Maximize2, RotateCw } from "lucide-react";
 import { Field } from "./ui";
 import { useEditor } from "../store/editor";
+import { stageCaption, releaseEdit } from "../store/interactive";
 import { updateCaption } from "../store/clipEdit";
 import type { Caption } from "../types/api";
 
@@ -27,7 +28,7 @@ function toForm(c: Caption): Form {
 
 export function CaptionGeometryEditor({ caption, disabled = false }: { caption: Caption; disabled?: boolean }) {
   useLocale();
-  const { state, dispatch } = useEditor();
+  const { dispatch } = useEditor();
   const [form, setForm] = useState<Form>(() => toForm(caption));
   const captionSnapshot = useRef<string | null>(null);
 
@@ -46,11 +47,12 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
     captionSnapshot.current = snapshot;
   }, [caption]);
 
-  const commit = () => {
-    const x = Number(form.x);
-    const y = Number(form.y);
-    const scale = Number(form.scale);
-    const rotation = Number(form.rotation);
+  const commit = (next = form) => {
+    if (Object.values(next).some(v => v === "")) return;
+    const x = Number(next.x);
+    const y = Number(next.y);
+    const scale = Number(next.scale);
+    const rotation = Number(next.rotation);
     if ([x, y, scale, rotation].some((v) => Number.isNaN(v))) {
       dispatch({ type: "STATUS_SET", severity: "warn", text: msg("几何值须为数字") });
       return;
@@ -60,7 +62,7 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
     if (y !== (caption.y ?? 0.5)) update.y = y;
     if (scale !== (caption.scale ?? 1)) update.scale = scale;
     if (rotation !== (caption.rotation ?? 0)) update.rotation = rotation;
-    if (Object.keys(update).length > 1) void updateCaption(dispatch, state, update);
+    if (Object.keys(update).length > 1 && x >= 0 && x <= 1 && y >= 0 && y <= 1 && scale >= .1 && scale <= 5 && Math.abs(rotation) <= 180) stageCaption(dispatch, caption.id, update);
   };
 
   const onEnter = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -70,8 +72,9 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
     }
   };
 
-  const set = (k: keyof Form) => (e: { target: { value: string } }) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }));
+  const set = (k: keyof Form) => (e: { target: { value: string } }) => {
+    const next = { ...form, [k]: e.target.value }; setForm(next); commit(next);
+  };
 
   return (
     <div className="cv-style-edit__geom">
@@ -89,7 +92,7 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
             aria-label={tr("字幕X坐标")}
             disabled={disabled}
             onChange={set("x")}
-            onBlur={commit}
+            onBlur={() => releaseEdit(`caption:${caption.id}`)}
             onKeyDown={onEnter}
           />
         </Field>
@@ -104,7 +107,7 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
             aria-label={tr("字幕Y坐标")}
             disabled={disabled}
             onChange={set("y")}
-            onBlur={commit}
+            onBlur={() => releaseEdit(`caption:${caption.id}`)}
             onKeyDown={onEnter}
           />
         </Field>
@@ -119,7 +122,7 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
             aria-label={tr("字幕缩放")}
             disabled={disabled}
             onChange={set("scale")}
-            onBlur={commit}
+            onBlur={() => releaseEdit(`caption:${caption.id}`)}
             onKeyDown={onEnter}
           />
         </Field>
@@ -134,7 +137,7 @@ export function CaptionGeometryEditor({ caption, disabled = false }: { caption: 
             aria-label={tr("字幕旋转")}
             disabled={disabled}
             onChange={set("rotation")}
-            onBlur={commit}
+            onBlur={() => releaseEdit(`caption:${caption.id}`)}
             onKeyDown={onEnter}
           />
         </Field>
