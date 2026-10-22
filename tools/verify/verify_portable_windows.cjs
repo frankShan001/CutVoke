@@ -146,6 +146,12 @@ async function main() {
       if (["127.0.0.1", "localhost"].includes(url.hostname) || url.protocol === "data:") return route.continue();
       (report.blockedExternalRequests ||= []).push(url.origin); return route.abort();
     });
+    const setup = page.getByRole("dialog", { name: "欢迎使用 CutVoke" });
+    await expect(setup).toBeVisible();
+    await setup.getByRole("button", { name: "保存并开始使用", exact: true }).click();
+    await expect(setup).not.toBeVisible();
+    assert.equal((await page.evaluate(() => window.cutvokeDesktop.settings())).setupComplete, true);
+    report.checks.firstRunSettingsSavedThroughGUI = true;
     const locales = ["zh-CN", "zh-TW", "en", "ja", "ko", "es", "fr", "de", "pt-BR", "ru", "ar"];
     for (const locale of locales) {
       await page.getByTestId("language-select").selectOption(locale);
@@ -235,6 +241,8 @@ async function main() {
     await close();
     await launch();
     assert.deepEqual(await api(`projects/${projectId}`), before);
+    assert.equal((await page.evaluate(() => window.cutvokeDesktop.settings())).setupComplete, true);
+    await expect(page.getByRole("dialog", { name: "欢迎使用 CutVoke" })).not.toBeVisible();
     assert.equal(await page.locator("html").getAttribute("lang"), "zh-CN");
     await page.getByRole("button", { name: `打开工程 ${projectId}`, exact: true }).click();
     const cache = await api("preview-cache");

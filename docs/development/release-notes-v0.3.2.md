@@ -7,7 +7,7 @@ Changes since v0.3.1:
 - Updated editor setup, resource workflows and preview preparation; reusable cinematic and travel effects and privacy-safe effect-module sharing.
 - Reorganized applications, engine modules and asset sources while preserving approved resource bytes and legacy offline-pack support.
 - Fixed Python 3.13 packaging with a hash-locked NumPy release that provides native wheels on all four targets; repaired relocated desktop build paths.
-- Pinned macOS NumPy wheels compatible with the macOS 13 baseline and kept project creation reachable in short desktop windows after language changes.
+- Pinned macOS NumPy wheels compatible with the macOS 13 baseline; native acceptance now completes and verifies the first-launch setup before editing.
 - Corrected FFmpeg filtergraph compatibility tests, deterministic alpha conversion, relocated preset attribution and timeline drag coordinates.
 - Added a release gate that requires successful same-commit CI and all native package acceptances, verifies embedded provenance and archive hashes, stages a fresh draft, then verifies public downloads.
 
