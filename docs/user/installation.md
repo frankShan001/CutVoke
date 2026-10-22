@@ -194,7 +194,7 @@ The project version is aligned at **0.3.1** in Python, MCP and desktop metadata.
 
 ## Troubleshooting
 
-The editor opens after the current composed frame is ready and prepares continuous playback in the background. Supported timelines use short, reduced-resolution playback previews; explicit full-resolution frame computation, still export and video export retain the project settings. GPU acceleration is selected automatically for supported complex effects, with CPU fallback. A new complex interval can still require preparation. See the [local rendering performance record](../development/render-performance-20261021.md) for the measured scope and limitations.
+The editor opens after the current composed frame is ready and prepares continuous playback in the background. Supported timelines use short, reduced-resolution playback previews; explicit full-resolution frame computation, still export and video export retain the project settings. GPU acceleration is selected automatically for supported complex effects, with CPU fallback. A new complex interval can still require preparation; latency depends on the timeline, source media and available hardware. To measure your own workload, use `python tools/verify/benchmark_render.py --help` from a source checkout.
 
 | Symptom | Check and action |
 | --- | --- |

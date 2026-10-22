@@ -17,4 +17,4 @@ python -m pytest -q tests/integration/test_effect_contributions.py tests/renderi
 
 For an editable original-media sample, run [the isolated demo](../../../tools/verify/demo_vlog_effects.py) with a new `--output` directory. The effect contract is the manifest schema and renderer, not a third-party SDK. Change parameters and metadata under a new contributor ID; do not supply executable code in a manifest.
 
-[Peter McKinnon's named Luma Fade tutorial](https://www.youtube.com/watch?v=1Qm1EGxdZ6E) motivated the technique. The research could verify source metadata and a named method, but main-film playback remained buffering. No exact shot, timestamp, asset or algorithm is claimed to have been copied. See the [reference record](../../../docs/user/vlog-effect-references.json). Translations are technical drafts without native-speaker review.
+[Peter McKinnon's named Luma Fade tutorial](https://www.youtube.com/watch?v=1Qm1EGxdZ6E) provides technique context. This effect independently uses CutVoke's existing luma-mask implementation; no tutorial footage or algorithm is included. Translations are technical drafts without native-speaker review.

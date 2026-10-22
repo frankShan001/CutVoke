@@ -9,14 +9,14 @@
 - [本地语音识别](user/LOCAL_ASR.md)
 - [资源包发布](user/resource-pack-registry.md)
 - [项目目录和数据位置](development/project-layout.md)
+- [公开仓库收录范围](development/repository-content.md)
+- [旅行花字与手记标题](user/travel-titles.md)
 - [界面翻译贡献](development/translations.zh-CN.md) / [English](development/translations.md)
-- [外部验收材料包](development/acceptance-kit/README.md)
 - [脚本入口](../tools/README.md)
 
 文档按用途阅读：
 
 - [正式文档配图](images/README.md)：README 和使用文档中的截图、插图。
 - [素材制作源文件](../resources/README.md)：原始图集、来源与提取记录、品牌母版。
-- [历史审核资料](history/reviews/README.md)：按日期归档的审核结论及必要视觉证据。
 
-`history/` 中的版本、计数和本机路径只代表当时状态。当前能力以应用返回的命令目录及现行使用文档为准。新的临时审核输出放在 Git 忽略的 `.artifacts/`。
+文档面向使用者和贡献者，描述当前操作、接口和维护方法。个人开发记录、阶段验收报告和临时审核截图保存在仓库外；可重新生成的测试输出写入 Git 忽略的 `.artifacts/`。

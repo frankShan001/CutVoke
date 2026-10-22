@@ -48,7 +48,7 @@ npm run test:e2e
 
 Browser tests create a temporary database and synthetic media. They do not use personal projects. On Windows they use installed Chrome; Linux can use an installed Chromium by setting `CUTVOKE_E2E_BROWSER=/usr/bin/chromium`. Keep the activated Python environment on PATH so the test server and MCP subprocess use the same dependencies. Test APIs must receive an explicit temporary `media_dir`; a file-backed `HttpApi` also derives its media directory from its database. `MCPServer(..., media_dir=...)` allows isolated embedding. Do not change HOME or relax filesystem permissions to run tests.
 
-For desktop dependency changes, run `npm ci --ignore-scripts`, `npm run test:build-deps` and `npm run test:i18n` in `desktop`. The proxy test uses disposable loopback servers. Downloader overrides live in `apps/desktop/package.json`; preserve the actual downloader's API and proxy support when changing them.
+For desktop dependency changes, run `npm ci --ignore-scripts`, `npm run test:build-deps` and `npm run test:i18n` in `apps/desktop`. The proxy test uses disposable loopback servers. Downloader overrides live in `apps/desktop/package.json`; preserve the actual downloader's API and proxy support when changing them.
 
 Rendering changes need real media, inspected frames and relevant audio checks. Record the input, command and result in the PR; successful process exit alone does not establish correct pictures. Do not weaken pixel, alpha, duration or frame-count assertions to make an incompatible build pass.
 
@@ -81,6 +81,6 @@ Follow the [project layout](docs/development/project-layout.md). Put generated l
 
 Applications live in `apps/editor` and `apps/desktop`. The Python engine is split into `domain`, `editing`, `rendering`, `storage` and `interfaces`, with corresponding test groups. Run `python tools/verify/check_repository_layout.py` to catch obsolete imports and build paths.
 
-Keep built-in artwork inputs and provenance in `resources/source/`, published documentation images in `docs/images/`, and selected dated review evidence in `docs/history/reviews/YYYY-MM/`. Do not commit replaced artwork backups or intermediate crop experiments. Run `python tools/verify/check_asset_layout.py` before submitting.
+Keep reproducible artwork inputs and provenance in `resources/source/` and published documentation images in `docs/images/`. Personal development journals, one-off acceptance reports and review screenshots belong outside the repository. Runtime resource metadata and third-party notices remain part of the product. Follow the [repository content policy](docs/development/repository-content.md) and run `python tools/verify/check_asset_layout.py` before submitting.
 
 The [candidate packaging workflow](docs/development/prerelease.md) builds and verifies source/wheel artifacts without publishing a Release. Windows installers require separate Windows acceptance and third-party binary/license review.

@@ -17,11 +17,9 @@ class AssetLayoutTests(unittest.TestCase):
         subprocess.run(["git", "init", "-q", str(self.root)], check=True)
         self.image = self.write("docs/images/readme/demo.png", b"original image bytes")
         self.write("README.md", b"![Editor](docs/images/readme/demo.png)\n")
-        self.write("docs/development/asset-relocations.json", json.dumps({
-            "entries": [{"previousPath": "docs/assets/readme/demo.png",
-                         "path": "docs/images/readme/demo.png",
+        self.write("resources/source/provenance.json", json.dumps({
+            "entries": [{"path": "docs/images/readme/demo.png",
                          "sha256": hashlib.sha256(self.image.read_bytes()).hexdigest()}],
-            "archivedFiles": [],
         }).encode())
 
     def write(self, name, data):
@@ -30,12 +28,22 @@ class AssetLayoutTests(unittest.TestCase):
         path.write_bytes(data)
         return path
 
-    def test_valid_unstaged_relocation(self):
+    def test_valid_unstaged_source(self):
         self.assertEqual(check(self.root), [])
 
-    def test_detects_changed_historical_bytes(self):
+    def test_detects_changed_source_bytes(self):
         self.image.write_bytes(b"edited image")
-        self.assertTrue(any("evidence bytes changed" in error for error in check(self.root)))
+        self.assertTrue(any("provenance bytes changed" in error for error in check(self.root)))
+
+    def test_rejects_private_history_even_when_force_added(self):
+        self.write(".gitignore", b"docs/history/\n")
+        self.write("docs/history/session.md", b"local development notes")
+        subprocess.run(["git", "add", "-f", "docs/history/session.md"], cwd=self.root, check=True)
+        self.assertTrue(any("Private development record" in error for error in check(self.root)))
+
+    def test_rejects_documentation_link_to_missing_guide(self):
+        self.write("README.md", b"[Guide](docs/user/removed.md)\n")
+        self.assertTrue(any("Broken documentation link" in error for error in check(self.root)))
 
     def test_rejects_ignored_local_image_dependency(self):
         self.write(".gitignore", b".artifacts/\n")
@@ -57,7 +65,7 @@ class AssetLayoutTests(unittest.TestCase):
         self.write("docs/assets/unused.png", b"old")
         self.write("tools/assets/extract.py", b'ATLAS = "resources/source/materials/missing.png"\n')
         errors = check(self.root)
-        self.assertTrue(any("Use source, documentation" in error for error in errors))
+        self.assertTrue(any("Use source or documentation" in error for error in errors))
         self.assertTrue(any("Missing source input" in error for error in errors))
 
 

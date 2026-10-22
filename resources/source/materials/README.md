@@ -10,4 +10,4 @@
 
 制作工具在 `tools/assets/`：提取脚本读取这里的源图，将新提取报告写到 `.artifacts/assets/reports/`，联系图/预览写到 `.artifacts/reviews/`；注册脚本读取这里已归档的提取记录。更改内置成品和正式记录前，检查透明边缘、裁切安全区、实际渲染与来源许可。只将通过审核且有必要保留的记录归档回来。
 
-历史提取 JSON 保留原始字节，其中旧路径通过 [位置对照表](../../../docs/development/asset-relocations.json) 定位。配图与审核拼图不在此目录。
+提取 JSON 保留原始字节，其中旧路径通过 [来源索引](../provenance.json) 的 `legacyPath` 定位。配图与审核拼图不在此目录。

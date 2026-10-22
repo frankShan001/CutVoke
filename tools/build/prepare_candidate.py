@@ -44,7 +44,7 @@ def main():
             flag = "--version" if executable == "node" else "-version"
             facts[executable] = capture([executable, flag], root).splitlines()[0]
     (output / "BUILD-INFO.json").write_text(json.dumps(facts, indent=2) + "\n", encoding="utf-8")
-    shutil.copyfile(root / "docs/development/release-notes-draft.md", output / "RELEASE_NOTES.md")
+    shutil.copyfile(root / "CHANGELOG.md", output / "RELEASE_NOTES.md")
     sums = []
     for artifact in sorted(output.iterdir()):
         digest = hashlib.sha256()

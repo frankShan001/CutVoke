@@ -1,0 +1,471 @@
+{
+  "schemaVersion": 1,
+  "description": "Source and documentation asset checksums. legacyPath resolves original provenance references embedded in released catalogs; private review archives are not required.",
+  "entries": [
+    {
+      "path": "resources/source/materials/annotation-doodle-sticker-sheet-20260925.extraction.json",
+      "sha256": "465c15b383e9c5c885317073ac3199ab7e0b970491a1e2ce3aa105340261c2ff",
+      "legacyPath": "docs/assets/annotation-doodle-sticker-sheet-20260925.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/annotation-doodle-sticker-sheet-20260925.png",
+      "sha256": "f77b258de9cd32fe405373d75d56349babc958b4616997b2420fdf3de90ac71d",
+      "legacyPath": "docs/assets/annotation-doodle-sticker-sheet-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/atmospheric-overlay-texture-sheet-20260924.extraction.json",
+      "sha256": "89fde8af1f77912f5eb90c1446a55cc790dedeadac4aab0392e31b94dcfc2f42",
+      "legacyPath": "docs/assets/atmospheric-overlay-texture-sheet-20260924.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/atmospheric-overlay-texture-sheet-20260924.png",
+      "sha256": "983255221b2e6b8bd795cbe3f49eb12718d2c9defaefb8c673293e0c64bfbbd8",
+      "legacyPath": "docs/assets/atmospheric-overlay-texture-sheet-20260924.png"
+    },
+    {
+      "path": "resources/source/materials/atmospheric-overlay-texture-sheet-v2-20260924.extraction.json",
+      "sha256": "cbce9b8cdff6a9d977ee519d5fe7e4e9c8b3fc3fb6b96b2037a3fb27305a0dbe",
+      "legacyPath": "docs/assets/atmospheric-overlay-texture-sheet-v2-20260924.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/atmospheric-overlay-texture-sheet-v2-20260924.png",
+      "sha256": "66ac551c7b6af35050afbc72c3d0781892238a59f6ff952ce790e5b979871ef1",
+      "legacyPath": "docs/assets/atmospheric-overlay-texture-sheet-v2-20260924.png"
+    },
+    {
+      "path": "resources/source/materials/basic-label-sticker-atlas-20260925.png",
+      "sha256": "3dfc0f239757b2247cde0a6d00d7cf234f2ced928bbadd363cc16234523954ae",
+      "legacyPath": "docs/assets/basic-label-sticker-atlas-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/basic-navigation-sticker-atlas-20260925.png",
+      "sha256": "5893f053c2e7308aa1e46571da873b2e17017154e899c12060c7e349c73082ae",
+      "legacyPath": "docs/assets/basic-navigation-sticker-atlas-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/basic-symbol-sticker-atlas-20260925.png",
+      "sha256": "cad7244088163c8214c9f72847be0f8881823fa101f3621c638178bd1b1d791a",
+      "legacyPath": "docs/assets/basic-symbol-sticker-atlas-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/botanical-sticker-sheet-20260924.extraction.json",
+      "sha256": "8ca5dc0e64950b4f2f2bfaf891685a156a52cc88220d4138f6f9515a7f5323e4",
+      "legacyPath": "docs/assets/botanical-sticker-sheet-20260924.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/botanical-sticker-sheet-20260924.png",
+      "sha256": "45d28c31d0e7366c6c83df15e4377a4b53420f331605ff380967c656a2985d6b",
+      "legacyPath": "docs/assets/botanical-sticker-sheet-20260924.png"
+    },
+    {
+      "path": "resources/source/brand/cutvoke-icon-master.png",
+      "sha256": "2c897df0ab6a950643c5c47f661e2840d1793e831b8bcc46a19cb079c8628505",
+      "legacyPath": "docs/assets/brand/cutvoke-icon-master.png"
+    },
+    {
+      "path": "resources/source/brand/generation-prompt.json",
+      "sha256": "817d2c084a779ff1dd40bc636b6b2fb0824c6ebc21517718a60c7fce86ae9a6d",
+      "legacyPath": "docs/assets/brand/generation-prompt.json"
+    },
+    {
+      "path": "resources/source/brand/manifest.json",
+      "sha256": "6bad9555fdb24bb884c384e622ef4d8f8040012483da9e91a1d32d0867a1c2d2",
+      "legacyPath": "docs/assets/brand/manifest.json"
+    },
+    {
+      "path": "resources/source/materials/celebration-party-sticker-atlas-20260927.extraction.json",
+      "sha256": "be2c56110ce2cd1f708365de8d8d9a0736ee56ecd9b6f6bf47cd5f0237102632",
+      "legacyPath": "docs/assets/celebration-party-sticker-atlas-20260927.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/celebration-party-sticker-atlas-20260927.png",
+      "sha256": "c29d8eacef2e4aad3416c98068bf4417957c9046d1bcef582436a14712b5cac5",
+      "legacyPath": "docs/assets/celebration-party-sticker-atlas-20260927.png"
+    },
+    {
+      "path": "resources/source/materials/cinematic-effect-texture-atlas-20260927.extraction.json",
+      "sha256": "599a0896d863a7d4a13c9136a992ba2447e91b3c80a550e02e7107226bcad4d0",
+      "legacyPath": "docs/assets/cinematic-effect-texture-atlas-20260927.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/cinematic-effect-texture-atlas-20260927.png",
+      "sha256": "7f3d9563b198c6b2b1966640f6ed633ef1d1fdabea8ad0b2e38ff01d7a0058e2",
+      "legacyPath": "docs/assets/cinematic-effect-texture-atlas-20260927.png"
+    },
+    {
+      "path": "resources/source/materials/cinematic-optical-overlay-atlas-20260926.extraction.json",
+      "sha256": "7137db618c49231cc55d068d08a3e1f17da61fd455613ae49b728801188138c7",
+      "legacyPath": "docs/assets/cinematic-optical-overlay-atlas-20260926.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/cinematic-optical-overlay-atlas-20260926.png",
+      "sha256": "c6a1edd2f82723fd433b961a3dc52b1722f5778f95884a2579d05f85e365ad7c",
+      "legacyPath": "docs/assets/cinematic-optical-overlay-atlas-20260926.png"
+    },
+    {
+      "path": "resources/source/materials/cinematic-overlay-texture-extraction-20260925.json",
+      "sha256": "f2b95ba22a996cf72f3a853bfef1bb2aab393477e62b34681c1015d169fb8fcc",
+      "legacyPath": "docs/assets/cinematic-overlay-texture-extraction-20260925.json"
+    },
+    {
+      "path": "resources/source/materials/cinematic-overlay-texture-sheet-20260925.png",
+      "sha256": "b9b0cdeb00c76586cfb4c7464602d785fb35fd47a495455a82e5857732faa1bd",
+      "legacyPath": "docs/assets/cinematic-overlay-texture-sheet-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/cinematic-texture-atlas-20260925.extraction.json",
+      "sha256": "b5e6b3ec1feb56e0e730d71d5f2ea45153113b3d1d29908b60f6e91064a5ecc3",
+      "legacyPath": "docs/assets/cinematic-texture-atlas-20260925.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/cinematic-texture-atlas-20260925.png",
+      "sha256": "473cc2a8f586a2724a72dd4186d322207663e7c3a75a3ab4af0fd59d4436571d",
+      "legacyPath": "docs/assets/cinematic-texture-atlas-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/concert-stage-light-atlas-20260927.extraction.json",
+      "sha256": "d646f55da698a97fb32795a2a44a6273899c65986bf8aef85ae270944a8623c6",
+      "legacyPath": "docs/assets/concert-stage-light-atlas-20260927.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/concert-stage-light-atlas-20260927.png",
+      "sha256": "1524cf92579a123dbcb881c3bdeeb96cd1b58f7f99681baf9dea32402a4e5f64",
+      "legacyPath": "docs/assets/concert-stage-light-atlas-20260927.png"
+    },
+    {
+      "path": "resources/source/materials/decor-sticker-sheet-20260924.png",
+      "sha256": "db4769be4361d894ec86c969cb2a8ce9799b2650e31f147b7b5eb5e9b78c29fa",
+      "legacyPath": "docs/assets/decor-sticker-sheet-20260924.png"
+    },
+    {
+      "path": "resources/source/materials/digital-glitch-overlay-texture-sheet-20260925.extraction.json",
+      "sha256": "0406460118be94eee358c050cf8e3384278795b55f46837400376a24cd73ae6d",
+      "legacyPath": "docs/assets/digital-glitch-overlay-texture-sheet-20260925.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/digital-glitch-overlay-texture-sheet-20260925.png",
+      "sha256": "d6c1c22c45a25fb0593a63735904ded635f043e790f4822dc4087af27d50260a",
+      "legacyPath": "docs/assets/digital-glitch-overlay-texture-sheet-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/east-asian-ink-motion-overlay-atlas-20260926.extraction.json",
+      "sha256": "8480db3c23e5ab4ba82eead635a7b3877f99686233f1e67aaf1eeea52ae8bf90",
+      "legacyPath": "docs/assets/east-asian-ink-motion-overlay-atlas-20260926.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/east-asian-ink-motion-overlay-atlas-20260926.png",
+      "sha256": "b8d6fa4d097410f7208aab23ec410f273f73c1fcecb9cd742ca4a6e24487a06a",
+      "legacyPath": "docs/assets/east-asian-ink-motion-overlay-atlas-20260926.png"
+    },
+    {
+      "path": "resources/source/materials/editor-effect-overlay-atlas-20260925.extraction.json",
+      "sha256": "6fb62151f14ea7ceb222ec2beb9d5a8bf420dcdc7706fd9708ca467c3fe385d4",
+      "legacyPath": "docs/assets/editor-effect-overlay-atlas-20260925.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/editor-effect-overlay-atlas-20260925.png",
+      "sha256": "4cef2e55062b40cd9c900b5ffb691baa1dc58f1049a36ac538247620fdc4e687",
+      "legacyPath": "docs/assets/editor-effect-overlay-atlas-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/education-science-sticker-atlas-20260925-v2.extraction.json",
+      "sha256": "2506db95313edf0ebb1b8cf42c38cde3a8ed72abab43b60b0db18f1cc4958868",
+      "legacyPath": "docs/assets/education-science-sticker-atlas-20260925-v2.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/education-science-sticker-atlas-20260925-v2.png",
+      "sha256": "b28be7348dcc5c3a038bfc83380e64c7bfab9c2577b2ca0c5e736312b8355304",
+      "legacyPath": "docs/assets/education-science-sticker-atlas-20260925-v2.png"
+    },
+    {
+      "path": "resources/source/materials/energy-light-overlay-atlas-20260927.extraction.json",
+      "sha256": "e97a339b8d54cf13ae2bac858c73532c0d542f02209b29f474e57a99bf5c24d1",
+      "legacyPath": "docs/assets/energy-light-overlay-atlas-20260927.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/energy-light-overlay-atlas-20260927.png",
+      "sha256": "23394d62c1b80284f83a0841d1bd96305ae905da9965c77524ed99867ee5738f",
+      "legacyPath": "docs/assets/energy-light-overlay-atlas-20260927.png"
+    },
+    {
+      "path": "resources/source/materials/fantasy-energy-overlay-atlas-20260927.extraction.json",
+      "sha256": "ceb3b0016c6908968ae16c369254b08c6a2f5e30de1ab4ec8cb141bc9e291ab4",
+      "legacyPath": "docs/assets/fantasy-energy-overlay-atlas-20260927.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/fantasy-energy-overlay-atlas-20260927.png",
+      "sha256": "3cc2f68e043fc926fcffc0710e7c169b2842c8b0720403aef79114b33d08d66c",
+      "legacyPath": "docs/assets/fantasy-energy-overlay-atlas-20260927.png"
+    },
+    {
+      "path": "resources/source/materials/food-drink-sticker-sheet-20260925-v2.png",
+      "sha256": "5184c1d0cc6ddbe030ad7e1f0f0e5c00bd33676dc7399943a49ef9cf79888d02",
+      "legacyPath": "docs/assets/food-drink-sticker-sheet-20260925-v2.png"
+    },
+    {
+      "path": "resources/source/materials/food-drink-sticker-sheet-20260925.png",
+      "sha256": "96cb6c94feda0d8b99020a091dfd79f3f6a4b66c6a611a8b8063a12551b03c37",
+      "legacyPath": "docs/assets/food-drink-sticker-sheet-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/glass-liquid-refraction-atlas-20260927.extraction.json",
+      "sha256": "475d0025a22d85802d391d317bd1d89c8ce2bf84cd03704ca9fa52106d38b4d9",
+      "legacyPath": "docs/assets/glass-liquid-refraction-atlas-20260927.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/glass-liquid-refraction-atlas-20260927.png",
+      "sha256": "036658f2ec6642ed67cbc5321f0b91b7105e68c0dc63b11dc8b5d19e23dd8b88",
+      "legacyPath": "docs/assets/glass-liquid-refraction-atlas-20260927.png"
+    },
+    {
+      "path": "resources/source/materials/legacy-icon-atlases-20260925.extraction.json",
+      "sha256": "1f758831c0ab9edf0bc9e09db9f968d96e324834d0935afaef91e293deb7fb70",
+      "legacyPath": "docs/assets/legacy-icon-atlases-20260925.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/manga-motion-atlas-v2-20260926.extraction.json",
+      "sha256": "f48bc845d9be3a02f8542f698890799d5a73e25449324ba79396ee7a8dfdd1ba",
+      "legacyPath": "docs/assets/manga-motion-atlas-v2-20260926.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/manga-motion-atlas-v2-20260926.png",
+      "sha256": "18ff71a52781b36e52df25d36af5dfae04309ebb2d1ed40d7b747452437fb54c",
+      "legacyPath": "docs/assets/manga-motion-atlas-v2-20260926.png"
+    },
+    {
+      "path": "resources/source/materials/manga-motion-contrast-atlas-20260924.extraction.json",
+      "sha256": "d39ec679cde5b5594fddd1b02b1e543006cd543a7c17dd2f014b90ab2b1f6a39",
+      "legacyPath": "docs/assets/manga-motion-contrast-atlas-20260924.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/manga-motion-contrast-atlas-20260924.png",
+      "sha256": "6a99149af1494ffb9bb854ae0db43a029e47fe4c767377e3742a8215b39a8d14",
+      "legacyPath": "docs/assets/manga-motion-contrast-atlas-20260924.png"
+    },
+    {
+      "path": "resources/source/materials/manga-motion-sticker-sheet-20260924.extraction.json",
+      "sha256": "819d1365ac0027d7bc34cd5e21647a014368543f06f00777de1c285bb55d13c2",
+      "legacyPath": "docs/assets/manga-motion-sticker-sheet-20260924.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/manga-motion-sticker-sheet-20260924.png",
+      "sha256": "afcac80a895c60e6d7a570faa0f67004fba988262789accbd8de66196a8d1fe4",
+      "legacyPath": "docs/assets/manga-motion-sticker-sheet-20260924.png"
+    },
+    {
+      "path": "resources/source/materials/material-texture-sheet-20260925.extraction.json",
+      "sha256": "a0a4476d4679200ef2f54b2b1fc6abff57b4935e30fa2970d28df231149af7bc",
+      "legacyPath": "docs/assets/material-texture-sheet-20260925.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/material-texture-sheet-20260925.png",
+      "sha256": "902793ae14fd74e68b49dde7a8b38e60bd0a35fabae7264367921eaa888d5a95",
+      "legacyPath": "docs/assets/material-texture-sheet-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/music-rhythm-overlay-atlas-20260926.extraction.json",
+      "sha256": "a96358c6c9203fc9e36555768af3c8fa6d160fdeb68b5626f064c65e0e9e07ab",
+      "legacyPath": "docs/assets/music-rhythm-overlay-atlas-20260926.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/music-rhythm-overlay-atlas-20260926.png",
+      "sha256": "c3a16d9338391128cba5c7a6f3bdcdf2a83152ed295e33c452cea31d54301d27",
+      "legacyPath": "docs/assets/music-rhythm-overlay-atlas-20260926.png"
+    },
+    {
+      "path": "resources/source/materials/natural-light-shadow-overlay-atlas-20260927.extraction.json",
+      "sha256": "604d6c244b6c4bd69a162dcf0adeb52899a920cfd51c1bef0f7e8e94e3bcea62",
+      "legacyPath": "docs/assets/natural-light-shadow-overlay-atlas-20260927.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/natural-light-shadow-overlay-atlas-20260927.png",
+      "sha256": "e1395dd3c0824fcff72d15618baf3aed43dfe0e874de8093ffe5e1451aec43de",
+      "legacyPath": "docs/assets/natural-light-shadow-overlay-atlas-20260927.png"
+    },
+    {
+      "path": "resources/source/materials/person-fx-overlay-atlas-20260925.extraction.json",
+      "sha256": "a18dfe7024b95e803e6f12b45c9576d8e2f309b269f3b7263cf3712698896715",
+      "legacyPath": "docs/assets/person-fx-overlay-atlas-20260925.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/person-fx-overlay-atlas-20260925.png",
+      "sha256": "a557a0eebf168734dcfbb8ff9dda75ab2f7496afac322a5d59e468301312bcc9",
+      "legacyPath": "docs/assets/person-fx-overlay-atlas-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/pet-sticker-sheet-20260925.extraction.json",
+      "sha256": "ae54e0867a8dbbeaa86ed733715e9354cbfb750c03066dbad6d198418f01e87c",
+      "legacyPath": "docs/assets/pet-sticker-sheet-20260925.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/pet-sticker-sheet-20260925.png",
+      "sha256": "2357672f93ef702dfe59e02f1582549c8d16865e4622393253914c398d0726c1",
+      "legacyPath": "docs/assets/pet-sticker-sheet-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/pixel-game-effect-atlas-20260926.extraction.json",
+      "sha256": "9035cfe6973dd995f2106edbbe9add07e4649aa7d51d855522a6961f1297db3b",
+      "legacyPath": "docs/assets/pixel-game-effect-atlas-20260926.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/pixel-game-effect-atlas-20260926.png",
+      "sha256": "c35223525351d73957ed3fa194b31f7c30b0b8e2b941f0c112ad3d99079e8473",
+      "legacyPath": "docs/assets/pixel-game-effect-atlas-20260926.png"
+    },
+    {
+      "path": "resources/source/materials/product-promo-overlay-atlas-20260927.extraction.json",
+      "sha256": "ff3fd1d254a0cdfadf44555faf2ff4df7847fadc2ae8b8984288afa15d445871",
+      "legacyPath": "docs/assets/product-promo-overlay-atlas-20260927.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/product-promo-overlay-atlas-20260927.png",
+      "sha256": "c84c1b462af2320b99a3c093f71797610260193f6f2963a626a714dd301e6dac",
+      "legacyPath": "docs/assets/product-promo-overlay-atlas-20260927.png"
+    },
+    {
+      "path": "resources/source/materials/reaction-sticker-sheet-20260924.extraction.json",
+      "sha256": "8cdc10c4b86f22ef98dfc5a08ff67583f0a89e6772ba7ee151ee421da46d8277",
+      "legacyPath": "docs/assets/reaction-sticker-sheet-20260924.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/reaction-sticker-sheet-20260924.png",
+      "sha256": "28e05a3a1532d6aa6522eb386e34eb57aa767c7802b3bcceafc684f50eeb2d8b",
+      "legacyPath": "docs/assets/reaction-sticker-sheet-20260924.png"
+    },
+    {
+      "path": "docs/images/readme/banner.svg",
+      "sha256": "6b5cf8f9768ad211558550eeef8b367fe13b5f1fdf97a3fbba8bc66c043c7379",
+      "legacyPath": "docs/assets/readme/banner.svg"
+    },
+    {
+      "path": "docs/images/readme/en/caption-editing.png",
+      "sha256": "8821c14f0a2e4c34d83a1fbea9e8a8672719746eebe9821c1176e60266e4f6ce",
+      "legacyPath": "docs/assets/readme/en/caption-editing.png"
+    },
+    {
+      "path": "docs/images/readme/en/community-transition.png",
+      "sha256": "62ec2b42e34b5da6a325b8193e6954162dc42afe3bb3b1bb61f8bab397af50b8",
+      "legacyPath": "docs/assets/readme/en/community-transition.png"
+    },
+    {
+      "path": "docs/images/readme/en/editor-overview.png",
+      "sha256": "9392fd3ee5d155bede13c05b218a2524b9e9e843dc4b0183a63cb602d13d6af5",
+      "legacyPath": "docs/assets/readme/en/editor-overview.png"
+    },
+    {
+      "path": "docs/images/readme/zh-CN/caption-editing.png",
+      "sha256": "fc6217c349a8bc60366431a8e0d74a7bb7a7ef937001ce13a1cfa1b1d607f5e7",
+      "legacyPath": "docs/assets/readme/zh-CN/caption-editing.png"
+    },
+    {
+      "path": "docs/images/readme/zh-CN/community-transition.png",
+      "sha256": "47e4dc27628ea18e1ddc57620eb96d685a8bfc3db5614e7e876a891c9c4120dc",
+      "legacyPath": "docs/assets/readme/zh-CN/community-transition.png"
+    },
+    {
+      "path": "docs/images/readme/zh-CN/editor-overview.png",
+      "sha256": "6de84446fffbab93abd76e2fd08b83f31e798f928cb7cd2005c7c21928daa30b",
+      "legacyPath": "docs/assets/readme/zh-CN/editor-overview.png"
+    },
+    {
+      "path": "resources/source/materials/scrapbook-decor-atlas-20260927-v2.extraction.json",
+      "sha256": "1525321ae9cfb4d8b7a8eebde60856134266270890c12332c9163b23d5f7e104",
+      "legacyPath": "docs/assets/scrapbook-decor-atlas-20260927-v2.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/scrapbook-decor-atlas-20260927-v2.png",
+      "sha256": "be90d9c690c2d601b1d47ae77f8498a7f227d62f32fef897ffc6fef2e3dae71c",
+      "legacyPath": "docs/assets/scrapbook-decor-atlas-20260927-v2.png"
+    },
+    {
+      "path": "resources/source/materials/sports-sticker-atlas-20260925.extraction.json",
+      "sha256": "88bae44d07c91cba9944eb10bb10fbeb90bb32fca455ba810699992ed0bd7657",
+      "legacyPath": "docs/assets/sports-sticker-atlas-20260925.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/sports-sticker-atlas-20260925.png",
+      "sha256": "5a5aea858d502f5cbfc0fc033128cb6663597fc6d992d7c777fd0c9589647420",
+      "legacyPath": "docs/assets/sports-sticker-atlas-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/travel-vlog-sticker-sheet-20260925-v2.extraction.json",
+      "sha256": "9ea02d01be92f2022fffea2595756c45b5e7fe839fac64d028d2bf23045b836d",
+      "legacyPath": "docs/assets/travel-vlog-sticker-sheet-20260925-v2.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/travel-vlog-sticker-sheet-20260925-v2.png",
+      "sha256": "c5dec537d4592f04d90b1d0007d7d01c4fd7c7f936be5ff8b58f524cece0ee4d",
+      "legacyPath": "docs/assets/travel-vlog-sticker-sheet-20260925-v2.png"
+    },
+    {
+      "path": "resources/source/materials/video-annotation-guide-sticker-atlas-20260927.extraction.json",
+      "sha256": "7ad0ca3f0ccdff4cd6fcbbe18b642af0f0211719d847dd38dc0729ad4b22e842",
+      "legacyPath": "docs/assets/video-annotation-guide-sticker-atlas-20260927.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/video-annotation-guide-sticker-atlas-20260927.png",
+      "sha256": "fe4d7804e0e16fad2ddb7caabcc1ba02f297ab5e2732ad3db290f948e5867255",
+      "legacyPath": "docs/assets/video-annotation-guide-sticker-atlas-20260927.png"
+    },
+    {
+      "path": "resources/source/materials/video-background-material-atlas-20260927.extraction.json",
+      "sha256": "4b335f4b19f73a869c7386de997a2cce76f80ffc109cd2ec50b739293f74cf87",
+      "legacyPath": "docs/assets/video-background-material-atlas-20260927.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/video-background-material-atlas-20260927.png",
+      "sha256": "952422c33d1720facc817500771b908d5fdeff84a0865751789f37dc1dba1ecd",
+      "legacyPath": "docs/assets/video-background-material-atlas-20260927.png"
+    },
+    {
+      "path": "resources/source/materials/video-background-texture-sheet-20260925.extraction.json",
+      "sha256": "9b277ddb96b610d4ef08e9c7964de27d6a486a7fc2d395c723940ef6df59970a",
+      "legacyPath": "docs/assets/video-background-texture-sheet-20260925.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/video-background-texture-sheet-20260925.png",
+      "sha256": "77e80024186b3dd9dcf52cd42926c64290b6fd2c2ff9b9d5acc718c0d1d4d2aa",
+      "legacyPath": "docs/assets/video-background-texture-sheet-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/video-optical-overlay-texture-sheet-20260925.extraction.json",
+      "sha256": "bdc2e9df35c6d157278d471a317d592641bd3a6935f5081fae59607bb0966964",
+      "legacyPath": "docs/assets/video-optical-overlay-texture-sheet-20260925.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/video-optical-overlay-texture-sheet-20260925.png",
+      "sha256": "f505479a7777434ac36d78ef86da2abe06064108db51227d6382cd343e184b40",
+      "legacyPath": "docs/assets/video-optical-overlay-texture-sheet-20260925.png"
+    },
+    {
+      "path": "resources/source/materials/video-overlay-texture-sheet-20260924.extraction.json",
+      "sha256": "52d7af597224604ab78463fca098d758f0781b5b3c1360beafe28808a73a8187",
+      "legacyPath": "docs/assets/video-overlay-texture-sheet-20260924.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/video-overlay-texture-sheet-20260924.png",
+      "sha256": "26a1aad405a673065b7d5a1152346be7d0c66985c45eb386a16684c68500047f",
+      "legacyPath": "docs/assets/video-overlay-texture-sheet-20260924.png"
+    },
+    {
+      "path": "resources/source/materials/vintage-film-print-texture-atlas-20260926.extraction.json",
+      "sha256": "75f1cbd3dd86bc7cba203415a2dcf4731dc61a6c597fdb4fa7a010ddd9909511",
+      "legacyPath": "docs/assets/vintage-film-print-texture-atlas-20260926.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/vintage-film-print-texture-atlas-20260926.png",
+      "sha256": "4906c287a82d8064963c98a6034d87760633176daab3780e2a0c94f1ddbb6c77",
+      "legacyPath": "docs/assets/vintage-film-print-texture-atlas-20260926.png"
+    },
+    {
+      "path": "resources/source/materials/weather-atmosphere-overlay-atlas-20260926.extraction.json",
+      "sha256": "932996459820bc27939810cefb354c1a5c2ea3736941a3a7441db13a1e26454b",
+      "legacyPath": "docs/assets/weather-atmosphere-overlay-atlas-20260926.extraction.json"
+    },
+    {
+      "path": "resources/source/materials/weather-atmosphere-overlay-atlas-20260926.png",
+      "sha256": "fa4888ff8cd6f092018216dc430dde9589e63516a4cf57c7141f4818d020051f",
+      "legacyPath": "docs/assets/weather-atmosphere-overlay-atlas-20260926.png"
+    }
+  ]
+}

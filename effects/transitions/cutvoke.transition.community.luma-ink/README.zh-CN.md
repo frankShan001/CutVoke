@@ -17,4 +17,4 @@ python -m pytest -q tests/integration/test_effect_contributions.py tests/renderi
 
 需要可编辑原创样片时，用新的 `--output` 目录运行[隔离演示脚本](../../../tools/verify/demo_vlog_effects.py)。扩展时沿用可支持映射，换成自己的贡献者 ID，并保留来源、许可、边界和实测证据；清单不能携带任意执行代码。
 
-[Peter 的 Luma Fade 教程](https://www.youtube.com/watch?v=1Qm1EGxdZ6E)提供具名手法依据。研究核验了来源元数据和手法名称，但正片始终缓冲，没有复制具体镜头、时间点、素材或算法。完整限制见[来源记录](../../../docs/user/vlog-effect-references.json)。翻译是尚无母语审校的技术草稿。
+[Peter 的 Luma Fade 教程](https://www.youtube.com/watch?v=1Qm1EGxdZ6E)提供具名手法参考。本效果独立使用 CutVoke 现有亮度遮罩功能实现，未引入教程中的素材或算法。翻译是尚无母语审校的技术草稿。

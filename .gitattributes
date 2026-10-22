@@ -6,9 +6,8 @@ resources/source/brand/*.json text eol=lf
 docs/images/readme/banner.svg text eol=lf
 # Relocated historical provenance remains byte-identical on Windows and Linux.
 resources/source/materials/*.json -text whitespace=cr-at-eol
-docs/history/reviews/**/*.json -text whitespace=cr-at-eol
 docs/images/readme/*.json -text whitespace=cr-at-eol
-docs/development/asset-relocations.json text eol=lf
+resources/source/provenance.json text eol=lf
 # Approved resource hashes cover the original bytes, including CRLF sidecars.
 # Preserve those bytes on every OS; never rewrite an approval to hide a mismatch.
 src/cutvoke/assets/**/*.json -text

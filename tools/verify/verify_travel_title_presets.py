@@ -170,7 +170,7 @@ def main():
                     entry["checks"][check] = True
                     entry["evidence"][check] = rel + qa_file.name
                 print(f"{pid}: visible={pixels}, edit={edit_pixels}, preview diff={diff:.4f}, seek diff={seek_diff:.4f}")
-    proof = ROOT / "output/travel-title-library-20261019"
+    proof = ROOT / ".artifacts/acceptance/travel-title-library"
     proof.mkdir(parents=True, exist_ok=True)
     sheet.save(proof / "contact.png")
     CATALOG.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\r\n")

@@ -1,12 +1,18 @@
 recursive-include .artifacts/web *
 include README.zh-CN.md CONTRIBUTING.md CONTRIBUTING.zh-CN.md SECURITY.md CHANGELOG.md
-recursive-include docs *.md *.json *.png *.svg
+include docs/*.md
+recursive-include docs/user *.md *.json
+recursive-include docs/development *.md *.json
+recursive-include docs/images *.md *.json *.png *.svg
+prune docs/history
+prune private
+prune local-notes
 recursive-include resources *.md *.json *.png
 recursive-include skills *.md *.py
 recursive-include effects *.md *.json *.png LICENSE
 recursive-include examples *.md *.py *.json
 recursive-include tools *.py *.mjs *.cmd *.ps1 *.sh *.md
-recursive-include tests *.py
+recursive-include tests *.py *.md
 recursive-include apps/editor *.json *.ts *.tsx *.css *.html *.mjs
 recursive-include apps/editor/public *
 prune apps/editor/node_modules

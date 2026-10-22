@@ -17,11 +17,10 @@
 | 实测工程渲染耗时（支持隔离空缓存） | `verify/benchmark_render.py --help` |
 | 检查社区效果清单与贡献材料 | `verify/validate_effect_contributions.py` |
 | 检查内置资源包 | `build/build_builtin_resource_pack.py --check` |
-| 迁移旧工程文件 | `maintenance/migrate_workspace_data.py` |
 
 Python 工具可直接执行，不依赖当前工作目录定位源码。生成文件统一放到 `.artifacts/`。`assets/` 中部分工具会改写资源目录和清单，执行前先查看其用途和参数；视觉审核与性能检查集中在 `verify/`。
 
-素材制作输入在 [resources/source/materials](../resources/source/materials/README.md)，品牌母版在 [resources/source/brand](../resources/source/brand/README.md)。新的提取报告和审核预览输出到 `.artifacts/`；注册工具读取已选择归档的提取记录。审核后再明确归档必要证据，详见[项目目录说明](../docs/development/project-layout.md)。
+素材制作输入在 [resources/source/materials](../resources/source/materials/README.md)，品牌母版在 [resources/source/brand](../resources/source/brand/README.md)。新的提取报告和审核预览输出到 `.artifacts/`；注册工具读取与当前素材对应的提取记录。只将产品所需的来源和校验元数据纳入仓库，个人审核过程保存在仓库外，详见[收录范围](../docs/development/repository-content.md)。
 
 独立 wheel 交付时，将 `dev/start-cutvoke-wheel.cmd` **复制到 wheel 旁边**，保持文件名 `start-cutvoke-wheel.cmd`；它按所在目录寻找安装包，无需源码仓库。
 

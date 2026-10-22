@@ -120,6 +120,6 @@ PR 请保持范围清楚，并包含：
 
 遵守 [项目目录说明](docs/development/project-layout.md)。新增工具按用途放入 `tools/` 的对应目录，临时渲染、日志和报告统一写入 `.artifacts/`。测试工程使用临时数据库；用户工程、原始素材与成片保存在源码仓库之外。
 
-内置素材制作输入与来源记录放在 `resources/source/`，正式文档配图放在 `docs/images/`，必要的历史审核证据放在 `docs/history/reviews/YYYY-MM/`。源图、成品与审核记录各有用途；不要提交旧成品备份和重复裁切试验。提交前运行 `python tools/verify/check_asset_layout.py`。
+可复现的内置素材制作输入与来源记录放在 `resources/source/`，正式文档配图放在 `docs/images/`。个人开发日志、一次性验收报告和审核截图保存在仓库外。运行时需要的资源元数据及第三方许可随产品保留。遵循[公开仓库收录范围](docs/development/repository-content.md)，提交前运行 `python tools/verify/check_asset_layout.py`。
 
 安装、已测版本与故障排查见[安装说明](docs/user/installation.md)；源码/wheel 的候选包校验与 Windows 验收边界见[预发布流程](docs/development/prerelease.md)。

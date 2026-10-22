@@ -14,7 +14,7 @@ python tools/build/prepare_candidate.py --output dist/candidate-local
 python tools/verify/verify_distribution.py dist/candidate-local
 ```
 
-Use a new output directory for each attempt. The script produces one `.tar.gz` source archive, one `py3-none-any.whl`, `VERIFICATION.json`, `BUILD-INFO.json`, a release-note draft and `SHA256SUMS`. The source includes the Web source/built editor, contribution/security docs, examples, AI Skill and build/verification tools. The wheel includes the built editor and runtime resources. Python, cryptography/fontTools and a compatible system FFmpeg/ffprobe remain required. The wheel tag alone is not proof of Windows/macOS acceptance.
+Use a new output directory for each attempt. The script produces one `.tar.gz` source archive, one `py3-none-any.whl`, `VERIFICATION.json`, `BUILD-INFO.json`, `RELEASE_NOTES.md` copied from the public `CHANGELOG.md`, and `SHA256SUMS`. The source includes the Web source/built editor, contribution/security docs, examples, AI Skill and build/verification tools. Private development archives are excluded. The wheel includes the built editor and runtime resources. Python, cryptography/fontTools and a compatible system FFmpeg/ffprobe remain required. The wheel tag alone is not proof of Windows/macOS acceptance.
 
 `BUILD-INFO.json` records the Git SHA, dirty-worktree flag and tool versions. A dirty candidate is for local review only; rebuild from the approved clean commit before publication. Checksums detect byte changes, not publisher identity; these candidates are unsigned.
 

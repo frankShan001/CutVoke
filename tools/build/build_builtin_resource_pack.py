@@ -46,10 +46,10 @@ def _relative(path: Path) -> str:
 def build_manifest() -> dict[str, Any]:
     files: dict[str, dict[str, Any]] = {}
     resources: list[dict[str, Any]] = []
-    # The released pack pins provenance text as well as media bytes. Read reports
-    # from their new locations while retaining their original signed identity.
-    relocations = json.loads((REPO / "docs/development/asset-relocations.json").read_text(encoding="utf-8"))
-    original_locations = {entry["path"]: entry["previousPath"] for entry in relocations["entries"]}
+    # Retain released provenance text without depending on development archives.
+    provenance = json.loads((REPO / "resources/source/provenance.json").read_text(encoding="utf-8"))
+    original_locations = {entry["path"]: entry.get("legacyPath", entry["path"])
+                          for entry in provenance["entries"]}
 
     def add_file(path: Path) -> str:
         relative = _relative(path)

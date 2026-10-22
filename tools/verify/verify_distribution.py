@@ -17,6 +17,11 @@ def check_names(names):
             raise ValueError(f"unsafe archive path: {name}")
         if any(part in {"__pycache__", "node_modules", ".venv", ".git"} for part in path.parts):
             raise ValueError(f"local dependency/cache leaked into archive: {name}")
+        if any(part in {"private", "local-notes"} for part in path.parts) or any(
+            path.parts[index:index + 2] == ("docs", "history")
+            for index in range(len(path.parts) - 1)
+        ):
+            raise ValueError(f"private development record leaked into archive: {name}")
         if path.suffix in {".pyc", ".pyo", ".sqlite", ".db", ".part"}:
             raise ValueError(f"runtime file leaked into archive: {name}")
 
@@ -71,6 +76,8 @@ def verify(directory: Path) -> dict:
             "apps/desktop/requirements-build.lock", "apps/desktop/PORTABLE-README.txt",
             "apps/desktop/UNIX-README.txt", "apps/desktop/assets/brand/cutvoke.ico",
             "resources/source/brand/cutvoke-icon-master.png", "tools/README.md",
+            "resources/source/provenance.json", "docs/development/repository-content.md",
+            "CHANGELOG.md", "tests/README.md",
             "tests/support/e2e_server.py",
             "skills/cutvoke-editor/SKILL.md", "skills/cutvoke-editor/scripts/demo.py",
             "effects/transitions/cutvoke.transition.community.soft-reveal/manifest.json",
@@ -86,7 +93,8 @@ def verify(directory: Path) -> dict:
     return {"ok": True, "version": version, "wheel": wheels[0].name,
             "source": sources[0].name, "wheelEntries": wheel_count,
             "sourceEntries": len(names), "checks": ["editor bundled", "runtime version matches",
-            "source workflow included", "no caches/dependencies/runtime databases", "safe archive paths"]}
+            "source workflow included", "no private development archives",
+            "no caches/dependencies/runtime databases", "safe archive paths"]}
 
 
 def main():
