@@ -1,0 +1,37 @@
+name: Verify and finish v0.3.2 draft
+
+on:
+  push:
+    branches: [codex/release-v0.3.2-recovery]
+    paths: [.github/workflows/recover-v0.3.2.yml, tools/release/recover_v032.py]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-refs/tags/v0.3.2
+  cancel-in-progress: false
+
+jobs:
+  finish-verified-draft:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13.16'
+      - name: Reverify existing draft bytes, publish and verify public downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/release/recover_v032.py
+      - name: Retain verification evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: published-v0.3.2-verification
+          path: .artifacts/recovery/verification.json
+          if-no-files-found: warn

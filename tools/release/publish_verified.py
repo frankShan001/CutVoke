@@ -163,7 +163,11 @@ def main():
     gh('release', 'create', tag, '--repo', repo, '--target', sha, '--verify-tag', '--draft', '--prerelease',
        '--title', f'CutVoke {tag} — Cross-platform preview / 跨平台预览版', '--notes-file', str(note_file))
     gh('release', 'upload', tag, '--repo', repo, *(str(p) for p in paths))
-    release = api(f'repos/{repo}/releases/tags/{tag}')
+    # The by-tag REST endpoint does not resolve an unpublished draft.
+    pages = json.loads(gh('api', '--paginate', '--slurp', f'repos/{repo}/releases?per_page=100'))
+    drafts = [r for page in pages for r in page if r['tag_name'] == tag]
+    require(len(drafts) == 1, 'Missing/ambiguous newly created draft')
+    release = api(f'repos/{repo}/releases/{drafts[0]["id"]}')
     require(release['draft'] and release['prerelease'], 'Unexpected release state')
     require(len(release['assets']) == len(expected), 'Unexpected asset count')
     for asset in release['assets']:
