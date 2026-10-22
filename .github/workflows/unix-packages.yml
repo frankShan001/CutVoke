@@ -121,12 +121,12 @@ jobs:
           .artifacts/venv-portable/bin/python -m PyInstaller --noconfirm --distpath .artifacts/build/desktop-engine --workpath .artifacts/build/desktop-work apps/desktop/engine.spec
       - name: Verify Electron and package native app
         run: |
-          npm ci --prefix desktop
-          npm run test:build-deps --prefix desktop
-          npm run test:i18n --prefix desktop
-          npm run test:storage --prefix desktop
+          npm ci --prefix apps/desktop
+          npm run test:build-deps --prefix apps/desktop
+          npm run test:i18n --prefix apps/desktop
+          npm run test:storage --prefix apps/desktop
           python tools/build/prepare_desktop_unix.py
-          npm run package:unix --prefix desktop -- ${{ matrix.builder }}
+          npm run package:unix --prefix apps/desktop -- ${{ matrix.builder }}
       - name: Assemble distribution preserving executable modes and symlinks
         run: .artifacts/venv-portable/bin/python tools/build/assemble_portable.py
       - name: Extract shipped archive and accept real macOS app

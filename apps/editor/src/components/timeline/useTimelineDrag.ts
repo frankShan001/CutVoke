@@ -98,7 +98,10 @@ export function useTimelineDrag(): TimelineDragApi {
     if (!trackId) return null;
     const rect = lane.getBoundingClientRect();
     // lane 本身随横向滚动移动，rect.left 已包含 scrollLeft；不能再加一次滚动量。
-    const px = Math.max(0, clientX - rect.left);
+    // Absolutely positioned clips use the lane's padding edge. Its border is
+    // outside that origin; counting it shifts each drop by a pixel (a frame
+    // at low zoom), including Alt moves that keep attachments in place.
+    const px = Math.max(0, clientX - rect.left - lane.clientLeft);
     // 保留按下时鼠标在片段内的位置，点击片段中心再拖时不会突然把片段左边缘吸到鼠标下。
     const st = getLatestState();
     const frameRate = st?.project?.sequence.fps;

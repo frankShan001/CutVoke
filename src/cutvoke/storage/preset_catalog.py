@@ -101,7 +101,9 @@ class PresetSpec:
             "appliesTo": list(self.applies_to), "cover": self.cover,
             "motionPreview": self.motion_preview,
             "adjustable": list(self.adjustable), "license": self.license,
-            "source": self.source,
+            # Keep approved catalog bytes intact while displaying relocated paths.
+            "source": self.source.replace("src/cutvoke/core/builtin_presets.json",
+                                          "src/cutvoke/catalogs/builtin_presets.json"),
             "downloadState": self.download_state, "status": self.status,
             "mediaAvailable": self._exists(self.cover) and self._exists(self.motion_preview),
             "checks": dict(self.checks), "evidence": dict(self.evidence),

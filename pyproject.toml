@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cutvoke"
-version = "0.3.1"
+version = "0.3.2"
 description = "A local video editing workspace shared by people and external AI agents."
 readme = "README.md"
 requires-python = ">=3.10"

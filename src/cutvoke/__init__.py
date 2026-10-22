@@ -13,7 +13,7 @@
   - service   统一编辑服务（任务书 8，幂等 + 版本校验 + 事件）
 """
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 from cutvoke.domain.model import Project, Sequence, Track, Clip, AssetReference, EffectInstance, Caption, Marker
 from cutvoke.domain.rational import Rational

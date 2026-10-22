@@ -1,0 +1,38 @@
+name: Verified release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13.16'
+      - name: Verify same-commit builds, stage and publish prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/release/publish_verified.py
+      - name: Retain publication evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-verification
+          path: .artifacts/release/BUILD-INFO.json
+          if-no-files-found: warn

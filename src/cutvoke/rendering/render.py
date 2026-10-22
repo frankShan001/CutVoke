@@ -4665,7 +4665,10 @@ class RenderService:
                 f"[{cur}]format=rgba,split=2[{stem}_rgb][{stem}_src]",
                 f"[{stem}_src]alphaextract,format=gray16le[{stem}_alpha]",
                 f"movie=filename='{path}':dec_threads=2,settb=expr={time_base},setpts={clock}[{stem}_matte]",
-                f"[{stem}_alpha][{stem}_matte]blend=all_mode=multiply:shortest=0:repeatlast=1,format=gray[{stem}_coverage]",
+                # Disable swscale's version-dependent dithering when reducing
+                # coverage to eight bits; it can add two alpha units on FFmpeg 6.
+                f"[{stem}_alpha][{stem}_matte]blend=all_mode=multiply:shortest=0:repeatlast=1,"
+                f"scale=flags=neighbor:sws_dither=none,format=gray[{stem}_coverage]",
                 f"[{stem}_rgb][{stem}_coverage]alphamerge,format=gbrap[{stem}_out]",
             ])
             return f'{stem}_out'

@@ -694,7 +694,8 @@ test("six resource services can fail together and recover independently across d
   const projectMediaName = sources[0].split(/[\\/]/).pop() || sources[0];
   await expect(page.locator(".media-item").filter({ hasText: projectMediaName }).first()).toBeVisible();
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "特效" }).click();
-  await expect(page.getByRole("status").filter({ hasText: "加载中" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "效果库", exact: true })
+    .locator(".cv-loading").last()).toBeVisible();
   releaseAssetFailure();
   releaseStickerFailure();
   releaseEffectFailure();
@@ -3112,7 +3113,9 @@ test("attached overlays follow video moves, Alt keeps them in place, and unlinki
   const moveBy = async (fractionOfClip: number, holdAlt = false) => {
     const box = await videoBlock.boundingBox();
     expect(box).not.toBeNull();
-    const startX = box!.x + box!.width / 2;
+    // Grab near the leading edge so the exact-distance drop stays inside the
+    // viewport. The center of a zoomed clip crosses the auto-scroll zone.
+    const startX = box!.x + Math.min(24, box!.width / 4);
     const startY = box!.y + box!.height / 2;
     if (holdAlt) await page.keyboard.down("Alt");
     await page.mouse.move(startX, startY);

@@ -24,6 +24,9 @@
   display: none;
 }
 .zone-left__scroll {
+  /* Domain changes restore scroll explicitly; browser anchoring must not
+     move that position when cached resource lists refresh. */
+  overflow-anchor: none;
   flex: 1;
   min-height: 0;
   overflow-y: auto;

@@ -11,3 +11,7 @@ fonttools==4.66.1
 cffi==2.0.0
 pycparser==3.0
 macholib==1.16.4; sys_platform == "darwin"
+# Native renderer dependencies; NumPy 2.2 supports Python 3.10–3.13.
+numpy==2.2.6
+opencv-python-headless==4.11.0.86
+pillow==12.3.0

@@ -7,6 +7,7 @@ from fractions import Fraction
 
 import numpy as np
 import pytest
+from cutvoke.rendering.render import _filter_complex_file_option
 from PIL import Image
 
 from cutvoke.domain.model import AssetReference, Clip, Track
@@ -28,7 +29,7 @@ def test_vectorized_field_matches_original_expression(tmp_path, curve, invert):
     graph.write_text('[0:v]'+_fx_mask_expr(params)+'[v]', encoding='utf-8')
     result = subprocess.run(['ffmpeg', '-v', 'error', '-filter_complex_threads', '2',
                              '-f', 'lavfi', '-i', 'color=white:size=160x96:rate=24:duration=1.25',
-                             '-/filter_complex', str(graph), '-map', '[v]',
+                             _filter_complex_file_option('ffmpeg'), str(graph), '-map', '[v]',
                              '-pix_fmt', 'rgba', '-f', 'rawvideo', 'pipe:1'],
                             check=True, capture_output=True)
     original = np.frombuffer(result.stdout, np.uint8).reshape(-1,96,160,4)[:,:,:,3]

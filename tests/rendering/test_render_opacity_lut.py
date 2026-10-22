@@ -5,6 +5,7 @@ import subprocess
 
 import numpy as np
 import pytest
+from cutvoke.rendering.render import _filter_complex_file_option
 
 from cutvoke.domain.keyframes import Keyframe, expression
 from cutvoke.domain.model import AssetReference, Clip
@@ -36,7 +37,7 @@ def test_lut_matches_per_pixel_opacity_and_keeps_chroma(tmp_path, fps, easing):
         result = subprocess.run([
             'ffmpeg', '-v', 'error', '-filter_complex_threads', '2',
             '-f', 'rawvideo', '-pixel_format', 'yuva444p', '-video_size', '24x16',
-            '-framerate', str(fps), '-i', 'pipe:0', '-/filter_complex', str(graph),
+            '-framerate', str(fps), '-i', 'pipe:0', _filter_complex_file_option('ffmpeg'), str(graph),
             '-map', '[v]', '-frames:v', '36', '-f', 'rawvideo', 'pipe:1'],
             input=source * 36, capture_output=True, check=True)
         outputs.append(np.frombuffer(result.stdout, dtype=np.uint8).reshape(36, 4, 16, 24))

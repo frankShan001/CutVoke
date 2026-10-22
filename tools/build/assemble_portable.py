@@ -74,14 +74,18 @@ if python_license is None:
     raise RuntimeError(f'Missing Python license in {sys.base_prefix}')
 shutil.copyfile(python_license, licenses / ('Python-LICENSE.rtf' if python_license.suffix == '.rtf' else 'Python-LICENSE.txt'))
 dependencies = []
-for name_ in ('cryptography', 'fonttools', 'cffi', 'pycparser', 'pyinstaller'):
+for name_ in ('cryptography', 'fonttools', 'cffi', 'pycparser', 'pyinstaller',
+              'numpy', 'pillow', 'opencv-python-headless'):
     dist = metadata.distribution(name_)
     destination = licenses / 'python' / name_
     destination.mkdir(parents=True)
     count = 0
     for file in dist.files or []:
         if '.dist-info/' in file.as_posix() and any(token in file.name.lower() for token in ('license', 'copying', 'notice')):
-            shutil.copyfile(dist.locate_file(file), destination / file.name)
+            # Preserve nested third-party notices with identical basenames.
+            target = destination / file.as_posix().split('.dist-info/', 1)[1]
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(dist.locate_file(file), target)
             count += 1
     if not count:
         raise RuntimeError(f'Missing runtime dependency license: {name_}')
