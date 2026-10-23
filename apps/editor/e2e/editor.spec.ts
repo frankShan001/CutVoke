@@ -4252,6 +4252,95 @@ test("live effect pixels update during held input and caption IME autosaves with
   await page.screenshot({ path: "../../.artifacts/live-effect-caption.png" });
 });
 
+test("playback reuses the prefetched editor window instead of fetching another variant", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({ status: 404, contentType: "application/json", body: "{}" }));
+  const nextRequests: string[] = [];
+  page.on("request", request => {
+    const url = new URL(request.url());
+    if (url.pathname === `${apiPath(id)}/preview-window` && url.searchParams.get("index") === "1") nextRequests.push(url.href);
+  });
+  await openProject(page, name);
+  await page.getByRole("button", { name: "播放", exact: true }).click();
+  await expect.poll(async () => Number(await page.getByRole("slider", { name: "时间线播放头" }).getAttribute("aria-valuenow"))).toBeGreaterThan(2.5);
+  expect(nextRequests).toHaveLength(1);
+  expect(new URL(nextRequests[0]).searchParams.get("editorTitles")).toBe("1");
+  await page.getByRole("button", { name: "暂停", exact: true }).click();
+});
+
+test("live audio does not go silent while the visual decoder buffers", async ({ page, request }) => {
+  const { name } = await createProject(request);
+  await openProject(page, name);
+  const meter = page.getByTestId("live-audio-meter");
+  await expect(meter).toHaveAttribute("data-ready", "true");
+  await page.getByRole("button", { name: "播放", exact: true }).click();
+  await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeGreaterThan(.02);
+  const result = await page.evaluate(async () => {
+    const video = document.querySelector<HTMLVideoElement>("video.player__video")!;
+    const original = video.play;
+    let held = true;
+    video.play = function () { return held ? Promise.resolve() : original.call(this); };
+    video.pause();
+    video.dispatchEvent(new Event("waiting"));
+    let silent = 0, longestSilent = 0;
+    const samples: number[] = [];
+    try {
+      for (let i = 0; i < 35; i++) {
+        await new Promise(resolve => setTimeout(resolve, 20));
+        const rms = Number(document.querySelector<HTMLOutputElement>('[data-testid="live-audio-meter"]')!.dataset.rms);
+        samples.push(rms);
+        silent = rms < .01 ? silent + 1 : 0;
+        longestSilent = Math.max(longestSilent, silent);
+      }
+    } finally { held = false; video.play = original; await video.play(); }
+    return { longestSilentMs: longestSilent * 20, samples: samples.length, audible: samples.filter(x => x > .01).length };
+  });
+  const evidence = test.info().outputPath("audio-buffer-continuity.json");
+  writeFileSync(evidence, JSON.stringify(result));
+  await test.info().attach("audio-buffer-continuity", { path: evidence, contentType: "application/json" });
+  expect(result.longestSilentMs).toBeLessThanOrEqual(60);
+  expect(result.audible / result.samples).toBeGreaterThan(.95);
+  await page.getByRole("button", { name: "暂停", exact: true }).click();
+  const paused = await meter.getAttribute("data-rms");
+  await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeLessThan(.001);
+  expect(paused).not.toBeNull();
+});
+
+test("live audio stays continuous when video frame callbacks are delayed", async ({ page, request }) => {
+  const { name } = await createProject(request);
+  await page.addInitScript(() => {
+    // The video clock still advances while costly frame presentation delays UI updates.
+    HTMLVideoElement.prototype.requestVideoFrameCallback = () => 1;
+    HTMLVideoElement.prototype.cancelVideoFrameCallback = () => {};
+    const descriptor = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, "currentTime")!;
+    const seeks: Array<{ at: number; from: number; to: number; video: number }> = [];
+    (window as typeof window & { audioSeeks: typeof seeks }).audioSeeks = seeks;
+    Object.defineProperty(HTMLMediaElement.prototype, "currentTime", { ...descriptor, set(value: number) {
+      if (this instanceof HTMLAudioElement && !this.paused) seeks.push({at:performance.now(),from:this.currentTime,to:value,video:document.querySelector('video')?.currentTime || 0});
+      descriptor.set!.call(this, value);
+    } });
+  });
+  await openProject(page, name);
+  const meter = page.getByTestId("live-audio-meter");
+  await expect(meter).toHaveAttribute("data-ready", "true");
+  await page.getByRole("button", { name: "播放", exact: true }).click();
+  await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeGreaterThan(.02);
+  const result = await page.evaluate(async () => {
+    const seeks = (window as typeof window & { audioSeeks: number[] }).audioSeeks;
+    seeks.length = 0;
+    const levels: number[] = [];
+    for (let i = 0; i < 64; i++) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+      levels.push(Number(document.querySelector<HTMLOutputElement>('[data-testid="live-audio-meter"]')?.dataset.rms));
+    }
+    return { seeks: seeks.length, details: [...seeks], audible: levels.filter(level => level > .01).length, samples: levels.length };
+  });
+  await test.info().attach("audio-continuity", { body: JSON.stringify(result), contentType: "application/json" });
+  expect(result.seeks).toBeLessThanOrEqual(1);
+  expect(result.audible / result.samples).toBeGreaterThan(.85);
+  await page.getByRole("button", { name: "暂停", exact: true }).click();
+});
+
 test("live audio gain is audible before release and saves as one undo without restarting playback", async ({ page, request }) => {
   const { id, name } = await createProject(request);
   await openProject(page, name);

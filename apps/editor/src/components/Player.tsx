@@ -75,6 +75,8 @@ export function Player() {
   const [zoom, setZoom] = useState<ZoomMode>(FIT);
   const [ratio, setRatio] = useState<[number, number]>([16, 9]);
   const [buffering, setBuffering] = useState(false);
+  const bufferingRef = useRef(buffering);
+  bufferingRef.current = buffering;
   const [readyVideoUrl, setReadyVideoUrl] = useState<string | null>(null);
   const [frameGate, setFrameGate] = useState("");
   const [stageSize, setStageSize] = useState({ width: 640, height: 360 });
@@ -96,6 +98,7 @@ export function Player() {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const playingRef = useRef(playing);
   playingRef.current = playing;
+  const audioTransportRef = useRef({ active: false, time: 0, started: 0 });
   const scrubbingRef = useRef(state.scrubbing);
   scrubbingRef.current = state.scrubbing;
   const scrubPausedVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -184,8 +187,31 @@ export function Player() {
       }
     },
   });
-  const windowBoundsRef = useRef({ start: windowStart, end: windowEnd });
-  windowBoundsRef.current = { start: windowStart, end: windowEnd };
+  const windowBoundsRef = useRef({ start: windowStart, end: windowEnd, source: videoUrl });
+  windowBoundsRef.current = { start: windowStart, end: windowEnd, source: videoUrl };
+  const audioPlaybackClock = useCallback(() => {
+    // With a ready native mix, audio owns the transport. Video decoding and
+    // segment handoffs must not pause or rewind a healthy sound stream.
+    if (mode === "video" && (nativeAudioRef.current || audioTransportRef.current.active) && playingRef.current && !scrubbingRef.current) {
+      const transport = audioTransportRef.current;
+      if (!transport.active) {
+        transport.active = true; transport.time = playheadRef.current; transport.started = performance.now();
+      }
+      return { time: Math.min(mediaEndSecs, transport.time + (performance.now() - transport.started) / 1000), playing: true };
+    }
+    audioTransportRef.current.active = false;
+    if (scrubbingRef.current) return { time: playheadRef.current, playing: false };
+    if (mode !== "video" || !playingRef.current || scrubbingRef.current) return null;
+    const video = videoRef.current;
+    if (!video || video.readyState < 2 || video.dataset.previewSource !== windowBoundsRef.current.source)
+      return { time: playheadRef.current, playing: false };
+    return { time: windowBoundsRef.current.start + video.currentTime,
+      playing: !video.paused && !video.seeking && !bufferingRef.current && video.readyState >= 3 };
+  }, [mode, mediaEndSecs]);
+  useLayoutEffect(() => {
+    if (audioTransportRef.current.active && Math.abs(playhead - reportedVideoTimeRef.current) > .25)
+      audioTransportRef.current.active = false;
+  }, [playhead]);
   const bindPreviewVideo = useCallback((video: HTMLVideoElement | null) => {
     if (video) video.muted = nativeAudioRef.current;
     if (video && video.readyState >= 1) {
@@ -376,6 +402,7 @@ export function Player() {
   }, [scheduleFrame, state.opening, usePrepared, currentId, videoUrl]);
   const onVideoEnded = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current || scrubbingRef.current) return;
+    if (audioTransportRef.current.active && playingRef.current) return;
     if (windowEnd < mediaEndSecs - 0.01) {
       setVideoTime(windowEnd);
       dispatchRef.current({ type: "PLAYHEAD_SET", t: windowEnd });
@@ -390,6 +417,7 @@ export function Player() {
     const v = event.currentTarget;
     if (v !== videoRef.current) return;
     if (scrubbingRef.current) return;
+    if (audioTransportRef.current.active && playingRef.current) return;
     const absoluteTime = windowStart + v.currentTime;
     // A native preview can be stale or longer than the current editable sequence.
     // The editor's content boundary is authoritative for both playback and scrubbing.
@@ -449,6 +477,7 @@ export function Player() {
   }, [confirmFrame]);
   const onPause = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current) return;
+    if (audioTransportRef.current.active && playingRef.current) return;
     if (scrubPausedVideoRef.current === event.currentTarget) {
       scrubPausedVideoRef.current = null;
       return;
@@ -507,7 +536,7 @@ export function Player() {
   // Publish once per decoded frame, rather than repainting the editor at the
   // display's 60/144Hz rate while a 30fps video is still showing the same frame.
   useEffect(() => {
-    if (!playing || mode !== "video" || state.scrubbing) return;
+    if (!playing || mode !== "video" || state.scrubbing || nativeAudioReady || audioTransportRef.current.active) return;
     const video = videoRef.current;
     if (!video) return;
     let frameId = 0;
@@ -537,7 +566,37 @@ export function Player() {
       if (hasFrameCallback) video.cancelVideoFrameCallback(frameId);
       else window.cancelAnimationFrame(frameId);
     };
-  }, [playing, mode, mediaEndSecs, windowStart, state.scrubbing, videoUrl]);
+  }, [playing, mode, mediaEndSecs, windowStart, state.scrubbing, videoUrl, nativeAudioReady]);
+
+  useEffect(() => {
+    if (!playing || (!nativeAudioReady && !audioTransportRef.current.active) || state.scrubbing || mode !== "video") return;
+    let frame = 0, lastPublished = -Infinity;
+    const tick = (now: number) => {
+      const clock = audioPlaybackClock();
+      if (clock && now - lastPublished >= 1000 / 30) {
+        lastPublished = now;
+        let time = clock.time;
+        const loop = loopRef.current;
+        if (loop.enabled && loop.in != null && loop.out != null && loop.out > loop.in && time >= Math.min(loop.out, mediaEndSecs)) {
+          time = loop.in;
+          audioTransportRef.current = { active: true, time, started: now };
+        }
+        reportedVideoTimeRef.current = time;
+        setVideoTime(time);
+        dispatchRef.current({ type: "PLAYHEAD_SET", t: time });
+        const video = videoRef.current, bounds = windowBoundsRef.current;
+        if (video && video.dataset.previewSource === bounds.source && video.readyState >= 2 && time >= bounds.start && time < bounds.end) {
+          if (!video.seeking && Math.abs(video.currentTime - (time - bounds.start)) > .15)
+            video.currentTime = time - bounds.start;
+          if (video.paused) requestVideoPlay(video);
+        }
+        if (time >= mediaEndSecs) { video?.pause(); endPlay(); return; }
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [playing, nativeAudioReady, state.scrubbing, mode, audioPlaybackClock, mediaEndSecs, requestVideoPlay, endPlay]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -554,7 +613,7 @@ export function Player() {
   useEffect(() => {
     if (usePrepared || mode !== "video" || !videoReady || state.scrubbing || !playing ||
         !currentId || !hasRenderable || windowEnd >= mediaEndSecs - 0.01) return;
-    const nextUrl = `/api/v1/projects/${encodeURIComponent(currentId)}/preview-window?index=${windowIndex + 1}&timeline=${previewTimelineToken}&restore=${sourceRestoreRevision}`;
+    const nextUrl = `/api/v1/projects/${encodeURIComponent(currentId)}/preview-window?editorTitles=1&index=${windowIndex + 1}&timeline=${previewTimelineToken}&restore=${sourceRestoreRevision}`;
     const lease = segments.cache.acquire(nextUrl);
     void lease.promise.catch(() => {});
     return lease.release;
@@ -617,6 +676,14 @@ export function Player() {
       return;
     }
     const v = videoRef.current;
+    if (playingRef.current) {
+      playingRef.current = false;
+      audioTransportRef.current.active = false;
+      setPlaying(false);
+      v?.pause();
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已暂停") });
+      return;
+    }
     if (mode === "video" && v) {
       if (v.paused) {
         if (mediaEndSecs <= 0) return;
@@ -833,7 +900,7 @@ export function Player() {
             <span className="player__compare-label">{tr("正在生成调色前画面…")}</span>
           ) : null}
           {!state.opening && currentId && !showColorBefore ? <InteractiveScene playing={playing} onReady={setNativeReady} /> : null}
-          {!state.opening && currentId ? <InteractiveAudio playing={playing} onReady={setNativeAudioReady} /> : null}
+          {!state.opening && currentId ? <InteractiveAudio playing={playing} onReady={setNativeAudioReady} playbackClock={audioPlaybackClock} /> : null}
           <InteractionStatus />
           <TransformCanvasOverlay />
           <MaskCanvasOverlay />

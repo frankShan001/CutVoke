@@ -10,15 +10,18 @@ type Voice = { element: HTMLAudioElement; gain?: GainNode; analyser?: AnalyserNo
   signature: string; prepared: boolean; ready: boolean; url?: string; disposed?: boolean; failed?: boolean; hasAudio?: boolean };
 
 /** One gain envelope per clip. Moving a fader never re-encodes the mixed video. */
-export function InteractiveAudio({ playing, onReady }: { playing: boolean; onReady(ready: boolean): void }) {
+export function InteractiveAudio({ playing, onReady, playbackClock }: {
+  playing: boolean; onReady(ready: boolean): void;
+  playbackClock(): { time: number; playing: boolean } | null;
+}) {
   const { state } = useEditor();
   const project = useInteractionProject(state.project);
   const context = useRef<AudioContext | null>(null);
   const client = useRef(crypto.randomUUID()), serial = useRef(0);
   const voices = useRef(new Map<string, Voice>());
   const meter = useRef<HTMLOutputElement>(null);
-  const latest = useRef({ project, time: state.playhead, playing, onReady });
-  latest.current = { project, time: state.playhead, playing, onReady };
+  const latest = useRef({ project, time: state.playhead, playing, onReady, playbackClock });
+  latest.current = { project, time: state.playhead, playing, onReady, playbackClock };
   useEffect(() => {
     const unlock = () => { if (context.current?.state === "suspended") void context.current.resume(); };
     document.addEventListener("pointerdown", unlock);
@@ -28,7 +31,12 @@ export function InteractiveAudio({ playing, onReady }: { playing: boolean; onRea
   useEffect(() => {
     let frame = 0, disposed = false;
     const update = () => {
-      const { project: snapshot, time, playing: running, onReady: ready } = latest.current;
+      const { project: snapshot, onReady: ready } = latest.current;
+      // React's playhead follows presented frames and can lag the audio clock.
+      // Seeking to that stale value repeatedly interrupts otherwise healthy audio.
+      const clock = latest.current.playbackClock();
+      const time = clock?.time ?? latest.current.time;
+      const running = clock?.playing ?? latest.current.playing;
       const activeIds = new Set<string>();
       let hasAudio = false, allReady = true;
       // A sidechain needs the other clips' key streams. Keep the complete
@@ -89,6 +97,9 @@ export function InteractiveAudio({ playing, onReady }: { playing: boolean; onRea
           hasAudio = true;
           if (!voice.ready || voice.failed) { allReady = false; continue; }
           const element = voice.element;
+          // During a window handoff/buffer stall, stop before repositioning.
+          // Otherwise the old voice runs ahead while the new video is starting.
+          if (!running && !element.paused) element.pause();
           element.preservesPitch = clip.preservePitch !== false;
           const target = voice.prepared ? time - start : sourceTime(clip, time);
           if (element.readyState >= 1 && Math.abs(element.currentTime - target) > (running ? .14 : .02)) element.currentTime = Math.min(Math.max(0, element.duration - .001), target);
