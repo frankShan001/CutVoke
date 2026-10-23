@@ -115,7 +115,13 @@ for (const locale of ["zh-CN", "en", "de", "ar"]) {
     await switchTo(page, locale === "en" ? "ar" : "en");
     await expect(text).toHaveValue("保存草稿 / keep draft / مسودة");
     await switchTo(page, locale);
-    expect(await current(request, item.id)).toEqual(before);
+    // Valid edits now auto-save after the typing gesture settles. Language
+    // changes must preserve the exact edit and leave all other content intact.
+    const saved = structuredClone(before);
+    saved.revision = String(BigInt(before.revision) + 1n);
+    for (const sequence of [saved.sequence, ...saved.sequences])
+      sequence.captions.find((caption: { id: string }) => caption.id === "i18n-caption").text = "保存草稿 / keep draft / مسودة";
+    await expect.poll(() => current(request, item.id)).toEqual(saved);
     await page.screenshot({ path: resolve(evidence, `${locale}-editor.png`) });
     // Numeric/media geometry stays LTR while side panels mirror for Arabic.
     expect(await page.locator(".timeline").evaluate(node => getComputedStyle(node).direction)).toBe("ltr");
@@ -134,7 +140,7 @@ for (const locale of ["zh-CN", "en", "de", "ar"]) {
     await expect(error).toBeVisible();
     const headings: Record<string, string> = { "zh-CN": "操作未完成", en: "Operation incomplete", de: "Vorgang nicht abgeschlossen", ar: "لم تكتمل العملية" };
     await expect(error).toHaveAccessibleName(headings[locale]);
-    expect(await current(request, item.id)).toEqual(before);
+    expect(await current(request, item.id)).toEqual(saved);
     await page.screenshot({ path: resolve(evidence, `${locale}-validation.png`) });
   });
 }

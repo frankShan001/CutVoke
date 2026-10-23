@@ -94,6 +94,11 @@ export function TransitionPanel() {
   const selectedSpec = transitions.find((spec) => spec.effectId === transitionId);
   const defaultsKey = JSON.stringify(selectedSpec?.defaults || {});
   const currentParamsKey = JSON.stringify(currentFx?.params || {});
+  // Auto-save changes revision and object identity without changing the image.
+  // Invalidate a trial only when its effective inputs change.
+  const trialScope = useMemo(() => JSON.stringify([state.currentId, clipSel, transitionId, duration, params,
+    project?.sequence, project?.sequences?.filter(sequence => sequence.id !== project.sequence.id)]),
+    [state.currentId, clipSel, transitionId, duration, params, project]);
   useEffect(() => {
     setParams(JSON.parse(transitionId === currentFxId ? currentParamsKey : defaultsKey));
   }, [clipSel, transitionId, currentFxId, currentParamsKey, defaultsKey]);
@@ -116,7 +121,7 @@ export function TransitionPanel() {
       if (trialUrl.current) URL.revokeObjectURL(trialUrl.current);
       trialUrl.current = null;
     };
-  }, [state.currentId, clipSel, transitionId, duration, params, state.project?.revision]);
+  }, [trialScope]);
   const transitionTarget = useMemo(() => {
     if (!currentClip) return { valid: false, reason: tr("请选择要添加转场的后一段片段"), maxDuration: 0 };
     const index = clipOptions.findIndex((clip) => clip.id === currentClip.id);

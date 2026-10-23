@@ -28,11 +28,18 @@ class EffectVideoJoinTests(unittest.TestCase):
                     effects=[{"effectId": "cutvoke.fx.shake", "params": {"pixels": 8, "hz": 5.2}}])])]))
             output = root / "preview.mp4"
             reference = root / "reference.mp4"
-            with patch.dict(QUALITY_PRESETS, {"low": {"crf": "0", "preset": "veryfast"}}):
+            # Preview windows use the preview preset. Compare lossless pixels,
+            # not two independently quantized H.264 streams.
+            with patch.dict(QUALITY_PRESETS, {"preview": {"crf": "0", "preset": "veryfast"}}):
                 RenderService().render_preview_window(p, str(reference), .4, .8)
             original = subprocess.Popen
             injected = []
+            encodes = []
             def spawn(args, **kwargs):
+                if "-map" in args and Path(args[0]).stem.lower() == "ffmpeg":
+                    encodes.append(args)
+                    self.assertIn("-crf", args)
+                    self.assertEqual(args[args.index("-crf") + 1], "0")
                 if (not injected and "-map" in args and str(args[-1]).startswith(str(output))
                         and Path(args[0]).stem.lower() == "ffmpeg"):
                     stalled = Mock(returncode=-15)
@@ -42,13 +49,14 @@ class EffectVideoJoinTests(unittest.TestCase):
                 return original(args, **kwargs)
             with patch("subprocess.Popen", spawn), patch("cutvoke.rendering.render._process_cpu_seconds", return_value=0), \
                     patch("cutvoke.rendering.render._PREVIEW_IDLE_SECONDS", 0), \
-                    patch.dict(QUALITY_PRESETS, {"low": {"crf": "0", "preset": "veryfast"}}):
+                    patch.dict(QUALITY_PRESETS, {"preview": {"crf": "0", "preset": "veryfast"}}):
                 report = RenderService().render_preview_window(p, str(output), .4, .8)
             self.assertEqual(report["retryCount"], 1)
             self.assertEqual(report["recoveryMode"], "finite-intermediate")
             self.assertTrue(report["has_audio"])
             self.assertAlmostEqual(report["duration"], .8, places=2)
             injected[0].terminate.assert_called_once()
+            self.assertEqual(len(encodes), 3)  # stalled, lossless intermediate, recovered window
             self.assertFalse(list(root.glob("*.recovery.mkv")))
             info = json.loads(subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0",
                 "-show_entries", "stream=nb_frames", "-of", "json", str(output)],

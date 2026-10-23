@@ -93,35 +93,41 @@ export function InteractiveScene({ playing, onReady }: { playing: boolean; onRea
   };
   useEffect(() => {
     mounted.current = true;
-    return () => { mounted.current = false; for (const entry of media.current.values()) dispose(entry); media.current.clear(); };
-  }, [projectId]);
+    return () => { mounted.current = false; onReady(false); for (const entry of media.current.values()) dispose(entry); media.current.clear(); };
+  }, [projectId, onReady]);
   const pump = async (entry: Media) => {
     if (entry.busy || !entry.pending || entry.disposed) return;
     const target = entry.pending;
     if (target.signature === entry.completed) return;
     entry.busy = true; entry.activeSignature = target.signature;
     const request = new AbortController(); entry.request = request;
+    let url: string | undefined;
     try {
       const response = await fetch(`/api/v1/projects/${encodeURIComponent(projectId!)}/interactive-frame`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...target.body, client: `${client.current}:${(target.body as { clipId?: string }).clipId || "scene"}`, serial: ++serial.current }), signal: request.signal });
       if (!response.ok) { const body = await response.json(); throw new Error(body.error?.message || response.statusText); }
-      const url = URL.createObjectURL(await response.blob());
+      url = URL.createObjectURL(await response.blob());
       const image = new Image(); image.src = url; await image.decode();
-      if (entry.disposed || target.scope !== entry.scope || target.signature !== entry.pending?.signature) { URL.revokeObjectURL(url); return; }
+      if (request.signal.aborted || entry.disposed || target.scope !== entry.scope || target.signature !== entry.pending?.signature) return;
       if (entry.url) URL.revokeObjectURL(entry.url);
       entry.source = image; entry.url = url; entry.ready = true; entry.error = undefined;
+      url = undefined;
       entry.completed = target.signature; if (mounted.current) setError("");
     } catch (failure) {
       if (!request.signal.aborted && !entry.disposed && target.signature === entry.pending?.signature) { entry.error = String(failure); if (mounted.current) setError(String(failure)); }
       if (!request.signal.aborted) entry.completed = target.signature;
     } finally {
+      if (url) URL.revokeObjectURL(url);
       entry.busy = false;
-      if (!entry.disposed && entry.pending?.signature !== target.signature) schedule(entry);
+      entry.request = undefined;
+      // An aborted request can become the latest target again (A -> B -> A).
+      // Keep pumping until that target has actually completed.
+      if (!entry.disposed && entry.pending?.signature !== entry.completed) schedule(entry);
     }
   };
   const schedule = (entry: Media) => {
-    if (entry.activeSignature === entry.pending?.signature && entry.busy) return;
     clearTimeout(entry.timer);
+    if (entry.activeSignature === entry.pending?.signature && entry.busy) return;
     entry.timer = window.setTimeout(() => { entry.request?.abort(); void pump(entry); }, 60);
   };
   useEffect(() => {
@@ -274,8 +280,12 @@ export function InteractiveScene({ playing, onReady }: { playing: boolean; onRea
   };
   return <>
     <canvas ref={canvas} className="player__interactive-scene" data-ready={ready} aria-label={tr("预览画面")}
-      style={{ opacity: ready ? 1 : 0 }} onPointerDown={select} />
+      style={{ opacity: ready ? 1 : 0, pointerEvents: ready ? "auto" : "none" }} onPointerDown={select} />
     {calculating && !playing ? <span className="player__interactive-status" role="status">{tr("正在准备预览…")}</span> : null}
-    {error ? <span className="player__interactive-status" role="alert">{tr("预览渲染失败：{0}", error)}</span> : null}
+    {error ? <span className="player__interactive-status" role="alert">{tr("预览渲染失败：{0}", error)}
+      <button type="button" className="tool-btn" onClick={() => {
+        for (const entry of media.current.values()) if (entry.error) { entry.error = undefined; entry.completed = undefined; }
+        setError(""); setRetry(value => value + 1);
+      }}>{tr("重试预览")}</button></span> : null}
   </>;
 }

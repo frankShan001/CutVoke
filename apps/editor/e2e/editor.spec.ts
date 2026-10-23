@@ -207,6 +207,9 @@ test("click selects without moving; keyboard and pointer reorder whole clips wit
 
   const blue = page.locator(".clip-block").filter({ hasText: "blue.mp4" });
   const red = page.locator(".clip-block").filter({ hasText: "red.mp4" });
+  // The database observes undo before the browser finishes rendering it.
+  // Wait for the real drag target to reach its restored timeline position.
+  await expect(red).toHaveCSS("left", "0px");
   const source = await blue.boundingBox();
   const target = await red.boundingBox();
   expect(source && target).toBeTruthy();
@@ -1934,6 +1937,13 @@ test("six-clip high-density timeline locates a seam and trims to an exact frame"
   await caption.click();
   await expect(caption).toHaveAttribute("aria-pressed", "true");
   const ruler = page.getByRole("slider", { name: "时间线播放头" });
+  // A pointer selects its actual position inside a caption; keyboard selection
+  // from outside the interval locates its first frame.
+  await expect(ruler).toHaveAttribute("aria-valuenow", "5");
+  await ruler.focus();
+  await ruler.press("Home");
+  await caption.focus();
+  await caption.press("Enter");
   await expect(ruler).toHaveAttribute("aria-valuenow", "4");
 
   const startedAt = Date.now();
@@ -2005,6 +2015,9 @@ test("six-clip high-density timeline locates a seam and trims to an exact frame"
   }
   await ruler.focus();
   await page.keyboard.press("Home");
+  // At this narrow viewport the creative panel is an overlay drawer. Close it
+  // before dragging the playhead beneath it, as a pointer user must do.
+  await page.getByRole("button", { name: "隐藏素材面板", exact: true }).click();
   const scroller = page.locator(".timeline__scroller");
   await scroller.evaluate((element) => { element.scrollLeft = 0; });
   const head = (await page.locator(".timeline-playhead__drag").boundingBox())!;
@@ -2199,6 +2212,9 @@ test("effect numeric edits request a fresh composed preview after commit", async
 });
 
 test("buffering keeps the video position and size fixed", async ({ page, request }) => {
+  // Exercise the server-video fallback: a healthy native source compositor
+  // deliberately hides video buffering because it can still present pixels.
+  await page.route("**/source-media?*", route => route.abort());
   const { name } = await createProject(request);
   await openProject(page, name);
   const video = page.locator("video.player__video");
@@ -3185,6 +3201,8 @@ test("attached overlays follow video moves, Alt keeps them in place, and unlinki
 
   const videoBlock = page.locator('.timeline-track__lane[data-track-id="v1"] .clip-block');
   const moveBy = async (fractionOfClip: number, holdAlt = false) => {
+    const scale = Number((await page.locator(".timeline__zoom-val").textContent())!.split("px")[0]);
+    await expect(videoBlock).toHaveCSS("left", `${(await readPositions()).video * scale}px`);
     const box = await videoBlock.boundingBox();
     expect(box).not.toBeNull();
     // Grab near the leading edge so the exact-distance drop stays inside the

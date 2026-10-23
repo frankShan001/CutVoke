@@ -2,6 +2,7 @@ import { expect, test, type APIRequestContext } from "@playwright/test";
 import { mkdirSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execFileSync } from "node:child_process";
 
 const rat = (num: number) => ({ num: String(num), den: "1" });
 const evidence = resolve("../../.artifacts/acceptance/production-fixes");
@@ -32,14 +33,21 @@ test("text-only project plays native title pixels and archives from the activity
   await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible({ timeout: 45_000 });
   const video = page.locator("video.player__video");
   await expect(video).toBeVisible();
-  await expect.poll(() => video.evaluate((element: HTMLVideoElement) => {
-    const canvas = document.createElement("canvas"); canvas.width = 320; canvas.height = 180;
-    const ctx = canvas.getContext("2d")!; ctx.drawImage(element, 0, 0, 320, 180);
-    const pixels = ctx.getImageData(0, 0, 320, 180).data;
+  await expect(page.locator(".player__title-overlay text").last()).toHaveText("LIGHT");
+  await expect(page.locator(".player__title-overlay text").last()).toBeVisible();
+  await expect(page.locator(".player__interactive-scene")).toHaveAttribute("data-ready", "true");
+  await expect(page.locator(".player__interactive-status")).toHaveCount(0);
+  await page.evaluate(() => document.fonts.ready);
+  // Root titles are drawn as SVG over the cached video. Measure the actual
+  // composited screen, including fonts and layer visibility.
+  await expect.poll(async () => {
+    const pixels = execFileSync("ffmpeg", ["-v", "error", "-i", "pipe:0", "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1"],
+      { input: await page.locator(".player__canvas-frame").screenshot(), maxBuffer: 16 * 1024 * 1024 });
     let count = 0;
-    for (let index = 0; index < pixels.length; index += 4) if (pixels[index] > 160) count++;
+    for (let index = 0; index < pixels.length; index += 3)
+      if (pixels[index] > 160 && pixels[index + 1] > 160 && pixels[index + 2] > 160) count++;
     return count;
-  })).toBeGreaterThan(100);
+  }).toBeGreaterThan(100);
   await page.getByRole("button", { name: "播放", exact: true }).click();
   await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.currentTime)).toBeGreaterThan(.2);
   await page.getByRole("button", { name: "暂停", exact: true }).click();

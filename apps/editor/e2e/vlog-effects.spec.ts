@@ -60,24 +60,38 @@ test("Vlog effects edit, preview, localize and retain authored transition parame
   await page.getByRole("combobox", { name: "亮度来源", exact: true }).selectOption("incoming");
   // Two 3-second clips cap a requested 2-second transition at 1.5 seconds.
   await page.getByRole("button", { name: "2s", exact: true }).click();
-  const before = await current();
+  // Hold the trial across the auto-save response. Persisting the same inputs
+  // must not abort or erase a valid preview already being rendered.
+  let releaseTrial!: () => void;
+  const trialGate = new Promise<void>(resolve => { releaseTrial = resolve; });
+  await page.route(/\/resource-preview\?/, async route => {
+    const response = await route.fetch();
+    await trialGate;
+    await route.fulfill({ response });
+  });
   const previewRequest = page.waitForRequest(req => new URL(req.url()).pathname.endsWith("resource-preview") &&
     new URL(req.url()).searchParams.has("params"));
   await page.getByRole("button", { name: "预览当前转场", exact: true }).click();
   const query = new URL((await previewRequest).url()).searchParams;
   expect(Number(query.get("duration"))).toBe(1.5);
   expect(JSON.parse(query.get("params")!)).toMatchObject({ softness: .14, reverse: true, keySource: "incoming" });
+  await expect.poll(async () => (await effect(1, "cutvoke.transition.lumaReveal"))?.params.duration).toBe(2);
+  const before = await current();
+  releaseTrial();
   await expect(page.locator(".resource-preview img")).toBeVisible();
   expect(await current()).toEqual(before);
   await page.getByRole("button", { name: "保存转场参数", exact: true }).click();
   await expect.poll(async () => (await effect(1, "cutvoke.transition.lumaReveal"))?.params)
-    .toMatchObject({ softness: .14, reverse: true, keySource: "incoming", duration: 1.5 });
+    .toMatchObject({ softness: .14, reverse: true, keySource: "incoming", duration: 2 });
   await chooseTransition("锚点匹配转场");
   await page.getByRole("spinbutton", { name: "前镜头锚点 X", exact: true }).fill("0.4");
   await page.getByRole("spinbutton", { name: "后镜头匹配角度", exact: true }).fill("-12");
   await page.getByRole("button", { name: "保存转场参数", exact: true }).click();
   await expect.poll(async () => (await effect(1, "cutvoke.transition.matchAlign"))?.params)
     .toMatchObject({ aX: .4, bAngle: -12 });
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect.poll(async () => (await effect(1, "cutvoke.transition.matchAlign"))?.params.bAngle).not.toBe(-12);
+  await expect.poll(async () => (await effect(1, "cutvoke.transition.matchAlign"))?.params.aX).toBe(.4);
   await page.getByRole("button", { name: "撤销", exact: true }).click();
   await expect.poll(async () => (await effect(1, "cutvoke.transition.matchAlign"))?.params.aX).not.toBe(.4);
   await page.getByRole("button", { name: "撤销", exact: true }).click();
