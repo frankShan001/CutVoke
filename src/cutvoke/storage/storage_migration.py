@@ -47,6 +47,9 @@ def migrate_library(source_file: str, destination: str, *, cache_directory=None,
                 raise ValueError("Finish Agent editing before moving / 请等待 Agent 编辑完成")
             if guard.execute("SELECT 1 FROM export_jobs WHERE status IN ('queued','running') LIMIT 1").fetchone():
                 raise ValueError("Finish exports before moving / 请等待导出完成")
+            if (guard.execute("SELECT 1 FROM sqlite_master WHERE name='asr_jobs'").fetchone() and
+                    guard.execute("SELECT 1 FROM asr_jobs WHERE status IN ('queued','running') LIMIT 1").fetchone()):
+                raise ValueError("Finish recognition before moving / 请等待语音识别完成或停止服务")
             caches = {".preview-cache", ".preview-cache-v2", ".cutvoke-preview-cache"}
             def ignore(folder, names):
                 skip = caches | ({source.name, source.name + "-wal", source.name + "-shm", "logs"}
@@ -86,6 +89,8 @@ def migrate_library(source_file: str, destination: str, *, cache_directory=None,
                             if path_key(raw) in mapping:
                                 output.execute(f"UPDATE {table} SET {column}=? WHERE rowid=?",
                                                (mapping[path_key(raw)], rowid))
+                from cutvoke.storage.asr_journal import relocate_asr_jobs
+                relocate_asr_jobs(output, root, stage, target)
                 output.commit()
                 if output.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
                     raise ValueError("Copied project database failed integrity check")

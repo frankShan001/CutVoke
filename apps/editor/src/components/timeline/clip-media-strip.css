@@ -1,0 +1,6 @@
+.clip-media-strip { position: absolute; top: 0; bottom: 0; height: 100%; object-fit: fill;
+  pointer-events: none; user-select: none; opacity: .56; z-index: 0; }
+.clip-media-strip--waveform { opacity: .85; }
+.clip-block__name, .clip-block__meta { position: relative; z-index: 1; }
+.clip-block__name { background: #111827bd; border-radius: 3px; padding-inline: 3px; }
+.clip-block__drag { z-index: 3; }

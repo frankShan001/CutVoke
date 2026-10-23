@@ -72,6 +72,8 @@ from cutvoke.rendering.person_cutout import (PersonCutoutError, PersonCutoutJobM
                             availability as person_cutout_availability,
                             find_video_clip)
 from cutvoke.storage.luts import CubeInvalid, MAX_CUBE_BYTES, validate_cube
+from cutvoke.storage.media_uploads import (receive_upload, relative_path as media_relative_path,
+                                           scan_relinks, cleanup_uploads, UploadError)
 
 
 # Bump when preview rendering changes so neither disk cache nor browser ETag can
@@ -103,6 +105,7 @@ class HttpApi:
             str(Path(store_path).resolve().parent / "media")
             if store_path and store_path != ":memory:" and "mode=memory" not in store_path
             else os.path.join(os.path.expanduser("~"), ".cutvoke", "media"))
+        cleanup_uploads(self.media_dir)
         if service.store is not None:
             self._ensure_active_stickers()
         self.render = render or RenderService()
@@ -113,6 +116,7 @@ class HttpApi:
         self.logger = logger
         # 资源上限（T31）：请求体大小、并发导出数
         self.limiter = ResourceLimiter(limits)
+        self._upload_slots = threading.BoundedSemaphore(2)
         # 会话令牌（T31）：None 表示仅回环匿名访问（默认）；存在则要求令牌
         self.session = session
         # The CLI injects a boot-time snapshot; library users have identity too.
@@ -131,12 +135,15 @@ class HttpApi:
         self._interactive_frame_jobs = {}
         self._preview_jobs_lock = threading.Lock()
         self._preview_active_jobs: dict[str, tuple[str, threading.Event]] = {}
+        self._preview_active_requests: dict[str, tuple[threading.Event, int, str]] = {}
         self._preview_preparation = PreviewPreparation(
             os.path.join(self.media_dir, ".preview-cache"), self.render,
             self._preview_window_file, self._preview_lock,
             renderer_version=PREVIEW_RENDER_CACHE_VERSION,
             window_seconds=PREVIEW_WINDOW_SECONDS, disk_cache=self.preview_cache)
-        self._asr_jobs = AsrJobManager()
+        self._asr_jobs = AsrJobManager(
+            str(service.store.path) if service.store else None,
+            project_loader=getattr(service, "get_project", None))
         self._person_cutout_jobs = PersonCutoutJobManager()
         # V02 异步导出队列：**挂在 EditService 上**（架构矫正）。本 HttpApi 不再
         # 自持队列实例——否则会与 service 命令各持一份，导致两个后台线程重复
@@ -630,7 +637,19 @@ class HttpApi:
         # A newer visual edit may arrive while the old immutable window is still
         # encoding under the cache lock. Signal that worker before waiting for
         # the lock; windows with identical visual dependencies remain queued.
-        preview_cancel = cancel_event if cancel_event is not None else threading.Event()
+        # Preempt only this speculative window, never its parent whole-project
+        # preparation. Parent cancellation still reaches the render immediately.
+        class WindowCancel(threading.Event):
+            preempted = False
+
+            def preempt(self):
+                self.preempted = True
+                self.set()
+
+            def is_set(self):
+                return super().is_set() or bool(cancel_event and cancel_event.is_set())
+        preview_cancel = WindowCancel() if priority > 0 else (
+            cancel_event if cancel_event is not None else threading.Event())
         project_key = str(project.project_id)
         # Captions are drawn by the editor and already removed above. Metadata
         # such as project name/favorites/revision is not a visual dependency.
@@ -649,6 +668,12 @@ class HttpApi:
         cached = self.preview_cache.get(name, metadata, cached_window_is_valid)
         if cached:
             return cached, digest, duration
+        with self._preview_jobs_lock:
+            active = self._preview_active_requests.get(project_key)
+            if active and priority < active[1] and digest != active[2]:
+                # Idle lookahead is expendable; a different foreground seek
+                # must not wait for an expensive speculative interval to finish.
+                active[0].preempt()
         # The short disk-index lock never covers encoding. Recheck on admission
         # so duplicate requests share a render and cached reads bypass the queue.
         with self._preview_scheduler.slot(preview_cancel, priority):
@@ -662,6 +687,7 @@ class HttpApi:
             temp_path = out_path + "." + uuid.uuid4().hex + ".building.mp4"
             with self._preview_jobs_lock:
                 self._preview_active_jobs[project_key] = (visual_identity, preview_cancel)
+                self._preview_active_requests[project_key] = (preview_cancel, priority, digest)
             try:
                 if local and (preview_width,preview_height)==(seq.width,seq.height):
                     options = {"cancel_event": preview_cancel} if isinstance(self.render, RenderService) else {}
@@ -675,15 +701,22 @@ class HttpApi:
                     from cutvoke.rendering.render import RenderCancelled
                     raise RenderCancelled("preview superseded by a newer edit")
                 out_path = self.preview_cache.publish(name, temp_path, metadata)
-            except BaseException:
+            except BaseException as error:
                 with contextlib.suppress(OSError):
                     os.remove(temp_path)
+                from cutvoke.rendering.render import RenderCancelled
+                if (isinstance(error, RenderCancelled) and
+                        getattr(preview_cancel, "preempted", False) and
+                        not (cancel_event and cancel_event.is_set())):
+                    from cutvoke.rendering.preview_prepare import PreviewPreempted
+                    raise PreviewPreempted("background interval yielded to a foreground seek") from error
                 raise
             finally:
                 with self._preview_jobs_lock:
                     active = self._preview_active_jobs.get(project_key)
                     if active is not None and active[1] is preview_cancel:
                         self._preview_active_jobs.pop(project_key, None)
+                        self._preview_active_requests.pop(project_key, None)
             return out_path, digest, duration
 
     def _require_current_preview(self, project, visual_identity: str) -> None:
@@ -839,6 +872,11 @@ class HttpApi:
 
     def relink_asset(self, asset_id: str, filename: str, raw: bytes) -> tuple[int, dict]:
         """Restore one missing uploaded file at its original project reference path."""
+        import io
+        with receive_upload(io.BytesIO(raw), len(raw), self.media_dir, filename) as staged:
+            return self.relink_asset_file(asset_id, filename, staged)
+
+    def relink_asset_file(self, asset_id, filename, staged, *, verify_identity=False, confirm_legacy=False):
         store = self.service.store
         asset = store.get_asset(asset_id) if store is not None else None
         if not asset:
@@ -854,13 +892,17 @@ class HttpApi:
         if Path(filename).suffix.lower() != source.suffix.lower():
             return 400, {"error": {"code": "TYPE_MISMATCH",
                                    "message": "请选择与原素材相同扩展名的文件"}}
-        if not raw:
+        if not staged.size:
             return 400, {"error": {"code": "INVALID_ARGUMENT", "message": "文件为空"}}
+        fingerprint = asset.get("sha256")
+        if not fingerprint and re.fullmatch(r"asset_[a-f0-9]{64}", asset_id):
+            fingerprint = asset_id[6:]
+        if verify_identity and ((fingerprint and fingerprint != staged.sha256) or (not fingerprint and not confirm_legacy)):
+            return 409, {"error": {"code": "RELINK_IDENTITY_MISMATCH",
+                                   "message": "文件内容与原素材指纹不一致；未恢复任何工程引用"}}
         media_root.mkdir(parents=True, exist_ok=True)
-        staged = media_root / f"{asset_id}-{uuid.uuid4().hex[:8]}{source.suffix.lower()}"
         try:
-            staged.write_bytes(raw)
-            info = self.render.probe_media(str(staged))
+            info = self.render.probe_media(str(staged.path))
             kind = self._infer_kind(filename, bool(info.get("has_video")),
                                     bool(info.get("has_audio")))
             if (kind != asset.get("kind") or
@@ -870,24 +912,31 @@ class HttpApi:
                                        "message": "新文件的媒体类型与原素材不一致"}}
             duration = info.get("duration") if info.get("duration", 0) > 0 else None
             previous = asset.get("duration")
+            if verify_identity and not fingerprint:
+                if (staged.size != asset.get("size") or
+                        any(asset.get(key) and info.get(key) != asset[key] for key in ("width", "height")) or
+                        (previous is not None and (duration is None or abs(duration - float(previous)) > 0.05))):
+                    return 409, {"error": {"code": "RELINK_MEDIA_MISMATCH",
+                                           "message": "候选文件的大小、时长或画面规格不匹配，未恢复素材"}}
             if (previous is not None and
                     (duration is None or duration + 0.01 < float(previous))):
                 return 400, {"error": {"code": "DURATION_TOO_SHORT",
                                        "message": "新文件比原素材短，可能使已有片段越过素材末尾"}}
-            os.replace(staged, source)
+            os.replace(staged.path, source)
             restored = store.add_asset(
-                asset_id=asset_id, name=filename, path=str(source), size=len(raw),
+                asset_id=asset_id, name=filename, path=str(source), size=staged.size,
                 kind=kind, duration=duration,
                 has_video=bool(info.get("has_video")),
                 has_audio=bool(info.get("has_audio")),
                 width=info.get("width"), height=info.get("height"),
+                sha256=staged.sha256,
             )
             return 200, {**restored, "available": True}
         except Exception as error:  # noqa: BLE001 — caller needs a structured failure
             return 422, {"error": {"code": "RELINK_FAILED", "message": str(error)}}
         finally:
             with contextlib.suppress(OSError):
-                staged.unlink()
+                staged.path.unlink()
 
     @staticmethod
     def _infer_kind(name: str, has_video: bool, has_audio: bool) -> str:
@@ -918,8 +967,17 @@ class HttpApi:
         None，元数据后续可被访问时再补齐（降级策略，见 D02 素材工作流）。
         账本仅在持久化服务（store 存在）下可用；内存态退化为仅落盘。
         """
+        import io
+        with receive_upload(io.BytesIO(raw), len(raw), self.media_dir, filename) as staged:
+            return self.import_asset_file(filename, staged)
+
+    def import_asset_file(self, filename, staged, *, relative_path=None):
+        relative_path = media_relative_path(relative_path or filename)
+        filename = Path(filename.replace("\\", "/")).name
         asset_id = f"asset_{uuid.uuid4().hex[:10]}"
-        stored = self.save_asset(asset_id, filename, raw)
+        extension = Path(filename).suffix[:10].lower() or ".bin"
+        stored = str(Path(self.media_dir) / (asset_id + extension))
+        os.replace(staged.path, stored)
 
         kind = "unknown"
         duration = None
@@ -941,9 +999,10 @@ class HttpApi:
         store = self.service.store
         if store is not None:
             return store.add_asset(
-                asset_id=asset_id, name=filename, path=stored, size=len(raw),
+                asset_id=asset_id, name=filename, path=stored, size=staged.size,
                 kind=kind, duration=duration, has_video=has_video,
                 has_audio=has_audio, width=width, height=height,
+                sha256=staged.sha256, relative_path=relative_path,
             )
 
         # 无持久化 store：仍返回富描述，但不落账本（内存态服务）
@@ -951,7 +1010,7 @@ class HttpApi:
             "assetId": asset_id,
             "name": filename,
             "path": stored,
-            "size": len(raw),
+            "size": staged.size,
             "kind": kind,
             "duration": duration,
             "hasVideo": has_video,
@@ -1207,6 +1266,22 @@ class HttpApi:
         if (method == "POST" and len(parts) == 5 and
                 parts[:3] == ["api", "v1", "asr-jobs"] and parts[4] == "cancel"):
             job = self._asr_jobs.cancel(parts[3])
+            if job is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "识别任务不存在"}}
+            return 200, job
+
+        if (method == "POST" and len(parts) == 5 and
+                parts[:3] == ["api", "v1", "asr-jobs"] and parts[4] in ("resume", "dismiss", "drafts")):
+            try:
+                if parts[4] == "resume":
+                    job = self._asr_jobs.resume(parts[3])
+                elif parts[4] == "dismiss":
+                    job = self._asr_jobs.dismiss(parts[3])
+                else:
+                    job = self._asr_jobs.save_drafts(parts[3], body.get("drafts"),
+                                                     updated_at=body.get("updatedAt"))
+            except SpeechRecognitionError as exc:
+                return 400, {"error": {"code": "ASR_UNAVAILABLE", "message": str(exc)}}
             if job is None:
                 return 404, {"error": {"code": "NOT_FOUND", "message": "识别任务不存在"}}
             return 200, job
@@ -1542,6 +1617,43 @@ class HttpApi:
                 return 200, {"__png__": frame.read()}
 
         if (method == "GET" and len(parts) == 5 and parts[:3] == ["api", "v1", "projects"]
+                and parts[4] == "sync"):
+            return 200, self.service.project_sync(parts[3], known_token=body.get("token"))
+
+        if (method == "GET" and len(parts) == 7 and parts[:3] == ["api", "v1", "projects"]
+                and parts[4] == "clips" and parts[6] == "timeline-media"):
+            import math
+            from cutvoke.rendering.render import RenderError
+            project = self.service.get_project(parts[3])
+            clip = next((clip for track in project.sequence.tracks for clip in track.clips if clip.id == parts[5]), None)
+            if clip is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "clip is not in the active project sequence"}}
+            try:
+                kind = body.get("kind", "thumbnail")
+                width = int(body.get("w", 320))
+                duration = float(clip.duration.to_fraction())
+                start, end = float(body.get("from", 0)), float(body.get("to", duration))
+                if (kind not in ("thumbnail", "waveform") or not 64 <= width <= 960 or
+                        not all(math.isfinite(value) for value in (start, end)) or
+                        not 0 <= start < end <= duration + 1e-5):
+                    raise ValueError("invalid timeline media range, kind or width")
+                end = min(end, duration)
+                if start >= end:
+                    raise ValueError("timeline media range starts beyond the clip end")
+            except (TypeError, ValueError, OverflowError) as error:
+                return 400, {"error": {"code": "INVALID_ARGUMENT", "message": str(error)}}
+            if clip.nested or not clip.asset_ref or not clip.asset_ref.source_path:
+                return 204, {}
+            from cutvoke.rendering.timeline_media import timeline_media
+            try:
+                result = timeline_media(render=self.render, clip=clip,
+                    cache_dir=Path(self.media_dir) / ".timeline-media-cache", kind=kind,
+                    width=width, start=start, end=end)
+                return (200, {"__png__": Path(result).read_bytes()}) if result else (204, {})
+            except RenderError as error:
+                return 422, {"error": {"code": "TIMELINE_MEDIA_FAILED", "message": str(error)}}
+
+        if (method == "GET" and len(parts) == 5 and parts[:3] == ["api", "v1", "projects"]
                 and parts[4] == "source-media"):
             project = self.service.get_project(parts[3])
             requested = body.get("path")
@@ -1688,6 +1800,20 @@ class HttpApi:
                 return 200, self.render.probe_media(src)
             except RenderError as e:
                 return 422, {"error": {"code": "PROBE_FAILED", "message": str(e)}}
+
+        if method == "POST" and parts == ["api", "v1", "assets", "relink", "scan"]:
+            store = self.service.store
+            if store is None:
+                return 404, {"error": {"code": "NOT_FOUND", "message": "asset ledger requires persistent store"}}
+            try:
+                assets = [asset for asset in store.list_assets() if self._imported_media_path(asset) is not None]
+                return 200, scan_relinks(assets, body.get("files"))
+            except UploadError as error:
+                return error.status, {"error": {"code": error.code, "message": str(error)}}
+
+        if method == "GET" and parts == ["api", "v1", "assets", "import-limits"]:
+            return 200, {"maxMediaBytes": self.limiter.limits.max_media_bytes,
+                         "maxJsonBytes": self.limiter.limits.max_body_bytes}
 
         # 素材库列表（D02 素材工作流）：GET /api/v1/assets → 服务端资产账本
         if method == "GET" and parts == ["api", "v1", "assets"]:
@@ -1874,6 +2000,9 @@ class HttpApi:
                     return 422, {"error": {"code": "PERSON_CUTOUT_PREVIEW_FAILED",
                                            "message": str(exc)}}
 
+            if method == "GET" and len(parts) == 5 and parts[4] == "asr-jobs":
+                return 200, {"jobs": self._asr_jobs.jobs(pid)}
+
             if method == "POST" and len(parts) == 5 and parts[4] == "asr-jobs":
                 clip_id = body.get("clipId")
                 if not isinstance(clip_id, str) or not clip_id:
@@ -2032,6 +2161,25 @@ class HttpApi:
 
             if method == "GET" and len(parts) == 5 and parts[4] == "summary":
                 return 200, self.service.project_summary(pid)
+
+            if method == "GET" and len(parts) == 5 and parts[4] == "multicam-monitor":
+                from tempfile import TemporaryDirectory
+                snapshot = copy.deepcopy(self.service.get_project(pid))
+                track_id = body.get("trackId")
+                if not snapshot.sequence.multicam or track_id not in snapshot.sequence.multicam.get("trackIds", []):
+                    return 400, {"error": {"code": "INVALID_ARGUMENT", "message": "Choose a camera track"}}
+                members = snapshot.sequence.multicam["trackIds"]
+                snapshot.sequence.multicam = None
+                for track in snapshot.sequence.tracks:
+                    if track.kind == "video": track.visible = track.id == track_id
+                try:
+                    with TemporaryDirectory(prefix="cutvoke-camera-") as directory:
+                        path = str(Path(directory) / "frame.png")
+                        result = self.render.extract_frame(snapshot, float(body.get("time", 0)), path, include_captions=False)
+                        if result: return 200, {"__png__": Path(result).read_bytes()}
+                        return 404, {"error": {"code": "CAMERA_GAP", "message": "Camera has no picture at this time"}}
+                except (ValueError, RuntimeError) as exc:
+                    return 400, {"error": {"code": "CAMERA_PREVIEW_FAILED", "message": str(exc)}}
 
             if method == "GET" and len(parts) == 5 and parts[4] == "lookup":
                 try:
@@ -2259,6 +2407,11 @@ class HttpApi:
                     return 404, {"error": {"code": "NOT_FOUND",
                                            "message": f"unknown project: {pid}"}}
                 queue_payload = dict(body)
+                if body.get("sequenceId") is not None:
+                    from cutvoke.editing.sequence_tools import select
+                    try: proj = select(proj, body["sequenceId"])
+                    except ValueError as exc:
+                        return 400, {"error": {"code": "INVALID_ARGUMENT", "message": str(exc)}}
                 if body.get("range") is not None:
                     try:
                         start, end = self.service._validated_export_range(
@@ -2267,7 +2420,10 @@ class HttpApi:
                         return 400, {"error": {"code": e.code,
                                                "message": e.message}}
                     queue_payload["range"] = {"start": start, "end": end}
-                job = self._export_queue().submit(proj, queue_payload)
+                try:
+                    job = self._export_queue().submit(proj, queue_payload)
+                except (ValueError, TypeError) as error:
+                    return 400, {"error": {"code": "INVALID_ARGUMENT", "message": str(error)}}
                 return 202, {"jobId": job["jobId"], "status": job["status"],
                              "projectId": job["projectId"],
                              "outPath": job["outPath"],
@@ -2510,7 +2666,8 @@ class HttpApi:
                     proj = self.service.get_project(pid)
                     if body.get("editorTitles") == "1":
                         proj = browser_titles(proj)
-                    path, etag, duration = self._preview_window_file(proj, index)
+                    path, etag, duration = self._preview_window_file(
+                        proj, index, priority=10 if body.get("prefetch") == "1" else 0)
                     result = {"__video_path__": path, "__video_etag__": etag,
                               "duration": duration,
                               "windowStart": index * PREVIEW_WINDOW_SECONDS}
@@ -2914,7 +3071,8 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             for key in ("category", "subcategory", "family", "qualifiedOnly", "effectId", "clipId", "duration", "lang", "path", "w",
                         "q", "appliesTo", "favoritesOnly", "recentOnly", "rev",
                         "entityType", "entityId", "textContains", "atSeconds", "compareClipId",
-                        "fromSeconds", "toSeconds", "fields", "limit", "index", "editorTitles"):
+                        "fromSeconds", "toSeconds", "fields", "limit", "index", "editorTitles",
+                        "token", "kind", "from", "to", "trackId", "time"):
                 if key in qs:
                     body[key] = qs[key][0]
             # Like built Web files, these two public font assets need no session
@@ -2990,9 +3148,13 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                     self._respond(400, {"error": {"code": "INVALID_ARGUMENT",
                                                   "message": "import requires ?name=<filename>"}})
                     return
-                length = int(self.headers.get("Content-Length", 0))
+                try:
+                    length = int(self.headers.get("Content-Length", 0))
+                except ValueError:
+                    self._respond(400, {"error": {"code": "INVALID_ARGUMENT", "message": "invalid Content-Length"}})
+                    return
                 limit = (min(api.limiter.limits.max_body_bytes, MAX_CUBE_BYTES)
-                         if parsed.path == "/api/v1/luts" else api.limiter.limits.max_body_bytes)
+                         if parsed.path == "/api/v1/luts" else api.limiter.limits.max_media_bytes)
                 if length <= 0:
                     self._respond(400, {"error": {"code": "INVALID_ARGUMENT",
                                                   "message": "empty body"}})
@@ -3001,8 +3163,8 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                     self._respond(413, {"error": {"code": "BODY_TOO_LARGE",
                                                   "message": f"文件 {length} 字节超过上限 {limit} 字节"}})
                     return
-                raw = self.rfile.read(length)
                 if parsed.path == "/api/v1/luts":
+                    raw = self.rfile.read(length)
                     try:
                         self._respond(201, api.import_lut(fname, raw))
                     except CubeInvalid as error:
@@ -3012,17 +3174,31 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                         self._respond(500, {"error": {"code": "LUT_SAVE_FAILED",
                                                       "message": str(error)}})
                     return
-                if relink:
-                    status, result = api.relink_asset(path_parts[3], fname, raw)
-                    self._respond(status, result)
+                if not api._upload_slots.acquire(blocking=False):
+                    self._respond(429, {"error": {"code": "UPLOAD_BUSY", "message": "请等待当前素材上传完成"}})
                     return
+                previous_timeout = self.connection.gettimeout()
                 try:
-                    asset = api.import_asset(fname, raw)
+                    self.connection.settimeout(api.limiter.limits.request_timeout_seconds)
+                    relative = media_relative_path((qs.get("relativePath") or [fname])[0])
+                    with receive_upload(self.rfile, length, api.media_dir, fname) as staged:
+                        if relink:
+                            status, result = api.relink_asset_file(path_parts[3], fname, staged,
+                                verify_identity=(qs.get("verifyIdentity") or [""])[0] == "1",
+                                confirm_legacy=(qs.get("confirmLegacy") or [""])[0] == "1")
+                            self._respond(status, result)
+                        else:
+                            self._respond(201, api.import_asset_file(fname, staged, relative_path=relative))
+                except UploadError as error:
+                    self._respond(error.status, {"error": {"code": error.code, "message": str(error)}})
+                except (ConnectionError, TimeoutError):
+                    self.close_connection = True
                 except Exception as e:  # noqa: BLE001
                     self._respond(500, {"error": {"code": "ASSET_SAVE_FAILED",
                                                   "message": str(e)}})
-                    return
-                self._respond(201, asset)
+                finally:
+                    self.connection.settimeout(previous_timeout)
+                    api._upload_slots.release()
                 return
             try:
                 body = self._read_body()

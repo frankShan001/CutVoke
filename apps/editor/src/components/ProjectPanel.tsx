@@ -8,6 +8,7 @@ import { ArrowLeft, Pencil } from "lucide-react";
 import { Button, Field, Panel, TextInput } from "./ui";
 import { useEditor } from "../store/editor";
 import { renameProject } from "../store/actions";
+import { ProductionTools } from "./ProductionTools";
 
 export function ProjectPanel() {
   useLocale();
@@ -74,6 +75,7 @@ export function ProjectPanel() {
         >
           <ArrowLeft size={14} />{tr("返回工程列表")}</Button>
       </div>
+      <ProductionTools />
     </Panel>
   );
 }

@@ -97,7 +97,8 @@ def test_group_copy_remaps_children_and_is_one_persistent_undo(editor, tmp_path)
     assert preview['ok'], preview
     assert editor.service.get_project('production').to_dict() == before
     result = apply(editor, 'clip.duplicateGroup', payload, 'copy-group')
-    mapping = {e['sourceClipId']: e['id'] for e in result['changedEntities']}
+    mapping = {e['sourceClipId']: e['id'] for e in result['changedEntities']
+               if e.get('change') == 'created' and e.get('sourceClipId')}
     reloaded = editor.service.store.load('production')
     clips = {c.id: c for t in reloaded.sequence.tracks for c in t.clips}
     assert clips[mapping['title']].attached_to_clip_id == mapping['bike']

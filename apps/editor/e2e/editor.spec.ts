@@ -3246,10 +3246,20 @@ test("timeline range export is queued and reports the selected duration", async 
   await expect(dialog).toBeVisible();
   const outputPath = resolve(process.cwd(), "../../output", `${id}-range.mp4`);
   await dialog.getByLabel("输出文件路径").fill(outputPath);
-  await dialog.getByLabel("画质").selectOption("low");
+  await dialog.getByLabel("画质").selectOption("medium");
+  await dialog.getByLabel("视频码率（kbps）").fill("1800");
+  await dialog.getByLabel("音频码率（kbps）").fill("128");
   await dialog.getByLabel("仅导出时间范围").check();
   await dialog.getByLabel("导出开始时间").fill("0.8");
   await dialog.getByLabel("导出结束时间").fill("2.2");
+  await dialog.getByRole("button", { name: "关闭导出" }).click();
+  await page.getByRole("button", { name: "导出", exact: true }).click();
+  await expect(dialog.getByLabel("画质")).toHaveValue("medium");
+  await expect(dialog.getByLabel("视频码率（kbps）")).toHaveValue("1800");
+  await expect(dialog.getByLabel("音频码率（kbps）")).toHaveValue("128");
+  await expect(dialog.getByLabel("导出开始时间")).toHaveValue("0.8");
+  await expect(dialog.getByLabel("导出结束时间")).toHaveValue("2.2");
+  await dialog.screenshot({ path: "../../.artifacts/editor-shortboard-fixes-20261023/export-controls.png" });
   await dialog.getByRole("button", { name: "开始导出" }).click();
   await expect(dialog.getByText("导出完成", { exact: false }))
     .toBeVisible({ timeout: 75_000 });
@@ -3260,15 +3270,79 @@ test("timeline range export is queued and reports the selected duration", async 
   expect(jobsResponse.ok()).toBeTruthy();
   const jobs = (await jobsResponse.json()).jobs as Array<{
     outPath: string; status: string; result: { duration: number } | null;
+    request: { videoBitrateKbps: number; audioBitrateKbps: number; range: { start: number; end: number } };
   }>;
   const completed = jobs.find((job) => job.outPath === outputPath);
   expect(completed?.status).toBe("succeeded");
   expect(completed?.result?.duration).toBeCloseTo(1.4, 1);
+  expect(completed?.request).toMatchObject({ videoBitrateKbps: 1800, audioBitrateKbps: 128, range: { start: .8, end: 2.2 } });
   await dialog.getByRole("button", { name: "关闭导出" }).click();
   await page.getByRole("button", { name: "导出", exact: true }).click();
   await expect(dialog.getByText("导出完成", { exact: false })).toBeVisible();
   await expect(dialog.getByLabel("输出文件路径")).toHaveValue(outputPath);
   unlinkSync(outputPath);
+});
+
+test("transparent export UI writes a real ProRes MOV and restores its options", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await openProject(page, name);
+  await page.getByRole("button", { name: "导出", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "导出成片" });
+  const outputPath = resolve(process.cwd(), "../../output", `${id}-alpha.mov`);
+  await dialog.getByLabel("输出文件路径").fill(outputPath.replace(/\.mov$/, ".mp4"));
+  await dialog.getByLabel("透明背景（ProRes 4444）").check();
+  await expect(dialog.getByLabel("输出文件路径")).toHaveValue(outputPath);
+  await expect(dialog.getByLabel("视频码率（kbps）")).not.toBeVisible();
+  await dialog.getByLabel("仅导出时间范围").check();
+  await dialog.getByLabel("导出开始时间").fill("0");
+  await dialog.getByLabel("导出结束时间").fill("1");
+  await dialog.getByRole("button", { name: "开始导出" }).click();
+  await expect(dialog.getByText("导出完成", { exact: false })).toBeVisible({ timeout: 45_000 });
+  const jobs = (await (await request.get(`${apiPath(id)}/exports`)).json()).jobs;
+  const job = jobs.find((item: { outPath: string }) => item.outPath === outputPath);
+  expect(job.status).toBe("succeeded");
+  expect(job.request.transparent).toBe(true);
+  expect(job.result.videoEncoder).toBe("prores_ks");
+  expect(job.result.has_alpha).toBe(true);
+  await dialog.getByRole("button", { name: "关闭导出" }).click();
+  await page.getByRole("button", { name: "导出", exact: true }).click();
+  await expect(dialog.getByLabel("透明背景（ProRes 4444）")).toBeChecked();
+  await expect(dialog.getByLabel("输出文件路径")).toHaveValue(outputPath);
+  unlinkSync(outputPath);
+});
+
+test("export stage progress is measured and cancellation is distinct from failure", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await openProject(page, name);
+  const job = { jobId: `cancel-${id}`, projectId: id, revision: "0", quality: "medium",
+    outPath: "cancel.mp4", status: "queued", result: null, error: null,
+    request: { videoBitrateKbps: 1800, audioBitrateKbps: 128, range: { start: 1, end: 3 } },
+    progress: { phase: "encoding", fraction: .4, processedSeconds: .8, totalSeconds: 2, etaSeconds: 9, updatedAt: Date.now()/1000 },
+    createdAt: Date.now()/1000 - 10 };
+  await page.route(`**/projects/${id}/exports`, route => route.fulfill({ json: { jobs: [job] } }));
+  await page.route(`**/jobs/${job.jobId}/cancel`, route => {
+    job.status = "cancelled";
+    return route.fulfill({ json: { jobId: job.jobId, status: job.status, cancelled: true } });
+  });
+  await page.getByRole("button", { name: "导出", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "导出成片" });
+  await expect(dialog.getByText("等待队列", { exact: true })).toBeVisible();
+  await expect(dialog.getByRole("progressbar")).not.toBeVisible();
+  job.status = "running";
+  await expect(dialog.getByRole("progressbar", { name: "当前阶段进度" })).toHaveAttribute("value", "0.4");
+  await expect(dialog.getByText(/当前阶段 40%/)).toBeVisible();
+  await dialog.screenshot({ path: "../../.artifacts/editor-shortboard-fixes-20261023/export-progress.png" });
+  await expect(dialog.getByLabel("画质")).toHaveValue("medium");
+  await expect(dialog.getByLabel("视频码率（kbps）")).toHaveValue("1800");
+  await dialog.getByRole("button", { name: "取消导出", exact: true }).click();
+  await expect(dialog.getByText("导出已取消", { exact: true })).toBeVisible();
+  await expect(page.getByRole("alertdialog", { name: "操作未完成" })).not.toBeVisible();
+  await dialog.getByRole("button", { name: "关闭导出" }).click();
+  await page.getByRole("button", { name: "导出", exact: true }).click();
+  await expect(dialog.getByText("导出已取消", { exact: true })).toBeVisible();
+  await expect(dialog.getByLabel("仅导出时间范围")).toBeChecked();
+  await expect(dialog.getByLabel("导出开始时间")).toHaveValue("1");
+  await expect(dialog.getByLabel("导出结束时间")).toHaveValue("3");
 });
 
 test("long export stays running beyond three minutes and recovers after closing the panel", async ({ page, request }) => {
@@ -3871,12 +3945,15 @@ test("local ASR review edits word timing and commits captions with undo and relo
     languages: ["auto", "zh", "en", "ja", "ko"], message: "测试识别服务已就绪",
   } }));
   await page.route(`**/api/v1/projects/${id}/asr-jobs`, async (route) => {
+    if (route.request().method() === "GET") return route.fulfill({ json: { jobs: [] } });
     startPayload = route.request().postDataJSON();
     await route.fulfill({ json: {
       ...completed, status: "queued", phase: "排队中", progress: 0, result: null,
     } });
   });
   await page.route("**/api/v1/asr-jobs/asr-ui-e2e", (route) => route.fulfill({ json: completed }));
+  await page.route("**/api/v1/asr-jobs/asr-ui-e2e/drafts", (route) => route.fulfill({ json: completed }));
+  await page.route("**/api/v1/asr-jobs/asr-ui-e2e/dismiss", (route) => route.fulfill({ json: completed }));
 
   await openProject(page, name);
   await page.locator(".clip-block").filter({ hasText: "red.mp4" }).click();
@@ -4293,8 +4370,10 @@ test("live audio does not go silent while the visual decoder buffers", async ({ 
   await expect(meter).toHaveAttribute("data-ready", "true");
   await page.getByRole("button", { name: "播放", exact: true }).click();
   await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeGreaterThan(.02);
-  const result = await page.evaluate(async () => {
-    const video = document.querySelector<HTMLVideoElement>("video.player__video")!;
+  // Native sound can start while the composed MP4 is still being prepared.
+  // Wait for the decoder this test is going to stall, rather than assuming
+  // that audible playback means a video element is already mounted.
+  const result = await page.locator("video.player__video").evaluate(async (video: HTMLVideoElement) => {
     const original = video.play;
     let held = true;
     video.play = function () { return held ? Promise.resolve() : original.call(this); };

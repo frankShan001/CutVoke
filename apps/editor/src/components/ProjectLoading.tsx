@@ -47,13 +47,14 @@ export function useProjectPreparation() {
   }, [state.opening, state.currentId]);
 
   useEffect(() => {
-    if (!state.opening || !state.currentId || !state.project) return;
+    if (!state.currentId || !state.project || state.view !== "editor") return;
     const project = projectRef.current!;
     const projectId = state.currentId;
+    const initialOpening = state.opening;
     const controller = new AbortController();
     const { signal } = controller;
     let jobId: string | undefined;
-    let enteredEditor = false;
+    let enteredEditor = !initialOpening;
     const cancelPreparation = () => {
       controller.abort();
       clearTimeout(decodeTimerRef.current);
@@ -78,7 +79,7 @@ export function useProjectPreparation() {
     window.addEventListener("cutvoke:prepared-preview-error", failedDecode);
     // Editing needs the current composed frame, not several seconds of video.
     // Request it before queuing background windows so it gets first admission.
-    void fetchPreviewFrame({ projectId, t: 0, width: 640, height: 360, signal }).then(async (result) => {
+    if (initialOpening) void fetchPreviewFrame({ projectId, t: 0, width: 640, height: 360, signal }).then(async (result) => {
       if (result.kind === "error" || result.kind === "cancelled") return;
       if (result.kind === "frame") {
         try {
@@ -92,6 +93,11 @@ export function useProjectPreparation() {
       dispatch({ type: "PROJECT_OPEN_READY", projectId });
     }).catch(() => { /* The window preparation below reports actionable errors. */ });
     void (async () => {
+      // A visual edit invalidates continuous playback too. Rebuild after a short
+      // idle interval instead of leaving edited complex projects on short
+      // windows forever; subsequent edits cancel this immutable request.
+      if (!initialOpening) for (let tick = 0; tick < 4; tick++) await pause(signal);
+      if (signal.aborted) return;
       let current = await previewRequest<PreviewJob>(
         `projects/${encodeURIComponent(projectId)}/preview-jobs`, undefined, { revision: project.revision, editorTitles: true });
       jobId = current.jobId;
@@ -142,7 +148,7 @@ export function useProjectPreparation() {
     // Opening ends when the first frame/window is ready. Keep this worker/poll alive
     // until the continuous preview completes; navigation or a visual edit owns
     // cancellation. An opening-state change alone must not cancel the job.
-  }, [state.currentId, contentKey, retry, dispatch]);
+  }, [state.currentId, state.view, contentKey, retry, dispatch]);
 
   return {
     progress: state.project ? progress : 0,

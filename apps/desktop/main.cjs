@@ -293,9 +293,10 @@ else {
       verifySender(event);
       const value = typeof suggested === "string" ? suggested.slice(0, 4096) : "";
       const filename = path.basename(value || "CutVoke.mp4").replace(/[<>:"/\\|?*\x00-\x1f]/g, "_");
-      const defaultPath = path.isAbsolute(value) && path.extname(value).toLowerCase() === ".mp4"
-        ? value : path.join(app.getPath("videos"), filename.endsWith(".mp4") ? filename : filename + ".mp4");
-      const result = await dialog.showSaveDialog(window, { defaultPath, filters: [{ name: "MP4", extensions: ["mp4"] }],
+      const extension = path.extname(value).toLowerCase() === ".mov" ? "mov" : "mp4";
+      const defaultPath = path.isAbsolute(value) && [".mp4", ".mov"].includes(path.extname(value).toLowerCase())
+        ? value : path.join(app.getPath("videos"), filename.toLowerCase().endsWith(`.${extension}`) ? filename : filename + `.${extension}`);
+      const result = await dialog.showSaveDialog(window, { defaultPath, filters: [{ name: extension === "mov" ? "ProRes MOV" : "MP4", extensions: [extension] }],
         properties: ["createDirectory", "showOverwriteConfirmation"] });
       return result.canceled ? null : result.filePath;
     });

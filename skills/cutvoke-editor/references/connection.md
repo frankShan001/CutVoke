@@ -26,7 +26,7 @@ Replace paths with those on the **engine's machine**. MCP and `cutvoke serve --d
 
 First call `editor_help({})`, then `runtime` and `project_list`. Request `editor_help({"topic":"recipes"})` for maintained examples and `editor_help({"topic":"command","command":"clip.insert"})` for a payload schema. `commands_list` provides `previewSupported`, so check before using `command_preview`. MCP guide resources expose the same guidance when the client supports them; no source-code access is necessary for ordinary editing.
 
-Restart/reconnect the MCP host process after an engine or effect-manifest update. Existing processes cache their loaded code and effect registry; there is no supported general hot reload.
+After an engine update, inspect `runtime.status`, `restartRequired` and `autoReload` before deciding to reconnect. The standard supervised stdio entry point can switch engine generations automatically; directly embedded or stale processes may still need a reconnect. After an effect-manifest update, reconnect if the current process has not loaded the new catalog. Do not restart the desktop or interrupt the user's edit just because a skill file changed.
 
 `media_import` copies local files into the persistent library shared with Web (`media/<assetId>.<extension>`). Exact legacy `media/imports/<sha256>.<extension>` ledger entries remain usable in place. Use the same database for MCP and the human editor, verify `available:true`, and relink truly missing files through the supported interface. The demo defaults to MCP imports and checks availability with its own local Web service; `--import-mode upload` separately exercises the Web upload API.
 

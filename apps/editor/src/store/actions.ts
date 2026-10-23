@@ -362,6 +362,7 @@ export async function doExport(
   outPath: string,
   quality: ExportQuality = "high",
   range?: ExportRange,
+  options: import("../lib/api").ExportOptions = {},
 ): Promise<ExportOutcome> {
   if (!state.currentId) {
     const err = new ApiFailure({ status: 400, code: "NO_PROJECT", message: tr("请先选择工程") });
@@ -370,7 +371,7 @@ export async function doExport(
   }
   try {
     if (!await flushPendingEdits()) throw new ApiFailure({ status: 409, code: "UNSAVED_EDITS", message: tr("保存失败，请重试") });
-    const job = await apiEnqueueExport(state.currentId, outPath, quality, range);
+    const job = await apiEnqueueExport(state.currentId, outPath, quality, range, true, options);
     dispatch({ type: "STATUS_SET", severity: "ok", text: msg("导出任务已加入队列，正在等待成片…") });
     return { ok: true, inFlight: true, jobId: job.jobId };
   } catch (err) {

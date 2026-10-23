@@ -18,7 +18,7 @@ import { ExportDialog } from "./components/ExportDialog";
 import { AgentActivityPanel } from "./components/AgentActivityPanel";
 import { WorkspaceBoundary } from "./components/WorkspaceBoundary";
 import { ProjectLoading, useProjectPreparation } from "./components/ProjectLoading";
-import { notifyTogglePlay } from "./hooks/useKeyboardShortcuts";
+import { useTimelineClipboardShortcuts, notifyTogglePlay } from "./hooks/useKeyboardShortcuts";
 import { LOCATE_PREFLIGHT_ISSUE, type LocatePreflightIssueEvent } from "./lib/preflight";
 
 const Workspace = lazy(() => import("./components/Workspace"));
@@ -45,6 +45,7 @@ const SHORTCUT_IGNORE_SELECTOR = [
 function AppShell() {
   useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
+  useTimelineClipboardShortcuts(state, dispatch);
   const preparation = useProjectPreparation();
   const shortcutStateRef = useRef(state);
   shortcutStateRef.current = state;

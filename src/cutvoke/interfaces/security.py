@@ -16,7 +16,7 @@ import os
 import secrets
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Optional, Tuple
 from urllib.parse import urlparse
@@ -394,6 +394,10 @@ class Limits:
     max_body_bytes: int = 16 * 1024 * 1024          # 单请求体最大字节
     max_concurrent_exports: int = 2                  # 最大并发导出任务数
     request_timeout_seconds: float = 30.0            # 单请求超时（秒）
+    # Media is streamed to disk; JSON/control requests retain the small limit.
+    # Hosts can lower/raise this independently without removing JSON protection.
+    max_media_bytes: int = field(default_factory=lambda: int(os.environ.get(
+        "CUTVOKE_MAX_MEDIA_BYTES", str(16 * 1024 * 1024 * 1024))))
 
 
 class ResourceLimiter:

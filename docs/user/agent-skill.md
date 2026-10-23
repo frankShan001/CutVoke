@@ -6,7 +6,7 @@ The **cutvoke-editor** skill teaches an external AI how to plan an edit, inspect
 
 ## Copy or install
 
-The self-contained folder is `skills/cutvoke-editor/`: `SKILL.md`, three progressively loaded references, and a runnable `scripts/demo.py`. Copy the **whole folder**, so its relative references remain available.
+The self-contained folder is `skills/cutvoke-editor/`: `SKILL.md`, progressively loaded references, and a runnable `scripts/demo.py`. Copy the **whole folder**, so its relative references remain available.
 
 For Codex's personal skill directory, from the checkout:
 
@@ -34,9 +34,17 @@ Configure a local MCP process as described in [external-agent-editing.md](extern
 
 Example request after connecting:
 
-> Use $cutvoke-editor to make a calm 12-second, 16:9 montage from the local media folder I selected. The audience is friends planning a quiet weekend. Keep one short title, readable captions, gentle motion and restrained transitions. Use only these files; write a new MP4 to my chosen output folder, review the actual frames and audio, and leave the timeline editable. If music or media rights are unclear, flag that before adding material.
+> Use $cutvoke-editor to make a calm 12-second, 16:9 montage from the local media folder I selected. The audience is friends planning a quiet weekend. Keep one short title, readable captions, gentle motion and restrained transitions. Use only these files; keep intermediate files and the new MP4 inside this project's directory, review the actual frames and audio, and leave the timeline editable. When finished, extract verified, reusable effects without user content and archive them in the CutVoke installation directory. If music or media rights are unclear, flag that before adding material.
 
 Supply the media folder/project, intended audience and takeaway, duration/aspect ratio, required copy/brand assets and destination. A thoughtful edit also depends on accessible media and the AI's ability to view/listen; the engine does not decide artistic quality automatically.
+
+## Project files and reusable effects
+
+Before generating files, the skill requires the AI to bind the target `projectId` to a stable, absolute `projectRoot` and record that association for later sessions. Reuse an existing project's recorded directory; a directory specified by the user takes precedence. For a new project without a directory, create `projects/<projectId>/` under the user's chosen parent directory or the current session workspace. Keep AI-generated plans, scripts, logs, temporary files, frames, audio, review evidence, project packages and final exports inside that project directory, explicitly supplying `outPath` wherever supported. An explicitly requested delivery destination can receive a copy while the project retains the main output. The engine continues to manage its database, imported media storage and caches; do not relocate them to satisfy artifact filing rules. See [workspace.md](../../skills/cutvoke-editor/references/workspace.md) for directory details.
+
+After editing, the AI reviews effects actually used and verified, selecting reusable recipes from supported `effects`, `motion` and `textStyle` settings. Register qualifying recipes with `effect_module_save` in the active data directory's `effect-modules` library, deduplicated by content. Then use `effect_module_export` to write `effects/<moduleId>.zip` inside the project and archive a copy at `user-effects/<moduleId>.zip` under the **verified CutVoke installation directory**. That installation folder is a local collection; the usable module library remains in the data directory. If the destination is unverified or unwritable, retain the project package and report the reason without elevating privileges, silently choosing another location, or overwriting a same-name file with different contents. Report when no qualifying candidate exists. See [effect-library.md](../../skills/cutvoke-editor/references/effect-library.md) for selection and filing rules.
+
+Effect packages contain supported parameter recipes without user media, copy or caption text, images, paths, code or project content; they are not published automatically. The skill also requires a manual handoff, targeted edits, and checks of real previews, final exports and audio. Uploading, publishing or sending content to others requires existing explicit authorization. These are instructions for the AI; filesystem isolation still depends on the host's permissions.
 
 ## A runnable integration example
 

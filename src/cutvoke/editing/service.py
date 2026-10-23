@@ -24,7 +24,7 @@ from typing import Callable, Optional
 
 from cutvoke.domain.model import (Project, Sequence, Track, Clip, AssetReference, Caption, CaptionWord,
                    Marker, new_id, EFFECT_TRANSFORM)
-from cutvoke.domain.keyframes import Keyframe
+from cutvoke.domain.keyframes import Keyframe, parameter_spec, validate_bezier, effect_instance_id
 from cutvoke.domain.protocol import Command, CommandResult, Event, Actor, ErrorCode, bump_revision
 from cutvoke.domain.rational import Rational
 from cutvoke.domain.speed_curve import SpeedCurve
@@ -260,7 +260,7 @@ _NONMUTATING_COMMANDS = frozenset({"export.cover", "export.video",
                                     "caption.autoSegment", "caption.transcribe",
                                     "audio.splitSentences",
                                     "caption.exportVtt",
-                                    "audio.denoise", "audio.vocalEnhance",
+                                    "audio.denoise", "audio.vocalEnhance", "audio.separate",
                                     "audio.normalize",
                                     "media.stabilize", "media.enhance", "media.trackPoint",
                                     "media.gif2video", "media.video2gif",
@@ -269,15 +269,17 @@ _NONMUTATING_COMMANDS = frozenset({"export.cover", "export.video",
                                     # 故不提 revision、不记 undo，走 _execute_nonmutating。
                                     "export.enqueue", "export.cancel", "export.jobs",
                                     # J12 模板清单：纯目录扫描，不依赖也不修改工程
-                                    "template.list", "project.preflight", "workspace.relocatePaths"})
+                                    "template.list", "project.preflight", "workspace.relocatePaths",
+                                    "project.interchangeExport"})
 
 # edit.batch 只组合候选工程上的纯编辑 handler。分析、导出、历史、录音等
 # 会触及工程外状态的命令不能嵌入，否则预演或失败回滚会留下副作用。
 _BATCH_EDIT_COMMANDS = frozenset({
+    "audio.mixer", "audio.busAdd", "audio.busRemove",
     "track.add", "track.remove", "track.update",
-    "sequence.background",
+    "sequence.background", "sequence.deleteRange", "transcript.delete",
     "clip.insert", "clip.attach", "clip.trim", "clip.move", "clip.split", "clip.speed",
-    "clip.remove", "clip.duplicate", "clip.duplicateGroup", "clip.audio", "clip.batch",
+    "clip.remove", "clip.duplicate", "clip.duplicateGroup", "clip.paste", "clip.audio", "clip.batch",
     "clip.keyframe", "clip.group", "clip.ungroup", "clip.rippleDelete",
     "clip.closeGap", "clip.align", "clip.distribute", "asset.swap",
     "effect.add", "effect.remove", "effect.update", "effect.copyVisual", "effect.setAnimation",
@@ -356,8 +358,14 @@ class EditService:
             "track.remove": self._h_track_remove,
             "track.update": self._h_track_update,
             "sequence.add": self._h_sequence_add,
+            "sequence.configure": self._h_sequence_configure,
+            "project.interchangeImport": self._h_project_interchange_import,
+            "project.interchangeExport": self._h_project_interchange_export,
+            "sequence.duplicate": self._h_sequence_duplicate,
             "sequence.switch": self._h_sequence_switch,
             "sequence.background": self._h_sequence_background,
+            "sequence.deleteRange": self._h_sequence_delete_range,
+            "transcript.delete": self._h_transcript_delete,
             "clip.insert": self._h_clip_insert,
             "clip.attach": self._h_clip_attach,
             "clip.trim": self._h_clip_trim,
@@ -367,6 +375,7 @@ class EditService:
             "clip.remove": self._h_clip_remove,
             "clip.duplicate": self._h_clip_duplicate,
             "clip.duplicateGroup": self._h_clip_duplicate_group,
+            "clip.paste": self._h_clip_paste,
             "clip.audio": self._h_clip_audio,
             "clip.detachAudio": self._h_clip_detach_audio,
             "clip.batch": self._h_clip_batch,
@@ -409,6 +418,7 @@ class EditService:
             # J08 多机位（multicam）：一组时间对齐、不同机位的同源轨 → 选一路输出
             "multicam.create": self._h_multicam_create,
             "multicam.switch": self._h_multicam_switch,
+            "multicam.sync": self._h_multicam_sync,
             "multicam.remove": self._h_multicam_remove,
             # 非改工程的分析/导出命令（HTTP/CLI/MCP 三方一致；经 _execute_nonmutating）
             "export.cover": self._h_export_cover,
@@ -447,6 +457,8 @@ class EditService:
             "template.list": self._h_template_list,
             "template.apply": self._h_template_apply,
         }
+        from cutvoke.editing.audio_commands import register as register_audio_commands
+        register_audio_commands(self)
 
     def _probe_source_duration(self, source_path: str) -> Optional[Rational]:
         """返回视频/音频真实时长；静态图片或无法探测时返回 None。
@@ -613,6 +625,21 @@ class EditService:
                 {"name": "switch", "description": "是否切到新序列（默认 true）", "required": False},
             ],
         },
+        "project.interchangeImport": {"description": "导入OTIO JSON/EDL/FCPXML剪切子集为新序列；返回诊断，可保存撤销。", "params": [
+            {"name": "format", "description": "otio/edl/fcpxml，AAF不支持", "required": True},
+            {"name": "content", "description": "UTF-8文档正文，最大4MiB", "required": True},
+            {"name": "strict", "description": "拒绝未映射的内容（默认true）", "required": False}]},
+        "project.interchangeExport": {"description": "输出可审计剪切互换文档与诊断；默认拒绝有损，不修改工程。", "params": [
+            {"name": "format", "description": "otio/edl/fcpxml，AAF不支持", "required": True},
+            {"name": "strict", "description": "拒绝未映射的内容（默认true）", "required": False},
+            {"name": "outPath", "description": "可选的绝对输出路径（默认只返回content）", "required": False},
+            {"name": "overwrite", "description": "允许覆盖文件（默认false）", "required": False}]},
+        "sequence.configure": {"description": "修改当前序列实际画布、帧率与构图。", "params": [
+            {"name": name, "description": name, "required": False}
+            for name in ("width", "height", "fps", "reframe", "name")]},
+        "sequence.duplicate": {"description": "复制完整可编辑序列并创建横竖屏等制作版本。", "params": [
+            {"name": name, "description": name, "required": False}
+            for name in ("sequenceId", "name", "width", "height", "fps", "reframe", "switch")]},
         "sequence.switch": {
             "description": "切换到指定序列（1.5-D 多时间线）。",
             "params": [
@@ -715,7 +742,7 @@ class EditService:
         "clip.duplicateGroup": {
             "description": "跨轨复制整组图层，保留相对时间、效果、关键帧与变速。默认递归带上绑定子图层，并重映射内部绑定；外部绑定解除。作为一个编辑步骤保存、撤销。",
             "params": [
-                {"name": "clipIds", "description": "源片段 ID 列表，1..256 个，可跨轨", "required": True},
+                {"name": "clipIds", "description": "源片段 ID 列表，1..5000 个，可跨轨", "required": True},
                 {"name": "timelineStart", "description": "新组合最早入点；缺省紧跟原组合末尾", "required": False},
                 {"name": "includeAttached", "description": "递归复制绑定到所选片段的子图层，默认 true", "required": False},
             ],
@@ -739,11 +766,26 @@ class EditService:
             ],
         },
         "clip.batch": {
-            "description": "批量修改同一轨道上多个片段（显式 clipIds 或整轨），支持 speed/volume/fadeIn/fadeOut/pitch/opacity/animation/transition。",
+            "description": "跨轨选区移动/删除/音频属性（action+clipIds），或兼容整轨属性修改（trackId+params）。作为一次编辑保存撤销。",
             "params": [
-                {"name": "trackId", "description": "目标轨道 ID", "required": True},
+                {"name": "trackId", "description": "兼容整轨属性修改的目标轨道 ID", "required": False},
                 {"name": "clipIds", "description": "显式片段 ID 列表（缺省=该轨全部）", "required": False},
-                {"name": "params", "description": "参数字典：speed|volume|fadeIn|fadeOut|pitch|opacity", "required": True},
+                {"name": "params", "description": "兼容属性字典：speed|volume|fadeIn|fadeOut|pitch|opacity", "required": False},
+                {"name": "action", "description": "选区操作：move/remove/audio", "required": False},
+                {"name": "offset", "description": "选区时间位移，精确秒或数值", "required": False},
+                {"name": "trackOffset", "description": "选区轨道位移整数", "required": False},
+                {"name": "includeAttached", "description": "包含绑定子图层；移动删除默认 true", "required": False},
+                {"name": "volume", "description": "选区音量倍率", "required": False},
+                {"name": "fadeIn", "description": "选区淡入秒数", "required": False},
+                {"name": "fadeOut", "description": "选区淡出秒数", "required": False},
+            ],
+        },
+        "clip.paste": {
+            "description": "插入剪贴板完整片段快照，跨轨保留相对时间并顺延后方内容；锁定受影响轨道时原子拒绝。",
+            "params": [
+                {"name": "items", "description": "完整片段快照及原轨道标识/类型/索引", "required": True},
+                {"name": "timelineStart", "description": "插入时间线位置", "required": True},
+                {"name": "targetTrackId", "description": "可选首个目标轨道 ID", "required": False},
             ],
         },
         "asset.swap": {
@@ -756,21 +798,21 @@ class EditService:
             ],
         },
         "clip.keyframe": {
-            "description": "增/删片段参数关键帧（P3 动画，D07）。",
+            "description": "通用参数关键帧与时间曲线；局部呈现时间，支持保存撤销与预览导出。",
             "params": [
                 {"name": "clipId", "description": "片段 ID", "required": True},
-                {"name": "action", "description": "add（默认）、batch 或 remove", "required": False},
-                {"name": "param", "description": "参数名 opacity/x/y/scale/rotation；add/remove 必填，batch 在各关键帧内提供", "required": False},
+                {"name": "action", "description": "add/batch/remove/update/retime；retime 用 keyframeIds/offset/timeScale/anchor", "required": False},
+                {"name": "param", "description": "opacity/x/y/scale/rotation/volume 或 effect:<instanceId>:brightness/contrast/saturation/sigma；先读取效果实例", "required": False},
                 {"name": "time", "description": "关键帧时刻（片段局部时间，{num,den} 或秒数）", "required": False},
                 {"name": "value", "description": "关键帧值（add 时必填）", "required": False},
-                {"name": "interpolation", "description": "linear/ease-in/ease-out（默认 linear）", "required": False},
+                {"name": "interpolation", "description": "linear/ease-in/ease-out/cubic-bezier；后者同时提供bezier四数控点（各0..1）", "required": False},
                 {"name": "keyframeId", "description": "要删除的关键帧 ID（remove 时必填）", "required": False},
             ],
         },
         "clip.group": {
-            "description": "把同一轨道上、时间连续（允许间隙）的一组片段打包成一个复合片段：删原片段，在组区间插入一个复合 Clip（timeline_start=组内首个 start，timeline_end=组内末个 end），nested 内建一条同类型轨道保留各片段相对位置（子序列时间从 0 起）。跨轨或非连续选区 → INVALID_ARGUMENT。",
+            "description": "把跨轨视频、文字、贴纸和音频创建为可整体变换/变速的复合片段，保留内部轨道与原轨道布局；选区中有未选重叠图层时拒绝以保持合成顺序。",
             "params": [
-                {"name": "clipIds", "description": "要打包的片段 ID 列表（须同轨、连续选区）", "required": True},
+                {"name": "clipIds", "description": "要打包的片段 ID 列表（可跨轨）", "required": True},
                 {"name": "groupId", "description": "显式复合片段 ID（缺省自动生成）", "required": False},
                 {"name": "name", "description": "复合片段名称（可选，存于 nested 序列名）", "required": False},
             ],
@@ -975,12 +1017,17 @@ class EditService:
             "description": "在多机位组内切换当前输出轨（剪辑师在机位间切换）：{trackId}。trackId 必须是组内成员，否则 INVALID_ARGUMENT。",
             "params": [
                 {"name": "trackId", "description": "要切到的组内轨道 ID（成为 activeTrackId）", "required": True},
+                {"name": "time", "description": "可选的时间线切换点（秒或有理数）；缺省保持旧的全局选择语义", "required": False},
             ],
         },
         "multicam.remove": {
             "description": "删除当前序列的多机位组（清掉 sequence.multicam 元数据；轨道本身不动）。",
             "params": [],
         },
+        "multicam.sync": {"description": "以实际音频波形互相关对齐两个机位；低置信或歧义会拒绝修改。", "params": [
+            {"name": "referenceTrackId", "description": "基准机位轨", "required": True},
+            {"name": "targetTrackId", "description": "待同步机位轨", "required": True},
+            {"name": "maxOffsetSeconds", "description": "最大搜索偏移（0..30秒）", "required": False}]},
         "effect.bypass": {
             "description": "旁路/恢复片段上的效果（保留在效果栈中，只是不参与渲染）。",
             "params": [
@@ -1158,7 +1205,7 @@ class EditService:
             ],
         },
         "audio.record": {
-            "description": "J05 录音：ffmpeg dshow 从麦克风采集到 wav（Windows）；非 Windows 用内置音源替代。",
+            "description": "真实麦克风录音：Windows DirectShow、macOS AVFoundation、Linux PulseAudio（device=alsa:设备可选ALSA）；设备不可用明确失败。",
             "params": [
                 {"name": "outPath", "description": "输出 wav 绝对路径", "required": True},
                 {"name": "seconds", "description": "录制时长秒（0.5~300，默认 5）", "required": False},
@@ -1191,6 +1238,7 @@ class EditService:
         "export.enqueue": {
             "description": "V02 异步导出入队（非阻塞）：提交一次后台导出任务，立即返回 jobId。串行消费、可取消、versioned 永不覆盖。不修改工程。",
             "params": [
+                {"name": "sequenceId", "description": "输出指定制作序列；不改变编辑器活动序列", "required": False},
                 {"name": "outPath", "description": "输出 MP4 绝对路径（必填）", "required": True},
                 {"name": "quality", "description": "画质 high/medium/low（默认 high）", "required": False},
                 {"name": "versioned", "description": "多版本：true 时永不覆盖已有成片，依次 name.mp4→name_v2.mp4（默认 False）", "required": False},
@@ -1242,6 +1290,22 @@ class EditService:
             "description": "B02 波纹删除：删除片段并把同轨上起点在其之后的片段整体左移（左移量=被删片段时长），消除删除造成的空洞。",
             "params": [
                 {"name": "clipId", "description": "要删除的片段 ID", "required": True},
+                {"name": "scope", "description": "track（兼容默认）或 sequence（全轨、字幕、标记联动）", "required": False},
+            ],
+        },
+        "sequence.deleteRange": {
+            "description": "原子删除整个序列的时间区间，跨轨裁切并收拢视频、声音、字幕、标记、自动化与机位切点。受影响轨道锁定时整次拒绝；可一次撤销。",
+            "params": [
+                {"name": "start", "description": "删除区间开始秒或有理数", "required": True},
+                {"name": "end", "description": "删除区间结束秒或有理数（不含）", "required": True},
+            ],
+        },
+        "transcript.delete": {
+            "description": "按已提交字幕的句子或词删除对应音视频时间，所有轨道、字幕和标记同步收拢。支持多个captionIds或一个captionId加wordIndices；一次撤销。",
+            "params": [
+                {"name": "captionIds", "description": "要删掉的句子字幕ID数组", "required": False},
+                {"name": "captionId", "description": "按词编辑时的字幕ID", "required": False},
+                {"name": "wordIndices", "description": "词级时间已知时要删的词索引数组", "required": False},
             ],
         },
         "clip.closeGap": {
@@ -1472,6 +1536,27 @@ class EditService:
             raise EditError(ErrorCode.INVALID_ARGUMENT, f"project not found: {project_id}")
         return self._projects[project_id]
 
+    def project_sync(self, project_id: str, known_token: Optional[str] = None) -> dict:
+        """Return a compact full snapshot only when authoritative state changed."""
+        if self._store is not None:
+            state = self._store.load_for_sync(project_id, known_token)
+            if state is None:
+                raise EditError(ErrorCode.INVALID_ARGUMENT, f"project not found: {project_id}")
+            token, revision, project = state
+        else:
+            project = self.get_project(project_id)
+            revision = project.revision
+            token = hashlib.sha256(json.dumps(project.to_dict(compact=True),
+                                             ensure_ascii=False, sort_keys=True,
+                                             separators=(",", ":")).encode()).hexdigest()
+            if token == known_token:
+                project = None
+        result = {"projectId": project_id, "revision": revision, "token": token,
+                  "unchanged": project is None}
+        if project is not None:
+            result["project"] = project.to_dict(compact=True)
+        return result
+
     def project_summary(self, project_id: str) -> dict:
         """Return a stable, low-token timeline index for an external Agent.
 
@@ -1622,9 +1707,11 @@ class EditService:
         return max(5.0, min(value, 300.0))
 
     def get_edit_lease(self, project_id: str) -> Optional[dict]:
-        self.get_project(project_id)
         if self._store is not None:
+            if not self._store.exists(project_id):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, f"project not found: {project_id}")
             return self._store.get_edit_lease(project_id)
+        self.get_project(project_id)
         lease = self._edit_leases.get(project_id)
         if lease is not None and float(lease["expiresAt"]) <= time.time():
             self._edit_leases.pop(project_id, None)
@@ -1992,7 +2079,7 @@ class EditService:
         try:
             if command.type in ("audio.analyze", "caption.autoSegment",
                                 "audio.splitSentences", "audio.denoise",
-                                "audio.vocalEnhance", "audio.normalize",
+                                "audio.vocalEnhance", "audio.normalize", "audio.separate",
                                 # J12：模板清单只读目录，不需要工程
                                 "template.list", "media.trackPoint"):
                 # 分析/切分/音频处理本身不依赖工程
@@ -2166,20 +2253,24 @@ class EditService:
         if command.type == "history.undo" and self._store is not None:
             # _h_undo 只读取快照；真正删除放到 commit 同一事务中。
             history_pop_depth = self._store.history_depth(pid)
+            redo_depth = self._store.redo_depth(pid)
+            history_push = {"depth": (redo_depth if redo_depth is not None else 0) - 1,
+                            "snapshot": proj.to_dict(compact=True), "revision": previous}
         if command.type == "history.redo" and self._store is not None:
             # Redo must put the state being left back on the persistent undo
             # stack, so a second undo returns to the same state instead of
             # consuming an older edit's snapshot.
             history_push = {
                 "depth": self._undo_depth(pid),
-                "snapshot": proj.to_dict(),
+                "snapshot": proj.to_dict(compact=True),
                 "revision": previous,
             }
+            history_pop_depth = self._store.redo_depth(pid)
         elif command.type not in ("history.undo", "history.redo"):
             depth = self._undo_depth(pid)
             history_push = {
                 "depth": depth,
-                "snapshot": proj.to_dict(),   # 提交前状态
+                "snapshot": proj.to_dict(compact=True),   # 完整序列，省略重复活动序列
                 "revision": previous,
             }
             clear_redo = True
@@ -2200,16 +2291,13 @@ class EditService:
             except RevisionConflict as e:
                 # 另一进程已推进数据库：转协议错误码
                 raise EditError(ErrorCode.REVISION_CONFLICT, str(e), retryable=True) from e
-            # 持久成功后，刷新数据库权威到内存（含候选工程）
-            self._projects[pid] = self._store.load(pid) or candidate
+            # This exact candidate is now durably committed. Public get_project
+            # still reloads SQLite, so a later cross-process edit remains visible.
+            # Re-decoding our own just-written full snapshot adds no authority.
+            self._projects[pid] = candidate
             # undo/redo 的内存栈也必须在持久提交成功后才改变；否则冲突
             # 会出现“工程未变，但历史栈已被消费”的半提交状态。
-            if command.type == "history.undo":
-                self._redo_stack[pid].append(copy.deepcopy(proj))
-            elif command.type == "history.redo":
-                if self._redo_stack[pid]:
-                    self._redo_stack[pid].pop()
-            elif clear_redo:
+            if clear_redo:
                 self._redo_stack[pid].clear()
         else:
             # 内存态也只在候选工程通过校验后变更历史栈，避免失败命令
@@ -2368,6 +2456,48 @@ class EditService:
         return [{"type": "sequence", "id": seq.id, "change": "background_updated",
                  "fields": ["backgroundColor"]}]
 
+    def _h_project_interchange_export(self, proj, p):
+        from pathlib import Path
+        from cutvoke.editing.interchange import export_timeline
+        result = export_timeline(proj.sequence, p.get("format", "otio"), p.get("strict", True))
+        out = p.get("outPath")
+        if out and result["content"] is not None:
+            path = Path(out)
+            if not path.is_absolute(): raise EditError(ErrorCode.INVALID_ARGUMENT, "outPath must be absolute")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with path.open("w" if p.get("overwrite") else "x", encoding="utf-8") as handle:
+                handle.write(result["content"])
+            path.with_suffix(path.suffix + ".diagnostics.json").write_text(
+                json.dumps(result["diagnostics"], ensure_ascii=False, indent=2), encoding="utf-8")
+            result["outPath"] = str(path)
+        return [dict(result, type="interchange_export")]
+
+    def _h_project_interchange_import(self, proj, p):
+        from cutvoke.editing.interchange import import_timeline
+        try:
+            sequence, diagnostics = import_timeline(p.get("content"), p.get("format", "otio"), p.get("strict", True))
+        except (ValueError, TypeError, KeyError) as exc:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(exc)) from exc
+        proj.sequences.append(sequence)
+        proj.sequence, proj.active_sequence_id = sequence, sequence.id
+        return [{"type": "sequence", "id": sequence.id, "change": "imported", "diagnostics": diagnostics}]
+
+    def _h_sequence_configure(self, proj, p):
+        from cutvoke.editing.sequence_tools import configure
+        try:
+            configure(proj.sequence, p)
+        except (ValueError, TypeError) as exc:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(exc)) from exc
+        return [{"type": "sequence", "id": proj.sequence.id, "change": "configured"}]
+
+    def _h_sequence_duplicate(self, proj, p):
+        from cutvoke.editing.sequence_tools import duplicate
+        try:
+            sequence = duplicate(proj, p)
+        except (ValueError, TypeError) as exc:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(exc)) from exc
+        return [{"type": "sequence", "id": sequence.id, "change": "created"}]
+
     def _h_sequence_switch(self, proj: Project, p: dict) -> list[dict]:
         """切换活动序列（1.5-D 多时间线）。"""
         sid = p["sequenceId"]
@@ -2416,7 +2546,7 @@ class EditService:
                 f"multicam tracks must share one kind, got {sorted(kinds)}")
 
         active = p.get("activeTrackId") or track_ids[0]
-        if active not in tracks_by_id:
+        if active not in track_ids:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             f"activeTrackId not found: {active}")
 
@@ -2425,6 +2555,8 @@ class EditService:
             "groupId": group_id,
             "trackIds": list(track_ids),
             "activeTrackId": active,
+            "audioTrackId": active,
+            "cuts": [],
             "sync": "time",
         }
         return [{"type": "multicam", "id": group_id, "change": "created",
@@ -2446,9 +2578,30 @@ class EditService:
                 f"track {track_id} is not a member of the multicam group")
         # 在候选副本上以新 dict 更新，避免就地改到共享引用
         seq.multicam = dict(seq.multicam)
+        if "time" in p:
+            time = (Rational.from_json(**p["time"]) if isinstance(p["time"], dict)
+                    else Rational.from_float(float(p["time"])))
+            if time < Rational.of(0):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, "Camera cut time must not be negative")
+            cuts = [cut for cut in seq.multicam.get("cuts", [])
+                    if Rational.from_json(**cut["time"]) != time]
+            cuts.append({"time": time.to_json(), "trackId": track_id})
+            seq.multicam["cuts"] = sorted(cuts, key=lambda cut: Rational.from_json(**cut["time"]).to_fraction())
+            return [{"type": "multicam", "change": "cut", "time": time.to_json(), "trackId": track_id}]
         seq.multicam["activeTrackId"] = track_id
         return [{"type": "multicam", "id": seq.multicam["groupId"],
                  "change": "switched", "activeTrackId": track_id}]
+
+    def _h_multicam_sync(self, proj, p):
+        from cutvoke.rendering.multicam_sync import synchronize
+        if not proj.sequence.multicam or any(p.get(field) not in proj.sequence.multicam["trackIds"]
+                for field in ("referenceTrackId", "targetTrackId")):
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "Choose tracks from the multicam group")
+        try:
+            report = synchronize(proj.sequence, p)
+        except (ValueError, OSError, subprocess.SubprocessError) as exc:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(exc)) from exc
+        return [{"type": "multicam", "change": "synchronized", "report": report}]
 
     def _h_multicam_remove(self, proj: Project, p: dict) -> list[dict]:
         """删除当前序列的多机位组（清掉 sequence.multicam 元数据；轨道本身不动）。"""
@@ -3082,6 +3235,9 @@ class EditService:
             f = p["fadeOut"]
             clip.fade_out = (Rational.from_json(**f) if isinstance(f, dict)
                              else Rational.from_float(float(f)))
+        if "fadeIn" in p or "fadeOut" in p:
+            clip.audio_fade_offset = Rational.of(0)
+            clip.audio_fade_duration = None
         if "pitch" in p:
             pt = p["pitch"]
             pitch = (Rational.from_json(**pt) if isinstance(pt, dict)
@@ -3319,6 +3475,12 @@ class EditService:
         复用 clip.speed / clip.audio / cutvoke.transform(opacity) 的既有写入基元，
         不重复实现。不支持的参数名报 INVALID_ARGUMENT。返回每条片段一项。
         """
+        if "action" in p:
+            from cutvoke.editing.clip_batch import edit
+            try:
+                return edit(self, proj, p)
+            except ValueError as error:
+                raise EditError(ErrorCode.INVALID_ARGUMENT, str(error)) from error
         track_id = p.get("trackId")
         if not track_id:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
@@ -4060,23 +4222,27 @@ class EditService:
         clip_id = p["clipId"]
         param = p.get("param", "")
         action = p.get("action", "add")
-        supported_params = {"opacity", "x", "y", "scale", "rotation"}
+        clip = self._clip_by_id(proj, clip_id)
 
         def parse_add(item: dict) -> tuple[str, Rational, float, str]:
             key_param = item.get("param", "")
             if not key_param:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 "clip.keyframe requires 'param'")
-            if key_param not in supported_params:
-                raise EditError(
-                    ErrorCode.INVALID_ARGUMENT,
-                    f"unsupported keyframe parameter: {key_param}; "
-                    f"available: {', '.join(sorted(supported_params))}")
+            try:
+                minimum, maximum, _ = parameter_spec(clip, key_param)
+            except ValueError as exc:
+                raise EditError(ErrorCode.INVALID_ARGUMENT, str(exc)) from exc
             if "time" not in item or "value" not in item:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 "keyframe add requires 'time' and 'value'")
-            t = (Rational.from_json(**item["time"]) if isinstance(item["time"], dict)
-                 else Rational.from_float(float(item["time"])))
+            try:
+                t = (Rational.from_json(**item["time"]) if isinstance(item["time"], dict)
+                     else Rational.from_float(float(item["time"])))
+            except (TypeError, ValueError, OverflowError, ZeroDivisionError) as exc:
+                raise EditError(ErrorCode.INVALID_ARGUMENT, "keyframe time must be finite") from exc
+            if t < Rational.of(0) or t > clip.duration:
+                raise EditError(ErrorCode.INVALID_ARGUMENT, "keyframe time must be inside the clip")
             interp = item.get("interpolation", "linear")
             if interp not in Keyframe.VALID_INTERP:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
@@ -4089,21 +4255,58 @@ class EditService:
             if not math.isfinite(value):
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 "keyframe value must be a finite number")
-            if key_param == "opacity" and not 0.0 <= value <= 1.0:
+            if not minimum <= value <= maximum:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
-                                "opacity keyframe value must be in [0, 1]")
-            if key_param == "scale" and not 0.05 <= value <= 5.0:
-                raise EditError(ErrorCode.INVALID_ARGUMENT,
-                                "scale keyframe value must be in [0.05, 5]")
-            if key_param == "rotation" and not -180.0 <= value <= 180.0:
-                raise EditError(ErrorCode.INVALID_ARGUMENT,
-                                "rotation keyframe value must be in [-180, 180]")
-            return key_param, t, value, interp
+                                f"{key_param} keyframe value must be in [{minimum:g}, {maximum:g}]")
+            try:
+                bezier = validate_bezier(item.get("bezier")) if interp == "cubic-bezier" else None
+            except ValueError as exc:
+                raise EditError(ErrorCode.INVALID_ARGUMENT, str(exc)) from exc
+            return key_param, t, value, interp, bezier
 
         for track in proj.sequence.tracks:
             for clip in track.clips:
                 if clip.id != clip_id:
                     continue
+                if action == "retime":
+                    selected = p.get("keyframeIds")
+                    if (not isinstance(selected, list) or not selected or len(selected)>1000
+                            or any(not isinstance(value,str) for value in selected) or len(selected) != len(set(selected))):
+                        raise EditError(ErrorCode.INVALID_ARGUMENT, "retime requires distinct keyframeIds")
+                    def seconds(value):
+                        try:
+                            return Rational.from_json(**value) if isinstance(value, dict) else Rational.from_float(float(value))
+                        except (TypeError, ValueError, OverflowError, ZeroDivisionError) as exc:
+                            raise EditError(ErrorCode.INVALID_ARGUMENT, "keyframe timing must be finite") from exc
+                    offset = seconds(p.get("offset", 0))
+                    anchor = seconds(p.get("anchor", 0))
+                    scale = seconds(p.get("timeScale", 1))
+                    if scale <= Rational.of(0):
+                        raise EditError(ErrorCode.INVALID_ARGUMENT, "timeScale must be positive")
+                    matched = set()
+                    for lane in clip.keyframes.values():
+                        stamps = []
+                        for key in lane:
+                            if key.id in selected:
+                                matched.add(key.id)
+                                key.time = anchor + (key.time-anchor)*scale + offset
+                            if key.time < Rational.of(0) or key.time > clip.duration:
+                                raise EditError(ErrorCode.INVALID_ARGUMENT, "retimed keyframe is outside the clip")
+                            stamps.append(key.time.to_fraction())
+                        if len(stamps) != len(set(stamps)):
+                            raise EditError(ErrorCode.INVALID_ARGUMENT, "retimed keyframes collide")
+                    if matched != set(selected):
+                        raise EditError(ErrorCode.INVALID_ARGUMENT, "keyframe not found")
+                    return [{"type": "clip", "id": clip_id, "change": "updated"}]
+                if action == "update":
+                    existing = next((k for k in clip.keyframes.get(param, []) if k.id == p.get("keyframeId")), None)
+                    if existing is None:
+                        raise EditError(ErrorCode.INVALID_ARGUMENT, "keyframe not found")
+                    _, stamp, value, interp, bezier = parse_add({**existing.to_dict(), "param": param, **p})
+                    if any(k.id != existing.id and k.time == stamp for k in clip.keyframes[param]):
+                        raise EditError(ErrorCode.INVALID_ARGUMENT, "keyframe time collides with another node")
+                    existing.time, existing.value, existing.interpolation, existing.bezier = stamp,value,interp,bezier
+                    return [{"type": "clip", "id": clip_id, "change": "updated"}]
                 if action == "remove":
                     if not param:
                         raise EditError(ErrorCode.INVALID_ARGUMENT,
@@ -4133,16 +4336,23 @@ class EditService:
                                         "keyframe batch items must be objects")
                 else:
                     updates = [parse_add(p)]
-                for key_param, t, value, interp in updates:
+                if action not in ("add", "batch"):
+                    raise EditError(ErrorCode.INVALID_ARGUMENT, "unknown keyframe action")
+                for key_param, t, value, interp, bezier in updates:
+                    if key_param.startswith("effect:"):
+                        instance = key_param.split(":")[1]
+                        for index, effect in enumerate(clip.effects):
+                            effect.setdefault("instanceId", effect_instance_id(effect, index))
                     kfs = clip.keyframes.setdefault(key_param, [])
                     existing = next((keyframe for keyframe in kfs
                                      if keyframe.time.to_fraction() == t.to_fraction()), None)
                     if existing is not None:
                         existing.value = value
                         existing.interpolation = interp
+                        existing.bezier = bezier
                     else:
                         kfs.append(Keyframe(id=new_id("kf"), time=t, value=value,
-                                            interpolation=interp))
+                                            interpolation=interp, bezier=bezier))
                 return [{"type": "clip", "id": clip_id, "change": "updated"}]
         raise EditError(ErrorCode.INVALID_ARGUMENT, f"clip not found: {clip_id}")
 
@@ -4156,47 +4366,16 @@ class EditService:
                     if at <= clip.timeline_start or at >= clip.timeline_end:
                         raise EditError(ErrorCode.INVALID_ARGUMENT,
                                         f"split point {at} outside clip [{clip.timeline_start},{clip.timeline_end})")
-                    left = clip
-                    if clip.speed_curve is not None:
-                        old_start, old_end = clip.timeline_start, clip.timeline_end
-                        right = copy.deepcopy(clip)
-                        right.id = f"{clip_id}_r"
-                        self._crop_curve_clip(right, at, old_end)
-                        self._crop_curve_clip(left, old_start, at)
-                        if left.frame_interpolation == "motion" and not left.has_slow_motion:
-                            left.frame_interpolation = "none"
-                        if right.frame_interpolation == "motion" and not right.has_slow_motion:
-                            right.frame_interpolation = "none"
-                    else:
-                        old_start, old_end = clip.timeline_start, clip.timeline_end
-                        # 源时间偏移 = 分割点对应素材位置
-                        source_at = clip.source_start + (at - clip.timeline_start) * clip.speed
-                        right = Clip(
-                            id=f"{clip_id}_r",
-                            asset_ref=clip.asset_ref,
-                            timeline_start=at,
-                            timeline_end=clip.timeline_end,
-                            source_start=source_at,
-                            speed=clip.speed,
-                            preserve_pitch=clip.preserve_pitch,
-                            effects=copy.deepcopy(clip.effects),
-                            linked=clip.linked,
-                            attached_to_clip_id=clip.attached_to_clip_id,
-                            hidden=clip.hidden,
-                            keyframes={name: list(kfs)
-                                      for name, kfs in clip.keyframes.items()},
-                            volume=clip.volume,
-                            fade_in=clip.fade_in,
-                            fade_out=clip.fade_out,
-                            pitch=clip.pitch,
-                            freeze_at=clip.freeze_at,
-                            nested=clip.nested,
-                            role=clip.role,
-                            frame_interpolation=clip.frame_interpolation,
-                        )
-                        left.timeline_end = at
-                        self._rebase_effect_ranges(right, old_start, old_end, at, old_end)
-                        self._rebase_effect_ranges(left, old_start, old_end, old_start, at)
+                    from cutvoke.editing.timeline_ops import crop_clip
+                    left = crop_clip(self, clip, clip.timeline_start, at)
+                    right = crop_clip(self, clip, at, clip.timeline_end)
+                    if right.nested is not None:
+                        from cutvoke.editing.compound import fresh_nested
+                        right.nested = fresh_nested(right.nested)
+                    right.id = f"{clip_id}_r"
+                    if any(c.id == right.id for lane in proj.sequence.tracks for c in lane.clips):
+                        right.id = new_id("clip")
+                    track.clips[idx] = left
                     track.clips.insert(idx + 1, right)
                     changed = [{"type": "clip", "id": clip_id, "change": "updated"},
                                {"type": "clip", "id": right.id, "change": "created"}]
@@ -4240,6 +4419,9 @@ class EditService:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             "export.enqueue requires 'outPath'")
         queue_payload = dict(p)
+        if p.get("sequenceId") is not None:
+            from cutvoke.editing.sequence_tools import select
+            proj = select(proj, p["sequenceId"])
         if p.get("range") is not None:
             start, end = self._validated_export_range(proj, p["range"])
             queue_payload["range"] = {"start": start, "end": end}
@@ -4654,6 +4836,15 @@ class EditService:
         id 不存在 → NOT_FOUND；缺 clipId → INVALID_ARGUMENT。
         左移后若某片段时间线起点 < 0（理论不会发生，因被删片段起点>=0）→ 拒绝。
         """
+        if p.get("scope", "track") not in {"track", "sequence"}:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "scope must be track or sequence")
+        if p.get("scope") == "sequence":
+            clip = next((c for t in proj.sequence.tracks for c in t.clips
+                         if c.id == p.get("clipId")), None)
+            if clip is None:
+                raise EditError(ErrorCode.NOT_FOUND, "clip not found")
+            return self._h_sequence_delete_range(proj, {
+                "start": clip.timeline_start.to_json(), "end": clip.timeline_end.to_json()})
         clip_id = p.get("clipId")
         before = {c.id: c.timeline_start for lane in proj.sequence.tracks for c in lane.clips}
         if not clip_id:
@@ -4695,6 +4886,43 @@ class EditService:
                 changed.extend(self._follow_attached_clips(proj, before, True))
                 return changed
         raise EditError("NOT_FOUND", f"clip not found: {clip_id}")
+
+    def _h_sequence_delete_range(self, proj: Project, p: dict) -> list[dict]:
+        from cutvoke.editing.timeline_ops import delete_range, seconds
+        try:
+            return delete_range(self, proj.sequence, seconds(p["start"]), seconds(p["end"]))
+        except (ValueError, TypeError, KeyError, OverflowError) as exc:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(exc)) from exc
+
+    def _h_transcript_delete(self, proj: Project, p: dict) -> list[dict]:
+        ids = p.get("captionIds")
+        word_indices = p.get("wordIndices")
+        ranges = []
+        if word_indices is not None:
+            cap = next((c for c in proj.sequence.captions if c.id == p.get("captionId")), None)
+            if (cap is None or not cap.words or not isinstance(word_indices, list)
+                    or not word_indices or any(type(i) is not int or i < 0 or i >= len(cap.words)
+                                               for i in word_indices)):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, "请选择具有词级时间的字幕及有效词索引")
+            ranges = [(cap.words[i].start, cap.words[i].end) for i in set(word_indices)]
+        elif isinstance(ids, list) and ids:
+            caps = [c for c in proj.sequence.captions if c.id in ids]
+            if len(caps) != len(set(ids)):
+                raise EditError(ErrorCode.NOT_FOUND, "部分字幕已不存在")
+            ranges = [(c.start, c.end) for c in caps]
+        else:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "请选择要删掉的句子或词")
+        merged = []
+        for start, end in sorted(ranges):
+            if merged and start <= merged[-1][1]:
+                merged[-1] = (merged[-1][0], max(end, merged[-1][1]))
+            else:
+                merged.append((start, end))
+        changed = []
+        for start, end in reversed(merged):
+            changed.extend(self._h_sequence_delete_range(proj, {
+                "start": start.to_json(), "end": end.to_json()}))
+        return changed
 
     def _h_clip_close_gap(self, proj: Project, p: dict) -> list[dict]:
         """clip.closeGap：关闭该轨上片段之间的空隙，使片段紧邻排列（保持各片段
@@ -4776,296 +5004,40 @@ class EditService:
         return changed
 
     def _h_clip_duplicate_group(self, proj: Project, p: dict) -> list[dict]:
-        ids = p.get('clipIds')
-        if (not isinstance(ids, list) or not 1 <= len(ids) <= 256 or
-                any(not isinstance(item, str) for item in ids) or len(set(ids)) != len(ids)):
-            raise EditError(ErrorCode.INVALID_ARGUMENT, 'clipIds must contain 1..256 unique clip IDs')
-        all_clips = {c.id: (t, c) for t in proj.sequence.tracks for c in t.clips}
-        selected = set(ids)
-        if not selected <= all_clips.keys():
-            raise EditError(ErrorCode.INVALID_ARGUMENT, 'some clipIds were not found')
-        if 'includeAttached' in p and not isinstance(p['includeAttached'], bool):
-            raise EditError(ErrorCode.INVALID_ARGUMENT, 'includeAttached must be a boolean')
-        if p.get('includeAttached', True):
-            while True:
-                children = {cid for cid, (_t, c) in all_clips.items()
-                            if c.attached_to_clip_id in selected}
-                if children <= selected:
-                    break
-                selected.update(children)
-        if len(selected) > 256:
-            raise EditError(ErrorCode.INVALID_ARGUMENT, 'attached group exceeds 256 clips')
-        originals = [(t, c) for t in proj.sequence.tracks for c in t.clips if c.id in selected]
-        if any(t.locked for t, _c in originals):
-            raise EditError(ErrorCode.INVALID_ARGUMENT, 'cannot copy a group into locked tracks')
-        first = min(c.timeline_start for _t, c in originals)
-        start = (Rational.from_json(**p['timelineStart']) if 'timelineStart' in p else
-                 max(c.timeline_end for _t, c in originals))
-        if start < Rational.of(0):
-            raise EditError(ErrorCode.INVALID_ARGUMENT, 'timelineStart must be nonnegative')
-        copies = [(t, c, c.to_dict()) for t, c in originals]
-        mapping = {}
-        def collect(value):
-            if isinstance(value, dict):
-                if isinstance(value.get('id'), str):
-                    mapping[value['id']] = new_id('copy')
-                for item in value.values():
-                    collect(item)
-            elif isinstance(value, list):
-                for item in value:
-                    collect(item)
-        for _track, _clip, data in copies:
-            collect(data)
-        def rewrite(value):
-            if isinstance(value, dict):
-                return {k: (mapping.get(v, v) if k in {'id', 'attachedToClipId', 'activeTrackId'}
-                             and isinstance(v, str) else
-                             [mapping.get(item, item) for item in v] if k in {'trackIds', 'clipIds'}
-                             and isinstance(v, list) else rewrite(v)) for k, v in value.items()}
-            if isinstance(value, list):
-                return [rewrite(item) for item in value]
-            return value
-        changed = []
-        for track, original, data in copies:
-            duplicate = Clip.from_dict(rewrite(data))
-            duplicate.timeline_start = original.timeline_start + start - first
-            duplicate.timeline_end = original.timeline_end + start - first
-            duplicate.attached_to_clip_id = mapping.get(original.attached_to_clip_id)
-            track.clips.append(duplicate)
-            changed.append({'type': 'clip', 'id': duplicate.id, 'change': 'created',
-                            'trackId': track.id, 'sourceClipId': original.id})
-        return changed
+        from cutvoke.editing.clip_batch import duplicate
+        try:
+            return duplicate(self, proj, p)
+        except ValueError as error:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(error)) from error
 
     def _h_clip_duplicate(self, proj: Project, p: dict) -> list[dict]:
-        """复制片段：{clipId, newClipId?, timelineStart?}。
+        """Copy every structured child with fresh IDs, including nested lanes."""
+        from cutvoke.editing.clip_batch import duplicate_one
+        try:
+            return duplicate_one(self, proj, p)
+        except ValueError as error:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(error)) from error
 
-        深拷贝源片段（含效果栈/关键帧/变速/联动/显隐），插入同一轨道，
-        时间线入点默认紧跟源片段之后（源片段时间线终点），保留源时长。
-        """
-        clip_id = p["clipId"]
-        for track in proj.sequence.tracks:
-            for clip in track.clips:
-                if clip.id == clip_id:
-                    new_id_ = p.get("newClipId") or new_id("clip")
-                    if any(c.id == new_id_ for t in proj.sequence.tracks
-                           for c in t.clips):
-                        raise EditError(ErrorCode.INVALID_ARGUMENT,
-                                        f"clip exists: {new_id_}")
-                    duration = clip.duration
-                    start = (Rational.from_json(**p["timelineStart"])
-                             if "timelineStart" in p else clip.timeline_end)
-                    dup = Clip(
-                        id=new_id_,
-                        asset_ref=AssetReference(
-                            clip.asset_ref.asset_id,
-                            source_path=clip.asset_ref.source_path,
-                            fingerprint=clip.asset_ref.fingerprint),
-                        timeline_start=start,
-                        timeline_end=start + duration,
-                        source_start=clip.source_start,
-                        speed=clip.speed,
-                        speed_curve=clip.speed_curve,
-                        frame_interpolation=clip.frame_interpolation,
-                        preserve_pitch=clip.preserve_pitch,
-                        effects=[dict(e) for e in clip.effects],
-                        linked=clip.linked,
-                        attached_to_clip_id=clip.attached_to_clip_id,
-                        hidden=clip.hidden,
-                        keyframes={k: list(v) for k, v in clip.keyframes.items()},
-                        volume=clip.volume,
-                        fade_in=clip.fade_in,
-                        fade_out=clip.fade_out,
-                        pitch=clip.pitch,
-                        freeze_at=clip.freeze_at,
-                        nested=clip.nested,
-                        role=clip.role,
-                    )
-                    track.clips.append(dup)
-                    return [{"type": "clip", "id": new_id_, "change": "created"}]
-        raise EditError(ErrorCode.INVALID_ARGUMENT, f"clip not found: {clip_id}")
+    def _h_clip_paste(self, proj: Project, p: dict) -> list[dict]:
+        from cutvoke.editing.clip_batch import paste
+        try:
+            return paste(self, proj, p)
+        except (ValueError, KeyError, TypeError) as error:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(error)) from error
 
     def _h_clip_group(self, proj: Project, p: dict) -> list[dict]:
-        """把同轨、连续选区的一组片段打包成一个复合片段（J08 高级时间线）。
-
-        payload: {clipIds: [...], groupId?, name?}
-          - 选中片段必须全部位于同一条轨道（否则 INVALID_ARGUMENT 跨轨拒绝）
-          - 选中片段必须在该轨道上连续（选区跨度内不得夹带未选片段，
-            允许片段之间存在时间间隙；否则 INVALID_ARGUMENT 不连续拒绝）
-          - 复合 Clip 的 timeline_start = 组内首个片段 start，
-            timeline_end = 组内末个片段 end；nested 内建一条同类型轨道，
-            各片段相对位置完整保留（子序列时间从 0 起，平移减去组首时间）。
-          - 复合 Clip 的 asset_ref 可空（内容在 nested 内）。
-        返回新复合片段实体信息。
-        """
-        clip_ids = p.get("clipIds")
-        if not isinstance(clip_ids, list) or not clip_ids:
-            raise EditError(ErrorCode.INVALID_ARGUMENT,
-                            "clip.group: clipIds must be a non-empty list")
-        selected_set = set(clip_ids)
-
-        seq = proj.active_sequence
-        # 1) 定位所有选中片段所在轨道（必须同轨）
-        found: list[Clip] = []
-        src_track: Optional[Track] = None
-        for track in seq.tracks:
-            for clip in track.clips:
-                if clip.id in selected_set:
-                    if src_track is not None and src_track is not track:
-                        raise EditError(
-                            ErrorCode.INVALID_ARGUMENT,
-                            "clip.group: clips span multiple tracks "
-                            "(cross-track grouping not supported)")
-                    src_track = track
-                    found.append(clip)
-        if src_track is None:
-            raise EditError(ErrorCode.INVALID_ARGUMENT,
-                            "clip.group: no selected clips found on any track")
-        if len(found) != len(selected_set):
-            raise EditError(ErrorCode.INVALID_ARGUMENT,
-                            "clip.group: some clipIds not found")
-
-        # 2) 连续选区校验：选区跨度 [span_start, span_end) 内不得夹带未选片段
-        span_start = min(c.timeline_start for c in found)
-        span_end = max(c.timeline_end for c in found)
-        for clip in src_track.clips:
-            if clip.id in selected_set:
-                continue
-            # 未选片段若与选区相交 → 选区不连续
-            if clip.timeline_start < span_end and span_start < clip.timeline_end:
-                raise EditError(
-                    ErrorCode.INVALID_ARGUMENT,
-                    f"clip.group: non-contiguous selection "
-                    f"(clip {clip.id} lies within the span but is not selected)")
-
-        # 3) 构造复合片段
-        group_id = p.get("groupId") or new_id("clip")
-        if any(c.id == group_id for t in seq.tracks for c in t.clips):
-            raise EditError(ErrorCode.INVALID_ARGUMENT,
-                            f"clip.group: groupId {group_id} already exists")
-        name = p.get("name", "")
-
-        # nested 子序列：沿用活动序列画布/帧率，内部建一条同类型轨道
-        nested_seq = Sequence(
-            id=f"{group_id}_seq", width=seq.width, height=seq.height, fps=seq.fps,
-            name=name,
-        )
-        nested_track = Track(id=f"{group_id}_track", kind=src_track.kind)
-        # 选中片段按 start 升序，平移进子序列（相对位置保留，含间隙）
-        for clip in sorted(found, key=lambda c: c.timeline_start):
-            inner = Clip(
-                id=clip.id,
-                asset_ref=AssetReference(
-                    clip.asset_ref.asset_id,
-                    source_path=clip.asset_ref.source_path,
-                    fingerprint=clip.asset_ref.fingerprint),
-                timeline_start=clip.timeline_start - span_start,
-                timeline_end=clip.timeline_end - span_start,
-                source_start=clip.source_start,
-                speed=clip.speed,
-                speed_curve=clip.speed_curve,
-                frame_interpolation=clip.frame_interpolation,
-                preserve_pitch=clip.preserve_pitch,
-                effects=[dict(e) for e in clip.effects],
-                linked=clip.linked,
-                hidden=clip.hidden,
-                keyframes={k: list(v) for k, v in clip.keyframes.items()},
-                volume=clip.volume,
-                fade_in=clip.fade_in,
-                fade_out=clip.fade_out,
-                pitch=clip.pitch,
-                nested=clip.nested,
-            )
-            nested_track.clips.append(inner)
-        nested_seq.tracks = [nested_track]
-
-        compound = Clip(
-            id=group_id,
-            asset_ref=AssetReference(""),  # 复合片段内容在 nested 内，asset_ref 可空
-            timeline_start=span_start,
-            timeline_end=span_end,
-            source_start=Rational.of(0, 1),
-            nested=nested_seq,
-        )
-
-        # 4) 用复合片段替换原连续块（保持其在轨道中的位置）
-        indices = [i for i, c in enumerate(src_track.clips) if c.id in selected_set]
-        insert_at = min(indices)
-        for c in found:
-            src_track.clips.remove(c)
-        src_track.clips.insert(insert_at, compound)
-
-        return [{"type": "clip", "id": group_id, "change": "grouped",
-                 "trackId": src_track.id, "count": len(found),
-                 "nestedTrackId": nested_track.id,
-                 "nestedClipIds": [c.id for c in nested_track.clips]}]
+        from cutvoke.editing.compound import group
+        try:
+            return group(proj.sequence, p)
+        except ValueError as exc:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(exc)) from exc
 
     def _h_clip_ungroup(self, proj: Project, p: dict) -> list[dict]:
-        """展开复合片段回原组（J08 高级时间线）。
-
-        payload: {clipId}
-          - 该 clip 必须带 nested（否则 INVALID_ARGUMENT 非复合拒绝）
-          - 删除复合 Clip，把 nested 内各片段按原绝对时间
-            （组首时间 + 子序列相对时间）插回同一条轨道。
-        返回展开后的片段信息。
-        """
-        clip_id = p["clipId"]
-        seq = proj.active_sequence
-        src_track: Optional[Track] = None
-        compound: Optional[Clip] = None
-        for track in seq.tracks:
-            for clip in track.clips:
-                if clip.id == clip_id:
-                    src_track, compound = track, clip
-                    break
-            if src_track is not None:
-                break
-        if compound is None:
-            raise EditError(ErrorCode.INVALID_ARGUMENT,
-                            f"clip.ungroup: clip not found: {clip_id}")
-        if compound.nested is None:
-            raise EditError(ErrorCode.INVALID_ARGUMENT,
-                            f"clip.ungroup: clip {clip_id} is not a compound clip")
-
-        group_start = compound.timeline_start
-        # 展开 nested 内全部轨道的全部片段，平移回绝对时间，插回原轨
-        restored: list[Clip] = []
-        for track in compound.nested.tracks:
-            for clip in track.clips:
-                restored.append(Clip(
-                    id=clip.id,
-                    asset_ref=AssetReference(
-                        clip.asset_ref.asset_id,
-                        source_path=clip.asset_ref.source_path,
-                        fingerprint=clip.asset_ref.fingerprint),
-                    timeline_start=clip.timeline_start + group_start,
-                    timeline_end=clip.timeline_end + group_start,
-                    source_start=clip.source_start,
-                    speed=clip.speed,
-                    speed_curve=clip.speed_curve,
-                    frame_interpolation=clip.frame_interpolation,
-                    preserve_pitch=clip.preserve_pitch,
-                    effects=[dict(e) for e in clip.effects],
-                    linked=clip.linked,
-                    hidden=clip.hidden,
-                    keyframes={k: list(v) for k, v in clip.keyframes.items()},
-                    volume=clip.volume,
-                    fade_in=clip.fade_in,
-                    fade_out=clip.fade_out,
-                    pitch=clip.pitch,
-                    nested=clip.nested,
-                ))
-        # 按绝对时间排序，保持原顺序插回
-        restored.sort(key=lambda c: c.timeline_start)
-
-        remove_idx = next(i for i, c in enumerate(src_track.clips) if c.id == clip_id)
-        src_track.clips.remove(compound)
-        for clip in restored:
-            src_track.clips.insert(remove_idx, clip)
-            remove_idx += 1
-
-        return [{"type": "clip", "id": clip_id, "change": "ungrouped",
-                 "trackId": src_track.id,
-                 "restoredClipIds": [c.id for c in restored]}]
+        from cutvoke.editing.compound import ungroup
+        try:
+            return ungroup(self, proj.sequence, p)
+        except ValueError as exc:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(exc)) from exc
 
     def _h_effect_module_apply(self, proj: Project, p: dict) -> list[dict]:
         from cutvoke.editing.effect_modules import _object
@@ -5143,7 +5115,7 @@ class EditService:
                         for item in clip.effects):
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             f"{slot}动画已存在；请用 effect.setAnimation 替换该动画槽位")
-        clip.effects.append({"effectId": effect_id, "version": version,
+        clip.effects.append({"effectId": effect_id, "version": version, "instanceId": new_id("fx"),
                              "params": params})
         # J01 最近使用：把该效果提到最近列表最前（去重，上限 24）
         rec = [e for e in proj.recent_effects if e != effect_id]
@@ -5164,8 +5136,12 @@ class EditService:
             for clip in track.clips:
                 if clip.id == clip_id:
                     before = len(clip.effects)
+                    removed_instances = {effect_instance_id(e,index) for index,e in enumerate(clip.effects)
+                                         if e.get("effectId") == effect_id}
                     clip.effects = [e for e in clip.effects
                                     if e.get("effectId") != effect_id]
+                    clip.keyframes = {name: lane for name,lane in clip.keyframes.items()
+                                      if not (name.startswith("effect:") and name.split(":")[1] in removed_instances)}
                     if len(clip.effects) == before:
                         raise EditError(
                             ErrorCode.INVALID_ARGUMENT,
@@ -6052,12 +6028,18 @@ class EditService:
     def _h_redo(self, proj: Project, p: dict) -> list[dict]:
         """重做：应用被撤销操作前的下一个状态（8.4）。候选副本语义同上。"""
         pid = proj.project_id
-        stack = self._redo_stack[pid]
-        if not stack:
-            raise EditError(ErrorCode.UNDO_CONFLICT, "nothing to redo")
-        # redo 项的 pop 与当前状态重新入 undo 栈，都由 execute 在成功
-        # 提交后完成；候选校验或 revision 冲突不会消耗 redo 历史。
-        next_state = stack[-1]
+        if self._store is not None:
+            depth = self._store.redo_depth(pid)
+            snapshot = self._store.peek_history(pid, depth) if depth is not None else None
+            if snapshot is None:
+                raise EditError(ErrorCode.UNDO_CONFLICT, "nothing to redo")
+            next_state = Project.from_dict(json.loads(snapshot))
+        else:
+            stack = self._redo_stack[pid]
+            if not stack:
+                raise EditError(ErrorCode.UNDO_CONFLICT, "nothing to redo")
+            next_state = stack[-1]
+        # The redo pop and current-state push commit atomically with the project.
         self._apply_snapshot(proj, next_state)
         return [{"type": "project", "id": pid, "change": "redone"}]
 
@@ -6077,13 +6059,13 @@ class EditService:
         target.schema_version = source.schema_version
         target.sequences = copy.deepcopy(source.sequences)
         target.active_sequence_id = source.active_sequence_id
-        target.sequence = copy.deepcopy(source.sequence)
         # 维持不变量：sequence 必须就是 sequences 里的活动序列（同一个对象）。
         for s in target.sequences:
             if s.id == target.active_sequence_id:
                 target.sequence = s
                 break
         else:
+            target.sequence = copy.deepcopy(source.sequence)
             target.sequences.append(target.sequence)
         # J01 工程级资源状态也随快照回退（否则撤销后收藏/最近/预设错位）
         target.favorites = list(source.favorites)

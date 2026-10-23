@@ -193,10 +193,11 @@ def find_source_clip(project: Project, clip_id: str) -> Clip:
     raise SpeechRecognitionError("请选择视频或音频片段进行识别")
 
 
-def source_signature(clip: Clip) -> str:
+def source_signature(clip: Clip, *, stat_path: str | Path | None = None) -> str:
     """Fingerprint the time mapping and source file used by a proposal."""
     path = Path(clip.asset_ref.source_path)
-    stat = path.stat()
+    # Library migration can inspect its staged copy while binding the final path.
+    stat = Path(stat_path).stat() if stat_path is not None else path.stat()
     state = {
         "clipId": clip.id,
         "path": str(path.resolve()),

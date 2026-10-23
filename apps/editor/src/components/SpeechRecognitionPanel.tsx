@@ -3,7 +3,7 @@ import { backendMessage } from "../i18n/backendMessages";
 /** Local ASR workbench: recognize a selected clip, review text, then commit once. */
 
 import { useEffect, useState } from "react";
-import { cancelAsrJob, getAsrJob, getAsrStatus, startAsrJob,
+import { dismissAsrJob, getAsrJob, getAsrStatus, listAsrJobs, resumeAsrJob, saveAsrDrafts, startAsrJob,
   type AsrJob, type AsrStatus } from "../lib/api";
 import { rationalToSecs, trySecsToRational } from "../lib/rational";
 import { getLatestState, runCommand } from "../store/actions";
@@ -69,6 +69,48 @@ const restoredDrafts = (saved: string | null, job: AsrJob): Draft[] => {
   return draftsFromJob(job);
 };
 
+type CachedDrafts = { drafts: Draft[]; updatedAt: number; pending: boolean };
+function cachedDrafts(jobId: string): CachedDrafts | null {
+  try {
+    const raw = window.localStorage.getItem(draftKey(jobId))
+      || window.sessionStorage.getItem(draftKey(jobId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // Older sessions saved the array directly, without a server acknowledgement.
+    if (Array.isArray(parsed)) return { drafts: parsed, updatedAt: 0, pending: true };
+    if (parsed && Array.isArray(parsed.drafts) && Number.isSafeInteger(parsed.updatedAt)
+        && typeof parsed.pending === "boolean") return parsed;
+  } catch { /* The server journal remains usable when browser storage is unavailable. */ }
+  return null;
+}
+
+function storeDrafts(jobId: string, value: CachedDrafts) {
+  const encoded = JSON.stringify(value);
+  try { window.localStorage.setItem(draftKey(jobId), encoded); } catch { /* Server save remains available. */ }
+  try { window.sessionStorage.setItem(draftKey(jobId), encoded); } catch { /* Use the durable browser copy. */ }
+}
+
+function retainDrafts(job: AsrJob, drafts: Draft[]): CachedDrafts {
+  const cached = cachedDrafts(job.jobId);
+  if (cached && JSON.stringify(cached.drafts) === JSON.stringify(drafts)) return cached;
+  const value = { drafts, updatedAt: Math.max(Date.now() * 1000,
+    (cached?.updatedAt || 0) + 1, (job.draftsUpdatedAt || 0) + 1), pending: true };
+  storeDrafts(job.jobId, value);
+  return value;
+}
+
+function restoreJobDrafts(job: AsrJob): Draft[] {
+  const cached = cachedDrafts(job.jobId);
+  const localIsNewer = cached?.pending && cached.updatedAt >= (job.draftsUpdatedAt || 0);
+  const selected = localIsNewer ? cached.drafts : job.drafts ?? cached?.drafts;
+  return restoredDrafts(selected != null ? JSON.stringify(selected) : null, job);
+}
+
+function forgetDrafts(jobId: string) {
+  try { window.localStorage.removeItem(draftKey(jobId)); } catch { /* Best effort. */ }
+  try { window.sessionStorage.removeItem(draftKey(jobId)); } catch { /* Best effort. */ }
+}
+
 function rebaseDraftWords(draft: Draft, start: string, end: string): DraftWord[] {
   if (!draft.words.length) return [];
   const originalStart = Number(draft.originStart);
@@ -93,6 +135,7 @@ export function SpeechRecognitionPanel() {
   const [model, setModel] = useState("base");
   const [language, setLanguage] = useState("auto");
   const [job, setJob] = useState<AsrJob | null>(null);
+  const [historyJobs, setHistoryJobs] = useState<AsrJob[]>([]);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [wordHighlightEnabled, setWordHighlightEnabled] = useState(false);
   const [wordHighlightColor, setWordHighlightColor] = useState("#FFD54A");
@@ -121,33 +164,51 @@ export function SpeechRecognitionPanel() {
   useEffect(() => {
     let active = true;
     setJob(null);
+    setHistoryJobs([]);
     setDrafts([]);
     setError("");
     const projectId = state.currentId;
     if (projectId) {
-      const oldJobId = window.sessionStorage.getItem(jobKey(projectId));
-      if (oldJobId) {
-        getAsrJob(oldJobId).then((restored) => {
+      listAsrJobs(projectId).then(({ jobs }) => {
+          // The project journal also works after an app restart or an origin change.
+          const oldJobId = window.sessionStorage.getItem(jobKey(projectId));
+          const restored = jobs.find((candidate) => candidate.jobId === oldJobId) || jobs[0];
           if (!active) return;
+          setHistoryJobs(jobs);
+          if (!restored) return;
           setJob(restored);
+          setModel(restored.model);
+          setLanguage(restored.requestedLanguage);
+          window.sessionStorage.setItem(jobKey(projectId), restored.jobId);
           if (restored.status === "completed") {
-            const saved = window.sessionStorage.getItem(draftKey(restored.jobId));
-            setDrafts(restoredDrafts(saved, restored));
+            setDrafts(restoreJobDrafts(restored));
           }
-        }).catch(() => {
+          if (restored.status === "failed") setError(restored.error);
+        }).catch((cause) => {
           if (active) {
-            window.sessionStorage.removeItem(jobKey(projectId));
-            setError(tr("上次识别任务已不可用，请重新识别"));
+            setError(cause instanceof Error ? cause.message : String(cause));
           }
         });
-      }
     }
     return () => { active = false; };
   }, [state.currentId]);
 
   useEffect(() => {
     if (job?.status === "completed") {
-      window.sessionStorage.setItem(draftKey(job.jobId), JSON.stringify(drafts));
+      const saved = retainDrafts(job, drafts);
+      if (!saved.pending) return;
+      const timer = window.setTimeout(() => {
+        saveAsrDrafts(job.jobId, drafts, saved.updatedAt).then((result) => {
+          const current = cachedDrafts(job.jobId);
+          // A reply for an older edit must not acknowledge a newer local draft.
+          if (current?.updatedAt === saved.updatedAt && result.draftsUpdatedAt === saved.updatedAt) {
+            storeDrafts(job.jobId, { ...current, pending: false });
+          }
+        }).catch((cause) => {
+          setError(cause instanceof Error ? cause.message : String(cause));
+        });
+      }, 350);
+      return () => window.clearTimeout(timer);
     }
   }, [job?.jobId, job?.status, drafts]);
 
@@ -160,15 +221,14 @@ export function SpeechRecognitionPanel() {
         if (!active) return;
         setJob(next);
         if (next.status === "completed") {
-          setDrafts(draftsFromJob(next));
+          setDrafts(restoreJobDrafts(next));
         }
         if (next.status === "failed") setError(next.error || tr("语音识别失败"));
       } catch (cause) {
         if (active) {
           const message = cause instanceof Error ? cause.message : String(cause);
           setError(message);
-          setJob((current) => current ? { ...current, status: "failed",
-                                      phase: "识别任务不可用", error: message } : current);
+          // A service restart is temporary. Keep polling the durable job ID.
         }
       }
     };
@@ -185,9 +245,10 @@ export function SpeechRecognitionPanel() {
     try {
       const next = await startAsrJob(state.currentId, { clipId: target, model, language });
       setJob(next);
-      setDrafts([]);
+      setDrafts(next.status === "completed" ? draftsFromJob(next) : []);
+      setHistoryJobs((current) => [next, ...current.filter((candidate) => candidate.jobId !== next.jobId)]);
       window.sessionStorage.setItem(jobKey(state.currentId), next.jobId);
-      window.sessionStorage.removeItem(draftKey(next.jobId));
+      forgetDrafts(next.jobId);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
@@ -195,8 +256,14 @@ export function SpeechRecognitionPanel() {
     }
   };
 
+  const setReviewedDrafts = (next: Draft[]) => {
+    // Persist in the input event, before a reload/unmount can cancel the debounce.
+    if (job?.status === "completed") retainDrafts(job, next);
+    setDrafts(next);
+  };
+
   const edit = (index: number, patch: Partial<Draft>) => {
-    setDrafts((current) => current.map((draft) => {
+    setReviewedDrafts(drafts.map((draft) => {
       if (draft.index !== index) return draft;
       const next = { ...draft, ...patch };
       if (patch.text !== undefined && patch.text !== draft.text) {
@@ -220,19 +287,55 @@ export function SpeechRecognitionPanel() {
   const discard = async () => {
     if (!job || !state.currentId || busy) return;
     setBusy(true);
-    let cancelError = "";
     try {
-      if (job.status === "queued" || job.status === "running") {
-        await cancelAsrJob(job.jobId);
-      }
-    } catch (cause) {
-      cancelError = cause instanceof Error ? cause.message : String(cause);
-    } finally {
+      await dismissAsrJob(job.jobId);
       window.sessionStorage.removeItem(jobKey(state.currentId));
-      window.sessionStorage.removeItem(draftKey(job.jobId));
+      forgetDrafts(job.jobId);
       setJob(null);
+      setHistoryJobs((current) => current.filter((candidate) => candidate.jobId !== job.jobId));
       setDrafts([]);
-      setError(cancelError);
+      setError("");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const selectJob = async (jobId: string) => {
+    if (!state.currentId || busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      if (job?.status === "completed") {
+        const saved = retainDrafts(job, drafts);
+        await saveAsrDrafts(job.jobId, drafts, saved.updatedAt);
+      }
+      const next = await getAsrJob(jobId);
+      setJob(next);
+      setModel(next.model);
+      setLanguage(next.requestedLanguage);
+      setDrafts(next.status === "completed" ? restoreJobDrafts(next) : []);
+      window.sessionStorage.setItem(jobKey(state.currentId), next.jobId);
+      if (next.status === "failed") setError(next.error);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const resume = async () => {
+    if (!job || busy || readOnly) return;
+    setBusy(true);
+    setError("");
+    try {
+      const next = await resumeAsrJob(job.jobId);
+      setJob(next);
+      if (next.status === "failed") setError(next.error);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
       setBusy(false);
     }
   };
@@ -268,18 +371,21 @@ export function SpeechRecognitionPanel() {
       sourceSignature: job.result.sourceSignature,
       style: { wordHighlightColor: wordHighlightEnabled ? wordHighlightColor : "" },
     });
-    setBusy(false);
     if (result.ok) {
+      // Retire the proposal so a later launch does not offer already-added text.
+      await dismissAsrJob(job.jobId).catch(() => {});
       dispatch({ type: "STATUS_SET", severity: "ok",
                  text: msg("已添加 {0} 条识别字幕，可逐条编辑和撤销", segments.length) });
       setJob(null);
+      setHistoryJobs((current) => current.filter((candidate) => candidate.jobId !== job.jobId));
       setDrafts([]);
       setQuery("");
       window.sessionStorage.removeItem(jobKey(state.currentId));
-      window.sessionStorage.removeItem(draftKey(job.jobId));
+      forgetDrafts(job.jobId);
     } else if (result.error) {
       setError(result.error.message);
     }
+    setBusy(false);
   };
 
   const visibleDrafts = drafts.filter((draft) =>
@@ -305,6 +411,16 @@ export function SpeechRecognitionPanel() {
       ) : null}
       <p className="cv-hint">{canRecognize
         ? tr("当前片段：{0}", selectedName) : tr("请先在时间线选中有声视频或音频片段")}</p>
+      {historyJobs.length > 1 || (!job && historyJobs.length > 0) ? (
+        <label>{tr("识别任务")}<select className="cv-input" aria-label={tr("识别任务")}
+          value={job?.jobId || ""} disabled={busy}
+          onChange={(event) => void selectJob(event.target.value)}>
+          {!job ? <option value="" disabled>{tr("识别任务")}</option> : null}
+          {historyJobs.map((candidate) => <option key={candidate.jobId} value={candidate.jobId}>
+            {candidate.clipId} · {candidate.model} · {candidate.requestedLanguage}
+          </option>)}
+        </select></label>
+      ) : null}
       <div className="cv-asr__settings">
         <label>{tr("语言")}<select className="cv-input" aria-label={tr("识别语言")} value={language}
             onChange={(event) => setLanguage(event.target.value)} disabled={busy || readOnly}>
@@ -326,11 +442,16 @@ export function SpeechRecognitionPanel() {
       </div>
       <button className="cv-btn cv-btn--primary" type="button"
         onClick={() => void start()} disabled={!capability?.ready || !canRecognize || busy || readOnly ||
-          job?.status === "running" || job?.status === "queued" || job?.status === "completed"}>{tr("开始识别")}</button>
+          job?.status === "running" || job?.status === "queued" || job?.status === "completed" ||
+          job?.status === "interrupted"}>{tr("开始识别")}</button>
       {job ? (
         <div className="cv-asr__job" role="status">
           <span>{backendMessage(job.phase)} · {job.progress}%</span>
           <progress max={100} value={job.progress} aria-label={tr("语音识别进度")} />
+          {job.status === "interrupted" ? (
+            <button className="cv-btn cv-btn--secondary" type="button"
+              onClick={() => void resume()} disabled={busy || readOnly || !capability?.ready}>{tr("继续识别")}</button>
+          ) : null}
           {job.status === "failed" ? (
             <button className="cv-btn cv-btn--secondary" type="button"
               onClick={() => void start(job.clipId)} disabled={busy || readOnly}>{tr("重试识别")}</button>
@@ -373,7 +494,7 @@ export function SpeechRecognitionPanel() {
                       onChange={(event) => edit(draft.index, { text: event.target.value })}
                       disabled={readOnly} />
                     <button className="cv-btn cv-btn--ghost cv-btn--sm" type="button"
-                      onClick={() => setDrafts((current) => current.filter((item) => item.index !== draft.index))}
+                      onClick={() => setReviewedDrafts(drafts.filter((item) => item.index !== draft.index))}
                       disabled={readOnly}>{tr("移除这条")}</button>
                   </div>
                 ))}

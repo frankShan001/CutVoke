@@ -22,6 +22,7 @@ import { AssetPreview, type PreviewAsset } from "./AssetPreview";
 import { StickerThumbnail } from "./StickerThumbnail";
 import { MEDIA_ROW_HEIGHT, useVirtualMediaRows } from "./useVirtualMediaRows";
 import { LOCATE_PREFLIGHT_ISSUE, type LocatePreflightIssueEvent } from "../lib/preflight";
+import { MediaRelinkFolder } from "./MediaRelinkFolder";
 
 interface ClipAsset {
   sourcePath: string;
@@ -61,11 +62,13 @@ export function MediaPanel() {
   const domainScrollPositions = useRef(new Map<CreativeDomain, number>());
   const [dragging, setDragging] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [transferKind, setTransferKind] = useState<"import" | "relink">("import");
   const [assetLoading, setAssetLoading] = useState(true);
   const [assetLoadError, setAssetLoadError] = useState("");
   const [assetLoadAttempt, setAssetLoadAttempt] = useState(0);
   const [importProgress, setImportProgress] = useState<{
     completed: number; total: number; name: string; succeeded: number; failed: number; done: boolean;
+    loaded: number; totalBytes: number; cancelled?: boolean;
   } | null>(null);
   const [importFailures, setImportFailures] = useState<{ name: string; message: string }[]>([]);
   const [swappingPath, setSwappingPath] = useState<string | null>(null);
@@ -99,6 +102,8 @@ export function MediaPanel() {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const relinkFileRef = useRef<HTMLInputElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const uploadAbort = useRef<AbortController | null>(null);
+  useEffect(() => () => uploadAbort.current?.abort(), []);
   const sourceTabRefs = useRef(new Map<SourceFilter, HTMLButtonElement>());
 
   useLayoutEffect(() => {
@@ -395,8 +400,11 @@ export function MediaPanel() {
       return;
     }
     setImporting(true);
+    setTransferKind("import");
     setImportFailures([]);
-    setImportProgress({ completed: 0, total: fileList.length, name: "", succeeded: 0, failed: 0, done: false });
+    const controller = new AbortController(); uploadAbort.current = controller;
+    setImportProgress({ completed: 0, total: fileList.length, name: fileList[0].name, succeeded: 0, failed: 0,
+      done: false, loaded: 0, totalBytes: fileList[0].size });
     try {
       const ok = await uploadFiles(
         Array.from(fileList),
@@ -406,8 +414,9 @@ export function MediaPanel() {
           dispatch({ type: "STATUS_SET", severity: "warn", text: msg("导入 {0} 失败：{1}", name, message) });
         },
         (progress) => setImportProgress({ ...progress, done: false }),
+        { signal: controller.signal },
       );
-      setImportProgress((progress) => progress ? { ...progress, done: true } : null);
+      setImportProgress((progress) => progress ? { ...progress, done: true, cancelled: controller.signal.aborted } : null);
       if (ok > 0) {
         setSourceFilter("mine"); setUsageFilter("unused"); setKindFilter("all"); setQuery("");
         dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已导入 {0} 个素材", ok) });
@@ -425,6 +434,7 @@ export function MediaPanel() {
       });
     } finally {
       setImporting(false);
+      uploadAbort.current = null;
       if (fileRef.current) fileRef.current.value = "";
     }
   };
@@ -530,12 +540,20 @@ export function MediaPanel() {
     const file = files?.item(0);
     if (!target || !file || editLocked) return;
     setRelinkingId(target.assetId);
+    const controller = new AbortController(); uploadAbort.current = controller;
+    setImporting(true); setTransferKind("relink"); setImportFailures([]);
+    setImportProgress({ completed: 0, total: 1, name: file.name, succeeded: 0, failed: 0, done: false, loaded: 0, totalBytes: file.size });
     try {
-      const result = await relinkAsset(target.assetId, file);
+      const result = await relinkAsset(target.assetId, file, { signal: controller.signal,
+        onProgress: (loaded, totalBytes) => setImportProgress(progress => progress ? { ...progress, loaded, totalBytes } : null) });
+      if (controller.signal.aborted) return;
       if (result.kind === "error") {
+        setImportProgress(progress => progress ? { ...progress, completed: 1, failed: 1 } : null);
+        setImportFailures([{ name: target.name, message: result.message }]);
         dispatch({ type: "STATUS_SET", severity: "err", text: msg("重新链接 {0} 失败：{1}", target.name, result.message) });
         return;
       }
+      setImportProgress(progress => progress ? { ...progress, completed: 1, succeeded: 1, loaded: file.size } : null);
       hydrateAssets([{ assetId: result.data.assetId, path: result.data.path,
                        name: result.data.name, size: result.data.size,
                        kind: result.data.kind, duration: result.data.duration,
@@ -550,6 +568,8 @@ export function MediaPanel() {
       }));
       dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已重新链接 {0}", result.data.name) });
     } finally {
+      setImporting(false); uploadAbort.current = null;
+      setImportProgress(progress => progress ? { ...progress, done: true, cancelled: controller.signal.aborted } : null);
       setRelinkingId(null);
       setRelinkTarget(null);
       if (relinkFileRef.current) relinkFileRef.current.value = "";
@@ -621,11 +641,18 @@ export function MediaPanel() {
       {(domain === "media" || domain === "music") && importProgress ? (
         <div className="media-import-progress" role="status">
           <span>
-            {importProgress.done
-              ? tr("导入结束：成功 {0}，失败 {1}", importProgress.succeeded, importProgress.failed)
+            {importProgress.cancelled ? tr("上传已取消，后续文件未上传") : importProgress.done
+              ? transferKind === "relink" ? tr("重新链接结束：成功 {0}，失败 {1}", importProgress.succeeded, importProgress.failed)
+                : tr("导入结束：成功 {0}，失败 {1}", importProgress.succeeded, importProgress.failed)
               : tr("导入 {0}/{1}{2}", importProgress.completed, importProgress.total, importProgress.name ? tr(" · {0}", importProgress.name) : "")}
           </span>
           <progress value={importProgress.completed} max={importProgress.total} />
+          {!importProgress.done ? <>
+            <span>{tr("当前文件：{0}", importProgress.name)}</span>
+            <span>{tr("已传 {0} / {1} MiB", (importProgress.loaded / 1048576).toFixed(1), (importProgress.totalBytes / 1048576).toFixed(1))}</span>
+            <progress aria-label={tr("当前文件上传进度")} value={importProgress.loaded} max={importProgress.totalBytes || 1} />
+            <button type="button" className="cv-btn cv-btn--secondary" onClick={() => uploadAbort.current?.abort()}>{tr("取消当前及后续上传")}</button>
+          </> : null}
           {importFailures.length ? (
             <ul className="media-import-progress__failures">
               {importFailures.map((failure, index) => (
@@ -635,6 +662,8 @@ export function MediaPanel() {
           ) : null}
         </div>
       ) : null}
+      {(domain === "media" || domain === "music") ? <MediaRelinkFolder disabled={editLocked || importing}
+        onRestored={() => setAssetLoadAttempt(attempt => attempt + 1)} /> : null}
       {(domain === "media" || domain === "music") ? <div className="media-sources" role="tablist" aria-label={tr("素材来源")}>
         <button
           type="button"

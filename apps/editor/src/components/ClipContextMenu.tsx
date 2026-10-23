@@ -4,12 +4,15 @@ import { tr, useLocale } from "../i18n";
 import { useEffect, useLayoutEffect, useRef, useState, type Dispatch } from "react";
 import { Scissors, Trash2, Gauge, Wand2, Copy } from "lucide-react";
 import type { Clip } from "../types/api";
-import { getLatestState } from "../store/actions";
-import { addEffect, duplicateClip, duplicateClipGroup, removeClip, setClipSpeed, splitClip } from "../store/clipEdit";
+import { getLatestState, runCommand } from "../store/actions";
+import { addEffect, duplicateClipGroup, setClipSpeed, splitClip } from "../store/clipEdit";
 import type { EditorAction } from "../store/editor";
 import { rationalToSecs, secsToRational } from "../lib/rational";
 import { assetDisplayName, useSessionAssets } from "../lib/assetStore";
 import { BUILTIN_TRANSFORM_ID, BUILTIN_COLOR_ID, BUILTIN_CROSSFADE_ID } from "../lib/effects";
+import { flushPendingEdits } from "../lib/pendingEdits";
+import { batchClips, copySelectedClips, duplicateSelectedClips, pasteClipsAtPlayhead } from "../store/timelineClipboard";
+import { selectedClipIds } from "../store/timelineSelection";
 
 export interface CtxTarget {
   x: number;
@@ -49,10 +52,11 @@ export function ClipContextMenu({
   if (!st || !st.currentId) return null;
   const ctx = st;
   const clip = target.clip;
+  const count = selectedClipIds(ctx).length;
 
   const run = (fn: () => Promise<unknown>) => {
     onClose();
-    void fn();
+    void (async () => { if (await flushPendingEdits()) await fn(); })();
   };
 
   const handleSplit = () => {
@@ -71,12 +75,12 @@ export function ClipContextMenu({
 
   const handleRemove = () => {
     if (!clip) return;
-    run(() => removeClip(dispatch, ctx, clip.id));
+    run(() => batchClips(dispatch, getLatestState() || ctx, "remove"));
   };
 
   const handleDuplicate = () => {
     if (!clip) return;
-    run(() => duplicateClip(dispatch, ctx, { clipId: clip.id, trackId: target.trackId }));
+    run(() => duplicateSelectedClips(dispatch, getLatestState() || ctx));
   };
 
   const handleSpeed = (speed: number) => {
@@ -110,14 +114,24 @@ export function ClipContextMenu({
         <div className="ctx-menu__label">
           {clip ? assetDisplayName(clip.assetRef) : tr("片段")}
         </div>
-        <button className="ctx-menu__item" onClick={handleSplit}>
+        <button className="ctx-menu__item" disabled={count > 1} onClick={handleSplit}>
           <Scissors size={14} />{tr(" 在播放头分割")}</button>
         <button className="ctx-menu__item" onClick={handleDuplicate}>
           <Copy size={14} />{tr(" 复制片段")}</button>
+        <button className="ctx-menu__item" onClick={()=>run(()=>copySelectedClips(dispatch,getLatestState() || ctx))}>
+          <Copy size={14} />{tr("复制到剪贴板")}</button>
+        <button className="ctx-menu__item" onClick={()=>run(()=>pasteClipsAtPlayhead(dispatch,getLatestState() || ctx))}>
+          <Copy size={14} />{tr("粘贴到播放头")}</button>
         <button className="ctx-menu__item" onClick={() => clip && run(() => duplicateClipGroup(dispatch, ctx, clip.id))}>
           <Copy size={14} />{tr("复制片段及绑定图层")}</button>
         <button className="ctx-menu__item ctx-menu__item--danger" onClick={handleRemove}>
           <Trash2 size={14} />{tr(" 删除片段")}</button>
+        <button className="ctx-menu__item ctx-menu__item--danger" disabled={!!ctx.editLock}
+          onClick={() => clip && run(() => runCommand(dispatch, ctx, "clip.rippleDelete", { clipId: clip.id, scope: "sequence" }))}>
+          <Trash2 size={14} />{tr("删除并全轨联动收拢")}</button>
+        {clip?.nested ? <button className="ctx-menu__item" disabled={!!ctx.editLock}
+          onClick={() => run(() => runCommand(dispatch, ctx, "clip.ungroup", { clipId: clip.id }))}>
+          <Copy size={14} />{tr("展开复合片段")}</button> : null}
         <div className="ctx-menu__sep" />
         <div className="ctx-menu__label">{tr("速度")}</div>
         <button className="ctx-menu__item" onClick={() => handleSpeed(0.5)}><Gauge size={14} /> 0.5x</button>

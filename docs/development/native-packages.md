@@ -1,10 +1,14 @@
 # Native macOS and Linux distribution candidates
 
+Current downloads are in the [v0.3.2 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.2). Use its [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/SHA256SUMS) and [BUILD-INFO.json](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/BUILD-INFO.json) for the exact archive bytes, source commit and acceptance runs. The 0.3.1 delivery records below are historical and do not verify 0.3.2.
+
+## Historical 0.3.1 delivery evidence
+
 The [native package workflow](../../.github/workflows/unix-packages.yml) builds
 macOS arm64 on `macos-15`, macOS Intel x64 on `macos-15-intel`, and Linux x64 on
 `ubuntu-22.04`. These are independent native builds, not cross-compiled Python
 environments. See the [user guide](../user/installation.md#macos-arm64--x64) for
-downloads, storage and system/security requirements. This build workflow does not publish a Release. The exact accepted archives are now available in the [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1), after independent full-byte/hash verification during [staging run 38998824276](https://github.com/frankShan001/CutVoke/actions/runs/38998824276). The tag points to `58f890090463300c007f541ac36be8bca71bb4e9`; the binaries retain the build commit below.
+downloads, storage and system/security requirements. This build workflow does not publish a Release. The historical accepted archives remain available in the [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1), after independent full-byte/hash verification during [staging run 38998824276](https://github.com/frankShan001/CutVoke/actions/runs/38998824276). That tag points to `58f890090463300c007f541ac36be8bca71bb4e9`; those binaries retain the build commit below.
 
 The **2026-10-16** delivery was built from
 `fdec479c4acbc3c685a5c8adbe8ec91621a7c194`. All three native jobs in

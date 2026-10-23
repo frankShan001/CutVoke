@@ -343,6 +343,9 @@ class Clip:
     volume: Rational = field(default_factory=lambda: Rational.of(1, 1))
     fade_in: Rational = field(default_factory=lambda: Rational.of(0, 1))
     fade_out: Rational = field(default_factory=lambda: Rational.of(0, 1))
+    # A range cut retains the original gain clock instead of restarting a fade.
+    audio_fade_offset: Rational = field(default_factory=lambda: Rational.of(0))
+    audio_fade_duration: Optional[Rational] = None
     # 音高（1.5-C 变声）：1.0=原调，>1 升调（变尖），<1 降调（变低沉）
     pitch: Rational = field(default_factory=lambda: Rational.of(1, 1))
     # 定格帧（B06）：非 None 时，片段全程渲染为源窗口冻结在 freeze_at 时刻的单帧。
@@ -472,6 +475,9 @@ class Clip:
         }
         if self.role:
             data["role"] = self.role
+        if self.audio_fade_duration is not None:
+            data["audioFadeOffset"] = self.audio_fade_offset.to_json()
+            data["audioFadeDuration"] = self.audio_fade_duration.to_json()
         return data
 
     @classmethod
@@ -498,6 +504,8 @@ class Clip:
             volume=Rational.from_json(**d["volume"]) if d.get("volume") else Rational.of(1, 1),
             fade_in=Rational.from_json(**d["fadeIn"]) if d.get("fadeIn") else Rational.of(0, 1),
             fade_out=Rational.from_json(**d["fadeOut"]) if d.get("fadeOut") else Rational.of(0, 1),
+            audio_fade_offset=Rational.from_json(**d["audioFadeOffset"]) if d.get("audioFadeOffset") else Rational.of(0),
+            audio_fade_duration=Rational.from_json(**d["audioFadeDuration"]) if d.get("audioFadeDuration") else None,
             pitch=Rational.from_json(**d["pitch"]) if d.get("pitch") else Rational.of(1, 1),
             freeze_at=(Rational.from_json(**d["freezeAt"])
                        if d.get("freezeAt") else None),
@@ -518,6 +526,11 @@ class Track:
     muted: bool = False
     visible: bool = True
     role: str = ""
+    audio_mix: dict = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        from cutvoke.domain.audio_mix import validate_mix
+        self.audio_mix = validate_mix(self.audio_mix)
 
     def to_dict(self) -> dict:
         data = {"id": self.id, "kind": self.kind,
@@ -525,6 +538,8 @@ class Track:
                 "locked": self.locked, "muted": self.muted, "visible": self.visible}
         if self.role:
             data["role"] = self.role
+        if self.audio_mix:
+            data["audioMix"] = self.audio_mix
         return data
 
     @classmethod
@@ -532,7 +547,8 @@ class Track:
         return cls(id=d["id"], kind=d["kind"],
                    clips=[Clip.from_dict(c) for c in d.get("clips", [])],
                    locked=d.get("locked", False), muted=d.get("muted", False),
-                   visible=d.get("visible", True), role=d.get("role", ""))
+                   visible=d.get("visible", True), role=d.get("role", ""),
+                   audio_mix=d.get("audioMix", {}))
 
 
 @dataclass
@@ -719,6 +735,15 @@ class Sequence:
     multicam: Optional[dict] = None
     # 画布背景色；只影响透明片段和未覆盖区域，默认黑色。旧工程缺省为黑色。
     background_color: str = "#000000"
+    reframe: str = "stretch"
+    audio_buses: list[dict] = field(default_factory=list)
+    master_audio: dict = field(default_factory=dict)
+    compound_layout: list[dict] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        from cutvoke.domain.audio_mix import validate_buses, validate_mix
+        self.audio_buses = validate_buses(self.audio_buses)
+        self.master_audio = validate_mix(self.master_audio, allow_route=False)
 
     def to_dict(self) -> dict:
         return {"id": self.id, "width": self.width, "height": self.height,
@@ -728,7 +753,9 @@ class Sequence:
                 "markers": [m.to_dict() for m in self.markers],
                 "name": self.name,
                 "multicam": self.multicam,
-                "backgroundColor": self.background_color}
+                "backgroundColor": self.background_color, "reframe": self.reframe,
+                "audioBuses": self.audio_buses, "masterAudio": self.master_audio,
+                "compoundLayout": self.compound_layout}
 
     @classmethod
     def from_dict(cls, d: dict) -> "Sequence":
@@ -740,7 +767,11 @@ class Sequence:
                    markers=[Marker.from_dict(m) for m in d.get("markers", [])],
                    name=d.get("name", ""),
                    multicam=d.get("multicam", None),
-                   background_color=d.get("backgroundColor", "#000000"))
+                   background_color=d.get("backgroundColor", "#000000"),
+                   reframe=d.get("reframe", "stretch"),
+                   audio_buses=d.get("audioBuses", []),
+                   master_audio=d.get("masterAudio", {}),
+                   compound_layout=d.get("compoundLayout", []))
 
 
 @dataclass
@@ -786,27 +817,38 @@ class Project:
                 return s
         return self.sequence
 
-    def to_dict(self) -> dict:
-        return {"schemaVersion": self.schema_version, "projectId": self.project_id,
-                "revision": self.revision, "sequence": self.sequence.to_dict(),
-                "name": self.name,
-                "sequences": [s.to_dict() for s in self.sequences],
+    def to_dict(self, *, compact: bool = False) -> dict:
+        """Public legacy layout by default; storage may omit the duplicated active sequence.
+
+        Every sequence remains complete in ``sequences``. Compact is opt-in so
+        existing HTTP, MCP, package and export consumers retain their contract.
+        """
+        sequences = [sequence.to_dict() for sequence in self.sequences]
+        result = {"schemaVersion": self.schema_version, "projectId": self.project_id,
+                "revision": self.revision, "name": self.name,
+                "sequences": sequences,
                 "activeSequenceId": self.active_sequence_id,
                 "favorites": list(self.favorites),
                 "recentEffects": list(self.recent_effects),
                 "presets": [dict(p) for p in self.presets]}
+        if not compact:
+            result["sequence"] = next((sequence for sequence in sequences
+                                       if sequence["id"] == self.active_sequence_id),
+                                      None) or self.sequence.to_dict()
+        return result
 
     @classmethod
     def from_dict(cls, d: dict) -> "Project":
         seqs = [Sequence.from_dict(s) for s in d.get("sequences", [])]
-        seq = Sequence.from_dict(d["sequence"])
         if not seqs:
+            seq = Sequence.from_dict(d["sequence"])
             seqs = [seq]
-        active_id = d.get("activeSequenceId", seq.id)
+        legacy = d.get("sequence") or {}
+        active_id = d.get("activeSequenceId", legacy.get("id", seqs[0].id))
         # 确保活动序列在列表里
         if not any(s.id == active_id for s in seqs):
             active_id = seqs[0].id
-        active_seq = next((s for s in seqs if s.id == active_id), seq)
+        active_seq = next(s for s in seqs if s.id == active_id)
         return cls(schema_version=d["schemaVersion"], project_id=d["projectId"],
                    revision=d["revision"], sequence=active_seq,
                    name=d.get("name", ""), sequences=seqs,

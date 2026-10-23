@@ -99,6 +99,10 @@ jobs:
         working-directory: apps/editor
         run: |
           npm ci
+          npm run i18n:check
+          npm run test:i18n
+          npm run test:preview-cache
+          npm run test:basic
           npx playwright install --with-deps chromium
           npm run test:e2e
       - name: Preserve browser failure diagnostics

@@ -66,6 +66,8 @@ export interface ServerAsset {
   createdAt: string;
   available: boolean;
   audioRole: AudioRole;
+  sha256?: string | null;
+  relativePath?: string | null;
 }
 
 export type ListAssetsOutcome =
@@ -147,18 +149,15 @@ export function assetWaveformUrl(assetId: string, w = 640): string {
   return `/api/v1/assets/${encodeURIComponent(assetId)}/waveform?w=${w}`;
 }
 
-export async function relinkAsset(assetId: string, file: File): Promise<
+export async function relinkAsset(assetId: string, file: File, options: UploadOptions & { verifyIdentity?: boolean; confirmLegacy?: boolean } = {}): Promise<
   { kind: "ok"; data: ServerAsset } | { kind: "error"; message: string }
 > {
   if (file.size === 0) return { kind: "error", message: tr("文件为空，请检查后重新选择") };
-  const url = `/api/v1/assets/${encodeURIComponent(assetId)}/relink?${new URLSearchParams({ name: file.name })}`;
+  const url = `/api/v1/assets/${encodeURIComponent(assetId)}/relink?${new URLSearchParams({ name: file.name,
+    ...(options.verifyIdentity ? { verifyIdentity: "1" } : {}),
+    ...(options.confirmLegacy ? { confirmLegacy: "1" } : {}) })}`;
   try {
-    const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: file });
-    const payload = await readJson(response);
-    if (!response.ok) {
-      const error = (payload as { error?: ApiErrorBody } | undefined)?.error;
-      return { kind: "error", message: error?.message || tr("重新链接失败（HTTP {0}）", response.status) };
-    }
+    const payload = await uploadFileBytes(url, file, options);
     return { kind: "ok", data: payload as ServerAsset };
   } catch (error) {
     return { kind: "error", message: error instanceof Error ? error.message : tr("重新链接网络错误") };
@@ -190,23 +189,55 @@ export async function updateAssetAudioRole(assetId: string, audioRole: AudioRole
  * POST /api/v1/assets?name=<filename>，body = 文件原始字节 → 201 {assetId, path, size, name}。
  * path 为服务端落盘绝对路径（前端不持久化绝对路径，仅会话内引用 assetId/path）。
  */
-export async function uploadAsset(file: File): Promise<ImportOutcome> {
+export interface UploadOptions {
+  signal?: AbortSignal;
+  onProgress?: (loaded: number, total: number) => void;
+}
+
+export function uploadFileBytes(url: string, file: File, options: UploadOptions = {}): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    const abort = () => request.abort();
+    const clean = () => options.signal?.removeEventListener("abort", abort);
+    request.open("POST", url);
+    request.setRequestHeader("Content-Type", "application/octet-stream");
+    request.upload.onprogress = event => options.onProgress?.(event.loaded, event.lengthComputable ? event.total : file.size);
+    request.onload = () => {
+      clean();
+      let data: unknown;
+      try { data = JSON.parse(request.responseText); } catch { data = undefined; }
+      if (request.status >= 200 && request.status < 300) resolve(data);
+      else reject(new Error((data as { error?: ApiErrorBody })?.error?.message || tr("导入失败（HTTP {0}）", request.status)));
+    };
+    request.onerror = () => { clean(); reject(new Error(tr("素材上传网络错误"))); };
+    request.onabort = () => { clean(); reject(new DOMException("Upload cancelled", "AbortError")); };
+    if (options.signal?.aborted) { reject(new DOMException("Upload cancelled", "AbortError")); return; }
+    options.signal?.addEventListener("abort", abort, { once: true });
+    request.send(file);
+  });
+}
+
+export interface RelinkCandidate { fileId: string; relativePath: string; size: number }
+export interface RelinkMatch {
+  assetId: string; name: string; size: number;
+  status: "matched" | "ambiguous" | "missing" | "unverified";
+  expected: { relativePath?: string; kind: string; duration?: number; width?: number; height?: number };
+  candidates: RelinkCandidate[];
+}
+export async function scanRelinkFiles(files: File[]): Promise<RelinkMatch[]> {
+  const response = await fetch("/api/v1/assets/relink/scan", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ files: files.map((file, index) => ({ fileId: String(index), name: file.name,
+      relativePath: file.webkitRelativePath || file.name, size: file.size })) }) });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data?.error?.message || tr("扫描重新链接候选失败"));
+  return data.items;
+}
+
+export async function uploadAsset(file: File, options: UploadOptions = {}): Promise<ImportOutcome> {
   if (file.size === 0) return { kind: "error", message: tr("文件为空，请检查后重新选择") };
-  const q = new URLSearchParams({ name: file.name });
+  const q = new URLSearchParams({ name: file.name, relativePath: file.webkitRelativePath || file.name });
   try {
-    const res = await fetch(`/api/v1/assets?${q.toString()}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/octet-stream" },
-      body: file,
-    });
-    const data = await readJson(res);
-    if (!res.ok) {
-      const err = (data as { error?: ApiErrorBody } | undefined)?.error;
-      return {
-        kind: "error",
-        message: err?.message || tr("导入失败（HTTP {0}）", res.status),
-      };
-    }
+    const data = await uploadFileBytes(`/api/v1/assets?${q.toString()}`, file, options);
     return { kind: "ok", data: data as ImportedAsset };
   } catch (err) {
     return { kind: "error", message: err instanceof Error ? err.message : tr("导入网络错误") };

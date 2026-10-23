@@ -1218,6 +1218,8 @@ def _prepare_static_masks(method):
         cancel = arguments.arguments.get("cancel_event")
         values = arguments.arguments
         original_project=project
+        from cutvoke.rendering.compound_sources import prepare as prepare_compounds
+        project = prepare_compounds(self, project, cancel)
         previous_scale=getattr(self._render_ctx,'preview_scale',1.0)
         preview_scale=1.0
         if method.__name__=='render_preview_window':
@@ -1344,6 +1346,15 @@ class RenderService:
             return ['-init_hw_device', gpu.device['specification'],
                     '-filter_hw_device', 'cutvoke']
         return []
+
+    def _canvas_source_filter(self, clip):
+        mode = getattr(self._render_ctx, 'reframe', 'stretch')
+        if mode == 'stretch' or clip.role == 'sticker': return ''
+        W, H = self._render_ctx.canvas_width, self._render_ctx.canvas_height
+        if mode == 'cover':
+            return f',scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},setsar=1'
+        return (f',scale={W}:{H}:force_original_aspect_ratio=decrease,format=rgba,'
+                f'pad={W}:{H}:(ow-iw)/2:(oh-ih)/2:color=black@0,setsar=1')
 
     def _preview_source_filter(self, clip):
         scale=getattr(self._render_ctx,'preview_scale',1.0)
@@ -1705,7 +1716,8 @@ class RenderService:
                tone_map: Optional[str] = None,
                source_transfer: Optional[str] = None,
                output_start: Optional[float] = None,
-               output_duration: Optional[float] = None) -> dict[str, Any]:
+               output_duration: Optional[float] = None,
+               progress_callback=None) -> dict[str, Any]:
         """把工程渲染为 MP4(H.264 + AAC) 视频。
 
         返回 dict：output_path, duration, width, height, has_audio, warnings。
@@ -1717,6 +1729,8 @@ class RenderService:
         才降级导出，并在 warnings 里留明确记录。
         """
         seq = project.sequence
+        if progress_callback:
+            progress_callback({"phase": "preparing"})
         requested_range = output_start is not None or output_duration is not None
         preflight_range = None
         if requested_range:
@@ -1801,7 +1815,8 @@ class RenderService:
                     seq, out_path, quality, overlay_position, cancel_event,
                     alpha, color_chain, color_space if tm == "none" else None,
                     video_bitrate_kbps, audio_bitrate_kbps, start, duration,
-                    preflight_warnings)
+                    preflight_warnings,
+                    **({"progress_callback": progress_callback} if progress_callback else {}))
 
         # 2. 编译 filter_complex 图 + 输入列表（有理数→float 仅在此层）
         #    _compile 在含字幕时会生成 ASS 临时目录（caption_cwd），需调用方清理。
@@ -1828,11 +1843,15 @@ class RenderService:
                              alpha=alpha, color_chain=color_chain,
                              output_start=(output_start - self._render_ctx.compile_origin
                                            if output_start is not None else None),
-                             output_duration=output_duration)
+                             output_duration=output_duration,
+                             progress_callback=progress_callback,
+                             progress_duration=verify_duration)
             # 5. ffprobe 验证真实可解码 + 时长/尺寸正确（透明导出另验 alpha；
             #    色彩管理另验输出 primaries 真的落到位）
             # 色调映射会把输出锁成 bt709，此时不该再按 color_space 断言。
             probed_space = color_space if (tm == "none" and color_space) else None
+            if progress_callback:
+                progress_callback({"phase": "verifying"})
             probe = self._verify(tmp_path, verify_duration, seq.width,
                                  seq.height, expect_alpha=alpha,
                                  expect_primaries=probed_space)
@@ -1877,7 +1896,8 @@ class RenderService:
             overlay_position: tuple[int, int], cancel_event: Optional[threading.Event],
             alpha: bool, color_chain: str, expected_primaries: Optional[str],
             video_bitrate_kbps: Optional[int], audio_bitrate_kbps: Optional[int],
-            start: float, duration: float, preflight_warnings: list[str]) -> dict[str, Any]:
+            start: float, duration: float, preflight_warnings: list[str],
+            progress_callback=None) -> dict[str, Any]:
         """Render dense long timelines with at most one window's inputs alive.
 
         FFV1/PCM intermediates avoid repeated lossy video/AAC encoding and AAC
@@ -1889,6 +1909,11 @@ class RenderService:
         warnings = list(preflight_warnings)
         has_audio = False
         chunks = []
+        stage_started = time.monotonic()
+        completed_seconds = 0.0
+        if progress_callback:
+            progress_callback({"phase": "rendering", "fraction": 0.0,
+                               "processedSeconds": 0.0, "totalSeconds": duration})
         def check_cancel() -> None:
             if cancel_event is not None and cancel_event.is_set():
                 raise RenderCancelled("render cancelled between windows")
@@ -1977,6 +2002,15 @@ class RenderService:
                     for path,chunk_duration,messages in result:
                         chunks.append((path,chunk_duration))
                         warnings.extend(m for m in messages if m not in warnings)
+                        completed_seconds += chunk_duration
+                        if progress_callback:
+                            elapsed = time.monotonic() - stage_started
+                            speed = completed_seconds / elapsed if elapsed > 0 else None
+                            progress_callback({"phase": "rendering",
+                                "fraction": min(1.0, completed_seconds / duration),
+                                "processedSeconds": completed_seconds, "totalSeconds": duration,
+                                "speed": speed,
+                                "etaSeconds": max(0.0, duration-completed_seconds)/speed if speed else None})
             check_cancel()
             manifest = temporary / "windows.ffconcat"
             lines = ["ffconcat version 1.0"]
@@ -1997,7 +2031,11 @@ class RenderService:
             self._run_ffmpeg(seq, graph, [str(manifest)], str(final), quality,
                 cancel_event, has_audio, video_bitrate_kbps=video_bitrate_kbps,
                 audio_bitrate_kbps=audio_bitrate_kbps, alpha=alpha,
-                color_chain=color_chain, output_duration=duration, concat_input=True)
+                color_chain=color_chain, output_duration=duration, concat_input=True,
+                progress_callback=progress_callback, progress_duration=duration,
+                progress_phase="encoding")
+            if progress_callback:
+                progress_callback({"phase": "verifying"})
             probe = self._verify(str(final), duration, seq.width, seq.height,
                                  expect_alpha=alpha, expect_primaries=expected_primaries)
             check_cancel()
@@ -2173,14 +2211,16 @@ class RenderService:
         source_seq = project.sequence
         t_rat = Rational.from_float(timeline_time)
         multicam = getattr(source_seq, "multicam", None)
-        active_track_id = multicam.get("activeTrackId") if isinstance(multicam, dict) else None
+        from cutvoke.domain.multicam import camera_at
+        active_track_id = camera_at(multicam, timeline_time)
 
         def covers(track: Any) -> bool:
             if getattr(track, "kind", "video") not in {"video", "text"}:
                 return False
             if not getattr(track, "visible", True):
                 return False
-            if track.kind == "video" and active_track_id and track.id != active_track_id:
+            if (track.kind == "video" and active_track_id and
+                    track.id in multicam.get("trackIds", [active_track_id]) and track.id != active_track_id):
                 return False
             return any(
                 not getattr(clip, "hidden", False)
@@ -2530,7 +2570,7 @@ class RenderService:
             if not track.visible or track.kind not in {"video", "audio"}:
                 continue
             clips, _warnings = _flatten_compound([c for c in track.clips if not c.hidden])
-            if track.kind == "video" and (active is None or track.id == active):
+            if track.kind == "video":
                 visual.extend(clips)
             if not track.muted:
                 audible.extend(clips)
@@ -2577,8 +2617,10 @@ class RenderService:
         warnings: list[str] = []
         # 渲染期标志（见 __init__ 注释）：供深层画布构建读取，避免层层传参漏传
         self._render_ctx.alpha = alpha
+        self._render_ctx.sequence_fps = seq.fps.to_fraction()
         self._render_ctx.canvas_height = seq.height
         self._render_ctx.canvas_width = seq.width
+        self._render_ctx.reframe = getattr(seq, 'reframe', 'stretch')
         self._render_ctx.window = render_window
         self._render_ctx.input_seeks = {}
         canvas_color = getattr(seq, "background_color", "#000000")
@@ -2680,8 +2722,6 @@ class RenderService:
         for t in seq.tracks:
             if t.kind != "video" or not t.visible:
                 continue
-            if multicam_active is not None and t.id != multicam_active:
-                continue  # 非活动机位轨：跳过渲染
             clips = sorted((c for c in t.clips if not c.hidden),
                            key=lambda c: c.timeline_start)
             # 复合片段（J08）：把 nested 子序列片段提升到外层时轴
@@ -2812,7 +2852,7 @@ class RenderService:
             f"r={fps_expr}:d={canvas_dur:.6f}{base_format}[trackbase]")
         current = "trackbase"
         gpu=getattr(self._render_ctx,'gpu',None)
-        if (gpu is not None and getattr(self._render_ctx,'bounded_origin',None) is not None
+        if (gpu is not None and not multicam and getattr(self._render_ctx,'bounded_origin',None) is not None
                 and len(track_labels)>1 and (x,y)==(0,0)
                 and all(c.id in getattr(self._render_ctx,'clip_clocks',{})
                         for _track, clips in track_clips for c in clips)):
@@ -2829,9 +2869,14 @@ class RenderService:
         else:
             for n, t_label in enumerate(track_labels):
                 out_label = "ovout" if n == len(track_labels) - 1 else f"ov{n}"
+                enable = ''
+                if isinstance(multicam, dict) and n < len(track_clips):
+                    from cutvoke.domain.multicam import visibility_expression
+                    expression = visibility_expression(multicam, track_clips[n][0].id, origin)
+                    if expression is not None: enable = f":enable='{expression}'"
                 parts.append(
                     f"[{current}][{t_label}]overlay=shortest=0:eof_action=pass:"
-                    f"format=auto:x={x}:y={y}[{out_label}]")
+                    f"format=auto:x={x}:y={y}{enable}[{out_label}]")
                 current = out_label
         # 统一缩放到序列画布并规范帧率（输出符合 sequence 设置）
         parts.append(
@@ -2921,6 +2966,10 @@ class RenderService:
         #   * 音频轨（kind=='audio'，未静音、可见）的可见片段
         #   * 视频轨的可见片段，若其源文件本身含音轨则一并提取（每条视频轨成一轨道）
         audio_groups: list[list[tuple[str, float, float]]] = []
+        from cutvoke.rendering.audio_mixer import audible_track_ids, finish_mix
+        mixer_sequence = audio_sequence or seq
+        audible_ids = audible_track_ids(mixer_sequence)
+        audio_group_track_ids = []
 
         def _collect_audio_segs(clips: list[Clip]) -> list[tuple]:
             segs: list[tuple] = []
@@ -2935,24 +2984,31 @@ class RenderService:
                 afx = self._enabled_audio_fx(c)
                 segs.append((src, ss, c.duration, c.speed, c.preserve_pitch, c.volume,
                              c.fade_in, c.fade_out, c.pitch, afx,
-                             c.timeline_start, c.speed_curve, c.id))
+                             c.timeline_start, c.speed_curve, c.id, c.keyframes.get("volume", []),
+                             getattr(c, "audio_fade_offset", Rational.of(0)),
+                             getattr(c, "audio_fade_duration", None)))
             return segs
 
         # 音频轨（静音轨不产生音轨）
         for t in audio_tracks:
-            if not t.visible or t.muted:
+            if not t.visible or t.muted or t.id not in audible_ids:
                 continue
             segs = _collect_audio_segs([c for c in t.clips if not c.hidden])
             if segs:
                 audio_groups.append(segs)
+                audio_group_track_ids.append(t.id)
 
         # 视频轨：默认提取嵌入音轨
         for t in (audio_sequence or seq).tracks:
-            if t.kind != "video" or not t.visible or t.muted:
+            if t.kind != "video" or not t.visible or t.muted or t.id not in audible_ids:
+                continue
+            if (isinstance(multicam, dict) and t.id in multicam.get('trackIds', [])
+                    and t.id != multicam.get('audioTrackId', multicam.get('activeTrackId'))):
                 continue
             segs = _collect_audio_segs([c for c in t.clips if not c.hidden])
             if segs:
                 audio_groups.append(segs)
+                audio_group_track_ids.append(t.id)
 
         has_audio = bool(audio_groups)
         audio_expected = 0.0
@@ -2966,7 +3022,7 @@ class RenderService:
             for g, segs in enumerate(audio_groups):
                 labels: list[str] = []
                 for (src, ss, tl_dur, speed, preserve_pitch, vol, fade_in, fade_out, pitch, afx,
-                     timeline_start, curve, clip_id) in segs:
+                     timeline_start, curve, clip_id, volume_keyframes, fade_offset, fade_duration) in segs:
                     ai = get_input(src)
                     seg = f"aseg{aseg}"
                     aseg += 1
@@ -3006,10 +3062,28 @@ class RenderService:
                     vol_f = float(vol.to_fraction())
                     if abs(vol_f - 1.0) > 1e-6:
                         audio_fx += f",volume={vol_f:.4f}"
+                    if volume_keyframes:
+                        from cutvoke.domain.keyframes import expression as keyframe_expression
+                        volume_expression = keyframe_expression(volume_keyframes, "t", 1.)
+                        audio_fx += f",volume='{volume_expression}':eval=frame"
                     fade_in_f = float(fade_in.to_fraction())
                     fade_out_f = float(fade_out.to_fraction())
                     # 输出的音频段真实时长 = 时间线时长（变速/倒放后仍等于 tl_dur）
                     seg_dur = float(tl_dur.to_fraction())
+                    fade_offset_f = float(fade_offset.to_fraction())
+                    if fade_offset_f or fade_duration is not None:
+                        original_duration = float(fade_duration.to_fraction()) if fade_duration is not None else seg_dur
+                        original_fi = min(fade_in_f, max(original_duration - .01, 0.))
+                        original_fo = min(fade_out_f, max(original_duration - .01, 0.))
+                        envelopes = []
+                        if original_fi > 0:
+                            envelopes.append(f"min(1,max(0,(t+{fade_offset_f:.9f})/{original_fi:.9f}))")
+                        if original_fo > 0:
+                            envelopes.append(f"min(1,max(0,({original_duration:.9f}-t-{fade_offset_f:.9f})/{original_fo:.9f}))")
+                        if envelopes:
+                            expression = "*".join(envelopes)
+                            audio_fx += f",aeval='val(ch)*({expression})':c=same"
+                        fade_in_f = fade_out_f = 0.
                     # afade 时长不能超过段时长
                     if fade_in_f > 0:
                         fi = min(fade_in_f, max(seg_dur - 0.01, 0.0))
@@ -3064,14 +3138,14 @@ class RenderService:
             from cutvoke.rendering.travel_fx import build_sidechain_ducks
             has_ducking = build_sidechain_ducks(audio_group_labels, audio_labels_by_clip,
                                                duck_requests, parts, canvas_dur + origin - audio_origin)
-            # 多条音轨 amix；单条直接透传 [outa]
-            if len(substreams) == 1:
-                parts.append(f"[{substreams[0]}]anull[outa]")
-            else:
-                ins = "".join(f"[{s}]" for s in substreams)
-                parts.append(
-                    f"{ins}amix=inputs={len(substreams)}:"
-                    f"duration=longest:normalize=0[outa]")
+            def mixer_effect_filter(effect):
+                key, params = self._fx_key_params(effect)
+                fn = _AUDIO_FX_STEPS.get(key)
+                if fn is None:
+                    raise RenderError(f"unsupported mixer effect {effect.get('effectId')}")
+                return fn(params)
+            finish_mix(mixer_sequence, audio_group_track_ids, substreams, parts,
+                       audio_origin, mixer_effect_filter)
             if has_ducking:
                 parts.append("[outa]alimiter=limit=0.794328:level=0:latency=1[outa]")
 
@@ -3650,9 +3724,12 @@ class RenderService:
         # 定格帧（B06）：只重复 freeze_at 对应的一帧。
         if clip.freeze_at is not None:
             chain = self._frozen_clip_chain(clip, vi, fps_expr)
-            chain += self._preview_source_filter(clip)
+            chain += self._preview_source_filter(clip) + self._canvas_source_filter(clip)
             col = clip.color_grade()
-            if (col["brightness"] != 0.0 or col["contrast"] != 1.0
+            animated_color = self._animated_color(clip, col)
+            if animated_color:
+                chain += "," + animated_color
+            elif (col["brightness"] != 0.0 or col["contrast"] != 1.0
                     or col["saturation"] != 1.0):
                 chain += (f",eq=brightness={col['brightness']:.6f}:"
                           f"contrast={col['contrast']:.6f}:"
@@ -3678,10 +3755,13 @@ class RenderService:
         chain = (f"[{vi}:v]trim=start={ss}:duration={src_dur},"
                  f"setpts=PTS-STARTPTS,{speed_expr}")
         chain += self._slow_motion_interpolation_filter(clip, fps_expr)
-        chain += self._preview_source_filter(clip)
+        chain += self._preview_source_filter(clip) + self._canvas_source_filter(clip)
         # F18 调色（尺寸不变，inline）
         col = clip.color_grade()
-        if (col["brightness"] != 0.0 or col["contrast"] != 1.0
+        animated_color = self._animated_color(clip, col)
+        if animated_color:
+            chain += "," + animated_color
+        elif (col["brightness"] != 0.0 or col["contrast"] != 1.0
                 or col["saturation"] != 1.0):
             chain += (f",eq=brightness={col['brightness']:.6f}:"
                       f"contrast={col['contrast']:.6f}:"
@@ -4216,8 +4296,11 @@ class RenderService:
                      f"trim=start={ss:.6f}:duration={src_dur:.6f},"
                      f"setpts=PTS-STARTPTS,{speed_expr}")
             chain += self._slow_motion_interpolation_filter(clip, fps_expr)
-        chain += self._preview_source_filter(clip)
-        if (color["brightness"] != 0.0 or color["contrast"] != 1.0
+        chain += self._preview_source_filter(clip) + self._canvas_source_filter(clip)
+        animated_color = self._animated_color(clip, color)
+        if animated_color:
+            chain += "," + animated_color
+        elif (color["brightness"] != 0.0 or color["contrast"] != 1.0
                 or color["saturation"] != 1.0):
             chain += (f",eq=brightness={color['brightness']:.6f}:"
                       f"contrast={color['contrast']:.6f}:"
@@ -4573,8 +4656,11 @@ class RenderService:
             chain = (f"[{vi}:v]trim=start={ss}:duration={src_dur},"
                      f"setpts=PTS-STARTPTS,{speed_expr}")
             chain += self._slow_motion_interpolation_filter(clip, fps_expr)
-        chain += self._preview_source_filter(clip)
-        if (color["brightness"] != 0.0 or color["contrast"] != 1.0
+        chain += self._preview_source_filter(clip) + self._canvas_source_filter(clip)
+        animated_color = self._animated_color(clip, color)
+        if animated_color:
+            chain += "," + animated_color
+        elif (color["brightness"] != 0.0 or color["contrast"] != 1.0
                 or color["saturation"] != 1.0):
             chain += (f",eq=brightness={color['brightness']:.6f}:"
                       f"contrast={color['contrast']:.6f}:"
@@ -4668,6 +4754,45 @@ class RenderService:
     def _has_fx(self, clip: Clip) -> bool:
         return bool(self._enabled_fx(clip))
 
+    def _animated_color(self, clip: Clip, color: dict) -> str:
+        from cutvoke.domain.keyframes import effect_instance_id
+        selected = [(index,e) for index,e in enumerate(clip.effects) if e.get("effectId") == "cutvoke.color"]
+        if not selected:
+            return ""
+        index,effect = selected[-1]
+        prefix = f"effect:{effect_instance_id(effect,index)}:"
+        if not any(clip.keyframes.get(prefix+p) for p in ("brightness","contrast","saturation")):
+            return ""
+        offset = getattr(self._render_ctx,'clip_clocks',{}).get(clip.id,(0,None))[0]
+        time_expr = f"(t+{offset:.12f})"
+        return "eq=" + ":".join(f"{name}='{kf_expression(clip.keyframes.get(prefix+name,[]),time_expr,color[name])}'"
+                                for name in ("brightness","contrast","saturation")) + ":eval=frame"
+
+    def _animated_blur(self, clip: Clip, effect: dict, params: dict, name: str) -> str:
+        from cutvoke.domain.keyframes import effect_instance_id
+        index = next(i for i,e in enumerate(clip.effects) if e is effect)
+        lane = clip.keyframes.get(f"effect:{effect_instance_id(effect,index)}:sigma",[])
+        if not lane or effect.get("effectId") != "cutvoke.fx.blur":
+            return ""
+        fps = getattr(self._render_ctx,"sequence_fps",Fraction(30))
+        offset = getattr(self._render_ctx,'clip_clocks',{}).get(clip.id,(0,None))[0]
+        count = max(1,math.ceil(clip.duration.to_fraction()*fps))
+        if count > 100_000:
+            raise RenderError("animated blur is limited to 100000 frames per clip")
+        target = f"gblur@{name}"
+        commands=[]
+        previous=None
+        initial=5.
+        for n in range(count):
+            time = Rational.of(n*fps.denominator,fps.numerator)+Rational.from_float(offset)
+            sigma = kf_evaluate(lane,time)*params.get("_previewScale",1.)
+            if n == 0: initial = sigma
+            if sigma != previous:
+                timestamp=max(offset,offset+(n-.25)/float(fps))
+                commands.append(f"{timestamp:.9f} {target} sigma {sigma:.12g}")
+                previous=sigma
+        return f"fps={fps.numerator}/{fps.denominator},sendcmd=c='{';'.join(commands)}',{target}=sigma={initial:.12g}"
+
     def _apply_fx(self, clip: Clip, cur: str, parts: list[str],
                   vseg: list[int], time_offset: float = 0.0) -> str:
         """按效果栈顺序把片段上的 fx 滤镜接到标签 cur 上，返回末标签。"""
@@ -4686,9 +4811,16 @@ class RenderService:
         self._render_ctx.fx_offset=local_offset
         for i, e in enumerate(self._enabled_fx(clip)):
             key, params = self._fx_key_params(e)
+            def apply_one(source):
+                animated = self._animated_blur(clip,e,params,f"ak{vseg[0]}")
+                if not animated:
+                    return self._fx_one(key,params,source,parts,vseg,i)
+                out = f"akout{vseg[0]}"; vseg[0]+=1
+                parts.append(f"[{source}]{animated}[{out}]")
+                return out
             effect_range = e.get("range")
             if effect_range is None:
-                cur = self._fx_one(key, params, cur, parts, vseg, i)
+                cur = apply_one(cur)
                 continue
             try:
                 start = Rational.from_json(**effect_range["start"])
@@ -4698,7 +4830,7 @@ class RenderService:
             if start < Rational.of(0) or end > original_duration or start >= end:
                 raise RenderError(f"temporal range is outside clip {clip.id}")
             if start == Rational.of(0) and end == original_duration:
-                cur = self._fx_one(key, params, cur, parts, vseg, i)
+                cur = apply_one(cur)
                 continue
 
             # Keep an unmodified branch beside the effected branch, then switch
@@ -4707,7 +4839,7 @@ class RenderService:
             base = f"fxrange_base{vseg[0]}"
             branch = f"fxrange_src{vseg[0]}"
             parts.append(f"[{cur}]split=2[{base}][{branch}]")
-            processed = self._fx_one(key, params, branch, parts, vseg, i)
+            processed = apply_one(branch)
             if key == "crop":
                 # crop changes frame dimensions. Scale only its active branch
                 # back to the unchanged branch dimensions before frame blending.
@@ -5294,7 +5426,9 @@ class RenderService:
                     output_start: Optional[float] = None,
                     output_duration: Optional[float] = None,
                     preview_source_duration: Optional[float] = None,
-                    lossless: bool = False, concat_input: bool = False) -> None:
+                    lossless: bool = False, concat_input: bool = False,
+                    progress_callback=None, progress_duration: Optional[float] = None,
+                    progress_phase: str = "encoding") -> None:
         preset = QUALITY_PRESETS.get(quality)
         if preset is None:
             raise RenderError(f"unknown quality preset: {quality!r} "
@@ -5411,6 +5545,49 @@ class RenderService:
                 cmd += ["-ss", f"{output_start:.6f}"]
             cmd += ["-movflags", "+faststart", out_path]
 
+        # FFmpeg reports encoded media time. Keep it separate from stderr and
+        # never manufacture a percentage from elapsed wall-clock time.
+        progress_path = None
+        progress_stop = threading.Event()
+        progress_thread = None
+        if progress_callback:
+            handle, progress_path = tempfile.mkstemp(prefix="cutvoke-progress-", suffix=".txt")
+            os.close(handle)
+            cmd[1:1] = ["-progress", progress_path, "-stats_period", "0.25", "-nostats"]
+            total = progress_duration or output_duration
+            progress_callback({"phase": progress_phase,
+                               "processedSeconds": 0.0, "totalSeconds": total,
+                               "fraction": 0.0 if total else None})
+            def watch_progress() -> None:
+                values = {}
+                with open(progress_path, "r", encoding="utf-8", errors="replace") as stream:
+                    while True:
+                        line = stream.readline()
+                        if not line:
+                            if progress_stop.is_set():
+                                return
+                            progress_stop.wait(.1)
+                            continue
+                        key, _, value = line.strip().partition("=")
+                        values[key] = value
+                        if key != "progress":
+                            continue
+                        try:
+                            processed = max(0.0, float(values.get("out_time_us", "0")) / 1_000_000)
+                            raw_speed = values.get("speed", "").rstrip("x")
+                            speed = float(raw_speed) if raw_speed not in {"", "N/A"} else None
+                            if speed is not None and (not math.isfinite(speed) or speed <= 0):
+                                speed = None
+                            payload = {"phase": progress_phase, "processedSeconds": processed,
+                                "totalSeconds": total, "fraction": min(1.0, processed/total) if total else None,
+                                "complete": value == "end",
+                                "speed": speed,
+                                "etaSeconds": max(0.0, total-processed)/speed if total and speed else None}
+                            progress_callback(payload)
+                        except (ValueError, TypeError):
+                            pass
+            progress_thread = threading.Thread(target=watch_progress, daemon=True)
+            progress_thread.start()
         # 取消支持：用 Popen + 看门狗线程，在 cancel_event 置位时终止 ffmpeg
         try:
             self._render_ctx.window_retry_count = 0
@@ -5478,6 +5655,12 @@ class RenderService:
                     raise RenderError("preview encoder stopped making progress after one retry")
                 self._render_ctx.window_retry_count = 1
         finally:
+            if progress_thread:
+                progress_stop.set()
+                progress_thread.join(timeout=2)
+            if progress_path:
+                with contextlib.suppress(OSError):
+                    os.remove(progress_path)
             if filter_script_path:
                 with contextlib.suppress(OSError):
                     os.remove(filter_script_path)
@@ -5501,7 +5684,9 @@ class RenderService:
                     color_chain=color_chain, output_start=output_start,
                     output_duration=output_duration,
                     preview_source_duration=preview_source_duration,
-                    lossless=lossless, concat_input=concat_input)
+                    lossless=lossless, concat_input=concat_input,
+                    progress_callback=progress_callback, progress_duration=progress_duration,
+                    progress_phase=progress_phase)
             tail = (stderr or b"").decode("utf-8", "replace")[-1500:]
             raise RenderError(
                 f"ffmpeg exited with code {proc.returncode}\n{tail}")

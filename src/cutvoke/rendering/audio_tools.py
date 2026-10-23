@@ -268,23 +268,29 @@ def record_audio(out_path: str, seconds: float = 5.0,
     seconds = float(seconds)
     if not (0.5 <= seconds <= 300.0):
         raise RuntimeError("record: seconds must be in [0.5, 300]")
-    if os.name != "nt":
-        # 非 Windows：用内置替代输入（真实可渲染的 lavfi 音源）保证命令可用
-        cmd = [DEFAULT_FFMPEG, "-y", "-f", "lavfi",
-               "-i", f"sine=frequency=440:duration={seconds:.1f}",
-               "-ar", "44100", "-ac", "1", out_path]
+    import sys
+    if os.name == "nt":
+        backend, src = "dshow", f"audio={device or 'default'}"
+    elif sys.platform == "darwin":
+        backend, src = "avfoundation", f":{device or 'default'}"
+    elif sys.platform.startswith("linux"):
+        backend, src = ("alsa", device[5:]) if device and device.startswith("alsa:") else ("pulse", device or "default")
     else:
-        src = device or "default"
-        cmd = [DEFAULT_FFMPEG, "-y", "-f", "dshow",
-               "-i", f"audio={src}",
-               "-t", f"{seconds:.1f}",
-               "-ar", "44100", "-ac", "1",
-               "-c:a", "pcm_s16le", out_path]
-    r = subprocess.run(cmd, capture_output=True, text=True, timeout=400)
+        raise RuntimeError("record: microphone capture is unsupported on this platform")
+    cmd = [DEFAULT_FFMPEG, "-y", "-nostdin", "-f", backend, "-i", src,
+           "-t", f"{seconds:.6f}", "-ar", "48000", "-ac", "1",
+           "-c:a", "pcm_s16le", out_path]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=seconds + 30)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise RuntimeError(f"record: {backend} microphone capture failed: {error}") from error
     if r.returncode != 0:
         raise RuntimeError(
             "record failed: " + (r.stderr or "")[-400:]
             + "（若未接录音设备/无默认设备，请用 device 参数指定麦克风）")
     if not os.path.isfile(out_path) or os.path.getsize(out_path) <= 44:
         raise RuntimeError("record: produced empty file")
-    return {"outPath": out_path, "duration": seconds}
+    duration, _, _ = _probe(out_path)
+    if duration <= 0:
+        raise RuntimeError("record: captured output could not be decoded")
+    return {"outPath": out_path, "duration": duration, "backend": backend}

@@ -1,0 +1,7 @@
+.clip-timing { margin-block: 12px; border-block: 1px solid var(--border); padding-block: 10px; }
+.clip-timing h4 { margin: 0 0 6px; font-size: 12px; }
+.clip-timing__row { gap: 6px; }
+.clip-timing__row input { width: 112px; min-width: 72px; }
+.clip-timing__unit { color: var(--text-faint); font-size: 10px; }
+.clip-timing__actions { display: flex; gap: 6px; margin-top: 8px; }
+.clip-timing__error { color: var(--danger, #fca5a5); overflow-wrap: anywhere; }

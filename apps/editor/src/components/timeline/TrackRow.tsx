@@ -8,6 +8,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRightLeft, Film, Music, Type, Lock, Unlock, Volume2, VolumeX, Eye, EyeOff, Trash2, Link2 } from "lucide-react";
 import type { Clip, Track } from "../../types/api";
 import { useEditor } from "../../store/editor";
+import { selectedClipIds, selectTimelineClip } from "../../store/timelineSelection";
 import { getLatestState, runCommand } from "../../store/actions";
 import { applyTransition, closeGapBeforeClip, trimClip, insertClipAutoTrack, insertClipFromDrop, moveClip, removeEffect, resolveInsertStart, splitClip, updateTrack } from "../../store/clipEdit";
 import { ClipContextMenu, type CtxTarget } from "../ClipContextMenu";
@@ -31,6 +32,7 @@ import { EFFECT_DND_TYPE, getEffectDrag, setEffectDrag, clipAcceptsEffect, type 
 import { applyResourceToClip } from "../../store/resourceEdit";
 import type { TimelineDragApi } from "./useTimelineDrag";
 import type { TimelineViewport } from "./useTimelineViewport";
+import { ClipMediaStrip } from "./ClipMediaStrip";
 
 interface TrimState {
   clipId: string;
@@ -173,6 +175,7 @@ export const TrackRow = memo(function TrackRow({
 
   // 切割模式：点击片段 → 在播放头处分割（若播放头在片段内）；否则选择
   const handleCutClick = (e: React.MouseEvent | React.KeyboardEvent, clip: Clip) => {
+    if (dragApi.consumeClick()) return;
     if (state.toolMode === "cut") {
       e.preventDefault();
       e.stopPropagation();
@@ -189,7 +192,8 @@ export const TrackRow = memo(function TrackRow({
         dispatch({ type: "STATUS_SET", severity: "warn", text: msg("播放头需在片段内部才能分割") });
       }
     } else {
-      dispatch({ type: "SELECTION_SET", selection: { trackId: track.id, clipId: clip.id } });
+      selectTimelineClip(dispatch, getLatestState() || state, clip.id, e);
+      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
       const start = rationalToSecs(clip.timelineStart);
       const end = rationalToSecs(clip.timelineEnd);
       const playhead = (getLatestState() || state).playhead;
@@ -698,8 +702,9 @@ export const TrackRow = memo(function TrackRow({
             isText={isText}
             attachedCount={attachments.get(clip.id) || 0}
             pxPerSec={pxPerSec}
+            viewport={viewport}
             locked={locked}
-            selected={state.selection?.clipId === clip.id && state.selection?.trackId === track.id && !state.selection?.effectId}
+            selected={selectedClipIds(state).includes(clip.id)}
             trimOverlay={trimShape?.clipId === clip.id ? trimShape.shape : undefined}
             effectDropState={effectDropAt?.clipId === clip.id ? (effectDropAt.allowed ? "allowed" : "denied") : undefined}
             onEffectDragOver={event => onEffectDragOver(event, clip)}
@@ -720,6 +725,7 @@ export const TrackRow = memo(function TrackRow({
               }
               e.preventDefault();
               e.stopPropagation();
+              if (!selectedClipIds(state).includes(clip.id)) selectTimelineClip(dispatch, state, clip.id);
               setMenuTarget({ x: e.clientX, y: e.clientY, clipId: clip.id, clip, trackId: track.id, playheadSecs: (getLatestState() || state).playhead });
             }}
             onCutClick={(e) => handleCutClick(e, clip)}
@@ -878,6 +884,7 @@ function ClipBlock({
   isText,
   attachedCount,
   pxPerSec,
+  viewport,
   locked,
   selected,
   trimOverlay,
@@ -895,6 +902,7 @@ function ClipBlock({
   isText: boolean;
   attachedCount: number;
   pxPerSec: number;
+  viewport: TimelineViewport;
   locked?: boolean;
   selected: boolean;
   trimOverlay?: TrimShape;
@@ -948,6 +956,7 @@ function ClipBlock({
       }}
       title={tr("{0} · {1}s{2}{3} · Alt+←/→ 调整顺序", name, durSecs.toFixed(1), clip.attachedToClipId ? tr(" · 跟随视频") : "", attachedCount ? tr(" · {0} 个片段跟随", attachedCount) : "")}
     >
+      <ClipMediaStrip clip={clip} isAudio={isAudio} isText={isText} pxPerSec={pxPerSec} visibleStart={viewport.start} visibleEnd={viewport.end} />
       <div className="clip-block__name">{name}</div>
       {clip.attachedToClipId || attachedCount ? <span className="clip-block__meta" aria-hidden="true"><Link2 size={11} />{attachedCount || ""}</span> : null}
       <div className="clip-block__meta">{durSecs.toFixed(1)}s</div>

@@ -12,6 +12,8 @@
     "i18n:extract": "node scripts/check-i18n.mjs --extract",
     "i18n:check": "node scripts/check-i18n.mjs",
     "test:i18n": "node --test scripts/i18n.test.mjs",
+    "test:preview-cache": "node --test scripts/preview-cache.test.mjs",
+    "test:basic": "node --test scripts/clip-timing.test.mjs scripts/project-sync.test.mjs scripts/timeline-media-cache.test.mjs scripts/import-media.test.mjs",
     "test:e2e": "npm run build && playwright test"
   },
   "dependencies": {

@@ -223,7 +223,7 @@ cutvoke mcp --data .artifacts/first-edit/data
 <details>
 <summary><strong>Install the editing skill and try a creative task</strong></summary>
 
-MCP already includes `editor_help` for current commands, units, recipes and error recovery. The optional [cutvoke-editor skill](skills/cutvoke-editor/SKILL.md) adds guidance for media inventory, audience and goals, shot rhythm, sound/captions, restrained transitions, preview feedback and final review.
+MCP already includes `editor_help` for current commands, units, recipes and error recovery. The optional [cutvoke-editor skill](skills/cutvoke-editor/SKILL.md) adds guidance for media inventory, audience and goals, shot rhythm, sound/captions, restrained transitions, preview feedback and final review. It keeps Agent-created files in the project folder and automatically collects verified, content-free reusable effects at completion: registered in the current library, with ZIP copies in the project and the verified installation's `user-effects/` folder. Collection is local; publication requires explicit authorization.
 
 The standard MCP launcher automatically activates healthy engine updates while keeping the connection and existing render jobs. See [automatic update behavior and limits](docs/production-workflow.md#runtime-changes--服务版本变化); previously running launchers need one initial reconnect.
 
@@ -231,7 +231,7 @@ The standard MCP launcher automatically activates healthy engine updates while k
 
 After connecting, try a request such as:
 
-> Use cutvoke-editor to make a 12-second weekend edit for friends from my selected local media. Keep one short title, readable captions, gentle motion and restrained transitions. Use only authorized files, create a new MP4 in my chosen directory, review actual pictures and sound, and leave an editable project.
+> Use cutvoke-editor to make a 12-second weekend edit for friends from my selected local media. Keep one short title, readable captions, gentle motion and restrained transitions. Use only authorized files, keep intermediate files and the new MP4 in this project's folder, review actual pictures and sound, leave an editable project, and collect useful reusable effects locally when finished.
 
 The skill is creative guidance. It does not install a model or guarantee a polished film from installation alone. Media permissions, the agent's ability to see/listen, and editorial judgment still matter. User media must not be uploaded without authorization.
 

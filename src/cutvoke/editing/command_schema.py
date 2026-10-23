@@ -41,10 +41,11 @@ CAPTION_STYLE = {
     "shadow": {"type": "integer", "minimum": 0, "maximum": 20}}
 STYLE = {"type": "object", "properties": CAPTION_STYLE, "additionalProperties": False}
 KEYFRAME = {"type": "object", "properties": {
-    "param": {"type": "string", "enum": ["opacity", "x", "y", "scale", "rotation"]},
+    "param": {"type": "string", "description": "opacity/x/y/scale/rotation/volume, or effect:<instanceId>:<parameter> (color brightness/contrast/saturation; blur sigma)."},
     "time": {**SECONDS, "description": "Clip-local presentation seconds, not absolute timeline time."},
     "value": {"type": "number", "description": "opacity 0..1; scale 0.05..5; rotation -180..180; x/y in canvas pixels."},
-    "interpolation": {"type": "string", "enum": ["linear", "ease-in", "ease-out"]}},
+    "interpolation": {"type": "string", "enum": ["linear", "ease-in", "ease-out", "cubic-bezier"]},
+    "bezier": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number", "minimum": 0, "maximum": 1}}},
     "required": ["param", "time", "value"], "additionalProperties": False}
 
 _BOOLEAN_FIELDS = set("locked muted visible switch enabled bold preservePitch followAttachments includeAttached applyToProject clearExisting setCanvas overwrite versioned transparent".split())
@@ -69,6 +70,21 @@ def normalize_schema(value):
 
 def payload_schema(command: str, params: list[dict], effects: dict | None = None) -> dict:
     """Derive public fields from the registered command catalog, not a tool copy."""
+    if command == "clip.paste":
+        return {"type": "object", "properties": {
+            "items": {"type": "array", "minItems": 1, "maxItems": 5000, "items": {
+                "type": "object", "properties": {"trackId": STRING,
+                    "trackIndex": {"type": "integer", "minimum": 0},
+                    "trackKind": {"type": "string", "enum": ["video", "audio", "text"]},
+                    "clip": {"type": "object"}},
+                "required": ["trackIndex", "trackKind", "clip"]}},
+            "timelineStart": SECONDS, "targetTrackId": STRING},
+            "required": ["items", "timelineStart"], "additionalProperties": False}
+    if command.startswith("audio."):
+        from cutvoke.editing.audio_commands import payload_schema as audio_payload_schema
+        audio_schema = audio_payload_schema(command)
+        if audio_schema is not None:
+            return audio_schema
     if command == "effectModule.apply":
         return {"type": "object", "properties": {
             "clipId": {"type": "string", "minLength": 1},
@@ -78,9 +94,19 @@ def payload_schema(command: str, params: list[dict], effects: dict | None = None
     properties, required = {}, []
     for param in params:
         name = param["name"]
-        if name in _BOOLEAN_FIELDS:
+        if name == "fps" and command.startswith("sequence."):
+            field = {"anyOf": [NUMBER, RATIONAL]}
+        elif name == "reframe":
+            field = {"type": "string", "enum": ["stretch", "contain", "cover"]}
+        elif name in ("referenceTrackId", "targetTrackId", "format", "content"):
+            field = STRING
+        elif name == "maxOffsetSeconds":
+            field = {"type": "number", "minimum": 0, "maximum": 30}
+        elif name == "strict":
             field = BOOL
-        elif name in _INTEGER_FIELDS:
+        elif name in _BOOLEAN_FIELDS:
+            field = BOOL
+        elif name in _INTEGER_FIELDS or name == "trackOffset":
             field = {"type": "integer"}
         elif name in _NUMBER_FIELDS:
             field = NUMBER
@@ -92,6 +118,10 @@ def payload_schema(command: str, params: list[dict], effects: dict | None = None
             field = STRING
         elif name in ("speed", "time", "offset"):
             field = SECONDS
+        elif name == "scope":
+            field = {"type": "string", "enum": ["track", "sequence"]}
+        elif name == "wordIndices":
+            field = {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 0}}
         elif name == "words":
             field = WORDS
         elif name == "effects":
@@ -142,6 +172,9 @@ def payload_schema(command: str, params: list[dict], effects: dict | None = None
             required.append(name)
     if command.startswith("caption.") and command in ("caption.add", "caption.update"):
         properties.update(copy.deepcopy(CAPTION_STYLE))
+    if command == "sequence.deleteRange":
+        properties["start"] = copy.deepcopy(SECONDS)
+        properties["end"] = copy.deepcopy(SECONDS)
     if command == "clip.insert":
         properties["text"] = normalize_schema(effects.get("cutvoke.text", {"type": "object"}))
         properties["text"]["required"] = ["content"]
@@ -151,10 +184,13 @@ def payload_schema(command: str, params: list[dict], effects: dict | None = None
         properties["attachedToClipId"]["type"] = ["string", "null"]
     if command == "clip.keyframe":
         properties.update(copy.deepcopy(KEYFRAME["properties"]))
-        properties["action"] = {"type": "string", "enum": ["add", "batch", "remove"], "default": "add"}
+        properties["action"] = {"type": "string", "enum": ["add", "batch", "remove", "update", "retime"], "default": "add"}
         properties["keyframes"] = {"type": "array", "minItems": 1, "items": KEYFRAME}
+        properties.update({"keyframeIds": IDS, "offset": SECONDS, "anchor": SECONDS,
+                           "timeScale": {"type": "number", "exclusiveMinimum": 0}})
         required = ["clipId"]
     if command == "clip.batch":
+        properties["action"] = {"type": "string", "enum": ["move", "remove", "audio"]}
         properties["params"] = {"type": "object", "properties": {
             "speed": SECONDS, **{k: NUMBER for k in ("volume", "fadeIn", "fadeOut", "pitch", "opacity")},
             "animation": {"anyOf": [STRING, EFFECT]}, "transition": {"anyOf": [STRING, EFFECT]}},
@@ -169,11 +205,14 @@ def payload_schema(command: str, params: list[dict], effects: dict | None = None
         properties["anchorPosition"]["enum"] = ["before", "after"]
     result = {"type": "object", "properties": properties, "required": required,
               "additionalProperties": True}
+    if command == "clip.batch":
+        result["anyOf"] = [{"required": ["trackId", "params"]}, {"required": ["action", "clipIds"]}]
     if command == "clip.keyframe":
         result["anyOf"] = [
             {"properties": {"action": {"enum": ["add"]}}, "required": ["param", "time", "value"]},
             {"properties": {"action": {"enum": ["batch"]}}, "required": ["action", "keyframes"]},
-            {"properties": {"action": {"enum": ["remove"]}}, "required": ["action", "param", "keyframeId"]}]
+            {"properties": {"action": {"enum": ["remove", "update"]}}, "required": ["action", "param", "keyframeId"]},
+            {"properties": {"action": {"enum": ["retime"]}}, "required": ["action", "keyframeIds"]}]
     if command == "track.add":
         properties["kind"]["enum"] = ["video", "audio", "text"]
     return result

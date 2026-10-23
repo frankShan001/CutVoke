@@ -20,6 +20,10 @@ from typing import Callable
 from cutvoke.rendering.render import RenderCancelled, RenderError
 
 
+class PreviewPreempted(RenderCancelled):
+    """A low-priority interval yielded; its immutable parent may continue."""
+
+
 def preview_identity(project, renderer_version: int) -> str:
     """Captions/metadata don't invalidate video; nested content and files do."""
     sequences = [sequence.to_dict() for sequence in project.sequences]
@@ -195,8 +199,9 @@ class PreviewPreparation:
                 self._prepare(job_id, snapshot, event)
             except Exception as error:  # noqa: BLE001 — keep worker alive after a bad project
                 with self._lock:
-                    job.update(state="cancelled" if event.is_set() else "failed",
-                               phase="cancelled" if event.is_set() else "failed",
+                    cancelled = event.is_set() or isinstance(error, RenderCancelled)
+                    job.update(state="cancelled" if cancelled else "failed",
+                               phase="cancelled" if cancelled else "failed",
                                error=str(error), finishedAt=time.time())
             finally:
                 with self._lock:
@@ -273,7 +278,15 @@ class PreviewPreparation:
                 original = work / f"source_{index}.mp4"
                 # Background renders yield to foreground seeks between windows.
                 if self.disk_cache:
-                    path, _etag, window_duration = self.window(project, index, event, priority=10)
+                    while True:
+                        try:
+                            path, _etag, window_duration = self.window(project, index, event, priority=10)
+                            break
+                        except PreviewPreempted:
+                            if event.wait(.05):
+                                raise
+                            # A foreground seek may preempt just this interval.
+                            # Retry through the low-priority queue afterwards.
                     protection = self.disk_cache.pin(path)
                 else:
                     protection = self.window_lock

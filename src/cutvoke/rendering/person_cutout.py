@@ -15,6 +15,7 @@ import importlib.util
 import json
 import math
 import os
+import queue
 import shutil
 import subprocess
 import tempfile
@@ -222,15 +223,135 @@ def _probe_video(path: Path) -> dict:
         average = float(Fraction(video.get("avg_frame_rate", "0/1")))
     except (ValueError, ZeroDivisionError):
         nominal = average = 0
-    if nominal > 0 and average > 0 and abs(nominal - average) > max(0.05, average * 0.01):
-        raise PersonCutoutError(
-            "暂不支持可变帧率视频；请先将素材转换为恒定帧率再抠像")
+    # Packet timestamps, not OpenCV's decoded-frame index, determine source time.
+    # A VFR file can report equal nominal/average rates, so every decoding path
+    # goes through the same timestamp-aware fps filter below.
+    rate = (video.get("r_frame_rate") if 0 < nominal <= 120
+            else video.get("avg_frame_rate"))
     return {
         "video": video,
-        "fps": video.get("avg_frame_rate") or video.get("r_frame_rate") or "",
+        "fps": rate or "",
+        "duration": data.get("format", {}).get("duration") or video.get("duration"),
         "hasAudio": any(item.get("codec_type") == "audio"
                          for item in data.get("streams", [])),
     }
+
+
+class _CfrFrameReader:
+    """Lossless timestamp resampling with at most two decoded frames queued.
+
+    No transcoded video cache is written. The original remains the audio source
+    and the undo target. Both SAM2 passes and MediaPipe use this exact decoder.
+    """
+
+    def __init__(self, source, media, ffmpeg, cv2, np, cancelled=None):
+        metadata = cv2.VideoCapture(str(source), cv2.CAP_FFMPEG)
+        try:
+            if not metadata.isOpened():
+                raise PersonCutoutError("无法解码源视频")
+            self.width = int(metadata.get(cv2.CAP_PROP_FRAME_WIDTH))
+            self.height = int(metadata.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            self.expected_frames = int(metadata.get(cv2.CAP_PROP_FRAME_COUNT))
+        finally:
+            metadata.release()
+        try:
+            duration = float(media.get("duration") or 0)
+            if math.isfinite(duration) and duration > 0:
+                self.expected_frames = max(1, math.ceil(duration * float(Fraction(media["fps"]))))
+        except (ValueError, TypeError, ZeroDivisionError, OverflowError):
+            pass
+        if self.width < 16 or self.height < 16 or self.expected_frames <= 0:
+            raise PersonCutoutError("源视频尺寸或帧数无效")
+        if cancelled and cancelled():
+            raise PersonCutoutCancelled("人物抠像已取消")
+        self._np = np
+        self._cancelled = cancelled
+        self._frames = queue.Queue(maxsize=2)
+        self._stop = threading.Event()
+        self._error_log = tempfile.TemporaryFile()
+        command = [
+            ffmpeg, "-hide_banner", "-loglevel", "error", "-nostdin",
+            "-threads", "2", "-i", str(source), "-map", "0:v:0", "-an", "-sn", "-dn",
+            "-vf", f"fps=fps={media['fps']}:start_time=0:round=near",
+            "-filter_threads", "1", "-threads", "2",
+        ]
+        # VFR demuxers may infer an overlong last-frame duration (especially
+        # with reordered frames). Do not extend beyond the source container.
+        try:
+            duration = float(media.get("duration") or 0)
+            if math.isfinite(duration) and duration > 0:
+                command.extend(["-t", f"{duration:.9f}"])
+        except (ValueError, TypeError):
+            pass
+        command.extend(["-pix_fmt", "bgr24", "-f", "rawvideo", "pipe:1"])
+        try:
+            self._process = subprocess.Popen(
+                command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                stderr=self._error_log,
+            )
+        except OSError as exc:
+            self._error_log.close()
+            raise PersonCutoutError(f"无法启动视频时间轴规范化：{exc}") from exc
+        self._reader = threading.Thread(target=self._pump, daemon=True,
+                                        name="cutvoke-person-cfr")
+        self._reader.start()
+
+    def _offer(self, item):
+        while not self._stop.is_set():
+            try:
+                self._frames.put(item, timeout=0.1)
+                return
+            except queue.Full:
+                pass
+
+    def _pump(self):
+        frame_bytes = self.width * self.height * 3
+        try:
+            while not self._stop.is_set():
+                data = self._process.stdout.read(frame_bytes)
+                if not data:
+                    break
+                if len(data) != frame_bytes:
+                    raise PersonCutoutError("视频时间轴规范化返回了不完整的画面")
+                self._offer(data)
+            code = self._process.wait(timeout=30)
+            if code and not self._stop.is_set():
+                self._error_log.seek(0)
+                detail = self._error_log.read().decode("utf-8", errors="replace")[-1200:]
+                raise PersonCutoutError(f"视频时间轴规范化失败：{detail or code}")
+        except Exception as exc:
+            self._offer(exc)
+        finally:
+            self._offer(None)
+
+    def read(self):
+        deadline = time.monotonic() + 60
+        while True:
+            if self._cancelled and self._cancelled():
+                raise PersonCutoutCancelled("人物抠像已取消")
+            try:
+                item = self._frames.get(timeout=0.1)
+            except queue.Empty:
+                if time.monotonic() >= deadline:
+                    raise PersonCutoutError("视频时间轴规范化等待画面超时，请检查源素材")
+                continue
+            if isinstance(item, Exception):
+                raise item
+            if item is None:
+                return False, None
+            return True, self._np.frombuffer(item, dtype=self._np.uint8).reshape(
+                self.height, self.width, 3)
+
+    def release(self):
+        if self._stop.is_set():
+            return
+        self._stop.set()
+        if self._process.poll() is None:
+            self._process.kill()
+        self._process.wait(timeout=5)
+        self._reader.join(timeout=5)
+        self._process.stdout.close()
+        self._error_log.close()
 
 
 def _keep_large_components(confidence, cv2, np):
@@ -387,37 +508,50 @@ def _select_prompted_person(prompt_confidence, person_confidence, point, cv2, np
     return confidence, selected_mask, center, component_count
 
 
-def _run_ffmpeg(command: list[str], error_log, *, stage: str) -> None:
+def _run_ffmpeg(command: list[str], error_log, *, stage: str, cancelled=None) -> None:
+    process = None
     try:
-        result = subprocess.run(
-            command, check=False, stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL, stderr=error_log, timeout=1800,
+        process = subprocess.Popen(
+            command, stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL, stderr=error_log,
         )
+        deadline = time.monotonic() + 1800
+        while process.poll() is None:
+            if cancelled and cancelled():
+                raise PersonCutoutCancelled("人物抠像已取消")
+            if time.monotonic() >= deadline:
+                raise PersonCutoutError(f"{stage}超时")
+            time.sleep(0.1)
+    except PersonCutoutError:
+        raise
     except (OSError, subprocess.SubprocessError) as exc:
         raise PersonCutoutError(f"{stage}失败：{exc}") from exc
-    if result.returncode:
+    finally:
+        if process is not None and process.poll() is None:
+            process.kill()
+            process.wait(timeout=5)
+    if process.returncode:
         error_log.seek(0)
         detail = error_log.read().decode("utf-8", errors="replace")[-1200:]
-        raise PersonCutoutError(f"{stage}失败：{detail or result.returncode}")
+        raise PersonCutoutError(f"{stage}失败：{detail or process.returncode}")
 
 
 def _generate_sam2_masks(
     source: Path, width: int, height: int, expected_frames: int,
     prompt_sets: list[dict],
-    work_dir: Path, *, progress=None, cancelled=None,
+    work_dir: Path, *, media: dict, ffmpeg: str, progress=None, cancelled=None,
 ) -> Path:
     """Extract reduced frames and run the isolated SAM2 video predictor."""
     try:
         import cv2
+        import numpy as np
     except (ImportError, OSError) as exc:
         raise PersonCutoutError("SAM2 跟踪需要 OpenCV；请安装 cutvoke[person]") from exc
     frames_dir = work_dir / "frames"
     masks_dir = work_dir / "masks"
     frames_dir.mkdir(parents=True)
     masks_dir.mkdir(parents=True)
-    capture = cv2.VideoCapture(str(source), cv2.CAP_FFMPEG)
-    if not capture.isOpened():
-        raise PersonCutoutError("无法解码 SAM2 跟踪视频")
+    capture = _CfrFrameReader(source, media, ffmpeg, cv2, np, cancelled)
     scale = min(1.0, SAM2_FRAME_MAX_EDGE / max(width, height))
     inference_width = max(16, int(round(width * scale)))
     inference_height = max(16, int(round(height * scale)))
@@ -628,15 +762,8 @@ def generate_person_cutout(
         if temporary.exists():
             temporary.unlink()
 
-    capture = cv2.VideoCapture(str(source), cv2.CAP_FFMPEG)
-    if not capture.isOpened():
-        raise PersonCutoutError("无法解码源视频")
-    width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    expected_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-    if width < 16 or height < 16 or expected_frames <= 0:
-        capture.release()
-        raise PersonCutoutError("源视频尺寸或帧数无效")
+    capture = _CfrFrameReader(source, media, ffmpeg, cv2, np, cancelled)
+    width, height, expected_frames = capture.width, capture.height, capture.expected_frames
     selection_frame = int(round(float(selection_at_seconds) * fps))
     if selection_point is not None and selection_frame >= expected_frames:
         capture.release()
@@ -661,6 +788,7 @@ def generate_person_cutout(
             progress("正在载入人物分割模型", 1)
         sam2_masks_dir = None
         if tracking_mode == "sam2":
+            capture.release()
             if not availability().get("sam2Ready"):
                 raise PersonCutoutError(
                     "SAM2 跟踪组件或模型未准备：运行 cutvoke-person-model --sam2")
@@ -671,12 +799,11 @@ def generate_person_cutout(
             } for prompt in normalized_prompts]
             sam2_masks_dir = _generate_sam2_masks(
                 source, width, height, expected_frames, sam2_prompt_sets,
-                sam2_work_dir, progress=progress, cancelled=cancelled,
+                sam2_work_dir, media=media, ffmpeg=ffmpeg,
+                progress=progress, cancelled=cancelled,
             )
             capture.release()
-            capture = cv2.VideoCapture(str(source), cv2.CAP_FFMPEG)
-            if not capture.isOpened():
-                raise PersonCutoutError("SAM2 处理完成后无法重新解码源视频")
+            capture = _CfrFrameReader(source, media, ffmpeg, cv2, np, cancelled)
         else:
             vision = mp.tasks.vision
             options = vision.ImageSegmenterOptions(
@@ -865,7 +992,14 @@ def generate_person_cutout(
                     progress("正在逐帧分割人物", percent)
         capture.release()
         encoder.stdin.close()
-        code = encoder.wait(timeout=1800)
+        deadline = time.monotonic() + 1800
+        while encoder.poll() is None:
+            if cancelled and cancelled():
+                raise PersonCutoutCancelled("人物抠像已取消")
+            if time.monotonic() >= deadline:
+                raise PersonCutoutError("透明视频编码超时")
+            time.sleep(0.1)
+        code = encoder.returncode
         encoder = None
         if code:
             error_log.seek(0)
@@ -884,7 +1018,7 @@ def generate_person_cutout(
             "-c:a", "aac", "-b:a", "192k", "-t", f"{duration:.9f}",
             "-movflags", "+faststart", str(muxed),
         ]
-        _run_ffmpeg(mux_command, error_log, stage="透明视频封装")
+        _run_ffmpeg(mux_command, error_log, stage="透明视频封装", cancelled=cancelled)
         result = _probe_video(muxed)
         pixel_format = str(result["video"].get("pix_fmt", ""))
         if not pixel_format.startswith("yuva"):
@@ -892,6 +1026,8 @@ def generate_person_cutout(
                 f"透明通道未能写入导出文件（像素格式：{pixel_format or 'unknown'}）")
         if media["hasAudio"] and not result["hasAudio"]:
             raise PersonCutoutError("透明视频封装时未能保留源音频")
+        if cancelled and cancelled():
+            raise PersonCutoutCancelled("人物抠像已取消")
         os.replace(muxed, target)
         if progress:
             progress("人物抠像完成", 100)
@@ -904,6 +1040,7 @@ def generate_person_cutout(
             "videoCodec": "prores_ks",
             "pixelFormat": pixel_format,
             "alpha": True,
+            "sourceTimeNormalized": True,
             "selectionMode": "selected_person" if selection_point is not None else "all_people",
             "trackingMode": (tracking_mode if selection_point is not None else "semantic"),
             "selectionAtSeconds": (round(float(selection_at_seconds), 6)

@@ -6,6 +6,8 @@ import { msg, tr } from "../../i18n";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useEditor } from "../../store/editor";
+import { selectedClipIds, withAttachedClips } from "../../store/timelineSelection";
+import { batchClips } from "../../store/timelineClipboard";
 import { getLatestState } from "../../store/actions";
 import { moveClip } from "../../store/clipEdit";
 import { inferKind } from "../../lib/assetStore";
@@ -26,6 +28,7 @@ export interface ActiveDrag {
   originStart: number;
   originEnd: number;
   grabOffsetPx: number;
+  group?: { clipId: string; trackId: string; start: number; end: number }[];
 }
 
 export interface DropTarget {
@@ -48,6 +51,7 @@ export interface DropTarget {
   mainTrackAutoFit?: boolean;
   /** 前端已知的不可放置原因；拖动时反馈并阻止提交。 */
   invalidReason?: string;
+  groupGhosts?: { left: number; top: number; width: number }[];
 }
 
 export interface TimelineDragApi {
@@ -57,6 +61,7 @@ export interface TimelineDragApi {
   move: (e: React.PointerEvent) => void;
   finish: (e: React.PointerEvent) => void;
   cancel: () => void;
+  consumeClick: () => boolean;
 }
 
 export function useTimelineDrag(): TimelineDragApi {
@@ -64,6 +69,7 @@ export function useTimelineDrag(): TimelineDragApi {
   const [active, setActive] = useState<ActiveDrag | null>(null);
   const [drop, setDrop] = useState<DropTarget | null>(null);
   const pointerIdRef = useRef<number | null>(null);
+  const suppressClick = useRef(false);
   const pendingRef = useRef<{ pointerId: number; drag: ActiveDrag; startX: number; startY: number } | null>(null);
   const pxPerSecRef = useRef(40);
   const activeRef = useRef<ActiveDrag | null>(null);
@@ -108,9 +114,10 @@ export function useTimelineDrag(): TimelineDragApi {
     let startSecs = Math.max(0, snapSecsToFrame((px - drag.grabOffsetPx) / pxPerSecRef.current, frameRate));
     const durSecs = drag.originEnd - drag.originStart;
     const targetTrack = st?.project?.sequence.tracks.find((track) => track.id === trackId);
+    const movingIds = new Set(drag.group?.map(item => item.clipId) || [drag.clipId]);
     const overlapsAt = (candidateStart: number) =>
       targetTrack?.clips.some((clip) => {
-        if (clip.id === drag.clipId) return false;
+        if (movingIds.has(clip.id)) return false;
         const otherStart = clipStartSecs(clip);
         const otherEnd = clipEndSecs(clip);
         return candidateStart < otherEnd - 1e-6 && candidateStart + durSecs > otherStart + 1e-6;
@@ -129,7 +136,7 @@ export function useTimelineDrag(): TimelineDragApi {
       const allClips: { id: string; start: number; end: number }[] = [];
       for (const t of st.project.sequence.tracks) {
         for (const c of t.clips) {
-          allClips.push({ id: c.id, start: clipStartSecs(c), end: clipEndSecs(c) });
+          if (!movingIds.has(c.id)) allClips.push({ id: c.id, start: clipStartSecs(c), end: clipEndSecs(c) });
         }
       }
       const pts = collectSnapPoints(
@@ -171,7 +178,7 @@ export function useTimelineDrag(): TimelineDragApi {
       && targetTrack?.id === primaryVideoTrackId,
     );
     const shouldInsert = overlapsAt(ghostStartSecs) || autoFitOnMainTrack;
-    if (!invalidReason && shouldInsert && targetTrack) {
+    if (!invalidReason && shouldInsert && targetTrack && !drag.group) {
       const candidates = targetTrack.clips
         .filter((clip) => clip.id !== drag.clipId)
         .sort((a, b) => clipStartSecs(a) - clipStartSecs(b));
@@ -204,6 +211,26 @@ export function useTimelineDrag(): TimelineDragApi {
     const originLeft = content && ruler
       ? ruler.getBoundingClientRect().left - content.getBoundingClientRect().left
       : 0;
+    const groupGhosts: DropTarget["groupGhosts"] = [];
+    if (drag.group && st?.project) {
+      const tracks = st.project.sequence.tracks;
+      const shift = tracks.findIndex(track => track.id === trackId) - tracks.findIndex(track => track.id === drag.srcTrackId);
+      const delta = startSecs - drag.originStart;
+      for (const item of drag.group) {
+        const source = tracks.find(track => track.id === item.trackId)!;
+        const target = tracks[tracks.indexOf(source) + shift];
+        if (!target || target.kind !== source.kind) invalidReason = tr("整体移动需要同类型目标轨道");
+        else if (source.locked || target.locked) invalidReason = tr("选中片段或目标轨道已锁定");
+        else if (item.start + delta < -1e-6) invalidReason = tr("整体移动不能超过时间线起点");
+        else if (target.kind === "video" && target.clips.some(clip => !movingIds.has(clip.id) && item.start+delta < clipEndSecs(clip)-1e-6
+          && item.end+delta > clipStartSecs(clip)+1e-6)) invalidReason = tr("目标位置已有片段，请选择空白区域");
+        const targetLane = target && Array.from(document.querySelectorAll<HTMLElement>(".timeline-track__lane"))
+          .find(element => element.dataset.trackId === target.id);
+        if (content && targetLane) groupGhosts.push({ left: originLeft + toPx(item.start+delta, pxPerSecRef.current),
+          top: targetLane.getBoundingClientRect().top - content.getBoundingClientRect().top + content.scrollTop + 6,
+          width: Math.max(8,toPx(item.end-item.start,pxPerSecRef.current)) });
+      }
+    }
     return {
       trackId,
       kind,
@@ -218,6 +245,7 @@ export function useTimelineDrag(): TimelineDragApi {
       anchorPosition,
       mainTrackAutoFit,
       invalidReason,
+      groupGhosts: drag.group ? groupGhosts : undefined,
     };
   }, []);
 
@@ -253,12 +281,19 @@ export function useTimelineDrag(): TimelineDragApi {
       if (state.editLock) return;
       if (e.button !== 0) return;
       e.stopPropagation();
+      suppressClick.current = false;
       pxPerSecRef.current = pxPerSec;
       const clipRect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       stopScroll();
       const scroller = (e.currentTarget as HTMLElement).closest<HTMLElement>(".timeline__scroller");
       if (scroller) pointer.current = { x: e.clientX, y: e.clientY, scroller };
       const inferredKind = inferKind(clip.assetRef.sourcePath, false, false);
+      const current = getLatestState() || state;
+      const picked = selectedClipIds(current);
+      const groupIds = picked.includes(clip.id) && picked.length > 1 ? withAttachedClips(current, picked) : [];
+      const group = groupIds.length ? current.project?.sequence.tracks.flatMap(lane => lane.clips
+        .filter(item => groupIds.includes(item.id)).map(item => ({ clipId: item.id, trackId: lane.id,
+          start: clipStartSecs(item), end: clipEndSecs(item) }))) : undefined;
       const stateObj: ActiveDrag = {
         mode,
         clipId: clip.id,
@@ -270,6 +305,7 @@ export function useTimelineDrag(): TimelineDragApi {
         originStart: clipStartSecs(clip),
         originEnd: clipEndSecs(clip),
         grabOffsetPx: Math.max(0, Math.min(clipRect.width, e.clientX - clipRect.left)),
+        group,
       };
       pointerIdRef.current = e.pointerId;
       pendingRef.current = { pointerId: e.pointerId, drag: stateObj, startX: e.clientX, startY: e.clientY };
@@ -289,7 +325,7 @@ export function useTimelineDrag(): TimelineDragApi {
         setDrop(d0);
       }
     },
-    [computeDrop, state.editLock, stopScroll],
+    [computeDrop, state, stopScroll],
   );
 
   const move = useCallback(
@@ -338,6 +374,7 @@ export function useTimelineDrag(): TimelineDragApi {
         return;
       }
       const d = drag.mode === "move" ? computeDrop(e.clientX, e.clientY) : null;
+      suppressClick.current = true;
       pendingRef.current = null;
       pointerIdRef.current = null;
       activeRef.current = null;
@@ -370,6 +407,13 @@ export function useTimelineDrag(): TimelineDragApi {
       const frameRate = st.project?.sequence.fps;
       if (!targetChanged && Math.abs(newStart - drag.originStart) < frameDurationSecs(frameRate) / 2) return;
       const timelineStart = secsToFrameRatString(newStart, frameRate);
+      if (drag.group) {
+        const tracks = st.project?.sequence.tracks || [];
+        void batchClips(dispatch, st, "move", { clipIds: drag.group.map(item => item.clipId),
+          offset: secsToFrameRatString(newStart-drag.originStart,frameRate),
+          trackOffset: tracks.findIndex(track=>track.id===d.trackId)-tracks.findIndex(track=>track.id===drag.srcTrackId) });
+        return;
+      }
       void moveClip(dispatch, st, {
         clipId: drag.clipId,
         followAttachments: !e.altKey,
@@ -402,5 +446,6 @@ export function useTimelineDrag(): TimelineDragApi {
     if (state.editLock) cancel();
   }, [state.editLock, cancel]);
 
-  return useMemo(() => ({ active, drop, begin, move, finish, cancel }), [active, drop, begin, move, finish, cancel]);
+  const consumeClick = useCallback(() => { const result = suppressClick.current; suppressClick.current = false; return result; }, []);
+  return useMemo(() => ({ active, drop, begin, move, finish, cancel, consumeClick }), [active, drop, begin, move, finish, cancel, consumeClick]);
 }

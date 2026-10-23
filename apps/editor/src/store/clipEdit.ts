@@ -398,6 +398,7 @@ export async function duplicateClip(
     // 后端生成新片段 id（newClipId），从 changedEntities 推断并选中
     const entities = res.command?.changedEntities || [];
     const added =
+      entities.find((e) => e.type === "clip" && e.sourceClipId === input.clipId)?.id ??
       entities.find((e) => e.type === "clip" && e.change === "added")?.id ??
       entities.find((e) => e.type === "clip")?.id;
     if (added) {
@@ -414,7 +415,7 @@ export async function duplicateClipGroup(
   const res = await runCommand(dispatch, state, "clip.duplicateGroup", { clipIds: [clipId], includeAttached: true });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
-    const created = res.command?.changedEntities.find((e) => e.type === "clip");
+    const created = res.command?.changedEntities.find((e) => e.type === "clip" && e.sourceClipId === clipId);
     if (created?.trackId) dispatch({ type: "SELECTION_SET", selection: { trackId: String(created.trackId), clipId: created.id } });
     dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已复制片段及绑定图层") });
   }
@@ -470,6 +471,7 @@ export async function addKeyframe(
     time: number | Rational;
     value: number;
     interpolation?: KeyframeInterpolation;
+    bezier?: [number,number,number,number];
   },
 ): Promise<ActionResult> {
   const payload: Record<string, unknown> = {
@@ -480,6 +482,7 @@ export async function addKeyframe(
     value: input.value,
   };
   if (input.interpolation) payload.interpolation = input.interpolation;
+  if (input.bezier) payload.bezier = input.bezier;
   const res = await runCommand(dispatch, state, "clip.keyframe", payload);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });

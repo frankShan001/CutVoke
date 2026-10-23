@@ -17,6 +17,9 @@ import { TransitionPanel } from "./TransitionPanel";
 import { SpeedPanel } from "./SpeedPanel";
 import { EffectStackPanel } from "./EffectStackPanel";
 import { AudioAnalyzePanel } from "./AudioAnalyzePanel";
+import { AudioMixerPanel } from "./AudioMixerPanel";
+import { VoiceoverPanel } from "./VoiceoverPanel";
+import { AudioSeparationPanel } from "./AudioSeparationPanel";
 import { LOCATE_PREFLIGHT_ISSUE, type LocatePreflightIssueEvent } from "../lib/preflight";
 
 type Tab = "inspect" | "transition" | "speed" | "stack" | "audio";
@@ -139,7 +142,7 @@ export function RightPanel() {
         {tab === "speed" ? <SpeedPanel /> : null}
         {tab === "transition" ? <TransitionPanel /> : null}
         {tab === "stack" ? <EffectStackPanel active /> : null}
-        {tab === "audio" ? <AudioAnalyzePanel /> : null}
+        {tab === "audio" ? <><VoiceoverPanel /><AudioMixerPanel /><AudioSeparationPanel /><AudioAnalyzePanel /></> : null}
       </div>
     </div>
   );

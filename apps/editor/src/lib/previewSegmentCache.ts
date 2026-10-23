@@ -5,6 +5,7 @@ interface Entry {
   source: string;
   refs: number;
   used: number;
+  priority: number;
   status: "queued" | "loading" | "ready";
   controller: AbortController;
   media?: CachedPreviewSegment;
@@ -28,18 +29,29 @@ export class PreviewSegmentCache {
     return this.entries.get(source)?.media || null;
   }
 
-  acquire(source: string) {
+  acquire(source: string, background = false) {
     if (this.closed) throw new Error("Preview cache is closed");
     let entry = this.entries.get(source);
+    if (entry?.controller.signal.aborted) {
+      this.entries.delete(source);
+      entry = undefined;
+    }
     if (!entry) {
       let resolve!: Entry["resolve"], reject!: Entry["reject"];
       const promise = new Promise<CachedPreviewSegment>((yes, no) => { resolve = yes; reject = no; });
-      entry = { source, refs: 0, used: 0, status: "queued", controller: new AbortController(),
+      entry = { source, refs: 0, used: 0, priority: background ? 10 : 0, status: "queued", controller: new AbortController(),
         promise, resolve, reject };
       this.entries.set(source, entry);
     }
     entry.refs++;
+    if (!background) entry.priority = 0;
     entry.used = ++this.clock;
+    // A speculative download must not occupy both network slots while a seek
+    // waits. Its server render is also preemptible by the foreground request.
+    if (!background && entry.status === "queued" && this.running >= this.concurrency) {
+      const speculative = [...this.entries.values()].find(item => item.status === "loading" && item.priority > 0);
+      speculative?.controller.abort();
+    }
     this.pump();
     let released = false;
     return { promise: entry.promise, release: () => {
@@ -70,7 +82,7 @@ export class PreviewSegmentCache {
     if (this.closed) return;
     while (this.running < this.concurrency) {
       const next = [...this.entries.values()].filter(e => e.status === "queued" && e.refs)
-        .sort((a, b) => b.used - a.used)[0];
+        .sort((a, b) => a.priority - b.priority || b.used - a.used)[0];
       if (!next) break;
       this.running++;
       next.status = "loading";
@@ -84,7 +96,9 @@ export class PreviewSegmentCache {
       for (let attempt = 0; !blob; attempt++) {
         let retryable = true;
         try {
-          const response = await fetch(entry.source, { signal: entry.controller.signal });
+          const requestUrl = entry.priority > 0
+            ? `${entry.source}${entry.source.includes("?") ? "&" : "?"}prefetch=1` : entry.source;
+          const response = await fetch(requestUrl, { signal: entry.controller.signal });
           if (!response.ok) {
             retryable = response.status === 408 || response.status === 429 || response.status >= 500;
             let message = tr("预览视频段失败（HTTP {0}）", response.status);
@@ -108,7 +122,7 @@ export class PreviewSegmentCache {
       entry.resolve(entry.media);
       this.trim();
     } catch (error) {
-      this.entries.delete(entry.source);
+      if (this.entries.get(entry.source) === entry) this.entries.delete(entry.source);
       entry.reject(error);
     }
   }

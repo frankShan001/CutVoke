@@ -1,5 +1,6 @@
 import { tr } from "../i18n";
 import { getLocale } from "../i18n/locale";
+import { expandProject, reuseProjectStructure, type CompactProject } from "./projectSync";
 /** HTTP API 封装（与 src/cutvoke/interfaces/httpapi.py 对齐）。
     与后端同源 fetch（相对路径 /api/v1/...），不写死 localhost 端口。 */
 
@@ -177,9 +178,34 @@ export async function createProject(input: {
   return post<CreateProjectResult>("/projects", input);
 }
 
-/** GET /projects/{id} → 扁平 Project（含 revision）。 */
+const projectCache = new Map<string, { token: string; project: Project }>();
+let syncSupported = true;
+
+/** Conditional, compact project sync, with compatibility for older local services. */
 export async function getProject(projectId: string): Promise<Project> {
-  return get<Project>(`/projects/${encodeURIComponent(projectId)}`);
+  if (!syncSupported) return get<Project>(`/projects/${encodeURIComponent(projectId)}`);
+  const prior = projectCache.get(projectId);
+  try {
+    const query = prior ? `?${new URLSearchParams({ token: prior.token })}` : "";
+    const result = await get<{ token: string; unchanged: boolean; project?: CompactProject }>(
+      `/projects/${encodeURIComponent(projectId)}/sync${query}`);
+    if (result.unchanged && prior) return prior.project;
+    if (!result.project || !result.token) throw new Error(tr("工程同步响应不完整，请刷新后重试。"));
+    const project = reuseProjectStructure(prior?.project, expandProject(result.project));
+    // A slow older response must not replace a newer committed state in the cache.
+    const current = projectCache.get(projectId);
+    if (current && current !== prior && BigInt(current.project.revision) > BigInt(project.revision)) return current.project;
+    projectCache.delete(projectId);
+    projectCache.set(projectId, { token: result.token, project });
+    while (projectCache.size > 4) projectCache.delete(projectCache.keys().next().value!);
+    return project;
+  } catch (error) {
+    if (error instanceof ApiFailure && error.status === 404) {
+      syncSupported = false;
+      return get<Project>(`/projects/${encodeURIComponent(projectId)}`);
+    }
+    throw error;
+  }
 }
 
 export interface EditLease {
@@ -234,7 +260,14 @@ export async function sendCommand(
   return post<CommandResult>(`/projects/${encodeURIComponent(projectId)}/commands`, body);
 }
 
-export type ExportQuality = "high" | "low";
+export type ExportQuality = "high" | "medium" | "low";
+
+export interface ExportOptions {
+  sequenceId?: string;
+  videoBitrateKbps?: number;
+  audioBitrateKbps?: number;
+  transparent?: boolean;
+}
 
 export interface ExportRange {
   start: number;
@@ -320,8 +353,7 @@ export async function exportProject(
   });
 }
 
-/** 导出任务（GET /projects/{id}/exports 返回的单个任务）。后端无百分比进度字段，
-    仅含 queued/running/终态状态与结果或错误。 */
+/** Persisted request and measured progress survive closing the export panel. */
 export interface ExportJob {
   jobId: string;
   projectId: string;
@@ -331,8 +363,22 @@ export interface ExportJob {
   status: "queued" | "running" | "succeeded" | "failed" | "cancelled" | "interrupted";
   result: ExportResult | null;
   error: { code: string; message: string } | null;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: string | number;
+  updatedAt?: string | number;
+  request?: ExportOptions & { range?: ExportRange };
+  progress?: {
+    phase: "preparing" | "rendering" | "encoding" | "verifying";
+    fraction?: number | null;
+    processedSeconds?: number;
+    totalSeconds?: number;
+    speed?: number | null;
+    etaSeconds?: number | null;
+    updatedAt?: number;
+  } | null;
+}
+
+export async function cancelExportJob(jobId: string): Promise<Pick<ExportJob, "jobId" | "status"> & { cancelled: boolean }> {
+  return post(`/jobs/${encodeURIComponent(jobId)}/cancel`, {});
 }
 
 /** GET /projects/{id}/exports → 该工程的导出任务列表（最新在前）。 */
@@ -416,11 +462,13 @@ export interface AsrJob {
   clipId: string;
   model: string;
   requestedLanguage: string;
-  status: "queued" | "running" | "completed" | "failed" | "cancelled";
+  status: "queued" | "running" | "completed" | "failed" | "cancelled" | "interrupted";
   phase: string;
   progress: number;
   error: string;
   result: AsrResult | null;
+  drafts?: unknown[] | null;
+  draftsUpdatedAt?: number;
 }
 
 export async function getAsrStatus(): Promise<AsrStatus> {
@@ -435,6 +483,22 @@ export async function startAsrJob(projectId: string, input: {
 
 export async function getAsrJob(jobId: string): Promise<AsrJob> {
   return get<AsrJob>(`/asr-jobs/${encodeURIComponent(jobId)}`);
+}
+
+export async function listAsrJobs(projectId: string): Promise<{ jobs: AsrJob[] }> {
+  return get<{ jobs: AsrJob[] }>(`/projects/${encodeURIComponent(projectId)}/asr-jobs`);
+}
+
+export async function resumeAsrJob(jobId: string): Promise<AsrJob> {
+  return post<AsrJob>(`/asr-jobs/${encodeURIComponent(jobId)}/resume`, {});
+}
+
+export async function dismissAsrJob(jobId: string): Promise<AsrJob> {
+  return post<AsrJob>(`/asr-jobs/${encodeURIComponent(jobId)}/dismiss`, {});
+}
+
+export async function saveAsrDrafts(jobId: string, drafts: unknown[], updatedAt?: number): Promise<AsrJob> {
+  return post<AsrJob>(`/asr-jobs/${encodeURIComponent(jobId)}/drafts`, { drafts, updatedAt });
 }
 
 export async function cancelAsrJob(jobId: string): Promise<AsrJob> {
@@ -752,8 +816,9 @@ export async function enqueueExportProject(
   quality: ExportQuality = "high",
   range?: ExportRange,
   overwrite = true,
+  options: ExportOptions = {},
 ): Promise<ExportQueueReceipt> {
-  const body: Record<string, unknown> = { outPath, quality, overwrite };
+  const body: Record<string, unknown> = { outPath, quality, overwrite, ...options };
   if (range) body.range = range;
   return post<ExportQueueReceipt>(`/projects/${encodeURIComponent(projectId)}/exports`, body);
 }

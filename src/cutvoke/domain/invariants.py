@@ -12,10 +12,12 @@
 from __future__ import annotations
 
 import os
+import math
 from dataclasses import dataclass, field
 
 from cutvoke.domain.model import Project, Track, Clip
 from cutvoke.domain.rational import Rational
+from cutvoke.domain.keyframes import Keyframe, parameter_spec, validate_bezier
 
 _IMAGE_SUFFIXES = frozenset({
     ".avif", ".bmp", ".gif", ".heic", ".jpeg", ".jpg", ".png", ".tif", ".tiff", ".webp",
@@ -126,6 +128,21 @@ def validate_project(project: Project) -> ValidationResult:
                 if clip.source_start < Rational.of(0, 1):
                     errors.append(f"clip {clip.id}[{scope}]: negative source_start "
                                   f"{clip.source_start}")
+                for param, lane in clip.keyframes.items():
+                    try:
+                        minimum, maximum, _ = parameter_spec(clip, param)
+                        stamps = set()
+                        for key in lane:
+                            if (not math.isfinite(key.value) or not minimum <= key.value <= maximum
+                                    or key.time < Rational.of(0)
+                                    or key.interpolation not in Keyframe.VALID_INTERP
+                                    or key.time.to_fraction() in stamps):
+                                raise ValueError("invalid time, value, interpolation or duplicate time")
+                            stamps.add(key.time.to_fraction())
+                            if key.interpolation == "cubic-bezier":
+                                validate_bezier(key.bezier)
+                    except (ValueError, TypeError) as exc:
+                        errors.append(f"clip {clip.id}: invalid keyframes {param}: {exc}")
                 # 复合片段：递归校验其内部子序列（子序列时间从 0 起）
                 if clip.nested is not None:
                     _validate_tracks(clip.nested.tracks, scope=f"{scope}/{clip.id}")

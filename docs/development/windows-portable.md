@@ -6,7 +6,9 @@ For the current cross-platform delivery, see the release metadata above and
 the [installation guide](../user/installation.md). The record below preserves
 the original Windows baseline rather than replacing its historical evidence.
 
-The historical [0.3.1 candidate download](https://github.com/frankShan001/CutVoke/actions/runs/38788916823/artifacts/11999831137) is available from successful Windows run **38788916823**, built from **1fd2f1fcb48c2c9af54555c558e40354812fc786**. See the [durable verification record](windows-portable-verification.json) and [user download/storage guide](../user/installation.md#windows-portable-x64). This is an unsigned Actions candidate, not a formal Release/tag.
+## Historical 0.3.1 baseline
+
+The historical [0.3.1 candidate download](https://github.com/frankShan001/CutVoke/actions/runs/38788916823/artifacts/11999831137) originates from successful Windows run **38788916823**, built from **1fd2f1fcb48c2c9af54555c558e40354812fc786**. See the [durable verification record](windows-portable-verification.json) and [user download/storage guide](../user/installation.md#windows-portable-x64). That unsigned Actions candidate predates the Release/tag; its artifact availability depends on Actions retention. It is not the current download or a checksum record for 0.3.2.
 
 The `Windows portable` workflow produces a folder ZIP containing `CutVoke.exe`,
 Electron, a PyInstaller backend, the built Web editor, product assets, Noto fonts,

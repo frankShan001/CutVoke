@@ -6,7 +6,7 @@ import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, use
 import { ArrowLeftRight, CircleHelp, LocateFixed, Maximize2, ZoomIn, ZoomOut, Plus } from "lucide-react";
 import { useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
-import { insertClipAutoTrack, duplicateClip } from "../../store/clipEdit";
+import { insertClipAutoTrack } from "../../store/clipEdit";
 import { trackKindForMedia, uploadFiles } from "../../lib/importMedia";
 import { inferKind, type SessionAsset } from "../../lib/assetStore";
 import { Ruler } from "./Ruler";
@@ -19,6 +19,11 @@ import { niceMajorStep, timelineLengthSecs, trackEndSecs, toPx, ZOOM_LEVELS, zoo
 import { playbackEndSecs } from "../playerUtils";
 import { getEffectCatalog, type EffectSpec } from "../../lib/effects";
 import { useTimelineViewport } from "./useTimelineViewport";
+import { TimelineEditTools } from "./TimelineEditTools";
+import { selectedClipIds } from "../../store/timelineSelection";
+import { copySelectedClips, pasteClipsAtPlayhead } from "../../store/timelineClipboard";
+import { useTimelineMarquee } from "./useTimelineMarquee";
+import "../../styles/timeline-edit-tools.css";
 
 function TimelineClock({ end, revealTime }: { end: number; revealTime: (time: number, force?: boolean) => void }) {
   useLocale();
@@ -43,37 +48,6 @@ export function Timeline() {
   const captions = state.project?.sequence.captions || [];
   const pxPerSec = ZOOM_LEVELS[zoomIdx];
 
-  // Ctrl/⌘+D：复制当前选中片段（补充右键菜单）。浏览器 Ctrl+D 默认书签，需 preventDefault。
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (!(e.ctrlKey || e.metaKey) || (e.key !== "d" && e.key !== "D")) return;
-      if (e.defaultPrevented || e.isComposing || state.view !== "editor" || state.editLock || state.exportOpen || state.templateOpen || state.agentPanelOpen) return;
-      const ael = document.activeElement as HTMLElement | null;
-      const tag = (ael?.tagName || "").toLowerCase();
-      if (tag === "input" || tag === "textarea" || tag === "select" || ael?.isContentEditable || ael?.closest("[role='dialog'], [role='alertdialog']")) return;
-      const st = getLatestState();
-      const cur = st && st.currentId ? st : state;
-      const sel = cur.selection;
-      if (sel?.clipId) {
-        e.preventDefault();
-        const selectedTrack = cur.project?.sequence.tracks.find((track) => track.id === sel.trackId);
-        if (selectedTrack?.locked || cur.editLock) {
-          dispatch({
-            type: "STATUS_SET",
-            severity: "warn",
-            text: selectedTrack?.locked
-              ? msg("所选片段所在轨道已锁定，解锁后才能复制")
-              : msg("Agent 正在编辑，暂不能复制片段"),
-          });
-          return;
-        }
-        void duplicateClip(dispatch, cur, { clipId: sel.clipId, trackId: sel.trackId });
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [dispatch, state]);
-
   const lengthSecs = useMemo(() => timelineLengthSecs(tracks), [tracks, locale]);
   const contentEndSecs = useMemo(() => Math.max(0, ...tracks.map(trackEndSecs)), [tracks, locale]);
   const playableEndSecs = useMemo(() => playbackEndSecs(tracks), [tracks, locale]);
@@ -96,6 +70,7 @@ export function Timeline() {
 
   const dragApi = useTimelineDrag();
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const selectionBox = useTimelineMarquee(scrollerRef);
   const fittedProjectRef = useRef<string | null>(null);
   const viewport = useTimelineViewport(scrollerRef, pxPerSec);
   const zoomAnchorRef = useRef<{ time: number; viewportX: number } | null>(null);
@@ -241,6 +216,7 @@ export function Timeline() {
           </span>
         </span>
         <span className="timeline__spacer" />
+        <TimelineEditTools />
         <button
           className={`tool-btn ${state.mainTrackAutoFitEnabled ? "tool-btn--on" : ""}`}
           onClick={() => dispatch({ type: "MAIN_TRACK_AUTO_FIT_TOGGLE" })}
@@ -276,6 +252,9 @@ export function Timeline() {
               <dt>{tr("选择 / 切割工具")}</dt><dd>V / C</dd>
               <dt>{tr("删除所选片段或效果")}</dt><dd>Delete / Backspace</dd>
               <dt>{tr("复制所选片段")}</dt><dd>Ctrl / ⌘ + D</dd>
+              <dt>{tr("复制 / 粘贴到播放头")}</dt><dd>Ctrl / ⌘ + C / V</dd>
+              <dt>{tr("多选片段")}</dt><dd>{tr("Ctrl/⌘ 单击，Shift 连选，空白拖动框选")}</dd>
+              <dt>{tr("全选片段")}</dt><dd>Ctrl / ⌘ + A</dd>
               <dt>{tr("撤销 / 重做")}</dt><dd>Ctrl / ⌘ + Z · Ctrl / ⌘ + Shift + Z</dd>
               <dt>{tr("逐帧定位")}</dt><dd>{tr("先点标尺，再按 ← / →")}</dd>
               <dt>{tr("片段前后重排")}</dt><dd>{tr("先聚焦片段，再按 Alt + ← / →")}</dd>
@@ -287,6 +266,8 @@ export function Timeline() {
       </header>
 
       <div className="timeline__body" ref={scrollerRef}>
+        {selectionBox ? <div data-testid="timeline-selection-box" style={{position:"fixed",...selectionBox,
+          border:"1px solid #65a7ff",background:"#4488ff22",pointerEvents:"none",zIndex:1000}} /> : null}
         <div className="timeline__scroller">
           <div
             className="timeline__content"
@@ -340,7 +321,9 @@ export function Timeline() {
             ) : null}
             {/* 素材拖到轨道区下方空白 → 自动建轨 */}
             <TimelineEmptyDrop />
-            {ghost ? (
+            {ghost?.groupGhosts?.map((item,index) => <div key={index} className={`clip-block clip-block--ghost${ghost.invalidReason ? " clip-block--ghost--invalid" : ""}`}
+              style={{ left:item.left,top:item.top,width:item.width }} aria-hidden="true" />)}
+            {ghost && !ghost.groupGhosts ? (
               <div
                 className={`clip-block clip-block--${ghostKind} clip-block--ghost ${ghost.snapped ? "clip-block--ghost--snapped" : ""} ${ghost.reorderMode ? "clip-block--ghost--reorder" : ""} ${ghost.invalidReason ? "clip-block--ghost--invalid" : ""}`}
                 style={{ left: ghost.ghostLeft, width: ghost.widthPx, top: ghost.ghostTop }}
@@ -371,6 +354,11 @@ export function Timeline() {
       </div>
 
       <footer className="timeline__footer">
+        {selectedClipIds(state).length ? <span role="status">{tr("已选 {0} 个片段",selectedClipIds(state).length)}</span> : null}
+        <button className="cv-btn cv-btn--sm" disabled={!selectedClipIds(state).length || !!state.editLock}
+          onClick={()=>void copySelectedClips(dispatch,state)}>{tr("复制到剪贴板")}</button>
+        <button className="cv-btn cv-btn--sm" disabled={!!state.editLock}
+          onClick={()=>void pasteClipsAtPlayhead(dispatch,state)}>{tr("粘贴到播放头")}</button>
         <span>{tr("主刻度 ")}{niceMajorStep(pxPerSec)}s</span>
         <span title={tr("单击选中片段；拖动片段可移动或跨轨，拖动边缘可裁剪；Delete/Backspace 删除所选片段或效果。磁吸可在顶部工具栏切换。")}>
           {state.toolMode === "cut" ? tr("切割模式：点击片段在播放头分割") : tr("单击选中 · 拖动移动/跨轨 · 边缘裁剪 · Delete 删除")}

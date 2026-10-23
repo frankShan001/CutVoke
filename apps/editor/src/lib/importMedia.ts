@@ -1,7 +1,7 @@
 /** 文件导入公共流程（WP-03）：上传 → 探测 → 入会话素材库。
     供 MediaPanel 的文件选择与时间线的「OS 文件拖入」共用，避免逻辑分叉。 */
 
-import { uploadAsset, probeMedia } from "./mediaApi";
+import { uploadAsset, probeMedia, type UploadOptions } from "./mediaApi";
 import { addSessionAsset, inferKind, type SessionAsset } from "./assetStore";
 
 export interface UploadedMedia {
@@ -32,14 +32,14 @@ export function mediaFitsTrack(kind: SessionAsset["kind"], trackKind: string): b
 }
 
 /** 上传单个文件：POST /assets → probe → 写入会话素材库。 */
-export async function uploadOneFile(file: File): Promise<UploadOneResult> {
-  const up = await uploadAsset(file);
+export async function uploadOneFile(file: File, options: UploadOptions = {}): Promise<UploadOneResult> {
+  const up = await uploadAsset(file, options);
   if (up.kind !== "ok") return { ok: false, name: file.name, message: up.message };
   const probe = await probeMedia(up.data.path);
   let dur: number | null = null;
   let kind: SessionAsset["kind"] = "unknown";
   if (probe.kind === "ok") {
-    dur = probe.data.duration > 0 ? Math.round(probe.data.duration * 10) / 10 : null;
+    dur = Number.isFinite(probe.data.duration) && probe.data.duration > 0 ? probe.data.duration : null;
     kind = inferKind(up.data.name, probe.data.has_video, probe.data.has_audio);
   } else {
     kind = inferKind(up.data.name, false, false);
@@ -64,25 +64,33 @@ export async function uploadFiles(
   files: File[],
   onEach: (media: UploadedMedia, index: number) => unknown,
   onError?: (name: string, message: string) => void,
-  onProgress?: (progress: { completed: number; total: number; name: string; succeeded: number; failed: number }) => void,
+  onProgress?: (progress: { completed: number; total: number; name: string; succeeded: number; failed: number; loaded: number; totalBytes: number }) => void,
+  options: UploadOptions = {},
 ): Promise<number> {
   let ok = 0;
   let index = 0;
   let failed = 0;
   let completed = 0;
   for (const f of files) {
-    const res = await uploadOneFile(f);
+    if (options.signal?.aborted) break;
+    const notify = (loaded: number) => onProgress?.({ completed, total: files.length, name: f.name,
+      succeeded: ok, failed, loaded, totalBytes: f.size });
+    notify(0);
+    const res = await uploadOneFile(f, { ...options, onProgress: (loaded, total) => {
+      notify(loaded); options.onProgress?.(loaded, total);
+    } });
+    if (options.signal?.aborted) break;
     if (!res.ok) {
       onError?.(res.name, res.message);
       failed++;
       completed++;
-      onProgress?.({ completed, total: files.length, name: f.name, succeeded: ok, failed });
+      notify(f.size);
       continue;
     }
     await onEach(res.media, index++);
     ok++;
     completed++;
-    onProgress?.({ completed, total: files.length, name: f.name, succeeded: ok, failed });
+    notify(f.size);
   }
   return ok;
 }

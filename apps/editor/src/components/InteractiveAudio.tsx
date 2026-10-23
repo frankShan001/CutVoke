@@ -41,14 +41,18 @@ export function InteractiveAudio({ playing, onReady, playbackClock }: {
       let hasAudio = false, allReady = true;
       // A sidechain needs the other clips' key streams. Keep the complete
       // server mix audible instead of preparing an isolated, unducked clip.
-      const sidechainMix = snapshot?.sequence.tracks.some(track => track.clips.some(clip =>
-        clip.effects?.some(effect => effect.enabled !== false && effect.effectId === "cutvoke.fx.sidechainDuck")));
+      const sidechainMix = !!snapshot && (Object.keys(snapshot.sequence.masterAudio || {}).length > 0 ||
+        (snapshot.sequence.audioBuses || []).length > 0 || snapshot.sequence.tracks.some(track =>
+          Object.keys(track.audioMix || {}).length > 0 || track.clips.some(clip =>
+            !!clip.keyframes?.volume?.length || !!clip.audioFadeDuration ||
+            rationalToSecs(clip.audioFadeOffset) > 0 ||
+            clip.effects?.some(effect => effect.enabled !== false && effect.effectId === "cutvoke.fx.sidechainDuck"))));
       const unsupportedMix = snapshot?.sequence.tracks.some(track => track.visible !== false && !track.muted &&
         track.clips.some(clip => !clip.hidden && (clip.nested || clip.freezeAt) && rationalToSecs(clip.timelineStart) <= time && time < rationalToSecs(clip.timelineEnd)));
-      for (const track of sidechainMix ? [] : snapshot?.sequence.tracks || []) {
+      for (const track of sidechainMix || unsupportedMix ? [] : snapshot?.sequence.tracks || []) {
         if (!['audio', 'video'].includes(track.kind) || track.role === "sticker" || track.visible === false || track.muted) continue;
         for (const clip of track.clips) {
-          if (clip.hidden || clip.role === "sticker" || /\.(png|jpe?g|webp|gif|svg|bmp)$/i.test(clip.assetRef.sourcePath)) continue;
+          if (clip.hidden || clip.nested || clip.freezeAt || clip.role === "sticker" || /\.(png|jpe?g|webp|gif|svg|bmp)$/i.test(clip.assetRef.sourcePath)) continue;
           const start = rationalToSecs(clip.timelineStart), end = rationalToSecs(clip.timelineEnd);
           if (time < start - 2 || time >= end) continue;
           activeIds.add(clip.id);
@@ -106,7 +110,8 @@ export function InteractiveAudio({ playing, onReady, playbackClock }: {
           element.playbackRate = voice.prepared ? 1 : Math.min(16, Math.max(.0625, rationalToSecs(clip.speed) || 1));
           const fadeIn = rationalToSecs(clip.fadeIn) || 0, fadeOut = rationalToSecs(clip.fadeOut) || 0;
           const volume = clip.volume ? rationalToSecs(clip.volume) : 1;
-          const envelope = Math.min(1, fadeIn > 0 ? (time - start) / fadeIn : 1, fadeOut > 0 ? (end - time) / fadeOut : 1);
+          const envelope = Math.min(1, Math.max(0, fadeIn > 0 ? (time - start) / fadeIn : 1))
+            * Math.min(1, Math.max(0, fadeOut > 0 ? (end - time) / fadeOut : 1));
           voice.gain?.gain.setValueAtTime(Math.max(0, volume * envelope), context.current!.currentTime);
           if (running && element.paused) {
             void context.current?.resume(); void element.play().catch(() => {});

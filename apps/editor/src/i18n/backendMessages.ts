@@ -21,6 +21,8 @@ export function backendMessage(text: string): string {
     case "准备识别": return tr("准备识别");
     case "识别语音": return tr("识别语音");
     case "识别完成": return tr("识别完成");
+    case "等待恢复": return tr("等待恢复");
+    case "识别来源已变化": return tr("识别来源已变化");
     case "识别失败": return tr("识别失败");
     case "识别任务不可用": return tr("识别任务不可用");
     case "提取片段音频": return tr("提取片段音频");

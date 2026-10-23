@@ -26,6 +26,7 @@ import { usePreviewFrame } from "./usePreviewFrame";
 import { usePreviewPoster } from "./usePreviewPoster";
 import { useVideoHandoff } from "./useVideoHandoff";
 import { usePreviewSegments } from "./usePreviewSegments";
+import { usePreviewPreload } from "./usePreviewPreload";
 import { PreviewVideoPool } from "./PreviewVideoPool";
 import { getEffectCatalog } from "../lib/effects";
 import { fetchPreviewFrame } from "../lib/mediaApi";
@@ -208,6 +209,19 @@ export function Player() {
     return { time: windowBoundsRef.current.start + video.currentTime,
       playing: !video.paused && !video.seeking && !bufferingRef.current && video.readyState >= 3 };
   }, [mode, mediaEndSecs]);
+  useEffect(() => {
+    let frame = 0;
+    const publish = () => {
+      const clock = audioPlaybackClock();
+      window.dispatchEvent(new CustomEvent("cutvoke:transport-clock", { detail: {
+        time: clock?.time ?? playheadRef.current,
+        playing: clock?.playing ?? false, end: mediaEndSecs,
+      } }));
+      frame = requestAnimationFrame(publish);
+    };
+    frame = requestAnimationFrame(publish);
+    return () => cancelAnimationFrame(frame);
+  }, [audioPlaybackClock, mediaEndSecs]);
   useLayoutEffect(() => {
     if (audioTransportRef.current.active && Math.abs(playhead - reportedVideoTimeRef.current) > .25)
       audioTransportRef.current.active = false;
@@ -609,16 +623,12 @@ export function Player() {
     } else if (playingRef.current && video.paused) requestVideoPlay(video);
   }, [state.scrubbing, videoUrl, mode, requestVideoPlay]);
 
-  // Retain the complete compressed next segment, ready for the next decoder.
-  useEffect(() => {
-    if (usePrepared || mode !== "video" || !videoReady || state.scrubbing || !playing ||
-        !currentId || !hasRenderable || windowEnd >= mediaEndSecs - 0.01) return;
-    const nextUrl = `/api/v1/projects/${encodeURIComponent(currentId)}/preview-window?editorTitles=1&index=${windowIndex + 1}&timeline=${previewTimelineToken}&restore=${sourceRestoreRevision}`;
-    const lease = segments.cache.acquire(nextUrl);
-    void lease.promise.catch(() => {});
-    return lease.release;
-  }, [playing, currentId, hasRenderable, windowEnd, mediaEndSecs, windowIndex,
-    previewTimelineToken, sourceRestoreRevision, segments.cache, usePrepared, mode, videoReady, state.scrubbing]);
+  usePreviewPreload({
+    cache: segments.cache, source: videoUrl, index: windowIndex,
+    total: Math.ceil(mediaEndSecs / PREVIEW_WINDOW_SECONDS), playing,
+    enabled: !usePrepared && mode === "video" && !state.scrubbing && !state.opening &&
+      hasRenderable && (playing || nativeReady || videoReady || frameGate === videoUrl),
+  });
 
   // 空格快捷键 → 播放/暂停
   const togglePlayRef = useRef<() => void>(() => {});

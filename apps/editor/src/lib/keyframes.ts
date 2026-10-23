@@ -28,6 +28,16 @@ export function evaluateKeyframes(
     let progress = Math.max(0, Math.min(1, (localTime - leftTime) / (rightTime - leftTime)));
     if (left.interpolation === "ease-in") progress *= progress;
     else if (left.interpolation === "ease-out") progress = 1 - (1 - progress) ** 2;
+    else if (left.interpolation === "cubic-bezier" && left.bezier) {
+      const [x1,y1,x2,y2] = left.bezier;
+      const coordinate = (u: number,a: number,b: number) => 3*(1-u)**2*u*a+3*(1-u)*u*u*b+u**3;
+      let low=0, high=1;
+      for (let i=0;i<40;i+=1) {
+        const u=(low+high)/2;
+        if (coordinate(u,x1,x2)<progress) low=u; else high=u;
+      }
+      progress=coordinate((low+high)/2,y1,y2);
+    }
     return leftValue + (rightValue - leftValue) * progress;
   }
   const last = valueAt(sorted.length - 1);

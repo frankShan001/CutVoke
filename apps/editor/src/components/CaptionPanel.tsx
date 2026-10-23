@@ -18,6 +18,7 @@ import { FontStylePanel } from "./FontStylePanel";
 import { CaptionAnimationSection } from "./CaptionAnimationSection";
 import { CaptionGeometryEditor } from "./CaptionGeometryEditor";
 import { SpeechRecognitionPanel } from "./SpeechRecognitionPanel";
+import { TranscriptEditor } from "./TranscriptEditor";
 
 type Align = "left" | "center" | "right";
 
@@ -306,6 +307,7 @@ export function CaptionPanel() {
   return (
     <Panel title={tr("字幕")} subtitle={tr("识别、导入与逐条编辑")}>
       <SpeechRecognitionPanel />
+      <TranscriptEditor />
       <div className="cv-srt-row">
         <Row>
           <Button variant="secondary" size="sm" onClick={handleImportClick} aria-label={tr("导入SRT")} disabled={readOnly}>

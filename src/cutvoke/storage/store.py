@@ -14,6 +14,7 @@ SQLite 事务为运行中的工程状态权威来源（任务书 11.1）：
 from __future__ import annotations
 
 import functools
+import hashlib
 import json
 import sqlite3
 import threading
@@ -26,6 +27,28 @@ from cutvoke.domain.model import Project
 
 
 SCHEMA_VERSION_PLACEHOLDER = "1"  # 仅用于 projects 表初始 schema 元列占位
+
+
+def _compact_snapshot(snapshot: dict) -> dict:
+    """Retain every sequence once; old sequence-only snapshots stay readable."""
+    sequences = snapshot.get("sequences")
+    if isinstance(sequences, list) and sequences and any(
+            item.get("id") == snapshot.get("activeSequenceId")
+            for item in sequences if isinstance(item, dict)):
+        return {key: value for key, value in snapshot.items() if key != "sequence"}
+    return snapshot
+
+
+def _project_json(project: Project) -> tuple[str, str]:
+    """Serialize one canonical snapshot and the legacy active-sequence column."""
+    snapshot = project.to_dict(compact=True)
+    active = next(sequence for sequence in snapshot["sequences"]
+                  if sequence["id"] == snapshot["activeSequenceId"])
+    payload = json.dumps(snapshot, ensure_ascii=False, separators=(",", ":"))
+    sequence_json = json.dumps(active, ensure_ascii=False, separators=(",", ":"))
+    # Fail before taking the write lock; the compatibility column is a subset.
+    json.loads(payload)
+    return payload, sequence_json
 
 
 def _iso_utc(ts: float) -> str:
@@ -234,6 +257,9 @@ class ProjectStore:
         }
         if "project_json" not in export_columns:
             self._conn.execute("ALTER TABLE export_jobs ADD COLUMN project_json TEXT")
+        for column in ("request_json", "progress_json"):
+            if column not in export_columns:
+                self._conn.execute(f"ALTER TABLE export_jobs ADD COLUMN {column} TEXT")
         # 自然键唯一：同一工程/版本/输出路径/质量 只保留一个任务，
         # 重复导出命中缓存而不是重复渲染。
         self._conn.execute(
@@ -301,6 +327,9 @@ class ProjectStore:
             self._conn.execute(
                 "ALTER TABLE assets ADD COLUMN audio_role TEXT NOT NULL "
                 "DEFAULT 'unclassified'")
+        for column in ("sha256", "relative_path"):
+            if column not in acols:
+                self._conn.execute(f"ALTER TABLE assets ADD COLUMN {column} TEXT")
 
     # ------------------------------------------------------------------
     # WP-01 权威提交：工程 + 幂等 + 事件 + 历史 一个事务原子写
@@ -346,14 +375,10 @@ class ProjectStore:
 
         调用方（EditService.execute）仅在 commit 成功后更新内存。
         """
-        seq = project.sequence
-        sequence_json = json.dumps(seq.to_dict(), ensure_ascii=False)
-        # 完整工程快照（sequence + 顶层 favorites/recentEffects/presets 等）。
-        # 历史 bug：旧实现只存 sequence_json，J01 新增的工程级资源状态
-        # （favorites/recent_effects/presets）在 sequence 之外，commit 后
-        # load 回来即丢失。这里存完整 dict，load 也读 project_json。
-        payload = json.dumps(project.to_dict(), ensure_ascii=False)
-        json.loads(payload)  # 坏数据在事务外失败，不污染已存好数据
+        payload, sequence_json = _project_json(project)
+        history_json = (json.dumps(_compact_snapshot(history_push["snapshot"]),
+                                   ensure_ascii=False, separators=(",", ":"))
+                        if history_push is not None else None)
 
         with self._transaction():
             # 1) 跨进程冲突检测（A01）：库已被别人推进则拒绝
@@ -380,7 +405,7 @@ class ProjectStore:
                     updated_at     = excluded.updated_at
                 """,
                 (project.project_id, project.schema_version, project.revision,
-                 sequence_json, payload, project.name, time.time()),
+                 sequence_json, payload, project.name, self._next_project_updated_at()),
             )
 
             # 3) 幂等记录（A10 持久化）
@@ -415,7 +440,7 @@ class ProjectStore:
                     "INSERT OR REPLACE INTO history "
                     "(project_id, depth, snapshot_json, revision) VALUES (?, ?, ?, ?)",
                     (project.project_id, depth,
-                     json.dumps(history_push["snapshot"], ensure_ascii=False),
+                     history_json,
                      history_push["revision"]),
                 )
             if history_clear_redo:
@@ -447,6 +472,14 @@ class ProjectStore:
             "AND depth >= 0", (project_id,),
         ).fetchone()
         return int(row[0])
+
+    @_synchronized
+    def redo_depth(self, project_id: str) -> Optional[int]:
+        """Newest retained redo state; negative depths form a durable LIFO stack."""
+        row = self._conn.execute(
+            "SELECT MIN(depth) FROM history WHERE project_id=? AND depth < 0",
+            (project_id,)).fetchone()
+        return int(row[0]) if row and row[0] is not None else None
 
     # ------------------------------------------------------------------
     # Agent 编辑租约（页面可见但写操作只允许租约持有者）
@@ -576,7 +609,7 @@ class ProjectStore:
 
     _EXPORT_COLS = ("job_id, project_id, revision, request_hash, out_path, "
                     "quality, status, result_json, error_json, created_at, "
-                    "updated_at")
+                    "updated_at, request_json, progress_json")
 
     @staticmethod
     def _export_row_to_dict(row) -> dict:
@@ -592,6 +625,8 @@ class ProjectStore:
             "error": json.loads(row[8]) if row[8] else None,
             "createdAt": row[9],
             "updatedAt": row[10],
+            "request": json.loads(row[11]) if row[11] else None,
+            "progress": json.loads(row[12]) if row[12] else None,
         }
 
     @_synchronized
@@ -697,6 +732,16 @@ class ProjectStore:
         return self._export_row_to_dict(row) if row else None
 
     @_synchronized
+    def update_export_job_progress(self, job_id: str, progress: dict) -> bool:
+        """Publish measured render work without reviving a terminal job."""
+        with self._transaction():
+            updated = self._conn.execute(
+                "UPDATE export_jobs SET progress_json=?, updated_at=? "
+                "WHERE job_id=? AND status='running'",
+                (json.dumps(progress, ensure_ascii=False), time.time(), job_id))
+            return updated.rowcount == 1
+
+    @_synchronized
     def list_export_jobs(self, project_id: Optional[str] = None,
                          limit: int = 50) -> list[dict]:
         """导出任务列表。project_id=None 时列出全部（V02 队列视图需要）。"""
@@ -716,6 +761,7 @@ class ProjectStore:
                           request_hash: str, out_path: str, quality: str,
                           status: str = "queued",
                           project_snapshot: Optional[dict] = None,
+                          request: Optional[dict] = None,
                           command_id: Optional[str] = None,
                           command_hash: Optional[str] = None,
                           command_result: Optional[dict] = None,
@@ -743,13 +789,13 @@ class ProjectStore:
             self._conn.execute(
                 "INSERT INTO export_jobs (job_id, project_id, revision, "
                 "request_hash, out_path, quality, status, project_json, "
-                "created_at, updated_at) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "created_at, updated_at, request_json) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (job_id, project_id, revision, request_hash, out_path, quality,
                  status,
                  json.dumps(project_snapshot, ensure_ascii=False)
                  if project_snapshot is not None else None,
-                 now, now))
+                 now, now, json.dumps(request, ensure_ascii=False) if request is not None else None))
             if command_id:
                 self._conn.execute(
                     "INSERT INTO idempotency (project_id, command_id, request_hash, result_json, committed_at) "
@@ -809,12 +855,7 @@ class ProjectStore:
         因此：进程在 save() 提交点之后崩溃可恢复；提交点之前崩溃，原工程
         保持上一次完整提交，符合已声明持久化保证。
         """
-        obj = project.to_dict()  # 复用 model 序列化逻辑，不重写
-        sequence_json = json.dumps(obj["sequence"], ensure_ascii=False)
-        payload = json.dumps(obj, ensure_ascii=False)
-        # 往返校验：确保写入的是可完整解析的 JSON，坏数据在事务外就失败。
-        json.loads(sequence_json)
-        json.loads(payload)
+        payload, sequence_json = _project_json(project)
 
         with self._transaction():  # 显式事务：异常 ROLLBACK，成功 COMMIT
             updated_at = self._next_project_updated_at()
@@ -893,6 +934,25 @@ class ProjectStore:
         return row is not None
 
     @_synchronized
+    def load_for_sync(self, project_id: str, known_token: Optional[str] = None
+                      ) -> Optional[tuple[str, str, Optional[Project]]]:
+        """Check authoritative metadata, reading a changed project in the same snapshot.
+
+        A rename deliberately does not change revision, so the token also covers
+        the name and strictly increasing update timestamp. No service cache can
+        hide another process's save, rename, or path relocation.
+        """
+        with self._transaction(immediate=False):
+            row = self._conn.execute(
+                "SELECT revision, name, updated_at FROM projects WHERE project_id=?",
+                (project_id,)).fetchone()
+            if row is None:
+                return None
+            token = hashlib.sha256(json.dumps([project_id, *row], ensure_ascii=False,
+                                             separators=(",", ":")).encode()).hexdigest()
+            return token, row[0], None if token == known_token else self.load(project_id)
+
+    @_synchronized
     def list_all(self) -> list[str]:
         """列出所有已保存的工程 ID。"""
         cur = self._conn.execute("SELECT project_id FROM projects ORDER BY project_id")
@@ -947,7 +1007,8 @@ class ProjectStore:
                   has_video: bool = False, has_audio: bool = False,
                   width: Optional[int] = None, height: Optional[int] = None,
                   builtin: bool = False,
-                  audio_role: Optional[str] = None) -> dict:
+                  audio_role: Optional[str] = None, sha256: Optional[str] = None,
+                  relative_path: Optional[str] = None) -> dict:
         """幂等登记一个素材（已上传并落盘后调用）。
 
         同 assetId 重复登记（重放 / 重启）时刷新为最新元数据（ON CONFLICT
@@ -962,8 +1023,8 @@ class ProjectStore:
                 INSERT INTO assets
                     (asset_id, name, path, size, kind, duration,
                      has_video, has_audio, width, height, created_at, builtin,
-                     audio_role)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     audio_role, sha256, relative_path)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(asset_id) DO UPDATE SET
                     name      = excluded.name,
                     path      = excluded.path,
@@ -976,19 +1037,21 @@ class ProjectStore:
                     height    = excluded.height,
                     builtin   = excluded.builtin,
                     audio_role = CASE WHEN ? THEN excluded.audio_role
-                                      ELSE assets.audio_role END
+                                      ELSE assets.audio_role END,
+                    sha256 = COALESCE(excluded.sha256, assets.sha256),
+                    relative_path = COALESCE(excluded.relative_path, assets.relative_path)
                 """,
                 (asset_id, name, path, size, kind, duration,
                  1 if has_video else 0, 1 if has_audio else 0,
                  width, height, time.time(), 1 if builtin else 0,
-                 audio_role or "unclassified", 1 if audio_role is not None else 0),
+                 audio_role or "unclassified", sha256, relative_path, 1 if audio_role is not None else 0),
             )
         return self._asset_row_to_dict(self._asset_row(asset_id))
 
     def _asset_row(self, asset_id: str):
         return self._conn.execute(
             "SELECT asset_id, name, path, size, kind, duration, "
-            "has_video, has_audio, width, height, created_at, builtin, audio_role "
+            "has_video, has_audio, width, height, created_at, builtin, audio_role, sha256, relative_path "
             "FROM assets WHERE asset_id=?", (asset_id,),
         ).fetchone()
 
@@ -1010,6 +1073,8 @@ class ProjectStore:
             "createdAt": _iso_utc(row[10]),
             "builtin": bool(row[11]),
             "audioRole": row[12],
+            "sha256": row[13],
+            "relativePath": row[14],
         }
 
     @_synchronized
@@ -1017,7 +1082,7 @@ class ProjectStore:
         """列出素材库，最近导入在前。"""
         cur = self._conn.execute(
             "SELECT asset_id, name, path, size, kind, duration, "
-            "has_video, has_audio, width, height, created_at, builtin, audio_role "
+            "has_video, has_audio, width, height, created_at, builtin, audio_role, sha256, relative_path "
             "FROM assets ORDER BY created_at DESC"
         )
         return [self._asset_row_to_dict(r) for r in cur]
@@ -1093,7 +1158,8 @@ class ProjectStore:
                 'SELECT depth, revision, snapshot_json FROM history WHERE project_id=? ORDER BY depth',
                 (project_id,)).fetchall()
             return {'project': project.to_dict(), 'events': self.events_since(project_id),
-                    'history': [{'depth': depth, 'revision': revision, 'project': json.loads(snapshot)}
+                    'history': [{'depth': depth, 'revision': revision,
+                                 'project': Project.from_dict(json.loads(snapshot)).to_dict()}
                                 for depth, revision, snapshot in rows],
                     'exports': self.list_export_jobs(project_id, limit=200)}
 

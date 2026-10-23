@@ -21,6 +21,9 @@ import { TitleEditor } from "./inspector/TitleEditor";
 import { TransformSection } from "./inspector/TransformSection";
 import { assetDisplayName, inferKind, useSessionAssets } from "../lib/assetStore";
 import { BUILTIN_TRANSFORM_ID } from "../lib/effects";
+import { ClipTimingSection } from "./inspector/ClipTimingSection";
+import { clipSourceRange } from "../lib/clipTiming";
+import { BatchClipSection } from "./inspector/BatchClipSection";
 import type { Clip } from "../types/api";
 
 export function Inspector() {
@@ -38,6 +41,8 @@ export function Inspector() {
     );
   }
 
+  if (state.selectedClipIds.length > 1) return <BatchClipSection />;
+
   // ---- 选中片段 ----
   if (selection?.clipId) {
     const track = selectors.trackById(project, selection.trackId);
@@ -46,9 +51,9 @@ export function Inspector() {
       const clipReadOnly = !!track?.locked || !!state.editLock;
       const tlStart = rationalToSecs(clip.timelineStart);
       const tlEnd = rationalToSecs(clip.timelineEnd);
-      const srcStart = rationalToSecs(clip.sourceStart);
       const dur = tlEnd - tlStart;
-      const srcEnd = srcStart + dur; // 近似（未考虑 speed，仅展示）
+      const sourceRange = clipSourceRange(clip);
+      const srcEnd = sourceRange.end;
       const speed = clip.speed ? rationalText(clip.speed) : "1/1";
       const isSticker = clip.role === "sticker" || track?.role === "sticker";
       const isText = track?.kind === "text";
@@ -89,6 +94,7 @@ export function Inspector() {
             aria-label={tr("片段编辑属性")}
             style={{ border: 0, margin: 0, padding: 0, minWidth: 0, opacity: clipReadOnly ? 0.55 : 1, pointerEvents: clipReadOnly ? "none" : undefined }}
           >
+            <ClipTimingSection clip={clip} hasSource={!isText && !clip.nested && !!clip.assetRef.sourcePath} />
             {(isText || isSticker || track?.kind === "audio") && anchorChoices.length ? <label className="inspector__subrow">
               <span className="inspector__key">{tr("跟随视频")}</span>
               <select className="cv-input" aria-label={tr("跟随视频片段")}
@@ -106,13 +112,13 @@ export function Inspector() {
             {clip.attachedToClipId ? <p className="cv-hint">{tr("移动关联视频时此片段同步移动；按住 Alt 拖动视频可临时保持此片段原位。")}</p> : null}
             {/* ---- 音频 / 关键帧 / 动画 / 画面特效 小节（J01 拆分）---- */}
             <div className="inspector__sep" />
-            {isText ? <TitleEditor key={clip.id} clip={clip} /> : <>
+            {isText ? <><TitleEditor key={clip.id} clip={clip} /><KeyframeSection clip={clip} /></> : <>
               {isSticker ? <StickerTransformSection clip={clip} /> : isVisualClip ? <>
                 {isImage ? null : <AudioSection clip={clip} canDetach
                   detachedAudioClipId={detachedAudioClipId} />}
                 <TransformSection clip={clip} />
               </> : isAudio ? <AudioSection clip={clip} /> : null}
-              {!isAudio ? <KeyframeSection clip={clip} /> : null}
+              <KeyframeSection clip={clip} />
               {!isAudio ? <AnimationSection clip={clip} /> : null}
               <FxSection clip={clip} trackKind={track!.kind} />
             </>}
@@ -138,7 +144,7 @@ export function Inspector() {
             <Row k={tr("时间线")} v={`[${rationalText(clip.timelineStart)} → ${rationalText(clip.timelineEnd)})`} mono />
             {!isText ? <Row
               k={tr("源区间")}
-              v={`[${rationalText(clip.sourceStart)} → ${rationalText({ num: String(Math.round(srcEnd * 1000)), den: "1000" })})`}
+              v={`[${rationalText({ num: String(Math.round(sourceRange.start * 1000000)), den: "1000000" })} → ${rationalText({ num: String(Math.round(srcEnd * 1000000)), den: "1000000" })})`}
               mono
             /> : null}
           </details>

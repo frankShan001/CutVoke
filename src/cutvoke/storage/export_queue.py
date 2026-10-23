@@ -199,9 +199,23 @@ class ExportQueue:
                expected_revision: Optional[str] = None) -> dict:
         """入队一次导出。payload：{outPath, quality?, videoBitrateKbps?,
         audioBitrateKbps?, transparent?, versioned?}。"""
+        if payload.get("sequenceId") is not None:
+            project = Project.from_dict(project.to_dict())
+            sequence = next((seq for seq in project.sequences if seq.id == payload["sequenceId"]), None)
+            if sequence is None: raise ValueError("Sequence not found: " + str(payload["sequenceId"]))
+            project.sequence, project.active_sequence_id = sequence, sequence.id
         out_path = payload.get("outPath")
         if not out_path:
             raise ValueError("export queue requires 'outPath'")
+        if payload.get("quality", "high") not in {"high", "medium", "low"}:
+            raise ValueError("quality must be high, medium or low")
+        for field, maximum in (("videoBitrateKbps", 1_000_000), ("audioBitrateKbps", 1536)):
+            value = payload.get(field)
+            if value is not None and (isinstance(value, bool) or not isinstance(value, int)
+                                      or value <= 0 or value > maximum):
+                raise ValueError(f"{field} must be a positive integer <= {maximum}")
+        if payload.get("transparent") and os.path.splitext(str(out_path))[1].lower() != ".mov":
+            raise ValueError("transparent export requires a .mov file (ProRes 4444)")
         out_path = os.path.abspath(out_path)
         if payload.get("versioned"):
             out_path = versioned_path(out_path)
@@ -217,6 +231,9 @@ class ExportQueue:
             "queuedAt": time.time(),
             "versioned": bool(payload.get("versioned")),
             "payload": dict(payload, outPath=out_path),
+            "request": dict(payload, outPath=out_path),
+            "createdAt": time.time(),
+            "progress": None,
         }
         snapshot = project.to_dict()
         if self._store is not None:
@@ -229,6 +246,7 @@ class ExportQueue:
                 out_path=out_path, quality=job["quality"],
                 status=STATUS_QUEUED,
                 project_snapshot=snapshot,
+                request=job["request"],
                 command_id=command_id, command_hash=command_hash,
                 expected_revision=expected_revision,
                 command_result={"commandId": command_id, "previousRevision": project.revision,
@@ -377,8 +395,22 @@ class ExportQueue:
                     expected_status=STATUS_RUNNING)
                 return
         payload = job["payload"]
-        svc = self._render_factory()
+        progress_clock = [0.0, ""]
+        def report_progress(progress: dict) -> None:
+            now = time.monotonic()
+            phase = str(progress.get("phase", ""))
+            if now - progress_clock[0] < .25 and phase == progress_clock[1] and not progress.get("complete"):
+                return
+            progress_clock[:] = [now, phase]
+            measured = dict(progress, updatedAt=time.time())
+            with self._lock:
+                if job["status"] != STATUS_RUNNING:
+                    return
+                job["progress"] = measured
+            if self._store is not None:
+                self._store.update_export_job_progress(job["jobId"], measured)
         try:
+            svc = self._render_factory()
             project = self._load_project(
                 job["projectId"], job["revision"],
                 self._snapshots.get(job["jobId"]))
@@ -391,6 +423,7 @@ class ExportQueue:
                 audio_bitrate_kbps=(int(payload["audioBitrateKbps"])
                                     if payload.get("audioBitrateKbps") else None),
                 alpha=bool(payload.get("transparent", False)))
+            render_options["progress_callback"] = report_progress
             export_range = payload.get("range")
             if export_range is not None:
                 start = float(export_range["start"])
@@ -446,6 +479,8 @@ class ExportQueue:
                 return False
             job["status"] = status
             job["finishedAt"] = time.time()
+            job["result"] = result
+            job["error"] = error
         return True
 
     def _load_project(self, project_id: str, revision: str,

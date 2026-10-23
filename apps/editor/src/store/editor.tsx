@@ -71,6 +71,8 @@ export interface EditorState {
   error: ApiFailure | null;
   status: { severity: Severity; text: string | UiMessage };
   selection: Selection | null;
+  selectedClipIds: string[];
+  selectionAnchorId: string | null;
   /** 当前由字幕列表或预览画布选中的字幕；纯 UI 状态，不写入工程。 */
   selectedCaptionId: string | null;
   lastSync: number;
@@ -118,6 +120,7 @@ export type EditorAction =
   | { type: "ERROR_SET"; error: ApiFailure | null }
   | { type: "STATUS_SET"; severity: Severity; text: string | UiMessage }
   | { type: "SELECTION_SET"; selection: Selection | null }
+  | { type: "CLIP_SELECTION_SET"; clipIds: string[]; primaryId?: string; anchorId?: string | null }
   | { type: "SYNC" }
   | { type: "RESET_SELECTION_FOR"; trackId: string | null }
   | { type: "PLAYHEAD_SET"; t: number }
@@ -150,6 +153,8 @@ const initialState: EditorState = {
   error: null,
   status: { severity: "idle", get text() { return tr("启动中…"); } },
   selection: null,
+  selectedClipIds: [],
+  selectionAnchorId: null,
   selectedCaptionId: null,
   lastSync: 0,
   playhead: 0,
@@ -214,6 +219,8 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
         preparedPreview: null,
         projectName: action.name !== undefined ? action.name : state.projectName,
         selection: null,
+        selectedClipIds: [],
+        selectionAnchorId: null,
         selectedCaptionId: null,
         editLock: null,
         captionDraftPreview: null,
@@ -226,6 +233,7 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
         project: action.project,
         revision: action.project.revision,
         selection: reconcileSelection(action.project, state.selection),
+        selectedClipIds: state.selectedClipIds.filter(id => action.project.sequence.tracks.some(t => t.clips.some(c => c.id === id))),
         selectedCaptionId: (action.project.sequence.captions || []).some(
           (caption) => caption.id === state.selectedCaptionId,
         ) ? state.selectedCaptionId : null,
@@ -255,7 +263,18 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
     case "STATUS_SET":
       return { ...state, status: { severity: action.severity, text: action.text } };
     case "SELECTION_SET":
-      return { ...state, selection: action.selection, selectedCaptionId: action.selection ? null : state.selectedCaptionId };
+      return { ...state, selection: action.selection,
+        selectedClipIds: action.selection?.clipId && !action.selection.effectId ? [action.selection.clipId] : [],
+        selectionAnchorId: action.selection?.clipId || null,
+        selectedCaptionId: action.selection ? null : state.selectedCaptionId };
+    case "CLIP_SELECTION_SET": {
+      const indexed = state.project?.sequence.tracks.flatMap(track => track.clips.map(clip => ({ trackId: track.id, clipId: clip.id }))) || [];
+      const ids = [...new Set(action.clipIds)].filter(id => indexed.some(item => item.clipId === id));
+      const primary = indexed.find(item => item.clipId === action.primaryId && ids.includes(item.clipId))
+        || indexed.find(item => ids.includes(item.clipId));
+      return { ...state, selectedClipIds: ids, selection: primary || null, selectedCaptionId: null,
+        selectionAnchorId: action.anchorId === undefined ? (primary?.clipId || null) : action.anchorId };
+    }
     case "SYNC":
       return { ...state, lastSync: Date.now() };
     case "PLAYHEAD_SET":
@@ -299,14 +318,15 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
     case "CAPTION_DRAFT_PREVIEW_SET":
       return { ...state, captionDraftPreview: action.preview };
     case "CAPTION_SELECTION_SET": {
-      return { ...state, selectedCaptionId: action.captionId, selection: action.captionId ? null : state.selection };
+      return { ...state, selectedCaptionId: action.captionId, selection: action.captionId ? null : state.selection,
+        selectedClipIds: action.captionId ? [] : state.selectedClipIds };
     }
     case "RESET_SELECTION_FOR":
       if (!action.trackId) {
-        return { ...state, selection: null };
+        return { ...state, selection: null, selectedClipIds: [], selectionAnchorId: null };
       }
       if (state.selection && state.selection.trackId === action.trackId) {
-        return { ...state, selection: null };
+        return { ...state, selection: null, selectedClipIds: [], selectionAnchorId: null };
       }
       return state;
     default:

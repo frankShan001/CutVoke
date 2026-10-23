@@ -24,6 +24,7 @@ export interface ResourceReference {
 }
 
 export interface EffectInstance {
+  instanceId?: string;
   effectId: string;
   version: string;
   params: Record<string, unknown>;
@@ -34,13 +35,14 @@ export interface EffectInstance {
 }
 
 /** 关键帧插值方式（与后端 Keyframe.VALID_INTERP 对齐）。 */
-export type KeyframeInterpolation = "linear" | "ease-in" | "ease-out";
+export type KeyframeInterpolation = "linear" | "ease-in" | "ease-out" | "cubic-bezier";
 
 export interface Keyframe {
   id: string;
   time: Rational;
   value: unknown;
   interpolation: KeyframeInterpolation;
+  bezier?: [number, number, number, number];
 }
 
 export interface SpeedCurve {
@@ -71,11 +73,23 @@ export interface Clip {
   fadeIn?: Rational;
   /** 淡出时长（秒，有理数）。clip.audio 设置。 */
   fadeOut?: Rational;
+  audioFadeOffset?: Rational;
+  audioFadeDuration?: Rational | null;
   effects?: EffectInstance[];
   linked?: boolean;
   attachedToClipId?: string | null;
   hidden?: boolean;
   keyframes?: Record<string, Keyframe[]>;
+}
+
+export interface AudioMix {
+  gainDb?: number;
+  pan?: number;
+  solo?: boolean;
+  muted?: boolean;
+  busId?: string;
+  envelope?: { time: number; gainDb: number }[];
+  effects?: { effectId: string; params: Record<string, unknown>; enabled?: boolean }[];
 }
 
 export interface Track {
@@ -86,6 +100,7 @@ export interface Track {
   locked?: boolean;
   muted?: boolean;
   visible?: boolean;
+  audioMix?: AudioMix;
 }
 
 export interface Sequence {
@@ -95,8 +110,13 @@ export interface Sequence {
   fps: Rational;
   /** Opaque canvas fill shown through transparent pixels and uncovered regions. */
   backgroundColor?: string;
+  reframe?: "stretch" | "contain" | "cover";
+  name?: string;
   audioSampleRate?: number;
-  multicam?: { activeTrackId?: string } | null;
+  audioBuses?: { id: string; name: string; mix: AudioMix }[];
+  masterAudio?: AudioMix;
+  multicam?: { activeTrackId?: string; trackIds?: string[]; audioTrackId?: string;
+    cuts?: { time: Rational; trackId: string }[] } | null;
   tracks: Track[];
   captions?: Caption[];
   markers?: Marker[];
