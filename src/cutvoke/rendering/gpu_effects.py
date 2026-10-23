@@ -10,6 +10,7 @@ from functools import lru_cache
 import ast
 import hashlib
 import math
+import os
 from pathlib import Path
 import random
 import subprocess
@@ -89,15 +90,23 @@ _warmup_lock = threading.Lock()
 _warmups = set()
 
 
+def acceleration_enabled():
+    return os.environ.get('CUTVOKE_GPU_ACCELERATION', '1') != '0'
+
+
 def device(ffmpeg: str):
     # functools' cache alone permits duplicate concurrent misses. A poster and
     # background playback must share one real driver probe, including failure.
+    if not acceleration_enabled():
+        return None
     with _probe_lock:
         return _device(ffmpeg)
 
 
 def warmup(ffmpeg: str):
     """Initialize the driver while the home screen opens, without rendering media."""
+    if not acceleration_enabled():
+        return
     with _warmup_lock:
         if ffmpeg in _warmups:
             return

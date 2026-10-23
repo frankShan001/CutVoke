@@ -4,13 +4,14 @@ const crypto = require("node:crypto");
 
 function readSettings(profile) {
   const file = path.join(profile, "settings.json");
-  if (!fs.existsSync(file)) return { setupComplete: false };
+  if (!fs.existsSync(file)) return { setupComplete: false, gpuAcceleration: true };
   const value = JSON.parse(fs.readFileSync(file, "utf8"));
   if (value.version !== 1 || typeof value.setupComplete !== "boolean" ||
-      (value.dataPath !== undefined && (typeof value.dataPath !== "string" || !path.isAbsolute(value.dataPath)))) {
+      (value.dataPath !== undefined && (typeof value.dataPath !== "string" || !path.isAbsolute(value.dataPath))) ||
+      (value.gpuAcceleration !== undefined && typeof value.gpuAcceleration !== "boolean")) {
     throw new Error("Invalid CutVoke settings.json");
   }
-  return value;
+  return { ...value, gpuAcceleration: value.gpuAcceleration !== false };
 }
 
 function writeSettings(profile, value) {

@@ -33,3 +33,17 @@ test("relocation rejects occupied targets, nested folders and path aliases", t =
   assert.equal(validateDestination(db, path.join(root, "新 工程")), path.join(root, "新 工程"));
   assert.equal(fs.readFileSync(db, "utf8"), "original");
 });
+
+test("GPU defaults on for new and legacy profiles and preserves an explicit off preference", t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "cutvoke-gpu-settings-"));
+  t.after(() => fs.rmSync(root, { recursive: true }));
+  assert.equal(readSettings(root).gpuAcceleration, true);
+  writeSettings(root, { setupComplete: true });
+  assert.equal(readSettings(root).gpuAcceleration, true);
+  writeSettings(root, { setupComplete: true, gpuAcceleration: false });
+  assert.equal(readSettings(root).gpuAcceleration, false);
+  writeSettings(root, { setupComplete: true, gpuAcceleration: true });
+  assert.equal(readSettings(root).gpuAcceleration, true);
+  writeSettings(root, { setupComplete: true, gpuAcceleration: "false" });
+  assert.throws(() => readSettings(root), /Invalid/);
+});

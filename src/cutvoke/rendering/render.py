@@ -50,6 +50,7 @@ from cutvoke.rendering.effects import (EffectRegistry, default_registry, find_tr
 from cutvoke.rendering.caption_render import (prepare_caption_render, CaptionFontError,
                              _caption_font_instance)
 from cutvoke.rendering import gpu_effects
+from cutvoke.rendering.gpu_effects import acceleration_enabled
 from cutvoke.rendering.render_memo import RenderMemo, file_identity
 
 # subprocess resolves these names through PATH. Deployments that need a fixed
@@ -1326,7 +1327,8 @@ class RenderService:
         # _composite_on_canvas / 关键帧子段 / 转场三条分支里，漏传任何一处
         # 都会"静默变成黑底"（alpha 存在但内容不透明），比报错更难发现。
         self._render_ctx = threading.local()
-        self.gpu_effects = gpu_effects
+        self.gpu_acceleration = acceleration_enabled()
+        self.gpu_effects = gpu_effects and self.gpu_acceleration
         self._gpu_failed = False
         self._probe_cache = RenderMemo()
         self._clock_cache = RenderMemo()
@@ -5358,7 +5360,7 @@ class RenderService:
         filter_args, filter_script_path = _filter_graph_arguments(self.ffmpeg, graph, caption_cwd)
 
         ext = os.path.splitext(out_path)[1].lower()
-        use_nvenc = (not alpha and not lossless and seq.width >= 144 and seq.height >= 144
+        use_nvenc = (self.gpu_acceleration and not alpha and not lossless and seq.width >= 144 and seq.height >= 144
                      and not getattr(self._render_ctx, "hardware_disabled", False)
                      and _nvenc_available(self.ffmpeg))
         self._render_ctx.video_encoder = "ffv1" if lossless else "prores_ks" if alpha else (

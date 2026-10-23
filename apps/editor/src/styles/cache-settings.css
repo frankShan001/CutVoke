@@ -30,8 +30,8 @@
 .settings-section { margin-top:20px; border-top:1px solid #373e48; padding-top:16px; }
 .settings-section h3 { margin:0 0 8px; font-size:15px; }
 .settings-save { position:sticky; bottom:-24px; margin:16px -24px -8px; padding:14px 24px; background:#171a20; border-top:1px solid #373e48; display:flex; justify-content:flex-end; }
-.cache-settings label.settings-confirm { display:flex; gap:10px; align-items:flex-start; line-height:1.6; }
-.settings-confirm input { width:16px; flex:none; margin-top:3px; }
+.cache-settings label.settings-confirm, .cache-settings label.settings-gpu-toggle { display:flex; gap:10px; align-items:flex-start; line-height:1.6; }
+.settings-confirm input, .settings-gpu-toggle input { width:16px; flex:none; margin-top:3px; }
 .cache-settings [role=alert] { overflow-wrap:anywhere; }
 .settings-navigation { display:flex; gap:8px; margin:16px 0; }
 .settings-navigation .tool-btn[aria-pressed=true] { border-color:var(--accent); color:var(--accent-text); background:var(--accent-soft-6); }

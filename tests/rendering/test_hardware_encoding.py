@@ -12,6 +12,35 @@ from cutvoke.rendering.render import RenderService, _nvenc_available
 from cutvoke.editing.service import EditService
 
 
+@pytest.mark.skipif(not shutil.which('ffmpeg'), reason='FFmpeg required')
+def test_disabled_acceleration_uses_cpu_without_probing_gpu(tmp_path, monkeypatch):
+    from cutvoke.rendering import gpu_effects
+    monkeypatch.setenv('CUTVOKE_GPU_ACCELERATION', '0')
+    renderer = RenderService()
+    assert renderer.gpu_effects is False
+    source = tmp_path / 'cpu.png'
+    Image.new('RGB', (320, 180), (190, 60, 30)).save(source)
+    project = EditService().create_project('cpu-setting', width=320, height=180, fps=R.of(24))
+    project.sequence.tracks = [Track('v', 'video', [
+        Clip('c', AssetReference('a', str(source)), R.of(0), R.of(1), R.of(0))])]
+    with patch('cutvoke.rendering.gpu_effects._device') as probe, \
+         patch('cutvoke.rendering.render._nvenc_available', return_value=True) as encoder_probe:
+        assert gpu_effects.device(renderer.ffmpeg) is None
+        gpu_effects.warmup(renderer.ffmpeg)
+        result = renderer.render(project, str(tmp_path / 'cpu.mp4'))
+    probe.assert_not_called()
+    encoder_probe.assert_not_called()
+    assert result['videoEncoder'] == 'libx264'
+    assert result['encoderFallback'] is False
+
+
+def test_acceleration_defaults_enabled_and_can_be_reenabled(monkeypatch):
+    monkeypatch.delenv('CUTVOKE_GPU_ACCELERATION', raising=False)
+    assert RenderService().gpu_acceleration is True
+    monkeypatch.setenv('CUTVOKE_GPU_ACCELERATION', '1')
+    assert RenderService().gpu_acceleration is True
+
+
 def test_driver_probe_is_real_and_bounded():
     _nvenc_available.cache_clear()
     try:

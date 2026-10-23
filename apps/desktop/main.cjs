@@ -33,7 +33,8 @@ if (process.platform === "win32" && process.env.CUTVOKE_DIRECT_COMPOSITION !== "
   app.commandLine.appendSwitch("disable-direct-composition");
 }
 
-if (process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_OFFSCREEN === "1") app.disableHardwareAcceleration();
+if (preferences.gpuAcceleration === false ||
+    (process.env.CUTVOKE_DESKTOP_QA === "1" && process.env.CUTVOKE_DESKTOP_QA_OFFSCREEN === "1")) app.disableHardwareAcceleration();
 
 let child, window, origin, qaHook, closing = false, windowClosing = false, ready = false, savingSettings = false;
 const language = createLanguageController(path.join(app.getPath("userData"), "ui-language.json"),
@@ -55,6 +56,7 @@ const prefix = engineExists ? [] : ["-m", "cutvoke"];
 function mcpConfig() {
   return { mcpServers: { cutvoke: { command: executable, args: [...prefix, "mcp", "--data", dataPath],
     env: { CUTVOKE_HOME: storage.base || path.dirname(dataPath), CUTVOKE_FONT_CACHE: fontCache,
+      CUTVOKE_GPU_ACCELERATION: preferences.gpuAcceleration === false ? "0" : "1",
       ...(engineExists ? {} : { PYTHONPATH: path.join(root, "src") }) } } } };
 }
 function vacantPort() {
@@ -95,6 +97,7 @@ async function start() {
   const logDir = path.join(app.getPath("userData"), "logs"); fs.mkdirSync(logDir, { recursive: true });
   const log = fs.createWriteStream(path.join(logDir, "engine.log"), { flags: "a" });
   const env = { ...process.env, CUTVOKE_DESKTOP_KEY: shutdownKey,
+    CUTVOKE_GPU_ACCELERATION: preferences.gpuAcceleration === false ? "0" : "1",
     CUTVOKE_HOME: storage.base || path.dirname(dataPath), CUTVOKE_FONT_CACHE: fontCache,
     PYTHONIOENCODING: "utf-8", PYTHONUTF8: "1" };
   if (!engineExists) env.PYTHONPATH = [path.join(root, "src"), ...(qaPython ? [path.join(root, ".venv", "Lib", "site-packages")] : [])].join(path.delimiter);
@@ -152,7 +155,7 @@ async function stop(strict = false) {
 
 function settingsState() {
   return { setupComplete: preferences.setupComplete, projectDirectory: path.dirname(dataPath),
-    projectLocationManaged: !!process.env.CUTVOKE_DATA };
+    projectLocationManaged: !!process.env.CUTVOKE_DATA, gpuAcceleration: preferences.gpuAcceleration !== false };
 }
 
 async function saveSettings(value) {
@@ -160,6 +163,11 @@ async function saveSettings(value) {
   const directory = validateDirectory(value.projectDirectory);
   const cacheDirectory = validateDirectory(value.cacheDirectory);
   const maxBytes = value.maxBytes;
+  if (value.gpuAcceleration !== undefined && typeof value.gpuAcceleration !== "boolean") {
+    throw new Error("GPU acceleration must be enabled or disabled / GPU 加速设置必须为布尔值");
+  }
+  const gpuAcceleration = value.gpuAcceleration ?? (preferences.gpuAcceleration !== false);
+  const gpuChanged = gpuAcceleration !== (preferences.gpuAcceleration !== false);
   if (!Number.isSafeInteger(maxBytes) || maxBytes < 256 * 1024 ** 2 || maxBytes > 1024 ** 4) {
     throw new Error("Cache capacity must be 0.25–1024 GiB / 缓存容量应为 0.25–1024 GiB");
   }
@@ -191,23 +199,29 @@ async function saveSettings(value) {
           } catch (error) { reject(new Error(error.message || errors)); }
         });
       });
-      writeSettings(storage.profile, { setupComplete: true, dataPath: migrated });
+      writeSettings(storage.profile, { setupComplete: true, dataPath: migrated, gpuAcceleration });
       // The next launch regenerates the Agent config for the new library.
       app.relaunch();
       setTimeout(() => { savingSettings = false; app.quit(); }, 150);
       return { restartRequired: true };
     }
+    if (gpuChanged) await request("settings/preflight");
     const previous = await request("preview-cache");
     await request("preview-cache", { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ directory: cacheDirectory, maxBytes }) });
     try {
-      writeSettings(storage.profile, { setupComplete: true, dataPath });
+      writeSettings(storage.profile, { setupComplete: true, dataPath, gpuAcceleration });
     } catch (error) {
       await request("preview-cache", { method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ directory: previous.directory, maxBytes: previous.maxBytes }) });
       throw error;
     }
-    preferences = { setupComplete: true, dataPath };
+    preferences = { setupComplete: true, dataPath, gpuAcceleration };
+    if (gpuChanged) {
+      app.relaunch();
+      setTimeout(() => { savingSettings = false; app.quit(); }, 150);
+      return { restartRequired: true };
+    }
     return { restartRequired: false };
   } catch (error) {
     if (!ready) {

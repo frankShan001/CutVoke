@@ -9,6 +9,7 @@ export interface DesktopSettings {
   setupComplete: boolean;
   projectDirectory: string;
   projectLocationManaged: boolean;
+  gpuAcceleration?: boolean;
 }
 declare global {
   interface Window {
@@ -20,7 +21,7 @@ declare global {
       revealCacheDirectory(): Promise<void>;
       info(): Promise<{ mcp: object; version: string }>;
       settings(): Promise<DesktopSettings>;
-      saveSettings(value: { projectDirectory: string; cacheDirectory: string; maxBytes: number }): Promise<{ restartRequired: boolean }>;
+      saveSettings(value: { projectDirectory: string; cacheDirectory: string; maxBytes: number; gpuAcceleration?: boolean }): Promise<{ restartRequired: boolean }>;
       chooseProjectDirectory(): Promise<string | null>;
       chooseExportFile(suggested: string): Promise<string | null>;
       revealExport(projectId: string, jobId: string): Promise<void>;

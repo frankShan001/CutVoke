@@ -6,6 +6,7 @@ import { getLanguagePreference, LANGUAGE_NAMES, LOCALES, setLanguage, type Langu
 import type { DesktopSettings } from "../types/desktop";
 import "../styles/cache-settings.css";
 import { ResourcePackManager } from "./ResourcePackManager";
+import { flushPendingEdits } from "../lib/pendingEdits";
 import "../styles/resources.css";
 
 interface CacheStatus {
@@ -34,6 +35,7 @@ export function CacheSettings() {
   const [projectDirectory, setProjectDirectory] = useState("");
   const [firstRun, setFirstRun] = useState(false);
   const [migrationConfirmed, setMigrationConfirmed] = useState(false);
+  const [gpuAcceleration, setGpuAcceleration] = useState(true);
   const desktop = window.cutvokeDesktop;
   const moving = !!desktopSettings && projectDirectory.trim() !== desktopSettings.projectDirectory;
   const dialog = useRef<HTMLDialogElement>(null);
@@ -45,6 +47,7 @@ export function CacheSettings() {
       const settings = await desktop.settings();
       if (!alive.current) return;
       setDesktopSettings(settings); setProjectDirectory(settings.projectDirectory);
+      setGpuAcceleration(settings.gpuAcceleration !== false);
       setFirstRun(!settings.setupComplete);
     }
     const current = await previewRequest<CacheStatus>("preview-cache");
@@ -82,7 +85,9 @@ export function CacheSettings() {
     if (desktop) {
       if (!projectDirectory.trim()) throw new Error(tr("请选择工程保存位置"));
       if (moving && !migrationConfirmed) throw new Error(tr("请先确认迁移说明"));
-      const result = await desktop.saveSettings({ projectDirectory: projectDirectory.trim(), cacheDirectory: directory, maxBytes });
+      if ((moving || gpuAcceleration !== (desktopSettings?.gpuAcceleration !== false)) && !await flushPendingEdits())
+        throw new Error(tr("请先保存当前修改，再更改设置。"));
+      const result = await desktop.saveSettings({ projectDirectory: projectDirectory.trim(), cacheDirectory: directory, maxBytes, gpuAcceleration });
       if (result.restartRequired) { setMessage(tr("设置已保存，正在重新打开应用…")); return; }
     } else {
       await previewRequest("preview-cache", undefined, { directory, maxBytes });
@@ -133,6 +138,13 @@ export function CacheSettings() {
               <span>{tr("目标目录必须为空。我已停止外部 Agent 和其他编辑服务，迁移后会更新其连接配置。")}</span></label>}
           </> : <p className="cache-settings__muted">{tr("浏览器版的工程位置由本地服务管理。请在桌面版设置中修改，或调整服务的 --data 启动参数。")}</p>}
         </section>
+        {desktop && <section className="settings-section" aria-label={tr("GPU 加速")}>
+          <h3>{tr("GPU 加速")}</h3>
+          <label className="settings-gpu-toggle"><input type="checkbox" checked={gpuAcceleration} disabled={busy}
+            onChange={event => setGpuAcceleration(event.target.checked)} /><span>{tr("启用 GPU 加速")}</span></label>
+          <p className="cache-settings__muted">{tr("默认启用，用于界面显示、支持的预览特效和视频编码；不可用时自动回退到 CPU。")}</p>
+          <p className="cache-settings__muted">{tr("更改后保存设置，应用将重新打开。")}</p>
+        </section>}
         <section className="settings-section" aria-label={tr("预览缓存")}>
         <h3>{tr("预览缓存")}</h3>
         <p className="cache-settings__muted">{tr("保留已准备的画面，再次打开工程时复用。")}</p>

@@ -1733,5 +1733,10 @@
   "，有 {0} 个关联片段": ", mit {0} verbundenen Clips",
   "，素材已齐备": "- alle Medien bereitgestellt",
   "，跟随视频移动": "Folgen Sie dem Video",
-  "； 不修改文字、时码、位置或动画。": "Text, Timing, Position und Animation bleiben unverändert."
+  "； 不修改文字、时码、位置或动画。": "Text, Timing, Position und Animation bleiben unverändert.",
+  "GPU 加速": "GPU-Beschleunigung",
+  "启用 GPU 加速": "GPU-Beschleunigung aktivieren",
+  "默认启用，用于界面显示、支持的预览特效和视频编码；不可用时自动回退到 CPU。": "Standardmäßig für die Oberfläche, unterstützte Vorschaueffekte und Videokodierung aktiviert. Falls nicht verfügbar, wird die CPU verwendet.",
+  "更改后保存设置，应用将重新打开。": "Nach dem Speichern dieser Änderung wird die Anwendung neu gestartet.",
+  "请先保存当前修改，再更改设置。": "Speichere deine aktuellen Änderungen, bevor du die Einstellungen änderst."
 }
