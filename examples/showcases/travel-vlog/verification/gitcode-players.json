@@ -99,7 +99,7 @@
     "rangeRequestsHonored": false,
     "browserPlaybackVerified": false,
     "fallback": "Direct GitCode MP4 downloads and repository-relative file links",
-    "readmePresentation": "Repository-owned silent GIF previews linked to exact GitCode MP4 downloads",
+    "readmePresentation": "Full-resolution JPEG film stills with GitCode MP4 download links",
     "readmeInlineVideoReliedOn": false,
     "clientMarkdownFiltersHtmlVideo": true,
     "clientRendererSource": "https://cdn-static.gitcode.com/_nuxt-gitcode-ssr/DH2AmmMI.js",

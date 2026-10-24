@@ -26,13 +26,13 @@
 
 ## Watch two complete edits
 
-Original footage first. The complete edit next. Both examples include **English and Chinese videos, source media and editable projects**. The animated previews below are silent; download the linked MP4s for the complete English versions with sound.
+Original footage first. The complete edit next. Both examples include **English and Chinese videos, source media and editable projects**. The images below are full-resolution film stills. Download the MP4s for the complete English videos with sound.
 
 ### 01 · CHASE THE LIGHT
 
 **Motorcycle film · 31.6 seconds · Landscape**
 
-<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/be0897f4fed7fe6869d188c7e54bbfad1e19afcd/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4"><img src="examples/showcases/chase-the-light/previews/motorcycle-case_en.gif" alt="Silent animated preview; download the MP4 for sound" width="720" /></a>
+<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/be0897f4fed7fe6869d188c7e54bbfad1e19afcd/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4"><img src="examples/showcases/chase-the-light/previews/motorcycle-poster_en.jpg" alt="Full-resolution film still; download the MP4 for playback" width="720" /></a>
 
 [Download the English comparison with sound](https://raw.gitcode.com/shansjl/CutVoke/blobs/be0897f4fed7fe6869d188c7e54bbfad1e19afcd/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4) · [Open the repository video page](examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4)
 
@@ -44,7 +44,7 @@ Original footage first. The complete edit next. Both examples include **English 
 
 **Handheld travel vlog · 42.5 seconds · 9:16 portrait**
 
-<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/1bf878da94a891ec064638207a79fa8b96c27db3/examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4"><img src="examples/showcases/travel-vlog/previews/travel-vlog-case_en.gif" alt="Silent animated preview; download the MP4 for sound" width="360" /></a>
+<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/1bf878da94a891ec064638207a79fa8b96c27db3/examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4"><img src="examples/showcases/travel-vlog/previews/travel-vlog-poster_en.jpg" alt="Full-resolution film still; download the MP4 for playback" width="360" /></a>
 
 [Download the English comparison with sound](https://raw.gitcode.com/shansjl/CutVoke/blobs/1bf878da94a891ec064638207a79fa8b96c27db3/examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4) · [Open the repository video page](examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4)
 

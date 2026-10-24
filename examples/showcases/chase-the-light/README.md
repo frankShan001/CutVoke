@@ -6,11 +6,11 @@ Four 8-second MiniMax direct outputs become a 22.333-second cinematic film. All 
 
 ## Preview and download the English version
 
-<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/be0897f4fed7fe6869d188c7e54bbfad1e19afcd/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4"><img src="previews/motorcycle-case_en.gif" alt="Silent animated preview; download the MP4 for sound" width="720" /></a>
+<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/be0897f4fed7fe6869d188c7e54bbfad1e19afcd/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4"><img src="previews/motorcycle-poster_en.jpg" alt="Full-resolution film still; download the MP4 for playback" width="720" /></a>
 
 [Download the English comparison with sound](https://raw.gitcode.com/shansjl/CutVoke/blobs/be0897f4fed7fe6869d188c7e54bbfad1e19afcd/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4) · [Open the repository video page](videos/motorcycle-case_en.mp4)
 
-The animation is a silent preview. Download the MP4 above for the complete source-to-edit comparison with sound.
+The image is a full-resolution film still. Download the MP4 above for the complete source-to-edit comparison with sound.
 
 | File | Purpose |
 | --- | --- |

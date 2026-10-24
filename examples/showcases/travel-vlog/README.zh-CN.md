@@ -6,11 +6,11 @@
 
 ## 预览与下载中文版本
 
-<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/1c1c7dd76d5260d6381b9d8156bb1f25bfff4f37/examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4"><img src="previews/travel-vlog-case_zh-CN.gif" alt="无声动图预览；下载 MP4 可观看带声音的完整视频" width="360" /></a>
+<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/1c1c7dd76d5260d6381b9d8156bb1f25bfff4f37/examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4"><img src="previews/travel-vlog-poster_zh-CN.jpg" alt="原片高清静帧；下载 MP4 可观看完整视频" width="360" /></a>
 
 [下载带声音的中文对比片](https://raw.gitcode.com/shansjl/CutVoke/blobs/1c1c7dd76d5260d6381b9d8156bb1f25bfff4f37/examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4) · [打开仓库视频页](videos/travel-vlog-case_zh-CN.mp4)
 
-动图为无声预览；下载上方 MP4，可观看带声音的完整原素材与剪辑效果对比片。
+图片为原片高清静帧；下载上方 MP4，可观看带声音的完整原素材与剪辑效果对比片。
 
 | 文件 | 用途 |
 | --- | --- |

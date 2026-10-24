@@ -6,11 +6,11 @@ A cheerful 1080×1920, 24 fps travel story about two companions, a failed seasid
 
 ## Preview and download the English version
 
-<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/1bf878da94a891ec064638207a79fa8b96c27db3/examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4"><img src="previews/travel-vlog-case_en.gif" alt="Silent animated preview; download the MP4 for sound" width="360" /></a>
+<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/1bf878da94a891ec064638207a79fa8b96c27db3/examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4"><img src="previews/travel-vlog-poster_en.jpg" alt="Full-resolution film still; download the MP4 for playback" width="360" /></a>
 
 [Download the English comparison with sound](https://raw.gitcode.com/shansjl/CutVoke/blobs/1bf878da94a891ec064638207a79fa8b96c27db3/examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4) · [Open the repository video page](videos/travel-vlog-case_en.mp4)
 
-The animation is a silent preview. Download the MP4 above for the complete source-to-edit comparison with sound.
+The image is a full-resolution film still. Download the MP4 above for the complete source-to-edit comparison with sound.
 
 | File | Purpose |
 | --- | --- |

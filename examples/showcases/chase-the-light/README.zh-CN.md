@@ -6,11 +6,11 @@
 
 ## 预览与下载中文版本
 
-<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/d7c695df7edf271d4964701c6dd297e1e2b1ec05/examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4"><img src="previews/motorcycle-case_zh-CN.gif" alt="无声动图预览；下载 MP4 可观看带声音的完整视频" width="720" /></a>
+<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/d7c695df7edf271d4964701c6dd297e1e2b1ec05/examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4"><img src="previews/motorcycle-poster_zh-CN.jpg" alt="原片高清静帧；下载 MP4 可观看完整视频" width="720" /></a>
 
 [下载带声音的中文对比片](https://raw.gitcode.com/shansjl/CutVoke/blobs/d7c695df7edf271d4964701c6dd297e1e2b1ec05/examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4) · [打开仓库视频页](videos/motorcycle-case_zh-CN.mp4)
 
-动图为无声预览；下载上方 MP4，可观看带声音的完整原素材与剪辑效果对比片。
+图片为原片高清静帧；下载上方 MP4，可观看带声音的完整原素材与剪辑效果对比片。
 
 | 文件 | 用途 |
 | --- | --- |

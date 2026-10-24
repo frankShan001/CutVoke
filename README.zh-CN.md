@@ -26,17 +26,17 @@
 
 ## 看看两个完整剪辑案例
 
-先看原始素材，再看完整剪辑。两个案例都提供 **中英文视频、原始素材和可编辑工程**；下方为中文版的无声动图预览；下载对应 MP4，即可观看带声音的完整视频。
+先看原始素材，再看完整剪辑。两个案例都提供 **中英文视频、原始素材和可编辑工程**；下方为原片高清静帧；下载对应 MP4，可观看带声音的完整视频。
 
 ### 01 · 逐光而行
 
 **摩托短片 · 31.6 秒 · 横屏**
 
-<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/d7c695df7edf271d4964701c6dd297e1e2b1ec05/examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4"><img src="examples/showcases/chase-the-light/previews/motorcycle-case_zh-CN.gif" alt="无声动图预览；下载 MP4 可观看带声音的完整视频" width="720" /></a>
+<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/d7c695df7edf271d4964701c6dd297e1e2b1ec05/examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4"><img src="examples/showcases/chase-the-light/previews/motorcycle-poster_zh-CN.jpg" alt="原片高清静帧；下载 MP4 可观看完整视频" width="720" /></a>
 
 [下载带声音的中文对比片](https://raw.gitcode.com/shansjl/CutVoke/blobs/d7c695df7edf271d4964701c6dd297e1e2b1ec05/examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4) · [打开仓库视频页](examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4)
 
-**看这些效果：**移动遮罩、碎片重构、光源锚点跟踪、多层光影和动态文字。先展示四段 MiniMax 原始镜头，再播放 22.3 秒成片；片内文字已中文化。
+**看这些效果：** 移动遮罩、碎片重构、光源锚点跟踪、多层光影和动态文字。先展示四段 MiniMax 原始镜头，再播放 22.3 秒成片；片内文字已中文化。
 
 [下载中文纯成片](https://raw.gitcode.com/shansjl/CutVoke/blobs/a638300c241104d5129e17a47e9f96e161ef3365/examples/showcases/chase-the-light/videos/motorcycle-film_zh-CN.mp4) · [中文完整剪辑工程](examples/showcases/chase-the-light/projects/motorcycle-edit_zh-CN.cutvokepack) · [素材与中英文版本](examples/showcases/chase-the-light/README.zh-CN.md)
 
@@ -44,11 +44,11 @@
 
 **手持旅拍 · 42.5 秒 · 9:16 竖屏**
 
-<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/1c1c7dd76d5260d6381b9d8156bb1f25bfff4f37/examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4"><img src="examples/showcases/travel-vlog/previews/travel-vlog-case_zh-CN.gif" alt="无声动图预览；下载 MP4 可观看带声音的完整视频" width="360" /></a>
+<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/1c1c7dd76d5260d6381b9d8156bb1f25bfff4f37/examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4"><img src="examples/showcases/travel-vlog/previews/travel-vlog-poster_zh-CN.jpg" alt="原片高清静帧；下载 MP4 可观看完整视频" width="360" /></a>
 
 [下载带声音的中文对比片](https://raw.gitcode.com/shansjl/CutVoke/blobs/1c1c7dd76d5260d6381b9d8156bb1f25bfff4f37/examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4) · [打开仓库视频页](examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4)
 
-摆拍被海浪打断，摄影师先笑场，两个人留下快乐回忆。**看这些效果：**分屏、彩色分层花字、曲线变速、遮罩、调色与声音衔接；音乐下保留环境声。
+摆拍被海浪打断，摄影师先笑场，两个人留下快乐回忆。**看这些效果：** 分屏、彩色分层花字、曲线变速、遮罩、调色与声音衔接；音乐下保留环境声。
 
 [下载中文纯成片](https://raw.gitcode.com/shansjl/CutVoke/blobs/69f31f72b3f052074ce0f762ab7754e923b2efa5/examples/showcases/travel-vlog/videos/travel-vlog-film_zh-CN.mp4) · [中文可编辑工程](examples/showcases/travel-vlog/projects/travel-vlog_zh-CN.cutvokepack) · [素材与中英文版本](examples/showcases/travel-vlog/README.zh-CN.md)
 
