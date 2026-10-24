@@ -24,6 +24,12 @@
 </tr>
 </table>
 
+## Watch the product introduction
+
+**[Watch the CutVoke introduction on Bilibili →](https://www.bilibili.com/video/BV18VHA62EZ1/)**
+
+Open the video on Bilibili for playback controls, sound and fullscreen viewing.
+
 ## Watch two complete edits
 
 Original footage first. The complete edit next. Both examples include **English and Chinese videos, source media and editable projects**. The images below are full-resolution film stills. Download the MP4s for the complete English videos with sound.
