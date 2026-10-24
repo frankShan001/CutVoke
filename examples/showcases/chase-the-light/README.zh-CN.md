@@ -4,11 +4,13 @@
 
 四段各 8 秒的 MiniMax 直出素材，剪成 22.333 秒电影感短片。时间线剪辑、合成、跟踪、文字、声音和导出全部使用 CutVoke。
 
-## 观看中文版本
+## 预览与下载中文版本
 
-https://github.com/user-attachments/assets/5647c4b6-2b2b-45db-bda4-e6ad83a4eca3
+<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/d7c695df7edf271d4964701c6dd297e1e2b1ec05/examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4"><img src="previews/motorcycle-case_zh-CN.gif" alt="无声动图预览；下载 MP4 可观看带声音的完整视频" width="720" /></a>
 
-上方播放窗口可直接观看带声音的完整原素材与剪辑效果对比片。
+[下载带声音的中文对比片](https://raw.gitcode.com/shansjl/CutVoke/blobs/d7c695df7edf271d4964701c6dd297e1e2b1ec05/examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4) · [打开仓库视频页](videos/motorcycle-case_zh-CN.mp4)
+
+动图为无声预览；下载上方 MP4，可观看带声音的完整原素材与剪辑效果对比片。
 
 | 文件 | 用途 |
 | --- | --- |
@@ -41,7 +43,7 @@ git lfs pull --include="examples/showcases/chase-the-light/**"
 
 ## 验证与素材说明
 
-[bilingual-manifest.json](bilingual-manifest.json) 记录交付文件大小与 SHA-256。[verification/](verification/) 保存完整解码、时长与帧数、采样峰值和实际导出画面记录。`tools/verify/verify_bilingual_showcases.py` 检查工程包 CRC、包内素材哈希、语言覆盖及独立素材哈希。内嵌播放器使用 `videos/` 中原始 MP4 的 GitHub 托管副本；[readme-players.json](verification/readme-players.json) 记录对应网址与 SHA-256。全部 MP4 剪辑和导出使用 CutVoke。
+[bilingual-manifest.json](bilingual-manifest.json) 记录交付文件大小与 SHA-256。[verification/](verification/) 保存完整解码、时长与帧数、采样峰值和实际导出画面记录。`tools/verify/verify_bilingual_showcases.py` 检查工程包 CRC、包内素材哈希、语言覆盖及独立素材哈希。视频链接使用本仓库 GitCode LFS 存储中的原始 MP4；[gitcode-players.json](verification/gitcode-players.json) 记录固定网址与 SHA-256。全部 MP4 剪辑和导出使用 CutVoke。
 
 示例媒体和用户提供的配乐不属于软件 MIT 许可证的授权范围；纳入仓库不额外授予音乐或模型使用权。已有字体许可证保留在 `src/cutvoke/assets/fonts/`。
 

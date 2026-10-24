@@ -1,0 +1,108 @@
+{
+  "hosting": "GitCode repository Git LFS",
+  "timelineChanged": false,
+  "transcoded": false,
+  "videos": [
+    {
+      "source": "examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4",
+      "url": "https://raw.gitcode.com/shansjl/CutVoke/blobs/be0897f4fed7fe6869d188c7e54bbfad1e19afcd/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4",
+      "gitBlobSha": "be0897f4fed7fe6869d188c7e54bbfad1e19afcd",
+      "bytes": 62132310,
+      "sha256": "9403df2ce01df6e3400568977fc6ce32d98126ca6e6aa699c50e388b7d44ea09",
+      "language": "en",
+      "role": "comparison",
+      "anonymousHttpStatus": 200,
+      "mp4PrefixVerified": true,
+      "remoteMediaMetadata": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1024,
+            "height": 576
+          },
+          {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ],
+        "format": {
+          "duration": "31.583333"
+        }
+      }
+    },
+    {
+      "source": "examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4",
+      "url": "https://raw.gitcode.com/shansjl/CutVoke/blobs/d7c695df7edf271d4964701c6dd297e1e2b1ec05/examples/showcases/chase-the-light/videos/motorcycle-case_zh-CN.mp4",
+      "gitBlobSha": "d7c695df7edf271d4964701c6dd297e1e2b1ec05",
+      "bytes": 42489225,
+      "sha256": "21f7e1eb5bcd6b9478e23d96a95df2bd5c9459e75283312357912dd46cee88d4",
+      "language": "zh-CN",
+      "role": "comparison",
+      "anonymousHttpStatus": 200,
+      "mp4PrefixVerified": true,
+      "remoteMediaMetadata": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1024,
+            "height": 576
+          },
+          {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ],
+        "format": {
+          "duration": "31.583333"
+        }
+      }
+    },
+    {
+      "source": "examples/showcases/chase-the-light/videos/motorcycle-film_en.mp4",
+      "url": "https://raw.gitcode.com/shansjl/CutVoke/blobs/84b1677f5ce529915bf7a1ced13b6e31b3e1638c/examples/showcases/chase-the-light/videos/motorcycle-film_en.mp4",
+      "gitBlobSha": "84b1677f5ce529915bf7a1ced13b6e31b3e1638c",
+      "bytes": 9139839,
+      "sha256": "15ca0deea50cd002003a010e30cff01c78a9ef37b3562c28861b5b88398ce6b2",
+      "language": "en",
+      "role": "film",
+      "anonymousHttpStatus": 200,
+      "mp4PrefixVerified": true
+    },
+    {
+      "source": "examples/showcases/chase-the-light/videos/motorcycle-film_zh-CN.mp4",
+      "url": "https://raw.gitcode.com/shansjl/CutVoke/blobs/a638300c241104d5129e17a47e9f96e161ef3365/examples/showcases/chase-the-light/videos/motorcycle-film_zh-CN.mp4",
+      "gitBlobSha": "a638300c241104d5129e17a47e9f96e161ef3365",
+      "bytes": 29945255,
+      "sha256": "35e891fbfce110b43983b1570b48b5d4e5d360d479708aece459c5081d5d6b25",
+      "language": "zh-CN",
+      "role": "film",
+      "anonymousHttpStatus": 200,
+      "mp4PrefixVerified": true
+    }
+  ],
+  "verification": {
+    "urlSource": "Official contents API download_url",
+    "apiDocs": "https://docs.gitcode.com/docs/apis/get-api-v-5-repos-owner-repo-contents-path/",
+    "anonymousDownloadVerified": true,
+    "contentType": "application/octet-stream",
+    "rangeResponseStatus": 200,
+    "rangeRequestsHonored": false,
+    "browserPlaybackVerified": false,
+    "fallback": "Direct GitCode MP4 downloads and repository-relative file links",
+    "readmePresentation": "Repository-owned silent GIF previews linked to exact GitCode MP4 downloads",
+    "readmeInlineVideoReliedOn": false,
+    "clientMarkdownFiltersHtmlVideo": true,
+    "clientRendererSource": "https://cdn-static.gitcode.com/_nuxt-gitcode-ssr/DH2AmmMI.js",
+    "serverRenderedPlaybackVerified": false
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "hosting": "GitCode repository Git LFS",
+  "timelineChanged": false,
+  "transcoded": false,
+  "videos": [
+    {
+      "source": "examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4",
+      "url": "https://raw.gitcode.com/shansjl/CutVoke/blobs/1bf878da94a891ec064638207a79fa8b96c27db3/examples/showcases/travel-vlog/videos/travel-vlog-case_en.mp4",
+      "gitBlobSha": "1bf878da94a891ec064638207a79fa8b96c27db3",
+      "bytes": 87152479,
+      "sha256": "a3d803d07876b39d4e7347b45c83402b463acd967a260ecdc496e69618afa60d",
+      "language": "en",
+      "role": "comparison",
+      "anonymousHttpStatus": 200,
+      "mp4PrefixVerified": true,
+      "remoteMediaMetadata": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1080,
+            "height": 1920
+          },
+          {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ],
+        "format": {
+          "duration": "42.500000"
+        }
+      }
+    },
+    {
+      "source": "examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4",
+      "url": "https://raw.gitcode.com/shansjl/CutVoke/blobs/1c1c7dd76d5260d6381b9d8156bb1f25bfff4f37/examples/showcases/travel-vlog/videos/travel-vlog-case_zh-CN.mp4",
+      "gitBlobSha": "1c1c7dd76d5260d6381b9d8156bb1f25bfff4f37",
+      "bytes": 65743292,
+      "sha256": "28f464175549c85f784d8ada52dc63f916ee53d586b30e91ca4cb1a264f51fba",
+      "language": "zh-CN",
+      "role": "comparison",
+      "anonymousHttpStatus": 200,
+      "mp4PrefixVerified": true,
+      "remoteMediaMetadata": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_type": "video",
+            "width": 1080,
+            "height": 1920
+          },
+          {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ],
+        "format": {
+          "duration": "42.500000"
+        }
+      }
+    },
+    {
+      "source": "examples/showcases/travel-vlog/videos/travel-vlog-film_en.mp4",
+      "url": "https://raw.gitcode.com/shansjl/CutVoke/blobs/da8a45a656b79e8bf5a5875d9ed2fa0afe974c18/examples/showcases/travel-vlog/videos/travel-vlog-film_en.mp4",
+      "gitBlobSha": "da8a45a656b79e8bf5a5875d9ed2fa0afe974c18",
+      "bytes": 79531493,
+      "sha256": "fe3d1152972f30d5ca8d3978c62e62294e6e94e033cf080526059c5c0e4917fe",
+      "language": "en",
+      "role": "film",
+      "anonymousHttpStatus": 200,
+      "mp4PrefixVerified": true
+    },
+    {
+      "source": "examples/showcases/travel-vlog/videos/travel-vlog-film_zh-CN.mp4",
+      "url": "https://raw.gitcode.com/shansjl/CutVoke/blobs/69f31f72b3f052074ce0f762ab7754e923b2efa5/examples/showcases/travel-vlog/videos/travel-vlog-film_zh-CN.mp4",
+      "gitBlobSha": "69f31f72b3f052074ce0f762ab7754e923b2efa5",
+      "bytes": 59874527,
+      "sha256": "d471ea6ad6830a504da1d74dbad560c94d8ed7fd19cbe4088460079451e45faf",
+      "language": "zh-CN",
+      "role": "film",
+      "anonymousHttpStatus": 200,
+      "mp4PrefixVerified": true
+    }
+  ],
+  "verification": {
+    "urlSource": "Official contents API download_url",
+    "apiDocs": "https://docs.gitcode.com/docs/apis/get-api-v-5-repos-owner-repo-contents-path/",
+    "anonymousDownloadVerified": true,
+    "contentType": "application/octet-stream",
+    "rangeResponseStatus": 200,
+    "rangeRequestsHonored": false,
+    "browserPlaybackVerified": false,
+    "fallback": "Direct GitCode MP4 downloads and repository-relative file links",
+    "readmePresentation": "Repository-owned silent GIF previews linked to exact GitCode MP4 downloads",
+    "readmeInlineVideoReliedOn": false,
+    "clientMarkdownFiltersHtmlVideo": true,
+    "clientRendererSource": "https://cdn-static.gitcode.com/_nuxt-gitcode-ssr/DH2AmmMI.js",
+    "serverRenderedPlaybackVerified": false
+  }
+}

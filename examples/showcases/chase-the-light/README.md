@@ -4,11 +4,13 @@
 
 Four 8-second MiniMax direct outputs become a 22.333-second cinematic film. All timeline editing, compositing, tracking, typography, sound and export use CutVoke.
 
-## Watch the English version
+## Preview and download the English version
 
-https://github.com/user-attachments/assets/3504df36-059c-4ca5-ade9-dbde6a0e1663
+<a href="https://raw.gitcode.com/shansjl/CutVoke/blobs/be0897f4fed7fe6869d188c7e54bbfad1e19afcd/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4"><img src="previews/motorcycle-case_en.gif" alt="Silent animated preview; download the MP4 for sound" width="720" /></a>
 
-Play the complete source-to-edit comparison, with sound, directly in the video player above.
+[Download the English comparison with sound](https://raw.gitcode.com/shansjl/CutVoke/blobs/be0897f4fed7fe6869d188c7e54bbfad1e19afcd/examples/showcases/chase-the-light/videos/motorcycle-case_en.mp4) · [Open the repository video page](videos/motorcycle-case_en.mp4)
+
+The animation is a silent preview. Download the MP4 above for the complete source-to-edit comparison with sound.
 
 | File | Purpose |
 | --- | --- |
@@ -41,7 +43,7 @@ Use the latest repository source build for the added travel effects and producti
 
 ## Verification and provenance
 
-[bilingual-manifest.json](bilingual-manifest.json) pins delivered file bytes and hashes. [verification/](verification/) records full MP4 decode, duration/frame counts, sample peaks and sampled exported pictures. Package CRCs, embedded-media hashes, language coverage and standalone source hashes are verified by `tools/verify/verify_bilingual_showcases.py`. The embedded players use GitHub-hosted copies of the exact MP4s in `videos/`; [readme-players.json](verification/readme-players.json) records their URLs and SHA-256 hashes. All MP4 editing and export use CutVoke.
+[bilingual-manifest.json](bilingual-manifest.json) pins delivered file bytes and hashes. [verification/](verification/) records full MP4 decode, duration/frame counts, sample peaks and sampled exported pictures. Package CRCs, embedded-media hashes, language coverage and standalone source hashes are verified by `tools/verify/verify_bilingual_showcases.py`. The video links use the exact MP4s in this repository's GitCode LFS storage; [gitcode-players.json](verification/gitcode-players.json) records their pinned URLs and SHA-256 hashes. All MP4 editing and export use CutVoke.
 
 The media and user-supplied music are separate from the software MIT license. Inclusion does not grant additional music or model rights. Existing bundled font licenses remain under `src/cutvoke/assets/fonts/`.
 
