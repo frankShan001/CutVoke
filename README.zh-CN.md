@@ -26,9 +26,11 @@
 
 ## 观看产品介绍
 
-**[前往 B 站观看 CutVoke 推广视频 →](https://www.bilibili.com/video/BV18VHA62EZ1/)**
-
-在 B 站播放，可使用进度条、音量和全屏控件。
+<p>
+  <a href="https://www.bilibili.com/video/BV18VHA62EZ1/"><img src="docs/images/readme/platform-links/bilibili.svg" alt="Bilibili" width="140" height="44" /></a>
+  &nbsp;
+  <a href="https://www.youtube.com/watch?v=2--4_XO15RI"><img src="docs/images/readme/platform-links/youtube.svg" alt="YouTube" width="148" height="44" /></a>
+</p>
 
 ## 看看两个完整剪辑案例
 

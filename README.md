@@ -26,9 +26,11 @@
 
 ## Watch the product introduction
 
-**[Watch the CutVoke introduction on Bilibili →](https://www.bilibili.com/video/BV18VHA62EZ1/)**
-
-Open the video on Bilibili for playback controls, sound and fullscreen viewing.
+<p>
+  <a href="https://www.bilibili.com/video/BV18VHA62EZ1/"><img src="docs/images/readme/platform-links/bilibili.svg" alt="Bilibili" width="140" height="44" /></a>
+  &nbsp;
+  <a href="https://www.youtube.com/watch?v=2--4_XO15RI"><img src="docs/images/readme/platform-links/youtube.svg" alt="YouTube" width="148" height="44" /></a>
+</p>
 
 ## Watch two complete edits
 

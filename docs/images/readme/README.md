@@ -60,3 +60,7 @@ establish performance, audio quality or compatibility with every external AI hos
 
 简体中文：两组截图分别展示英文和简体中文界面，素材由仓库演示脚本生成。
 复拍时使用独立数据目录；只提交正式图片和必要来源说明，详细过程保存在本地。
+
+## Video platform links
+
+[platform-links/bilibili.svg](platform-links/bilibili.svg) and [platform-links/youtube.svg](platform-links/youtube.svg) are static link badges used in both root READMEs. The platform icon paths come from [Simple Icons: Bilibili](https://github.com/simple-icons/simple-icons/blob/develop/icons/bilibili.svg) and [Simple Icons: YouTube](https://github.com/simple-icons/simple-icons/blob/develop/icons/youtube.svg), distributed under [CC0](https://github.com/simple-icons/simple-icons/blob/develop/LICENSE.md). The platform marks identify their respective video links; they are separate from CutVoke branding. The SVGs include text alternatives and have no scripts or external dependencies.
