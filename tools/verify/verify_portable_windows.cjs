@@ -1,3 +1,4 @@
+const { verifyNativePreview } = require("./verify_native_preview.cjs");
 // Runs the shipped ZIP's CutVoke.exe on Windows, with no development runtimes
 // on the app's PATH. Playwright drives its actual, visible Electron window.
 const assert = require("node:assert/strict");
@@ -213,20 +214,18 @@ async function main() {
     await page.reload();
     await page.getByRole("button", { name: `打开工程 ${projectId}`, exact: true }).click();
     await page.getByRole("heading", { name: "时间线", exact: true }).waitFor();
-    await page.getByRole("button", { name: "播放", exact: true }).click();
-    // The decoder pool retains hidden, paused videos. Only the active player
-    // proves visible playback; DOM order is not the playback identity.
-    const previewVideo = page.locator("video.player__video");
-    await expect(previewVideo).toBeVisible({ timeout: 90_000 });
-    await expect.poll(() => previewVideo.evaluate(v => v.currentTime), { timeout: 90_000 }).toBeGreaterThan(.25)
-      .catch(async error => {
-        report.previewVideos = await page.locator("video").evaluateAll(videos => videos.map(v => ({
-          className: v.className, hidden: v.hidden, currentTime: v.currentTime,
-          paused: v.paused, readyState: v.readyState, error: v.error?.message, src: v.currentSrc,
-        })));
-        save(); throw error;
-      });
-    await page.getByRole("button", { name: "暂停", exact: true }).click();
+    try {
+      report.previewPlayback = await verifyNativePreview(page, expect);
+    } catch (error) {
+      report.previewVideos = await page.locator("video").evaluateAll(videos => videos.map(v => ({
+        className: v.className, hidden: v.hidden, visibility: getComputedStyle(v).visibility,
+        currentTime: v.currentTime, paused: v.paused, readyState: v.readyState,
+        error: v.error?.message, src: v.currentSrc,
+      })));
+      report.previewPlayhead = await page.getByRole("slider", { name: "时间线播放头" }).getAttribute("aria-valuenow");
+      await page.screenshot({ path: path.join(out, "preview-failure.png") }).catch(() => {});
+      save(); throw error;
+    }
     report.checks.actualPreviewPlayback = true;
     await page.screenshot({ path: path.join(out, "02-chinese-import-preview.png") });
     await page.getByRole("button", { name: "导出", exact: true }).click();

@@ -2,6 +2,15 @@ name: macOS and Linux packages
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - apps/desktop/**
+      - src/**
+      - apps/editor/**
+      - tools/build/**
+      - tools/verify/**
+      - .github/workflows/unix-packages.yml
+      - .gitattributes
   push:
     branches: [main]
     paths:
@@ -9,6 +18,7 @@ on:
       - src/**
       - apps/editor/**
       - tools/build/**
+      - tools/verify/verify_native_preview.cjs
       - tools/verify/verify_portable_unix.cjs
       - tools/verify/verify_unix_*
       - tools/verify/verify_linux_dialog.py

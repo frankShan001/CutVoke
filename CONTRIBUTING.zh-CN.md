@@ -51,9 +51,12 @@ npm run typecheck
 npm run test:i18n
 npm run build
 npm run test:e2e
+npm run test:e2e:regressions
 ```
 
 浏览器测试会启动临时工程库并生成小型测试素材，不会读写个人工程。Windows 本地使用已安装的 Chrome；CI 会安装 Chromium。Linux 云环境可设置 `CUTVOKE_E2E_BROWSER=/usr/bin/chromium` 使用已有浏览器。只改后端且不影响编辑流程时，可以只运行后端检查。
+
+防回归子集会重复三次检查菜单关闭、防抖阈值前后、取消预览准备和慢解码短片。验证时序时要控制计时器和所有竞争的就绪响应，不能假设自动化操作必定在防抖期限内完成；表单定位应限定到目标编辑区。独立执行的效果命令会生成新实例 ID，等价比较要保留引用关系、效果顺序、参数和关键帧目标。相关 PR 与 main 推送均运行原生打包验收；结论应绑定精确 SHA，浏览器和四个平台全部结束后才能称该变更已验证。
 
 桌面打包依赖变更后，在 `apps/desktop/` 中运行 `npm run test:build-deps`，验证下载器的代理接入仍然可用。打包工具的传递依赖覆盖集中在 `apps/desktop/package.json` 的 `overrides`；调整覆盖时同时核对调用接口和安全审计。
 

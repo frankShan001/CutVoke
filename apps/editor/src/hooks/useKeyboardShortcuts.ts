@@ -17,6 +17,7 @@ export function useTimelineClipboardShortcuts(state: EditorState, dispatch: Disp
       const current = getLatestState() || latest.current;
       const target = event.target as HTMLElement | null;
       if (event.defaultPrevented || event.repeat || event.isComposing || event.altKey
+        || document.querySelector(".ctx-menu")
         || current.view !== "editor" || current.opening || current.editLock || current.error
         || current.exportOpen || current.templateOpen || current.agentPanelOpen
         || target?.closest("input,textarea,select,[contenteditable='true'],[role='dialog'],[role='alertdialog']")) return;

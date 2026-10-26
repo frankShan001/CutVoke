@@ -35,6 +35,10 @@ export function ClipContextMenu({
 }) {
   const locale = useLocale();
   const menu = useRef<HTMLDivElement>(null);
+  // Keep this listener mounted while selection/polling updates rerender the row.
+  // A preceding capture listener can dispatch during the same Escape event.
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   const [position, setPosition] = useState({ x: target.x, y: target.y });
   useLayoutEffect(() => {
     const rect = menu.current?.getBoundingClientRect();
@@ -43,10 +47,10 @@ export function ClipContextMenu({
       y: Math.max(8, Math.min(target.y, innerHeight - rect.height - 8)) });
   }, [target.x, target.y, locale]);
   useEffect(() => {
-    const keydown = (event: KeyboardEvent) => { if (event.key === "Escape") { event.preventDefault(); onClose(); } };
+    const keydown = (event: KeyboardEvent) => { if (event.key === "Escape") { event.preventDefault(); closeRef.current(); } };
     window.addEventListener("keydown", keydown, true);
     return () => window.removeEventListener("keydown", keydown, true);
-  }, [onClose]);
+  }, []);
   useSessionAssets();
   const st = getLatestState();
   if (!st || !st.currentId) return null;

@@ -101,6 +101,8 @@ for (const locale of ["zh-CN", "en", "de", "ar"]) {
     await expect(page.locator(".ctx-menu")).toBeVisible();
     await noPageOverflow(page);
     await page.keyboard.press("Escape");
+    await expect(page.locator(".ctx-menu,.ctx-menu__backdrop")).toHaveCount(0);
+    await expect(page.locator(".clip-block--selected")).toHaveCount(1);
     await page.locator(".tool-btn--export").click();
     const dialog = page.locator(".export-dialog");
     await expect(dialog).toBeVisible();
@@ -110,7 +112,8 @@ for (const locale of ["zh-CN", "en", "de", "ar"]) {
     await page.locator(".export-dialog__close").click();
     await page.locator("#creative-domain-caption").click();
     await page.locator(".caption-timeline-clip").first().click();
-    const text = page.locator("textarea").first();
+    const text = page.locator(".cv-style-edit textarea");
+    await expect(text).toHaveCount(1);
     await text.fill("保存草稿 / keep draft / مسودة");
     await switchTo(page, locale === "en" ? "ar" : "en");
     await expect(text).toHaveValue("保存草稿 / keep draft / مسودة");
