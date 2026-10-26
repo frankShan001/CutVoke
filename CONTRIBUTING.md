@@ -68,6 +68,11 @@ on that first submitted frame; never poll until a nonblack picture appears.
 Keep controlled frame-submission delay and submitted-black-frame coverage in
 the shared acceptance-helper browser tests.
 
+Keyframe selection and mutation must wait for both command completion and the
+refreshed editor snapshot. A server revision or API node count alone does not
+prove UI readiness; gate the compact project sync response and retain exact
+multi-node timing, selection and single-command undo/redo assertions.
+
 ## Engine boundaries
 
 1. Keep project time as `Rational`; floats belong at display/FFmpeg boundaries.

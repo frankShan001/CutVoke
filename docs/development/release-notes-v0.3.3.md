@@ -5,7 +5,7 @@ This patch prerelease contains the editor and playback fixes accepted on main, r
 Changes since the published v0.3.2 packages:
 
 - Improved interactive previews and continuous playback, added the default-on GPU acceleration setting, and completed editor, resource and effect workflows. Acceleration availability still depends on the device and driver.
-- Fixed context-menu dismissal blocking Export, pending effect controls, mask gestures interrupted by delayed save acknowledgements, and translated toolbar controls escaping the fixed editor viewport.
+- Fixed context-menu dismissal blocking Export, pending effect controls, mask gestures interrupted by delayed save acknowledgements, translated toolbar controls escaping the fixed editor viewport, and selecting stale keyframe lanes while a save is still refreshing the editor.
 - Fixed Windows deep-data resource installs: short exclusive staging names, verified immutable resource registration, bounded concurrent publication, and specific filesystem failure diagnostics.
 - Fixed a transition EOF clock error that could freeze a valid export on its middle shot, and preserved decoded full-preview playback while saving live audio gain.
 - Added controlled late-response, exact-pixel, playback-continuity, resource-hash and packaged-app regression coverage. Browser CI dependency stages now have separate logs and bounded timeouts.
@@ -16,7 +16,7 @@ Windows and Linux packages are unsigned. macOS uses an ad-hoc integrity signatur
 
 Existing tags and downloads, including v0.3.1 and v0.3.2, remain available. Use this release's metadata to check these new archives; historical tag names and old verification records do not substitute for the embedded source commit. GitCode synchronization is not part of this publication.
 
-本版为 v0.3.3 四平台预发布，包含交互预览、持续播放、默认 GPU 加速设置和编辑资源流程改进，修复菜单遮挡、蒙版保存竞态、翻译布局、Windows 深目录资源安装、转场画面冻结与实时音量保存打断预览等问题。发布前须通过同一源码提交的 CI 与四平台真实成品验收，并核对包内版本、来源 SHA、附件哈希和公开下载内容。
+本版为 v0.3.3 四平台预发布，包含交互预览、持续播放、默认 GPU 加速设置和编辑资源流程改进，修复菜单遮挡、蒙版保存竞态、关键帧保存期间的旧选区、翻译布局、Windows 深目录资源安装、转场画面冻结与实时音量保存打断预览等问题。发布前须通过同一源码提交的 CI 与四平台真实成品验收，并核对包内版本、来源 SHA、附件哈希和公开下载内容。
 
 Windows 下载为免安装便携 ZIP；更新先关闭程序并备份、保留原有工程及数据目录。四个平台包包含前端、冻结后端、FFmpeg/ffprobe、资源、字体、许可及对应 FFmpeg 源码，基础剪辑无需另装 Python、Node.js 或系统 FFmpeg。可选模型仍需单独下载。
 

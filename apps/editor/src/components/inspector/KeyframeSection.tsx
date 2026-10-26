@@ -27,6 +27,8 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   const [offset,setOffset] = useState("0");
   const [timeScale,setTimeScale] = useState("1");
   const [draft,setDraft] = useState<Keyframe[] | null>(null);
+  const [saving,setSaving] = useState(false);
+  const savingRef = useRef(false);
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ id: string; moved: boolean } | null>(null);
   const duration = Math.max(.001,rationalToSecs(clip.timelineEnd)-rationalToSecs(clip.timelineStart));
@@ -45,15 +47,22 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   });
   const spec = options.find(option=>option.name===param) || options[0];
   const lane = draft || [...(clip.keyframes?.[param] || [])].sort((a,b)=>rationalToSecs(a.time)-rationalToSecs(b.time));
-  const readOnly = Boolean(state.editLock);
+  const readOnly = Boolean(state.editLock) || saving;
   useEffect(()=>{setSelected([]);setDraft(null);setParam(audio?"volume":"opacity");},[clip.id,audio]);
   useEffect(()=>{setDraft(null);},[clip.keyframes]);
-  const commit = async (payload: Record<string,unknown>) => {
+  const save = async (action: () => Promise<unknown>) => {
+    if (savingRef.current) return;
+    savingRef.current = true; setSaving(true);
+    try { return await action(); }
+    finally { savingRef.current = false; setSaving(false); }
+  };
+  const commit = (payload: Record<string,unknown>) => save(async () => {
     const result = await runCommand(dispatch,getLatestState() || state,"clip.keyframe",{clipId:clip.id,...payload});
     if (result.ok) dispatch({type:"UNDO_SET",blocked:false});
     return result;
-  };
+  });
   const select = (frame: Keyframe, multiple=false) => {
+    if (savingRef.current || state.editLock) return;
     setSelected(current=>multiple ? current.includes(frame.id) ? current.filter(id=>id!==frame.id) : [...current,frame.id] : [frame.id]);
     setKfTime(String(rationalToSecs(frame.time)));setKfValue(String(frame.value));
     setKfInterp(frame.interpolation);setBezier(frame.bezier || [.25,.1,.25,1]);
@@ -102,7 +111,7 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
         {["linear","ease-in","ease-out","cubic-bezier"].map(value=><option key={value} value={value}>{value}</option>)}</select>
       <button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={readOnly} onClick={()=>{
         const time=Number(kfTime),value=Number(kfValue);if(!Number.isFinite(time)||!Number.isFinite(value))return;
-        void addKeyframe(dispatch,getLatestState() || state,{clipId:clip.id,param,time,value,interpolation:kfInterp,...(kfInterp==="cubic-bezier"?{bezier}:{})});
+        void save(()=>addKeyframe(dispatch,getLatestState() || state,{clipId:clip.id,param,time,value,interpolation:kfInterp,...(kfInterp==="cubic-bezier"?{bezier}:{})}));
       }}><Plus size={10}/>{tr(" 添加")}</button>
       {selected.length===1?<button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={readOnly} onClick={()=>void commit({action:"update",param,keyframeId:selected[0],time:secsToRational(Number(kfTime)),value:Number(kfValue),interpolation:kfInterp,...(kfInterp==="cubic-bezier"?{bezier}:{})})}>{tr("更新节点")}</button>:null}
     </div>
@@ -128,12 +137,12 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
     </>:null}
     <p className="cv-hint">{tr("拖动节点调整时间和值；多选后可整体移动或缩放时间。")}</p>
     {lane.length===0?<p className="cv-hint">{tr("暂无关键帧。")}</p>:lane.map(frame=><div key={frame.id} className="inspector__subrow" style={{gap:4}}>
-      <input type="checkbox" checked={selected.includes(frame.id)} aria-label={tr("选择关键帧 {0}",frame.id)} onChange={()=>select(frame,true)} />
+      <input type="checkbox" disabled={readOnly} checked={selected.includes(frame.id)} aria-label={tr("选择关键帧 {0}",frame.id)} onChange={()=>select(frame,true)} />
       <span className="inspector__key">t={rationalToSecs(frame.time).toFixed(2)}s</span><span>{Number(frame.value).toFixed(2)} · {frame.interpolation}</span>
-      <button className="cv-btn cv-btn--sm cv-btn--danger" disabled={readOnly} title={tr("删除关键帧")} onClick={()=>void removeKeyframe(dispatch,getLatestState() || state,{clipId:clip.id,param,keyframeId:frame.id})}><Trash2 size={10}/>{tr(" 删除")}</button>
+      <button className="cv-btn cv-btn--sm cv-btn--danger" disabled={readOnly} title={tr("删除关键帧")} onClick={()=>void save(()=>removeKeyframe(dispatch,getLatestState() || state,{clipId:clip.id,param,keyframeId:frame.id}))}><Trash2 size={10}/>{tr(" 删除")}</button>
     </div>)}
     {lane.length>0?<div className="inspector__subrow" style={{gap:4,flexWrap:"wrap",marginTop:6}}>
-      <button className="cv-btn cv-btn--sm cv-btn--secondary" onClick={()=>setSelected(lane.map(frame=>frame.id))}>{tr("全选节点")}</button>
+      <button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={readOnly} onClick={()=>{if(!savingRef.current && !state.editLock)setSelected(lane.map(frame=>frame.id));}}>{tr("全选节点")}</button>
       <label className="cv-hint">{tr("移动秒数")}<input className="cv-input" type="number" step="0.1" value={offset} aria-label={tr("关键帧移动秒数")} style={{width:70}} onChange={e=>setOffset(e.target.value)}/></label>
       <label className="cv-hint">{tr("时间倍率")}<input className="cv-input" type="number" min="0.01" step="0.1" value={timeScale} aria-label={tr("关键帧时间倍率")} style={{width:70}} onChange={e=>setTimeScale(e.target.value)}/></label>
       <button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={!selected.length || readOnly} onClick={()=>void commit({action:"retime",keyframeIds:selected,offset:Number(offset),timeScale:Number(timeScale),anchor:0})}>{tr("应用时间调整")}</button>
