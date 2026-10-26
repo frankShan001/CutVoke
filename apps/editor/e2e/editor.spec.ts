@@ -1,5 +1,6 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -4494,31 +4495,106 @@ test("live audio stays continuous when video frame callbacks are delayed", async
   await page.getByRole("button", { name: "暂停", exact: true }).click();
 });
 
-test("live audio gain is audible before release and saves as one undo without restarting playback", async ({ page, request }) => {
-  const { id, name } = await createProject(request);
-  await openProject(page, name);
-  await page.locator('[data-clip-id="color-0"]').click();
-  const meter = page.getByTestId("live-audio-meter");
-  await expect(meter).toHaveAttribute("data-ready", "true");
-  await page.getByRole("button", { name: "播放", exact: true }).click();
-  await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeGreaterThan(.02);
-  const volume = page.getByRole("slider", { name: "片段音量" });
-  const box = await volume.boundingBox();
-  const baseline = (await readProject(request, id)).revision;
-  const source = await page.locator("video.player__video").getAttribute("src");
-  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(box!.x + 1, box!.y + box!.height / 2, { steps: 3 });
-  await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeLessThan(.001);
-  await page.waitForTimeout(600);
-  expect((await readProject(request, id)).revision).toBe(baseline);
-  await page.mouse.up();
-  await expect.poll(async () => seconds((await readProject(request, id)).sequence.tracks[0].clips[0].volume!)).toBe(0);
-  expect(await page.locator("video.player__video").getAttribute("src")).toBe(source);
-  await page.getByRole("button", { name: "撤销", exact: true }).click();
-  await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeGreaterThan(.02);
-  await page.getByRole("button", { name: "暂停", exact: true }).click();
-});
+for (const prepared of [true, false]) {
+  test(`live audio gain is audible before release and saves as one undo without restarting playback (${prepared ? "prepared" : "window handoff"})`, async ({ page, request }) => {
+    if (prepared) test.setTimeout(90_000); // Two real 30s preparations; interaction assertions keep their original limits.
+    const { id, name } = await createProject(request);
+    // A single real 30s tone leaves room to inspect a replacement preparation
+    // without accidentally crossing a clip boundary or reaching transport end.
+    const media = test.info().outputPath("gain-tone.mp4");
+    execFileSync("ffmpeg", ["-v", "error", "-nostdin", "-y", "-f", "lavfi", "-i", "color=red:s=160x90:r=15:d=30",
+      "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=30", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-threads", "2", "-c:a", "aac", "-shortest", media], { timeout: 30_000 });
+    const uploaded = await request.post("/api/v1/assets?name=gain-tone.mp4", { headers: { "Content-Type": "application/octet-stream" }, data: readFileSync(media) });
+    expect(uploaded.ok()).toBeTruthy();
+    const asset = await uploaded.json();
+    for (const clipId of ["color-0", "color-1", "color-2"]) await apply(request, id, "clip.remove", { clipId });
+    await apply(request, id, "clip.insert", { trackId: "v1", clipId: "color-0", sourcePath: asset.path,
+      timelineStart: { num: 0, den: 1 }, timelineEnd: { num: 30, den: 1 } });
+    const jobs: string[] = [], keepalives: string[] = [];
+    page.on("response", async response => {
+      if (response.request().method() === "POST" && response.url().endsWith(`/projects/${id}/preview-jobs`) && response.ok()) jobs.push((await response.json()).jobId);
+      if (response.url().endsWith("/keepalive") && response.ok()) keepalives.push(response.url());
+    });
+    if (!prepared) await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({ status: 404, json: {} }));
+    await page.addInitScript(() => {
+      const voices: HTMLAudioElement[] = [];
+      const frames: Array<{ source: string; identity: string; rgba: number[] }> = [];
+      (window as typeof window & { gainVoices: typeof voices }).gainVoices = voices;
+      (window as typeof window & { gainFrames: typeof frames }).gainFrames = frames;
+      document.addEventListener("loadeddata", event => {
+        const video = event.target;
+        if (!(video instanceof HTMLVideoElement) || !video.matches(".player__video")) return;
+        const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1;
+        const context = canvas.getContext("2d")!; context.drawImage(video, 0, 0, 1, 1, 0, 0, 1, 1);
+        frames.push({ source: video.dataset.previewSource || "", identity: video.dataset.previewIdentity || "",
+          rgba: [...context.getImageData(0, 0, 1, 1).data] });
+      }, true);
+      const play = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function () {
+        if (this instanceof HTMLAudioElement && !voices.includes(this)) voices.push(this);
+        return play.call(this);
+      };
+    });
+    await openProject(page, name);
+    const video = page.locator("video.player__video"), ruler = page.getByRole("slider", { name: "时间线播放头", exact: true });
+    await expect(video).toHaveAttribute(prepared ? "src" : "data-preview-source", prepared ? /preview-jobs\/[^/]+\/media/ : /index=0/, { timeout: prepared ? 30_000 : 10_000 });
+    await expect.poll(() => video.evaluate(element => (element as HTMLVideoElement).readyState)).toBeGreaterThan(1);
+    await page.locator('[data-clip-id="color-0"]').click();
+    const meter = page.getByTestId("live-audio-meter"), volume = page.getByRole("slider", { name: "片段音量" });
+    await expect(meter).toHaveAttribute("data-ready", "true");
+    const box = await volume.boundingBox(), baseline = (await readProject(request, id)).revision;
+    const source = await video.getAttribute("src"), identity = await video.getAttribute("data-preview-identity");
+    const lease = prepared ? source!.replace(/\/media$/, "/keepalive") : "";
+    const leases = keepalives.filter(url => url.endsWith(lease)).length;
+    await page.getByRole("button", { name: "播放", exact: true }).click();
+    await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeGreaterThan(.02);
+    const audioBefore = await page.evaluate(() => {
+      const w = window as typeof window & { gainVoices: HTMLAudioElement[]; gainVoice?: HTMLAudioElement; gainPauses: number };
+      w.gainVoice = w.gainVoices.find(voice => !voice.paused)!; w.gainPauses = 0;
+      w.gainVoice.addEventListener("pause", () => w.gainPauses++);
+      return { source: w.gainVoice.src, time: w.gainVoice.currentTime };
+    });
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box!.x + 1, box!.y + box!.height / 2, { steps: 3 });
+    await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeLessThan(.001);
+    if (prepared) await page.waitForTimeout(600); // Held gain must not auto-save.
+    else {
+      await expect.poll(async () => Number(await ruler.getAttribute("aria-valuenow"))).toBeGreaterThan(2.2);
+      // Capture the decoded boundary frame, not whichever window happens to
+      // be current when a loaded runner completes the next automation call.
+      await expect.poll(() => page.evaluate(() => (window as typeof window & {
+        gainFrames: Array<{ source: string }> }).gainFrames.some(frame => new URL(frame.source, location.href).searchParams.get("index") === "1"))).toBe(true);
+      const boundary = await page.evaluate(() => (window as typeof window & {
+        gainFrames: Array<{ source: string; identity: string; rgba: number[] }> }).gainFrames.find(frame => new URL(frame.source, location.href).searchParams.get("index") === "1")!);
+      expect(boundary.identity).toBe(identity);
+      expect(boundary.rgba.every((value, index) => Math.abs(value - [253, 0, 0, 255][index]) <= 4)).toBe(true);
+      expect(await video.getAttribute("src")).not.toBe(source); // Real window handoff is required.
+    }
+    expect((await readProject(request, id)).revision).toBe(baseline);
+    await page.mouse.up();
+    await expect.poll(async () => seconds((await readProject(request, id)).sequence.tracks[0].clips[0].volume!)).toBe(0);
+    if (prepared) {
+      await expect.poll(() => jobs.length).toBeGreaterThan(1);
+      await expect.poll(async () => (await (await request.get(`/api/v1/preview-jobs/${jobs.at(-1)}`)).json()).state, { timeout: 30_000 }).toBe("completed");
+      expect(await video.getAttribute("src")).toBe(source); // Preserve the original strict assertion.
+      await expect.poll(() => keepalives.filter(url => url.endsWith(lease)).length).toBeGreaterThan(leases);
+    }
+    expect(await video.getAttribute("data-preview-identity")).toBe(identity);
+    const audioAfter = await page.evaluate(() => {
+      const w = window as typeof window & { gainVoices: HTMLAudioElement[]; gainVoice: HTMLAudioElement; gainPauses: number };
+      return { sameVoice: w.gainVoices.length === 1 && w.gainVoices[0] === w.gainVoice, source: w.gainVoice.src,
+        time: w.gainVoice.currentTime, paused: w.gainVoice.paused, pauses: w.gainPauses };
+    });
+    expect(audioAfter.sameVoice).toBe(true); expect(audioAfter.source).toBe(audioBefore.source);
+    expect(audioAfter.time).toBeGreaterThan(audioBefore.time); expect(audioAfter.paused).toBe(false); expect(audioAfter.pauses).toBe(0);
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeGreaterThan(.02);
+    await expect.poll(async () => seconds((await readProject(request, id)).sequence.tracks[0].clips[0].volume!)).toBe(1);
+    await page.getByRole("button", { name: "暂停", exact: true }).click();
+  });
+}
+
 
 
 test("live audio preserves independent pitch and refreshes prepared audio when pitch settings change", async ({ page, request }) => {

@@ -30,7 +30,7 @@ import { usePreviewPreload } from "./usePreviewPreload";
 import { PreviewVideoPool } from "./PreviewVideoPool";
 import { getEffectCatalog } from "../lib/effects";
 import { fetchPreviewFrame } from "../lib/mediaApi";
-import { previewContentKey as projectPreviewKey } from "../lib/previewPreparation";
+import { previewContentKey as projectPreviewKey, type PreparedPreview } from "../lib/previewPreparation";
 
 const FIT = "fit" as const;
 type ZoomMode = typeof FIT | number;
@@ -130,9 +130,28 @@ export function Player() {
     return key;
   }, [project, locale, nativeAudioReady]);
   const previewTimelineToken = useMemo(() => contentToken(previewContentKey), [previewContentKey, locale]);
-  const prepared = state.preparedPreview;
+  // A live gain edit keeps the same visual key, but the background preparer
+  // clears/replaces its audio-bearing result. Retain the matching decoded
+  // immutable media instead of needlessly dropping playback back to windows.
+  const decodedPrepared = useRef<PreparedPreview | null>(null);
+  const offered = state.preparedPreview;
+  const offeredMatches = offered?.projectId === currentId && offered.contentKey === previewContentKey && sourceRestoreRevision === 0;
+  if (offeredMatches && readyVideoUrl === offered.url) decodedPrepared.current = offered;
+  const retained = decodedPrepared.current;
+  const retainPrepared = nativeAudioReady && sourceRestoreRevision === 0 &&
+    retained?.projectId === currentId && retained.contentKey === previewContentKey;
+  if (!offeredMatches && !retainPrepared) decodedPrepared.current = null;
+  const prepared = retainPrepared ? retained : offered;
   const usePrepared = !!prepared && prepared.projectId === currentId &&
     prepared.contentKey === previewContentKey && sourceRestoreRevision === 0;
+  useEffect(() => {
+    if (!usePrepared || !prepared || prepared.url === offered?.url) return;
+    const job = prepared.url.match(/\/preview-jobs\/([^/]+)\/media$/)?.[1];
+    if (!job) return;
+    const refresh = () => void fetch(`/api/v1/preview-jobs/${job}/keepalive`, { method: "POST" }).catch(() => {});
+    refresh(); const timer = window.setInterval(refresh, 10000);
+    return () => clearInterval(timer);
+  }, [usePrepared, prepared?.url, offered?.url]);
   const [settledSeek, setSettledSeek] = useState(playhead);
   useEffect(() => {
     if (playingRef.current && !state.scrubbing) return;
@@ -405,6 +424,8 @@ export function Player() {
   const onVideoError = useCallback((video: HTMLVideoElement) => {
     if (video !== videoRef.current || video.dataset.previewSource !== videoUrl ||
         !video.error || video.error.code === 1) return;
+    decodedPrepared.current = null;
+    setReadyVideoUrl(null);
     if (state.opening && usePrepared) {
       window.dispatchEvent(new CustomEvent("cutvoke:prepared-preview-error", { detail: { projectId: currentId } }));
       return;
