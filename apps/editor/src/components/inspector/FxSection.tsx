@@ -213,6 +213,7 @@ function FxParams({
           aria-label={tr("启用效果 {0}", spec.name)} />{tr("启用")}</label>
         <button type="button" className="cv-chip" disabled={busy} onClick={onRemove} aria-label={tr("删除效果 {0}", spec.name)}>{tr("删除效果")}</button>
       </div>
+      <fieldset disabled={busy} inert={busy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       {isColorBalance ? (
         <>
           <ColorWheels params={local} onPreview={(next) => { setLocal(next); commitLocal(next, true); }} onCommit={() => releaseEdit(`${clipId}:${spec.effectId}`)} />
@@ -262,6 +263,7 @@ function FxParams({
           <p className="cv-hint">{tr("导入文件按 Rec.709/sRGB 画面解释；预览与导出共用同一 LUT 渲染链。")}</p>
         </div>
       ) : null}
+      </fieldset>
     </details>
   );
 }

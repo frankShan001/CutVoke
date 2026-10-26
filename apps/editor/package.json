@@ -15,7 +15,7 @@
     "test:preview-cache": "node --test scripts/preview-cache.test.mjs",
     "test:basic": "node --test scripts/clip-timing.test.mjs scripts/project-sync.test.mjs scripts/timeline-media-cache.test.mjs scripts/import-media.test.mjs scripts/project-equivalence.test.mjs",
     "test:e2e": "npm run build && playwright test",
-    "test:e2e:regressions": "playwright test e2e/i18n.spec.ts e2e/interactive-preview.spec.ts e2e/production-workflow.spec.ts e2e/preview-preload.spec.ts --grep \"menus,|returning A|slow preparation|native acceptance\" --repeat-each=3"
+    "test:e2e:regressions": "playwright test e2e/editor.spec.ts e2e/i18n.spec.ts e2e/interactive-preview.spec.ts e2e/production-workflow.spec.ts e2e/preview-preload.spec.ts --grep \"menus,|returning A|slow preparation|native acceptance|mirror and flip\" --repeat-each=3"
   },
   "dependencies": {
     "lucide-react": "^0.454.0",

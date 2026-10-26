@@ -114,7 +114,9 @@ for resource in resource_manifest['files']:
     path = frozen_package / resource['path']
     assert path.is_file(), f"Missing required resource: {resource['path']}"
     assert hashlib.sha256(path.read_bytes()).hexdigest() == resource['sha256'], resource['path']
-commit = os.environ.get('GITHUB_SHA') or subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
+# GITHUB_SHA is a synthetic merge commit for PR events, even with an explicit
+# head checkout. Describe the sources actually frozen into this archive.
+commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
 info = {'version': version, 'commit': commit, 'platform': f'{system}-{arch}',
         'signature': 'ad-hoc; no Developer ID; not notarized' if system == 'macos' else 'unsigned',
         'python': platform.python_version(), 'electron': json.loads((root / 'apps/desktop/package-lock.json').read_text())['packages']['node_modules/electron']['version'],

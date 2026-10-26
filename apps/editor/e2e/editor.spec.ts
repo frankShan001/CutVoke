@@ -3869,17 +3869,35 @@ test("mirror and flip presets expose editable axis controls that survive undo an
   await enabled.uncheck();
   await expect.poll(async () => (await readProject(request, id)).sequence.tracks[0].clips[0].effects
     .find((effect) => effect.effectId === "cutvoke.fx.mirror")!.enabled).toBe(false);
-  await enabled.check();
+  let releaseEnable!: () => void;
+  const enableGate = new Promise<void>(resolve => { releaseEnable = resolve; });
+  await page.route(`**/projects/${id}/commands`, async route => {
+    const body = route.request().postDataJSON();
+    if (body.type !== "effect.bypass" || !body.payload.enabled) return route.continue();
+    const response = await route.fetch();
+    await enableGate;
+    await route.fulfill({ response }).catch(() => {});
+  });
   const axis = page.getByLabel("翻转轴向");
   await expect(axis).toHaveValue("horizontal");
   await expect(axis.locator("option")).toHaveText(["水平", "垂直", "水平 + 垂直"]);
-  await axis.selectOption("vertical");
 
   const axisOf = async () => {
     const project = await readProject(request, id);
     return project.sequence.tracks[0].clips.find((clip) => clip.id === "color-0")
       ?.effects.find((effect) => effect.effectId === "cutvoke.fx.mirror")?.params?.axis;
   };
+  try {
+    await enabled.check();
+    await expect(enabled).toBeDisabled();
+    // The parameter writer rejects input while bypass/remove is pending, so
+    // the visible controls must communicate that state instead of dropping it.
+    await expect(axis).toBeDisabled();
+    expect(await axisOf()).toBe("horizontal");
+  } finally { releaseEnable(); }
+  await expect(enabled).toBeEnabled();
+  await expect(axis).toBeEnabled();
+  await axis.selectOption("vertical");
   await expect.poll(axisOf).toBe("vertical");
   await page.getByRole("button", { name: "撤销" }).click();
   await expect.poll(axisOf).toBe("horizontal");

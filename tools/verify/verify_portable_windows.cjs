@@ -58,6 +58,7 @@ async function main() {
   assert.equal(process.platform, "win32", "This acceptance must run on Windows");
   const download = JSON.parse(fs.readFileSync(path.join(root, "dist/portable/download-info.json")));
   report.download = download;
+  assert.equal(download.commit, execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim(), "Archive provenance must match the checked-out source");
   const zip = path.join(root, "dist/portable", download.filename);
   assert.equal(crypto.createHash("sha256").update(fs.readFileSync(zip)).digest("hex"), download.sha256);
   const extracted = path.join(out, "中文 空格路径");

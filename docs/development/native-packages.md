@@ -69,6 +69,13 @@ ZIP writers lose. A per-file SHA256 manifest, build commit, dependency metadata,
 archive bytes and archive SHA256 accompany each download. Mac licenses and build
 metadata sit outside the signed `.app` so assembly does not invalidate it.
 
+Pull requests run the same extracted-archive acceptance as main builds. The
+workflow seals each newly built Mac app with `codesign --sign -` and verifies it
+strictly before assembly, because electron-builder otherwise skips signing in
+PR environments. This local integrity seal uses no certificate or keychain and
+does not establish a publisher identity. Archive provenance comes from the
+checked-out Git HEAD; the PR event's `GITHUB_SHA` can refer to a synthetic merge.
+
 ## Actual download acceptance
 
 `verify_portable_unix.cjs` extracts the exact user archive into a Chinese/space
