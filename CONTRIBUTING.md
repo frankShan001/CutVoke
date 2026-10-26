@@ -62,6 +62,12 @@ For desktop dependency changes, run `npm ci --ignore-scripts`, `npm run test:bui
 
 Rendering changes need real media, inspected frames and relevant audio checks. Record the input, command and result in the PR; successful process exit alone does not establish correct pictures. Do not weaken pixel, alpha, duration or frame-count assertions to make an incompatible build pass.
 
+Native playback samples must follow a submitted compositor frame, not just a
+readyState value or an advancing audio clock. Preserve the strict pixel check
+on that first submitted frame; never poll until a nonblack picture appears.
+Keep controlled frame-submission delay and submitted-black-frame coverage in
+the shared acceptance-helper browser tests.
+
 ## Engine boundaries
 
 1. Keep project time as `Rational`; floats belong at display/FFmpeg boundaries.
