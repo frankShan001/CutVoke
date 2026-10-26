@@ -3582,7 +3582,11 @@ class RenderService:
                     clock = f"settb=expr={fps.denominator}/{fps.numerator},setpts=N"
                     clears_rate = _setpts_clears_frame_rate(self.ffmpeg)
                     if clears_rate:
-                        clock = f"fps={fps_expr},{clock},fps={fps_expr}"
+                        # Rebase the EOF before fps consumes it: overlay can
+                        # forward secondary-file EOF in the source time base.
+                        # Resampling first repeats the incoming shot beyond its
+                        # real duration and starves later concat clips.
+                        clock = f"{clock},fps={fps_expr}"
                     # Older xfade can forward EOF before mixing the outgoing
                     # final picture. Keep a lookahead picture beyond the seam;
                     # the completed lane is still bounded to its real duration.
@@ -5142,17 +5146,11 @@ class RenderService:
         parts.append(
             f"[{bg}][{src_label}]overlay=shortest=0:eof_action=repeat:"
             f"format=auto:x={x}:y={y}[{out}]")
-        # The bed already emits the sequence frame clock, but modern overlay
-        # can forward a secondary EOF still expressed in the source time base
-        # (e.g. 15360 instead of 15). A following fps then repeats its last frame
-        # for hundreds of seconds, starving later concat clips. Rebase frames
-        # and EOF by the known canvas frame count before any resampling. Keep
-        # legacy 6.1 unchanged: its one-frame alpha beds otherwise lose EOF.
+        # The color bed already emits the sequence frame clock. Resampling it
+        # again loses its final frame on FFmpeg 6.1, including one-frame beds.
         fin = f"cf{vseg[0]}"
         vseg[0] += 1
-        clock = (f"setpts=N/({fps_expr})/TB,fps={fps_expr}"
-                 if _setpts_clears_frame_rate(self.ffmpeg) else "null")
-        parts.append(f"[{out}]{clock}[{fin}]")
+        parts.append(f"[{out}]null[{fin}]")
         return fin
 
     def _build_clip_opacity_keyframes(self, clip: Clip, seq: Sequence,
