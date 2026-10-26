@@ -1,4 +1,5 @@
 const { verifyNativePreview } = require("./verify_native_preview.cjs");
+const { verifyNativeTransition } = require("./verify_native_transition.cjs");
 const { verifyWindowsResourceInstall } = require("./verify_windows_resource_install.cjs");
 // Runs the shipped ZIP's CutVoke.exe on Windows, with no development runtimes
 // on the app's PATH. Playwright drives its actual, visible Electron window.
@@ -246,6 +247,8 @@ async function main() {
     run(ffmpeg, ["-v", "error", "-nostdin", "-ss", "1", "-i", exported, "-frames:v", "1", "-update", "1", "-y", path.join(out, "04-decoded-export-frame.png")], env);
     report.exportProbe = probe;
     report.checks.guiExportAndFullVideoAudioDecode = true;
+    report.transitionClock = await verifyNativeTransition({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath });
+    report.checks.threeShotTransitionClockAndPixels = true;
     const before = await api(`projects/${projectId}`);
     const pid = runtime.processId;
     const duplicate = spawn(executable, [], { env: { ...env, CUTVOKE_DESKTOP_QA: "1", CUTVOKE_DESKTOP_QA_SHOW: "1" }, stdio: "ignore" });

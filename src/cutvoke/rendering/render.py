@@ -3582,7 +3582,11 @@ class RenderService:
                     clock = f"settb=expr={fps.denominator}/{fps.numerator},setpts=N"
                     clears_rate = _setpts_clears_frame_rate(self.ffmpeg)
                     if clears_rate:
-                        clock = f"fps={fps_expr},{clock},fps={fps_expr}"
+                        # Rebase the EOF before fps consumes it: overlay can
+                        # forward secondary-file EOF in the source time base.
+                        # Resampling first repeats the incoming shot beyond its
+                        # real duration and starves later concat clips.
+                        clock = f"{clock},fps={fps_expr}"
                     # Older xfade can forward EOF before mixing the outgoing
                     # final picture. Keep a lookahead picture beyond the seam;
                     # the completed lane is still bounded to its real duration.

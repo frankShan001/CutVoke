@@ -170,6 +170,12 @@ unsupported. Evidence records read-only LongPathsEnabled policy, both Python and
 frozen EXE manifest declarations, actual host-Python boundary opens and frozen
 install results separately: 260 characters is not a universal failure boundary.
 
+Each packaged engine also exports a silent red/green/blue three-shot timeline
+with a crossfade three times. Decode all 45 frames and check absolute colors on
+all three shots; duration and successful process exit alone cannot detect a held
+second picture. This covers finite canvas EOF clocks with the bundled FFmpeg,
+including platforms whose source CI uses a different FFmpeg generation.
+
 All recorded execution is hosted-runner automation. It does not claim human
 acceptance on a Mac/Linux device, protected-folder permission prompts, native
 picker/drag ergonomics, speaker/audio output, GPU acceleration, every effect or

@@ -1,4 +1,5 @@
 const { verifyNativePreview } = require("./verify_native_preview.cjs");
+const { verifyNativeTransition } = require("./verify_native_transition.cjs");
 // Extract and run the exact Unix download, with a sandboxed visible renderer.
 // Shares the established Windows GUI/MCP/import/preview/export acceptance flow.
 const assert = require("node:assert/strict");
@@ -253,6 +254,8 @@ async function main() {
     run(ffmpeg, ["-v", "error", "-nostdin", "-ss", "1", "-i", exported, "-frames:v", "1", "-update", "1", "-y", path.join(out, "04-decoded-export-frame.png")], env);
     report.exportProbe = probe;
     report.checks.guiExportAndFullVideoAudioDecode = true;
+    report.transitionClock = await verifyNativeTransition({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath });
+    report.checks.threeShotTransitionClockAndPixels = true;
     const before = await api(`projects/${projectId}`);
     const pid = runtime.processId;
     const duplicate = spawn(executable, [], { env: { ...env, CUTVOKE_DESKTOP_QA: "1", CUTVOKE_DESKTOP_QA_SHOW: "1" }, stdio: "ignore" });
