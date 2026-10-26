@@ -5,7 +5,7 @@ const crypto = require("node:crypto");
 const assert = require("node:assert/strict");
 const { execFileSync } = require("node:child_process");
 
-async function verifyWindowsResourceInstall({ root, out, executable, engine, electron, expect, env }) {
+async function verifyWindowsResourceInstall({ root, out, executable, engine, electron, env }) {
   const packageRoot = path.join(path.dirname(engine), "_internal/cutvoke");
   const manifest = JSON.parse(fs.readFileSync(path.join(packageRoot, "catalogs/builtin_resource_pack.json")));
   const pngs = manifest.files.filter(x => x.path.startsWith("assets/stickers/") && x.path.endsWith(".png"));
@@ -51,7 +51,7 @@ async function verifyWindowsResourceInstall({ root, out, executable, engine, ele
         assert.deepEqual(unavailable, [], JSON.stringify(unavailable));
       for (const item of unavailable) {
         assert.ok(item.installationError?.destinationPathLength >= 260, JSON.stringify(item));
-        assert.ok(item.installationError.stage && item.installationError.winerror != null);
+        assert.ok(item.installationError.stage && [3, 206].includes(item.installationError.winerror), JSON.stringify(item));
         assert.ok(item.availabilityMessage.includes("缩短应用数据目录"));
       }
       let verifiedImages = 0, verifiedPreviews = 0;

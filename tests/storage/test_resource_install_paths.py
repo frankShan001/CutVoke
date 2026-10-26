@@ -19,7 +19,9 @@ def tmp_path():
     # pytest's descriptive per-test dirname would consume the boundary budget
     # itself on Windows; still use a unique, automatically cleaned temp root.
     with tempfile.TemporaryDirectory(prefix="cv-") as directory:
-        yield Path(directory)
+        # Windows TEMP may contain RUNNER~1; installation resolves it to the
+        # full account name. Budget and assert against that same actual path.
+        yield Path(directory).resolve()
 
 
 def _length(path):
@@ -226,8 +228,9 @@ def test_fresh_database_installs_every_sticker_under_legacy_create_limit(tmp_pat
     assert sum(_length(destination(f)) + 37 >= 260 for f in images) > 0
     _bounded_creates(monkeypatch)
     store = ProjectStore(str(tmp_path / "fresh.sqlite"))
-    api = HttpApi(EditService(store=store), media_dir=str(media))
+    api = None
     try:
+        api = HttpApi(EditService(store=store), media_dir=str(media))
         status, response = api.handle("GET", "/api/v1/stickers", {})
         assert status == 200 and len(response["stickers"]) == 612
         assert not [(s["stickerId"], s["installationError"]) for s in response["stickers"] if not s["available"] or not s["previewAvailable"]]
@@ -236,7 +239,8 @@ def test_fresh_database_installs_every_sticker_under_legacy_create_limit(tmp_pat
                 asset = store.get_asset(sticker["assetId"])
                 assert hashlib.sha256(Path(asset["path"]).read_bytes()).hexdigest() == sticker["resourceRef"]["sha256"]
     finally:
-        api.close()
+        if api is not None:
+            api.close()
         store.close()
 
 
@@ -252,10 +256,11 @@ def test_http_keeps_install_failure_evidence_and_clears_it_after_recovery(tmp_pa
             raise error
         return original(source, destination)
     store = ProjectStore(str(tmp_path / "fresh.sqlite"))
-    with monkeypatch.context() as patch:
-        patch.setattr(rp.os, "replace", replace)
-        api = HttpApi(EditService(store=store), media_dir=str(tmp_path / "media"))
+    api = None
     try:
+        with monkeypatch.context() as patch:
+            patch.setattr(rp.os, "replace", replace)
+            api = HttpApi(EditService(store=store), media_dir=str(tmp_path / "media"))
         status, response = api.handle("GET", "/api/v1/stickers", {})
         item = next(s for s in response["stickers"] if s["assetId"] == "builtin_sticker_arrow_down")
         assert status == 200 and not item["available"]
@@ -269,5 +274,6 @@ def test_http_keeps_install_failure_evidence_and_clears_it_after_recovery(tmp_pa
         item = next(s for s in response["stickers"] if s["assetId"] == "builtin_sticker_arrow_down")
         assert item["available"] and item["installationError"] is None
     finally:
-        api.close()
+        if api is not None:
+            api.close()
         store.close()
