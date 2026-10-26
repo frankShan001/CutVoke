@@ -3576,21 +3576,38 @@ test("text and freehand masks edit on canvas and persist through undo and reopen
   await textOutline.focus();
   await textOutline.press("ArrowRight");
   await expect.poll(async () => Number((await maskParams()).x)).toBeCloseTo(0.11, 3);
+  await expect(overlay).toHaveAttribute("data-source-revision", (await readProject(request, id)).revision);
 
-  await page.getByLabel("形状", { exact: true }).selectOption("freehand");
-  await expect.poll(async () => (await maskParams()).shape).toBe("freehand");
-  await expect(page.getByRole("button", { name: "取消绘制" })).toBeVisible();
-  const canvas = await overlay.boundingBox();
-  expect(canvas).toBeTruthy();
-  const path = [
-    [0.35, 0.6], [0.68, 0.6], [0.68, 0.82], [0.35, 0.82], [0.35, 0.6],
-  ];
-  await page.mouse.move(canvas!.x + canvas!.width * path[0][0], canvas!.y + canvas!.height * path[0][1]);
-  await page.mouse.down();
-  for (const [x, y] of path.slice(1)) {
-    await page.mouse.move(canvas!.x + canvas!.width * x, canvas!.y + canvas!.height * y, { steps: 4 });
-  }
-  await page.mouse.up();
+  let releaseShape!: () => void, shapeRevision = "";
+  const shapeGate = new Promise<void>(resolve => { releaseShape = resolve; });
+  await page.route(`**/projects/${id}/commands`, async route => {
+    const body = route.request().postDataJSON();
+    if (body.type !== "effect.update" || body.payload.params?.shape !== "freehand") return route.continue();
+    const response = await route.fetch();
+    shapeRevision = String((await response.json()).revision);
+    await shapeGate;
+    await route.fulfill({ response }).catch(() => {});
+  });
+  // Polling must not acknowledge the edit before the controlled command does.
+  await page.route(url => url.pathname === `/api/v1/projects/${id}` || url.pathname === `/api/v1/projects/${id}/sync`,
+    async route => { await shapeGate; await route.continue().catch(() => {}); });
+  try {
+    await page.getByLabel("形状", { exact: true }).selectOption("freehand");
+    await expect.poll(async () => (await maskParams()).shape).toBe("freehand");
+    await expect(page.getByRole("button", { name: "取消绘制" })).toBeVisible();
+    const canvas = await overlay.boundingBox();
+    expect(canvas).toBeTruthy();
+    const path = [[0.35, 0.6], [0.68, 0.6], [0.68, 0.82], [0.35, 0.82], [0.35, 0.6]];
+    await page.mouse.move(canvas!.x + canvas!.width * path[0][0], canvas!.y + canvas!.height * path[0][1]);
+    await page.mouse.down();
+    await page.mouse.move(canvas!.x + canvas!.width * path[1][0], canvas!.y + canvas!.height * path[1][1], { steps: 4 });
+    releaseShape();
+    await expect(overlay).toHaveAttribute("data-source-revision", shapeRevision);
+    for (const [x, y] of path.slice(2)) {
+      await page.mouse.move(canvas!.x + canvas!.width * x, canvas!.y + canvas!.height * y, { steps: 4 });
+    }
+    await page.mouse.up();
+  } finally { releaseShape(); }
   await expect.poll(async () => {
     const points = (await maskParams()).points as Array<{ x: number; y: number }> | undefined;
     return points?.length || 0;

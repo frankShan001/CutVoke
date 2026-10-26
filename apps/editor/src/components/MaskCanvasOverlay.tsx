@@ -1,7 +1,7 @@
 import { tr, useLocale } from "../i18n";
 /** Direct manipulation for geometry, text and freehand alpha masks. */
 
-import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { useEditor } from "../store/editor";
 
 import { stageEffect, releaseEdit, useInteractionProject } from "../store/interactive";
@@ -247,6 +247,12 @@ export function MaskCanvasOverlay() {
   const mask = clip?.effects?.find((effect) => effect.effectId === "cutvoke.fx.mask" && effect.enabled !== false);
   const params = mask?.params || {};
   const paramsKey = JSON.stringify(state.project?.sequence.tracks.flatMap(t => t.clips).find(c => c.id === clip?.id)?.effects?.find(e => e.effectId === "cutvoke.fx.mask")?.params || {});
+  const visibleParamsKey = JSON.stringify(params);
+  const previousView = useRef({ clipId: clip?.id, params: visibleParamsKey, lock: state.editLock });
+  const changedView = previousView.current.clipId !== clip?.id || previousView.current.params !== visibleParamsKey || previousView.current.lock !== state.editLock;
+  useLayoutEffect(() => {
+    previousView.current = { clipId: clip?.id, params: visibleParamsKey, lock: state.editLock };
+  });
   const svgRef = useRef<SVGSVGElement>(null);
   const gestureRef = useRef<Gesture | null>(null);
   const previewRef = useRef<Geometry | null>(null);
@@ -262,6 +268,9 @@ export function MaskCanvasOverlay() {
   const height = project?.sequence.height || 1080;
 
   useEffect(() => {
+    // A committed shape can acknowledge the identical staged preview after
+    // the next gesture has started. Only a changed visible view invalidates it.
+    if (!changedView) return;
     gestureRef.current = null;
     previewRef.current = null;
     drawPointerId.current = null;
@@ -481,6 +490,7 @@ export function MaskCanvasOverlay() {
         className={`player__mask-overlay${drawing ? " player__mask-overlay--drawing" : ""}`}
         viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet"
         aria-label={tr("画布蒙版控件")}
+        data-source-revision={state.project?.revision}
         onPointerDown={beginDraw}
         onPointerMove={drawing ? moveDraw : move}
         onPointerUp={drawing ? finishDraw : finish}
