@@ -9,6 +9,7 @@ on:
       - apps/editor/**
       - tools/build/**
       - tools/verify/**
+      - tests/rendering/test_canvas_eof_clock.py
       - .github/workflows/windows-portable.yml
       - .gitattributes
   push:
@@ -19,6 +20,8 @@ on:
       - apps/editor/**
       - tools/build/**
       - tools/verify/verify_native_preview.cjs
+      - tools/verify/verify_native_transition.cjs
+      - tests/rendering/test_canvas_eof_clock.py
       - tools/verify/verify_portable_windows.*
       - .github/workflows/windows-portable.yml
       - .gitattributes
@@ -105,12 +108,12 @@ jobs:
           npm ci
           npm run typecheck
           npm run build
-      - name: Check resource staging and diagnostics on real Windows Python
+      - name: Check resource installs and canvas clocks on real Windows Python
         run: |
           python -m pip install --target .artifacts/windows-test-deps pytest pytest-subtests
           $env:PYTHONPATH = "$pwd/src;$pwd/.artifacts/windows-test-deps"
           $env:PATH = "$pwd/.artifacts/portable-ffmpeg/bin;$env:PATH"
-          .artifacts/venv-portable/Scripts/python.exe -m pytest -q tests/storage/test_resource_install_paths.py
+          .artifacts/venv-portable/Scripts/python.exe -m pytest -q tests/storage/test_resource_install_paths.py tests/rendering/test_canvas_eof_clock.py
       - name: Freeze backend with bundled FFmpeg and product assets
         run: |
           $env:CUTVOKE_FFMPEG_DIR = (Resolve-Path .artifacts/portable-ffmpeg/bin).Path

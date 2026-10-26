@@ -9,6 +9,7 @@ on:
       - apps/editor/**
       - tools/build/**
       - tools/verify/**
+      - tests/rendering/test_canvas_eof_clock.py
       - .github/workflows/unix-packages.yml
       - .gitattributes
   push:
@@ -19,6 +20,8 @@ on:
       - apps/editor/**
       - tools/build/**
       - tools/verify/verify_native_preview.cjs
+      - tools/verify/verify_native_transition.cjs
+      - tests/rendering/test_canvas_eof_clock.py
       - tools/verify/verify_portable_unix.cjs
       - tools/verify/verify_unix_*
       - tools/verify/verify_linux_dialog.py
