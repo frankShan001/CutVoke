@@ -3578,6 +3578,15 @@ test("text and freehand masks edit on canvas and persist through undo and reopen
   await expect.poll(async () => Number((await maskParams()).x)).toBeCloseTo(0.11, 3);
   await expect(overlay).toHaveAttribute("data-source-revision", (await readProject(request, id)).revision);
 
+  const framePattern = `**/projects/${id}/preview-frame?*`;
+  await page.route(framePattern, route => route.fulfill({ status: 503, json: {
+    error: { message: "钢笔蒙版至少需要 3 个路径点；请在画布按住拖动绘制" },
+  } }));
+  const decoder = page.locator("video.player__video");
+  await expect(decoder).toBeAttached();
+  await decoder.evaluate((video: HTMLVideoElement) => { video.src = "data:video/mp4;base64,bm90IGEgdmlkZW8="; video.load(); });
+  await expect(page.locator(".player__preview-error")).toBeVisible();
+
   let releaseShape!: () => void, shapeRevision = "";
   const shapeGate = new Promise<void>(resolve => { releaseShape = resolve; });
   await page.route(`**/projects/${id}/commands`, async route => {
@@ -3597,7 +3606,14 @@ test("text and freehand masks edit on canvas and persist through undo and reopen
     await expect(page.getByRole("button", { name: "取消绘制" })).toBeVisible();
     const canvas = await overlay.boundingBox();
     expect(canvas).toBeTruthy();
-    const path = [[0.35, 0.6], [0.68, 0.6], [0.68, 0.82], [0.35, 0.82], [0.35, 0.6]];
+    // Start over the error text itself: the user must be able to repair an
+    // unfinished mask even when its current preview cannot render.
+    const notice = await page.locator(".player__preview-error strong").boundingBox();
+    expect(notice).toBeTruthy();
+    const x = (notice!.x + notice!.width / 2 - canvas!.x) / canvas!.width;
+    const y = (notice!.y + notice!.height / 2 - canvas!.y) / canvas!.height;
+    const right = Math.min(.95, x + .25), bottom = Math.min(.95, y + .2);
+    const path = [[x, y], [right, y], [right, bottom], [x, bottom], [x, y]];
     await page.mouse.move(canvas!.x + canvas!.width * path[0][0], canvas!.y + canvas!.height * path[0][1]);
     await page.mouse.down();
     await page.mouse.move(canvas!.x + canvas!.width * path[1][0], canvas!.y + canvas!.height * path[1][1], { steps: 4 });
@@ -3612,6 +3628,7 @@ test("text and freehand masks edit on canvas and persist through undo and reopen
     const points = (await maskParams()).points as Array<{ x: number; y: number }> | undefined;
     return points?.length || 0;
   }).toBeGreaterThanOrEqual(4);
+  await page.unroute(framePattern);
 
   const pointsBeforeUndo = (await maskParams()).points;
   await page.getByRole("button", { name: "撤销" }).click();

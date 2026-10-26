@@ -169,6 +169,9 @@
   overflow: visible;
 }
 .player__mask-overlay--drawing {
+  /* An unfinished path can fail preview rendering. Drawing is how the user
+     repairs it, so an error notice must not intercept that pointer gesture. */
+  z-index: 7;
   pointer-events: all;
   cursor: crosshair;
   touch-action: none;
