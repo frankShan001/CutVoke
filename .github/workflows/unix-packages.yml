@@ -2,6 +2,15 @@ name: macOS and Linux packages
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - apps/desktop/**
+      - src/**
+      - apps/editor/**
+      - tools/build/**
+      - tools/verify/**
+      - .github/workflows/unix-packages.yml
+      - .gitattributes
   push:
     branches: [main]
     paths:
@@ -9,6 +18,7 @@ on:
       - src/**
       - apps/editor/**
       - tools/build/**
+      - tools/verify/verify_native_preview.cjs
       - tools/verify/verify_portable_unix.cjs
       - tools/verify/verify_unix_*
       - tools/verify/verify_linux_dialog.py
@@ -40,6 +50,8 @@ jobs:
       MACOSX_DEPLOYMENT_TARGET: '13.0'
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-python@v7
         with:
           python-version: '3.13.16'
@@ -127,6 +139,9 @@ jobs:
           npm run test:storage --prefix apps/desktop
           python tools/build/prepare_desktop_unix.py
           npm run package:unix --prefix apps/desktop -- ${{ matrix.builder }}
+      - name: Seal local ad-hoc macOS app for main and pull-request builds
+        if: runner.os == 'macOS'
+        run: .artifacts/venv-portable/bin/python tools/build/seal_macos_app.py
       - name: Assemble distribution preserving executable modes and symlinks
         run: .artifacts/venv-portable/bin/python tools/build/assemble_portable.py
       - name: Extract shipped archive and accept real macOS app

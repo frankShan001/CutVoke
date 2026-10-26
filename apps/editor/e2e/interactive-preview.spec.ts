@@ -98,34 +98,45 @@ test("rapid edits abort obsolete work and a late response cannot replace the lat
   } finally { obsolete.release(); }
 });
 
-test("returning A to B to A cancels the stale debounce without aborting the needed frame", async ({ page, request }) => {
-  const id = await fixture(request);
-  await page.goto("/");
-  const images = await pngs(page), first = gate();
-  let requests = 0, aborted = 0;
-  page.on("requestfailed", req => { if (req.url().endsWith("interactive-frame")) aborted++; });
-  await page.route(`**/projects/${id}/interactive-frame`, async route => {
-    requests++;
-    await first.promise;
-    await route.fulfill({ contentType: "image/png", body: Buffer.from(images.blue, "base64") }).catch(() => {});
+for (const debounceElapsed of [false, true]) {
+  test(`returning A to B to A ${debounceElapsed ? "after debounce reissues the aborted frame" : "cancels the stale debounce without aborting the needed frame"}`, async ({ page, request }) => {
+    const id = await fixture(request);
+    await page.goto("/");
+    const images = await pngs(page), first = gate();
+    let requests = 0, aborted = 0;
+    page.on("requestfailed", req => { if (req.url().endsWith("interactive-frame")) aborted++; });
+    await page.route(`**/projects/${id}/interactive-frame`, async route => {
+      requests++;
+      await first.promise;
+      await route.fulfill({ contentType: "image/png", body: Buffer.from(images.blue, "base64") }).catch(() => {});
+    });
+    try {
+      await open(page, id);
+      await expect.poll(() => requests).toBe(1);
+      // The return must occur inside the 60ms debounce. Browser automation and
+      // a loaded CI runner cannot promise that two key actions take <60ms.
+      await page.clock.install();
+      await page.clock.pauseAt(new Date(Date.now() + 100));
+      const ruler = page.getByRole("slider", { name: "时间线播放头" });
+      await ruler.focus();
+      await ruler.press("ArrowRight");
+      await expect(ruler).toHaveAttribute("aria-valuenow", String(1 / 15));
+      if (debounceElapsed) {
+        await page.clock.runFor(75);
+        await expect.poll(() => aborted).toBe(1);
+      }
+      await ruler.press("Home");
+      await expect(ruler).toHaveAttribute("aria-valuenow", "0");
+      await page.clock.runFor(150); // Exceed the debounce with A still in flight.
+      expect(aborted).toBe(debounceElapsed ? 1 : 0);
+      first.release();
+      await page.clock.resume();
+      await expect(page.locator(".player__interactive-scene")).toHaveAttribute("data-ready", "true");
+      await expect.poll(() => pixel(page)).toEqual([0, 0, 255, 255]);
+      expect(requests).toBe(debounceElapsed ? 2 : 1);
+    } finally { first.release(); }
   });
-  try {
-    await open(page, id);
-    await expect.poll(() => requests).toBe(1);
-    const ruler = page.getByRole("slider", { name: "时间线播放头" });
-    await ruler.focus();
-    await ruler.press("ArrowRight");
-    await expect(ruler).toHaveAttribute("aria-valuenow", String(1 / 15));
-    await ruler.press("Home");
-    await expect(ruler).toHaveAttribute("aria-valuenow", "0");
-    await page.waitForTimeout(150); // Exceed the 60ms debounce with A still in flight.
-    expect(aborted).toBe(0);
-    first.release();
-    await expect(page.locator(".player__interactive-scene")).toHaveAttribute("data-ready", "true");
-    await expect.poll(() => pixel(page)).toEqual([0, 0, 255, 255]);
-    expect(requests).toBe(1);
-  } finally { first.release(); }
-});
+}
 
 test("leaving the editor interrupts an in-flight interactive request and discards its late result", async ({ page, request }) => {
   const id = await fixture(request);

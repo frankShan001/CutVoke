@@ -1,4 +1,6 @@
 import { test, expect, type APIRequestContext } from "@playwright/test";
+import { createRequire } from "node:module";
+const { verifyNativePreview } = createRequire(import.meta.url)("../../../tools/verify/verify_native_preview.cjs");
 
 async function fixture(request: APIRequestContext) {
   const sourceProject = await (await request.get("/api/v1/projects/e2e-fixture")).json();
@@ -71,4 +73,44 @@ test("visual edits rebuild continuous playback without reopening the editor", as
     { timeout: 40_000 }).toBe("completed");
   await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible();
   await expect.poll(() => page.locator(`video[data-preview-source='/api/v1/preview-jobs/${jobs[1]}/media']`).count()).toBeGreaterThan(0);
+});
+
+test("native acceptance waits for a delayed decoder before playing a short clip", async ({ page, request }) => {
+  test.setTimeout(60_000);
+  await page.setViewportSize({ width: 1024, height: 681 }); // macOS hosted-runner window
+  const { id, name } = await fixture(request);
+  const project = await (await request.get(`/api/v1/projects/${id}`)).json();
+  const edited = await request.post(`/api/v1/projects/${id}/commands`, { data: {
+    type: "edit.batch", expectedRevision: project.revision, commandId: crypto.randomUUID(),
+    payload: { commands: [
+      { type: "clip.remove", payload: { clipId: "v1" } },
+      { type: "clip.remove", payload: { clipId: "v2" } },
+      { type: "clip.trim", payload: { clipId: "v0", timelineEnd: { num: 3, den: 1 } } },
+    ] },
+  } });
+  expect(edited.ok(), await edited.text()).toBeTruthy();
+  await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({ status: 404, json: {} }));
+  let release!: () => void, blocked = 0;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  await page.route(`**/projects/${id}/preview-window?*`, async route => {
+    blocked++;
+    await gate;
+    await route.continue().catch(() => {});
+  });
+  try {
+    await page.goto("/");
+    await page.getByRole("button", { name: `打开工程 ${name}` }).click();
+    await expect(page.getByRole("heading", { name: "时间线", exact: true })).toBeVisible();
+    await expect.poll(() => blocked).toBeGreaterThan(0);
+    const acceptance = verifyNativePreview(page, expect);
+    void acceptance.catch(() => {}); // The assertions below can fail before it is awaited.
+    // Exceed the entire clip duration. Acceptance must still be paused; an
+    // eager click lets the healthy source/audio clock finish before decoding.
+    await page.waitForTimeout(3500);
+    await expect(page.getByRole("slider", { name: "时间线播放头", exact: true })).toHaveAttribute("aria-valuenow", "0");
+    await expect(page.getByRole("button", { name: "播放", exact: true })).toBeVisible();
+    release();
+    const samples = await acceptance;
+    expect(samples).toHaveLength(3);
+  } finally { release(); }
 });

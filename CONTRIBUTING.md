@@ -36,6 +36,13 @@ python tools/verify/check_layering.py
 python -m pytest -q
 ```
 
+Resource installation changes must retain the staging/concurrency/cleanup
+coverage in `tests/storage/test_resource_install_paths.py`. Model legacy path
+limits deterministically and keep real Windows Python plus frozen-app deep-data
+acceptance; runner registry/manifest support can otherwise hide a long-name bug.
+Keep exclusive allocation, checksum verification and atomic same-directory
+replacement. Preserve filesystem failure evidence instead of silently skipping.
+
 For frontend or shared editing workflow changes, from `apps/editor`:
 
 ```bash
@@ -44,9 +51,12 @@ npm run test:i18n
 npm run build
 npx playwright install chromium
 npm run test:e2e
+npm run test:e2e:regressions
 ```
 
 Browser tests create a temporary database and synthetic media. They do not use personal projects. On Windows they use installed Chrome; Linux can use an installed Chromium by setting `CUTVOKE_E2E_BROWSER=/usr/bin/chromium`. Keep the activated Python environment on PATH so the test server and MCP subprocess use the same dependencies. Test APIs must receive an explicit temporary `media_dir`; a file-backed `HttpApi` also derives its media directory from its database. `MCPServer(..., media_dir=...)` allows isolated embedding. Do not change HOME or relax filesystem permissions to run tests.
+
+The regression subset repeats menu dismissal, both sides of the preview debounce, cancelled preparation, delayed native decoding, pending effect controls, mask gestures across delayed acknowledgements and German toolbar bounds across five viewport widths three times. Control timers and every competing readiness response when testing an ordering; automation speed is not a debounce guarantee. Scope form locators to the intended editor. Fixed shells must not become scroll areas when native focus/reveal scrolling runs; check toolbar children as well as the outer header bounds. Independently executed effects get fresh instance IDs: compare their reference graph while retaining parameters, order and keyframe targets. Native package checks run on relevant pull requests as well as main pushes; report results for the exact tested SHA and wait for browser and all four native targets before calling a change verified.
 
 For desktop dependency changes, run `npm ci --ignore-scripts`, `npm run test:build-deps` and `npm run test:i18n` in `apps/desktop`. The proxy test uses disposable loopback servers. Downloader overrides live in `apps/desktop/package.json`; preserve the actual downloader's API and proxy support when changing them.
 

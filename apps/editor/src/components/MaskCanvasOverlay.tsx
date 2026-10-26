@@ -247,6 +247,8 @@ export function MaskCanvasOverlay() {
   const mask = clip?.effects?.find((effect) => effect.effectId === "cutvoke.fx.mask" && effect.enabled !== false);
   const params = mask?.params || {};
   const paramsKey = JSON.stringify(state.project?.sequence.tracks.flatMap(t => t.clips).find(c => c.id === clip?.id)?.effects?.find(e => e.effectId === "cutvoke.fx.mask")?.params || {});
+  const visibleParamsKey = JSON.stringify(params);
+  const gestureOrigin = useRef<{ clipId: string; params: string; geometry: Geometry } | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const gestureRef = useRef<Gesture | null>(null);
   const previewRef = useRef<Geometry | null>(null);
@@ -262,6 +264,12 @@ export function MaskCanvasOverlay() {
   const height = project?.sequence.height || 1080;
 
   useEffect(() => {
+    // Transient previews can disappear one React commit before the refreshed
+    // project arrives. Compare acknowledgement against the gesture's own view,
+    // not that intermediate render, and keep real external changes cancellable.
+    if (!state.editLock && gestureOrigin.current?.clipId === clip?.id &&
+        gestureOrigin.current?.params === paramsKey && (gestureRef.current || drawPointerId.current !== null)) return;
+    gestureOrigin.current = null;
     gestureRef.current = null;
     previewRef.current = null;
     drawPointerId.current = null;
@@ -281,7 +289,7 @@ export function MaskCanvasOverlay() {
       rationalToSecs(clip.timelineStart) > state.playhead ||
       rationalToSecs(clip.timelineEnd) <= state.playhead) return null;
 
-  const current = preview || geometry(params, width, height);
+  const current = preview || (drawPointerId.current !== null ? gestureOrigin.current?.geometry : null) || geometry(params, width, height);
   const editable = !state.editLock && !track.locked;
   const drawing = current.shape === "freehand" && (manualDraw || current.points.length < 3);
 
@@ -326,6 +334,7 @@ export function MaskCanvasOverlay() {
     if (!at) return;
     gestureRef.current = { mode, pointerId: event.pointerId,
       startX: at.x, startY: at.y, initial: current, pointIndex, handleKind };
+    gestureOrigin.current = { clipId: clip.id, params: visibleParamsKey, geometry: current };
     previewRef.current = current;
     setPreview(current);
     setDragging(true);
@@ -347,6 +356,7 @@ export function MaskCanvasOverlay() {
     if (gestureRef.current?.pointerId !== event.pointerId) return;
     move(event);
     gestureRef.current = null;
+    gestureOrigin.current = null;
     setDragging(false);
     const next = previewRef.current;
     previewRef.current = null;
@@ -373,6 +383,7 @@ export function MaskCanvasOverlay() {
     draftRef.current = [];
     setDraftPoints([]);
     drawPointerId.current = event.pointerId;
+    gestureOrigin.current = { clipId: clip.id, params: visibleParamsKey, geometry: current };
     appendDrawPoint(event);
     svgRef.current?.setPointerCapture(event.pointerId);
   };
@@ -387,6 +398,7 @@ export function MaskCanvasOverlay() {
     appendDrawPoint(event);
     const points = draftRef.current;
     drawPointerId.current = null;
+    gestureOrigin.current = null;
     draftRef.current = [];
     setDraftPoints([]);
     if (points.length < 3) return;
@@ -400,6 +412,7 @@ export function MaskCanvasOverlay() {
   const cancelGesture = () => {
     releaseEdit(`${clip.id}:cutvoke.fx.mask`);
     gestureRef.current = null;
+    gestureOrigin.current = null;
     previewRef.current = null;
     drawPointerId.current = null;
     draftRef.current = [];
@@ -481,6 +494,7 @@ export function MaskCanvasOverlay() {
         className={`player__mask-overlay${drawing ? " player__mask-overlay--drawing" : ""}`}
         viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet"
         aria-label={tr("画布蒙版控件")}
+        data-source-revision={state.project?.revision}
         onPointerDown={beginDraw}
         onPointerMove={drawing ? moveDraw : move}
         onPointerUp={drawing ? finishDraw : finish}

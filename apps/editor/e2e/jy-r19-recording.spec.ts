@@ -1,48 +1,10 @@
+import { structuralSignature, type Project } from "./projectEquivalence";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { getBuiltinPackVersion } from "./resourcePackHelpers";
 
 test.use({ video: "on" });
-
-type Project = {
-  projectId: string;
-  revision: string;
-  sequence: {
-    width: number;
-    height: number;
-    fps: { num: string; den: string };
-    tracks: Array<{
-      id: string;
-      kind: string;
-      role?: string;
-      visible?: boolean;
-      muted?: boolean;
-      locked?: boolean;
-      clips: Array<{
-        id: string;
-        assetRef: { sourcePath: string; assetId?: string };
-        role?: "sticker";
-        timelineStart: { num: string; den: string };
-        timelineEnd: { num: string; den: string };
-        sourceStart?: { num: string; den: string };
-        speed?: { num: string; den: string };
-        attachedToClipId?: string | null;
-        keyframes?: Record<string, Array<{
-          id: string; time: { num: string; den: string }; value: unknown; interpolation?: string;
-        }>>;
-        effects: Array<{
-          effectId: string; version?: string; params?: Record<string, unknown>;
-          presetId?: string; range?: { start: { num: string; den: string }; end: { num: string; den: string } };
-        }>;
-      }>;
-    }>;
-    captions: Array<{
-      id: string; text: string; start: { num: string; den: string }; end: { num: string; den: string };
-      [key: string]: unknown;
-    }>;
-  };
-};
 
 const apiPath = (id: string) => `/api/v1/projects/${encodeURIComponent(id)}`;
 const outputDir = resolve(process.cwd(), process.env.CUTVOKE_JY_R19_OUTPUT
@@ -144,44 +106,6 @@ async function openProject(page: Page, name: string): Promise<void> {
   await expect(page.locator(".clip-block")).toHaveCount(7); // 六段视频与独立音乐
 }
 
-function structuralSignature(project: Project): string {
-  const shape = {
-    width: project.sequence.width,
-    height: project.sequence.height,
-    fps: project.sequence.fps,
-    tracks: project.sequence.tracks.map((track) => ({
-      id: track.id,
-      kind: track.kind,
-      role: track.role ?? "",
-      visible: track.visible ?? true,
-      muted: track.muted ?? false,
-      locked: track.locked ?? false,
-      clips: track.clips.map((clip) => ({
-        id: clip.id,
-        assetRef: clip.assetRef,
-        role: clip.role ?? "",
-        timelineStart: clip.timelineStart,
-        timelineEnd: clip.timelineEnd,
-        sourceStart: clip.sourceStart,
-        speed: clip.speed,
-        attachedToClipId: clip.attachedToClipId ?? null,
-        keyframes: clip.keyframes ?? {},
-        effects: clip.effects,
-      })),
-    })),
-    captions: project.sequence.captions,
-  };
-  const canonicalize = (value: unknown): unknown => {
-    if (Array.isArray(value)) return value.map(canonicalize);
-    if (typeof value === "object" && value !== null) {
-      return Object.fromEntries(Object.entries(value as Record<string, unknown>)
-        .sort(([left], [right]) => left.localeCompare(right))
-        .map(([key, item]) => [key, canonicalize(item)]));
-    }
-    return value;
-  };
-  return JSON.stringify(canonicalize(shape));
-}
 
 async function createAgentReplica(request: APIRequestContext, source: Project): Promise<Project> {
   const id = `jy-r18-agent-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;

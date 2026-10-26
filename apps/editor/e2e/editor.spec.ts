@@ -2249,6 +2249,10 @@ test("prepared playback follows the ruler, stops at the end, and survives an Age
   expect(bounds).toBeTruthy();
   const video = page.locator("video.player__video");
   await page.mouse.click(bounds!.x + 7.6 * 40, bounds!.y + bounds!.height / 2);
+  // This scenario verifies prepared playback. A healthy source/audio clock
+  // can finish the short remainder while the continuous decoder is loading.
+  await expect(video).toHaveAttribute("src", /preview-jobs\/[^/]+\/media/);
+  await expect.poll(() => video.evaluate((element) => (element as HTMLVideoElement).readyState)).toBeGreaterThan(1);
   await page.getByRole("button", { name: "播放", exact: true }).click();
   await expect.poll(async () => Number(await ruler.getAttribute("aria-valuenow"))).toBeGreaterThan(8.25);
   await expect(video).toHaveAttribute("src", /preview-jobs\/[^/]+\/media/);
@@ -3576,25 +3580,59 @@ test("text and freehand masks edit on canvas and persist through undo and reopen
   await textOutline.focus();
   await textOutline.press("ArrowRight");
   await expect.poll(async () => Number((await maskParams()).x)).toBeCloseTo(0.11, 3);
+  await expect(overlay).toHaveAttribute("data-source-revision", (await readProject(request, id)).revision);
 
-  await page.getByLabel("形状", { exact: true }).selectOption("freehand");
-  await expect.poll(async () => (await maskParams()).shape).toBe("freehand");
-  await expect(page.getByRole("button", { name: "取消绘制" })).toBeVisible();
-  const canvas = await overlay.boundingBox();
-  expect(canvas).toBeTruthy();
-  const path = [
-    [0.35, 0.6], [0.68, 0.6], [0.68, 0.82], [0.35, 0.82], [0.35, 0.6],
-  ];
-  await page.mouse.move(canvas!.x + canvas!.width * path[0][0], canvas!.y + canvas!.height * path[0][1]);
-  await page.mouse.down();
-  for (const [x, y] of path.slice(1)) {
-    await page.mouse.move(canvas!.x + canvas!.width * x, canvas!.y + canvas!.height * y, { steps: 4 });
-  }
-  await page.mouse.up();
+  const framePattern = `**/projects/${id}/preview-frame?*`;
+  await page.route(framePattern, route => route.fulfill({ status: 503, json: {
+    error: { message: "钢笔蒙版至少需要 3 个路径点；请在画布按住拖动绘制" },
+  } }));
+  const decoder = page.locator("video.player__video");
+  await expect(decoder).toBeAttached();
+  await decoder.evaluate((video: HTMLVideoElement) => { video.src = "data:video/mp4;base64,bm90IGEgdmlkZW8="; video.load(); });
+  await expect(page.locator(".player__preview-error")).toBeVisible();
+
+  let releaseShape!: () => void, shapeRevision = "";
+  const shapeGate = new Promise<void>(resolve => { releaseShape = resolve; });
+  await page.route(`**/projects/${id}/commands`, async route => {
+    const body = route.request().postDataJSON();
+    if (body.type !== "effect.update" || body.payload.params?.shape !== "freehand") return route.continue();
+    const response = await route.fetch();
+    shapeRevision = String((await response.json()).revision);
+    await shapeGate;
+    await route.fulfill({ response }).catch(() => {});
+  });
+  // Polling must not acknowledge the edit before the controlled command does.
+  await page.route(url => url.pathname === `/api/v1/projects/${id}` || url.pathname === `/api/v1/projects/${id}/sync`,
+    async route => { await shapeGate; await route.continue().catch(() => {}); });
+  try {
+    await page.getByLabel("形状", { exact: true }).selectOption("freehand");
+    await expect.poll(async () => (await maskParams()).shape).toBe("freehand");
+    await expect(page.getByRole("button", { name: "取消绘制" })).toBeVisible();
+    const canvas = await overlay.boundingBox();
+    expect(canvas).toBeTruthy();
+    // Start over the error text itself: the user must be able to repair an
+    // unfinished mask even when its current preview cannot render.
+    const notice = await page.locator(".player__preview-error strong").boundingBox();
+    expect(notice).toBeTruthy();
+    const x = (notice!.x + notice!.width / 2 - canvas!.x) / canvas!.width;
+    const y = (notice!.y + notice!.height / 2 - canvas!.y) / canvas!.height;
+    const right = Math.min(.95, x + .25), bottom = Math.min(.95, y + .2);
+    const path = [[x, y], [right, y], [right, bottom], [x, bottom], [x, y]];
+    await page.mouse.move(canvas!.x + canvas!.width * path[0][0], canvas!.y + canvas!.height * path[0][1]);
+    await page.mouse.down();
+    await page.mouse.move(canvas!.x + canvas!.width * path[1][0], canvas!.y + canvas!.height * path[1][1], { steps: 4 });
+    releaseShape();
+    await expect(overlay).toHaveAttribute("data-source-revision", shapeRevision);
+    for (const [x, y] of path.slice(2)) {
+      await page.mouse.move(canvas!.x + canvas!.width * x, canvas!.y + canvas!.height * y, { steps: 4 });
+    }
+    await page.mouse.up();
+  } finally { releaseShape(); }
   await expect.poll(async () => {
     const points = (await maskParams()).points as Array<{ x: number; y: number }> | undefined;
     return points?.length || 0;
   }).toBeGreaterThanOrEqual(4);
+  await page.unroute(framePattern);
 
   const pointsBeforeUndo = (await maskParams()).points;
   await page.getByRole("button", { name: "撤销" }).click();
@@ -3869,17 +3907,35 @@ test("mirror and flip presets expose editable axis controls that survive undo an
   await enabled.uncheck();
   await expect.poll(async () => (await readProject(request, id)).sequence.tracks[0].clips[0].effects
     .find((effect) => effect.effectId === "cutvoke.fx.mirror")!.enabled).toBe(false);
-  await enabled.check();
+  let releaseEnable!: () => void;
+  const enableGate = new Promise<void>(resolve => { releaseEnable = resolve; });
+  await page.route(`**/projects/${id}/commands`, async route => {
+    const body = route.request().postDataJSON();
+    if (body.type !== "effect.bypass" || !body.payload.enabled) return route.continue();
+    const response = await route.fetch();
+    await enableGate;
+    await route.fulfill({ response }).catch(() => {});
+  });
   const axis = page.getByLabel("翻转轴向");
   await expect(axis).toHaveValue("horizontal");
   await expect(axis.locator("option")).toHaveText(["水平", "垂直", "水平 + 垂直"]);
-  await axis.selectOption("vertical");
 
   const axisOf = async () => {
     const project = await readProject(request, id);
     return project.sequence.tracks[0].clips.find((clip) => clip.id === "color-0")
       ?.effects.find((effect) => effect.effectId === "cutvoke.fx.mirror")?.params?.axis;
   };
+  try {
+    await enabled.check();
+    await expect(enabled).toBeDisabled();
+    // The parameter writer rejects input while bypass/remove is pending, so
+    // the visible controls must communicate that state instead of dropping it.
+    await expect(axis).toBeDisabled();
+    expect(await axisOf()).toBe("horizontal");
+  } finally { releaseEnable(); }
+  await expect(enabled).toBeEnabled();
+  await expect(axis).toBeEnabled();
+  await axis.selectOption("vertical");
   await expect.poll(axisOf).toBe("vertical");
   await page.getByRole("button", { name: "撤销" }).click();
   await expect.poll(axisOf).toBe("horizontal");

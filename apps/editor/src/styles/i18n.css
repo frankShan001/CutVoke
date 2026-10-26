@@ -21,5 +21,6 @@ input[type="text"], input[type="search"], textarea { unicode-bidi:plaintext; }
 .media-domain-tab { min-width:0; white-space:normal; overflow-wrap:anywhere; line-height:1.3; min-height:30px; }
 :root:is([lang="en"], [lang="es"], [lang="fr"], [lang="de"], [lang="pt-BR"], [lang="ru"], [lang="ar"]) .media-domain-tabs { grid-template-columns:repeat(3,minmax(0,1fr)); }
 @media (max-width:1700px) { .topbar__tag, .topbar__sync-time { display:none; } }
+@media (max-width:1700px) { .topbar__btn-label, .topbar__sync-label { display:none; } }
 @media (max-width:1500px) { .topbar__sync-label { display:none; } }
 @media (max-width:650px) { .home__create-row { flex-wrap:wrap; } .home__create-row .cv-input { flex-basis:100%; } }

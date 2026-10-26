@@ -69,6 +69,13 @@ ZIP writers lose. A per-file SHA256 manifest, build commit, dependency metadata,
 archive bytes and archive SHA256 accompany each download. Mac licenses and build
 metadata sit outside the signed `.app` so assembly does not invalidate it.
 
+Pull requests run the same extracted-archive acceptance as main builds. The
+workflow seals each newly built Mac app with `codesign --sign -` and verifies it
+strictly before assembly, because electron-builder otherwise skips signing in
+PR environments. This local integrity seal uses no certificate or keychain and
+does not establish a publisher identity. Archive provenance comes from the
+checked-out Git HEAD; the PR event's `GITHUB_SHA` can refer to a synthetic merge.
+
 ## Actual download acceptance
 
 `verify_portable_unix.cjs` extracts the exact user archive into a Chinese/space
@@ -137,6 +144,31 @@ including logs, font caches and generated MCP configuration. `CUTVOKE_HOME` and
 `CUTVOKE_DATA` allow explicit writable locations. Windows portable storage keeps
 its existing sibling directory behavior. A failed write never silently creates
 an empty replacement library. Normal OS file permissions still apply.
+
+Resource installs reserve short independent temporary basenames exclusively in
+the destination directory, verify their bytes and atomically replace the final
+file. A long sticker basename must not be repeated in its staging filename.
+Concurrent installers may accept another installer's completed file only after
+verifying its hash and size. Windows sharing/access conflicts receive a bounded
+wait; a lasting denial or corrupt destination still fails with its original OS
+evidence. Ten six-installer rounds and deterministic peer/denial cases cover this.
+Filesystem failures retain the operation stage, path lengths (UTF-16 code units),
+errno and winerror in the sticker API's `installationError` and engine log. If the
+final path itself exceeds the process/filesystem limit, choose a shorter portable
+data location (`CUTVOKE_PORTABLE_HOME`); changing Windows system policy is not a
+required workaround.
+Serve and MCP startup must keep those immutable paths. Re-registering package
+source files afterward can conceal a failed installation and break saved-project
+resource pinning; entrypoint regressions check both successful and failed installs.
+
+Windows acceptance includes deterministic legacy-boundary tests under real
+Python and fresh packaged-app profiles. It checks every sticker's availability,
+preview availability and image/preview SHA-256. A controlled profile has 36 old
+staging paths at or above 260 characters while all final paths fit. A second
+profile measures final paths beyond 260 and requires useful diagnostics where
+unsupported. Evidence records read-only LongPathsEnabled policy, both Python and
+frozen EXE manifest declarations, actual host-Python boundary opens and frozen
+install results separately: 260 characters is not a universal failure boundary.
 
 All recorded execution is hosted-runner automation. It does not claim human
 acceptance on a Mac/Linux device, protected-folder permission prompts, native

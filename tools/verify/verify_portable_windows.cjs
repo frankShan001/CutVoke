@@ -1,3 +1,5 @@
+const { verifyNativePreview } = require("./verify_native_preview.cjs");
+const { verifyWindowsResourceInstall } = require("./verify_windows_resource_install.cjs");
 // Runs the shipped ZIP's CutVoke.exe on Windows, with no development runtimes
 // on the app's PATH. Playwright drives its actual, visible Electron window.
 const assert = require("node:assert/strict");
@@ -57,6 +59,7 @@ async function main() {
   assert.equal(process.platform, "win32", "This acceptance must run on Windows");
   const download = JSON.parse(fs.readFileSync(path.join(root, "dist/portable/download-info.json")));
   report.download = download;
+  assert.equal(download.commit, execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim(), "Archive provenance must match the checked-out source");
   const zip = path.join(root, "dist/portable", download.filename);
   assert.equal(crypto.createHash("sha256").update(fs.readFileSync(zip)).digest("hex"), download.sha256);
   const extracted = path.join(out, "中文 空格路径");
@@ -213,20 +216,18 @@ async function main() {
     await page.reload();
     await page.getByRole("button", { name: `打开工程 ${projectId}`, exact: true }).click();
     await page.getByRole("heading", { name: "时间线", exact: true }).waitFor();
-    await page.getByRole("button", { name: "播放", exact: true }).click();
-    // The decoder pool retains hidden, paused videos. Only the active player
-    // proves visible playback; DOM order is not the playback identity.
-    const previewVideo = page.locator("video.player__video");
-    await expect(previewVideo).toBeVisible({ timeout: 90_000 });
-    await expect.poll(() => previewVideo.evaluate(v => v.currentTime), { timeout: 90_000 }).toBeGreaterThan(.25)
-      .catch(async error => {
-        report.previewVideos = await page.locator("video").evaluateAll(videos => videos.map(v => ({
-          className: v.className, hidden: v.hidden, currentTime: v.currentTime,
-          paused: v.paused, readyState: v.readyState, error: v.error?.message, src: v.currentSrc,
-        })));
-        save(); throw error;
-      });
-    await page.getByRole("button", { name: "暂停", exact: true }).click();
+    try {
+      report.previewPlayback = await verifyNativePreview(page, expect);
+    } catch (error) {
+      report.previewVideos = await page.locator("video").evaluateAll(videos => videos.map(v => ({
+        className: v.className, hidden: v.hidden, visibility: getComputedStyle(v).visibility,
+        currentTime: v.currentTime, paused: v.paused, readyState: v.readyState,
+        error: v.error?.message, src: v.currentSrc,
+      })));
+      report.previewPlayhead = await page.getByRole("slider", { name: "时间线播放头" }).getAttribute("aria-valuenow");
+      await page.screenshot({ path: path.join(out, "preview-failure.png") }).catch(() => {});
+      save(); throw error;
+    }
     report.checks.actualPreviewPlayback = true;
     await page.screenshot({ path: path.join(out, "02-chinese-import-preview.png") });
     await page.getByRole("button", { name: "导出", exact: true }).click();
@@ -265,6 +266,9 @@ async function main() {
     report.checks.restartPreservesProjectAndLanguage = true;
     await close();
     report.checks.windowCloseStopsOwnedBackend = true;
+    report.resourceInstall = await verifyWindowsResourceInstall({ root, out, executable, engine,
+      electron: _electron, expect, env });
+    report.checks.freshDeepResourceFilesAndPreviewsAvailable = true;
     report.storage = { database: path.join(data, "data/projects.sqlite"), profile, cache: cache.directory };
     run("pwsh.exe", ["-NoProfile", "-File", path.join(root, "tools/verify/verify_portable_windows.ps1"), "-App", executable, "-Output", out, "-Normal"]);
     const normal = JSON.parse(fs.readFileSync(path.join(out, "normal-startup-result.json")));

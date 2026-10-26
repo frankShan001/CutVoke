@@ -116,6 +116,14 @@ test("a slow preparation can be cancelled to enter on-demand editing", async ({ 
   const id = await create(request, name);
   await edit(request, id, "clip.insert", title());
   let cancellations = 0;
+  // First-frame readiness also enters the editor. Hold that independent path
+  // so this test actually exercises the manual cancellation button.
+  let releaseFrame!: () => void;
+  const frameGate = new Promise<void>(resolve => { releaseFrame = resolve; });
+  await page.route(`**/api/v1/projects/${id}/preview-frame?*`, async route => {
+    await frameGate;
+    await route.continue().catch(() => {});
+  });
   await page.route(`**/api/v1/projects/${id}/preview-jobs`, route => route.fulfill({
     json: { jobId: "slow-production", state: "running", phase: "rendering", progress: 0,
       completedWindows: 0, totalWindows: 1, currentWindow: 1, windowStart: 0, windowEnd: 2,
@@ -129,13 +137,16 @@ test("a slow preparation can be cancelled to enter on-demand editing", async ({ 
   await page.route("**/api/v1/preview-jobs/slow-production/cancel", route => {
     cancellations++; return route.fulfill({ json: { state: "cancelled" } });
   });
-  await page.goto("/");
-  await page.getByRole("button", { name: `打开工程 ${name}` }).click();
-  await expect(page.getByText("正在渲染第 1 段（0–2 秒），已用 5 秒")).toBeVisible();
-  await page.getByRole("button", { name: "先进入编辑，按需预览" }).click();
-  await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible();
-  await expect.poll(() => cancellations).toBeGreaterThan(0);
-  await expect(page.locator("video.player__video")).toBeVisible({ timeout: 30_000 });
+  try {
+    await page.goto("/");
+    await page.getByRole("button", { name: `打开工程 ${name}` }).click();
+    await expect(page.getByText("正在渲染第 1 段（0–2 秒），已用 5 秒")).toBeVisible();
+    await page.getByRole("button", { name: "先进入编辑，按需预览" }).click();
+    await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible();
+    await expect.poll(() => cancellations).toBeGreaterThan(0);
+    releaseFrame();
+    await expect(page.locator("video.player__video")).toBeVisible({ timeout: 30_000 });
+  } finally { releaseFrame(); }
 });
 
 test("canvas production versions switch and OTIO download imports through the Web controls", async ({ page, request }) => {
