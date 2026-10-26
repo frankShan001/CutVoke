@@ -148,6 +148,10 @@ an empty replacement library. Normal OS file permissions still apply.
 Resource installs reserve short independent temporary basenames exclusively in
 the destination directory, verify their bytes and atomically replace the final
 file. A long sticker basename must not be repeated in its staging filename.
+Concurrent installers may accept another installer's completed file only after
+verifying its hash and size. Windows sharing/access conflicts receive a bounded
+wait; a lasting denial or corrupt destination still fails with its original OS
+evidence. Ten six-installer rounds and deterministic peer/denial cases cover this.
 Filesystem failures retain the operation stage, path lengths (UTF-16 code units),
 errno and winerror in the sticker API's `installationError` and engine log. If the
 final path itself exceeds the process/filesystem limit, choose a shorter portable

@@ -105,7 +105,8 @@ def test_short_install_is_idempotent_and_exclusively_reserves_temp(tmp_path, mon
     assert len(reserved) == 1
 
 
-def test_concurrent_installers_use_independent_temps_and_atomic_verified_replace(tmp_path, monkeypatch):
+@pytest.mark.parametrize("iteration", range(10))
+def test_concurrent_installers_use_independent_temps_and_atomic_verified_replace(tmp_path, monkeypatch, iteration):
     source, root, target, kwargs = _case(tmp_path)
     barrier = threading.Barrier(6, timeout=10)
     names = []
@@ -124,6 +125,58 @@ def test_concurrent_installers_use_independent_temps_and_atomic_verified_replace
     assert result == [target] * 6
     assert len(set(names)) == 6
     assert target.read_bytes() == source.read_bytes()
+    assert list(target.parent.iterdir()) == [target]
+
+
+def test_verified_peer_publication_survives_windows_replace_conflict(tmp_path, monkeypatch):
+    source, root, target, kwargs = _case(tmp_path)
+    def competing_publish(temporary, destination):
+        # Another process has published the exact bytes before our rename fails.
+        Path(destination).write_bytes(Path(temporary).read_bytes())
+        error = PermissionError(errno.EACCES, "concurrent rename", str(destination))
+        error.winerror = 5
+        raise error
+    monkeypatch.setattr(rp.os, "replace", competing_publish)
+    assert rp.install_immutable_resource_file(source, root, **kwargs) == target
+    assert target.read_bytes() == source.read_bytes()
+    assert list(target.parent.iterdir()) == [target]
+
+
+def test_windows_sharing_conflict_retries_then_commits_verified_bytes(tmp_path, monkeypatch):
+    source, root, target, kwargs = _case(tmp_path)
+    original = rp.os.replace
+    attempts = []
+    def replace(src, dst):
+        attempts.append(True)
+        if len(attempts) < 3:
+            error = OSError(errno.EACCES, "fixture sharing conflict", str(dst))
+            error.winerror = 32
+            raise error
+        return original(src, dst)
+    monkeypatch.setattr(rp.os, "replace", replace)
+    assert rp.install_immutable_resource_file(source, root, **kwargs) == target
+    assert len(attempts) == 3
+    assert target.read_bytes() == source.read_bytes()
+    assert list(target.parent.iterdir()) == [target]
+
+
+def test_persistent_windows_denial_does_not_accept_corrupt_existing_file(tmp_path, monkeypatch):
+    source, root, target, kwargs = _case(tmp_path)
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"existing corrupt resource")
+    attempts = []
+    def denied(*args):
+        attempts.append(True)
+        error = PermissionError(errno.EACCES, "persistent denial", str(target))
+        error.winerror = 5
+        raise error
+    monkeypatch.setattr(rp.os, "replace", denied)
+    with pytest.raises(PermissionError) as caught:
+        rp.install_immutable_resource_file(source, root, **kwargs)
+    assert 1 < len(attempts) <= 10
+    assert caught.value.installation_diagnostic["stage"] == "replace"
+    assert caught.value.installation_diagnostic["winerror"] == 5
+    assert target.read_bytes() == b"existing corrupt resource"
     assert list(target.parent.iterdir()) == [target]
 
 

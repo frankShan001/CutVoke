@@ -11,6 +11,7 @@ import re
 import shutil
 import tempfile
 import threading
+import time
 import uuid
 import zipfile
 from pathlib import Path
@@ -98,6 +99,29 @@ def file_matches_sha256(path: Path, expected: str, size_bytes: int | None = None
     return _matches_sha256(path, stat, expected)
 
 
+def _publish_verified_resource(temporary: Path, destination: Path,
+                               expected_sha256: str, expected_size: int | None) -> bool:
+    """Commit once, or accept an identical verified publication by a peer.
+
+    Windows rename can reject concurrent replacement/read handles with access
+    or sharing errors. Never accept an unverified destination or hide a lasting
+    permission error; leave the original exception intact after a bounded wait.
+    """
+    for attempt in range(8):
+        if file_matches_sha256(destination, expected_sha256, expected_size):
+            return False
+        try:
+            os.replace(temporary, destination)
+            return True
+        except OSError as error:
+            if file_matches_sha256(destination, expected_sha256, expected_size):
+                return False
+            if getattr(error, "winerror", None) not in (5, 32, 33) or attempt == 7:
+                raise
+            time.sleep(.01 * 2 ** attempt)
+    raise AssertionError("unreachable resource publication state")
+
+
 def install_immutable_resource_file(
     source: Path,
     resource_root: Path,
@@ -158,8 +182,8 @@ def install_immutable_resource_file(
                 (expected_size is not None and temporary.stat().st_size != expected_size)):
             raise ValueError(f"resource copy failed verification: {relative_path}")
         stage, operation_path = "replace", destination
-        os.replace(temporary, destination)
-        temporary = None
+        if _publish_verified_resource(temporary, destination, expected_sha256, expected_size):
+            temporary = None
     except (OSError, ValueError) as error:
         failure = error
         error.installation_diagnostic = resource_install_diagnostic(
@@ -176,6 +200,8 @@ def install_immutable_resource_file(
                     failure.installation_diagnostic["cleanupError"] = resource_install_diagnostic(
                         cleanup_error, stage="cleanup", path=temporary)
                 else:
+                    cleanup_error.installation_diagnostic = resource_install_diagnostic(
+                        cleanup_error, stage="cleanup", path=temporary, destination=destination, temporary=temporary)
                     raise
     return destination
 
