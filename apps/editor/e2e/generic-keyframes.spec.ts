@@ -34,11 +34,32 @@ test('generic curve editor persists Bezier volume and retimes selected nodes as 
   await page.locator('.inspector').getByRole('button',{name:'添加',exact:true}).first().click();
   const lane=async()=>(await read(request,id)).sequence.tracks[0].clips[0].keyframes.volume;
   await expect.poll(async()=>(await lane())?.length).toBe(1);
-  await page.getByLabel('关键帧时间（秒）').fill('2');await page.getByLabel('关键帧值',{exact:true}).fill('1');
-  await page.getByLabel('关键帧插值').selectOption('linear');
-  await page.locator('.inspector').getByRole('button',{name:'添加',exact:true}).first().click();
-  await expect.poll(async()=>(await lane())?.length).toBe(2);
+  const selections=page.getByRole('checkbox',{name:/^选择关键帧 /});
+  await expect(selections).toHaveCount(1);
+  let releaseRefresh!:()=>void,blocked=0;
+  const refreshGate=new Promise<void>(resolve=>{releaseRefresh=resolve;});
+  let holdRefresh=true;
+  await page.route(url=>[`${projectPath(id)}`,`${projectPath(id)}/sync`].includes(url.pathname),async route=>{
+    if(holdRefresh && route.request().method()==='GET'){blocked++;await refreshGate;}
+    await route.continue().catch(()=>{});
+  });
+  try {
+    await page.getByLabel('关键帧时间（秒）').fill('2');await page.getByLabel('关键帧值',{exact:true}).fill('1');
+    await page.getByLabel('关键帧插值').selectOption('linear');
+    await page.locator('.inspector').getByRole('button',{name:'添加',exact:true}).first().click();
+    await expect.poll(async()=>(await lane())?.length).toBe(2);
+    await expect.poll(()=>blocked).toBeGreaterThan(0);
+    // The server already has two nodes while this view still has one. Do not
+    // allow a stale Select All to silently exclude the just-added node.
+    await expect(selections).toHaveCount(1);
+    await expect(page.getByRole('button',{name:'全选节点'})).toBeDisabled();
+    await expect(selections.first()).toBeDisabled();
+    await expect(page.locator('.inspector').getByRole('button',{name:'添加',exact:true}).first()).toBeDisabled();
+  } finally {holdRefresh=false;releaseRefresh();}
+  await expect(selections).toHaveCount(2);
+  await expect(page.getByRole('button',{name:'全选节点'})).toBeEnabled();
   await page.getByRole('button',{name:'全选节点'}).click();
+  await expect(selections.nth(0)).toBeChecked();await expect(selections.nth(1)).toBeChecked();
   await page.getByLabel('关键帧移动秒数').fill('.5');await page.getByLabel('关键帧时间倍率').fill('.5');
   await page.getByRole('button',{name:'应用时间调整'}).click();
   const times=async()=>(await lane()).map((key:any)=>Number(key.time.num)/Number(key.time.den));

@@ -114,3 +114,53 @@ test("native acceptance waits for a delayed decoder before playing a short clip"
     expect(samples).toHaveLength(3);
   } finally { release(); }
 });
+
+test("native acceptance waits for a submitted frame after clocks advance and still rejects black pixels", async ({ page, request }) => {
+  const { id, name } = await fixture(request);
+  await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({ status: 404, json: {} }));
+  await page.goto("/");
+  await page.getByRole("button", { name: `打开工程 ${name}` }).click();
+  const video = page.locator("video.player__video");
+  await expect(video).toBeVisible();
+  await expect.poll(() => video.evaluate(v => v.readyState)).toBeGreaterThanOrEqual(2);
+  await page.evaluate(() => {
+    const gate = { held: true, black: false, reads: 0, pending: [] as (() => void)[] };
+    (window as any).__frameSubmission = gate;
+    const realCallback = HTMLVideoElement.prototype.requestVideoFrameCallback;
+    HTMLVideoElement.prototype.requestVideoFrameCallback = function(callback) {
+      return realCallback.call(this, (now, metadata) => {
+        if (gate.held && !this.paused) gate.pending.push(() => callback(now, metadata));
+        else callback(now, metadata);
+      });
+    };
+    const realPixels = CanvasRenderingContext2D.prototype.getImageData;
+    CanvasRenderingContext2D.prototype.getImageData = function(...args: Parameters<typeof realPixels>) {
+      gate.reads++;
+      if (gate.held || gate.black) return new ImageData(args[2], args[3]);
+      return realPixels.apply(this, args);
+    };
+  });
+  let settled = false, acceptanceError = "";
+  const acceptance = verifyNativePreview(page, expect, { cycles: 1 });
+  void acceptance.then(() => { settled = true; }, (error: Error) => { settled = true; acceptanceError = error.message; });
+  await expect.poll(() => video.evaluate(v => v.currentTime)).toBeGreaterThan(.35);
+  await expect.poll(async () => Number(await page.getByRole("slider", { name: "时间线播放头", exact: true }).getAttribute("aria-valuenow"))).toBeGreaterThan(.25);
+  await expect.poll(() => page.evaluate(() => (window as any).__frameSubmission.pending.length)).toBeGreaterThan(0);
+  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))));
+  expect(settled, acceptanceError).toBe(false);
+  expect(await page.evaluate(() => (window as any).__frameSubmission.reads)).toBe(0);
+  await page.evaluate(() => {
+    const gate = (window as any).__frameSubmission;
+    gate.held = false;
+    gate.pending.splice(0).forEach((callback: () => void) => callback());
+  });
+  const samples = await acceptance;
+  expect(samples).toHaveLength(1);
+  expect(samples[0].mediaTime).toBeGreaterThan(.25);
+  expect(samples[0].presentedFrames).toBeGreaterThan(0);
+  expect(samples[0].energy).toBeGreaterThan(0);
+  // A submitted black picture must fail immediately at the original pixel
+  // assertion, rather than being retried until a nicer frame appears.
+  await page.evaluate(() => { (window as any).__frameSubmission.black = true; });
+  await expect(verifyNativePreview(page, expect, { cycles: 1 })).rejects.toThrow(/toBeGreaterThan/);
+});

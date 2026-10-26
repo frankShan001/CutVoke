@@ -65,10 +65,21 @@ jobs:
           cache-dependency-path: |
             apps/desktop/package-lock.json
             apps/editor/package-lock.json
-      - name: Install Linux build and desktop test tools
+      - name: Select official Ubuntu archive mirror
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i 's|https\?://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
+            cat /etc/apt/apt-mirrors.txt
+          fi
+      - name: Refresh Ubuntu package indexes
+        if: runner.os == 'Linux'
+        timeout-minutes: 5
+        run: sudo apt-get update
+      - name: Install Linux build and desktop test tools
+        if: runner.os == 'Linux'
+        timeout-minutes: 10
+        run: |
           sudo apt-get install -y nasm ninja-build pkg-config libgtk-3-0 libnss3 libasound2 libgbm1 libatk-bridge2.0-0 libxss1 libdrm2 libxkbcommon0 xvfb xdotool openbox dbus-x11 scrot tesseract-ocr
       - name: Install macOS build tools
         if: runner.os == 'macOS'

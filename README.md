@@ -7,7 +7,7 @@
 <p align="center">Start a cut with your preferred AI. Refine it by hand. Keep every edit in a local, editable project.</p>
 
 <p align="center">
-  <a href="https://github.com/frankShan001/CutVoke/releases/tag/v0.3.2"><img src="https://img.shields.io/badge/v0.3.2-prerelease-527fca?style=flat-square" alt="v0.3.2 prerelease" /></a>
+  <a href="https://github.com/frankShan001/CutVoke/releases/tag/v0.3.3"><img src="https://img.shields.io/badge/v0.3.3-prerelease-527fca?style=flat-square" alt="v0.3.3 prerelease" /></a>
   <a href="https://github.com/frankShan001/CutVoke/actions/workflows/ci.yml"><img src="https://github.com/frankShan001/CutVoke/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-4d8a74?style=flat-square" alt="MIT license" /></a>
 </p>
@@ -121,14 +121,14 @@ For the latest source build, see the [production workflow](docs/production-workf
 
 **Download, extract and start editing.** Basic local import, editing, preview and MP4 export need no AI account or separate Python, Node.js or FFmpeg installation.
 
-| Your device | v0.3.2 prerelease |
+| Your device | v0.3.3 prerelease |
 | --- | --- |
-| Windows x64 | [Portable ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/CutVoke-0.3.2-windows-x64-portable.zip) |
-| Mac · Apple Silicon | [arm64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/CutVoke-0.3.2-macos-arm64.zip) |
-| Mac · Intel | [x64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/CutVoke-0.3.2-macos-x64.zip) |
-| Linux x64 | [tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/CutVoke-0.3.2-linux-x64.tar.gz) |
+| Windows x64 | [Portable ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-windows-x64-portable.zip) |
+| Mac · Apple Silicon | [arm64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-macos-arm64.zip) |
+| Mac · Intel | [x64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-macos-x64.zip) |
+| Linux x64 | [tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-linux-x64.tar.gz) |
 
-[Verify SHA-256](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/SHA256SUMS) · [Installation / troubleshooting](docs/user/installation.md) · [All release assets](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.2)
+[Verify SHA-256](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/SHA256SUMS) · [Installation / troubleshooting](docs/user/installation.md) · [All release assets](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.3)
 
 > [!NOTE]
 > The video showcases were made with the source build. Reproduction project packages and source instructions are linked below.
@@ -136,10 +136,10 @@ For the latest source build, see the [production workflow](docs/production-workf
 <details>
 <summary><strong>Windows portable (x64 prerelease)</strong></summary>
 
-[Download Windows portable 0.3.2](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/CutVoke-0.3.2-windows-x64-portable.zip), from the [v0.3.2 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.2).
+[Download Windows portable 0.3.3](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-windows-x64-portable.zip), from the [v0.3.3 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.3).
 
-1. Download the ZIP and [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/SHA256SUMS); verify the ZIP with `Get-FileHash -Algorithm SHA256`.
-2. Fully extract `CutVoke-0.3.2-windows-x64-portable.zip` into a writable folder.
+1. Download the ZIP and [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/SHA256SUMS); verify the ZIP with `Get-FileHash -Algorithm SHA256`.
+2. Fully extract `CutVoke-0.3.3-windows-x64-portable.zip` into a writable folder.
 3. Double-click **`CutVoke.exe`**. Keep all neighboring files.
 
 No installer, administrator permission, Python, Node.js or system FFmpeg is needed. Basic local import, editing, preview and MP4 export work without an AI account. Optional AI clients, cloud services and speech/person models have separate requirements.
@@ -151,9 +151,9 @@ Projects, imported media, settings and caches use **`CutVoke Data` beside the ex
 <details>
 <summary><strong>macOS (Apple Silicon / Intel) and Linux (x64)</strong></summary>
 
-The [v0.3.2 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.2) rebuilds all four archives from its tagged source commit. [BUILD-INFO.json](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/BUILD-INFO.json) records the exact source, successful CI/native acceptance runs and archive hashes. Earlier releases remain available.
+The [v0.3.3 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.3) rebuilds all four archives from its tagged source commit. [BUILD-INFO.json](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/BUILD-INFO.json) records the exact source, successful CI/native acceptance runs and archive hashes. Earlier releases remain available.
 
-These are the actual archives, ready to extract; no outer Actions ZIP is involved. Verify against [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/SHA256SUMS). The built editor, frozen backend, FFmpeg/ffprobe, resources, fonts and licenses are included; basic editing needs no separate Python, Node.js or FFmpeg. [Installation and requirements](docs/user/installation.md#macos-arm64--x64) and the [release build evidence](https://github.com/frankShan001/CutVoke/releases/download/v0.3.2/BUILD-INFO.json) describe the exact scope.
+These are the actual archives, ready to extract; no outer Actions ZIP is involved. Verify against [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/SHA256SUMS). The built editor, frozen backend, FFmpeg/ffprobe, resources, fonts and licenses are included; basic editing needs no separate Python, Node.js or FFmpeg. [Installation and requirements](docs/user/installation.md#macos-arm64--x64) and the [release build evidence](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/BUILD-INFO.json) describe the exact scope.
 
 - **macOS 13+:** choose the matching architecture, unzip and move `CutVoke.app` to `/Applications` or `~/Applications`. It has an ad-hoc integrity signature, **no Developer ID or notarization**. Gatekeeper's automatic trust checks rejected both builds. After verifying the source and SHA256, users who trust the unmodified app may follow [Apple's app-specific approval instructions](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac) in **System Settings → Privacy & Security → Open Anyway** after trying to open it. Keep global security protections enabled; no developer account purchase is needed. Actual automation ran on macOS 15 arm64 and Intel, not every user device or macOS 13/14.
 - **Linux x64 / Ubuntu 22.04 baseline:** preserve executable permissions/symlinks while extracting the tar.gz, then run `./cutvoke` in its directory. A graphical desktop, glibc 2.35+, Electron system libraries and working unprivileged user-namespace sandbox are required. No FUSE is needed. Root, `noexec` and policies blocking the sandbox are outside this directory package's supported scope; do not use `--no-sandbox`. Other distributions, Wayland-only sessions and Ubuntu 24.04 AppArmor need separate acceptance.
