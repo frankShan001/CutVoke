@@ -75,6 +75,8 @@ jobs:
   browser:
     name: Browser editing workflow
     runs-on: ubuntu-24.04
+    # Successful complete jobs took 19-30min; bound stalled hosted installs.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
         with:
@@ -94,12 +96,24 @@ jobs:
         run: |
           npm ci --ignore-scripts
           npm run test:build-deps
-      - name: Install renderer and project package
+      # Keep installation phases separate so live job metadata identifies a
+      # stalled apt index, FFmpeg package, pip resolver, or browser download.
+      - name: Refresh Ubuntu package indexes
+        timeout-minutes: 5
+        run: sudo apt-get update
+      - name: Install FFmpeg
+        timeout-minutes: 5
         run: |
-          sudo apt-get update
           sudo apt-get install -y ffmpeg
+          ffmpeg -version
+      - name: Install Python project and development dependencies
+        timeout-minutes: 10
+        run: |
+          python -VV
+          python -m pip --version
           python -m pip install -e ".[dev]"
-      - name: Install browser and run editor scenarios
+      - name: Install browser and check editor helpers
+        timeout-minutes: 15
         working-directory: apps/editor
         run: |
           npm ci
@@ -108,8 +122,14 @@ jobs:
           npm run test:preview-cache
           npm run test:basic
           npx playwright install --with-deps chromium
-          npm run test:e2e
-          npm run test:e2e:regressions
+      - name: Run full editor scenarios
+        timeout-minutes: 40
+        working-directory: apps/editor
+        run: npm run test:e2e
+      - name: Repeat deterministic state orderings
+        timeout-minutes: 10
+        working-directory: apps/editor
+        run: npm run test:e2e:regressions
       - name: Preserve browser failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v7
