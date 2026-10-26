@@ -43,6 +43,8 @@ python tools/verify/check_layering.py
 python -m pytest -q
 ```
 
+资源安装改动须保留 `tests/storage/test_resource_install_paths.py` 的临时文件、并发及失败清理覆盖。既要确定性模拟旧路径边界，也要保留真实 Windows Python 与冻结应用的深数据目录验收，避免 runner 的注册表或应用清单支持掩盖长文件名缺陷。临时文件须排他创建、验证哈希并在同目录原子替换；文件系统失败应保留具体诊断，不能静默跳过。
+
 前端改动至少运行：
 
 ```bash

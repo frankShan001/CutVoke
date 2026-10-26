@@ -106,6 +106,7 @@ class HttpApi:
             if store_path and store_path != ":memory:" and "mode=memory" not in store_path
             else os.path.join(os.path.expanduser("~"), ".cutvoke", "media"))
         cleanup_uploads(self.media_dir)
+        self._sticker_install_errors: dict[str, dict] = {}
         if service.store is not None:
             self._ensure_active_stickers()
         self.render = render or RenderService()
@@ -160,9 +161,11 @@ class HttpApi:
         store_path = str(getattr(self.service.store, "path", ""))
         immutable_root = (None if store_path == ":memory:" or "mode=memory" in store_path
                           else Path(self.media_dir) / ".builtin-resources")
+        self._sticker_install_errors = {}
         ensure_builtin_stickers(
             self.service.store, immutable_root=immutable_root,
-            package_root=active_resource_pack_root(self.media_dir))
+            package_root=active_resource_pack_root(self.media_dir),
+            diagnostics=self._sticker_install_errors)
 
     def _ensure_builtin_backgrounds(self) -> None:
         """Expose bundled composition backgrounds in the shared media library."""
@@ -1496,14 +1499,17 @@ class HttpApi:
                 } if isinstance(file_record, dict) and isinstance(file_record.get("sha256"), str) else None)
                 preview_available = preview is not None and preview.is_file()
                 availability_message = ""
+                installation_error = self._sticker_install_errors.get(sticker["assetId"]) if not resource_available else None
                 if not resource_available or not preview_available:
-                    availability_message = "资源缺失或校验失败；请恢复/下载对应资源包，或选择其他贴纸。"
+                    availability_message = (installation_error["message"] if installation_error else
+                        "资源缺失或校验失败；请恢复/下载对应资源包，或选择其他贴纸。")
                 items.append({key: value for key, value in sticker.items()
                               if key not in ("path", "previewPath")} | {
                     "resourceRef": resource_ref,
                     "available": resource_available and preview_available,
                     "previewAvailable": preview_available,
                     "availabilityMessage": availability_message,
+                    "installationError": installation_error,
                     "downloadState": "bundled" if resource_available and preview_available else "missing",
                 })
             return 200, {"stickers": items, "count": len(items),

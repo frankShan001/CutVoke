@@ -145,6 +145,24 @@ including logs, font caches and generated MCP configuration. `CUTVOKE_HOME` and
 its existing sibling directory behavior. A failed write never silently creates
 an empty replacement library. Normal OS file permissions still apply.
 
+Resource installs reserve short independent temporary basenames exclusively in
+the destination directory, verify their bytes and atomically replace the final
+file. A long sticker basename must not be repeated in its staging filename.
+Filesystem failures retain the operation stage, path lengths (UTF-16 code units),
+errno and winerror in the sticker API's `installationError` and engine log. If the
+final path itself exceeds the process/filesystem limit, choose a shorter portable
+data location (`CUTVOKE_PORTABLE_HOME`); changing Windows system policy is not a
+required workaround.
+
+Windows acceptance includes deterministic legacy-boundary tests under real
+Python and fresh packaged-app profiles. It checks every sticker's availability,
+preview availability and image/preview SHA-256. A controlled profile has 36 old
+staging paths at or above 260 characters while all final paths fit. A second
+profile measures final paths beyond 260 and requires useful diagnostics where
+unsupported. Evidence records read-only LongPathsEnabled policy, both Python and
+frozen EXE manifest declarations, actual host-Python boundary opens and frozen
+install results separately: 260 characters is not a universal failure boundary.
+
 All recorded execution is hosted-runner automation. It does not claim human
 acceptance on a Mac/Linux device, protected-folder permission prompts, native
 picker/drag ergonomics, speaker/audio output, GPU acceleration, every effect or

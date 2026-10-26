@@ -22,6 +22,7 @@
 from __future__ import annotations
 
 import os
+import logging
 from pathlib import Path
 from typing import Optional
 
@@ -165,7 +166,8 @@ def ensure_builtin_audio(store, render: Optional[RenderService] = None) -> list[
 
 
 def ensure_builtin_stickers(store, immutable_root: Optional[Path] = None,
-                           package_root: Optional[Path] = None) -> list[dict]:
+                           package_root: Optional[Path] = None,
+                           diagnostics: Optional[dict] = None) -> list[dict]:
     """把包内贴纸目录的真实 PNG 登记进素材账本（J07 内容资产，kind=image）。
 
     素材按资源包版本和 SHA-256 保存在不可变目录；工程引用因此不会因后续
@@ -176,6 +178,7 @@ def ensure_builtin_stickers(store, immutable_root: Optional[Path] = None,
     from cutvoke.storage.resource_pack import (
         install_immutable_resource_file,
         load_resource_pack_manifest,
+        resource_install_diagnostic,
     )
 
     manifest = load_resource_pack_manifest(package_root)
@@ -207,7 +210,11 @@ def ensure_builtin_stickers(store, immutable_root: Optional[Path] = None,
                     expected_sha256=file_record["sha256"],
                     expected_size=file_record.get("sizeBytes"),
                 )
-            except (OSError, ValueError):
+            except (OSError, ValueError) as error:
+                detail = resource_install_diagnostic(error, path=source)
+                logging.getLogger(__name__).warning("resource_install_failed %s %s", sticker["assetId"], detail)
+                if diagnostics is not None:
+                    diagnostics[sticker["assetId"]] = detail
                 continue
         asset = store.add_asset(
             asset_id=sticker["assetId"],

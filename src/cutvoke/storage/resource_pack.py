@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import errno
 import hashlib
 import io
 import json
 import os
 import re
 import shutil
+import tempfile
 import threading
 import uuid
 import zipfile
@@ -30,6 +32,30 @@ from cutvoke.paths import catalog_path
 MANIFEST_PATH = catalog_path("builtin_resource_pack.json")
 _HASH_CACHE: dict[tuple[str, int, int, str], bool] = {}
 _HASH_CACHE_LOCK = threading.Lock()
+
+
+def resource_install_diagnostic(error: Exception, *, stage: str = "source_verify",
+                                path: Path | None = None,
+                                destination: Path | None = None,
+                                temporary: Path | None = None) -> dict[str, Any]:
+    """Keep filesystem evidence even when resource registration can continue."""
+    existing = getattr(error, "installation_diagnostic", None)
+    if existing is not None:
+        return existing
+    failed = str(getattr(error, "filename", None) or path or "")
+    length = lambda value: len(str(value).encode("utf-16-le")) // 2 if value else None
+    final_length = length(destination)
+    message = f"资源安装失败（{stage}，路径长度 {length(failed)}）：{error}"
+    if final_length is not None:
+        message += f"；目标路径长度 {final_length}"
+    if (getattr(error, "winerror", None) == 206 or getattr(error, "errno", None) == errno.ENAMETOOLONG
+            or (final_length is not None and final_length >= 260)):
+        message += "；目标路径本身可能超出当前运行环境限制，请缩短应用数据目录路径后重试。"
+    return {"stage": stage, "path": failed, "pathLength": length(failed),
+            "destinationPath": str(destination) if destination else None,
+            "destinationPathLength": final_length, "temporaryPathLength": length(temporary),
+            "errno": getattr(error, "errno", None), "winerror": getattr(error, "winerror", None),
+            "errorType": type(error).__name__, "detail": str(error), "message": message}
 
 
 def _matches_sha256(path: Path, stat, expected: str) -> bool:
@@ -103,24 +129,54 @@ def install_immutable_resource_file(
 
     root = resource_root.resolve()
     destination = root.joinpath(pack_id, pack_version, expected_sha256.lower(), *relative.parts)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    destination = destination.resolve()
-    if not destination.is_relative_to(root):
-        raise ValueError("resource destination escapes the immutable resource root")
-    if file_matches_sha256(destination, expected_sha256, expected_size):
-        return destination
-
-    temporary = destination.with_name(f"{destination.name}.{uuid.uuid4().hex}.tmp")
+    temporary = None
+    failure = None
+    stage, operation_path = "destination_prepare", destination.parent
     try:
-        shutil.copyfile(source, temporary)
-        if not file_matches_sha256(temporary, expected_sha256, expected_size):
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination = destination.resolve()
+        if not destination.is_relative_to(root):
+            raise ValueError("resource destination escapes the immutable resource root")
+        if file_matches_sha256(destination, expected_sha256, expected_size):
+            return destination
+        stage, operation_path = "temporary_create", destination.parent
+        # Same-directory replacement stays atomic. The name is independent of
+        # the resource's (potentially very long) basename, and O_EXCL reserves it.
+        fd, name = tempfile.mkstemp(prefix=".cv-", dir=destination.parent)
+        temporary = Path(name)
+        stage, operation_path = "copy", temporary
+        with os.fdopen(fd, "wb") as output, source.open("rb") as input_file:
+            shutil.copyfileobj(input_file, output)
+        stage, operation_path = "copy_verify", temporary
+        # Unlike status checks, verification here must preserve a read/stat
+        # failure's errno/winerror instead of flattening it into "unavailable".
+        digest = hashlib.sha256()
+        with temporary.open("rb") as copied:
+            for block in iter(lambda: copied.read(1024 * 1024), b""):
+                digest.update(block)
+        if (digest.hexdigest() != expected_sha256.lower() or
+                (expected_size is not None and temporary.stat().st_size != expected_size)):
             raise ValueError(f"resource copy failed verification: {relative_path}")
+        stage, operation_path = "replace", destination
         os.replace(temporary, destination)
+        temporary = None
+    except (OSError, ValueError) as error:
+        failure = error
+        error.installation_diagnostic = resource_install_diagnostic(
+            error, stage=stage, path=operation_path, destination=destination,
+            temporary=temporary or (Path(error.filename) if stage == "temporary_create" and getattr(error, "filename", None) else None))
+        raise
     finally:
-        try:
-            temporary.unlink(missing_ok=True)
-        except OSError:
-            pass
+        if temporary is not None:
+            try:
+                temporary.unlink(missing_ok=True)
+            except OSError as cleanup_error:
+                # Preserve the primary failure and record cleanup separately.
+                if failure is not None:
+                    failure.installation_diagnostic["cleanupError"] = resource_install_diagnostic(
+                        cleanup_error, stage="cleanup", path=temporary)
+                else:
+                    raise
     return destination
 
 

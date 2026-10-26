@@ -1,4 +1,5 @@
 const { verifyNativePreview } = require("./verify_native_preview.cjs");
+const { verifyWindowsResourceInstall } = require("./verify_windows_resource_install.cjs");
 // Runs the shipped ZIP's CutVoke.exe on Windows, with no development runtimes
 // on the app's PATH. Playwright drives its actual, visible Electron window.
 const assert = require("node:assert/strict");
@@ -265,6 +266,9 @@ async function main() {
     report.checks.restartPreservesProjectAndLanguage = true;
     await close();
     report.checks.windowCloseStopsOwnedBackend = true;
+    report.resourceInstall = await verifyWindowsResourceInstall({ root, out, executable, engine,
+      electron: _electron, expect, env });
+    report.checks.freshDeepResourceFilesAndPreviewsAvailable = true;
     report.storage = { database: path.join(data, "data/projects.sqlite"), profile, cache: cache.directory };
     run("pwsh.exe", ["-NoProfile", "-File", path.join(root, "tools/verify/verify_portable_windows.ps1"), "-App", executable, "-Output", out, "-Normal"]);
     const normal = JSON.parse(fs.readFileSync(path.join(out, "normal-startup-result.json")));

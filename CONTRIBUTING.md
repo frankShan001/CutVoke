@@ -36,6 +36,13 @@ python tools/verify/check_layering.py
 python -m pytest -q
 ```
 
+Resource installation changes must retain the staging/concurrency/cleanup
+coverage in `tests/storage/test_resource_install_paths.py`. Model legacy path
+limits deterministically and keep real Windows Python plus frozen-app deep-data
+acceptance; runner registry/manifest support can otherwise hide a long-name bug.
+Keep exclusive allocation, checksum verification and atomic same-directory
+replacement. Preserve filesystem failure evidence instead of silently skipping.
+
 For frontend or shared editing workflow changes, from `apps/editor`:
 
 ```bash
