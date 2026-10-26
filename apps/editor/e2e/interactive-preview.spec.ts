@@ -65,38 +65,73 @@ test("interactive rendering retries a failed latest frame with a real pointer cl
   expect(await current(request, id)).toEqual(before);
 });
 
-test("rapid edits abort obsolete work and a late response cannot replace the latest pixels", async ({ page, request }) => {
-  const id = await fixture(request);
-  await page.goto("/");
-  const images = await pngs(page), obsolete = gate();
-  const seen: number[] = [], failures: string[] = [];
-  page.on("requestfailed", req => { if (req.url().endsWith("interactive-frame")) failures.push(req.failure()?.errorText || ""); });
-  await page.route(`**/projects/${id}/interactive-frame`, async route => {
-    const body = route.request().postDataJSON();
-    const zoom = Number(body.commands.find((edit: { payload: { params?: { zoom?: number } } }) => edit.payload.params?.zoom)?.payload.params.zoom || 1.25);
-    seen.push(zoom);
-    if (zoom === 1.4) await obsolete.promise;
-    await route.fulfill({ contentType: "image/png", body: Buffer.from(zoom === 1.6 ? images.lime : images.blue, "base64") }).catch(() => {});
+for (const saveBeforeLate of [false, true]) {
+  test(`rapid edits abort obsolete work and a late response cannot replace the latest pixels ${saveBeforeLate ? "after" : "before"} save acknowledgement`, async ({ page, request }) => {
+    const id = await fixture(request);
+    await page.goto("/");
+    const images = await pngs(page), obsolete = gate(), obsoleteHandled = gate(), saveAck = gate();
+    const seen: number[] = [], abortedZooms: number[] = [];
+    let committedLatestFrames = 0;
+    page.on("requestfailed", req => {
+      if (req.url().endsWith("interactive-frame")) {
+        const edits = req.postDataJSON().commands;
+        abortedZooms.push(Number(edits.find((edit: { payload: { params?: { zoom?: number } } }) => edit.payload.params?.zoom)?.payload.params.zoom));
+      }
+    });
+    await page.route(`**/projects/${id}/commands`, async route => {
+      const response = await route.fetch();
+      await saveAck.promise;
+      await route.fulfill({ response });
+    });
+    await page.route(`**/projects/${id}/interactive-frame`, async route => {
+      const body = route.request().postDataJSON();
+      // commands is a pending overlay, not the complete saved effect state.
+      // After the save acknowledgement the client correctly sends commands: [].
+      const saved = await current(request, id);
+      const base = saved.sequence.tracks[0].clips[0].effects.find((effect: { effectId: string }) => effect.effectId === "cutvoke.fx.punchIn").params.zoom;
+      const zoom = Number(body.commands.find((edit: { payload: { params?: { zoom?: number } } }) => edit.payload.params?.zoom)?.payload.params.zoom ?? base);
+      seen.push(zoom);
+      if (!body.commands.length && Number(base) === 1.6) committedLatestFrames++;
+      if (zoom === 1.4) await obsolete.promise;
+      try {
+        await route.fulfill({ contentType: "image/png", body: Buffer.from(zoom === 1.6 ? images.lime : images.blue, "base64") });
+      } catch (error) { if (zoom !== 1.4) throw error; }
+      finally { if (zoom === 1.4) obsoleteHandled.release(); }
+    });
+    const savedFrame = async () => {
+      saveAck.release();
+      await expect(page.locator(".player__edit-status")).toHaveCount(0);
+      // A successful save may retain the equivalent preview without fetching.
+      // Seek one frame to deterministically exercise the persisted-state request.
+      const ruler = page.getByRole("slider", { name: "时间线播放头", exact: true });
+      await ruler.focus(); await ruler.press("ArrowRight");
+      await expect(ruler).toHaveAttribute("aria-valuenow", String(1 / 15));
+      await expect.poll(() => committedLatestFrames).toBeGreaterThan(0);
+      await expect.poll(() => pixel(page)).toEqual([0, 255, 0, 255]);
+    };
+    try {
+      await open(page, id);
+      await expect.poll(() => pixel(page)).toEqual([0, 0, 255, 255]);
+      await page.locator(".clip-block--video").click();
+      const zoom = page.getByRole("spinbutton", { name: "推近倍率", exact: true });
+      await zoom.fill("1.4");
+      await expect.poll(() => seen.includes(1.4)).toBe(true);
+      await zoom.fill("1.5");
+      await zoom.fill("1.6");
+      await expect.poll(() => seen.includes(1.6)).toBe(true);
+      await expect.poll(() => abortedZooms.includes(1.4)).toBe(true);
+      await expect.poll(() => pixel(page)).toEqual([0, 255, 0, 255]);
+      if (saveBeforeLate) await savedFrame();
+      obsolete.release();
+      await obsoleteHandled.promise;
+      await page.evaluate(async () => { for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame); });
+      expect(await pixel(page)).toEqual([0, 255, 0, 255]);
+      if (!saveBeforeLate) await savedFrame();
+      await expect.poll(async () => (await current(request, id)).sequence.tracks[0].clips[0].effects[0].params.zoom).toBe(1.6);
+      await expect(page.locator(".player__interactive-status[role='alert']")).toHaveCount(0);
+    } finally { obsolete.release(); saveAck.release(); }
   });
-  try {
-    await open(page, id);
-    await expect.poll(() => pixel(page)).toEqual([0, 0, 255, 255]);
-    await page.locator(".clip-block--video").click();
-    const zoom = page.getByRole("spinbutton", { name: "推近倍率", exact: true });
-    await zoom.fill("1.4");
-    await expect.poll(() => seen.includes(1.4)).toBe(true);
-    await zoom.fill("1.5");
-    await zoom.fill("1.6");
-    await expect.poll(() => seen.includes(1.6)).toBe(true);
-    await expect.poll(() => failures.length).toBeGreaterThan(0);
-    await expect.poll(() => pixel(page)).toEqual([0, 255, 0, 255]);
-    obsolete.release();
-    await page.waitForTimeout(150); // Let the deliberately late response finish.
-    expect(await pixel(page)).toEqual([0, 255, 0, 255]);
-    await expect.poll(async () => (await current(request, id)).sequence.tracks[0].clips[0].effects[0].params.zoom).toBe(1.6);
-    await expect(page.locator(".player__interactive-status[role='alert']")).toHaveCount(0);
-  } finally { obsolete.release(); }
-});
+}
 
 for (const debounceElapsed of [false, true]) {
   test(`returning A to B to A ${debounceElapsed ? "after debounce reissues the aborted frame" : "cancels the stale debounce without aborting the needed frame"}`, async ({ page, request }) => {
