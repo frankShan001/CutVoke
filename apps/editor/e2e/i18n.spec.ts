@@ -41,7 +41,7 @@ async function switchTo(page: Page, locale: string) {
 }
 async function noPageOverflow(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBeTruthy();
-  const overflow = await page.locator(".topbar,.home__create-row,.cv-panel,.right-tabs,.resource-categories,.ctx-menu,.export-dialog__panel").evaluateAll(nodes =>
+  const overflow = await page.locator(".topbar,.topbar > *,.home__create-row,.cv-panel,.right-tabs,.resource-categories,.ctx-menu,.export-dialog__panel").evaluateAll(nodes =>
     nodes.filter(node => { const box = node.getBoundingClientRect(); return box.width && (box.left < -1 || box.right > innerWidth + 1); }).map(node => node.className));
   expect(overflow).toEqual([]);
   const overlaps = await page.locator(".topbar").evaluateAll(nodes => nodes.flatMap(node => {
@@ -157,6 +157,23 @@ test("long translations fit a narrow home screen", async ({ page }) => {
   await noPageOverflow(page);
   await page.setViewportSize({ width: 600, height: 900 });
   await noPageOverflow(page);
+});
+
+test("German editor shell keeps toolbar controls inside the viewport when revealing status", async ({ page, request }) => {
+  const item = await fixture(request);
+  await page.goto("/");
+  await page.getByRole("button", { name: `打开工程 ${item.name}`, exact: true }).click();
+  await expect(page.locator(".timeline")).toBeVisible({ timeout: 75_000 });
+  await switchTo(page, "de");
+  for (const width of [1600, 1500, 1400, 1280, 1024]) {
+    await page.setViewportSize({ width, height: 960 });
+    // Native reveal/focus scrolling must stay within intentional scroll areas.
+    await page.locator(".topbar__sync").evaluate(node => node.scrollIntoView({ block: "nearest", inline: "nearest" }));
+    await expect(page.locator(".app-shell")).toHaveJSProperty("scrollLeft", 0);
+    await noPageOverflow(page);
+    for (const name of ["Exportieren", "Einstellungen", "Aktualisieren"])
+      await expect(page.getByRole("button", { name, exact: true })).toBeInViewport({ ratio: 1 });
+  }
 });
 
 test("cross-tab language changes preserve an open dialog and its draft", async ({ page, request }) => {

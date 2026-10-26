@@ -96,4 +96,3 @@ export function structuralSignature(project: Pick<Project, "sequence">): string 
   };
   return JSON.stringify(canonicalize(shape));
 }
-

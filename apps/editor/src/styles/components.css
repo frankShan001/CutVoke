@@ -6,7 +6,9 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden;
+  /* The shell is a fixed viewport, not a scroll area. Hidden overflow still
+     permits native focus/reveal scrolling to displace the entire editor. */
+  overflow: clip;
 }
 
 /* ---- 顶部工具栏 ---- */
