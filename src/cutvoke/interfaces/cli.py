@@ -123,24 +123,15 @@ def cmd_serve(args) -> int:
     api.runtime_info = {**runtime_identity(db_path),
                         "startedAt": datetime.now(timezone.utc).isoformat()}
     # J07：首次启动把内置声音资产登记进素材账本（幂等，与用户素材共存同表）
-    from cutvoke.storage.builtin_assets import (ensure_builtin_audio, ensure_builtin_stickers,
-                                       ensure_builtin_backgrounds)
+    from cutvoke.storage.builtin_assets import ensure_builtin_audio
     try:
         n_builtin = len(ensure_builtin_audio(store))
         logger.info("serve.builtin_audio", detail={"registered": n_builtin})
     except Exception as e:  # noqa: BLE001 — 内置资产登记失败不阻断服务启动
         print(f"内置声音资产登记失败（忽略）：{e}", file=sys.stderr)
-    try:
-        n_stickers = len(ensure_builtin_stickers(store))
-        logger.info("serve.builtin_stickers", detail={"registered": n_stickers})
-    except Exception as e:  # noqa: BLE001
-        print(f"内置贴纸登记失败（忽略）：{e}", file=sys.stderr)
-    # J07 内容扩展：内置背景图登记（幂等，与用户素材共存同表）
-    try:
-        n_backgrounds = len(ensure_builtin_backgrounds(store))
-        logger.info("serve.builtin_backgrounds", detail={"registered": n_backgrounds})
-    except Exception as e:  # noqa: BLE001
-        print(f"内置背景图登记失败（忽略）：{e}", file=sys.stderr)
+    # HttpApi already registered the active pack at immutable destinations.
+    # Re-registering bundled sources here would overwrite those paths and even
+    # conceal a failed installation by inserting a mutable package-file fallback.
     # Web UI 静态目录解析，兼容两种安装形态：
     #   1) wheel 安装：走包内 src/cutvoke/web/（pyproject package-data 打进）
     #   2) 仓库开发：走项目根 web/dist（Vite 产物）> web/（旧单文件）
@@ -640,10 +631,16 @@ def cmd_mcp(args) -> int:
     # J07：MCP 启动同样登记内置声音/贴纸资产（幂等，与用户素材共存同表）
     from cutvoke.storage.builtin_assets import (ensure_builtin_audio, ensure_builtin_stickers,
                                        ensure_builtin_backgrounds)
+    from cutvoke.storage.resource_pack import active_resource_pack_root
     try:
         ensure_builtin_audio(store)
-        ensure_builtin_stickers(store)
-        ensure_builtin_backgrounds(store)
+        media_dir = server._media_directory()
+        package_root = active_resource_pack_root(media_dir)
+        ensure_builtin_stickers(store, immutable_root=media_dir / ".builtin-resources",
+                                package_root=package_root)
+        ensure_builtin_backgrounds(store, render=server.render,
+                                   immutable_root=media_dir / ".builtin-resources",
+                                   package_root=package_root)
     except Exception as e:  # noqa: BLE001
         print(f"内置资产登记失败（忽略）：{e}", file=sys.stderr)
     print(f"CutVoke MCP: data at {_resolve_db(args)} "

@@ -247,6 +247,7 @@ def ensure_builtin_backgrounds(
         file_matches_sha256,
         install_immutable_resource_file,
         load_resource_pack_manifest,
+        resource_install_diagnostic,
     )
 
     builtin_root = Path(__file__).resolve().parent.parent
@@ -297,7 +298,9 @@ def ensure_builtin_backgrounds(
                     expected_sha256=record["sha256"],
                     expected_size=record.get("sizeBytes"),
                 )
-            except (OSError, ValueError):
+            except (OSError, ValueError) as error:
+                logging.getLogger(__name__).warning("resource_install_failed %s %s", asset_id,
+                    resource_install_diagnostic(error, path=source))
                 continue
         size = os.path.getsize(path)
         width = height = None

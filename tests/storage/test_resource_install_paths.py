@@ -277,3 +277,47 @@ def test_http_keeps_install_failure_evidence_and_clears_it_after_recovery(tmp_pa
         if api is not None:
             api.close()
         store.close()
+
+
+@pytest.mark.parametrize("mode", ["serve", "mcp"])
+@pytest.mark.parametrize("failed_install", [False, True])
+def test_entrypoints_keep_immutable_paths_and_do_not_mask_install_errors(tmp_path, monkeypatch, mode, failed_install):
+    from cutvoke.interfaces import cli, httpapi
+    from cutvoke.interfaces.mcp_server import MCPServer
+    from cutvoke.interfaces.security import SessionToken
+    from cutvoke.storage import builtin_assets
+    from cutvoke.rendering import gpu_effects
+    monkeypatch.setattr(SessionToken, "is_enabled", lambda: False)
+    monkeypatch.setattr(builtin_assets, "ensure_builtin_audio", lambda *args, **kw: [])
+    monkeypatch.setattr(gpu_effects, "warmup", lambda *args: None)
+    original = rp.os.replace
+    def replace(source, destination):
+        if failed_install and Path(destination).name == "arrow_down.png":
+            error = OSError(errno.ENAMETOOLONG, "entrypoint install failure", str(destination))
+            error.winerror = 206
+            raise error
+        return original(source, destination)
+    monkeypatch.setattr(rp.os, "replace", replace)
+    inspected = []
+    def inspect(store):
+        expected = tmp_path / "media/.builtin-resources"
+        other = store.get_asset("builtin_sticker_arrow_up")
+        assert Path(other["path"]).is_relative_to(expected)
+        affected = store.get_asset("builtin_sticker_arrow_down")
+        if failed_install:
+            assert affected is None, "A failed immutable install must not fall back to mutable package files"
+        else:
+            assert Path(affected["path"]).is_relative_to(expected)
+        inspected.append(True)
+    def serve(api, **kw):
+        inspect(api.service.store)
+        _, catalog = api.handle("GET", "/api/v1/stickers", {})
+        sticker = next(s for s in catalog["stickers"] if s["assetId"] == "builtin_sticker_arrow_down")
+        assert sticker["available"] is not failed_install
+        if failed_install:
+            assert sticker["installationError"]["stage"] == "replace"
+    monkeypatch.setattr(httpapi, "serve", serve)
+    monkeypatch.setattr(MCPServer, "run_stdio", lambda self: inspect(self.service.store))
+    args = cli.build_parser().parse_args([mode, "--data", str(tmp_path / "entrypoint.sqlite"), *(["--worker"] if mode == "mcp" else [])])
+    assert (cli.cmd_serve(args) if mode == "serve" else cli.cmd_mcp(args)) == 0
+    assert inspected == [True]

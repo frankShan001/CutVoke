@@ -45,6 +45,8 @@ async function verifyWindowsResourceInstall({ root, out, executable, engine, ele
       assert.equal(path.normalize(runtime.pythonExecutable), engine);
       const catalog = await get("stickers");
       const assets = new Map((await get("assets")).assets.map(a => [a.assetId, a]));
+      fs.writeFileSync(path.join(out, "resource-install-current.json"), JSON.stringify({ label, home, runtime,
+        catalog, assets: [...assets.values()] }, null, 2));
       assert.equal(catalog.stickers.length, 612);
       const unavailable = catalog.stickers.filter(s => !s.available || !s.previewAvailable);
       if (required || (capabilities.registryLongPathsEnabled === 1 && capabilities.frozenManifest.longPathAware))
@@ -64,7 +66,8 @@ async function verifyWindowsResourceInstall({ root, out, executable, engine, ele
         verifiedPreviews++;
         if (sticker.kind === "static" && sticker.available) {
           const asset = assets.get(sticker.assetId);
-          assert.ok(path.toNamespacedPath(asset.path).startsWith(path.toNamespacedPath(path.join(home, "data/media/.builtin-resources"))));
+          assert.ok(path.toNamespacedPath(asset.path).startsWith(path.toNamespacedPath(path.join(home, "data/media/.builtin-resources"))),
+            JSON.stringify({ assetId: sticker.assetId, installedPath: asset.path, expectedRoot: path.join(home, "data/media/.builtin-resources") }));
           assert.equal(crypto.createHash("sha256").update(fs.readFileSync(asset.path)).digest("hex"), sticker.resourceRef.sha256);
           verifiedImages++;
         }

@@ -153,6 +153,9 @@ errno and winerror in the sticker API's `installationError` and engine log. If t
 final path itself exceeds the process/filesystem limit, choose a shorter portable
 data location (`CUTVOKE_PORTABLE_HOME`); changing Windows system policy is not a
 required workaround.
+Serve and MCP startup must keep those immutable paths. Re-registering package
+source files afterward can conceal a failed installation and break saved-project
+resource pinning; entrypoint regressions check both successful and failed installs.
 
 Windows acceptance includes deterministic legacy-boundary tests under real
 Python and fresh packaged-app profiles. It checks every sticker's availability,
