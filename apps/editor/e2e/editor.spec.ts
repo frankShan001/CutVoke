@@ -2249,6 +2249,10 @@ test("prepared playback follows the ruler, stops at the end, and survives an Age
   expect(bounds).toBeTruthy();
   const video = page.locator("video.player__video");
   await page.mouse.click(bounds!.x + 7.6 * 40, bounds!.y + bounds!.height / 2);
+  // This scenario verifies prepared playback. A healthy source/audio clock
+  // can finish the short remainder while the continuous decoder is loading.
+  await expect(video).toHaveAttribute("src", /preview-jobs\/[^/]+\/media/);
+  await expect.poll(() => video.evaluate((element) => (element as HTMLVideoElement).readyState)).toBeGreaterThan(1);
   await page.getByRole("button", { name: "播放", exact: true }).click();
   await expect.poll(async () => Number(await ruler.getAttribute("aria-valuenow"))).toBeGreaterThan(8.25);
   await expect(video).toHaveAttribute("src", /preview-jobs\/[^/]+\/media/);
