@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/facebookresearch/sam2",
+  "commit": "2b90b9f5ceec907a1c18123530e92e794ad901a4",
+  "sourceZipSha256": "fe93082a71a885a427894b1eab76341768781b6b58a298a0717e03862097d137",
+  "cudaExtension": false
+}

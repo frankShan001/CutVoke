@@ -1,13 +1,7 @@
-"""参数关键帧数据模型（任务书 T22 / 第 7.2 章）。
+"""Clip-local numeric curves shared by editing, exact cropping and FFmpeg.
 
-M2 完整版之前的最小实现：先落地数据结构 + 线性插值求值，渲染生效留 M2。
-
-- Keyframe: 片段局部呈现时间(time: Rational) + value(float) + interpolation
-- 一个片段按参数名分组持有多组关键帧（先支持 opacity 这一种参数作为最小落地）
-- evaluate: 对一组关键帧在片段局部时间 time 处求值，线性插值
-  （首末关键帧之外保持端点值，符合 7.2「参数曲线在首末关键帧之外保持端点值」）
-
-不引入第三方依赖；有理数时间权威不变。
+Support linear, ease-in/out, cubic Bezier and hold interpolation; values remain
+at their endpoints outside the curve. Time stays rational throughout edits.
 """
 
 from __future__ import annotations
@@ -29,10 +23,10 @@ class Keyframe:
     id: str
     time: Rational
     value: float
-    interpolation: str = "linear"  # linear | ease-in | ease-out
+    interpolation: str = "linear"  # linear | ease-in | ease-out | cubic-bezier | hold
     bezier: tuple[float, float, float, float] | None = None
 
-    VALID_INTERP = ("linear", "ease-in", "ease-out", "cubic-bezier")
+    VALID_INTERP = ("linear", "ease-in", "ease-out", "cubic-bezier", "hold")
 
     def __post_init__(self):
         if self.interpolation == "cubic-bezier":
@@ -74,6 +68,8 @@ def evaluate(keyframes: List[Keyframe], time: Rational) -> float:
 
     每段使用起始关键帧声明的插值方式；ease-in/ease-out 在段内生效。
     """
+    if hasattr(keyframes, "evaluator"):
+        return keyframes.evaluator(float(time.to_fraction()))
     if not keyframes:
         raise ValueError("evaluate requires at least one keyframe")
     kfs = sorted(keyframes, key=lambda k: k.time.to_fraction())
@@ -101,6 +97,8 @@ def expression(keyframes: List[Keyframe], time: str, default: float) -> str:
     Keep presentation time and values fractional: rounding positions or holding
     two output frames at a sampled midpoint makes slow camera moves judder.
     """
+    if hasattr(keyframes, "formula"):
+        return keyframes.formula.replace("__TIME__", f"({time})")
     if not keyframes:
         return f"{default:.12g}"
     kfs = sorted(keyframes, key=lambda keyframe: keyframe.time.to_fraction())
@@ -115,6 +113,8 @@ def expression(keyframes: List[Keyframe], time: str, default: float) -> str:
             progress = f"pow({progress},2)"
         elif a.interpolation == "ease-out":
             progress = f"(1-pow(1-({progress}),2))"
+        elif a.interpolation == "hold":
+            progress = "0"
         elif a.interpolation == "cubic-bezier":
             x1, y1, x2, y2 = a.bezier
             bx = f"(3*(1-ld(3)))*(1-ld(3))*ld(3)*{x1:.12g}+3*(1-ld(3))*ld(3)*ld(3)*{x2:.12g}+pow(ld(3),3)"
@@ -155,6 +155,8 @@ def _inverse_x(x, controls):
 
 def ease(progress, interpolation="linear", bezier=None):
     progress = min(1.0, max(0.0, progress))
+    if interpolation == 'hold':
+        return 1.0 if progress >= 1 else 0.0
     if interpolation == "ease-in":
         return progress**2
     if interpolation == "ease-out":
@@ -192,6 +194,10 @@ def crop_keyframes(keyframes, start: Rational, end: Rational):
                          if a.time.to_fraction() <= time < b.time.to_fraction()), None)
             if pair and pair[0].value != pair[1].value:
                 a,b = pair
+                if a.interpolation == 'hold':
+                    frame.interpolation = 'hold'
+                    result.append(frame)
+                    continue
                 controls = (a.bezier if a.interpolation == "cubic-bezier" else
                     (1/3,0,2/3,1/3) if a.interpolation == "ease-in" else
                     (1/3,2/3,2/3,1) if a.interpolation == "ease-out" else (1/3,1/3,2/3,2/3))

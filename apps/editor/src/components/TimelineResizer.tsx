@@ -3,6 +3,7 @@ import { tr, useLocale } from "../i18n";
     用 CSS 变量 --timeline-h 控制，范围 120px ~ 70% 容器高。 */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { rememberWorkspace } from "../lib/workspaces";
 
 function readTimelineHeight() {
   if (typeof window === "undefined") return 300;
@@ -24,6 +25,7 @@ export function TimelineResizer({ containerRef }: { containerRef: React.RefObjec
     const next = Math.round(Math.min(maxHeight, Math.max(120, value)));
     document.documentElement.style.setProperty("--timeline-h", `${next}px`);
     setHeight(next);
+    rememberWorkspace();
   };
 
   const onPointerDown = (e: React.PointerEvent) => {
@@ -85,6 +87,7 @@ export function TimelineResizer({ containerRef }: { containerRef: React.RefObjec
     if (pointerId.current !== e.pointerId) return;
     pointerId.current = null;
     setDragging(false);
+    rememberWorkspace();
   }, []);
 
   useEffect(() => {

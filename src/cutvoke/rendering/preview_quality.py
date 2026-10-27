@@ -6,7 +6,7 @@ MAX_DIMENSION = 1280
 SUPPORTED_FX={'gblur','grayscale','chromatic','rgbsplit','invert','sepia','vintage',
               'posterize','mirror','vignette','chromakey','lut3d','curves','crop',
               'trail','hsl','colorbalance','mask','glow','vibrance','colorize','lens',
-              'vflip','lightWeave','opticalField','shatter'}
+              'vflip','lightWeave','opticalField','shatter','fractalNoise','turbulentDisplace','waveWarp','vectorPath','trackedMask','cameraPlane','scene3d'}
 
 
 def dimensions(sequence, maximum=MAX_DIMENSION):
@@ -53,7 +53,9 @@ def snapshot(project,maximum=MAX_DIMENSION):
                 for name in ({'sigma'} if key=='gblur' else
                              {'offset'} if key in {'chromatic','rgbsplit'} else
                              {'pixels'} if key=='shake' else
-                             {'gap'} if key=='shatter' else set()):
+                             {'gap'} if key=='shatter' else
+                             {'amount'} if key=='turbulentDisplace' else
+                             {'amplitude','wavelength'} if key=='waveWarp' else set()):
                     defaults={'sigma':5,'offset':4,'gap':3}
                     if name in params or name in defaults:
                         params[name]=params.get(name,defaults.get(name,0))*scale

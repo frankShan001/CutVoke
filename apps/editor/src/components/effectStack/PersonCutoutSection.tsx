@@ -15,6 +15,8 @@ import {
 import { Button } from "../ui";
 import { showError, useEditor } from "../../store/editor";
 import { refreshProject } from "../../store/actions";
+import { AgentHandoffSection } from './AgentHandoffSection';
+import { ExtensionSetup } from '../ExtensionSetup';
 
 const JOB_STORAGE_PREFIX = "cutvoke.person-cutout-job:";
 const RUNNING_STATES = new Set<PersonCutoutJob["status"]>(["queued", "running", "applying"]);
@@ -49,6 +51,7 @@ export function PersonCutoutSection({
   const [previewFailed, setPreviewFailed] = useState(false);
   const [busy, setBusy] = useState<"start" | "cancel" | "apply" | null>(null);
   const [statusError, setStatusError] = useState("");
+  const [availabilityVersion, setAvailabilityVersion] = useState(0);
 
   useEffect(() => {
     let disposed = false;
@@ -64,7 +67,7 @@ export function PersonCutoutSection({
       }
     });
     return () => { disposed = true; };
-  }, [active, projectId]);
+  }, [active, projectId, availabilityVersion]);
 
   useEffect(() => {
     let disposed = false;
@@ -89,11 +92,11 @@ export function PersonCutoutSection({
   }, [projectId, clipId]);
 
   useEffect(() => {
-    if (availability?.sam2Ready && !availability.modelReady) {
+    if (availability?.sam2Ready && !availability.mediapipeReady) {
       setSelectionMode("selected");
       setTrackingMode("sam2");
     }
-  }, [availability?.sam2Ready, availability?.modelReady]);
+  }, [availability?.sam2Ready, availability?.mediapipeReady]);
 
   useEffect(() => {
     if (!job || !RUNNING_STATES.has(job.status)) return;
@@ -260,20 +263,14 @@ export function PersonCutoutSection({
         </div>
       </div>
 
+      <AgentHandoffSection active={active} projectId={projectId} clipId={selectedIsVideo?clipId:null}
+        jobId={jobMatchesSelection && (job?.status==='completed' || job?.status==='applied')?job.jobId:undefined} readOnly={readOnly}/>
       {statusError ? <p className="person-cutout__message person-cutout__message--error" role="alert"><strong>{tr("人物处理未完成，请检查下面的提示。")}</strong><br /><span dir="auto">{statusError}</span></p> : null}
-      {!availability?.ready ? (
-        <div className="person-cutout__setup" role="status">
-          <p>{availability?.message || tr("正在检查本机抠像组件…")}</p>
-          {availability && !availability.installed ? <code>pip install "cutvoke[person]"</code> : null}
-          {availability?.installed && !availability.modelReady
-            ? <code>uv run cutvoke-person-model</code> : null}
-          {!availability?.sam2Ready
-            ? <code>uv run cutvoke-person-model --sam2</code> : null}
-        </div>
-      ) : (
+      {active && <ExtensionSetup onReady={() => setAvailabilityVersion(value => value + 1)} />}
+      {!availability?.ready ? <p role="status">{tr("启用抠像组件后，即可选择目标并生成透明视频。")}</p> : (
         <>
           <p className="person-cutout__message person-cutout__message--success">
-            {backendMessage(availability.message)}
+            {tr("抠像组件已就绪，建议先处理一小段检查效果。")}
           </p>
           <label className="person-cutout__softness">
             <span>{tr("边缘柔化 ")}<strong>{edgeSoftness.toFixed(1)} px</strong></span>
@@ -286,17 +283,17 @@ export function PersonCutoutSection({
             <label>
               <input type="radio" name="person-cutout-selection" value="all"
                 checked={selectionMode === "all"}
-                disabled={!availability?.modelReady}
+                disabled={!availability?.mediapipeReady}
                 onChange={() => { setSelectionMode("all"); setTrackingMode("semantic"); setSelectionPoints([]); setPromptFrames([]); }} />{tr("保留所有可见人物")}</label>
             <label>
               <input type="radio" name="person-cutout-selection" value="selected"
                 checked={selectionMode === "selected"}
-                disabled={!availability?.modelReady && !availability?.sam2Ready}
+                disabled={!availability?.mediapipeReady && !availability?.sam2Ready}
                 onChange={() => {
                   setSelectionMode("selected");
                   setSelectionPoints([]);
                   setPromptFrames([]);
-                  setTrackingMode(availability?.sam2Ready && !availability.modelReady ? "sam2" : "semantic");
+                  setTrackingMode(availability?.sam2Ready && !availability.mediapipeReady ? "sam2" : "semantic");
                   setPreviewFailed(false);
                 }} />{tr("只保留我点选的人物")}</label>
           </fieldset>
@@ -312,17 +309,11 @@ export function PersonCutoutSection({
                     setPromptFrames([]);
                     setSelectionPoints([]);
                   }}>
-                  <option value="semantic" disabled={!availability?.modelReady}>{tr("轮廓连续跟踪")}</option>
+                  <option value="semantic" disabled={!availability?.mediapipeReady}>{tr("轮廓连续跟踪")}</option>
                   <option value="magic_touch" disabled={!availability?.interactiveModelReady}>{tr("MagicTouch 点提示逐帧重分割")}</option>
                   <option value="sam2" disabled={!availability?.sam2Ready}>{tr("SAM2 视频身份跟踪")}</option>
                 </select>
               </label>
-              {!availability?.interactiveModelReady
-                ? <p className="person-cutout__message">{tr("准备可选模型：")}<code>uv run cutvoke-person-model --interactive</code></p>
-                : null}
-              {!availability?.sam2Ready
-                ? <p className="person-cutout__message">{tr("安装更强的视频身份跟踪：")}<code>uv run cutvoke-person-model --sam2</code></p>
-                : null}
               {trackingMode === "sam2" ? (
                 <label className="person-cutout__prompt-time">
                   <span>{tr("预览源素材时间（秒）")}</span>

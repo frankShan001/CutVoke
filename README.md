@@ -272,6 +272,7 @@ Declarative transitions can reuse supported FFmpeg mappings. Other families depe
 
 | What you need | Documentation |
 | --- | --- |
+| Independent project folders, moving, backups and legacy migration | [Project directories](docs/user/PROJECT_DIRECTORIES.md) |
 | Local startup, desktop, shared database and MCP configuration | [Local setup](docs/user/LOCAL_DELIVERY_MCP.md) |
 | Agent queries, previews, leases, retries and export | [External agent editing](docs/user/external-agent-editing.md) |
 | Skill installation, task inputs and runnable example | [Skill usage](docs/user/agent-skill.md) |

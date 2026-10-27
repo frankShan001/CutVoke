@@ -75,7 +75,7 @@ if python_license is None:
 shutil.copyfile(python_license, licenses / ('Python-LICENSE.rtf' if python_license.suffix == '.rtf' else 'Python-LICENSE.txt'))
 dependencies = []
 for name_ in ('cryptography', 'fonttools', 'cffi', 'pycparser', 'pyinstaller',
-              'numpy', 'pillow', 'opencv-python-headless'):
+              'numpy', 'pillow', 'opencv-python-headless', 'moderngl', 'glcontext'):
     dist = metadata.distribution(name_)
     destination = licenses / 'python' / name_
     destination.mkdir(parents=True)

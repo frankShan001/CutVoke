@@ -415,3 +415,7 @@
   font-size: 11px;
   color: var(--text-faint);
 }
+.timeline__filter { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:6px 12px; border-bottom:1px solid var(--border); color:var(--text-dim); font-size:11px; }
+.timeline__filter input { min-width:120px; width:220px; height:28px; }
+.timeline__filter select { width:auto; max-width:150px; height:28px; }
+.timeline__filter-empty { padding:30px; }

@@ -31,7 +31,7 @@ export function RightPanel() {
   const panelScroll = useRef<HTMLDivElement>(null);
   const tabRefs = useRef(new Map<Tab, HTMLButtonElement>());
   const scrollByTab = useRef(new Map<Tab, number>());
-  const [effectToEdit, setEffectToEdit] = useState<{ effectId: string; category: string } | null>(null);
+  const [effectToEdit, setEffectToEdit] = useState<{ effectId: string; category: string; instanceId?: string } | null>(null);
   const switchTab = (next: Tab) => {
     if (next === tab) return;
     if (panelScroll.current) scrollByTab.current.set(tab, panelScroll.current.scrollTop);
@@ -46,7 +46,7 @@ export function RightPanel() {
     const openTransition = () => switchTab("transition");
     const selectVisual = () => switchTab("inspect");
     const editEffect = (event: Event) => {
-      const target = (event as CustomEvent<{ effectId: string; category: string }>).detail;
+      const target = (event as CustomEvent<{ effectId: string; category: string; instanceId?: string }>).detail;
       if (!target || typeof target.effectId !== "string" || typeof target.category !== "string") return;
       switchTab(target.category === "transition" ? "transition" : "inspect");
       setEffectToEdit(target);
@@ -73,7 +73,7 @@ export function RightPanel() {
         panel.scrollTop = 0; setEffectToEdit(null); return;
       }
       const target = [...panel.querySelectorAll<HTMLElement>("[data-effect-id]")]
-        .find(node => node.dataset.effectId === effectToEdit.effectId && node.getClientRects().length);
+        .find(node => node.dataset.effectId === effectToEdit.effectId && (!effectToEdit.instanceId || node.dataset.effectInstanceId===effectToEdit.instanceId) && node.getClientRects().length);
       if (target) {
         if (target instanceof HTMLDetailsElement && !target.open) target.open = true;
         panel.scrollTop += target.getBoundingClientRect().top - panel.getBoundingClientRect().top - 12;

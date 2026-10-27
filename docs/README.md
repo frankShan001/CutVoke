@@ -1,6 +1,13 @@
 # 文档导航
 
 - [使用与 MCP 接入](user/LOCAL_DELIVERY_MCP.md)
+- [独立工程目录、移动与备份](user/PROJECT_DIRECTORIES.md)
+- [重度剪辑：音轨检查、光效融合与实例操作](user/HEAVY_EDITING.md)
+- [快速应用、时间线筛选与动画属性](user/ANIMATION_WORKFLOW.md)
+- [调整层、轨道遮罩、预合成、空间路径与摄像机](user/COMPOSITING_WORKFLOW.md)
+- [本机三维、可选抠像模型与外部 AI 交接](user/LOCAL_3D_AND_MODELS.md)
+- [可选扩展安装与大陆/海外下载来源](development/optional-extension-installation.md)
+- [After Effects 调研与借鉴范围](research/AFTER_EFFECTS_RESEARCH_2026-10-27.md)
 - [外部 Agent 编辑流程](user/external-agent-editing.md)
 - [AI 剪辑技能安装与使用](user/agent-skill.zh-CN.md) / [English](user/agent-skill.md)
 - [社区特效贡献](user/effect-contributing.zh-CN.md) / [English](../effects/README.md)

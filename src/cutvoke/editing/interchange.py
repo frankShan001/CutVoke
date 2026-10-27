@@ -79,11 +79,14 @@ def _issues(sequence, format, items):
     if sequence.multicam: diagnostic(items, "MULTICAM_UNMAPPED", "multicam", "Bake the camera decisions before interchange")
     if sequence.audio_buses or sequence.master_audio: diagnostic(items, "AUDIO_MIX_UNMAPPED", "audioMix", "Bus/master processing is not mapped")
     if sequence.reframe != "stretch": diagnostic(items, "REFRAME_UNMAPPED", "reframe", "Canvas reframe is CutVoke metadata; other editors do not reproduce it", "warning" if format == "otio" else "error")
+    if sequence.exposed_properties: diagnostic(items, "EXPOSED_PROPERTIES_UNMAPPED", "exposedProperties", "Exposed composition controls require the CutVoke project/package format")
     for track in sequence.tracks:
         if track.kind not in ("video", "audio"): diagnostic(items, "TRACK_UNMAPPED", track.id, "Only media tracks are supported")
         if track.audio_mix: diagnostic(items, "TRACK_MIX_UNMAPPED", track.id, "Track audio processing is not mapped")
         if format != "otio" and (track.muted or not track.visible): diagnostic(items, "TRACK_STATE_UNMAPPED", track.id, "Track mute/visibility is not mapped in this adapter")
         for clip in track.clips:
+            if clip.compositing or clip.sequence_ref or clip.property_links or clip.motion_path or clip.property_overrides or clip.role == 'adjustment':
+                diagnostic(items, "COMPOSITION_UNMAPPED", clip.id, "Matte references, adjustments, shared instances, overrides, spatial paths and property links require baking before cut-list interchange")
             if format != "otio" and clip.hidden: diagnostic(items, "HIDDEN_CLIP_UNMAPPED", clip.id, "Hidden clips are not mapped in this adapter")
             if clip.nested or clip.effects or clip.keyframes or clip.speed_curve or clip.speed.to_fraction() != 1 or clip.freeze_at is not None:
                 diagnostic(items, "CLIP_PROCESSING_UNMAPPED", clip.id, "Nested clips, effects, keyframes, speed changes and freezes are not mapped")

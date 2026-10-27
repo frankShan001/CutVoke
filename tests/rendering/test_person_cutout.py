@@ -66,7 +66,7 @@ class PersonCutoutApiTests(unittest.TestCase):
 
     def _make_cutout(self) -> Path:
         target_dir = self.media_dir / ".person-cutouts"
-        target_dir.mkdir(parents=True)
+        target_dir.mkdir(parents=True,exist_ok=True)
         output = target_dir / "generated.mov"
         subprocess.run([
             "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
@@ -147,6 +147,7 @@ class PersonCutoutApiTests(unittest.TestCase):
             "error": "",
             "result": {"outputPath": str(output), "alpha": True},
         }
+        self.api._person_cutout_jobs._journal.put(self.api._person_cutout_jobs._jobs[job_id])
 
         status, result = self.api.handle(
             "POST", f"/api/v1/projects/{project.project_id}/person-cutout-jobs/{job_id}/apply", {})
@@ -171,6 +172,7 @@ class PersonCutoutApiTests(unittest.TestCase):
             "sourceSignature": "stale", "status": "completed", "phase": "完成",
             "progress": 100, "error": "", "result": {"outputPath": str(output)},
         }
+        self.api._person_cutout_jobs._journal.put(self.api._person_cutout_jobs._jobs[job_id])
         status, result = self.api.handle(
             "POST", f"/api/v1/projects/{project.project_id}/person-cutout-jobs/{job_id}/apply", {})
         self.assertEqual(status, 400)

@@ -2126,7 +2126,8 @@ class EffectRegistry:
         self._specs: dict[str, EffectSpec] = {}
         self._load_errors: list[str] = []
         if with_builtin:
-            for spec in _builtin_specs():
+            from cutvoke.rendering.composition_operators import specs as composition_operator_specs
+            for spec in _builtin_specs() + composition_operator_specs():
                 self._specs[spec.id] = spec
 
     # ---- 注册与发现 ----
@@ -2232,6 +2233,17 @@ class EffectRegistry:
         if errors:
             raise EffectParamInvalid(f"{effect_id} 参数非法: " + "; ".join(errors))
         resolved = resolve_defaults(spec.parameters, value)
+        if effect_id=='cutvoke.fx.scene3d':
+            from cutvoke.rendering.scene3d import validate
+            try:validate(resolved)
+            except (ValueError,KeyError,IndexError) as error:raise EffectParamInvalid(str(error)) from error
+        if effect_id in {'cutvoke.fx.cameraPlane','cutvoke.fx.trackedMask','cutvoke.fx.vectorPath'}:
+            key = {'cutvoke.fx.cameraPlane':'poseFrames','cutvoke.fx.trackedMask':'pathFrames','cutvoke.fx.vectorPath':'trimFrames'}[effect_id]
+            frames = resolved.get(key) or []
+            if any(a['at'] >= b['at'] for a,b in zip(frames,frames[1:])):
+                raise EffectParamInvalid(f'{key} times must strictly increase')
+            if key == 'pathFrames' and any(len(frame['points']) != len(resolved['points']) for frame in frames):
+                raise EffectParamInvalid('tracked mask vertex count must remain constant')
         if effect_id == "cutvoke.text":
             for key in ("animColor", "outerStrokeColor", "blockShadowColor"):
                 if key not in resolved:
@@ -2261,6 +2273,13 @@ class EffectRegistry:
             times=[frame['time'] for frame in resolved.get('anchorFrames',[])]
             if any(a>=b for a,b in zip(times,times[1:])):
                 raise EffectParamInvalid('光源附着点时间必须严格递增')
+            angles=[frame['time'] for frame in resolved.get('angleFrames',[])]
+            if any(a>=b for a,b in zip(angles,angles[1:])):
+                raise EffectParamInvalid('光源方向关键点时间必须严格递增')
+        if effect_id == 'cutvoke.transition.lumaReveal' and resolved.get('thresholdCurve'):
+            times=[point['at'] for point in resolved['thresholdCurve']]
+            if any(a>=b for a,b in zip(times,times[1:])):
+                raise EffectParamInvalid('亮度阈值曲线进度必须严格递增')
         if effect_id == "cutvoke.fx.edge" and isinstance(resolved, dict):
             if float(resolved["low"]) >= float(resolved["high"]):
                 raise EffectParamInvalid(

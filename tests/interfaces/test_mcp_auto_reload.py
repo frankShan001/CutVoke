@@ -200,7 +200,7 @@ def test_active_export_and_preview_drain_then_original_preview_remains_playable(
     preview = client.call("preview_prepare", projectId="reload", expectedRevision=edit["revision"])
     assert preview["ok"], preview
     export = client.call("command_apply", projectId="reload", expectedRevision=edit["revision"],
-        commandId="export-once", type="export.enqueue", payload={"outPath": str(client.root / "result.mp4")})
+        commandId="export-once", type="export.enqueue", payload={"outPath": "result.mp4"})
     assert export["ok"], export
     export_id = export["changedEntities"][0]["jobId"]
     client.update()
@@ -228,7 +228,8 @@ def test_active_export_and_preview_drain_then_original_preview_remains_playable(
     from cutvoke.rendering.render import RenderService
     renderer = RenderService()
     renderer._verify(job["path"], 1, 320, 180)
-    renderer._verify(str(client.root / "result.mp4"), 1, 320, 180)
+    renderer._verify(final_export["outPath"], 1, 320, 180)
+    assert Path(final_export["outPath"]).parent.name == "exports"
     # A second generation also transfers previously inherited preview records.
     client.update(3)
     client.updated(3)
@@ -239,7 +240,8 @@ def test_cancel_old_jobs_during_update(client):
     edit = client.project()
     preview = client.call("preview_prepare", projectId="reload", expectedRevision=edit["revision"])
     export = client.call("command_apply", projectId="reload", expectedRevision=edit["revision"],
-        commandId="cancel-export", type="export.enqueue", payload={"outPath": str(client.root / "cancelled.mp4")})
+        commandId="cancel-export", type="export.enqueue", payload={"outPath": "cancelled.mp4"})
+    assert export["ok"], export
     export_id = export["changedEntities"][0]["jobId"]
     client.update()
     assert client.updated()["autoReload"]["drainingWorkers"] == 1
@@ -254,7 +256,7 @@ def test_cancel_old_jobs_during_update(client):
     client.wait_for(lambda: client.call("runtime")["autoReload"]["drainingWorkers"] == 0)
     assert client.call("export_job", projectId="reload", jobId=export_id)["status"] == "cancelled"
     assert client.call("preview_job", projectId="reload", jobId=preview["jobId"])["state"] == "cancelled"
-    assert not (client.root / "cancelled.mp4").exists()
+    assert not Path(export["changedEntities"][0]["outPath"]).exists()
 
 
 def test_incomplete_update_keeps_old_connection_and_retries_without_reconnect(client):

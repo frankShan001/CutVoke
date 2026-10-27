@@ -21,6 +21,7 @@ def builtin_vlog_effects():
     from cutvoke.rendering.effects import EffectSpec
 
     labels = _labels()
+    from cutvoke.rendering.luma_transition import controls as luma_controls
 
     def number(key, default, low, high, *, unit=None, step=.01):
         result = {"type": "number", "default": default, "minimum": low,
@@ -72,6 +73,7 @@ def builtin_vlog_effects():
         ("transition.lumaReveal", "叠化", {
             "engine": "ffmpeg-xfade", "filter": "xfade", "transition": "custom",
             "vlogPattern": "lumaReveal"}, {
+            **luma_controls(),
             "duration": number("transitionDuration", .6, .05, 2, unit="s"),
             "softness": number("softness", .08, .005, .35, step=.005),
             "reverse": {"type": "boolean", "default": False,

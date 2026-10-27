@@ -6,7 +6,7 @@ import { showError, useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
 import { stageEdit, releaseEdit } from "../../store/interactive";
 import { removeEffect } from "../../store/clipEdit";
-import { bypassEffect } from "../../store/effectEdit";
+import { bypassEffect, reorderEffect } from "../../store/effectEdit";
 import {
   effectsByCategory,
   getEffectCatalog,
@@ -14,9 +14,11 @@ import {
 } from "../../lib/effects";
 import { paramControls } from "../../lib/effectControls";
 import { ParamControls } from "./ParamControls";
+import { StructuredEffectControls, validStructuredParameters } from './StructuredEffectControls';
 import { inferKind } from "../../lib/assetStore";
 import { uploadLut } from "../../lib/lutApi";
 import { ColorWheels } from "./ColorWheels";
+import { Scene3DControls } from './Scene3DControls';
 import type { Clip } from "../../types/api";
 
 function preserveMaskBoundsOnShapeChange(
@@ -60,26 +62,27 @@ export function FxSection({ clip, trackKind }: { clip: Clip; trackKind: string }
   }, [dispatch, locale]);
 
   const isActive = (id: string) => clip.effects?.some((e) => e.effectId === id) ?? false;
-  const paramsOf = (id: string) =>
-    (clip.effects?.find((e) => e.effectId === id)?.params as Record<string, unknown>) ?? {};
 
-  const toggle = async (spec: EffectSpec) => {
+  const toggle = async (spec: EffectSpec, instanceId: string) => {
     if (busy) return;
     setBusy(true);
     const ctx = getLatestState() || state;
     if (isActive(spec.effectId)) {
-      await removeEffect(dispatch, ctx, { clipId: clip.id, effectId: spec.effectId });
+      await removeEffect(dispatch, ctx, { clipId: clip.id, effectId: spec.effectId, instanceId });
     }
     setBusy(false);
   };
 
-  const setParams = async (spec: EffectSpec, params: Record<string, unknown>, held = false): Promise<boolean> => {
+  const setParams = async (spec: EffectSpec, instanceId: string, params: Record<string, unknown>, held = false): Promise<boolean> => {
     if (busy) return false;
-    stageEdit(dispatch, `${clip.id}:${spec.effectId}`, [{ type: "effect.update", payload: { clipId: clip.id, effectId: spec.effectId, params } }], held);
+    stageEdit(dispatch, `${clip.id}:${instanceId}`, [{ type: "effect.update", payload: { clipId: clip.id, effectId: spec.effectId, instanceId, params, replaceParams:true } }], held);
     return true;
   };
 
-  const activeSpecs = specs.filter((s) => isActive(s.effectId));
+  const activeSpecs = (clip.effects || []).flatMap((effect, effectIndex) => {
+    const spec = specs.find(item => item.effectId === effect.effectId);
+    return spec ? [{ spec, effect, effectIndex, instanceId: effect.instanceId || `legacy_${effectIndex}` }] : [];
+  });
   const sectionLabel = trackKind === "audio" ? tr("音频特效") : mediaKind === "image" ? tr("画面特效") : tr("片段特效");
 
   return (
@@ -92,23 +95,33 @@ export function FxSection({ clip, trackKind }: { clip: Clip; trackKind: string }
           <Plus size={12} />{tr("从效果库添加")}
         </button>
       </div>
-      {activeSpecs.map((s, index) => (
+      {activeSpecs.map(({ spec: s, effect, effectIndex, instanceId }, index) => (
         <FxParams
-          key={`${clip.id}:${s.effectId}`}
+          key={`${clip.id}:${instanceId}`}
           clipId={clip.id}
+          instanceId={instanceId}
           initiallyOpen={index === 0}
-          enabled={clip.effects?.find((effect) => effect.effectId === s.effectId)?.enabled !== false}
-          onRemove={() => void toggle(s)}
+          enabled={effect.enabled !== false}
+          onRemove={() => void toggle(s, instanceId)}
           busy={busy}
+          canMoveUp={effectIndex > 0}
+          canMoveDown={effectIndex < (clip.effects?.length || 0) - 1}
+          onMove={async (direction) => {
+            if (busy) return;
+            setBusy(true);
+            try { await reorderEffect(dispatch, getLatestState() || state, {
+              clipId: clip.id, effectId: s.effectId, instanceId, toIndex: effectIndex + direction,
+            }); } finally { setBusy(false); }
+          }}
           onEnabled={async (enabled) => {
             if (busy) return false;
             setBusy(true);
-            try { return (await bypassEffect(dispatch, getLatestState() || state, { clipId: clip.id, effectId: s.effectId, enabled })).ok; }
+            try { return (await bypassEffect(dispatch, getLatestState() || state, { clipId: clip.id, effectId: s.effectId, instanceId, enabled })).ok; }
             finally { setBusy(false); }
           }}
           spec={s}
-          params={paramsOf(s.effectId)}
-          onCommit={(p, held) => setParams(s, p, held)}
+          params={effect.params || {}}
+          onCommit={(p, held) => setParams(s, instanceId, p, held)}
         />
       ))}
     </>
@@ -117,17 +130,21 @@ export function FxSection({ clip, trackKind }: { clip: Clip; trackKind: string }
 
 /** 单个已生效滤镜的参数编辑器（本地态，提交时才发命令）。 */
 function FxParams({
-  clipId, initiallyOpen, enabled, busy, onRemove, onEnabled,
+  clipId, instanceId, initiallyOpen, enabled, busy, onRemove, onEnabled, canMoveUp, canMoveDown, onMove,
   spec,
   params,
   onCommit,
 }: {
   clipId: string;
+  instanceId: string;
   initiallyOpen: boolean;
   enabled: boolean;
   busy: boolean;
   onRemove(): void;
   onEnabled(enabled: boolean): Promise<boolean>;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMove(direction: number): Promise<void>;
   spec: EffectSpec;
   params: Record<string, unknown>;
   onCommit: (next: Record<string, unknown>, held?: boolean) => Promise<boolean>;
@@ -138,12 +155,13 @@ function FxParams({
   useEffect(() => setLocallyEnabled(enabled), [enabled]);
   useEffect(() => {
     const open = (event: Event) => {
-      const target = (event as CustomEvent<{ effectId?: string; clipId?: string }>).detail;
-      if (target?.effectId === spec.effectId && (!target.clipId || target.clipId === clipId)) setExpanded(true);
+      const target = (event as CustomEvent<{ effectId?: string; clipId?: string; instanceId?: string }>).detail;
+      if (target?.effectId === spec.effectId && (!target.clipId || target.clipId === clipId) &&
+          (!target.instanceId || target.instanceId === instanceId)) setExpanded(true);
     };
     window.addEventListener("cutvoke:edit-effect", open);
     return () => window.removeEventListener("cutvoke:edit-effect", open);
-  }, [clipId, spec.effectId]);
+  }, [clipId, spec.effectId, instanceId]);
   const [local, setLocal] = useState<Record<string, unknown>>(params);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState("");
@@ -178,6 +196,7 @@ function FxParams({
   }), [spec, local, locale]);
 
   const commitLocal = (next: Record<string, unknown>, held = false) => {
+    if(!validStructuredParameters(spec,next))return;
     if (JSON.stringify(next) === JSON.stringify(params)) return;
     void onCommit(next, held).then((ok) => {
       if (!ok) setLocal(params);
@@ -197,15 +216,17 @@ function FxParams({
         const control = controls.find(c => c.name === name);
         if (value !== undefined && (control?.kind !== "number" || typeof value === "number" && Number.isFinite(value) && (control.min === undefined || value >= control.min) && (control.max === undefined || value <= control.max))) commitLocal(next, held);
       }}
-      onCommit={() => releaseEdit(`${clipId}:${spec.effectId}`)}
+      onCommit={() => releaseEdit(`${clipId}:${instanceId}`)}
     />
   );
 
   return (
-    <details className={`inspector__effect-params${enabled ? "" : " inspector__effect-params--disabled"}`} data-effect-id={spec.effectId}
+    <details className={`inspector__effect-params${enabled ? "" : " inspector__effect-params--disabled"}`} data-effect-id={spec.effectId} data-effect-instance-id={instanceId}
       aria-label={tr("{0}参数", spec.name)} open={expanded} onToggle={(event) => setExpanded(event.currentTarget.open)}>
       <summary>{spec.name}</summary>
       <div className="inspector__effect-actions">
+        <button type="button" className="cv-chip" disabled={busy || !canMoveUp} onClick={() => void onMove(-1)}>{tr("上移")}</button>
+        <button type="button" className="cv-chip" disabled={busy || !canMoveDown} onClick={() => void onMove(1)}>{tr("下移")}</button>
         <label><input type="checkbox" checked={locallyEnabled} disabled={busy} onChange={(event) => {
           const next = event.currentTarget.checked; setLocallyEnabled(next);
           void onEnabled(next).then(ok => { if (!ok) setLocallyEnabled(enabled); });
@@ -214,15 +235,18 @@ function FxParams({
         <button type="button" className="cv-chip" disabled={busy} onClick={onRemove} aria-label={tr("删除效果 {0}", spec.name)}>{tr("删除效果")}</button>
       </div>
       <fieldset disabled={busy} inert={busy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+      {spec.effectId==='cutvoke.fx.scene3d'?<Scene3DControls clipId={clipId} instanceId={instanceId} params={local} onChange={setLocal} onCommit={next=>commitLocal(next)}/>:null}
       {isColorBalance ? (
         <>
-          <ColorWheels params={local} onPreview={(next) => { setLocal(next); commitLocal(next, true); }} onCommit={() => releaseEdit(`${clipId}:${spec.effectId}`)} />
+          <ColorWheels params={local} onPreview={(next) => { setLocal(next); commitLocal(next, true); }} onCommit={() => releaseEdit(`${clipId}:${instanceId}`)} />
           <details className="inspector__adv color-wheels__numeric">
             <summary>{tr("RGB 数值微调")}</summary>
             {numericControls}
           </details>
         </>
       ) : numericControls}
+      <StructuredEffectControls spec={spec} params={local} onChange={setLocal} onCommit={next=>commitLocal(next)}/>
+      <button className="cv-chip" title={tr('恢复静态参数；关键帧保留')} onClick={()=>{setLocal(spec.defaults);commitLocal(spec.defaults);}}>{tr('重置参数')}</button>
       {isLut ? (
         <div className="lut-import">
           <input ref={lutInput} type="file" accept=".cube" hidden

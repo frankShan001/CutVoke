@@ -95,42 +95,11 @@ def edit(service, proj, payload):
 
 def _clone_items(items):
     """Fresh identities and controlled references; user text remains verbatim."""
-    mapping = {}
-    def collect(value):
-        if isinstance(value, dict):
-            for key, child in value.items():
-                if key in {"id", "instanceId"} and isinstance(child, str):
-                    mapping.setdefault(child, new_id("copy"))
-                collect(child)
-        elif isinstance(value, list):
-            for child in value:
-                collect(child)
-    for item in items:
-        collect(item["clip"])
-    references = {"id", "instanceId", "attachedToClipId", "activeTrackId", "trackId", "nestedTrackId", "busId"}
-    def rewrite(value):
-        if isinstance(value, dict):
-            result = {}
-            for key, child in value.items():
-                new_key = key
-                if key.startswith("effect:"):
-                    parts = key.split(":", 2)
-                    if len(parts) == 3:
-                        new_key = f"effect:{mapping.get(parts[1], parts[1])}:{parts[2]}"
-                if key in references and isinstance(child, str):
-                    result[new_key] = mapping.get(child, child)
-                elif key in {"trackIds", "clipIds"} and isinstance(child, list):
-                    result[new_key] = [mapping.get(cid, cid) for cid in child]
-                else:
-                    result[new_key] = rewrite(child)
-            return result
-        if isinstance(value, list):
-            return [rewrite(child) for child in value]
-        return value
+    from cutvoke.editing.identity_clone import fresh_data
+    data_items = fresh_data([item["clip"] for item in items])
     clones = []
     source_ids = {item["clip"].get("id") for item in items}
-    for item in items:
-        data = rewrite(item["clip"])
+    for item, data in zip(items, data_items):
         # A copied follower cannot retain a binding to an uncopied original.
         if item["clip"].get("attachedToClipId") not in source_ids:
             data.pop("attachedToClipId", None)

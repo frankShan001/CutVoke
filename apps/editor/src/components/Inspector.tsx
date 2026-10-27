@@ -24,6 +24,12 @@ import { BUILTIN_TRANSFORM_ID } from "../lib/effects";
 import { ClipTimingSection } from "./inspector/ClipTimingSection";
 import { clipSourceRange } from "../lib/clipTiming";
 import { BatchClipSection } from "./inspector/BatchClipSection";
+import { CompositingSection } from "./inspector/CompositingSection";
+import { EssentialPropertiesSection } from "./inspector/EssentialPropertiesSection";
+import { PropertyLinksSection } from "./inspector/PropertyLinksSection";
+import { MotionPathSection } from "./inspector/MotionPathSection";
+import { MaskTrackingSection } from "./inspector/MaskTrackingSection";
+import { ModifiedPropertiesSection } from "./inspector/ModifiedPropertiesSection";
 import type { Clip } from "../types/api";
 
 export function Inspector() {
@@ -58,6 +64,7 @@ export function Inspector() {
       const isSticker = clip.role === "sticker" || track?.role === "sticker";
       const isText = track?.kind === "text";
       const isAudio = track?.kind === "audio";
+      const isAdjustment = clip.role === "adjustment";
       const isImage = track?.kind === "video" && inferKind(clip.assetRef.sourcePath, false, false) === "image";
       const isVisualClip = track?.kind === "video" && !isSticker;
       const anchorChoices = project.sequence.tracks
@@ -94,7 +101,13 @@ export function Inspector() {
             aria-label={tr("片段编辑属性")}
             style={{ border: 0, margin: 0, padding: 0, minWidth: 0, opacity: clipReadOnly ? 0.55 : 1, pointerEvents: clipReadOnly ? "none" : undefined }}
           >
-            <ClipTimingSection clip={clip} hasSource={!isText && !clip.nested && !!clip.assetRef.sourcePath} />
+            <ModifiedPropertiesSection clip={clip} />
+            <div data-property-section="timing"><ClipTimingSection clip={clip} hasSource={!isText && !clip.nested && !!clip.assetRef.sourcePath} /></div>
+            {!isAudio ? <div data-property-section="compositing"><CompositingSection clip={clip} /></div> : null}
+            <div data-property-section="template"><EssentialPropertiesSection clip={clip} /></div>
+            {!isAudio ? <div data-property-section="links"><PropertyLinksSection clip={clip} /></div> : null}
+            {!isAudio && !isAdjustment ? <div data-property-section="motion"><MotionPathSection clip={clip} /></div> : null}
+            {!isAudio && !isAdjustment && !isImage ? <MaskTrackingSection clip={clip} /> : null}
             {(isText || isSticker || track?.kind === "audio") && anchorChoices.length ? <label className="inspector__subrow">
               <span className="inspector__key">{tr("跟随视频")}</span>
               <select className="cv-input" aria-label={tr("跟随视频片段")}
@@ -112,15 +125,15 @@ export function Inspector() {
             {clip.attachedToClipId ? <p className="cv-hint">{tr("移动关联视频时此片段同步移动；按住 Alt 拖动视频可临时保持此片段原位。")}</p> : null}
             {/* ---- 音频 / 关键帧 / 动画 / 画面特效 小节（J01 拆分）---- */}
             <div className="inspector__sep" />
-            {isText ? <><TitleEditor key={clip.id} clip={clip} /><KeyframeSection clip={clip} /></> : <>
+            {isText ? <><div data-property-section="title"><TitleEditor key={clip.id} clip={clip} /></div><div data-property-section="keys"><KeyframeSection clip={clip} /></div></> : <>
               {isSticker ? <StickerTransformSection clip={clip} /> : isVisualClip ? <>
-                {isImage ? null : <AudioSection clip={clip} canDetach
-                  detachedAudioClipId={detachedAudioClipId} />}
-                <TransformSection clip={clip} />
-              </> : isAudio ? <AudioSection clip={clip} /> : null}
-              <KeyframeSection clip={clip} />
-              {!isAudio ? <AnimationSection clip={clip} /> : null}
-              <FxSection clip={clip} trackKind={track!.kind} />
+                {isImage || isAdjustment ? null : <div data-property-section="audio"><AudioSection clip={clip} canDetach
+                  detachedAudioClipId={detachedAudioClipId} /></div>}
+                {!isAdjustment ? <div data-property-section="transform"><TransformSection clip={clip} /></div> : null}
+              </> : isAudio ? <div data-property-section="audio"><AudioSection clip={clip} /></div> : null}
+              <div data-property-section="keys"><KeyframeSection clip={clip} /></div>
+              {!isAudio && !isAdjustment ? <AnimationSection clip={clip} /> : null}
+              <div data-property-section="effects"><FxSection clip={clip} trackKind={track!.kind} /></div>
             </>}
 
 

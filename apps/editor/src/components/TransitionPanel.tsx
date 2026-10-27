@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Eye, Film, Trash2 } from "lucide-react";
 import { Button, Field, Panel, Select, TextInput, Badge } from "./ui";
 import { useEditor, showError, selectors } from "../store/editor";
-import { stageEffect, releaseEdit, useInteractionProject } from "../store/interactive";
+import { stageEdit, releaseEdit, useInteractionProject } from "../store/interactive";
 import { getLatestState } from "../store/actions";
 import { removeEffect } from "../store/clipEdit";
 import { rationalToSecs } from "../lib/rational";
@@ -20,6 +20,7 @@ import {
 } from "../lib/effects";
 import { paramControls } from "../lib/effectControls";
 import { ParamControls } from "./inspector/ParamControls";
+import { StructuredEffectControls, validStructuredParameters } from './inspector/StructuredEffectControls';
 import type { Clip } from "../types/api";
 
 const DURATION_PRESETS = [0.5, 1.0, 1.5, 2.0];
@@ -148,9 +149,11 @@ export function TransitionPanel() {
 
   const previewParams = (next: Record<string, unknown>, nextDuration = duration) => {
     if (!currentClip || !currentFx || readOnly) return;
+    if(selectedSpec && !validStructuredParameters(selectedSpec,next))return;
     const d = Number(nextDuration);
     if (Number.isFinite(d) && d >= minDuration && d <= maxDuration && Object.values(next).every(v => v !== undefined && (typeof v !== "number" || Number.isFinite(v))))
-      stageEffect(dispatch, currentClip, currentFxId, { ...next, duration: d });
+      stageEdit(dispatch,`${currentClip.id}:${currentFxId}`,[{type:'effect.update',payload:{clipId:currentClip.id,effectId:currentFxId,
+        params:{...next,duration:d},replaceParams:true}}]);
   };
   const changeDuration = (value: string) => { setDuration(value); previewParams(params, value); };
 
@@ -282,6 +285,7 @@ export function TransitionPanel() {
         <ParamControls controls={parameterControls} onChange={(name, value) => {
           const next = { ...params, [name]: value }; setParams(next); previewParams(next);
         }} onCommit={() => releaseEdit(`${clipSel}:${currentFxId}`)} />
+        {selectedSpec ? <StructuredEffectControls spec={selectedSpec} params={params} onChange={setParams} onCommit={next=>previewParams(next)}/> : null}
       </fieldset> : null}
 
       <Button full onClick={() => void handleTrial()}

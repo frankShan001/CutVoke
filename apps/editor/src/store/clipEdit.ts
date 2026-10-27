@@ -579,11 +579,12 @@ export async function addEffect(
 export async function removeEffect(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { clipId: string; effectId: string },
+  input: { clipId: string; effectId: string; instanceId?: string },
 ): Promise<ActionResult> {
   const res = await runCommand(dispatch, state, "effect.remove", {
     clipId: input.clipId,
     effectId: input.effectId,
+    ...(input.instanceId ? { instanceId: input.instanceId } : {}),
   });
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });

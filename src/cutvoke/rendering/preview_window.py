@@ -12,7 +12,8 @@ from cutvoke.domain.rational import Rational
 # These filters are stateless, except for the explicitly bounded trail history.
 SAFE = frozenset({"gblur", "grayscale", "colorbalance", "glow", "mask", "chromatic",
     "trail", "colorize", "lens", "shatter", "vibrance", "lightWeave", "opticalField",
-    "invert", "sepia", "vflip", "hflip", "sharpen", "curves", "lut3d", "vignette"})
+    "invert", "sepia", "vflip", "hflip", "sharpen", "curves", "lut3d", "vignette",
+    "fractalNoise", "turbulentDisplace", "waveWarp", "vectorPath", "trackedMask", "cameraPlane", "scene3d"})
 
 
 @lru_cache(maxsize=256)
@@ -27,6 +28,11 @@ def _static_picture(path, size, modified):
 
 def bounded(project, window, renderer):
     if window is None:
+        return project, {}, None
+    # Linked layers need both clocks intact. Compilation still seeks and
+    # selects a bounded output window; don't independently trim dependencies.
+    if any(c.compositing.get("matte") or c.role == "adjustment"
+           for t in project.sequence.tracks for c in t.clips):
         return project, {}, None
     start, end = window
     history = 0

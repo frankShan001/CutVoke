@@ -1,5 +1,7 @@
 # 本地启动与 MCP 接入
 
+当前源码版的新工程使用[独立工程目录](PROJECT_DIRECTORIES.md)：工程库负责索引，素材、编辑数据、缓存和导出保存在各工程目录中。旧工程可在工程面板预览迁移，原库与素材会保留。
+
 ## 已构建桌面发行包（Windows / macOS / Linux）
 
 下载与校验值见[安装说明](installation.md)，选择与系统架构一致的包。完整解压后，Windows 打开 `CutVoke.exe`，Mac 将 `CutVoke.app` 移到应用程序目录再打开，Linux x64 在目录运行 `./cutvoke`。这些包内置编辑器、冻结后端和 FFmpeg，基础剪辑无需另装 Python、Node 或 FFmpeg。

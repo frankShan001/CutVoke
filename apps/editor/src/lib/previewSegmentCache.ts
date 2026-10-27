@@ -2,6 +2,7 @@ import { tr } from "../i18n";
 export interface CachedPreviewSegment { url: string; bytes: number }
 
 interface Entry {
+  token: string;
   source: string;
   refs: number;
   used: number;
@@ -39,7 +40,7 @@ export class PreviewSegmentCache {
     if (!entry) {
       let resolve!: Entry["resolve"], reject!: Entry["reject"];
       const promise = new Promise<CachedPreviewSegment>((yes, no) => { resolve = yes; reject = no; });
-      entry = { source, refs: 0, used: 0, priority: background ? 10 : 0, status: "queued", controller: new AbortController(),
+      entry = { token: crypto.randomUUID().replace(/-/g, ""), source, refs: 0, used: 0, priority: background ? 10 : 0, status: "queued", controller: new AbortController(),
         promise, resolve, reject };
       this.entries.set(source, entry);
     }
@@ -50,7 +51,7 @@ export class PreviewSegmentCache {
     // waits. Its server render is also preemptible by the foreground request.
     if (!background && entry.status === "queued" && this.running >= this.concurrency) {
       const speculative = [...this.entries.values()].find(item => item.status === "loading" && item.priority > 0);
-      speculative?.controller.abort();
+      if (speculative) this.cancelBackground(speculative);
     }
     this.pump();
     let released = false;
@@ -58,6 +59,7 @@ export class PreviewSegmentCache {
       if (released) return;
       released = true;
       entry.refs--;
+      if (!entry.refs && entry.status === "loading" && entry.priority > 0) this.cancelBackground(entry);
       if (!entry.refs && entry.status === "queued") {
         this.entries.delete(source);
         entry.reject(new DOMException("Preview position superseded", "AbortError"));
@@ -71,6 +73,7 @@ export class PreviewSegmentCache {
   dispose() {
     this.closed = true;
     for (const entry of this.entries.values()) {
+      if (entry.status === "loading" && entry.priority > 0) this.cancelBackground(entry);
       entry.controller.abort();
       if (entry.status === "queued") entry.reject(new DOMException("Preview scope closed", "AbortError"));
       if (entry.media) URL.revokeObjectURL(entry.media.url);
@@ -90,6 +93,13 @@ export class PreviewSegmentCache {
     }
   }
 
+  private cancelBackground(entry: Entry) {
+    entry.controller.abort();
+    const project = entry.source.match(/\/projects\/([^/?]+)/)?.[1];
+    if (project) void fetch(`/api/v1/projects/${project}/preview-prefetch-cancel`, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: entry.token }) }).catch(() => {});
+  }
+
   private async load(entry: Entry) {
     try {
       let blob: Blob | null = null;
@@ -97,7 +107,7 @@ export class PreviewSegmentCache {
         let retryable = true;
         try {
           const requestUrl = entry.priority > 0
-            ? `${entry.source}${entry.source.includes("?") ? "&" : "?"}prefetch=1` : entry.source;
+            ? `${entry.source}${entry.source.includes("?") ? "&" : "?"}prefetch=1&prefetchToken=${entry.token}` : entry.source;
           const response = await fetch(requestUrl, { signal: entry.controller.signal });
           if (!response.ok) {
             retryable = response.status === 408 || response.status === 429 || response.status >= 500;

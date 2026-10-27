@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld("cutvokeDesktop", Object.freeze({
   settings: () => ipcRenderer.invoke("cutvoke:settings"),
   saveSettings: value => ipcRenderer.invoke("cutvoke:settings-save", value),
   chooseProjectDirectory: () => ipcRenderer.invoke("cutvoke:choose-project-directory"),
+  chooseExtensionDirectory: () => ipcRenderer.invoke("cutvoke:choose-extension-directory"),
+  chooseExtensionBundle: () => ipcRenderer.invoke("cutvoke:choose-extension-bundle"),
   chooseExportFile: suggested => ipcRenderer.invoke("cutvoke:choose-export", suggested),
   revealExport: (projectId, jobId) => ipcRenderer.invoke("cutvoke:reveal-export", projectId, jobId),
 }));

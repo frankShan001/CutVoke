@@ -272,6 +272,7 @@ MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错�
 
 | 想了解什么 | 文档 |
 | --- | --- |
+| 独立工程目录、移动、备份与旧工程迁移 | [工程目录管理](docs/user/PROJECT_DIRECTORIES.md) |
 | 本地启动、桌面、共享数据库与 MCP 配置 | [本地使用](docs/user/LOCAL_DELIVERY_MCP.md) |
 | Agent 查询、预演、租约、重试与导出 | [外部 Agent 接入](docs/user/external-agent-editing.md) |
 | 技能复制、任务输入及可运行示例 | [技能使用](docs/user/agent-skill.zh-CN.md) |

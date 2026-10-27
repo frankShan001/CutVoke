@@ -6,7 +6,10 @@ import { getLanguagePreference, LANGUAGE_NAMES, LOCALES, setLanguage, type Langu
 import type { DesktopSettings } from "../types/desktop";
 import "../styles/cache-settings.css";
 import { ResourcePackManager } from "./ResourcePackManager";
+import { PreviewBudgetSettings } from "./PreviewBudgetSettings";
+import { ExtensionSetup } from "./ExtensionSetup";
 import { flushPendingEdits } from "../lib/pendingEdits";
+import { useEditor } from "../store/editor";
 import "../styles/resources.css";
 
 interface CacheStatus {
@@ -20,8 +23,11 @@ const kinds: Record<string, string> = { get window() { return tr("片段预览")
 
 export function CacheSettings() {
   useLocale();
+  const { state } = useEditor();
+  const scoped = state.view === "editor" ? state.currentId : null;
+  const cachePath = (suffix = "") => `preview-cache${suffix}${scoped ? `?projectId=${encodeURIComponent(scoped)}` : ""}`;
   const [open, setOpen] = useState(false);
-  const [section, setSection] = useState<"general" | "resources">("general");
+  const [section, setSection] = useState<"general" | "resources" | "extensions">("general");
   const [resourceBusy, setResourceBusy] = useState(false);
   const [status, setStatus] = useState<CacheStatus | null>(null);
   const [directory, setDirectory] = useState("");
@@ -50,7 +56,7 @@ export function CacheSettings() {
       setGpuAcceleration(settings.gpuAcceleration !== false);
       setFirstRun(!settings.setupComplete);
     }
-    const current = await previewRequest<CacheStatus>("preview-cache");
+    const current = await previewRequest<CacheStatus>(cachePath());
     if (!alive.current) return;
     setStatus(current); setDirectory(current.directory); setCapacity(String(current.maxBytes / 1024 ** 3));
   };
@@ -87,10 +93,13 @@ export function CacheSettings() {
       if (moving && !migrationConfirmed) throw new Error(tr("请先确认迁移说明"));
       if ((moving || gpuAcceleration !== (desktopSettings?.gpuAcceleration !== false)) && !await flushPendingEdits())
         throw new Error(tr("请先保存当前修改，再更改设置。"));
-      const result = await desktop.saveSettings({ projectDirectory: projectDirectory.trim(), cacheDirectory: directory, maxBytes, gpuAcceleration });
+      const globalCache = scoped ? await previewRequest<CacheStatus>("preview-cache") : null;
+      if (scoped) await previewRequest(cachePath(), undefined, { directory, maxBytes });
+      const result = await desktop.saveSettings({ projectDirectory: projectDirectory.trim(),
+        cacheDirectory: globalCache?.directory || directory, maxBytes: globalCache?.maxBytes || maxBytes, gpuAcceleration });
       if (result.restartRequired) { setMessage(tr("设置已保存，正在重新打开应用…")); return; }
     } else {
-      await previewRequest("preview-cache", undefined, { directory, maxBytes });
+      await previewRequest(cachePath(), undefined, { directory, maxBytes });
     }
     const wasFirstRun = firstRun;
     await load();
@@ -108,8 +117,10 @@ export function CacheSettings() {
       {!firstRun && <div className="settings-navigation" role="group" aria-label={tr("设置")}>
         <button type="button" className="tool-btn" aria-pressed={section === "general"} disabled={busy || resourceBusy} onClick={() => setSection("general")}>{tr("常规")}</button>
         <button type="button" className="tool-btn" aria-pressed={section === "resources"} disabled={busy || resourceBusy} onClick={() => setSection("resources")}>{tr("资源管理")}</button>
+        <button type="button" className="tool-btn" aria-pressed={section === "extensions"} disabled={busy || resourceBusy} onClick={() => setSection("extensions")}>{tr("可选抠像组件")}</button>
       </div>}
       {section === "resources" && !firstRun && <ResourcePackManager onBusyChange={setResourceBusy} />}
+      {section === "extensions" && !firstRun && <ExtensionSetup />}
       <div hidden={section !== "general"}>
       {message && <p role="status" className="cache-settings__success">{message}</p>}
       {error && <p role="alert" className="cache-settings__error">{error}</p>}
@@ -146,6 +157,7 @@ export function CacheSettings() {
           <p className="cache-settings__muted">{tr("更改后保存设置，应用将重新打开。")}</p>
         </section>}
         <section className="settings-section" aria-label={tr("预览缓存")}>
+        <PreviewBudgetSettings />
         <h3>{tr("预览缓存")}</h3>
         <p className="cache-settings__muted">{tr("保留已准备的画面，再次打开工程时复用。")}</p>
         {!firstRun && <><div className="cache-settings__usage"><strong>{readableBytes(status.usedBytes)} <small>{tr("已使用")}</small></strong><span>{tr("上限 ")}{gib(status.maxBytes)} GiB · {status.entries}{tr(" 个缓存文件")}</span></div>
@@ -157,15 +169,15 @@ export function CacheSettings() {
           {window.cutvokeDesktop && <button className="tool-btn" disabled={busy} onClick={() => void run(async () => { const selected = await window.cutvokeDesktop!.chooseCacheDirectory(); if (selected) setDirectory(selected); })}><FolderOpen size={14} />{tr("选择")}</button>}</div></label>
         <p className="cache-settings__muted">{tr("更换目录后会在新位置保存缓存；原位置的缓存保留。清理缓存后，后续访问会重新准备画面。")}</p>
         {!firstRun && <div className="cache-settings__actions">
-          <button className="tool-btn" disabled={busy} onClick={() => void run(async () => setStatus(await previewRequest<CacheStatus>("preview-cache")))}><RefreshCw size={14} />{tr("刷新用量")}</button>
-          {window.cutvokeDesktop && <button className="tool-btn" disabled={busy} onClick={() => void run(() => window.cutvokeDesktop!.revealCacheDirectory())}>{tr("打开目录")}</button>}
+          <button className="tool-btn" disabled={busy} onClick={() => void run(async () => setStatus(await previewRequest<CacheStatus>(cachePath())))}><RefreshCw size={14} />{tr("刷新用量")}</button>
+          {window.cutvokeDesktop && !scoped && <button className="tool-btn" disabled={busy} onClick={() => void run(() => window.cutvokeDesktop!.revealCacheDirectory())}>{tr("打开目录")}</button>}
         </div>}
         </section>
         {!firstRun && <><footer><div><strong>{tr("清理空闲缓存")}</strong><p>{tr("正在使用和最近访问的缓存会保留。")}</p></div>
           {!confirmClear ? <button className="tool-btn" disabled={busy} onClick={() => setConfirmClear(true)}>{tr("清理")}</button> : <div className="cache-settings__actions">
             <button className="tool-btn" disabled={busy} onClick={() => setConfirmClear(false)}>{tr("取消")}</button>
             <button className="tool-btn" disabled={busy} onClick={() => void run(async () => {
-              const result = await previewRequest<{ freedBytes: number }>("preview-cache/clear", undefined, {});
+              const result = await previewRequest<{ freedBytes: number }>(cachePath("/clear"), undefined, {});
               await load(); setConfirmClear(false); setMessage(tr("已释放 {0} GiB", gib(result.freedBytes)));
             })}>{tr("确认清理")}</button></div>}
         </footer>

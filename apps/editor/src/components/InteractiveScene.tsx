@@ -17,6 +17,7 @@ const TRANSFORM = "cutvoke.transform";
 const AUDIO = new Set(["cutvoke.fx.equalizer", "cutvoke.fx.compressor", "cutvoke.fx.loudnorm", "cutvoke.fx.pan", "cutvoke.fx.sidechainDuck"]);
 const IMAGE = /\.(png|jpe?g|webp|gif|bmp|svg|avif)(?:$|\?)/i;
 function fullScene(project: Project, time: number) {
+  if (project.sequence.tracks.some(track => track.clips.some(clip => clip.compositing || clip.role === "adjustment" || clip.sequenceRef || clip.propertyLinks || clip.motionPath))) return true;
   return !!project.sequence.multicam || project.sequence.tracks.some(track => track.visible !== false && track.clips.some(clip => {
     if (clip.hidden) return false;
     const start = rationalToSecs(clip.timelineStart), end = rationalToSecs(clip.timelineEnd);

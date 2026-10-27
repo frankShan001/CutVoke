@@ -60,6 +60,10 @@ def main() -> None:
     with tempfile.TemporaryDirectory(prefix="cutvoke-e2e-") as root:
         service = EditService(store=ProjectStore(os.path.join(root, "projects.sqlite")))
         seed_fixture(service, root)
+        if os.environ.get("CUTVOKE_E2E_FOLDERS") == "1":
+            from cutvoke.storage.project_directory import ProjectLibraryStore
+            service.close(); service.store.close()
+            service = EditService(store=ProjectLibraryStore(os.path.join(root, "projects.sqlite")))
         api = HttpApi(service, RenderService(), media_dir=os.path.join(root, "media"))
         try:
             serve(api, host="127.0.0.1", port=port, web_dir=str(web_dir))

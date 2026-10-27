@@ -70,6 +70,9 @@ def model_path() -> Path:
     configured = os.environ.get(MODEL_ENV, "").strip()
     if configured:
         return Path(configured).expanduser().resolve()
+    from cutvoke.storage.extension_paths import active_extension
+    managed=active_extension('person').get('models',{}).get('semantic')
+    if managed:return Path(managed).resolve()
     return (Path.home() / ".cutvoke" / "models" /
             "selfie_segmenter.tflite").resolve()
 
@@ -78,6 +81,9 @@ def interactive_model_path() -> Path:
     configured = os.environ.get(INTERACTIVE_MODEL_ENV, "").strip()
     if configured:
         return Path(configured).expanduser().resolve()
+    from cutvoke.storage.extension_paths import active_extension
+    managed=active_extension('person').get('models',{}).get('magic_touch')
+    if managed:return Path(managed).resolve()
     return (Path.home() / ".cutvoke" / "models" / "magic_touch.tflite").resolve()
 
 
@@ -85,6 +91,9 @@ def sam2_model_path() -> Path:
     configured = os.environ.get(SAM2_MODEL_ENV, "").strip()
     if configured:
         return Path(configured).expanduser().resolve()
+    from cutvoke.storage.extension_paths import active_extension
+    managed=active_extension('object').get('models',{}).get('sam2')
+    if managed:return Path(managed).resolve()
     return (Path.home() / ".cutvoke" / "models" / "sam2.1_hiera_base_plus.pt").resolve()
 
 
@@ -96,6 +105,9 @@ def sam2_runtime_python() -> Path:
     configured = os.environ.get(SAM2_PYTHON_ENV, "").strip()
     if configured:
         return Path(configured).expanduser().resolve()
+    from cutvoke.storage.extension_paths import active_extension
+    managed=active_extension('object').get('python')
+    if managed:return Path(managed).resolve()
     root = sam2_runtime_root()
     return root / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
 
@@ -152,6 +164,8 @@ def availability() -> dict:
                      opencv_installed)
     except (ImportError, ValueError):
         installed = False
+    from cutvoke.rendering.model_runtime_bridge import person_python
+    installed=installed or bool(person_python() and opencv_installed)
     path = model_path()
     model_ready = _model_is_valid(path)
     interactive_model_ready = _interactive_model_is_valid(interactive_model_path())
@@ -173,6 +187,7 @@ def availability() -> dict:
     return {
         "installed": installed,
         "opencvInstalled": opencv_installed,
+        "ffmpegReady": ffmpeg_ready,
         "modelReady": model_ready,
         "interactiveModelReady": interactive_model_ready,
         "mediapipeReady": mediapipe_ready,
@@ -587,8 +602,9 @@ def _generate_sam2_masks(
     progress_path = work_dir / "progress.json"
     selection_frame = prompt_sets[0]["frame"]
     total = max(1, frame_count - selection_frame)
+    from cutvoke.rendering.model_runtime_bridge import worker_script
     command = [
-        str(python), "-m", "cutvoke.rendering.sam2_worker",
+        str(python), "-I", str(worker_script('sam2_worker.py',work_dir)),
         "--frames-dir", str(frames_dir), "--masks-dir", str(masks_dir),
         "--checkpoint", str(checkpoint),
         "--prompt-sets-json", json.dumps(prompt_sets, separators=(",", ":")),
@@ -601,7 +617,7 @@ def _generate_sam2_masks(
         try:
             process = subprocess.Popen(
                 command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                stderr=error_log, env=env,
+                stderr=error_log, env=env, creationflags=0x08000000 if os.name == 'nt' else 0,
             )
         except OSError as exc:
             raise PersonCutoutError(f"无法启动 SAM2 跟踪进程：{exc}") from exc
@@ -689,6 +705,11 @@ def generate_person_cutout(
     cancelled: Callable[[], bool] | None = None,
 ) -> dict:
     """Create a transparent ProRes 4444 MOV while preserving source audio."""
+    from cutvoke.rendering.model_runtime_bridge import run_person
+    managed=run_person(source_path,output_path,model_file=model_file,edge_softness=edge_softness,selection_point=selection_point,
+        selection_points=selection_points,selection_at_seconds=selection_at_seconds,selection_prompts=selection_prompts,
+        tracking_mode=tracking_mode,progress=progress,cancelled=cancelled)
+    if managed is not None:return managed
     source = Path(source_path).resolve()
     target = Path(output_path).resolve()
     model = Path(model_file or model_path()).resolve()
@@ -792,7 +813,7 @@ def generate_person_cutout(
             if not availability().get("sam2Ready"):
                 raise PersonCutoutError(
                     "SAM2 跟踪组件或模型未准备：运行 cutvoke-person-model --sam2")
-            sam2_work_dir = Path(tempfile.mkdtemp(prefix="cutvoke-sam2-"))
+            sam2_work_dir = Path(tempfile.mkdtemp(prefix=".cutvoke-sam2-",dir=target.parent))
             sam2_prompt_sets = [{
                 "frame": int(round(prompt["atSeconds"] * fps)),
                 "points": [list(point) for point in prompt["points"]],
@@ -1074,13 +1095,15 @@ def generate_person_cutout(
 class PersonCutoutJobManager:
     """Bounded in-process jobs for model loading and frame-by-frame rendering."""
 
-    def __init__(self) -> None:
+    def __init__(self, storage_path=None) -> None:
         self._lock = threading.RLock()
         self._slot = threading.Semaphore(1)
         self._closed = threading.Event()
         self._jobs: dict[str, dict] = {}
         self._threads: dict[str, threading.Thread] = {}
         self._cancel: dict[str, threading.Event] = {}
+        from cutvoke.storage.local_jobs import LocalJobs
+        self._journal = LocalJobs(storage_path) if storage_path else None
 
     def submit(self, project: Project, clip_id: str, media_dir: str | Path,
                *, edge_softness: float = 1.2,
@@ -1165,7 +1188,7 @@ class PersonCutoutJobManager:
                 "jobId": job_id, "projectId": project.project_id,
                 "clipId": clip_id, "sourceSignature": signature,
                 "status": "queued", "phase": "排队中", "progress": 0,
-                "error": "", "result": None, "createdAt": time.time(),
+                "error": "", "result": None, "createdAt": time.time(),"workerPid":os.getpid(),
                 "selectionMode": "selected_person" if selection_mode == "selected" else "all_people",
                 "trackingMode": tracking_mode,
                 "selectionPoint": list(selection_point) if selection_point else None,
@@ -1179,6 +1202,9 @@ class PersonCutoutJobManager:
                 } for prompt in normalized_prompts] if normalized_prompts else None),
             }
             cancel = threading.Event()
+            if self._journal:
+                try:self._journal.put(job,maximum_pending=MAX_PENDING_JOBS)
+                except ValueError as error:raise PersonCutoutError(str(error)) from error
             self._jobs[job_id] = job
             self._cancel[job_id] = cancel
             thread = threading.Thread(
@@ -1196,11 +1222,16 @@ class PersonCutoutJobManager:
 
     def get(self, job_id: str) -> dict | None:
         with self._lock:
+            if self._journal:return self._journal.get(job_id)
             job = self._jobs.get(job_id)
             return copy.deepcopy(job) if job is not None else None
 
     def cancel(self, job_id: str) -> dict | None:
         with self._lock:
+            if self._journal:
+                job=self._journal.update(job_id,{'status':'cancelled','phase':'已取消','error':''},expected={'queued','running'})
+                if job_id in self._cancel:self._cancel[job_id].set()
+                return job or self._journal.get(job_id)
             job = self._jobs.get(job_id)
             if job is None:
                 return None
@@ -1209,17 +1240,25 @@ class PersonCutoutJobManager:
                 job.update(status="cancelled", phase="已取消", error="")
             return copy.deepcopy(job)
 
-    def claim_apply(self, job_id: str, project_id: str) -> dict | None:
+    def claim_apply(self, job_id: str, project_id: str, command_id: str = '') -> dict | None:
         with self._lock:
+            if self._journal:
+                current=self._journal.get(job_id)
+                if current and current['projectId']==project_id and current['status']=='applying' and current.get('applyCommandId')==command_id:return current
+                return self._journal.update(job_id,{'status':'applying','phase':'正在应用到时间线','applyCommandId':command_id},expected={'completed'},project_id=project_id)
             job = self._jobs.get(job_id)
             if (job is None or job["projectId"] != project_id or
                     job["status"] != "completed"):
                 return None
-            job.update(status="applying", phase="正在应用到时间线")
+            job.update(status="applying", phase="正在应用到时间线",applyCommandId=command_id)
             return copy.deepcopy(job)
 
-    def finish_apply(self, job_id: str, *, error: str = "") -> dict | None:
+    def finish_apply(self, job_id: str, *, error: str = "", receipt=None) -> dict | None:
         with self._lock:
+            if self._journal:
+                changes=({'status':'completed','phase':'已生成透明片段，可重试应用','error':error} if error else
+                         {'status':'applied','phase':'已应用；可撤销恢复原片','progress':100,'error':'','applyReceipt':receipt})
+                return self._journal.update(job_id,changes,expected={'applying'})
             job = self._jobs.get(job_id)
             if job is None:
                 return None
@@ -1228,7 +1267,7 @@ class PersonCutoutJobManager:
                            error=error)
             else:
                 job.update(status="applied", phase="已应用；可撤销恢复原片",
-                           progress=100, error="")
+                           progress=100, error="",applyReceipt=receipt)
             return copy.deepcopy(job)
 
     def close(self) -> None:
@@ -1240,17 +1279,34 @@ class PersonCutoutJobManager:
             for key in active:
                 self._cancel[key].set()
                 self._jobs[key].update(status="cancelled", phase="服务已关闭")
+                if self._journal:self._journal.update(key,{'status':'cancelled','phase':'服务已关闭'},expected={'queued','running'})
         for thread in threads:
             if thread is not None:
                 thread.join(timeout=1)
+        # A finishing worker may still be unwinding after a cancelled model
+        # call. Keep its journal connection until that worker has returned.
+        if self._journal and not any(thread and thread.is_alive() for thread in threads):
+            self._journal.close();self._journal=None
 
     def _update(self, job_id: str, **changes: object) -> None:
         with self._lock:
+            if self._journal:
+                job=self._journal.update(job_id,changes,expected={'queued','running'})
+                if job is not None:self._jobs[job_id]=job
+                return
             job = self._jobs.get(job_id)
             if job is not None and job["status"] not in ("cancelled", "applied"):
                 job.update(changes)
 
-    def _run(self, job_id: str, clip: Clip, source: str, model: Path,
+    def _run(self, *arguments) -> None:
+        try:self._generate(*arguments)
+        finally:
+            with self._lock:
+                self._threads.pop(arguments[0],None)
+                if self._closed.is_set() and not self._threads and self._journal:
+                    self._journal.close();self._journal=None
+
+    def _generate(self, job_id: str, clip: Clip, source: str, model: Path,
              output: Path, edge_softness: float,
              selection_point: tuple[float, float] | None,
              selection_points: list[tuple[float, float, int]] | None,
@@ -1259,12 +1315,14 @@ class PersonCutoutJobManager:
              tracking_mode: str,
              cancel: threading.Event) -> None:
         with self._slot:
-            if cancel.is_set() or self._closed.is_set():
+            def cancelled():
+                return cancel.is_set() or self._closed.is_set() or bool(self._journal and (self._journal.get(job_id) or {}).get('status')=='cancelled')
+            if cancelled():
                 return
             self._update(job_id, status="running", phase="准备人物分割", progress=1)
             try:
                 def report(phase: str, percent: int) -> None:
-                    if cancel.is_set() or self._closed.is_set():
+                    if cancelled():
                         raise PersonCutoutCancelled("人物抠像已取消")
                     self._update(job_id, phase=phase, progress=percent)
 
@@ -1276,9 +1334,9 @@ class PersonCutoutJobManager:
                     selection_at_seconds=selection_at_seconds,
                     selection_prompts=selection_prompts or None,
                     tracking_mode=tracking_mode,
-                    cancelled=cancel.is_set,
+                    cancelled=cancelled,
                 )
-                if cancel.is_set() or self._closed.is_set():
+                if cancelled():
                     Path(result["outputPath"]).unlink(missing_ok=True)
                     return
                 with self._lock:
@@ -1286,17 +1344,17 @@ class PersonCutoutJobManager:
                     if job["status"] == "cancelled":
                         Path(result["outputPath"]).unlink(missing_ok=True)
                         return
-                    job.update(status="completed", phase="透明片段已生成",
-                               progress=100, result=result)
+                    self._update(job_id,status="completed", phase="透明片段已生成",progress=100, result=result)
             except PersonCutoutCancelled:
                 with self._lock:
                     job = self._jobs.get(job_id)
                     if job is not None:
                         job.update(status="cancelled", phase="已取消", error="")
+                        if self._journal:self._journal.update(job_id,{'status':'cancelled','phase':'已取消','error':''},expected={'queued','running'})
                 output.unlink(missing_ok=True)
             except Exception as exc:
                 with self._lock:
                     job = self._jobs.get(job_id)
                     if job is not None and job["status"] != "cancelled":
-                        job.update(status="failed", phase="抠像失败", error=str(exc))
+                        self._update(job_id,status="failed", phase="抠像失败", error=str(exc))
                 output.unlink(missing_ok=True)

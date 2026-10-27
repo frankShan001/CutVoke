@@ -44,16 +44,16 @@ KEYFRAME = {"type": "object", "properties": {
     "param": {"type": "string", "description": "opacity/x/y/scale/rotation/volume, or effect:<instanceId>:<parameter> (color brightness/contrast/saturation; blur sigma)."},
     "time": {**SECONDS, "description": "Clip-local presentation seconds, not absolute timeline time."},
     "value": {"type": "number", "description": "opacity 0..1; scale 0.05..5; rotation -180..180; x/y in canvas pixels."},
-    "interpolation": {"type": "string", "enum": ["linear", "ease-in", "ease-out", "cubic-bezier"]},
+    "interpolation": {"type": "string", "enum": ["linear", "ease-in", "ease-out", "cubic-bezier", "hold"]},
     "bezier": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number", "minimum": 0, "maximum": 1}}},
     "required": ["param", "time", "value"], "additionalProperties": False}
 
-_BOOLEAN_FIELDS = set("locked muted visible switch enabled bold preservePitch followAttachments includeAttached applyToProject clearExisting setCanvas overwrite versioned transparent".split())
+_BOOLEAN_FIELDS = set("locked muted visible switch enabled bold preservePitch followAttachments includeAttached applyToProject clearExisting setCanvas overwrite versioned transparent replaceParams".split())
 _INTEGER_FIELDS = set("width height fontSize strokeWidth animIn animOut toIndex limit maxWords videoBitrateKbps audioBitrateKbps".split())
 _NUMBER_FIELDS = set("fps volume fadeIn fadeOut pitch stickerScale duration strength amount I seconds minSilence sharpness denoise overlap rotation scale x y value timelineTime t".split())
 _RATIONAL_FIELDS = set("timelineStart timelineEnd sourceStart sourceTime start end at fromTime toTime".split())
-_ID_ARRAY_FIELDS = set("clipIds targetClipIds captionIds trackIds ids order".split())
-_STRING_FIELDS = set("activeTrackId afterClipId align anchorClipId anchorPosition assetId attachedToClipId audioClipId audioPath audioTrackId axis background beforeClipId captionId category clipId color colorSpace createTrackKind createTrackRole device effectId fontFamily frameInterpolation gifPath groupId interpolation jobId keyframeId kind language markerId method mode model name newClipId outDir outPath param path presetId projectId quality role sequenceId slot sourceClipId sourceColorSpace sourcePath sourceSignature sourceTransfer status stickerId strokeColor target templateId text textPresetId toneMap trackId unit version videoPath wordHighlightColor action".split())
+_ID_ARRAY_FIELDS = set("clipIds targetClipIds captionIds trackIds keyframeIds ids order instanceOrder".split())
+_STRING_FIELDS = set("activeTrackId afterClipId align anchorClipId anchorPosition assetId attachedToClipId audioClipId audioPath audioTrackId axis background beforeClipId captionId category clipId color colorSpace createTrackKind createTrackRole device effectId instanceId fontFamily frameInterpolation gifPath groupId interpolation jobId keyframeId kind language markerId method mode model name newClipId outDir outPath param path presetId projectId quality role sequenceId slot sourceClipId sourceColorSpace sourcePath sourceSignature sourceTransfer status stickerId strokeColor target templateId text textPresetId toneMap trackId unit version videoPath wordHighlightColor action".split())
 
 
 def normalize_schema(value):
@@ -70,6 +70,14 @@ def normalize_schema(value):
 
 def payload_schema(command: str, params: list[dict], effects: dict | None = None) -> dict:
     """Derive public fields from the registered command catalog, not a tool copy."""
+    from cutvoke.editing.composition_commands import payload_schema as composition_schema
+    compositing = composition_schema(command)
+    if compositing is not None:
+        return compositing
+    from cutvoke.editing.essential_commands import payload_schema as essential_schema
+    essential = essential_schema(command)
+    if essential is not None:
+        return essential
     if command == "clip.paste":
         return {"type": "object", "properties": {
             "items": {"type": "array", "minItems": 1, "maxItems": 5000, "items": {
@@ -184,10 +192,11 @@ def payload_schema(command: str, params: list[dict], effects: dict | None = None
         properties["attachedToClipId"]["type"] = ["string", "null"]
     if command == "clip.keyframe":
         properties.update(copy.deepcopy(KEYFRAME["properties"]))
-        properties["action"] = {"type": "string", "enum": ["add", "batch", "remove", "update", "retime"], "default": "add"}
+        properties["action"] = {"type": "string", "enum": ["add", "batch", "remove", "update", "retime", "interpolate"], "default": "add"}
         properties["keyframes"] = {"type": "array", "minItems": 1, "items": KEYFRAME}
         properties.update({"keyframeIds": IDS, "offset": SECONDS, "anchor": SECONDS,
                            "timeScale": {"type": "number", "exclusiveMinimum": 0}})
+        properties['keyframeIds'] = {'type':'array','items':STRING,'minItems':1,'maxItems':1000,'uniqueItems':True}
         required = ["clipId"]
     if command == "clip.batch":
         properties["action"] = {"type": "string", "enum": ["move", "remove", "audio"]}
@@ -215,4 +224,21 @@ def payload_schema(command: str, params: list[dict], effects: dict | None = None
             {"properties": {"action": {"enum": ["retime"]}}, "required": ["action", "keyframeIds"]}]
     if command == "track.add":
         properties["kind"]["enum"] = ["video", "audio", "text"]
+    if command in {'effect.remove', 'effect.update', 'effect.bypass', 'effect.reorder'}:
+        properties['instanceId'] = {"type":"string", "minLength":1,
+            "description":"Exact effect instance ID. Read it from effect.add or project_query; avoids changing sibling instances."}
+        result['required'] = [name for name in required if name != 'effectId']
+        if command == 'effect.update':
+            properties['replaceParams'] = {'type':'boolean','default':False,
+                'description':'Replace the entire parameter object instead of merging. An empty object restores defaults; omitted optional geometry is removed. Keyframes are preserved.'}
+            result['required'] = [name for name in result['required'] if name != 'params']
+            properties['effectIndex'] = {"type":"integer", "minimum":0}
+            properties['range'] = {'type':'object','properties':{'start':copy.deepcopy(RATIONAL),'end':copy.deepcopy(RATIONAL)},
+                                   'required':['start','end'],'additionalProperties':False}
+            result['allOf'] = [{'anyOf':[{'required':['params']},{'required':['range']}]}]
+        if command == 'effect.reorder':
+            properties['instanceOrder'] = {"type":"array", "items":{"type":"string"}, "minItems":1, "maxItems":512, "uniqueItems":True}
+            result['anyOf'] = [{"required":[name]} for name in ('instanceId','effectId','instanceOrder','order')]
+        else:
+            result['anyOf'] = [{"required":[name]} for name in ('instanceId','effectId')]
     return result

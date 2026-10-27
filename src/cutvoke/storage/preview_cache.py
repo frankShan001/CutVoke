@@ -46,10 +46,13 @@ class _Index:
 
 
 class PreviewDiskCache:
-    def __init__(self, media_dir: str, *, grace_seconds: float = 30):
-        self.default_dir = Path(media_dir).resolve() / ".preview-cache-v2"
+    def __init__(self, media_dir: str, *, grace_seconds: float = 30, workspace_root=None):
+        self.workspace_root = Path(workspace_root).resolve() if workspace_root else None
+        self.default_dir = (self.workspace_root / "cache" / "preview" if self.workspace_root
+                            else Path(media_dir).resolve() / ".preview-cache-v2")
         self.legacy_dir = Path(media_dir).resolve() / ".preview-cache"
-        self.config_file = Path(media_dir).resolve().parent / "preview-cache.json"
+        self.config_file = (self.workspace_root / "cache" / "preview-settings.json" if self.workspace_root
+                            else Path(media_dir).resolve().parent / "preview-cache.json")
         self.lock = threading.RLock()
         self.pins: dict[str, int] = {}
         self.grace_seconds = grace_seconds
@@ -66,6 +69,8 @@ class PreviewDiskCache:
             return
         config = json.loads(self.config_file.read_text("utf-8")) if stamp else {}
         directory = Path(config.get("directory", self.default_dir)).expanduser().resolve()
+        if self.workspace_root and not directory.is_relative_to(self.workspace_root / "cache"):
+            directory = self.default_dir
         budget = config.get("maxBytes", DEFAULT_BYTES)
         if not isinstance(budget, int) or isinstance(budget, bool) or budget <= 0:
             raise ValueError("cache maxBytes must be a positive integer")
@@ -200,6 +205,8 @@ class PreviewDiskCache:
         with self.lock:
             self._reload()
             destination = Path(directory).expanduser().resolve() if directory else self.directory
+            if self.workspace_root and not destination.is_relative_to(self.workspace_root / "cache"):
+                raise ValueError("独立工程的缓存必须保存在工程 cache 目录内")
             if directory and destination != self.directory and destination.name not in (".preview-cache-v2", ".cutvoke-preview-cache"):
                 destination = destination / ".cutvoke-preview-cache"
             budget = self.max_bytes if max_bytes is None else max_bytes

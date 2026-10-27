@@ -6,7 +6,6 @@ qualified only after explicit visual and edit/export checks are recorded.
 
 from __future__ import annotations
 
-import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -64,6 +63,7 @@ class PresetSpec:
     def _review_matches_media(self) -> bool:
         """A visual decision expires when its media, audit or preset changes."""
         try:
+            from cutvoke.storage.resource_pack import file_matches_sha256
             review = json.loads(self._path(self.evidence["visualDistinct"]).read_text(
                 encoding="utf-8"))
             hashes = {
@@ -77,7 +77,7 @@ class PresetSpec:
                     review.get("version") == self.version and
                     review.get("effectId") == self.effect_id and
                     review.get("params") == self.params and
-                    all(review.get(key) == hashlib.sha256(self._path(path).read_bytes()).hexdigest()
+                    all(file_matches_sha256(self._path(path), review.get(key, ''))
                         for key, path in hashes.items()))
         except (KeyError, OSError, ValueError, TypeError):
             return False

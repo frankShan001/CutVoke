@@ -2,6 +2,10 @@
 
 CutVoke 保存可编辑的时间线并执行剪辑。外部 Agent 负责理解需求、规划和视觉验收。编辑器无需大模型服务或生成服务。
 
+可选本地神经网络抠像通过 `local_model_status` 和 `local_matting_*` 工具调用。AI 必须先判断当前模型及客户端是否支持读取真实工具图片；不支持或未知时不要调用视觉抠像流程，改由人工入口操作。界面协助请求采用持久队列与活跃 Agent 的有界等待，不自动唤醒空闲聊天。完整契约见[本机三维、可选模型与 AI 交接](LOCAL_3D_AND_MODELS.md)。
+
+新建工程可指定独立 `directory`。通过 `project_directory` 读取素材、缓存、导出与备份位置；`media_import` 传 `projectId`，导出使用工程 `exports/` 内的绝对路径或相对文件名。移动、备份和旧工程迁移见[工程目录管理](PROJECT_DIRECTORIES.md)。
+
 ## 连接
 
 Windows 安装版内置了独立的 MCP 引擎，可直接运行：
@@ -64,6 +68,8 @@ MCP 客户端的 `command` 应填写展开后的绝对路径，`args` 填写 `["
 - MCP 错误附带 `error.recovery`，包括下一步说明和可调用的帮助入口。错误恢复不会自动提交新编辑或覆盖其他人的修改。
 
 ## 可复现的隔离演示
+
+重度剪辑的音轨检查、光效融合、实例操作与转场对比见 [重度剪辑说明](HEAVY_EDITING.md)。
 
 运行 `python skills/cutvoke-editor/scripts/demo.py --output .artifacts/agent-demo`。
 脚本生成原创测试图片与音乐，经独立 stdio MCP 导入、编辑、预览、导出和打包，

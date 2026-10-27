@@ -122,11 +122,12 @@ function patchClip(project: Project, id: unknown, edit: Edit) {
     }
   } else if (edit.type.startsWith("effect.")) {
     const effects = clip.effects ||= [];
-    const index = typeof p.effectIndex === "number" ? p.effectIndex : effects.findIndex(effect => effect.effectId === p.effectId);
+    const index = p.instanceId ? effects.findIndex((effect,index)=>(effect.instanceId || `legacy_${index}`)===p.instanceId) :
+      typeof p.effectIndex === "number" ? p.effectIndex : effects.findIndex(effect => effect.effectId === p.effectId);
     const effect = effects[index];
     if (edit.type === "effect.add" && effect) effect.params = { ...effect.params, ...p.params as object };
     else if (edit.type === "effect.add" && !effect) effects.push({ effectId: String(p.effectId), version: "1.0.0", params: p.params as Record<string, unknown> });
-    else if (effect && edit.type === "effect.update") effect.params = { ...effect.params, ...p.params as object };
+    else if (effect && edit.type === "effect.update") effect.params = p.replaceParams ? {...p.params as object} : { ...effect.params, ...p.params as object };
     else if (effect && edit.type === "effect.bypass") effect.enabled = Boolean(p.enabled);
   }
 }

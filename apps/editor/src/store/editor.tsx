@@ -37,6 +37,7 @@ export interface Selection {
   effectId?: string;
   /** 效果栈下标，用于区分同一片段上相同 effectId 的多个实例。 */
   effectIndex?: number;
+  effectInstanceId?: string;
   effectKind?: "transition" | "effect";
 }
 

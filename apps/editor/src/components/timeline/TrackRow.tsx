@@ -85,6 +85,7 @@ export const TrackRow = memo(function TrackRow({
   dragApi,
   effectSpecs,
   viewport,
+  visibleClipIds,
 }: {
   track: Track;
   /** 人类可读轨道名（如「视频轨 1」），替代内部 track.id。 */
@@ -93,6 +94,7 @@ export const TrackRow = memo(function TrackRow({
   dragApi: TimelineDragApi;
   effectSpecs: EffectSpec[];
   viewport: TimelineViewport;
+  visibleClipIds?: Set<string>;
 }) {
   const locale = useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
@@ -130,10 +132,10 @@ export const TrackRow = memo(function TrackRow({
   const laneFocused = state.selection?.trackId === track.id && !state.selection?.clipId;
   const isPrimaryVideo = !isAudio && state.project?.sequence.tracks.find((item) => item.kind === "video" && item.role !== "sticker")?.id === track.id;
   const orderedClips = useMemo(() => [...track.clips].sort((a, b) => clipStartSecs(a) - clipStartSecs(b)), [track.clips, locale]);
-  const visibleClips = useMemo(() => track.clips.filter((clip) =>
+  const visibleClips = useMemo(() => track.clips.filter((clip) => (!visibleClipIds || visibleClipIds.has(clip.id)) && (
     track.clips.length <= 100 || (clipEndSecs(clip) >= viewport.start && clipStartSecs(clip) <= viewport.end) ||
-    clip.id === state.selection?.clipId || clip.id === dragApi.active?.clipId || clip.id === trim?.clipId || clip.id === menuTarget?.clipId),
-  [track.clips, viewport, state.selection?.clipId, dragApi.active?.clipId, trim?.clipId, menuTarget?.clipId, locale]);
+    clip.id === state.selection?.clipId || clip.id === dragApi.active?.clipId || clip.id === trim?.clipId || clip.id === menuTarget?.clipId)),
+  [track.clips, viewport, state.selection?.clipId, dragApi.active?.clipId, trim?.clipId, menuTarget?.clipId, locale,visibleClipIds]);
   const attachments = useMemo(() => {
     const counts = new Map<string, number>();
     for (const other of state.project?.sequence.tracks || []) for (const clip of other.clips) {
@@ -142,7 +144,7 @@ export const TrackRow = memo(function TrackRow({
     return counts;
   }, [state.project, locale]);
   const previousClips = useMemo(() => new Map(orderedClips.map((clip, index) => [clip.id, orderedClips[index - 1]])), [orderedClips, locale]);
-  const visibleGaps = useMemo(() => isPrimaryVideo ? orderedClips.flatMap((clip, index) => {
+  const visibleGaps = useMemo(() => isPrimaryVideo && !visibleClipIds ? orderedClips.flatMap((clip, index) => {
     const start = index > 0 ? clipEndSecs(orderedClips[index - 1]) : 0;
     const end = clipStartSecs(clip);
     if (end - start < frameDuration / 2 || (track.clips.length > 100 && (end < viewport.start || start > viewport.end))) return [];
@@ -150,7 +152,7 @@ export const TrackRow = memo(function TrackRow({
       other.id !== track.id && other.kind === "video" && other.visible !== false &&
       other.clips.some((item) => clipStartSecs(item) < end && clipEndSecs(item) > start));
     return [{ clipId: clip.id, start, end, label: covered ? tr("主轨空隙") : tr("黑场空隙") }];
-  }) : [], [isPrimaryVideo, orderedClips, frameDuration, viewport, state.project, track.id, locale]);
+  }) : [], [isPrimaryVideo, orderedClips, frameDuration, viewport, state.project, track.id, locale,visibleClipIds]);
 
   // Source metadata is only needed for a selected clip's trim handles. Library
   // durations already exist; probing every clip here starved preview requests.
@@ -922,7 +924,8 @@ function ClipBlock({
   const left = trimOverlay?.left ?? baseLeft;
   const width = trimOverlay ? Math.max(trimOverlay.width, 8) : Math.max(baseWidth, 8);
   const titleContent = clip.effects?.find((effect) => effect.effectId === "cutvoke.text")?.params?.content;
-  const name = isText ? String(titleContent || tr("未命名标题")) : assetDisplayName(clip.assetRef);
+  const name = isText ? String(titleContent || tr("未命名标题")) : clip.role==='adjustment'?
+    clip.effects?.some(effect=>effect.effectId==='cutvoke.fx.scene3d')?tr('三维场景'):tr('调整层'):assetDisplayName(clip.assetRef);
 
   return (
     <div

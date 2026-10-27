@@ -4,6 +4,9 @@ import { readFileSync } from "node:fs";
 import ts from "typescript";
 
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`;
+const scope = moduleUrl(ts.transpileModule(readFileSync(new URL("../src/lib/projectScope.ts", import.meta.url), "utf8"),
+  { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText);
+const { setActiveProject } = await import(scope);
 const mediaApi = moduleUrl(`
   export async function uploadAsset(file, options = {}) {
     globalThis.__mediaUploadCalls.push(file.name);
@@ -22,7 +25,8 @@ const assetStore = moduleUrl(`
 const source = readFileSync(new URL("../src/lib/importMedia.ts", import.meta.url), "utf8");
 const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
 const { uploadOneFile, uploadFiles } = await import(moduleUrl(compiled
-  .replace('"./mediaApi"', JSON.stringify(mediaApi)).replace('"./assetStore"', JSON.stringify(assetStore))));
+  .replace('"./mediaApi"', JSON.stringify(mediaApi)).replace('"./assetStore"', JSON.stringify(assetStore))
+  .replace('"./projectScope"', JSON.stringify(scope))));
 
 test("a 1.860-second probe result reaches session metadata without tenth-second rounding", async () => {
   globalThis.__mediaProbeDuration = 1.86;
@@ -33,6 +37,29 @@ test("a 1.860-second probe result reaches session metadata without tenth-second 
   assert.equal(result.media.duration, 1.86);
   assert.equal(globalThis.__mediaStoredAssets[0].duration, 1.86);
   assert.notEqual(result.media.duration, 1.9);
+});
+
+test("switching projects during a batch never uploads remaining files into the next project", async () => {
+  setActiveProject("one");
+  globalThis.__mediaProbeDuration = 1;
+  globalThis.__mediaUploadCalls = [];
+  globalThis.__mediaStoredAssets = [];
+  const count = await uploadFiles([{ name: "one.wav", size: 128 }, { name: "two.wav", size: 128 }],
+    () => setActiveProject("two"));
+  assert.equal(count, 1);
+  assert.deepEqual(globalThis.__mediaUploadCalls, ["one.wav"]);
+});
+
+test("switching projects during an in-flight upload never inserts it into the next timeline", async () => {
+  setActiveProject("before");
+  globalThis.__mediaUploadCalls = [];
+  globalThis.__mediaStoredAssets = [];
+  let inserted = 0;
+  const count = await uploadFiles([{ name: "in-flight.wav", size: 128 }], () => inserted++, undefined,
+    progress => { if (progress.loaded) setActiveProject("after"); });
+  assert.equal(count, 0);
+  assert.equal(inserted, 0);
+  assert.deepEqual(globalThis.__mediaStoredAssets, []);
 });
 
 test("cancelling an upload stops the remaining queue while preserving actual byte progress and filename", async () => {

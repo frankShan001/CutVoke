@@ -357,6 +357,11 @@ class Clip:
     nested: Optional["Sequence"] = None
     # 视觉层语义独立于轨道的媒体解码类型；贴纸仍由视频合成链渲染。
     role: str = ""
+    compositing: dict = field(default_factory=dict)
+    sequence_ref: str = ""
+    property_overrides: dict = field(default_factory=dict)
+    property_links: dict = field(default_factory=dict)
+    motion_path: Optional[dict] = None
     speed_curve: Optional[SpeedCurve] = None  # None = constant speed
     frame_interpolation: str = "none"  # slow-motion frame synthesis: none | motion
 
@@ -429,6 +434,8 @@ class Clip:
         """
         c = dict(COLOR_DEFAULTS)
         for e in self.effects_by_id(EFFECT_COLOR):
+            if e.get("compositing"):
+                continue
             p = e.get("params", {}) or {}
             if "brightness" in p:
                 c["brightness"] = float(p["brightness"])
@@ -475,6 +482,16 @@ class Clip:
         }
         if self.role:
             data["role"] = self.role
+        if self.compositing:
+            data["compositing"] = self.compositing
+        if self.sequence_ref:
+            data["sequenceRef"] = self.sequence_ref
+        if self.property_overrides:
+            data["propertyOverrides"] = self.property_overrides
+        if self.property_links:
+            data["propertyLinks"] = self.property_links
+        if self.motion_path is not None:
+            data["motionPath"] = self.motion_path
         if self.audio_fade_duration is not None:
             data["audioFadeOffset"] = self.audio_fade_offset.to_json()
             data["audioFadeDuration"] = self.audio_fade_duration.to_json()
@@ -512,6 +529,11 @@ class Clip:
             keyframes=keyframes,
             nested=Sequence.from_dict(d["nested"]) if d.get("nested") else None,
             role=d.get("role", ""),
+            compositing=d.get("compositing", {}),
+            sequence_ref=d.get("sequenceRef", ""),
+            property_overrides=d.get("propertyOverrides", {}),
+            property_links=d.get("propertyLinks", {}),
+            motion_path=d.get("motionPath"),
         )
 
 
@@ -739,6 +761,7 @@ class Sequence:
     audio_buses: list[dict] = field(default_factory=list)
     master_audio: dict = field(default_factory=dict)
     compound_layout: list[dict] = field(default_factory=list)
+    exposed_properties: list[dict] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         from cutvoke.domain.audio_mix import validate_buses, validate_mix
@@ -755,7 +778,8 @@ class Sequence:
                 "multicam": self.multicam,
                 "backgroundColor": self.background_color, "reframe": self.reframe,
                 "audioBuses": self.audio_buses, "masterAudio": self.master_audio,
-                "compoundLayout": self.compound_layout}
+                "compoundLayout": self.compound_layout,
+                **({"exposedProperties": self.exposed_properties} if self.exposed_properties else {})}
 
     @classmethod
     def from_dict(cls, d: dict) -> "Sequence":
@@ -771,7 +795,8 @@ class Sequence:
                    reframe=d.get("reframe", "stretch"),
                    audio_buses=d.get("audioBuses", []),
                    master_audio=d.get("masterAudio", {}),
-                   compound_layout=d.get("compoundLayout", []))
+                   compound_layout=d.get("compoundLayout", []),
+                   exposed_properties=d.get("exposedProperties", []))
 
 
 @dataclass

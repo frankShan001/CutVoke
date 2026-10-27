@@ -11,6 +11,7 @@ import { assetDisplayName, useSessionAssets } from "../lib/assetStore";
 import { LOCATE_PREFLIGHT_ISSUE, preflightSummary } from "../lib/preflight";
 import { rationalToSecs } from "../lib/rational";
 import type { ExportResult } from "../types/api";
+import { getProjectDirectory } from "../lib/projectDirectories";
 
 function savedExportSettings(projectId: string | null) {
   try { return JSON.parse(localStorage.getItem(`cutvoke.export.${projectId}`) || "null") as {
@@ -30,6 +31,18 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
   useSessionAssets();
   const [draft] = useState(() => savedExportSettings(state.currentId));
   const [outPath, setOutPath] = useState(draft?.outPath || "");
+  const [exportDirectory, setExportDirectory] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    if (state.currentId) void getProjectDirectory(state.currentId).then(info => {
+      if (cancelled || !info.exportDirectory) return;
+      const folder = info.exportDirectory;
+      setExportDirectory(folder);
+      setOutPath(previous => previous.startsWith(folder) ? previous :
+        `${folder}${folder.includes("\\") ? "\\" : "/"}${previous.split(/[\\/]/).pop() || "video.mp4"}`);
+    }).catch(error => { if (!cancelled) showError(dispatch, error); });
+    return () => { cancelled = true; };
+  }, [state.currentId, dispatch]);
   const [quality, setQuality] = useState<ExportQuality>(draft?.quality || "high");
   const [useRange, setUseRange] = useState(draft?.useRange || false);
   const [rangeStart, setRangeStart] = useState(draft?.rangeStart || "0");
@@ -310,7 +323,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
           value={outPath}
           disabled={busy}
           onChange={(e) => setOutPath(e.target.value)}
-          placeholder={tr("如：D:\\视频\\我的成片.mp4")}
+          placeholder={exportDirectory ? `${exportDirectory}/video.mp4` : tr("如：D:\\视频\\我的成片.mp4")}
           aria-label={tr("输出文件路径")}
         />
         {window.cutvokeDesktop?.chooseExportFile ? <Button variant="secondary" disabled={busy || restoring} onClick={() => void chooseFile()}>

@@ -45,7 +45,7 @@ class ValidationResult:
         }
 
 
-def validate_project(project: Project) -> ValidationResult:
+def validate_project(project: Project, *, _all_sequences: bool = True) -> ValidationResult:
     """校验工程不变量。"""
     errors: list[str] = []
     warnings: list[str] = []
@@ -70,6 +70,12 @@ def validate_project(project: Project) -> ValidationResult:
     # 复合片段（clip.nested 非 None）内部要满足同规则（J08）。
     def _validate_tracks(tracks: list, scope: str) -> None:
         clips_by_id = {clip.id: (track, clip) for track in tracks for clip in track.clips}
+        from cutvoke.domain.compositing import validate_sequence
+        from types import SimpleNamespace
+        try:
+            validate_sequence(SimpleNamespace(tracks=tracks))
+        except (ValueError, TypeError) as exc:
+            errors.append(f"compositing[{scope}]: {exc}")
         for track in tracks:
             _check_id(track.id, f"track[{scope}]")
             # 同轨视频片段不重叠（7.3）
@@ -148,6 +154,21 @@ def validate_project(project: Project) -> ValidationResult:
                     _validate_tracks(clip.nested.tracks, scope=f"{scope}/{clip.id}")
 
     _validate_tracks(seq.tracks, scope="seq")
+    if _all_sequences:
+        from cutvoke.domain.essential_properties import validate as validate_compositions
+        try:
+            validate_compositions(project)
+        except (ValueError, TypeError, KeyError, AttributeError) as exc:
+            errors.append(f"composition: {exc}")
+        import copy
+        for other in project.sequences:
+            if other is seq:
+                continue
+            view = copy.copy(project)
+            view.sequence = other
+            result = validate_project(view, _all_sequences=False)
+            errors.extend(f"sequence {other.id}: {message}" for message in result.errors)
+            warnings.extend(f"sequence {other.id}: {message}" for message in result.warnings)
 
     # 5. 字幕时间范围合法
     for cap in seq.captions:
@@ -157,7 +178,7 @@ def validate_project(project: Project) -> ValidationResult:
     structurally_valid = len(errors) == 0
     # 文字图层由结构化参数渲染，没有源文件；视频与音频片段才需要路径。
     renderable = structurally_valid and all(
-        clip.asset_ref.source_path != ""
+        clip.asset_ref.source_path != "" or clip.role == "adjustment" or clip.nested is not None or bool(clip.sequence_ref)
         for track in seq.tracks if track.kind in ("video", "audio") for clip in track.clips
     )
 

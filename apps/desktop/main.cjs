@@ -289,6 +289,16 @@ else {
         defaultPath: path.dirname(dataPath) });
       return result.canceled ? null : result.filePaths[0];
     });
+    ipcMain.handle("cutvoke:choose-extension-directory", async event => {
+      verifySender(event);
+      const result = await dialog.showOpenDialog(window, { properties: ["openDirectory", "createDirectory"] });
+      return result.canceled ? null : result.filePaths[0];
+    });
+    ipcMain.handle("cutvoke:choose-extension-bundle", async event => {
+      verifySender(event);
+      const result = await dialog.showOpenDialog(window, { properties: ["openFile"], filters: [{ name: "ZIP", extensions: ["zip"] }] });
+      return result.canceled ? null : result.filePaths[0];
+    });
     ipcMain.handle("cutvoke:choose-export", async (event, suggested) => {
       verifySender(event);
       const value = typeof suggested === "string" ? suggested.slice(0, 4096) : "";

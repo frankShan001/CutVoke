@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from contextlib import closing
+from contextlib import closing, ExitStack
 import os
 from pathlib import Path
 import shutil
@@ -41,7 +41,7 @@ def migrate_library(source_file: str, destination: str, *, cache_directory=None,
     try:
         # Hold the writer lock through snapshot and publication. Separate reader
         # includes committed WAL pages without backing up an active write txn.
-        with closing(sqlite3.connect(source, timeout=1)) as guard:
+        with ExitStack() as child_guards, closing(sqlite3.connect(source, timeout=1)) as guard:
             guard.execute("BEGIN IMMEDIATE")
             if guard.execute("SELECT 1 FROM edit_leases WHERE expires_at>? LIMIT 1", (time.time(),)).fetchone():
                 raise ValueError("Finish Agent editing before moving / 请等待 Agent 编辑完成")
@@ -50,15 +50,42 @@ def migrate_library(source_file: str, destination: str, *, cache_directory=None,
             if (guard.execute("SELECT 1 FROM sqlite_master WHERE name='asr_jobs'").fetchone() and
                     guard.execute("SELECT 1 FROM asr_jobs WHERE status IN ('queued','running') LIMIT 1").fetchone()):
                 raise ValueError("Finish recognition before moving / 请等待语音识别完成或停止服务")
+            directories = []
+            if guard.execute("SELECT 1 FROM sqlite_master WHERE name='project_directories'").fetchone():
+                for pid, folder in guard.execute("SELECT project_id,root FROM project_directories"):
+                    folder = Path(folder).resolve()
+                    if folder.is_relative_to(root):
+                        database_file = folder / 'project.sqlite'
+                        if not database_file.is_file():
+                            raise ValueError(f"工程目录离线，请先重新打开：{folder}")
+                        child = child_guards.enter_context(closing(sqlite3.connect(database_file, timeout=1)))
+                        child.execute('BEGIN IMMEDIATE')
+                        if child.execute('SELECT 1 FROM edit_leases WHERE expires_at>?', (time.time(),)).fetchone():
+                            raise ValueError('请等待独立工程的 Agent 编辑完成')
+                        for table in ('export_jobs', 'asr_jobs'):
+                            if (child.execute('SELECT 1 FROM sqlite_master WHERE name=?', (table,)).fetchone() and
+                                    child.execute(f"SELECT 1 FROM {table} WHERE status IN ('queued','running')").fetchone()):
+                                raise ValueError('请先完成独立工程的后台任务')
+                        directories.append((pid, folder))
             caches = {".preview-cache", ".preview-cache-v2", ".cutvoke-preview-cache"}
             def ignore(folder, names):
                 skip = caches | ({source.name, source.name + "-wal", source.name + "-shm", "logs"}
                                  if Path(folder) == root else set())
+                if any(Path(folder) == directory for _pid, directory in directories):
+                    skip |= {"project.sqlite", "project.sqlite-wal", "project.sqlite-shm", "cache"}
                 return [name for name in names if name in skip]
             for item in root.rglob("*"):
                 if item.is_symlink() or getattr(item.lstat(), "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT:
                     raise ValueError("Linked folders cannot be migrated automatically / 含链接目录，请先移除链接再迁移")
             shutil.copytree(root, stage, dirs_exist_ok=True, ignore=ignore)
+            # Child databases have their own WAL. Back up each one consistently;
+            # their manifests rebase owned paths when opened at the final location.
+            for _pid, folder in directories:
+                copied_db = stage / folder.relative_to(root) / 'project.sqlite'
+                for suffix in ('-wal', '-shm'):
+                    Path(str(copied_db) + suffix).unlink(missing_ok=True)
+                with closing(sqlite3.connect(folder / 'project.sqlite')) as reader, closing(sqlite3.connect(copied_db)) as output:
+                    reader.backup(output)
             database = stage / source.name
             with closing(sqlite3.connect(source)) as reader, closing(sqlite3.connect(database)) as output:
                 reader.backup(output)
@@ -91,6 +118,9 @@ def migrate_library(source_file: str, destination: str, *, cache_directory=None,
                                                (mapping[path_key(raw)], rowid))
                 from cutvoke.storage.asr_journal import relocate_asr_jobs
                 relocate_asr_jobs(output, root, stage, target)
+                for pid, folder in directories:
+                    output.execute('UPDATE project_directories SET root=? WHERE project_id=?',
+                                   (str(target / folder.relative_to(root)), pid))
                 output.commit()
                 if output.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
                     raise ValueError("Copied project database failed integrity check")

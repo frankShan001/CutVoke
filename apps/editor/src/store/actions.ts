@@ -1,4 +1,6 @@
 import { flushPendingEdits } from "../lib/pendingEdits";
+import { setActiveProject } from "../lib/projectScope";
+import { clearSessionAssets } from "../lib/assetStore";
 import { msg, tr } from "../i18n";
 /** 领域动作：封装 API 调用 + 状态派发。组件只调用这些动作，不含业务逻辑。 */
 
@@ -53,6 +55,7 @@ export async function selectProject(
   name?: string,
 ): Promise<boolean> {
   if (!await flushPendingEdits()) return false;
+  if (setActiveProject(projectId)) clearSessionAssets();
   dispatch({ type: "PROJECT_SELECTED", projectId, name: name ?? projectId });
   return refreshProject(dispatch, projectId);
 }
@@ -97,7 +100,7 @@ export async function pollEditLock(
 /** 创建工程。projectId 可选（由后端分配）；name 可选（人类可读名，后端持久化）。创建后自动选中（WP-03/A07）。 */
 export async function createProject(
   dispatch: Dispatch<EditorAction>,
-  opts: { projectId?: string; name?: string; width: number; height: number; fps: number },
+  opts: { projectId?: string; name?: string; directory?: string; width: number; height: number; fps: number },
 ): Promise<string | null> {
   dispatch({ type: "SYNC_STATE_SET", syncState: "saving" });
   try {
@@ -106,6 +109,7 @@ export async function createProject(
     if (!pid) throw new ApiFailure({ status: 500, code: "CREATE_FAILED", message: tr("创建工程未返回 projectId") });
     // 显示名优先级：用户输入名 → 输入的 projectId → 后端分配 id。
     const displayName = opts.name?.trim() || opts.projectId?.trim() || pid;
+    if (setActiveProject(pid)) clearSessionAssets();
     dispatch({ type: "PROJECT_SELECTED", projectId: pid, name: displayName });
     await loadProjects(dispatch);
     await refreshProject(dispatch, pid);

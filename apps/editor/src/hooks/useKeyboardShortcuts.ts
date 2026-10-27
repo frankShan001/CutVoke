@@ -6,6 +6,7 @@ import type { EditorState, EditorAction } from "../store/editor";
 import { getLatestState } from "../store/actions";
 import { selectedClipIds } from "../store/timelineSelection";
 import { batchClips, copySelectedClips, duplicateSelectedClips, pasteClipsAtPlayhead } from "../store/timelineClipboard";
+import { visibleTimelineSelection } from '../lib/timelineFilter';
 
 export { frameStep };
 
@@ -20,7 +21,7 @@ export function useTimelineClipboardShortcuts(state: EditorState, dispatch: Disp
         || document.querySelector(".ctx-menu")
         || current.view !== "editor" || current.opening || current.editLock || current.error
         || current.exportOpen || current.templateOpen || current.agentPanelOpen
-        || target?.closest("input,textarea,select,[contenteditable='true'],[role='dialog'],[role='alertdialog']")) return;
+        || target?.closest("input,textarea,select,dialog,[contenteditable='true'],[role='dialog'],[role='alertdialog']")) return;
       const key = event.key.toLowerCase(), command = event.ctrlKey || event.metaKey;
       if (command && !event.shiftKey && ["c","v","d","a","x"].includes(key)) {
         event.preventDefault();
@@ -28,8 +29,8 @@ export function useTimelineClipboardShortcuts(state: EditorState, dispatch: Disp
         if (key === "v") void pasteClipsAtPlayhead(dispatch, current);
         if (key === "d") void duplicateSelectedClips(dispatch, current);
         if (key === "x") void copySelectedClips(dispatch, current).then(ok => { if (ok) void batchClips(dispatch, getLatestState() || current, "remove"); });
-        if (key === "a") dispatch({ type: "CLIP_SELECTION_SET", clipIds: current.project?.sequence.tracks
-          .filter(track => track.visible !== false).flatMap(track => track.clips.filter(clip => !clip.hidden).map(clip => clip.id)) || [] });
+        if (key === "a") dispatch({ type: "CLIP_SELECTION_SET", clipIds: visibleTimelineSelection(current.currentId) ?? (current.project?.sequence.tracks
+          .filter(track => track.visible !== false).flatMap(track => track.clips.filter(clip => !clip.hidden).map(clip => clip.id)) || []) });
       } else if (!command && !event.shiftKey && ["delete","backspace"].includes(key)
         && !current.selection?.effectId && selectedClipIds(current).length) {
         event.preventDefault();

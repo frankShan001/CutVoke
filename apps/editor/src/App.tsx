@@ -16,6 +16,9 @@ import { HomeView } from "./components/HomeView";
 import { TemplateGallery } from "./components/TemplateGallery";
 import { ExportDialog } from "./components/ExportDialog";
 import { AgentActivityPanel } from "./components/AgentActivityPanel";
+import { QuickApply } from "./components/QuickApply";
+import { CompositionNavigator } from "./components/CompositionNavigator";
+import { applyWorkspace, savedWorkspaces, type WorkspaceLayout } from "./lib/workspaces";
 import { WorkspaceBoundary } from "./components/WorkspaceBoundary";
 import { ProjectLoading, useProjectPreparation } from "./components/ProjectLoading";
 import { useTimelineClipboardShortcuts, notifyTogglePlay } from "./hooks/useKeyboardShortcuts";
@@ -36,6 +39,7 @@ const SHORTCUT_IGNORE_SELECTOR = [
   "input",
   "textarea",
   "select",
+  "dialog",
   "[role='textbox']",
   "[contenteditable]:not([contenteditable='false'])",
   "[role='dialog']",
@@ -47,6 +51,22 @@ function AppShell() {
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   useTimelineClipboardShortcuts(state, dispatch);
   const preparation = useProjectPreparation();
+  const [quickApplyOpen,setQuickApplyOpen] = useState(false);
+  useEffect(() => {
+    const open = () => {
+      const current = getLatestState() || shortcutStateRef.current;
+      if(current.view==='editor' && !current.opening && !current.editLock && !current.error && !current.exportOpen && !current.templateOpen && !current.agentPanelOpen)
+        setQuickApplyOpen(true);
+    };
+    const key = (event: KeyboardEvent) => {
+      if(event.defaultPrevented || event.repeat || event.isComposing || event.altKey || event.shiftKey ||
+        !(event.ctrlKey || event.metaKey) || event.key!=='Enter' ||
+        (event.target as HTMLElement)?.closest('input,textarea,select,[contenteditable],[role="dialog"],dialog') || document.querySelector('[role="dialog"],dialog[open]')) return;
+      event.preventDefault();open();
+    };
+    window.addEventListener('cutvoke:quick-apply',open);window.addEventListener('keydown',key);
+    return()=>{window.removeEventListener('cutvoke:quick-apply',open);window.removeEventListener('keydown',key);};
+  },[]);
   const shortcutStateRef = useRef(state);
   shortcutStateRef.current = state;
   const [leftPanelOpen, setLeftPanelOpen] = useState(() =>
@@ -56,6 +76,14 @@ function AppShell() {
     typeof window === "undefined" || panelModeForWidth(window.innerWidth) !== "compact",
   );
   const panelPreferencesRef = useRef({ left: true, right: true });
+  useEffect(() => {
+    const update = (event: Event) => { const layout = (event as CustomEvent<WorkspaceLayout>).detail;
+      panelPreferencesRef.current = { left: layout.left, right: layout.right }; setLeftPanelOpen(layout.left); setRightPanelOpen(layout.right); };
+    window.addEventListener("cutvoke:workspace", update);
+    const active = savedWorkspaces().active;
+    if (active && window.innerWidth > 900) applyWorkspace(active);
+    return () => window.removeEventListener("cutvoke:workspace", update);
+  }, []);
   useEffect(() => {
     const open = () => setLeftPanelOpen(true);
     window.addEventListener("cutvoke:open-creative-domain", open);
@@ -177,8 +205,14 @@ function AppShell() {
           return;
         }
         const current = getLatestState() || latest;
+        const effects = track?.clips.find(clip=>clip.id===clipId)?.effects || [];
+        const selectedEffectIndex = selection.effectInstanceId ? effects.findIndex((effect,index)=>(effect.instanceId || `legacy_${index}`)===selection.effectInstanceId) :
+          selection.effectIndex ?? effects.findIndex(effect=>effect.effectId===selection.effectId);
+        const selectedEffect = effects[selectedEffectIndex];
+        if(selection.effectInstanceId && !selectedEffect) return;
         const removal = selection.effectId
-          ? removeEffect(dispatch, current, { clipId, effectId: selection.effectId })
+          ? removeEffect(dispatch, current, { clipId, effectId: selection.effectId,
+            ...(selectedEffect ? {instanceId:selectedEffect.instanceId || `legacy_${selectedEffectIndex}`} : {}) })
           : removeClip(dispatch, current, clipId);
         void removal.then((result) => {
           if (result.ok) dispatch({ type: "SELECTION_SET", selection: null });
@@ -215,6 +249,7 @@ function AppShell() {
   return (
     <>
     <div className="app-shell" inert={state.opening || undefined} aria-hidden={state.opening || undefined}>
+      <CompositionNavigator />
       <TopToolbar
         leftPanelOpen={leftPanelOpen}
         rightPanelOpen={rightPanelOpen}
@@ -235,6 +270,7 @@ function AppShell() {
         </Suspense>
       </WorkspaceBoundary>
       <StatusBar />
+      {quickApplyOpen ? <QuickApply onClose={()=>setQuickApplyOpen(false)}/> : null}
       <ErrorModal />
       {state.exportOpen ? <ExportDialog /> : null}
       {state.templateOpen ? <TemplateGallery /> : null}

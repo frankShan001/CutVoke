@@ -8,6 +8,12 @@
   display: flex;
   overflow: hidden;
 }
+.panel-resizer { width: 6px; flex: none; cursor: ew-resize; touch-action: none; background: var(--bg-2); }
+.panel-resizer:hover, .panel-resizer:focus-visible { background: var(--accent); }
+.workspace-settings { position: relative; }
+.workspace-settings__menu { position: absolute; z-index: 70; top: 100%; inset-inline-end: 0; width: 250px; padding: 12px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 30px #0008; display: grid; gap: 8px; }
+.workspace-settings__menu > div { display: flex; justify-content: space-between; gap: 6px; }
+.workspace-settings__menu label { display: grid; gap: 6px; }
 
 /* ---- 左：素材区 ---- */
 .zone-left {

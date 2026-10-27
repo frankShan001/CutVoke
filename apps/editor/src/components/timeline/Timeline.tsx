@@ -3,7 +3,7 @@ import { msg, tr, useLocale } from "../../i18n";
     持有共享拖拽系统（useTimelineDrag），拖动片段时渲染幽灵条块覆盖所有轨道。 */
 
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeftRight, CircleHelp, LocateFixed, Maximize2, ZoomIn, ZoomOut, Plus } from "lucide-react";
+import { ArrowLeftRight, CircleHelp, LocateFixed, Maximize2, ZoomIn, ZoomOut, Plus, Search, X } from "lucide-react";
 import { useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
 import { insertClipAutoTrack } from "../../store/clipEdit";
@@ -24,6 +24,7 @@ import { selectedClipIds } from "../../store/timelineSelection";
 import { copySelectedClips, pasteClipsAtPlayhead } from "../../store/timelineClipboard";
 import { useTimelineMarquee } from "./useTimelineMarquee";
 import "../../styles/timeline-edit-tools.css";
+import { filterTimelineClips, publishTimelineSelection, clearTimelineSelection, type TimelineFilterMode } from '../../lib/timelineFilter';
 
 function TimelineClock({ end, revealTime }: { end: number; revealTime: (time: number, force?: boolean) => void }) {
   useLocale();
@@ -43,9 +44,26 @@ export function Timeline() {
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const [zoomIdx, setZoomIdx] = useState(3); // 40px/s 默认
   const [effectSpecs, setEffectSpecs] = useState<EffectSpec[]>([]);
+  const [filter,setFilter] = useState<{projectId:string|null;query:string;mode:TimelineFilterMode}>({projectId:null,query:'',mode:'all'});
+  const filterOwner = useRef(Symbol('timeline-view'));
+  const query=filter.projectId===state.currentId ? filter.query : '';
+  const filterMode=filter.projectId===state.currentId ? filter.mode : 'all';
+  const filtering=!!query.trim() || filterMode!=='all';
 
   const tracks = state.project?.sequence.tracks || [];
   const captions = state.project?.sequence.captions || [];
+  const selectionIds=selectedClipIds(state);
+  const matchingIds=useMemo(()=>filterTimelineClips(tracks,query,filterMode,selectionIds,
+    new Map(effectSpecs.map(spec=>[spec.effectId,spec.name]))),[tracks,query,filterMode,state.selectedClipIds,state.selection,effectSpecs]);
+  const visibleIds=filtering ? matchingIds : undefined;
+  const visibleTracks=filtering ? tracks.filter(track=>track.clips.some(clip=>matchingIds.has(clip.id))) : tracks;
+  const hiddenSelected=filtering ? selectionIds.filter(id=>!matchingIds.has(id)).length : 0;
+  useEffect(()=>{
+    const owner=filterOwner.current;
+    if(filtering && state.currentId) publishTimelineSelection(state.currentId,[...matchingIds],owner);
+    else clearTimelineSelection(owner);
+    return()=>clearTimelineSelection(owner);
+  },[filtering,matchingIds,state.currentId]);
   const pxPerSec = ZOOM_LEVELS[zoomIdx];
 
   const lengthSecs = useMemo(() => timelineLengthSecs(tracks), [tracks, locale]);
@@ -155,6 +173,8 @@ export function Timeline() {
     scroller.scrollLeft = 0;
     return true;
   }, [contentEndSecs, lengthSecs]);
+  useEffect(()=>{const fit=()=>{zoomToFit();};window.addEventListener('cutvoke:fit-timeline',fit);
+    return()=>window.removeEventListener('cutvoke:fit-timeline',fit);},[zoomToFit]);
 
   // On first entry, show as much of the project as the current viewport allows.
   // Subsequent content updates do not override a zoom level chosen by the user.
@@ -265,6 +285,16 @@ export function Timeline() {
         </details>
       </header>
 
+      <div className="timeline__filter" role="search" aria-label={tr('时间线筛选')}>
+        <Search size={13}/><input className="cv-input" aria-label={tr('搜索片段、素材或特效')} placeholder={tr('搜索片段、素材或特效')} value={query}
+          onChange={event=>setFilter({projectId:state.currentId,mode:filterMode,query:event.target.value})}/>
+        <select className="cv-input" aria-label={tr('片段筛选方式')} value={filterMode}
+          onChange={event=>setFilter({projectId:state.currentId,query,mode:event.target.value as TimelineFilterMode})}>
+          <option value="all">{tr('全部片段')}</option><option value="selected">{tr('仅已选')}</option><option value="animated">{tr('仅有关键帧')}</option></select>
+        {filtering ? <><span role="status">{tr('显示 {0}/{1}',matchingIds.size,clipCount(tracks))}</span><button className="cv-chip" aria-label={tr('清除筛选')}
+          onClick={()=>setFilter({projectId:state.currentId,query:'',mode:'all'})}><X size={13}/></button></> : null}
+        {hiddenSelected ? <span className="cv-hint" role="status">{tr('另有 {0} 个已选片段被筛选隐藏',hiddenSelected)}</span> : null}
+      </div>
       <div className="timeline__body" ref={scrollerRef}>
         {selectionBox ? <div data-testid="timeline-selection-box" style={{position:"fixed",...selectionBox,
           border:"1px solid #65a7ff",background:"#4488ff22",pointerEvents:"none",zIndex:1000}} /> : null}
@@ -290,7 +320,7 @@ export function Timeline() {
                 <div className="timeline__emptystate-hint">{tr("或拖拽文件到下方空白区自动创建轨道")}</div>
               </div>
             ) : (
-              tracks.map((t) => (
+              visibleTracks.map((t) => (
                 <Fragment key={`${state.currentId}:${t.id}`}>
                   <TrackRow
                     track={t}
@@ -299,6 +329,7 @@ export function Timeline() {
                     dragApi={dragApi}
                     effectSpecs={effectSpecs}
                     viewport={viewport}
+                    visibleClipIds={visibleIds}
                   />
                   {t.kind === "video" ? (
                     <EffectTrackRow
@@ -307,12 +338,14 @@ export function Timeline() {
                       pxPerSec={pxPerSec}
                       effectSpecs={effectSpecs}
                       viewport={viewport}
+                      visibleClipIds={visibleIds}
                     />
                   ) : null}
                 </Fragment>
               ))
             )}
-            {captions.length > 0 ? (
+            {filtering && !matchingIds.size ? <p className="cv-empty timeline__filter-empty">{tr('没有匹配结果')}</p> : null}
+            {captions.length > 0 && !filtering ? (
               <CaptionTrackRow
                 captions={captions}
                 selectedCaptionId={state.selectedCaptionId}

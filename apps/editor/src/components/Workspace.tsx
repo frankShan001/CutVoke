@@ -5,6 +5,7 @@ import { Player } from "./Player";
 import { Timeline } from "./timeline/Timeline";
 import { TimelineResizer } from "./TimelineResizer";
 import { RightPanel } from "./RightPanel";
+import { PanelResizer } from "./PanelResizer";
 
 export default function Workspace({
   leftPanelOpen,
@@ -22,7 +23,7 @@ export default function Workspace({
           <MediaPanel />
         </div>
       </aside>
-
+      {leftPanelOpen ? <PanelResizer side="left" /> : null}
       <main className="zone-center" ref={centerRef}>
         <div className="zone-center__top">
           <div className="zone-center__preview">
@@ -35,6 +36,7 @@ export default function Workspace({
         </div>
       </main>
 
+      {rightPanelOpen ? <PanelResizer side="right" /> : null}
       <aside className={`zone-right${rightPanelOpen ? "" : " zone-right--collapsed"}`}>
         <RightPanel />
       </aside>

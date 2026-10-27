@@ -22,6 +22,16 @@ def configure(sequence, payload):
     rx, ry = width / sequence.width, height / sequence.height
     for track in sequence.tracks:
         for clip in track.clips:
+            if clip.motion_path:
+                for point in clip.motion_path['points']:
+                    for key,ratio in (('x',rx),('inX',rx),('outX',rx),('y',ry),('inY',ry),('outY',ry)):
+                        if key in point:point[key]*=ratio
+            for param,link in clip.property_links.items():
+                target_ratio=rx if param=='x' else ry if param=='y' else 1.
+                source=link['source']
+                source_ratio=(rx if source.get('param')=='x' else ry if source.get('param')=='y' else 1.) if source.get('type','property')=='property' else 1.
+                link['scale']=link.get('scale',1)*target_ratio/source_ratio
+                link['offset']=link.get('offset',0)*target_ratio
             for effect in clip.effects:
                 if effect.get("effectId") == "cutvoke.text":
                     params = effect.get("params", {})

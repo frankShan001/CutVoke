@@ -16,6 +16,14 @@ INSTRUCTIONS = (
     "a stable commandId and editLeaseId. Read error.recovery after failure. Verify actual pictures with "
     "preview_frames, export asynchronously, and release the lease for human takeover. "
     "Intelligence remains in your external agent; this application executes edits and returns evidence. "
+    "Optional LOCAL neural matting is available through local_model_status/local_matting_start/local_matting_job/local_matting_apply. "
+    "Local models are optional and excluded from the base installer. For first use call extension_status then extension_plan. "
+    "When installation is needed, explain purpose/device/disk cost and ask the HUMAN user; use extension_confirm only for their real response, then extension_install with its receipt and extension_job. "
+    "A general editing request is not installation consent. Reuse an already explicit installation authorization; respect declines and do not ask again for the same plan or mirror switch. "
+    "Use the app-managed installer, not shell/pip/Git commands. Querying readiness never downloads. Read editor_help(topic='local-models'). "
+    "Before that workflow read editor_help(topic='local-models') and SELF-ASSESS current image and tool-image input support. "
+    "If unsupported or unknown, DO NOT use AI matting or visual review; direct the user to the manual UI. Never guess visual points or pretend to see images. "
+    "UI requests are available with agent_requests; read editor_help(topic='agent-bridge'). Merely connecting MCP cannot wake an idle AI host. "
     "When inventing reusable effects during normal editing, read editor_help(topic='sharing'); "
     "save a content-free recipe with effect_module_save and apply through effectModule.apply. "
     "Never include user media, images, audio, text/captions, projects, personal information or paths in contributions. "
@@ -47,8 +55,8 @@ GUIDES = {
         "help": {"conventions": {"topic": "time"}, "editing": {"topic": "editing"},
                  "recovery": {"topic": "errors"}, "examples": {"topic": "recipes"},
                  "command": {"topic": "command", "command": "clip.insert"},
-                 "sharing": {"topic": "sharing"}},
-        "modelServices": False},
+                 "sharing": {"topic": "sharing"},"localModels":{"topic":"local-models"},"humanToAgent":{"topic":"agent-bridge"}},
+        "modelServices": False,"optionalLocalModels": True},
     "sharing": {
         "title": "Create reusable effects while editing; share settings only",
         "privacyNotice": PRIVACY,
@@ -98,6 +106,34 @@ GUIDES = {
             "EFFECT_UNAVAILABLE or insufficient transition handles: discover a supported effect, check its appliesTo and adjacent clips/durations, then retry a revised edit.",
             "Failed preview/export: read the job error, fix the cause, then submit a new task. Poll at bounded intervals and report failure or timeout honestly." ]},
 }
+GUIDES['local-models']={
+    'title':'Optional local neural matting and agent vision requirements',
+    'rules':[
+        'Local model inference does not call your LLM or upload footage. Model/runtime installation is optional; status never downloads anything.',
+        'FIRST assess whether YOUR CURRENT model can accept images AND YOUR HOST forwards actual tool-returned images. A model name, MCP connection, tool availability or sampling support does not prove this. If either is false or unknown, do not use AI matting/visual review; ask the user to choose points and review the result manually.',
+        'Native video understanding is optional: preview_frames returns PNGs at requested times. Images must actually be readable by you. Do not infer a visual target from a filename or invent coordinates.',
+        'Call local_model_status. MediaPipe semantic mode keeps people; SAM2 follows a selected object. Missing weights/runtime produce an actionable unavailable status; no fake masks or test audio fallback.',
+        'For first use call extension_status then extension_plan(extensionId=person or object). Explain the purpose, download/installed size, disk budget and device suitability briefly. A general editing instruction is not installation consent. Ask the user to accept/decline; an already explicit instruction to install this extension is sufficient. Record the actual response with extension_confirm and pass its confirmationId to extension_install. No shell, Python or Git setup is needed.',
+        'Read or cancel extension_job with bounded polling. UI and MCP share the same persisted job. Retrying an unchanged confirmed plan reuses cached downloads and needs no new approval; switching trusted mirrors within that plan needs no new approval. Decline means continue ordinary editing without repeatedly asking. Plan/status never downloads.',
+        'sourceMode auto probes trusted origins. china/global prefer regional origins with verified fallbacks; offline makes no network request and requires an extension ZIP. Use installDirectory on a disk with enough space. Unsupported platforms or insufficient RAM/space must remain unavailable, never pretend successful installation. Completion runs a real inference smoke test, not a benchmark or acceptance of the user clip.',
+        'Query the source with media_inspect and inspect source images with preview_frames. Points are normalized SOURCE coordinates, labels 1 include/0 exclude; prompt times are absolute source seconds inside the selected clip range, not timeline seconds.',
+        'Call local_matting_start with projectId, current expectedRevision, clipId, agentCapabilities={selfAssessed:true,imageInput:true,toolImageInput:true}, trackingMode=sam2, selectionMode=selected, selectionPrompts. Assert true ONLY after assessing actual support.',
+        'Poll local_matting_job about once per second with a bounded timeout. Inspect outputPath via preview_frames. A completed job is not proof of correct segmentation, fine hair, alpha edges or tracking continuity.',
+        'Acquire an edit lease, reread revision, then local_matting_apply with jobId, expectedRevision, editLeaseId, stable commandId and the same self-assessed vision capabilities. One source swap is one undo; always release the lease. Manual UI jobs and agent jobs share their persisted metadata.',
+        'If unsupported, unavailable, cancelled or uncertain, report it honestly. Do not download models silently, create a replacement fake mask, submit guessed prompts or claim to have inspected unseen frames.'],
+    'tools':['local_model_status','extension_status','extension_plan','extension_confirm','extension_install','extension_job','extension_export_offline','preview_frames','local_matting_start','local_matting_job','local_matting_apply']}
+GUIDES['agent-bridge']={
+    'title':'Explicit UI handoff to an external agent',
+    'automaticWake':False,
+    'rules':[
+        'The existing activity/lease UI is not a mechanism to launch a users AI. Human local matting runs independently and requires no external AI.',
+        'An explicit Request AI selection/review action creates a persistent project/revision/clip-scoped request. It does not start a model, bill a service, acquire an edit lease or apply edits.',
+        'An already active, user-authorized external agent can register agent_session with SELF-ASSESSED image/tool-image capabilities and call agent_requests(operation=wait,projectId,agentId,sessionToken,waitSeconds<=25). That pending tool call returns when the UI submits a request. Unknown/unsupported vision must be false and cannot claim/wait for these visual tasks.',
+        'Merely registering or connecting MCP does not wake an idle host. If no suitable active listener exists, the UI shows queued/manual handoff and offers copyable instructions. Full unattended wakeup requires an explicit host-side connector; this server does not pretend universal sampling/notification support.',
+        'Use agent_requests operation=claim, inspect the selected source/output frames, and stay inside the request scope. Stale revision requests cannot be newly claimed. Claims expire in 120s, so use a bounded task and claim again after expiry if still valid.',
+        'Complete/decline with a small structured result. Completion requires result.reviewedRevision matching the current revision, and actual frame inspection at that revision. Claiming or completing is not a timeline edit or visual acceptance by itself. Requested edits still use current revision/lease and user-visible undo. Never include sessionToken in public output.',
+        'Close the session when finished. Do not run an endless polling loop after the authorized task has ended or claim that notifications alone have activated the users model.'],
+    'tools':['agent_session','agent_requests']}
 
 
 def rat(seconds):
@@ -230,6 +266,9 @@ def recovery(code, arguments):
         "ASSET_CHANGED": "Inspect the intended source again, confirm its identity/duration, and relink before retrying.",
         "EFFECT_UNAVAILABLE": "Discover a supported effect using resources_list/effects_list and request its exact schema.",
         "INSUFFICIENT_HANDLES": "Inspect the incoming and preceding clips on the same track; shorten the transition or provide enough adjacent media."}
+    if code=='AGENT_VISION_REQUIRED':
+        return {'message':'Do not use the AI matting/visual-review workflow unless your current model AND host support actual tool-returned images. If unsupported or unknown, use the manual UI; never assert vision=true merely to bypass this check.',
+                'help':{'tool':'editor_help','arguments':{'topic':'local-models'}}}
     help_args = {"topic": "command", "command": command} if command and code == "INVALID_ARGUMENT" else {"topic": "errors"}
     return {"message": hints.get(code, "Inspect the error and job state, correct the cause, and retry only when appropriate. Check committed before replaying an edit."),
             "help": {"tool": "editor_help", "arguments": help_args}}

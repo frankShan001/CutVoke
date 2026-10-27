@@ -28,6 +28,7 @@ dev = ["pytest>=7", "numpy>=1.24", "Pillow>=10", "opencv-python-headless>=4.11,<
 asr = ["faster-whisper==1.2.1", "OpenCC==1.4.2"]
 separation = ["demucs==4.0.1", "torch>=2.0,<2.6", "torchaudio>=2.0,<2.6", "soundfile>=0.12"]
 person = ["mediapipe==1.0.1"]
+graphics = ["moderngl==5.12.0"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -46,7 +47,7 @@ packages = ["cutvoke", "cutvoke.domain", "cutvoke.editing", "cutvoke.rendering",
 package-dir = {"" = "src"}
 
 [tool.setuptools.package-data]
-cutvoke = ["assets/*/*.wav", "assets/*/*.png", "assets/*/*.jpg", "assets/*/*.mp4", "assets/*/*.json", "assets/*/*.cube", "assets/*/*.ttf", "assets/*/*.txt", "assets/*/*.md", "catalogs/builtin_presets.json", "catalogs/builtin_stickers.json", "catalogs/builtin_resource_pack.json"]
+cutvoke = ["assets/*/*.wav", "assets/*/*.png", "assets/*/*.jpg", "assets/*/*.mp4", "assets/*/*.json", "assets/*/*.cube", "assets/*/*.ttf", "assets/*/*.txt", "assets/*/*.md", "assets/extension_packages/*.whl", "assets/extension_packages/*.zip", "catalogs/*.json"]
 
 [tool.setuptools.exclude-package-data]
 cutvoke = [

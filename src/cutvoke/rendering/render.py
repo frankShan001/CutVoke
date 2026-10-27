@@ -1138,10 +1138,12 @@ def _atempo_chain(speed_f: float) -> list[str]:
     """把任意正倍速拆成 ffmpeg atempo 可接受的链（单段范围 0.5~2.0）。
 
     例如 speed=4 -> ['atempo=2.0','atempo=2.0']；speed=0.25 -> 两个 0.5。
-    speed=1 -> ['atempo=1.0']（无害透传）。
+    speed=1 -> []。atempo=1 仍会执行 WSOLA，并非逐样本透传。
     """
     parts: list[str] = []
     remaining = float(speed_f)
+    if remaining == 1.0:
+        return parts
     while remaining > 2.0 + 1e-9:
         parts.append("atempo=2.0")
         remaining /= 2.0
@@ -1214,12 +1216,24 @@ def _prepare_static_masks(method):
     signature = inspect.signature(method)
     @wraps(method)
     def prepared(self, project, *args, **kwargs):
+        render_started=time.monotonic()
         arguments = signature.bind(self, project, *args, **kwargs)
         cancel = arguments.arguments.get("cancel_event")
         values = arguments.arguments
+        callback = values.get('progress_callback')
+        if callback:
+            callback({'phase':'preparing'})
         original_project=project
+        from cutvoke.domain.essential_properties import resolve as resolve_compositions
+        project = resolve_compositions(project)
+        from cutvoke.domain.spatial_path import resolve as resolve_spatial_paths
+        project = resolve_spatial_paths(project)
+        from cutvoke.domain.controllers import resolve as resolve_controllers
+        project = resolve_controllers(project)
         from cutvoke.rendering.compound_sources import prepare as prepare_compounds
         project = prepare_compounds(self, project, cancel)
+        from cutvoke.rendering.text_layers import prepare as prepare_text_layers
+        project = prepare_text_layers(self, project, cancel)
         previous_scale=getattr(self._render_ctx,'preview_scale',1.0)
         preview_scale=1.0
         if method.__name__=='render_preview_window':
@@ -1251,6 +1265,11 @@ def _prepare_static_masks(method):
         self._render_ctx.verified_input_paths=set()
         self._render_ctx.clip_clocks={}
         self._render_ctx.bounded_origin=None
+        previous_metrics=getattr(self._render_ctx,'light_metrics',None)
+        previous_cache=getattr(self._render_ctx,'procedural_cache_dir',None)
+        self._render_ctx.light_metrics=[]
+        project_root=getattr(project,'_directory_root',None)
+        self._render_ctx.procedural_cache_dir=(str(Path(project_root)/'cache'/'effects') if project_root else None)
         if (method.__name__ in {'extract_frame','render_preview_window'} or
                 (method.__name__=='render' and window is not None and window[1]-window[0] <= 8)):
             from cutvoke.rendering.preview_window import bounded
@@ -1287,11 +1306,25 @@ def _prepare_static_masks(method):
                     with self._raster_mask_sources(procedural, cancel, window) as mattes:
                         with self._static_mask_sources(mattes, cancel, window) as snapshot:
                             try:
+                                prepared_at=time.monotonic()
                                 result=method(self, snapshot, *args, **kwargs)
                                 if isinstance(result,dict):
                                     result['effectProcessor']=('opencl:'+gpu.device['vendor']
                                         if gpu is not None and gpu.kernels else 'cpu')
                                     result['gpuEffects']=sorted(set(gpu.kernels)) if gpu else []
+                                    metrics=self._render_ctx.light_metrics
+                                    result['effectMetrics']=copy.deepcopy(metrics)
+                                    scenes=sorted({item['sceneRenderer'] for item in metrics if item.get('sceneRenderer') not in (None,'cached')})
+                                    if scenes:
+                                        result['sceneRenderers']=scenes
+                                        if any(value.startswith('opengl:') for value in scenes):result['effectProcessor']='mixed-local'
+                                    result.setdefault('timings',{}).update(
+                                        totalRenderSeconds=time.monotonic()-render_started,
+                                        preparationSeconds=prepared_at-render_started,
+                                        lightGenerationWorkerSeconds=sum(item.get('generationSeconds',0) for item in metrics),
+                                        lightGeneratedFrames=sum(item.get('generatedFrames',0) for item in metrics),
+                                        lightMemoryCacheHits=sum(bool(item.get('memoryHit')) for item in metrics),
+                                        lightDiskCacheHits=sum(bool(item.get('diskHit')) for item in metrics))
                                 return result
                             except RenderCancelled:
                                 raise
@@ -1312,6 +1345,8 @@ def _prepare_static_masks(method):
             self._render_ctx.export_audio_sequence=previous_audio_sequence
             self._render_ctx.audio_origin_delta=previous_audio_delta
             self._render_ctx.verified_input_paths=previous_verified
+            self._render_ctx.light_metrics=previous_metrics
+            self._render_ctx.procedural_cache_dir=previous_cache
     return prepared
 
 
@@ -1411,8 +1446,8 @@ class RenderService:
             return
         needed = self._preparation_clip_ids(project.sequence, window)
         if not any(e.get('effectId') == 'cutvoke.fx.mask' and supports(e.get('params', {}))
-                   for t in project.sequence.tracks if t.visible and t.kind == 'video'
-                   for c in t.clips if c.id in needed and not c.hidden
+                   for t in project.sequence.tracks if t.kind == 'video'
+                   for c in t.clips if c.id in needed
                    for e in self._enabled_fx(c)):
             yield project
             return
@@ -1421,7 +1456,7 @@ class RenderService:
         probes, sources, clocks = {}, {}, {}
         with tempfile.TemporaryDirectory(prefix='cutvoke-ink-mattes-') as directory:
             for track in snapshot.sequence.tracks:
-                if not track.visible or track.kind != 'video':
+                if track.kind != 'video':
                     continue
                 for clip in track.clips:
                     if (clip.id not in needed or clip.speed.to_fraction() != 1
@@ -1477,7 +1512,8 @@ class RenderService:
         A transition can read the outgoing clip after its nominal end. Retain
         that predecessor just as _compile does, including its optical layers.
         """
-        needed = set()
+        from cutvoke.domain.compositing import matte_source_ids
+        needed = matte_source_ids(seq, window)
         for track in seq.tracks:
             if not track.visible:
                 continue
@@ -1499,9 +1535,11 @@ class RenderService:
     def _procedural_sources(self, project, cancel_event=None, render_window=None):
         """Cache generated optical layers without modifying editable authority."""
         needed = self._preparation_clip_ids(project.sequence, render_window)
-        targets=[(c,e) for t in project.sequence.tracks if t.visible for c in t.clips if c.id in needed
-                 if not c.hidden for e in c.effects if _is_effect_enabled(e)
-                 and e.get('effectId') in ('cutvoke.fx.lightWeave','cutvoke.fx.opticalField')]
+        from cutvoke.rendering.composition_operators import PROCEDURAL
+        procedural_ids = PROCEDURAL | {'cutvoke.fx.lightWeave', 'cutvoke.fx.opticalField'}
+        targets=[(c,e) for t in project.sequence.tracks for c in t.clips if c.id in needed
+                 for e in c.effects if _is_effect_enabled(e)
+                 and e.get('effectId') in procedural_ids]
         if not targets:
             yield project
             return
@@ -1509,23 +1547,40 @@ class RenderService:
         snapshot=copy.deepcopy(project)
         tasks = []
         for track in snapshot.sequence.tracks:
-            if not track.visible:continue
             for clip in track.clips:
-                if clip.hidden or clip.id not in needed:continue
+                if clip.id not in needed:continue
                 for effect in clip.effects:
-                    if not _is_effect_enabled(effect) or effect.get('effectId') not in ('cutvoke.fx.lightWeave','cutvoke.fx.opticalField'):continue
+                    if not _is_effect_enabled(effect) or effect.get('effectId') not in procedural_ids:continue
                     params=effect.setdefault('params',{})
                     if params.get('_renderedLightPath') and Path(params['_renderedLightPath']).is_file():continue
                     tasks.append((clip,effect,params))
         source_directory=tempfile.TemporaryDirectory(prefix='cutvoke-optical-frame-')
         clip_clocks=getattr(self._render_ctx,'clip_clocks',{})
+        cache_directory=getattr(self._render_ctx,'procedural_cache_dir',None)
         def prepare(index_task):
             index,task=index_task
             clip,effect,params=task
+            metrics={'clipId':clip.id,'instanceId':effect.get('instanceId'),'effectId':effect.get('effectId'),
+                     'width':project.sequence.width,'height':project.sequence.height}
             try:
                 if cancel_event and cancel_event.is_set():
                     raise RenderCancelled('light layer preparation cancelled')
                 extra={}
+                if effect.get('effectId') in PROCEDURAL:
+                    from cutvoke.rendering.composition_operators import frame as operator_frame, VERSION as operator_version
+                    params['_operator'] = effect['effectId'].rsplit('.', 1)[-1]
+                    extra=dict(renderer=operator_frame,kind=f'operator-{params["_operator"]}-{operator_version}')
+                    if params['_operator']=='scene3d':
+                        from cutvoke.rendering.scene3d import VERSION as scene_version,availability as scene_availability
+                        params['_sceneFiles']=[]
+                        for item in params.get('objects',[]):
+                            if not item.get('texturePath'):continue
+                            try:
+                                info=Path(item['texturePath']).stat()
+                                params['_sceneFiles'].append((item['texturePath'],info.st_size,info.st_mtime_ns))
+                            except OSError as error:raise RenderError(f'3D material image missing or unreadable: {item["texturePath"]}') from error
+                        params['_sceneEngine']=(scene_availability()['defaultRenderer'] if params.get('renderer','auto')=='auto' else params['renderer'])
+                        extra['kind']=f'scene3d-{scene_version}-{params["_sceneEngine"]}'
                 if effect.get('effectId')=='cutvoke.fx.opticalField':
                     from cutvoke.rendering.vfx_optics import frame as optical_frame, VERSION as optical_version
                     extra=dict(renderer=optical_frame,kind=f'optics-{optical_version}')
@@ -1547,7 +1602,11 @@ class RenderService:
                     path=cached_source(
                         params,project.sequence.width,project.sequence.height,
                         project.sequence.fps.to_fraction(),float(clip.duration.to_fraction()),
-                        self.ffmpeg,lambda:bool(cancel_event and cancel_event.is_set()),**extra)
+                        self.ffmpeg,lambda:bool(cancel_event and cancel_event.is_set()),
+                        cache_directory=cache_directory,metrics=metrics,**extra)
+                    if params.get('_operator')=='scene3d':
+                        from cutvoke.rendering.scene3d import last_renderer
+                        metrics['sceneRenderer']=last_renderer() if not metrics.get('diskHit') else 'cached'
                     generated.append(path)
                     if Path(path).stat().st_size > self._procedural_item_bytes:
                         return RenderMemo.UNCACHED
@@ -1572,9 +1631,11 @@ class RenderService:
                 if generated:
                     params['_renderedLightPath']=generated[0]
                 else:
+                    metrics.update(memoryHit=True,generatedFrames=0)
                     path=Path(source_directory.name)/f'reused-{index}.mkv'
                     path.write_bytes(media)
                     params['_renderedLightPath']=str(path)
+                return metrics
             except InterruptedError as exc:
                 raise RenderCancelled(str(exc)) from exc
             except RuntimeError as exc:
@@ -1586,7 +1647,9 @@ class RenderService:
                     max(1,8_388_608//max(1,project.sequence.width*project.sequence.height)))
         try:
             with ThreadPoolExecutor(max_workers=workers) as executor:
-                list(executor.map(prepare,enumerate(tasks)))
+                metrics=list(executor.map(prepare,enumerate(tasks)))
+            if getattr(self._render_ctx,'light_metrics',None) is not None:
+                self._render_ctx.light_metrics.extend(metrics)
             yield snapshot
         finally:
             source_directory.cleanup()
@@ -1641,17 +1704,15 @@ class RenderService:
                        and not any(e.get("effectId") == "cutvoke.color" and _is_effect_enabled(e)
                                    for e in clip.effects))
             return (path_mask or graphic) and is_static(clip.asset_ref.source_path)
-        if not any(eligible(c) for t in project.sequence.tracks if t.visible for c in t.clips if not c.hidden):
+        if not any(eligible(c) for t in project.sequence.tracks for c in t.clips):
             yield project
             return
         snapshot = copy.deepcopy(project)
         with tempfile.TemporaryDirectory(prefix="cutvoke-static-mask-") as directory:
             prepared = {}
             for track in snapshot.sequence.tracks:
-                if not track.visible:
-                    continue
                 for clip in track.clips:
-                    if clip.hidden or not eligible(clip):
+                    if not eligible(clip):
                         continue
                     effects = self._enabled_fx(clip)
                     source = clip.asset_ref.source_path
@@ -1813,7 +1874,7 @@ class RenderService:
             if duration > 8:
                 return self._render_in_windows(
                     seq, out_path, quality, overlay_position, cancel_event,
-                    alpha, color_chain, color_space if tm == "none" else None,
+                    alpha, color_chain, (color_space or ('bt709' if not alpha else None)) if tm == "none" else None,
                     video_bitrate_kbps, audio_bitrate_kbps, start, duration,
                     preflight_warnings,
                     **({"progress_callback": progress_callback} if progress_callback else {}))
@@ -1849,12 +1910,24 @@ class RenderService:
             # 5. ffprobe 验证真实可解码 + 时长/尺寸正确（透明导出另验 alpha；
             #    色彩管理另验输出 primaries 真的落到位）
             # 色调映射会把输出锁成 bt709，此时不该再按 color_space 断言。
-            probed_space = color_space if (tm == "none" and color_space) else None
+            probed_space = (color_space or ('bt709' if not alpha else None)) if tm == 'none' else None
             if progress_callback:
                 progress_callback({"phase": "verifying"})
             probe = self._verify(tmp_path, verify_duration, seq.width,
                                  seq.height, expect_alpha=alpha,
                                  expect_primaries=probed_space)
+            audio_verification = None
+            if has_audio and quality != 'preview':
+                with tempfile.TemporaryDirectory(prefix='cutvoke-audio-check-', dir=out_dir) as check_directory:
+                    reference = Path(check_directory) / 'continuous.wav'
+                    self._render_continuous_audio(seq, str(reference), output_start or 0., verify_duration, cancel_event)
+                    from cutvoke.rendering.audio_integrity import verify_audio, AudioIntegrityError
+                    try:
+                        audio_verification = verify_audio(reference, tmp_path, self.ffmpeg, cancel_event)
+                    except AudioIntegrityError as error:
+                        raise RenderError(str(error)) from error
+                    except InterruptedError as error:
+                        raise RenderCancelled(str(error)) from error
         except BaseException:
             # 任何失败都清理临时文件，避免误导
             if os.path.exists(tmp_path):
@@ -1881,11 +1954,15 @@ class RenderService:
             "width": probe["width"],
             "height": probe["height"],
             "has_audio": has_audio,
+            "audioVerification": audio_verification,
             "has_alpha": _pix_fmt_has_alpha(probe.get("pix_fmt")),
             "pix_fmt": probe.get("pix_fmt"),
             "color_primaries": probe.get("color_primaries"),
             "color_transfer": probe.get("color_transfer"),
             "color_space": probe.get("color_space"),
+            "color_range": probe.get("color_range"),
+            "audio_start_time": probe.get("audio_start_time"),
+            "video_start_time": probe.get("video_start_time"),
             "warnings": warnings,
             "videoEncoder": getattr(self._render_ctx, "video_encoder", "libx264"),
             "encoderFallback": getattr(self._render_ctx, "encoder_fallback", False),
@@ -1910,6 +1987,7 @@ class RenderService:
         has_audio = False
         chunks = []
         stage_started = time.monotonic()
+        window_metrics = []
         completed_seconds = 0.0
         if progress_callback:
             progress_callback({"phase": "rendering", "fraction": 0.0,
@@ -1919,26 +1997,18 @@ class RenderService:
                 raise RenderCancelled("render cancelled between windows")
         with tempfile.TemporaryDirectory(prefix="cutvoke-export-windows-", dir=out_dir) as directory:
             temporary = Path(directory)
-            # All chunks share an audio stream whenever the project contains
-            # one; windows in silence receive PCM silence, never a missing track.
-            probed = {}
-            for track in seq.tracks:
-                if not track.visible or track.muted or track.kind not in {"audio", "video"}:
-                    continue
-                clips, _ = _flatten_compound([c for c in track.clips if not c.hidden])
-                for clip in clips:
-                    check_cancel()
-                    if (float(clip.timeline_end.to_fraction()) <= start or
-                            float(clip.timeline_start.to_fraction()) >= start + duration):
-                        continue
-                    source = clip.asset_ref.source_path
-                    if source not in probed:
-                        probed[source] = self.probe_media(source)
-                    if probed[source].get("has_audio"):
-                        has_audio = True
-                        break
-                if has_audio:
-                    break
+            # Matroska window timestamps have millisecond precision. Concatenating
+            # independently trimmed PCM packets can shift even an untouched master
+            # by several milliseconds. Mix once on the sample clock instead.
+            audio_path = temporary / 'continuous-audio.wav'
+            audio_started = time.monotonic()
+            has_audio, audio_messages = self._render_continuous_audio(
+                seq, str(audio_path), start, duration, cancel_event)
+            audio_seconds = time.monotonic() - audio_started
+            warnings.extend(message for message in audio_messages if message not in warnings)
+            video_seq = copy.deepcopy(seq)
+            for track in video_seq.tracks:
+                track.muted = True
             end = start + duration
             frame_rate = seq.fps.to_fraction()
             # Fragment graphs contain many independently timed alpha branches.
@@ -1957,21 +2027,22 @@ class RenderService:
                 self._render_ctx.gpu_clips={}
                 self._render_ctx.pixel_gpu=None
                 check_cancel()
+                compile_started = time.monotonic()
                 graph, inputs, _expected, chunk_audio, messages, caption_cwd = self._compile(
-                    seq, overlay_position, alpha=alpha,
+                    video_seq, overlay_position, alpha=alpha,
                     render_window=(cursor, cursor + chunk_duration))
                 origin = self._render_ctx.compile_origin
-                if has_audio and not chunk_audio:
-                    graph += (f";anullsrc=r={seq.audio_sample_rate}:cl=stereo:"
-                              f"d={cursor + chunk_duration - origin:.9f}[outa]")
+                compile_seconds = time.monotonic() - compile_started
                 path = temporary / f"window-{round(cursor*float(frame_rate)):09d}.mkv"
                 try:
                     self._run_ffmpeg(seq, graph, inputs, str(path), quality,
-                        cancel_event, has_audio, caption_cwd=caption_cwd,
+                        cancel_event, False, caption_cwd=caption_cwd,
                         alpha=alpha, output_start=cursor - origin,
                         output_duration=chunk_duration, lossless=True)
                     self._verify(str(path), chunk_duration, seq.width, seq.height,
                                  expect_alpha=alpha)
+                    window_metrics.append({'compile':compile_seconds,
+                                           'composite':time.monotonic()-compile_started-compile_seconds})
                 except RenderError as exc:
                     if ("stopped making progress" not in str(exc)
                             or chunk_duration <= 2):
@@ -2025,10 +2096,11 @@ class RenderService:
             if not _setpts_clears_frame_rate(self.ffmpeg):
                 graph = graph.replace("[outv]", ",setpts=N/FRAME_RATE/TB[outv]")
             if has_audio:
-                graph += (f";[0:a]aresample={seq.audio_sample_rate}:async=1:first_pts=0,"
-                          f"atrim=duration={duration:.9f},asetpts=PTS-STARTPTS[outa]")
+                graph += f";[1:a]asetpts=N/SR/TB[outa]"
             final = temporary / ("final" + os.path.splitext(out_path)[1])
-            self._run_ffmpeg(seq, graph, [str(manifest)], str(final), quality,
+            self._render_ctx.audio_origin_delta = 0.
+            encoding_started = time.monotonic()
+            self._run_ffmpeg(seq, graph, [str(manifest)] + ([str(audio_path)] if has_audio else []), str(final), quality,
                 cancel_event, has_audio, video_bitrate_kbps=video_bitrate_kbps,
                 audio_bitrate_kbps=audio_bitrate_kbps, alpha=alpha,
                 color_chain=color_chain, output_duration=duration, concat_input=True,
@@ -2038,6 +2110,15 @@ class RenderService:
                 progress_callback({"phase": "verifying"})
             probe = self._verify(str(final), duration, seq.width, seq.height,
                                  expect_alpha=alpha, expect_primaries=expected_primaries)
+            audio_verification = None
+            if has_audio:
+                from cutvoke.rendering.audio_integrity import verify_audio, AudioIntegrityError
+                try:
+                    audio_verification = verify_audio(audio_path, final, self.ffmpeg, cancel_event)
+                except AudioIntegrityError as error:
+                    raise RenderError(str(error)) from error
+                except InterruptedError as error:
+                    raise RenderCancelled(str(error)) from error
             check_cancel()
             os.replace(final, out_path)
         return {"output_path":out_path, "duration":probe["duration"],
@@ -2045,9 +2126,72 @@ class RenderService:
                 "has_audio":has_audio, "has_alpha":_pix_fmt_has_alpha(probe.get("pix_fmt")),
                 "pix_fmt":probe.get("pix_fmt"), "color_primaries":probe.get("color_primaries"),
                 "color_transfer":probe.get("color_transfer"), "color_space":probe.get("color_space"),
+                "color_range":probe.get("color_range"),
+                "audio_start_time":probe.get("audio_start_time"), "video_start_time":probe.get("video_start_time"),
                 "warnings":warnings, "renderStrategy":"lossless-windows", "windowCount":len(chunks),
+                "audioStrategy":"continuous-pcm" if has_audio else "none",
+                "audioVerification":audio_verification,
+                "timings":{"continuousAudioSeconds":audio_seconds,
+                           "compilationWorkerSeconds":sum(item['compile'] for item in window_metrics),
+                           "compositionWorkerSeconds":sum(item['composite'] for item in window_metrics),
+                           "encodingAndVerificationSeconds":time.monotonic()-encoding_started,
+                           "totalWindowSeconds":time.monotonic()-stage_started},
                 "videoEncoder":getattr(self._render_ctx,"video_encoder","libx264"),
                 "encoderFallback":getattr(self._render_ctx,"encoder_fallback",False)}
+
+    def _render_continuous_audio(self, seq, out_path, start, duration, cancel_event=None):
+        """Render only the original mixer, once, without decoding visual layers."""
+        audio_seq = copy.deepcopy(getattr(self._render_ctx, 'export_audio_sequence', None) or seq)
+        # _compile supplies a dummy canvas for audio-only sequences. Its nullsink
+        # must not generate full-resolution frames throughout a long master.
+        audio_seq.width = audio_seq.height = 16
+        audio_seq.captions = []
+        audio_seq.tracks = [track for track in audio_seq.tracks if track.kind in {'audio', 'video'}]
+        for track in audio_seq.tracks:
+            track.kind = 'audio'
+        saved = {key: getattr(self._render_ctx, key, None) for key in
+                 ('export_audio_sequence', 'bounded_origin', 'clip_clocks', 'audio_origin_delta')}
+        self._render_ctx.export_audio_sequence = None
+        self._render_ctx.bounded_origin = None
+        self._render_ctx.clip_clocks = {}
+        self._render_ctx.audio_origin_delta = 0.
+        caption_cwd = script = None
+        try:
+            graph, inputs, _expected, has_audio, warnings, caption_cwd = self._compile(audio_seq, (0, 0))
+            if not has_audio:
+                return False, warnings
+            rate = seq.audio_sample_rate
+            first, last = round(start * rate), round((start + duration) * rate)
+            graph += (f';[outv]nullsink;[outa]aresample={rate},apad=whole_len={last},'
+                      f'atrim=start_sample={first}:end_sample={last},asetpts=N/SR/TB[continuousa]')
+            args, script = _filter_graph_arguments(self.ffmpeg, graph)
+            command = [self.ffmpeg, '-y', '-nostdin', '-v', 'error', '-filter_complex_threads', '2']
+            for path in inputs:
+                command += ['-threads', '1', '-i', path]
+            command += [*args, '-map', '[continuousa]', '-ar', str(rate), '-ac', '2', '-c:a', 'pcm_f32le', out_path]
+            process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+            try:
+                while True:
+                    if cancel_event and cancel_event.is_set():
+                        raise RenderCancelled('continuous audio cancelled')
+                    try:
+                        _, error = process.communicate(timeout=.1)
+                        break
+                    except subprocess.TimeoutExpired:
+                        continue
+            finally:
+                if process.poll() is None:
+                    process.kill(); process.communicate()
+            if process.returncode:
+                raise RenderError('continuous audio failed: ' + error.decode('utf-8', errors='replace')[-1200:])
+            return True, warnings
+        finally:
+            for key, value in saved.items():
+                setattr(self._render_ctx, key, value)
+            if script:
+                Path(script).unlink(missing_ok=True)
+            if caption_cwd:
+                shutil.rmtree(caption_cwd, ignore_errors=True)
 
     @_prepare_static_masks
     def render_preview_window(self, project: Project, out_path: str,
@@ -2240,7 +2384,7 @@ class RenderService:
             if track.kind != "video" or not covers(track):
                 continue
             for clip in track.clips:
-                if (clip.hidden or clip.nested is not None or
+                if (clip.hidden or clip.nested is not None or clip.role == 'adjustment' or
                         not clip.timeline_start <= t_rat < clip.timeline_end):
                     continue
                 source_path = clip.asset_ref.source_path
@@ -2468,7 +2612,7 @@ class RenderService:
             for c in t.clips:
                 if c.hidden or c.id not in required_clip_ids:
                     continue
-                if c.nested is not None:
+                if c.nested is not None or c.role == "adjustment":
                     continue  # 复合片段：容器，源校验交给内部片段
                 src = c.asset_ref.source_path
                 if not src:
@@ -2623,6 +2767,8 @@ class RenderService:
         self._render_ctx.reframe = getattr(seq, 'reframe', 'stretch')
         self._render_ctx.window = render_window
         self._render_ctx.input_seeks = {}
+        from cutvoke.domain.compositing import validate_sequence
+        validate_sequence(seq)
         canvas_color = getattr(seq, "background_color", "#000000")
         if (not isinstance(canvas_color, str) or len(canvas_color) != 7
                 or canvas_color[0] != "#"
@@ -2722,7 +2868,7 @@ class RenderService:
         for t in seq.tracks:
             if t.kind != "video" or not t.visible:
                 continue
-            clips = sorted((c for c in t.clips if not c.hidden),
+            clips = sorted((c for c in t.clips if not c.hidden and not c.compositing.get("matteOnly")),
                            key=lambda c: c.timeline_start)
             # 复合片段（J08）：把 nested 子序列片段提升到外层时轴
             clips, flat_warnings = _flatten_compound(clips)
@@ -2747,6 +2893,9 @@ class RenderService:
                 clips = [c for i,c in enumerate(clips) if i in selected]
             renderable: list[Clip] = []
             for clip in clips:
+                if clip.role == "adjustment":
+                    renderable.append(clip)
+                    continue
                 src = clip.asset_ref.source_path
                 if has_video(src):
                     renderable.append(clip)
@@ -2797,6 +2946,9 @@ class RenderService:
             if isinstance(mode, dict) and mode.get("trackId") is not None
         }
         for n, (track, clips) in enumerate(track_clips):
+            if track.role == "adjustment":
+                track_streams.append(("", max(float(c.timeline_end.to_fraction()) - origin for c in clips)))
+                continue
             mode = mode_by_track_id.get(track.id, {})
             original_position = original_track_positions[track.id] if render_window is not None else n
             transparent_layer = alpha or bool(mode.get(
@@ -2852,7 +3004,7 @@ class RenderService:
             f"r={fps_expr}:d={canvas_dur:.6f}{base_format}[trackbase]")
         current = "trackbase"
         gpu=getattr(self._render_ctx,'gpu',None)
-        if (gpu is not None and not multicam and getattr(self._render_ctx,'bounded_origin',None) is not None
+        if (gpu is not None and all(track_labels) and not multicam and getattr(self._render_ctx,'bounded_origin',None) is not None
                 and len(track_labels)>1 and (x,y)==(0,0)
                 and all(c.id in getattr(self._render_ctx,'clip_clocks',{})
                         for _track, clips in track_clips for c in clips)):
@@ -2868,6 +3020,11 @@ class RenderService:
             current=gpu.composite(['trackbase',*padded],parts,'ovout')
         else:
             for n, t_label in enumerate(track_labels):
+                if not t_label:
+                    from cutvoke.rendering.compositing import adjustment
+                    for adjustment_clip in track_clips[n][1]:
+                        current = adjustment(self, adjustment_clip, current, parts, vseg, origin)
+                    continue
                 out_label = "ovout" if n == len(track_labels) - 1 else f"ov{n}"
                 enable = ''
                 if isinstance(multicam, dict) and n < len(track_clips):
@@ -3052,7 +3209,9 @@ class RenderService:
                     abs_f = abs(speed_f)
                     if curve is None and preserve_pitch:
                         # atempo changes duration without changing the tone.
-                        speed_filters += "," + ",".join(_atempo_chain(abs_f))
+                        tempo_filters = _atempo_chain(abs_f)
+                        if tempo_filters:
+                            speed_filters += "," + ",".join(tempo_filters)
                     elif curve is None:
                         # Changing the sample rate changes duration and pitch
                         # together. Resample back before mixing at project rate.
@@ -3114,9 +3273,9 @@ class RenderService:
                         # Run original fades/pitch/temporal audio FX before the
                         # crop, preserving a long music clip's phase/history.
                         audio_fx += f",atrim=start={-relative_start:.9f},asetpts=PTS-STARTPTS"
-                    delay_ms = max(0, round(relative_start * 1000))
-                    if delay_ms:
-                        audio_fx += f",adelay={delay_ms}:all=1"
+                    delay_samples = max(0, round(relative_start * sr))
+                    if delay_samples:
+                        audio_fx += f",adelay={delay_samples}S:all=1"
                     parts.append(
                         f"[{ai}:a]atrim=start={ss}:duration={src_dur},"
                         f"asetpts=PTS-STARTPTS{speed_filters}{audio_fx}"
@@ -3263,7 +3422,7 @@ class RenderService:
         if (tr["opacity"] != 1.0 or tr["scale"] != 1.0 or tr["rotation"] != 0.0
                 or tr["position"]["x"] != 0 or tr["position"]["y"] != 0):
             return True
-        if clip.keyframes.get("opacity"):
+        if any(clip.keyframes.get(param) for param in ("opacity", "x", "y", "scale", "rotation")):
             return True
         if find_transition(clip, self.effects) is not None:
             return True
@@ -3302,6 +3461,9 @@ class RenderService:
             else:
                 label = self._build_clip_plain(
                     c, seq, get_input, parts, vseg, fps_expr)
+            if c.compositing.get("matte"):
+                from cutvoke.rendering.compositing import matte
+                label = matte(self, c, label, seq, get_input, parts, vseg, fps_expr)
             clip_labels.append(label)
 
         # Reuse unused source frames after an outgoing clip's selected range as
@@ -3591,12 +3753,19 @@ class RenderService:
                     # final picture. Keep a lookahead picture beyond the seam;
                     # the completed lane is still bounded to its real duration.
                     lookahead = "" if clears_rate else "tpad=stop_mode=clone:stop=1,"
-                    parts.append(
-                        f"[{transition_outgoing}]{xfade_format}{lookahead}{clock}[inA];"
-                        f"[{incoming}]{xfade_format}{clock}[inB];"
-                        f"[inA][inB]"
-                        f"xfade=transition={xname}:offset={offset:.6f}:"
-                        f"duration={d:.6f}{expr_option}[{out}]")
+                    from cutvoke.rendering.luma_transition import build as build_luma, enabled as luma_enabled
+                    if vlog_pattern == 'lumaReveal' and luma_enabled(tr.get('params',{})):
+                        left,right=f'{out}_inA',f'{out}_inB'
+                        parts.append(f'[{transition_outgoing}]{xfade_format}{clock}[{left}]')
+                        parts.append(f'[{incoming}]{xfade_format}{clock}[{right}]')
+                        build_luma(left,right,out,tr.get('params',{}),d,offset,fps,parts,has_alpha)
+                    else:
+                        parts.append(
+                            f"[{transition_outgoing}]{xfade_format}{lookahead}{clock}[inA];"
+                            f"[{incoming}]{xfade_format}{clock}[inB];"
+                            f"[inA][inB]"
+                            f"xfade=transition={xname}:offset={offset:.6f}:"
+                            f"duration={d:.6f}{expr_option}[{out}]")
                 if handle or squeeze_axis is not None:
                     # Canvas clips may carry repeated EOF frames. Concatenating
                     # a short transition segment after such a stream can leave
@@ -3887,7 +4056,7 @@ class RenderService:
             unit = min(W, H)
             sx, sy = f"({scale})*{unit}/{W}", f"({scale})*{unit}/{H}"
         rotation = kf_expression(clip.keyframes.get("rotation", []), time, tr["rotation"])
-        has_rotation = tr["rotation"] != 0 or any(
+        has_rotation = bool(getattr(clip.keyframes.get("rotation"), "formula", None)) or tr["rotation"] != 0 or any(
             keyframe.value != 0 for keyframe in clip.keyframes.get("rotation", []))
         corners = []
         for index, (px, py) in enumerate(((-2, -2), (W + 2, -2),
@@ -3909,7 +4078,7 @@ class RenderService:
             f"perspective={':'.join(corners)}:sense=destination:eval=frame:"
             f"interpolation=cubic,crop={W}:{H}:0:0[{cur}]")
         opacity_lane = clip.keyframes.get("opacity", [])
-        if tr["opacity"] < 1 or any(keyframe.value != 1 for keyframe in opacity_lane):
+        if getattr(opacity_lane, "formula", None) or tr["opacity"] < 1 or any(keyframe.value != 1 for keyframe in opacity_lane):
             nxt = f"kop{vseg[0]}"; vseg[0] += 1
             parts.append(f"[{cur}]{self._opacity_filter(clip, fps, nxt, offset)}[{nxt}]")
             cur = nxt
@@ -4717,7 +4886,7 @@ class RenderService:
                 except Exception:
                     reg = None
             spec = reg.find(eid) if reg is not None else None
-            if not eid.startswith("cutvoke.fx.") and not (spec and spec.category == "fx"):
+            if not eid.startswith("cutvoke.fx.") and not (spec and spec.category == "fx") and not (eid == 'cutvoke.color' and e.get('compositing')):
                 continue
             key = (str(spec.implementation.get("filter", ""))
                    if spec is not None
@@ -4760,7 +4929,7 @@ class RenderService:
 
     def _animated_color(self, clip: Clip, color: dict) -> str:
         from cutvoke.domain.keyframes import effect_instance_id
-        selected = [(index,e) for index,e in enumerate(clip.effects) if e.get("effectId") == "cutvoke.color"]
+        selected = [(index,e) for index,e in enumerate(clip.effects) if e.get("effectId") == "cutvoke.color" and not e.get('compositing')]
         if not selected:
             return ""
         index,effect = selected[-1]
@@ -4814,14 +4983,35 @@ class RenderService:
             cur=shifted
         self._render_ctx.fx_offset=local_offset
         for i, e in enumerate(self._enabled_fx(clip)):
+            compositing = e.get("compositing")
+            if compositing and compositing.get("opacity", 1) == 0:
+                continue
             key, params = self._fx_key_params(e)
             def apply_one(source):
+                from cutvoke.rendering.profiler import begin, end as profile_end
+                source, profile_tag = begin(self, clip, e, source, parts, vseg)
                 animated = self._animated_blur(clip,e,params,f"ak{vseg[0]}")
+                if key == 'color':
+                    from cutvoke.domain.keyframes import effect_instance_id
+                    prefix = f'effect:{effect_instance_id(e, clip.effects.index(e))}:'
+                    clock = '(t)'
+                    animated = 'eq=' + ':'.join(f"{name}='{kf_expression(clip.keyframes.get(prefix+name, []), clock, float(params.get(name, default)))}'"
+                        for name, default in (('brightness',0),('contrast',1),('saturation',1))) + ':eval=frame'
                 if not animated:
-                    return self._fx_one(key,params,source,parts,vseg,i)
+                    processed = self._fx_one(key,params,source,parts,vseg,i)
+                    return profile_end(profile_tag, processed, parts, vseg)
                 out = f"akout{vseg[0]}"; vseg[0]+=1
                 parts.append(f"[{source}]{animated}[{out}]")
-                return out
+                return profile_end(profile_tag, out, parts, vseg)
+            if compositing:
+                original_apply = apply_one
+                def apply_one(source, operation=original_apply):
+                    from cutvoke.rendering.compositing import mix
+                    base, branch = f"fxmixbase{vseg[0]}", f"fxmixbranch{vseg[0]}"
+                    vseg[0] += 1
+                    parts.append(f"[{source}]split=2[{base}][{branch}]")
+                    changed = operation(branch)
+                    return mix(base, changed, compositing, parts, vseg)
             effect_range = e.get("range")
             if effect_range is None:
                 cur = apply_one(cur)
@@ -4896,6 +5086,12 @@ class RenderService:
     def _fx_one(self, key: str, params: dict, cur: str, parts: list[str],
                 vseg: list[int], idx: int) -> str:
         """应用单个滤镜：多流滤镜显式建图，其余内联续接。"""
+        if key == 'cameraPlane':
+            from cutvoke.rendering.camera_plane import build
+            return build(self, params, cur, parts, vseg)
+        if key in {'fractalNoise', 'turbulentDisplace', 'waveWarp', 'vectorPath', 'trackedMask', 'scene3d'}:
+            from cutvoke.rendering.composition_operators import build
+            return build(self, key, params, cur, parts, vseg)
         gpu=getattr(self._render_ctx,'pixel_gpu',None)
         if (key=='mask' and gpu is not None and (params.get('shape') in {'freehand','ink'} or getattr(self._render_ctx,'bounded_origin',None) is not None)
                 and params.get('shape')!='text' and not params.get('_renderedInkMattePath')
@@ -4967,8 +5163,8 @@ class RenderService:
             stem=f'lightweave{vseg[0]}';vseg[0]+=1
             offset=getattr(self._render_ctx,'fx_offset',0.)
             parts.append(f"movie=filename='{escaped}':dec_threads=2,setpts=PTS-STARTPTS+{offset:.12f}/TB[{stem}_light]")
-            parts.append(f'[{cur}][{stem}_light]overlay=shortest=1:eof_action=pass:format=auto[{stem}_out]')
-            return f'{stem}_out'
+            from cutvoke.rendering.vfx_fusion import composite
+            return composite(cur,f'{stem}_light',f'{stem}_out',params,parts)
         if key == "person_halo":
             return self._fx_person_halo(params, cur, parts, vseg, idx)
         if key in _FX_MULTI:
@@ -5445,6 +5641,12 @@ class RenderService:
         if color_chain:
             graph = f"{graph};[outv]{color_chain}[outvcm]"
             out_label = "[outvcm]"
+        elif not alpha:
+            # RGB procedural layers must be converted with a real SDR matrix,
+            # not merely encoded as YUV while retaining their inherited GBR tag.
+            graph += (';[outv]scale=out_color_matrix=bt709:out_range=tv,format=yuv420p,'
+                      'setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709[outv709]')
+            out_label = '[outv709]'
         audio_label = "[outa]"
         if output_duration is not None:
             # Terminate both filter outputs at the requested interval. Output
@@ -5479,9 +5681,9 @@ class RenderService:
         cmd: list[str] = [self.ffmpeg, "-y", "-nostdin",
                           "-filter_complex_threads", str(filter_threads),
                           "-filter_threads", str(filter_threads), *self._gpu_arguments(graph)]
-        for src in input_paths:
+        for input_index, src in enumerate(input_paths):
             cmd += ["-threads", "2"]
-            if concat_input:
+            if concat_input and input_index == 0:
                 cmd += ["-f", "concat", "-safe", "0", "-i", src]
             elif _is_image_src(src):
                 # 静态图片：-loop 1 无限循环 + 显式帧率，使单帧源能作为
@@ -5694,6 +5896,8 @@ class RenderService:
             tail = (stderr or b"").decode("utf-8", "replace")[-1500:]
             raise RenderError(
                 f"ffmpeg exited with code {proc.returncode}\n{tail}")
+        from cutvoke.rendering.profiler import collect as collect_profile
+        collect_profile(self, stderr or b"")
 
     def _recover_preview_window(self, cmd: list[str], out_path: str,
                                 preset: dict[str, str], has_audio: bool,
@@ -5743,7 +5947,7 @@ class RenderService:
             self.ffprobe, "-v", "error",
             "-show_entries",
             "format=duration:stream=codec_type,codec_name,width,height,pix_fmt,"
-            "color_primaries,color_transfer,color_space",
+            "color_primaries,color_transfer,color_space,color_range,start_time",
             "-of", "json", path,
         ]
         try:
@@ -5760,6 +5964,13 @@ class RenderService:
         video = next((s for s in streams if s.get("codec_type") == "video"), None)
         if video is None:
             raise RenderError("ffprobe found no video stream in output")
+        audio = next((s for s in streams if s.get('codec_type') == 'audio'), None)
+        def start_time(stream):
+            value=(stream or {}).get('start_time')
+            return float(value) if value not in (None,'N/A') else None
+        video_start,audio_start=start_time(video),start_time(audio)
+        if audio_start is not None and video_start is not None and abs(audio_start-video_start)>.05:
+            raise RenderError(f'audio/video start times differ by {audio_start-video_start:.6f}s')
 
         dur = info.get("format", {}).get("duration")
         if dur is None or dur == "N/A":
@@ -5802,4 +6013,5 @@ class RenderService:
                 "codec": video.get("codec_name"), "pix_fmt": pix_fmt,
                 "color_primaries": video.get("color_primaries"),
                 "color_transfer": video.get("color_transfer"),
-                "color_space": video.get("color_space")}
+                "color_space": video.get("color_space"), "color_range":video.get('color_range'),
+                "video_start_time":video_start,"audio_start_time":audio_start}

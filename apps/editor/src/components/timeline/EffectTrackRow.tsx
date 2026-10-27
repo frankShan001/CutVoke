@@ -34,7 +34,7 @@ type RangeDrag = {
 };
 
 const seconds = (value: { num: string; den: string }) => Number(value.num) / Number(value.den);
-const segmentKey = (segment: EffectSegment) => `${segment.clipId}:${segment.index}`;
+const segmentKey = (segment: EffectSegment) => `${segment.clipId}:${segment.effect.instanceId || `legacy_${segment.index}`}`;
 
 export const EffectTrackRow = memo(function EffectTrackRow({
   track,
@@ -42,12 +42,14 @@ export const EffectTrackRow = memo(function EffectTrackRow({
   pxPerSec,
   effectSpecs,
   viewport,
+  visibleClipIds,
 }: {
   track: Track;
   displayName: string;
   pxPerSec: number;
   effectSpecs: EffectSpec[];
   viewport: TimelineViewport;
+  visibleClipIds?: Set<string>;
 }) {
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const locked = !!track.locked || !!state.editLock;
@@ -73,7 +75,7 @@ export const EffectTrackRow = memo(function EffectTrackRow({
   const frameDuration = fpsValue && Number(fpsValue.num) > 0
     ? Number(fpsValue.den) / Number(fpsValue.num)
     : 1 / 30;
-  const segments: EffectSegment[] = track.clips.flatMap((clip) =>
+  const segments: EffectSegment[] = track.clips.filter(clip=>!visibleClipIds || visibleClipIds.has(clip.id)).flatMap((clip) =>
     (clip.effects || [])
       .map((effect, index) => {
         const clipStart = clipStartSecs(clip);
@@ -112,12 +114,14 @@ export const EffectTrackRow = memo(function EffectTrackRow({
         clipId: segment.clipId,
         effectId: String(segment.effect.effectId),
         effectIndex: segment.index,
+        effectInstanceId: segment.effect.instanceId || `legacy_${segment.index}`,
         effectKind: "effect",
       },
     });
     dispatch({ type: "PLAYHEAD_SET", t: segment.clipStart + segment.localStart });
     if (reveal) window.dispatchEvent(new CustomEvent("cutvoke:edit-effect", { detail: {
       effectId: String(segment.effect.effectId), category: "fx", trackId: track.id, clipId: segment.clipId,
+      instanceId:segment.effect.instanceId || `legacy_${segment.index}`,
     } }));
   };
 
@@ -126,6 +130,7 @@ export const EffectTrackRow = memo(function EffectTrackRow({
     const result = await removeEffect(dispatch, getLatestState() || state, {
       clipId: segment.clipId,
       effectId: String(segment.effect.effectId),
+      instanceId: segment.effect.instanceId || `legacy_${segment.index}`,
     });
     if (result.ok) dispatch({ type: "SELECTION_SET", selection: null });
   };
@@ -186,7 +191,7 @@ export const EffectTrackRow = memo(function EffectTrackRow({
     await updateEffect(dispatch, getLatestState() || state, {
       clipId: segment.clipId,
       effectId: String(segment.effect.effectId),
-      effectIndex: segment.index,
+      instanceId: segment.effect.instanceId || `legacy_${segment.index}`,
       range: { start: secsToRational(next.start.toFixed(6)), end: secsToRational(next.end.toFixed(6)) },
     });
   };
@@ -273,7 +278,8 @@ export const EffectTrackRow = memo(function EffectTrackRow({
                   state.selection?.trackId === track.id &&
                   state.selection?.clipId === segment.clipId &&
                   state.selection?.effectId === id &&
-                  (state.selection?.effectIndex === undefined || state.selection?.effectIndex === segment.index) &&
+                  (state.selection?.effectInstanceId ? state.selection.effectInstanceId===(segment.effect.instanceId || `legacy_${segment.index}`) :
+                    state.selection?.effectIndex === undefined || state.selection?.effectIndex === segment.index) &&
                   state.selection?.effectKind === "effect";
                 const absoluteStart = segment.clipStart + localStart;
                 const absoluteEnd = segment.clipStart + localEnd;

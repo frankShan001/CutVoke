@@ -6,13 +6,15 @@ import random
 
 from cutvoke.rendering.vfx_light import anchor, schema as light_schema
 
-VERSION = 2
+VERSION = 3
 
 
 def schema():
+    from cutvoke.rendering.vfx_fusion import schema as fusion_schema
     base = light_schema()
     keys = ('palette', 'anchorX', 'anchorY', 'anchorFrames', 'start', 'duration', 'intensity', 'seed')
     result = {k: base[k] for k in keys}
+    result.update(fusion_schema())
     def n(default, lo, hi, cn, integer=False):
         return dict(type='integer' if integer else 'number', default=default,
                     minimum=lo, maximum=hi, description={'zh-CN': cn})
@@ -29,6 +31,10 @@ def schema():
         'streaks': n(6,2,16,'衍射光谱条数',True),
         'particles': n(70,0,160,'惯性火花数量',True),
         'pulseHz': n(2.2,0,12,'光学亮度脉冲'),
+        'angleFrames':dict(type='array',minItems=1,maxItems=256,items=dict(type='object',
+            properties={'time':dict(type='number',minimum=0,maximum=3600),
+                        'angle':dict(type='number',minimum=-180,maximum=180)},
+            required=['time','angle'],additionalProperties=False),description={'zh-CN':'片段内光源方向关键点'}),
     })
     return result
 
@@ -36,6 +42,7 @@ def schema():
 def frame(params, width, height, time):
     from PIL import Image, ImageDraw, ImageFilter
     from cutvoke.rendering.mask_motion import progress
+    from cutvoke.rendering.vfx_fusion import blur_alpha
     start = float(params.get('start',0));duration = float(params.get('duration',1.7))
     q = (time-start)/duration
     out = Image.new('RGBA',(width,height))
@@ -51,6 +58,15 @@ def frame(params, width, height, time):
                'amber':[(255,130,37),(255,203,106),(255,238,197)]}[params.get('palette','cyan-gold')]
     x,y = anchor(params,time);cx,cy=x*width,y*height
     angle=math.radians(float(params.get('angle',-12)))
+    directions=params.get('angleFrames',[])
+    if directions:
+        angle=math.radians(float(directions[-1]['angle']))
+        if time <= directions[0]['time']: angle=math.radians(float(directions[0]['angle']))
+        for first,last in zip(directions,directions[1:]):
+            if first['time'] <= time <= last['time']:
+                q=(time-first['time'])/(last['time']-first['time'])
+                angle=math.radians(first['angle']+(last['angle']-first['angle'])*q)
+                break
     span=width*float(params.get('spread',.9));layer=params.get('layer','all')
     core=Image.new('RGBA',out.size);draw=ImageDraw.Draw(core)
     def stroke(points, colour, alpha, weight=1):
@@ -78,7 +94,7 @@ def frame(params, width, height, time):
         r=width*.007
         source=Image.new('L',out.size)
         ImageDraw.Draw(source).ellipse((cx-r,cy-r,cx+r,cy+r),fill=min(255,round(140*fade)))
-        source=source.filter(ImageFilter.GaussianBlur(max(1,width*.011)))
+        source=blur_alpha(source,max(1,width*.011))
         bloom=Image.new('RGBA',out.size,(230,249,255,0));bloom.putalpha(source)
         out=Image.alpha_composite(out,bloom)
     if layer in ('all','sparks'):
@@ -96,7 +112,8 @@ def frame(params, width, height, time):
             stroke([(px,py),(px-math.cos(a)*trail,py-math.sin(a)*trail)],
                    palette[i%3],220*(1-age/life)*depth,depth*1.7)
     # Blur alpha only, retaining luminous straight RGB in the transparent halo.
-    halo=core.getchannel('A').filter(ImageFilter.GaussianBlur(max(.5,width*.006)))
+    halo=blur_alpha(core.getchannel('A'),max(.5,width*.006))
     glow=Image.new('RGBA',out.size,(*palette[0],0));glow.putalpha(halo)
     out=Image.alpha_composite(out,glow)
-    return Image.alpha_composite(out,core)
+    from cutvoke.rendering.vfx_fusion import constrain
+    return constrain(Image.alpha_composite(out,core),params,time)

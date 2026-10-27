@@ -1,9 +1,14 @@
 import type { Sequence } from "../types/api";
 
 function baseSequence(sequence: Sequence) {
+  if (hasLayerGraph(sequence)) return { ...sequence, captions: [] };
   return { ...sequence, captions: [], tracks: sequence.tracks.map(track => track.kind !== "text" ? track :
     { ...track, clips: track.clips.map(clip => ({ ...clip, keyframes: {},
       effects: [{ effectId: "cutvoke.text", params: { content: "" } }] })) }) };
+}
+
+export function hasLayerGraph(sequence: Sequence): boolean {
+  return sequence.tracks.some(track => track.clips.some(clip => !!clip.compositing && Object.keys(clip.compositing).length > 0 || clip.role === "adjustment"));
 }
 
 import { tr } from "../i18n";

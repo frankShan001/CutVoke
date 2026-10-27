@@ -6,10 +6,12 @@ import importlib
 from PyInstaller.utils.hooks import collect_submodules
 
 root = Path(SPECPATH).parent.parent
+import runpy
+runpy.run_path(str(root / 'tools/build/prepare_extension_payloads.py'))['prepare'](root)
 # PyInstaller treats unavailable optional imports as warnings. These modules are
 # required for real projects (titles, masks, optical effects and image assets),
 # so reject a minimal build environment instead of shipping a broken renderer.
-runtime_modules = ['PIL.Image', 'PIL.ImageDraw', 'PIL.ImageFont', 'numpy', 'cv2', 'fontTools.ttLib', 'cryptography']
+runtime_modules = ['PIL.Image', 'PIL.ImageDraw', 'PIL.ImageFont', 'numpy', 'cv2', 'fontTools.ttLib', 'cryptography', 'moderngl', 'glcontext']
 for module in runtime_modules:
     try:
         importlib.import_module(module)
@@ -36,8 +38,9 @@ analysis = Analysis([str(root / 'apps' / 'desktop' / 'engine_entry.py')], pathex
     binaries=[(str(ffmpeg), 'bin'), (str(ffprobe), 'bin')],
     datas=[*asset_data,
            (str(root / '.artifacts' / 'web'), 'cutvoke/web'),
+           *[(str(p), 'cutvoke/assets/extension_packages') for p in (assets / 'extension_packages').glob('*') if p.suffix in {'.whl','.zip','.json','.md'}],
            *[(str(p), 'cutvoke/catalogs') for p in (root / 'src' / 'cutvoke' / 'catalogs').glob('*.json')]],
-    hiddenimports=collect_submodules('cutvoke') + runtime_modules, excludes=['tkinter', 'pytest'],
+    hiddenimports=collect_submodules('cutvoke') + collect_submodules('glcontext') + runtime_modules, excludes=['tkinter', 'pytest'],
     noarchive=False)
 pyz = PYZ(analysis.pure)
 exe = EXE(pyz, analysis.scripts, [], exclude_binaries=True, name='cutvoke-engine',

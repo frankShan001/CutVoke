@@ -8,7 +8,9 @@ if not exist ".artifacts\venv-desktop-build\Scripts\python.exe" (
   uv venv .artifacts\venv-desktop-build --python 3.12
   if errorlevel 1 goto :failed
 )
-uv pip install --python .artifacts\venv-desktop-build\Scripts\python.exe pyinstaller==6.22.3 cryptography==50.0.2 fontTools==4.66.1
+uv pip install --python .artifacts\venv-desktop-build\Scripts\python.exe --require-hashes -r apps\desktop\requirements-build.lock
+if errorlevel 1 goto :failed
+".artifacts\venv-desktop-build\Scripts\python.exe" tools\build\prepare_extension_payloads.py
 if errorlevel 1 goto :failed
 pushd apps\editor
 call npm ci

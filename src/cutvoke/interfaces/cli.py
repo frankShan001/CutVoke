@@ -57,6 +57,13 @@ def _resolve_db(args) -> str:
     raw = (getattr(args, "data", None) or os.environ.get("CUTVOKE_DATA")
            or os.path.join(DEFAULT_DATA_DIR, "projects.sqlite"))
     raw = os.path.expanduser(raw)
+    from pathlib import Path
+    from cutvoke.storage.project_directory import ENTRY, DATABASE
+    candidate = Path(raw)
+    if candidate.name == ENTRY and candidate.is_file():
+        return str(candidate.parent / DATABASE)
+    if candidate.is_dir() and (candidate / ENTRY).is_file():
+        return str(candidate / DATABASE)
     if raw.endswith((".sqlite", ".db")):
         os.makedirs(os.path.dirname(os.path.abspath(raw)), exist_ok=True)
         return raw
@@ -66,7 +73,8 @@ def _resolve_db(args) -> str:
 
 def _service_for(args) -> tuple[EditService, ProjectStore]:
     """按统一数据位置创建带持久化的服务，并恢复已保存工程。"""
-    store = ProjectStore(_resolve_db(args))
+    from cutvoke.storage.project_directory import open_project_store
+    store = open_project_store(_resolve_db(args))
     svc = EditService(store=store)
     for pid in store.list_all():
         try:
@@ -87,7 +95,8 @@ def cmd_serve(args) -> int:
     from cutvoke.interfaces.security import SessionToken
     from cutvoke.interfaces.diagnostics import JsonlLogger
     db_path = _resolve_db(args)
-    store = ProjectStore(db_path)
+    from cutvoke.storage.project_directory import open_project_store
+    store = open_project_store(db_path)
     service = EditService(store=store)
     # 启动时恢复所有已保存工程（持久化：重启后工程不丢）
     loaded = 0
@@ -351,7 +360,8 @@ def cmd_pack(args) -> int:
     from cutvoke.storage.store import ProjectStore
     from cutvoke.storage.projectpack import pack_project, ProjectPackError
     from cutvoke.rendering.effects import default_registry
-    store = ProjectStore(args.data)
+    from cutvoke.storage.project_directory import open_project_store
+    store = open_project_store(_resolve_db(args))
     try:
         project = store.load(args.project)
     except Exception as e:  # noqa: BLE001
@@ -359,6 +369,7 @@ def cmd_pack(args) -> int:
     if project is None:
         return _json_err("PROJECT_NOT_FOUND", f"工程不存在: {args.project}", 4)
     out = args.out or _os.path.abspath(f"{args.project}.cvkpkg")
+    out = EditService(store=store).output_path(args.project, args.out or "", suffix=".cvkpkg") or out
     try:
         written = pack_project(project, out, media_root=args.mediaRoot)
     except ProjectPackError as e:
@@ -389,7 +400,8 @@ def cmd_unpack(args) -> int:
         return _json_err("UNPACK_FAILED", str(e), 5)
     # 落盘到目标目录的 SQLite，便于随后直接 serve / export
     db = args.data or f"{args.dest}/projects.sqlite"
-    store = ProjectStore(db)
+    from cutvoke.storage.project_directory import open_project_store
+    store = open_project_store(db)
     store.save(project)
     _json_out({"ok": True, "projectId": project.project_id, "dest": args.dest,
                "store": db, "mediaFiles": len(mapping),
@@ -410,9 +422,11 @@ def cmd_project_create(args) -> int:
     svc, store = _service_for(args)
     proj = svc.create_project(args.project or args.name, name_hint=args.name,
                               width=args.width, height=args.height,
-                              fps=Rational.of(args.fps, 1))
+                              fps=Rational.of(args.fps, 1), directory=getattr(args, "directory", None))
     _json_out({"ok": True, "projectId": proj.project_id, "revision": proj.revision,
-               "name": proj.name, "data": _resolve_db(args)})
+               "name": proj.name, "data": _resolve_db(args),
+               "directory": str(store.directory(proj.project_id)) if hasattr(store, "directory") else None})
+    svc.close(); store.close()
     return 0
 
 
@@ -544,6 +558,11 @@ def cmd_export(args) -> int:
     out = getattr(args, "out", None)
     if not out:
         return _json_err("INVALID_ARGUMENT", "export requires --out", 2)
+    try:
+        out = svc.output_path(args.project, out)
+    except EditError as error:
+        store.close()
+        return _json_err(error.code, error.message, 2)
     if versioned:
         # V02 多版本：永不覆盖已有成片，name.mp4 → name_v2.mp4 → …
         from cutvoke.storage.export_queue import versioned_path
@@ -774,6 +793,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_create.add_argument("--height", type=int, default=1080)
     p_create.add_argument("--fps", type=int, default=30)
     p_create.add_argument("--data", help="SQLite store path（缺省 ~/.cutvoke/data/projects.sqlite）")
+    p_create.add_argument("--directory", help="new independent project folder (absolute, must not exist)")
     p_create.set_defaults(func=cmd_project_create)
     p_inspect = p_pc_sub.add_parser("inspect", help="inspect project")
     p_inspect.add_argument("--project", required=True)

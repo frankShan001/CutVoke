@@ -224,8 +224,10 @@ def test_punch_in_holds_anchor_and_returns_without_retiming(tmp_path):
         "anchorX": 33/(W-1), "anchorY": 32/(H-1), "zoom": 1.8}}]
     after = render(tmp_path, p, "punch-after")
     assert len(after) == len(before) == 48
-    assert np.mean(abs(after[:8]-before[:8])) < 1
-    assert np.mean(abs(after[44:]-before[44:])) < 1
+    # The RGB geometry branch and the direct YUV branch can differ by one
+    # quantization step after explicit BT.709 conversion and H.264 encoding.
+    assert np.mean(abs(after[:8]-before[:8])) < 2
+    assert np.mean(abs(after[44:]-before[44:])) < 2
     baseline_area = (before[22].min(axis=2) > 210).sum()
     mask = after[22].min(axis=2) > 210
     y, x = np.where(mask)
@@ -363,7 +365,8 @@ def test_transition_minimum_and_maximum_parameters_execute(pattern):
     spec = default_registry().get("cutvoke.transition."+pattern)
     for bound in ("minimum", "maximum"):
         params = {key: schema.get(bound, schema.get("default"))
-                  for key, schema in spec.parameters["properties"].items()}
+                  for key, schema in spec.parameters["properties"].items()
+                  if schema.get(bound, schema.get("default")) is not None}
         params = default_registry().validate_params(spec.id, params)
         expression = transition_expr(pattern, params, has_alpha=True)
         subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i",

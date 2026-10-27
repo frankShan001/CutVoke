@@ -56,6 +56,7 @@ from cutvoke.rendering.render import RenderService, _TRANSITION_HANDLE_STATIC_FX
 from cutvoke.rendering.preview_prepare import PreviewPreparation
 from cutvoke.rendering.editor_preview import browser_titles
 from cutvoke.storage.preview_cache import PreviewDiskCache, PreviewRenderScheduler
+from cutvoke.storage.store import RevisionConflict
 from cutvoke.storage.projectpack import (
     pack_project, unpack_project, inspect_package, ProjectPackError,
     SUPPORTED_PACKAGE_FORMAT,
@@ -78,7 +79,7 @@ from cutvoke.storage.media_uploads import (receive_upload, relative_path as medi
 
 # Bump when preview rendering changes so neither disk cache nor browser ETag can
 # treat media produced by an older renderer as current for the same project data.
-PREVIEW_RENDER_CACHE_VERSION = 30
+PREVIEW_RENDER_CACHE_VERSION = 34
 # Keep first playback and local edits bounded even on dense effect timelines.
 PREVIEW_WINDOW_SECONDS = 2
 ASSET_MEDIA_TYPES = {
@@ -98,8 +99,12 @@ class HttpApi:
                  *, logger: Optional[JsonlLogger] = None,
                  limits: Optional[Limits] = None,
                  session: Optional[SessionToken] = None,
-        media_dir: Optional[str] = None) -> None:
+        media_dir: Optional[str] = None, _directory_owner=None) -> None:
         self.service = service
+        self._directory_owner = _directory_owner
+        self._directory_apis = {}
+        self._directory_api_lock = threading.RLock()
+        self.workspace_root = getattr(service.store, "root", None)
         store_path = getattr(service.store, "path", None)
         self.media_dir = media_dir or (
             str(Path(store_path).resolve().parent / "media")
@@ -107,10 +112,10 @@ class HttpApi:
             else os.path.join(os.path.expanduser("~"), ".cutvoke", "media"))
         cleanup_uploads(self.media_dir)
         self._sticker_install_errors: dict[str, dict] = {}
-        if service.store is not None:
+        if service.store is not None and _directory_owner is None:
             self._ensure_active_stickers()
         self.render = render or RenderService()
-        if service.store is not None:
+        if service.store is not None and _directory_owner is None:
             self._ensure_builtin_backgrounds()
         # 结构化诊断日志（T31）：默认关闭（避免库导入即写用户目录），
         # 由 CLI / 服务启动时显式注入 JsonlLogger() 写入 ~/.cutvoke/logs/。
@@ -127,7 +132,7 @@ class HttpApi:
         # 预览视频缓存按“去掉可编辑字幕后的画面工程”寻址：字幕修改只更新
         # 前端叠层，不重新编码基础视频；画面/音频/效果变化才生成新缓存。
         self._preview_lock = threading.RLock()
-        self.preview_cache = PreviewDiskCache(self.media_dir)
+        self.preview_cache = PreviewDiskCache(self.media_dir, workspace_root=self.workspace_root)
         self._preview_scheduler = PreviewRenderScheduler()
         # Interactive stills must never wait for an MP4/background encode.
         self._frame_scheduler = PreviewRenderScheduler()
@@ -135,22 +140,35 @@ class HttpApi:
         self._frame_active_jobs = {}
         self._interactive_frame_jobs = {}
         self._preview_jobs_lock = threading.Lock()
+        self._prefetch_tokens: dict[str, threading.Event] = {}
         self._preview_active_jobs: dict[str, tuple[str, threading.Event]] = {}
         self._preview_active_requests: dict[str, tuple[threading.Event, int, str]] = {}
         self._preview_preparation = PreviewPreparation(
-            os.path.join(self.media_dir, ".preview-cache"), self.render,
+            self.cache_directory("preparation"), self.render,
             self._preview_window_file, self._preview_lock,
             renderer_version=PREVIEW_RENDER_CACHE_VERSION,
             window_seconds=PREVIEW_WINDOW_SECONDS, disk_cache=self.preview_cache)
         self._asr_jobs = AsrJobManager(
             str(service.store.path) if service.store else None,
             project_loader=getattr(service, "get_project", None))
-        self._person_cutout_jobs = PersonCutoutJobManager()
+        self._person_cutout_jobs = PersonCutoutJobManager(Path(self.media_dir)/'.person-cutouts'/'jobs.sqlite')
+        from cutvoke.storage.agent_inbox import AgentInbox
+        self.agent_inbox=(_directory_owner.agent_inbox if _directory_owner is not None else
+                          AgentInbox(Path(self.media_dir)/'.agent-inbox'/'requests.sqlite'))
         # V02 异步导出队列：**挂在 EditService 上**（架构矫正）。本 HttpApi 不再
         # 自持队列实例——否则会与 service 命令各持一份，导致两个后台线程重复
         # 消费任务。HttpApi 只做薄封装，转调 service._get_export_queue()，
         # 并传入 `lambda: self.render` 让队列复用本接口的 RenderService（便于
         # 测试注入假渲染器）。队列的懒创建/后台线程由 EditService.close() 收尾。
+
+    @property
+    def extension_installer(self):
+        if self._directory_owner is not None:return self._directory_owner.extension_installer
+        with self._preview_lock:
+            if getattr(self,'_extension_installer',None) is None:
+                from cutvoke.interfaces.extension_installation import ExtensionInstaller
+                self._extension_installer=ExtensionInstaller()
+            return self._extension_installer
 
     def _ensure_active_stickers(self) -> None:
         """Register active pack stickers while retaining versioned project media."""
@@ -190,14 +208,40 @@ class HttpApi:
 
     def close(self) -> None:
         """停掉异步导出队列的后台线程（复用实例 / 测试收尾时必须调用）。"""
+        for child in self._directory_apis.values():
+            child.close()
+        self._directory_apis.clear()
+        if getattr(self,'_extension_installer',None) is not None:self._extension_installer.close()
         self._preview_preparation.close()
         with self._preview_jobs_lock:
             for _identity, event in [*self._preview_active_jobs.values(),*self._frame_active_jobs.values(),*self._interactive_frame_jobs.values()]:
                 event.set()
         self._asr_jobs.close()
         self._person_cutout_jobs.close()
+        if self._directory_owner is None:self.agent_inbox.close()
         self.preview_cache.close()
         self.service.close()
+
+    def cache_directory(self, name):
+        if self.workspace_root:
+            return str(self.workspace_root / "cache" / name)
+        legacy = {"preparation": ".preview-cache", "timeline": ".timeline-media-cache", "waveform": ".waveform-cache"}
+        return str(Path(self.media_dir) / legacy.get(name, "." + name))
+
+    def project_api(self, project_id):
+        from cutvoke.storage.project_directory import ProjectLibraryStore
+        if not project_id or not isinstance(self.service.store, ProjectLibraryStore):
+            return self
+        with self._directory_api_lock:
+            store = self.service.store._target(project_id)
+            if store is None:
+                self.service.get_project(project_id)
+                return self
+            if project_id not in self._directory_apis:
+                self._directory_apis[project_id] = HttpApi(EditService(store=store), self.render,
+                    logger=self.logger, limits=self.limiter.limits, session=self.session,
+                    media_dir=str(store.root / "media"), _directory_owner=self)
+            return self._directory_apis[project_id]
 
     def _preview_media_file(self, project) -> tuple[str, str, Optional[float]]:
         """返回无字幕基础预览文件、ETag 和时长。
@@ -252,6 +296,9 @@ class HttpApi:
         time-dependent clip features fall back to full-project compilation.
         """
         seq = project.sequence
+        if any(c.compositing or c.property_links or c.motion_path or c.sequence_ref or c.role == "adjustment"
+               for t in seq.tracks for c in t.clips):
+            return None
         start_s = float(start.to_fraction())
         stop_s = float(stop.to_fraction())
         render_start_s, render_stop_s = start_s, stop_s
@@ -420,7 +467,7 @@ class HttpApi:
 
     def _preview_window_file(self, project, index: int,
                              cancel_event: Optional[threading.Event] = None,
-                             *, priority: int = 0) -> tuple[str, str, float]:
+                             *, priority: int = 0, prefetch_token: Optional[str] = None) -> tuple[str, str, float]:
         """Render/cache one playback window instead of an entire changed project."""
         if index < 0:
             raise EditError(ErrorCode.INVALID_ARGUMENT, "preview window index must be >= 0")
@@ -470,6 +517,7 @@ class HttpApi:
             if len(covering) == 1:
                 clip = covering[0]
                 if (not clip.effects and not clip.keyframes and not clip.nested and
+                        not clip.compositing and not clip.property_links and not clip.motion_path and not clip.sequence_ref and clip.role != 'adjustment' and
                         clip.speed_curve is None and
                         clip.freeze_at is None and clip.fade_in == Rational.of(0) and
                         clip.fade_out == Rational.of(0) and clip.speed > Rational.of(0)):
@@ -601,10 +649,19 @@ class HttpApi:
                 window_render_modes = render_modes_for_preview
 
         digest_sequence = digest_project.sequence
+        linked_composition = any(c.compositing or c.property_links or c.motion_path or c.sequence_ref or c.role == 'adjustment'
+                                 for t in project.sequence.tracks for c in t.clips)
         snapshot = {
             "sequence": digest_sequence.to_dict(),
             "windowRenderModes": window_render_modes,
         }
+        if linked_composition:
+            # Linked controls/mattes can sample an otherwise distant or hidden
+            # clip, and sequenceRef points outside the active timeline. Keep
+            # their authoritative dependency identity until graph-local slicing
+            # can prove which references are unused in this window.
+            from cutvoke.rendering.preview_prepare import preview_identity
+            snapshot['linkedDependencies'] = preview_identity(project, PREVIEW_RENDER_CACHE_VERSION)
         paths = {clip.asset_ref.source_path for track in digest_sequence.tracks
                  for clip in track.clips if clip.asset_ref.source_path}
         source_stats = []
@@ -642,6 +699,14 @@ class HttpApi:
         # the lock; windows with identical visual dependencies remain queued.
         # Preempt only this speculative window, never its parent whole-project
         # preparation. Parent cancellation still reaches the render immediately.
+        token_event = None
+        if prefetch_token:
+            if not re.fullmatch(r"[0-9a-f]{32}", prefetch_token):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, "invalid prefetchToken")
+            with self._preview_jobs_lock:
+                token_event = self._prefetch_tokens.setdefault(prefetch_token, threading.Event())
+                while len(self._prefetch_tokens) > 2048:
+                    self._prefetch_tokens.pop(next(iter(self._prefetch_tokens))).set()
         class WindowCancel(threading.Event):
             preempted = False
 
@@ -650,9 +715,12 @@ class HttpApi:
                 self.set()
 
             def is_set(self):
-                return super().is_set() or bool(cancel_event and cancel_event.is_set())
+                return super().is_set() or bool(cancel_event and cancel_event.is_set()) or bool(token_event and token_event.is_set())
         preview_cancel = WindowCancel() if priority > 0 else (
             cancel_event if cancel_event is not None else threading.Event())
+        export_queue = self.service._export_queue
+        if priority > 0 and export_queue is not None and export_queue.reload_status()["busy"]:
+            raise RenderCancelled("background preview yields to export")
         project_key = str(project.project_id)
         # Captions are drawn by the editor and already removed above. Metadata
         # such as project name/favorites/revision is not a visual dependency.
@@ -848,6 +916,8 @@ class HttpApi:
             return None
         path = Path(source).resolve()
         root = Path(self.media_dir).resolve()
+        if self.workspace_root and path.is_relative_to(root) and not path.is_symlink():
+            return path
         asset_id = asset.get("assetId")
         if path.parent == root and path.stem == asset_id:
             return path
@@ -859,6 +929,8 @@ class HttpApi:
 
     def _asset_media_path(self, asset: dict) -> Optional[Path]:
         """Resolve an asset ledger entry without exposing arbitrary local files."""
+        if self._directory_owner is not None and asset.get("builtin"):
+            return self._directory_owner._asset_media_path(asset)
         source = asset.get("path")
         if not isinstance(source, str) or not source:
             return None
@@ -1114,6 +1186,8 @@ class HttpApi:
             code = ("PACKAGE_FORMAT_UNSUPPORTED"
                     if "高于当前支持" in str(e) else "PACKAGE_ERROR")
             return 422, {"error": {"code": code, "message": str(e)}}
+        except (ValueError, OSError) as error:
+            return 400, {"error": {"code": "INVALID_ARGUMENT", "message": str(error)}}
         except Exception as e:  # noqa: BLE001
             return 500, {"error": {"code": "INTERNAL", "message": str(e)}}
 
@@ -1125,6 +1199,25 @@ class HttpApi:
         # 按段解码而不是解码整条路径，避免 %2F 被误当成路由分隔符。
         parts = [unquote(p) for p in path.split("/") if p]
         # parts 形如 ['api','v1','projects',...]
+        from cutvoke.interfaces.project_directories import directory_endpoint, route_project
+        try:
+            directory_result = directory_endpoint(self, method, parts, body)
+            target_api = route_project(self, method, parts, body) if directory_result is None else self
+        except RevisionConflict as error:
+            raise EditError(ErrorCode.REVISION_CONFLICT, str(error), retryable=True) from error
+        except (ValueError, OSError) as error:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(error)) from error
+        if directory_result is not None:
+            return directory_result
+        if target_api is not self:
+            return target_api.handle(method, path, body, inline_media=inline_media)
+        if (self.workspace_root and method == "POST" and body.get("outPath") and
+                len(parts) >= 5 and parts[:3] == ["api", "v1", "projects"] and
+                parts[-1] in ("export", "exports", "cover", "package", "archive")):
+            try:
+                body = {**body, "outPath": self.service.store.export_path(body["outPath"])}
+            except ValueError as error:
+                raise EditError(ErrorCode.INVALID_ARGUMENT, str(error)) from error
 
         if method == "POST" and len(parts) == 4 and parts[:3] == ["api", "v1", "agent"]:
             from cutvoke.interfaces.agent_tools import AgentTools, AGENT_TOOLS
@@ -1157,6 +1250,10 @@ class HttpApi:
             return 200, {"ok": True}
 
         if method == "GET" and parts == ["api", "v1", "settings", "preflight"]:
+            for child in list(self._directory_apis.values()):
+                child_status = child.handle(method, path, body)
+                if child_status[0] != 200:
+                    return child_status
             queue = self.service._export_queue
             busy = (self._preview_scheduler.active or self._preview_scheduler.queue or
                     self._preview_preparation.busy() or (queue and queue.reload_status()["busy"]))
@@ -1201,6 +1298,16 @@ class HttpApi:
                 return 404, {"error": {"code": "NOT_FOUND", "message": "preview job not found"}}
             except Exception as error:
                 return 422, {"error": {"code": "PREVIEW_FAILED", "message": str(error)}}
+
+        if (method == "POST" and parts[:3] == ["api", "v1", "projects"] and len(parts) == 5 and parts[4] == "preview-prefetch-cancel"):
+            token = body.get("token", "")
+            if not isinstance(token, str) or not re.fullmatch(r"[0-9a-f]{32}", token):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, "invalid prefetch cancellation token")
+            with self._preview_jobs_lock:
+                self._prefetch_tokens.setdefault(token, threading.Event()).set()
+                while len(self._prefetch_tokens) > 2048:
+                    self._prefetch_tokens.pop(next(iter(self._prefetch_tokens))).set()
+            return 200, {"cancelled": True}
 
         if (method == "POST" and parts[:3] == ["api", "v1", "projects"] and
                 len(parts) == 5 and parts[4] == "preview-jobs"):
@@ -1256,6 +1363,15 @@ class HttpApi:
 
         if method == "GET" and parts == ["api", "v1", "asr", "status"]:
             return 200, asr_availability()
+
+        if len(parts)==4 and parts[:3]==['api','v1','extensions']:
+            from cutvoke.interfaces.extension_tools import tool_specs as extension_specs,call as extension_call
+            from cutvoke.interfaces.mcp_server import MCPServer
+            name='extension_'+parts[3]
+            spec=next((value for value in extension_specs() if value['name']==name),None)
+            if spec and (method=='POST' or method=='GET' and name=='extension_status'):
+                MCPServer._validate_arguments(body,spec['inputSchema'])
+                return 200,{'ok':True,**extension_call(self,name,body)}
 
         if method == "GET" and parts == ["api", "v1", "person-cutout", "status"]:
             return 200, person_cutout_availability()
@@ -1570,7 +1686,14 @@ class HttpApi:
                 command = Command(type="edit.batch", payload={"commands": edits},
                                   project_id=project.project_id, expected_revision=project.revision)
                 project = self.service.preview_command(command, include_project=True)["project"]
-            preview = browser_titles(project)
+            composition_path = body.get("compositionPath")
+            if composition_path is not None:
+                from cutvoke.domain.essential_properties import at_path
+                try:
+                    project = at_path(project, composition_path)
+                except ValueError as error:
+                    raise EditError(ErrorCode.INVALID_ARGUMENT, str(error)) from error
+            preview = project if body.get("bakedTitles") else browser_titles(project)
             clip_id = body.get("clipId")
             if clip_id:
                 track = next((t for t in preview.sequence.tracks if
@@ -1609,7 +1732,7 @@ class HttpApi:
                     temporary = str(self.preview_cache.path(name)) + "." + uuid.uuid4().hex + ".png"
                     try:
                         result = self.render.extract_frame(preview, at, temporary, size=size,
-                                                           include_captions=False, alpha=bool(clip_id), cancel_event=cancel)
+                                                           include_captions=bool(body.get("bakedTitles")), alpha=bool(clip_id), cancel_event=cancel)
                         if result is None:
                             return 204, {}
                         if cancel.is_set():
@@ -1653,7 +1776,7 @@ class HttpApi:
             from cutvoke.rendering.timeline_media import timeline_media
             try:
                 result = timeline_media(render=self.render, clip=clip,
-                    cache_dir=Path(self.media_dir) / ".timeline-media-cache", kind=kind,
+                    cache_dir=Path(self.cache_directory("timeline")), kind=kind,
                     width=width, start=start, end=end)
                 return (200, {"__png__": Path(result).read_bytes()}) if result else (204, {})
             except RenderError as error:
@@ -1886,7 +2009,7 @@ class HttpApi:
             digest = hashlib.sha256(
                 f"{asset['assetId']}:{stat.st_size}:{stat.st_mtime_ns}:{width}".encode()
             ).hexdigest()[:24]
-            cache_dir = Path(self.media_dir) / ".waveform-cache"
+            cache_dir = Path(self.cache_directory("waveform"))
             cache_dir.mkdir(parents=True, exist_ok=True)
             output = cache_dir / f"{digest}.png"
             if not output.is_file():
@@ -1957,6 +2080,7 @@ class HttpApi:
             name_hint = body.get("name", "")
             proj = self.service.create_project(
                 pid, name_hint=name_hint, width=width, height=height, fps=fps,
+                directory=body.get("directory"),
             )
             return 201, proj.to_dict()
 
@@ -2076,10 +2200,27 @@ class HttpApi:
                                            "message": str(exc)}}
                 return 202, job
 
+            if len(parts)>=5 and parts[4]=='agent-requests':
+                project=self.service.get_project(pid)
+                if method=='GET' and len(parts)==5:
+                    return 200,{'requests':self.agent_inbox.list(pid),'connection':self.agent_inbox.connections(pid)}
+                if method=='POST' and len(parts)==5:
+                    if body.get('kind')=='matting.review':
+                        job=self._person_cutout_jobs.get(body.get('jobId'))
+                        if not job or job['projectId']!=pid or job['clipId']!=body.get('clipId') or job['status'] not in {'completed','applied'}:
+                            raise EditError(ErrorCode.INVALID_ARGUMENT,'review requires a completed matting job for this project and selected clip')
+                    return 201,{'request':self.agent_inbox.create(project,body),'connection':self.agent_inbox.connections(pid)}
+                if method=='POST' and len(parts)==7 and parts[6]=='cancel':
+                    return 200,self.agent_inbox.act(project,{'operation':'cancel','requestId':parts[5]})
+
             if (method == "POST" and len(parts) == 7 and
                     parts[4] == "person-cutout-jobs" and parts[6] == "apply"):
                 job_id = parts[5]
-                job = self._person_cutout_jobs.claim_apply(job_id, pid)
+                apply_id=body.get('commandId') or f'person_cutout_apply_{job_id}'
+                existing=self._person_cutout_jobs.get(job_id)
+                if existing and existing['projectId']==pid and existing['status']=='applied' and existing.get('applyCommandId')==apply_id and existing.get('applyReceipt'):
+                    return 200,{'job':existing,'command':existing['applyReceipt'],'idempotent':True}
+                job = self._person_cutout_jobs.claim_apply(job_id, pid,apply_id)
                 if job is None:
                     return 409, {"error": {"code": "PERSON_CUTOUT_NOT_READY",
                                            "message": "抠像任务不存在、尚未完成或属于其他工程"}}
@@ -2104,15 +2245,16 @@ class HttpApi:
                     command = self._make_command(pid, {
                         "type": "asset.swap",
                         "payload": {"clipIds": [clip.id], "sourcePath": str(output)},
-                        "expectedRevision": project.revision,
-                        "commandId": f"person_cutout_apply_{job_id}",
-                        "actor": {"kind": "human", "id": "person-cutout"},
+                        "expectedRevision": body.get('expectedRevision',project.revision),
+                        "commandId": body.get('commandId') or f"person_cutout_apply_{job_id}",
+                        "actor": body.get('actor') or {"kind": "human", "id": "person-cutout"},
+                        **({'editLeaseId':body['editLeaseId']} if body.get('editLeaseId') else {}),
                     })
                     applied = self.service.execute(command)
                 except Exception as exc:
                     self._person_cutout_jobs.finish_apply(job_id, error=str(exc))
                     raise
-                finished = self._person_cutout_jobs.finish_apply(job_id)
+                finished = self._person_cutout_jobs.finish_apply(job_id,receipt=applied.to_dict())
                 return 200, {"job": finished, "command": applied.to_dict()}
 
             # 重命名工程（仅 name）：缺失返回 404；非法 name 返回 400。
@@ -2153,13 +2295,7 @@ class HttpApi:
 
             if method == "POST" and len(parts) == 6 \
                     and parts[4] == "edit-lock" and parts[5] == "release":
-                released = self.service.release_edit_lease(
-                    pid, body.get("leaseId", ""))
-                # released=false 既可能是“别人的租约仍存在”，也可能只是本租约
-                # 已过期。必须回读真实状态，不能把失败释放一律报告成仍被锁定。
-                lease = self.service.get_edit_lease(pid)
-                return 200, {"locked": lease is not None,
-                             "lease": lease, "released": released}
+                return 200, self.service.release_edit_lease_status(pid, body.get('leaseId', ''))
 
             if method == "GET" and len(parts) == 4:
                 proj = self.service.get_project(pid)
@@ -2365,6 +2501,8 @@ class HttpApi:
                     # 缺省：写到 media_dir 的上级目录（同级），命名 {projectId}.cutvokepack.zip
                     out = os.path.join(os.path.dirname(self.media_dir),
                                        f"{pid}.cutvokepack.zip")
+                    if self.workspace_root:
+                        out = self.service.store.export_path("", suffix=".cvkpkg")
                 out = os.path.abspath(out)
                 dest = pack_project(proj, out)
                 # 统计片段数 / 去重素材数（来自工程当前状态，不重复读包）。
@@ -2673,7 +2811,8 @@ class HttpApi:
                     if body.get("editorTitles") == "1":
                         proj = browser_titles(proj)
                     path, etag, duration = self._preview_window_file(
-                        proj, index, priority=10 if body.get("prefetch") == "1" else 0)
+                        proj, index, priority=10 if body.get("prefetch") == "1" else 0,
+                        prefetch_token=body.get("prefetchToken") if body.get("prefetch") == "1" else None)
                     result = {"__video_path__": path, "__video_etag__": etag,
                               "duration": duration,
                               "windowStart": index * PREVIEW_WINDOW_SECONDS}
@@ -3078,7 +3217,7 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                         "q", "appliesTo", "favoritesOnly", "recentOnly", "rev",
                         "entityType", "entityId", "textContains", "atSeconds", "compareClipId",
                         "fromSeconds", "toSeconds", "fields", "limit", "index", "editorTitles",
-                        "token", "kind", "from", "to", "trackId", "time"):
+                        "token", "kind", "from", "to", "trackId", "time", "projectId"):
                 if key in qs:
                     body[key] = qs[key][0]
             # Like built Web files, these two public font assets need no session
@@ -3096,7 +3235,12 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                 return
             # 工程预览媒体：可播放 mp4（含音频）
             if isinstance(data, dict) and "__video_path__" in data:
-                with api.preview_cache.pin(data["__video_path__"]):
+                cache = api.preview_cache
+                for child in list(api._directory_apis.values()):
+                    if Path(data["__video_path__"]).is_relative_to(child.preview_cache.directory):
+                        cache = child.preview_cache
+                        break
+                with cache.pin(data["__video_path__"]):
                     self._respond_video_file(data["__video_path__"],
                                              data.get("__video_etag__", ""))
                 return
@@ -3149,6 +3293,28 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                       and path_parts[4] == "relink")
             if parsed.path in ("/api/v1/assets", "/api/v1/luts") or relink:
                 qs = parse_qs(parsed.query)
+                try:
+                    target_api = api.project_api((qs.get("projectId") or [None])[0])
+                    if relink and target_api is api:
+                        from cutvoke.interfaces.project_directories import route_project
+                        target_api = route_project(api, "POST", path_parts, {})
+                except (ValueError, OSError, EditError) as error:
+                    # A small body may already be in flight when folder lookup
+                    # rejects the request. Drain it before closing HTTP/1.0;
+                    # unread bytes can otherwise reset the socket on Windows
+                    # and hide the useful error from the browser.
+                    previous_timeout = self.connection.gettimeout()
+                    try:
+                        length = int(self.headers.get("Content-Length", "0"))
+                        if 0 < length <= 64 * 1024:
+                            self.connection.settimeout(1)
+                            self.rfile.read(length)
+                    except (ValueError, OSError):
+                        pass
+                    finally:
+                        self.connection.settimeout(previous_timeout)
+                    self._respond(400, {"error": {"code": "PROJECT_DIRECTORY_UNAVAILABLE", "message": str(error)}})
+                    return
                 fname = (qs.get("name") or [""])[0].strip()
                 if not fname:
                     self._respond(400, {"error": {"code": "INVALID_ARGUMENT",
@@ -3172,7 +3338,7 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                 if parsed.path == "/api/v1/luts":
                     raw = self.rfile.read(length)
                     try:
-                        self._respond(201, api.import_lut(fname, raw))
+                        self._respond(201, target_api.import_lut(fname, raw))
                     except CubeInvalid as error:
                         self._respond(400, {"error": {"code": "INVALID_LUT",
                                                       "message": str(error)}})
@@ -3187,14 +3353,14 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                 try:
                     self.connection.settimeout(api.limiter.limits.request_timeout_seconds)
                     relative = media_relative_path((qs.get("relativePath") or [fname])[0])
-                    with receive_upload(self.rfile, length, api.media_dir, fname) as staged:
+                    with receive_upload(self.rfile, length, target_api.media_dir, fname) as staged:
                         if relink:
-                            status, result = api.relink_asset_file(path_parts[3], fname, staged,
+                            status, result = target_api.relink_asset_file(path_parts[3], fname, staged,
                                 verify_identity=(qs.get("verifyIdentity") or [""])[0] == "1",
                                 confirm_legacy=(qs.get("confirmLegacy") or [""])[0] == "1")
                             self._respond(status, result)
                         else:
-                            self._respond(201, api.import_asset_file(fname, staged, relative_path=relative))
+                            self._respond(201, target_api.import_asset_file(fname, staged, relative_path=relative))
                 except UploadError as error:
                     self._respond(error.status, {"error": {"code": error.code, "message": str(error)}})
                 except (ConnectionError, TimeoutError):
@@ -3211,6 +3377,9 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             except GovernanceError as e:
                 self._respond(413, {"error": {"code": e.code, "message": str(e)}})
                 return
+            project_id = parse_qs(parsed.query).get("projectId", [None])[0]
+            if project_id and isinstance(body, dict):
+                body.setdefault("projectId", project_id)
             status, data = api.handle("POST", parsed.path, body)
             if isinstance(data, dict) and "__audio__" in data:
                 self._respond_bytes(status, data["__audio__"], "audio/mp4")
@@ -3231,6 +3400,9 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             except GovernanceError as e:
                 self._respond(413, {"error": {"code": e.code, "message": str(e)}})
                 return
+            project_id = parse_qs(parsed.query).get("projectId", [None])[0]
+            if project_id and isinstance(body, dict):
+                body.setdefault("projectId", project_id)
             status, data = api.handle("PATCH", parsed.path, body)
             self._respond(status, data)
 

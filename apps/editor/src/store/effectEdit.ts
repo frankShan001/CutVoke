@@ -29,7 +29,7 @@ export async function addEffectToClip(
 export async function removeEffectFromClip(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { clipId: string; effectId: string },
+  input: { clipId: string; effectId: string; instanceId?: string },
 ): Promise<ActionResult> {
   return removeEffect(dispatch, state, input);
 }
@@ -38,12 +38,13 @@ export async function removeEffectFromClip(
 export async function bypassEffect(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { clipId: string; effectId: string; enabled: boolean },
+  input: { clipId: string; effectId: string; instanceId?: string; enabled: boolean },
 ): Promise<ActionResult> {
   const res = await runCommand(dispatch, state, "effect.bypass", {
     clipId: input.clipId,
     effectId: input.effectId,
     enabled: input.enabled,
+    ...(input.instanceId ? { instanceId: input.instanceId } : {}),
   });
   if (res.ok) {
     dispatch({
@@ -59,12 +60,13 @@ export async function bypassEffect(
 export async function reorderEffect(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { clipId: string; effectId: string; toIndex: number },
+  input: { clipId: string; effectId: string; instanceId?: string; toIndex: number },
 ): Promise<ActionResult> {
   const res = await runCommand(dispatch, state, "effect.reorder", {
     clipId: input.clipId,
     effectId: input.effectId,
     toIndex: input.toIndex,
+    ...(input.instanceId ? { instanceId: input.instanceId } : {}),
   });
   if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已调整效果顺序") });
   return res;
@@ -80,6 +82,8 @@ export async function updateEffect(
     clipId: string;
     effectId: string;
     effectIndex?: number;
+    instanceId?: string;
+    replaceParams?: boolean;
     params?: Record<string, unknown>;
     range?: EffectInstance["range"];
   },
@@ -89,7 +93,9 @@ export async function updateEffect(
     effectId: input.effectId,
   };
   if (input.effectIndex !== undefined) payload.effectIndex = input.effectIndex;
-  if (input.params && Object.keys(input.params).length) payload.params = input.params;
+  if (input.instanceId) payload.instanceId = input.instanceId;
+  if (input.params && (Object.keys(input.params).length || input.replaceParams)) payload.params = input.params;
+  if (input.replaceParams) payload.replaceParams = true;
   if (input.range) payload.range = input.range;
   const res = await runCommand(dispatch, state, "effect.update", payload);
   if (res.ok) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已更新效果") });

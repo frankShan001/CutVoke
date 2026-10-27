@@ -27,7 +27,7 @@ from typing import Optional
 from cutvoke.domain.model import Project
 
 # 当前模块支持的包格式版本。包格式比此值新 → 明确拒绝（见 check_compatibility）。
-SUPPORTED_PACKAGE_FORMAT = 2
+SUPPORTED_PACKAGE_FORMAT = 3
 
 # 生成工具版本（与 pyproject.toml 的 version 保持一致；不引入 import 以避免
 # 在未安装环境下解析失败）。
@@ -138,6 +138,13 @@ def _collect_lut_paths(project: Project) -> list[str]:
     return list(paths)
 
 
+def _collect_texture_paths(project):
+    from cutvoke.domain.effect_files import effect_file_paths
+    return list(dict.fromkeys(path for sequence in _project_sequences(project)
+        for track in sequence.tracks for clip in track.clips for effect in clip.effects
+        for path,kind in effect_file_paths(effect) if kind=='texture'))
+
+
 def _resolve_media_source(ref, media_root: Optional[str]) -> Path:
     """根据 AssetReference 定位源素材文件。
 
@@ -212,6 +219,7 @@ def pack_project(project: Project, dest_pkg_path: str, *,
 
     refs = _collect_asset_refs(project)
     lut_paths = _collect_lut_paths(project)
+    texture_paths = _collect_texture_paths(project)
 
     # 第一阶段：定位 + 流式算 sha256 / 大小（只读源，不动源）。
     # 按源路径去重；按 sha256 去重素材副本（同内容只存一份）。
@@ -249,8 +257,17 @@ def pack_project(project: Project, dest_pkg_path: str, *,
                             "size": size, "sha256": sha_hex})
         pkg_to_src.setdefault(pkg_path, src)
 
+    effect_entries=[]
+    for source_path in texture_paths:
+        src=Path(source_path)
+        if not src.is_file() and media_root is not None:src=Path(media_root)/source_path
+        if not src.is_file():raise ProjectPackError(f'材质图片缺失：{source_path}')
+        digest,size=_sha256_stream(src);pkg_path=f'media/{digest}{src.suffix}'
+        effect_entries.append({'originalPath':source_path,'packagePath':pkg_path,'sha256':digest,'size':size,'resourceKind':'texture'})
+        pkg_to_src.setdefault(pkg_path,src)
+
     manifest = {
-        "packageFormat": 2 if lut_entries else 1,
+        "packageFormat": 3 if effect_entries else 2 if lut_entries else 1,
         "projectId": project.project_id,
         "schemaVersion": project.schema_version,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
@@ -258,6 +275,7 @@ def pack_project(project: Project, dest_pkg_path: str, *,
         "assets": asset_entries,
         "luts": lut_entries,
     }
+    if effect_entries:manifest['effectFiles']=effect_entries
 
     # 第二阶段：写入 zip。manifest / project 用 writestr；素材流式写入。
     # 素材按 pkg_path 去重，每个 pkg_path 仅流式写入一次（大文件不进内存）。
@@ -427,7 +445,7 @@ def unpack_project(pkg_path: str, dest_dir: str, *,
 
         # 素材落地 + 流式校验 sha256。
         entries_by_pkg: dict[str, list[dict]] = {}
-        for entry in [*manifest.get("assets", []), *manifest.get("luts", [])]:
+        for entry in [*manifest.get("assets", []), *manifest.get("luts", []), *manifest.get('effectFiles',[])]:
             entries_by_pkg.setdefault(entry["packagePath"], []).append(entry)
         media_dir = dest / "media"
         media_dir.mkdir(parents=True, exist_ok=True)
@@ -481,17 +499,18 @@ def unpack_project(pkg_path: str, dest_dir: str, *,
                         )
                     else:
                         ref.source_path = new_path
+
+        # Effects on source-free adjustment/3D layers need the same relocation
+        # as effects on ordinary clips. Never gate this on AssetReference.
+        from cutvoke.domain.effect_files import effect_file_paths
+        from cutvoke.storage.workspace_paths import replace_paths,path_key
+        normalized={path_key(old):new for old,new in mapping.items()}
+        for sequence in _project_sequences(project):
+            for track in sequence.tracks:
+                for clip in track.clips:
                     for effect in clip.effects:
-                        if effect.get("effectId") != "cutvoke.fx.lut":
-                            continue
-                        params = effect.get("params") or {}
-                        old_lut = params.get("file")
-                        if not old_lut:
-                            continue
-                        new_lut = mapping.get(old_lut)
-                        if new_lut is None:
-                            warnings.append(f"自定义 LUT 解包后缺失：{old_lut}")
-                        else:
-                            params["file"] = new_lut
+                        for path,kind in effect_file_paths(effect):
+                            if path not in mapping:warnings.append(('自定义 LUT' if kind=='lut' else '材质图片')+f'解包后缺失：{path}')
+                        if effect.get('params'):effect['params'],_=replace_paths(effect['params'],normalized)
 
     return project, mapping, warnings

@@ -66,6 +66,11 @@ export function MediaPanel() {
   const [assetLoading, setAssetLoading] = useState(true);
   const [assetLoadError, setAssetLoadError] = useState("");
   const [assetLoadAttempt, setAssetLoadAttempt] = useState(0);
+  useEffect(() => {
+    const refresh = () => setAssetLoadAttempt(value => value + 1);
+    window.addEventListener("cutvoke-project-media-refresh", refresh);
+    return () => window.removeEventListener("cutvoke-project-media-refresh", refresh);
+  }, []);
   const [importProgress, setImportProgress] = useState<{
     completed: number; total: number; name: string; succeeded: number; failed: number; done: boolean;
     loaded: number; totalBytes: number; cancelled?: boolean;
@@ -196,7 +201,7 @@ export function MediaPanel() {
     return () => {
       cancelled = true;
     };
-  }, [assetLoadAttempt]);
+  }, [assetLoadAttempt, state.currentId]);
 
   useEffect(() => {
     let cancelled = false;

@@ -50,15 +50,25 @@ class MCPServer:
         busy = exports["busy"]
         previews = []
         if self._agent_api is not None:
-            api = self._agent_api.api
-            preparation = api._preview_preparation
-            busy = busy or preparation.busy()
-            # ASR/cutout cancellation can precede their thread's actual exit.
-            for manager in (api._asr_jobs, api._person_cutout_jobs):
-                with manager._lock:
-                    busy = busy or any(thread.is_alive() for thread in manager._threads.values())
-            with preparation._lock:
-                previews = list(preparation._jobs)
+            root = self._agent_api.api
+            for api in [root, *list(root._directory_apis.values())]:
+                preparation = api._preview_preparation
+                busy = busy or preparation.busy()
+                queue = api.service._export_queue
+                if queue and queue is not self.service._export_queue:
+                    child_exports = queue.reload_status()
+                    busy = busy or child_exports["busy"]
+                    exports["jobIds"].extend(child_exports["jobIds"])
+                # Cancellation can precede the worker thread's actual exit.
+                for manager in (api._asr_jobs, api._person_cutout_jobs):
+                    with manager._lock:
+                        busy = busy or any(thread.is_alive() for thread in manager._threads.values())
+                installer=getattr(api,'_extension_installer',None)
+                if installer is not None:
+                    with installer._lock:
+                        busy=busy or any(thread.is_alive() for thread in installer._threads.values())
+                with preparation._lock:
+                    previews.extend(preparation._jobs)
         return {"runtime": self.runtime_info, "busy": busy,
                 "exportJobs": exports["jobIds"], "previewJobs": previews}
 
@@ -99,6 +109,7 @@ class MCPServer:
                     "properties": {
                         "projectId": {"type": "string", "description": "可选，工程 ID（缺省自动生成）"},
                         "name": {"type": "string", "description": "工程名称"},
+                        "directory": {"type": "string", "description": "可选的新工程独立目录，必须为尚不存在的绝对路径"},
                         "width": {"type": "integer", "minimum": 1, "default": 1920},
                         "height": {"type": "integer", "minimum": 1, "default": 1080},
                         "fps": {"type": "number", "exclusiveMinimum": 0, "default": 30},
@@ -291,7 +302,10 @@ class MCPServer:
                     MCPServer._validate_arguments(child, schema["additionalProperties"], f"{path}.{key}")
         elif expected == "array" and "items" in schema:
             if len(value) < schema.get("minItems", 0) or len(value) > schema.get("maxItems", math.inf):
-                raise ValueError(f"{path} has invalid item count")
+                maximum = schema.get('maxItems')
+                detail = (f"maximum {maximum}; received {len(value)}. Split into batches of at most {maximum}."
+                          if maximum is not None and len(value) > maximum else f"minimum {schema.get('minItems', 0)}; received {len(value)}.")
+                raise ValueError(f"{path} has invalid item count: {detail}")
             for index, child in enumerate(value):
                 MCPServer._validate_arguments(child, schema["items"], f"{path}[{index}]")
         elif expected == "string":
@@ -320,7 +334,7 @@ class MCPServer:
             status = runtime_status(self.runtime_info)
             readable = {'runtime', 'project_list', 'project_query', 'project_summary',
                         'project_lookup', 'project_events', 'preview_job', 'export_job',
-                        'preview_cache_status'}
+                        'preview_cache_status','local_matting_job','extension_status','extension_job'}
             releasing = name == 'edit_lock' and arguments.get('action') == 'release'
             cancelling = (self._managed and name == 'command_apply' and
                           arguments.get('type') == 'export.cancel')
@@ -359,7 +373,7 @@ class MCPServer:
                 return {"ok": True, **status}
             if name == "preview_cache_status":
                 from cutvoke.storage.preview_cache import PreviewDiskCache
-                cache = PreviewDiskCache(str(self._media_directory()))
+                cache = PreviewDiskCache(str(self._media_directory()), workspace_root=getattr(self.service.store, "root", None))
                 try:
                     return {"ok": True, **cache.status()}
                 finally:
@@ -389,7 +403,7 @@ class MCPServer:
         fps = Rational.of(30000, 1001) if fps_raw == 29.97 else Rational.of(value.numerator, value.denominator)
         proj = self.service.create_project(pid, width=a.get("width", 1920),
                                            height=a.get("height", 1080), fps=fps,
-                                           name_hint=a.get("name", ""))
+                                           name_hint=a.get("name", ""), directory=a.get("directory"))
         return {"ok": True, "projectId": proj.project_id, "revision": proj.revision,
                 "width": proj.sequence.width, "height": proj.sequence.height,
                 "fps": proj.sequence.fps.to_json()}
@@ -453,8 +467,7 @@ class MCPServer:
                 pid, lease_id, a.get("ttlSeconds", 30))
             return {"ok": True, "locked": True, "lease": lease}
         if action == "release":
-            released = self.service.release_edit_lease(pid, lease_id)
-            return {"ok": True, "locked": not released, "released": released}
+            return {"ok": True, **self.service.release_edit_lease_status(pid, lease_id)}
         raise EditError(ErrorCode.INVALID_ARGUMENT,
                         f"unknown edit_lock action: {action}")
 
@@ -462,7 +475,8 @@ class MCPServer:
         proj = self.service.get_project(a["projectId"])
         if a.get("expectedRevision") is not None and a["expectedRevision"] != proj.revision:
             raise EditError(ErrorCode.REVISION_CONFLICT, f"current revision {proj.revision}", retryable=True)
-        r = self.render.render(proj, a["outPath"], quality=a.get("quality", "high"), overwrite=a.get("overwrite", False))
+        output = self.service.output_path(a["projectId"], a["outPath"])
+        r = self.render.render(proj, output, quality=a.get("quality", "high"), overwrite=a.get("overwrite", False))
         return {"ok": True, **r}
 
     def _effects_list(self, a: dict) -> dict:
@@ -540,11 +554,17 @@ class MCPServer:
                     # This worker receives no new editing/preview requests after
                     # handoff. Its submitted previews retain their snapshots
                     # while newer revisions are edited in the fresh worker.
-                    self._agent_api.api._preserve_preview_snapshots = True
+                    root = self._agent_api.api
+                    for api in [root, *list(root._directory_apis.values())]:
+                        api._preserve_preview_snapshots = True
                 result = {}
             elif method == '_cutvoke/snapshot':
-                result = {"previews": (self._agent_api.api._preview_preparation.reload_snapshot()
-                                       if self._agent_api else [])}
+                previews = []
+                if self._agent_api:
+                    root = self._agent_api.api
+                    for api in [root, *list(root._directory_apis.values())]:
+                        previews.extend(api._preview_preparation.reload_snapshot())
+                result = {"previews": previews}
             elif method == '_cutvoke/restore':
                 self._agent_tools().api._preview_preparation.reload_restore(msg.get('params', {}).get('previews', []))
                 result = {}

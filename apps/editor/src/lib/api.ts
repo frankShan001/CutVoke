@@ -174,11 +174,13 @@ export async function createProject(input: {
   projectId?: string;
   /** 人类可读工程名（可选）。后端 name_hint 会持久化为工程名。 */
   name?: string;
+  directory?: string;
 }): Promise<CreateProjectResult> {
   return post<CreateProjectResult>("/projects", input);
 }
 
 const projectCache = new Map<string, { token: string; project: Project }>();
+export function invalidateProject(projectId: string): void { projectCache.delete(projectId); }
 let syncSupported = true;
 
 /** Conditional, compact project sync, with compatibility for older local services. */

@@ -40,7 +40,7 @@ MOTION_SCHEMA = {"type": "object", "properties": {
     "param": {"type": "string", "enum": list(MOTION_BOUNDS)},
     "at": {"type": "number", "minimum": 0, "maximum": 1},
     "value": {"type": "number"},
-    "interpolation": {"type": "string", "enum": ["linear", "ease-in", "ease-out"]}},
+    "interpolation": {"type": "string", "enum": ["linear", "ease-in", "ease-out", "hold"]}},
     "required": ["param", "at", "value"], "additionalProperties": False}
 RECIPE_SCHEMA = {"type": "object", "properties": {
     "effects": {"type": "array", "maxItems": 8, "items": {
@@ -81,6 +81,9 @@ def _safe_schema(schema, key=""):
     if kind == "object":
         return (schema.get("additionalProperties") is False
                 and all(_safe_schema(child, name) for name, child in schema.get("properties", {}).items()))
+    if kind == "array":
+        return (type(schema.get("maxItems")) is int and 0 <= schema["maxItems"] <= 256
+                and _safe_schema(schema.get("items", {})))
     # Arbitrary arrays, expressions, paths, text and resource references are not shareable.
     return False
 
@@ -111,6 +114,10 @@ def _safe_value(value, schema, key=""):
         props = schema.get("properties", {})
         _object(value, props, schema.get("required", ()))
         return {name: _safe_value(item, props[name], name) for name, item in value.items()}
+    elif kind == "array":
+        if not _safe_schema(schema) or not isinstance(value, list) or not schema.get("minItems", 0) <= len(value) <= schema['maxItems']:
+            raise ValueError("Effect module has an invalid bounded parameter array")
+        return [_safe_value(item, schema['items']) for item in value]
     else:
         raise ValueError("Unsupported effect module parameter type")
     return value
@@ -124,7 +131,7 @@ class EffectModuleLibrary:
 
     def supported(self):
         return {spec.id: spec for spec in self.builtins.all()
-                if spec.id != "cutvoke.text" and not spec.dependencies and _safe_schema(spec.parameters)}
+                if spec.id not in {"cutvoke.text", "cutvoke.fx.trackedMask", "cutvoke.fx.scene3d"} and not spec.dependencies and _safe_schema(spec.parameters)}
 
     def schemas(self):
         from cutvoke.editing.command_schema import normalize_schema
@@ -158,7 +165,13 @@ class EffectModuleLibrary:
             if slot:
                 seen_slots.add(slot)
             params = _safe_value(effect.get("params", {}), spec.parameters)
+            supplied = set(params)
             params = self.builtins.validate_params(eid, params)
+            if eid == 'cutvoke.transition.lumaReveal':
+                # New neutral defaults must not change v1 recipe hashes or ZIPs.
+                for key in ('spatialBlur', 'temporalFrames', 'dissolveMix'):
+                    if key not in supplied:
+                        params.pop(key, None)
             # Validate again after defaults: defaults cannot introduce content either.
             params = _safe_value(params, spec.parameters)
             result["effects"].append({"effectId": eid, "params": params})
@@ -174,7 +187,7 @@ class EffectModuleLibrary:
             at = _number(frame["at"], 0, 1)
             value = _number(frame["value"], *MOTION_BOUNDS[param])
             interpolation = frame.get("interpolation", "linear")
-            if interpolation not in ("linear", "ease-in", "ease-out"):
+            if interpolation not in ("linear", "ease-in", "ease-out", "hold"):
                 raise ValueError("Unsupported interpolation")
             if (param, at) in seen_frames:
                 raise ValueError("Duplicate normalized keyframe")

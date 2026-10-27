@@ -26,7 +26,8 @@ export function evaluateKeyframes(
     if (!Number.isFinite(leftValue) || !Number.isFinite(rightValue)) return fallback;
     if (rightTime <= leftTime) return rightValue;
     let progress = Math.max(0, Math.min(1, (localTime - leftTime) / (rightTime - leftTime)));
-    if (left.interpolation === "ease-in") progress *= progress;
+    if (left.interpolation === 'hold') progress = progress >= 1 ? 1 : 0;
+    else if (left.interpolation === "ease-in") progress *= progress;
     else if (left.interpolation === "ease-out") progress = 1 - (1 - progress) ** 2;
     else if (left.interpolation === "cubic-bezier" && left.bezier) {
       const [x1,y1,x2,y2] = left.bezier;
@@ -42,4 +43,15 @@ export function evaluateKeyframes(
   }
   const last = valueAt(sorted.length - 1);
   return Number.isFinite(last) ? last : fallback;
+}
+
+/** Scalar rate of change, sampled within its own segment; hold jumps have no finite velocity. */
+export function keyframeVelocity(keyframes: readonly Keyframe[], time: number, fallback: number): number {
+  const lane=[...keyframes].sort((a,b)=>rationalToSecs(a.time)-rationalToSecs(b.time));
+  const left=lane.findIndex((frame,i)=>i<lane.length-1 && time>=rationalToSecs(frame.time) && time<rationalToSecs(lane[i+1].time));
+  if(left<0 || lane[left].interpolation==='hold') return 0;
+  const start=rationalToSecs(lane[left].time), end=rationalToSecs(lane[left+1].time);
+  const epsilon=Math.max(1e-7,(end-start)*1e-4);
+  const a=Math.max(start,time-epsilon), b=Math.min(end,time+epsilon);
+  return b>a ? (evaluateKeyframes(lane,b,fallback)-evaluateKeyframes(lane,a,fallback))/(b-a) : 0;
 }

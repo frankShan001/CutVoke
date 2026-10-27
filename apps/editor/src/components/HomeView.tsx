@@ -9,6 +9,8 @@ import { Plus, FolderOpen, Pencil, Check, X, RefreshCw, PackageOpen, LayoutTempl
 import { useEditor, showError } from "../store/editor";
 import { createProject, loadProjects, renameProject, selectProject } from "../store/actions";
 import { openPackage } from "../lib/api";
+import { invalidateProject } from "../lib/api";
+import { openProjectDirectory } from "../lib/projectDirectories";
 import { CacheSettings } from "./CacheSettings";
 import { LanguageSelect } from "./LanguageSelect";
 
@@ -47,6 +49,9 @@ export function HomeView() {
   useLocale();
   const { state, dispatch } = useEditor();
   const [name, setName] = useState("");
+  const [directory, setDirectory] = useState("");
+  const [openDirectory, setOpenDirectory] = useState("");
+  const [directoryBusy, setDirectoryBusy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
@@ -72,6 +77,7 @@ export function HomeView() {
     const pid = await createProject(dispatch, {
       projectId: trimmed || undefined,
       name: trimmed || undefined,
+      directory: directory.trim() || undefined,
       width: DEFAULT_W,
       height: DEFAULT_H,
       fps: DEFAULT_FPS,
@@ -79,6 +85,7 @@ export function HomeView() {
     setBusy(false);
     if (pid) {
       setName("");
+      setDirectory("");
       dispatch({ type: "PROJECT_NAME_SET", name: trimmed || unnamedLabel(new Date().toISOString()) });
       dispatch({ type: "VIEW_SET", view: "editor" });
     }
@@ -103,6 +110,19 @@ export function HomeView() {
     } finally {
       setPackBusy(false);
     }
+  };
+
+  const handleOpenDirectory = async () => {
+    if (!openDirectory.trim()) return;
+    setDirectoryBusy(true);
+    try {
+      const result = await openProjectDirectory(openDirectory.trim());
+      invalidateProject(result.projectId);
+      await loadProjects(dispatch);
+      enterEditor(result.projectId, result.name || result.projectId);
+      setOpenDirectory("");
+    } catch (error) { showError(dispatch, error); }
+    finally { setDirectoryBusy(false); }
   };
 
   const startRename = (id: string, current: string) => {
@@ -158,7 +178,23 @@ export function HomeView() {
           >
             <LayoutTemplate size={14} />{tr("从模板新建")}</button>
         </div>
-        <p className="cv-hint">{tr("名称留空时由后端分配 ID，可稍后重命名；或选一个模板快速搭好结构。")}</p>
+        <input className="cv-input" style={{ marginTop: 8, width: "100%" }} value={directory} disabled={busy}
+          onChange={event => setDirectory(event.target.value)} aria-label={tr("新工程目录")}
+          placeholder={tr("新工程目录（留空使用默认位置，请填写尚不存在的目录）")} />
+        <p className="cv-hint">{tr("每个新工程独立保存素材、工程数据、缓存和导出。")}</p>
+      </section>
+
+      <section className="home__create" aria-label={tr("打开工程目录")}>
+        <div className="home__create-row">
+          <input className="cv-input" value={openDirectory} disabled={directoryBusy}
+            onChange={event => setOpenDirectory(event.target.value)}
+            onKeyDown={event => { if (event.key === "Enter") void handleOpenDirectory(); }}
+            aria-label={tr("工程目录路径")} placeholder={tr("工程目录或 project.cutvoke 文件路径")} />
+          {window.cutvokeDesktop && <button className="cv-btn cv-btn--md" disabled={directoryBusy}
+            onClick={async () => { const path = await window.cutvokeDesktop?.chooseProjectDirectory(); if (path) setOpenDirectory(path); }}>{tr("浏览")}</button>}
+          <button className="cv-btn cv-btn--md" disabled={directoryBusy || !openDirectory.trim()} onClick={() => void handleOpenDirectory()}>
+            <FolderOpen size={14} />{tr("打开工程目录")}</button>
+        </div>
       </section>
 
       <section className="home__create" aria-label={tr("打开资源包")}>

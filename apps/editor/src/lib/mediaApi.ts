@@ -1,4 +1,5 @@
 import { tr } from "../i18n";
+import { projectMediaUrl } from "./projectScope";
 /** 媒体相关 API：单帧预览 / 素材探测 / 文件导入资产。
     全部走同源相对路径，与后端 httpapi.py 对齐。 */
 
@@ -113,7 +114,7 @@ export async function listBuiltinStickers(): Promise<BuiltinSticker[]> {
  */
 export async function listAssets(): Promise<ListAssetsOutcome> {
   try {
-    const res = await fetch("/api/v1/assets", {
+    const res = await fetch(projectMediaUrl("/api/v1/assets"), {
       method: "GET",
       headers: { Accept: "application/json" },
     });
@@ -137,16 +138,16 @@ export type ImportOutcome = { kind: "ok"; data: ImportedAsset } | { kind: "error
 
 /** 素材缩略图 URL（D02）：GET /api/v1/assets/{id}/thumbnail?w=。 */
 export function assetThumbnailUrl(assetId: string, w = 320): string {
-  return `/api/v1/assets/${encodeURIComponent(assetId)}/thumbnail?w=${w}`;
+  return projectMediaUrl(`/api/v1/assets/${encodeURIComponent(assetId)}/thumbnail?w=${w}`);
 }
 
 /** Asset media uses the local ledger; transparent sticker PNGs keep their alpha here. */
 export function assetMediaUrl(assetId: string): string {
-  return `/api/v1/assets/${encodeURIComponent(assetId)}/media`;
+  return projectMediaUrl(`/api/v1/assets/${encodeURIComponent(assetId)}/media`);
 }
 
 export function assetWaveformUrl(assetId: string, w = 640): string {
-  return `/api/v1/assets/${encodeURIComponent(assetId)}/waveform?w=${w}`;
+  return projectMediaUrl(`/api/v1/assets/${encodeURIComponent(assetId)}/waveform?w=${w}`);
 }
 
 export async function relinkAsset(assetId: string, file: File, options: UploadOptions & { verifyIdentity?: boolean; confirmLegacy?: boolean } = {}): Promise<
@@ -168,7 +169,7 @@ export async function updateAssetAudioRole(assetId: string, audioRole: AudioRole
   { kind: "ok"; data: ServerAsset } | { kind: "error"; message: string }
 > {
   try {
-    const response = await fetch(`/api/v1/assets/${encodeURIComponent(assetId)}`, {
+    const response = await fetch(projectMediaUrl(`/api/v1/assets/${encodeURIComponent(assetId)}`), {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ audioRole }),
@@ -190,6 +191,7 @@ export async function updateAssetAudioRole(assetId: string, audioRole: AudioRole
  * path 为服务端落盘绝对路径（前端不持久化绝对路径，仅会话内引用 assetId/path）。
  */
 export interface UploadOptions {
+  projectId?: string | null;
   signal?: AbortSignal;
   onProgress?: (loaded: number, total: number) => void;
 }
@@ -199,7 +201,7 @@ export function uploadFileBytes(url: string, file: File, options: UploadOptions 
     const request = new XMLHttpRequest();
     const abort = () => request.abort();
     const clean = () => options.signal?.removeEventListener("abort", abort);
-    request.open("POST", url);
+    request.open("POST", projectMediaUrl(url, options.projectId));
     request.setRequestHeader("Content-Type", "application/octet-stream");
     request.upload.onprogress = event => options.onProgress?.(event.loaded, event.lengthComputable ? event.total : file.size);
     request.onload = () => {
@@ -225,7 +227,7 @@ export interface RelinkMatch {
   candidates: RelinkCandidate[];
 }
 export async function scanRelinkFiles(files: File[]): Promise<RelinkMatch[]> {
-  const response = await fetch("/api/v1/assets/relink/scan", { method: "POST", headers: { "Content-Type": "application/json" },
+  const response = await fetch(projectMediaUrl("/api/v1/assets/relink/scan"), { method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ files: files.map((file, index) => ({ fileId: String(index), name: file.name,
       relativePath: file.webkitRelativePath || file.name, size: file.size })) }) });
   const data = await response.json();

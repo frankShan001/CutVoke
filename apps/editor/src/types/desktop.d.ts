@@ -23,6 +23,8 @@ declare global {
       settings(): Promise<DesktopSettings>;
       saveSettings(value: { projectDirectory: string; cacheDirectory: string; maxBytes: number; gpuAcceleration?: boolean }): Promise<{ restartRequired: boolean }>;
       chooseProjectDirectory(): Promise<string | null>;
+      chooseExtensionDirectory(): Promise<string | null>;
+      chooseExtensionBundle(): Promise<string | null>;
       chooseExportFile(suggested: string): Promise<string | null>;
       revealExport(projectId: string, jobId: string): Promise<void>;
     };

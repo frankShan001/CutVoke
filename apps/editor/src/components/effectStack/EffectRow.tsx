@@ -4,6 +4,7 @@ import { ChevronUp, ChevronDown, Layers, Trash2 } from "lucide-react";
 import { effectLabel, type EffectSpec } from "../../lib/effects";
 import { paramsSummary } from "../../lib/effectControls";
 import type { EffectInstance } from "../../types/api";
+import { EffectCompositingControls } from "./EffectCompositingControls";
 
 export function EffectRow({
   effect,
@@ -14,6 +15,8 @@ export function EffectRow({
   onMove,
   onBypass,
   onRemove,
+  onEdit,
+  onReset,
 }: {
   effect: EffectInstance;
   index: number;
@@ -23,6 +26,8 @@ export function EffectRow({
   onMove: (dir: -1 | 1) => void;
   onBypass: () => void;
   onRemove: () => void;
+  onEdit: () => void;
+  onReset: () => void;
 }) {
   useLocale();
   const id = String(effect.effectId);
@@ -32,7 +37,7 @@ export function EffectRow({
   const summary = spec ? paramsSummary(spec, effect.params) : "";
 
   return (
-    <div className={`effect-row${!enabled ? " effect-row--bypassed" : ""}`}>
+    <div className={`effect-row${!enabled ? " effect-row--bypassed" : ""}`} data-effect-instance-id={effect.instanceId || `legacy_${index}`}>
       <div className="effect-row__head">
         <span className="effect-row__idx">{index + 1}</span>
         <span className="effect-row__name" title={id}>
@@ -45,7 +50,10 @@ export function EffectRow({
         </span>
       </div>
       {summary ? <div className="effect-row__params">{summary}</div> : null}
+      <EffectCompositingControls effect={effect} disabled={busy} />
       <div className="effect-row__actions">
+        <button className="effect-row__btn effect-row__btn--text" disabled={busy} onClick={onEdit}>{tr('编辑参数')}</button>
+        <button className="effect-row__btn effect-row__btn--text" disabled={busy} onClick={onReset} title={tr('恢复静态参数；关键帧保留')}>{tr('重置参数')}</button>
         <button
           type="button"
           className="effect-row__btn"

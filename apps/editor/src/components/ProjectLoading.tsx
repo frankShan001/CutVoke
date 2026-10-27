@@ -6,6 +6,7 @@ import { refreshProject } from "../store/actions";
 import { ApiFailure } from "../lib/api";
 import { previewContentKey, previewRequest, type PreviewJob } from "../lib/previewPreparation";
 import { fetchPreviewFrame } from "../lib/mediaApi";
+import { usePreviewBudget } from "../lib/previewBudget";
 
 const pause = (signal: AbortSignal) => new Promise<void>((resolve, reject) => {
   const abort = () => { clearTimeout(timer); reject(new DOMException("Cancelled", "AbortError")); };
@@ -15,6 +16,7 @@ const pause = (signal: AbortSignal) => new Promise<void>((resolve, reject) => {
 });
 
 export function useProjectPreparation() {
+  const budget = usePreviewBudget();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const [retry, setRetry] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -54,10 +56,12 @@ export function useProjectPreparation() {
     const controller = new AbortController();
     const { signal } = controller;
     let jobId: string | undefined;
+    let budgetTimer = 0;
     let enteredEditor = !initialOpening;
     const cancelPreparation = () => {
       controller.abort();
       clearTimeout(decodeTimerRef.current);
+      clearTimeout(budgetTimer);
       if (jobId) void previewRequest(`preview-jobs/${jobId}/cancel`, undefined, {}).catch(() => {});
     };
     setError(null); setJob(null); setProgress(0); setPhase("checking");
@@ -93,14 +97,22 @@ export function useProjectPreparation() {
       dispatch({ type: "PROJECT_OPEN_READY", projectId });
     }).catch(() => { /* The window preparation below reports actionable errors. */ });
     void (async () => {
+      if (!budget.enabled || !budget.continuous || budget.range?.projectId === projectId) {
+        if (initialOpening) dispatch({ type: "PROJECT_OPEN_READY", projectId });
+        return;
+      }
       // A visual edit invalidates continuous playback too. Rebuild after a short
       // idle interval instead of leaving edited complex projects on short
       // windows forever; subsequent edits cancel this immutable request.
-      if (!initialOpening) for (let tick = 0; tick < 4; tick++) await pause(signal);
+      if (!initialOpening) for (let tick = 0; tick < Math.ceil(budget.delayMs / 250); tick++) await pause(signal);
       if (signal.aborted) return;
       let current = await previewRequest<PreviewJob>(
         `projects/${encodeURIComponent(projectId)}/preview-jobs`, undefined, { revision: project.revision, editorTitles: true });
       jobId = current.jobId;
+      budgetTimer = window.setTimeout(() => {
+        if (initialOpening) dispatch({ type: "PROJECT_OPEN_READY", projectId });
+        cancelPreparation();
+      }, budget.wallSeconds * 1000);
       while (true) {
         if (signal.aborted) return;
         setJob(current); setPhase(current.phase); setProgress(Math.floor(current.progress * 0.9));
@@ -137,6 +149,7 @@ export function useProjectPreparation() {
         else dispatch({ type: "STATUS_SET", severity: "warn", text: message });
       }
     }).finally(() => {
+      clearTimeout(budgetTimer);
       // Let submission return its ID even after navigation so cancellation owns the right job.
       if (signal.aborted && jobId) void previewRequest(`preview-jobs/${jobId}/cancel`, undefined, {}).catch(() => {});
     });
@@ -148,7 +161,7 @@ export function useProjectPreparation() {
     // Opening ends when the first frame/window is ready. Keep this worker/poll alive
     // until the continuous preview completes; navigation or a visual edit owns
     // cancellation. An opening-state change alone must not cancel the job.
-  }, [state.currentId, state.view, contentKey, retry, dispatch]);
+  }, [state.currentId, state.view, contentKey, retry, dispatch, budget]);
 
   return {
     progress: state.project ? progress : 0,

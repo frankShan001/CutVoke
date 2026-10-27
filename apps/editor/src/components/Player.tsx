@@ -13,6 +13,7 @@ import { useEditor } from "../store/editor";
 import { getLatestState, runCommand } from "../store/actions";
 import { splitClip } from "../store/clipEdit";
 import { TitleCanvasOverlay } from "./TitleCanvasOverlay";
+import { hasLayerGraph } from "../lib/previewPreparation";
 import { CaptionCanvasOverlay } from "./CaptionCanvasOverlay";
 import { MaskCanvasOverlay } from "./MaskCanvasOverlay";
 import { CropCanvasOverlay } from "./CropCanvasOverlay";
@@ -937,7 +938,7 @@ export function Player() {
           <MaskCanvasOverlay />
           <StickerCanvasOverlay />
           <CropCanvasOverlay />
-          <TitleCanvasOverlay />
+          {state.project && !hasLayerGraph(state.project.sequence) ? <TitleCanvasOverlay /> : null}
           <CaptionCanvasOverlay />
           {showTitleSafeArea && currentId ? (
             <svg className="player__title-safe-area" viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}

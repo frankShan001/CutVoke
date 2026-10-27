@@ -43,6 +43,8 @@ def project_preflight(project: Project, *, output_range: tuple[float, float] | N
     def walk(seq: Sequence, parent_required: bool = True,
              window: tuple[float, float] | None = None) -> None:
         nonlocal clip_count, active_clip_count
+        from cutvoke.domain.compositing import matte_source_ids
+        matte_dependencies = matte_source_ids(seq, window)
         camera = (seq.multicam or {}).get("activeTrackId")
         for track in seq.tracks:
             picture_active = (track.kind == "video" and track.visible
@@ -82,23 +84,28 @@ def project_preflight(project: Project, *, output_range: tuple[float, float] | N
                 in_window = (window is None or (end > window[0] and start < window[1])
                              or clip.id in transition_neighbors)
                 text_active = track.kind == 'text' and track.visible
-                required = (parent_required and not clip.hidden and in_window
-                            and (picture_active or audio_active or text_active))
+                required = parent_required and (clip.id in matte_dependencies or
+                            (not clip.hidden and in_window and (picture_active or audio_active or text_active)))
                 if required and text_active:
                     active_clip_count += 1
                 reference = {"clipId": clip.id, "trackId": track.id,
                              "assetId": clip.asset_ref.asset_id, "required": required}
                 for effect in clip.effects:
-                    if (effect.get("effectId") == "cutvoke.fx.lut"
-                            and effect.get("enabled", True) is not False):
-                        path = (effect.get("params") or {}).get("file")
-                        if path:
-                            dependency(path, "lut", {**reference,
-                                "required": required and picture_active})
-                if clip.nested is not None:
+                    if effect.get("enabled", True) is not False:
+                        from cutvoke.domain.effect_files import effect_file_paths
+                        for path,kind in effect_file_paths(effect):
+                            dependency(path, kind, {**reference,
+                                "required": required and (picture_active or clip.id in matte_dependencies)})
+                if clip.nested is not None or clip.sequence_ref:
                     # The renderer resolves child offsets/speed. Conservatively
                     # check every child dependency when this parent is used.
-                    walk(clip.nested, required)
+                    child = clip.nested or next((item for item in project.sequences if item.id == clip.sequence_ref), None)
+                    if child is not None and not any(error["code"] == "INVALID_PROJECT" for error in errors):
+                        walk(child, required)
+                    continue
+                if clip.role == "adjustment":
+                    if required:
+                        active_clip_count += 1
                     continue
                 if track.kind in ("video", "audio"):
                     if required:

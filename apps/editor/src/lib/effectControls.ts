@@ -20,6 +20,12 @@ export interface ParamControl {
 }
 
 const PARAM_LABELS: Record<string, string> = {
+  get time() { return tr('关键帧时间（秒）'); },
+  get at() { return tr('进度'); },
+  get value() { return tr('数值'); },
+  get width() { return tr('宽度'); },
+  get height() { return tr('高度'); },
+  get feather() { return tr('羽化'); },
   get duration() { return tr("时长"); },
   get easing() { return tr("缓动"); },
   get sigma() { return tr("强度"); },

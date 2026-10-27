@@ -1,4 +1,5 @@
 import { tr } from "../i18n";
+import { projectMediaUrl } from "./projectScope";
 /** Import a 3D .cube LUT into CutVoke's managed local media directory. */
 
 export interface ImportedLut {
@@ -22,7 +23,7 @@ export async function uploadLut(file: File): Promise<
   }
   try {
     const query = new URLSearchParams({ name: file.name });
-    const response = await fetch(`/api/v1/luts?${query}`, {
+    const response = await fetch(projectMediaUrl(`/api/v1/luts?${query}`), {
       method: "POST",
       headers: { "Content-Type": "application/octet-stream" },
       body: file,

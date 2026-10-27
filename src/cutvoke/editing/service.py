@@ -285,6 +285,12 @@ _BATCH_EDIT_COMMANDS = frozenset({
     "effect.add", "effect.remove", "effect.update", "effect.copyVisual", "effect.setAnimation",
     "effect.setTransition", "effect.bypass", "effectModule.apply",
     "effect.reorder",
+    "effect.composite", "clip.composite", "composition.adjustment",
+    "composition.instance", "composition.expose", "composition.override", "composition.edit",
+    "clip.bind",
+    "clip.motionPath",
+    "effect.replace",
+    "composition.scene3d", "scene3d.import",
     "caption.add", "caption.bulkAdd", "caption.update", "caption.patch", "caption.remove",
     "caption.batchStyle", "caption.shift", "caption.splitByWords",
     "marker.add", "marker.remove",
@@ -294,6 +300,7 @@ _BATCH_MAX_COMMANDS = 32
 # Dry-run must not export, cancel jobs, download models, or write processed
 # media. Only these nonmutating handlers are read-only in the whole system.
 _PREVIEWABLE_READONLY_COMMANDS = frozenset({"project.preflight", "template.list"})
+_NONMUTATING_COMMANDS = _NONMUTATING_COMMANDS | {"composition.profile", "media.trackMask"}
 
 
 def _split_text_units(text: str, unit: str) -> list[str]:
@@ -459,6 +466,10 @@ class EditService:
         }
         from cutvoke.editing.audio_commands import register as register_audio_commands
         register_audio_commands(self)
+        from cutvoke.editing.composition_commands import register as register_composition_commands
+        register_composition_commands(self)
+        from cutvoke.editing.essential_commands import register as register_essential_commands
+        register_essential_commands(self)
 
     def _probe_source_duration(self, source_path: str) -> Optional[Rational]:
         """返回视频/音频真实时长；静态图片或无法探测时返回 None。
@@ -801,12 +812,13 @@ class EditService:
             "description": "通用参数关键帧与时间曲线；局部呈现时间，支持保存撤销与预览导出。",
             "params": [
                 {"name": "clipId", "description": "片段 ID", "required": True},
-                {"name": "action", "description": "add/batch/remove/update/retime；retime 用 keyframeIds/offset/timeScale/anchor", "required": False},
+                {"name": "action", "description": "add/batch/remove/update/retime/interpolate；retime 用 keyframeIds/offset/timeScale/anchor；interpolate 用 param/keyframeIds/interpolation/bezier，原子修改所选节点插值", "required": False},
                 {"name": "param", "description": "opacity/x/y/scale/rotation/volume 或 effect:<instanceId>:brightness/contrast/saturation/sigma；先读取效果实例", "required": False},
                 {"name": "time", "description": "关键帧时刻（片段局部时间，{num,den} 或秒数）", "required": False},
                 {"name": "value", "description": "关键帧值（add 时必填）", "required": False},
-                {"name": "interpolation", "description": "linear/ease-in/ease-out/cubic-bezier；后者同时提供bezier四数控点（各0..1）", "required": False},
+                {"name": "interpolation", "description": "linear/ease-in/ease-out/hold/cubic-bezier；后者同时提供bezier四数控点（各0..1）", "required": False},
                 {"name": "keyframeId", "description": "要删除的关键帧 ID（remove 时必填）", "required": False},
+                {"name": "keyframeIds", "description": "retime/interpolate 的不同节点 ID，1..1000 个；interpolate 必须位于同一 param 通道", "required": False},
             ],
         },
         "clip.group": {
@@ -843,7 +855,8 @@ class EditService:
             "description": "移除片段上的某效果实例。",
             "params": [
                 {"name": "clipId", "description": "片段 ID", "required": True},
-                {"name": "effectId", "description": "效果 ID", "required": True},
+                {"name": "effectId", "description": "效果类型 ID；不传 instanceId 时批量删除该类型", "required": False},
+                {"name": "instanceId", "description": "精确效果实例 ID，与 effectId 至少提供一个", "required": False},
             ],
         },
         "effect.copyVisual": {
@@ -962,8 +975,10 @@ class EditService:
             "description": "更新片段上效果实例参数（部分合并，按注册表校验，走撤销/持久化）。",
             "params": [
                 {"name": "clipId", "description": "片段 ID", "required": True},
-                {"name": "effectId", "description": "效果 ID", "required": True},
+                {"name": "effectId", "description": "效果类型 ID；缺省更新首个匹配实例", "required": False},
+                {"name": "instanceId", "description": "精确更新指定实例，与 effectId 至少提供一个", "required": False},
                 {"name": "params", "description": "要合并的参数对象（非空；新键覆盖、旧键保留）", "required": True},
+                {"name": "replaceParams", "description": "默认 false；true 完整替换参数，移除省略的可选几何；params={} 恢复静态默认值，保留关键帧", "required": False},
             ],
         },
         "effect.setAnimation": {
@@ -1032,7 +1047,8 @@ class EditService:
             "description": "旁路/恢复片段上的效果（保留在效果栈中，只是不参与渲染）。",
             "params": [
                 {"name": "clipId", "description": "片段 ID", "required": True},
-                {"name": "effectId", "description": "效果 ID", "required": True},
+                {"name": "effectId", "description": "效果类型 ID；不传 instanceId 时批量旁路该类型", "required": False},
+                {"name": "instanceId", "description": "精确效果实例 ID，与 effectId 至少提供一个", "required": False},
                 {"name": "enabled", "description": "true=启用，false=旁路（默认 true）", "required": False},
             ],
         },
@@ -1041,6 +1057,8 @@ class EditService:
             "params": [
                 {"name": "clipId", "description": "片段 ID", "required": True},
                 {"name": "effectId", "description": "要移动的效果 ID（与 order 二选一）", "required": False},
+                {"name": "instanceId", "description": "精确移动指定实例", "required": False},
+                {"name": "instanceOrder", "description": "实例 ID 顺序；未列出的实例保留在末尾", "required": False},
                 {"name": "toIndex", "description": "目标位置下标（与 effectId 搭配）", "required": False},
                 {"name": "order", "description": "整体顺序（effectId 数组，优先于 effectId）", "required": False},
             ],
@@ -1432,7 +1450,7 @@ class EditService:
     # ---- 工程生命周期 ----
     def create_project(self, project_id: str, name_hint: str = "",
                        width: int = 1920, height: int = 1080,
-                       fps: Rational = Rational.of(30, 1)) -> Project:
+                       fps: Rational = Rational.of(30, 1), directory: Optional[str] = None) -> Project:
         if project_id in self._projects:
             raise EditError(ErrorCode.INVALID_ARGUMENT, f"project exists: {project_id}")
         seq = Sequence(id=f"{project_id}_seq", width=width, height=height, fps=fps)
@@ -1444,7 +1462,13 @@ class EditService:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 f"project exists in store: {project_id}")
             try:
-                self._store.commit(proj)  # 原子创建
+                if directory:
+                    from cutvoke.storage.project_directory import ProjectLibraryStore
+                    if not isinstance(self._store, ProjectLibraryStore):
+                        raise EditError(ErrorCode.INVALID_ARGUMENT, "请从工程库创建独立目录")
+                    self._store.create_in_directory(proj, directory)
+                else:
+                    self._store.commit(proj)  # 原子创建
             except RevisionConflict as e:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 f"project already created elsewhere: {e}",
@@ -1764,6 +1788,21 @@ class EditService:
                             "edit lease is missing or expired", retryable=True)
         return lease
 
+    def release_edit_lease_status(self, project_id: str, lease_id: str) -> dict:
+        self.get_project(project_id)
+        if self._store is not None:
+            return self._store.release_edit_lease_status(project_id=project_id, lease_id=lease_id)
+        current = self._edit_leases.get(project_id)
+        if current is None:
+            return {'status':'not-held','released':False,'locked':False,'lease':None}
+        if current['expiresAt'] <= time.time():
+            self._edit_leases.pop(project_id, None)
+            return {'status':'expired','released':False,'locked':False,'lease':None}
+        if current['leaseId'] != lease_id:
+            return {'status':'not-owner','released':False,'locked':True,'lease':current}
+        self._edit_leases.pop(project_id, None)
+        return {'status':'released','released':True,'locked':False,'lease':None}
+
     def release_edit_lease(self, project_id: str, lease_id: str) -> bool:
         self.get_project(project_id)
         if self._store is not None:
@@ -1994,6 +2033,16 @@ class EditService:
     # ------------------------------------------------------------------
     # 非改工程命令：导出封面 / 音频分析（J09/J10 真实工具）
     # ------------------------------------------------------------------
+    def output_path(self, project_id: str, value: str, *, suffix=".mp4") -> str:
+        from cutvoke.storage.project_directory import ProjectLibraryStore, DirectoryProjectStore
+        store = self._store
+        if isinstance(store, ProjectLibraryStore):
+            store = store._target(project_id)
+        try:
+            return store.export_path(value, suffix=suffix) if isinstance(store, DirectoryProjectStore) else value
+        except ValueError as error:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, str(error)) from error
+
     def export_cover(self, project_id: str, out_path: str, *,
                      t: float = 0.0, width: Optional[int] = None) -> dict:
         """抽取工程在时刻 t 的一帧作为封面（PNG/JPEG），可选按 width 等比缩放。
@@ -2005,7 +2054,7 @@ class EditService:
 
         proj = self.get_project(project_id)
         ts = 0.0 if t is None else float(t)
-        out_abs = os.path.abspath(out_path)
+        out_abs = os.path.abspath(self.output_path(project_id, out_path, suffix=".png"))
         out_dir = os.path.dirname(out_abs) or "."
         os.makedirs(out_dir, exist_ok=True)
 
@@ -2077,16 +2126,20 @@ class EditService:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             f"unknown command type: {command.type}")
         try:
+            command_payload = dict(command.payload)
+            for key in ("outPath", "outDir"):
+                if command_payload.get(key):
+                    command_payload[key] = self.output_path(command.project_id, command_payload[key])
             if command.type in ("audio.analyze", "caption.autoSegment",
                                 "audio.splitSentences", "audio.denoise",
                                 "audio.vocalEnhance", "audio.normalize", "audio.separate",
                                 # J12：模板清单只读目录，不需要工程
                                 "template.list", "media.trackPoint"):
                 # 分析/切分/音频处理本身不依赖工程
-                payload = handler(None, command.payload)
+                payload = handler(None, command_payload)
             else:  # export.cover 需要工程
                 proj = self.get_project(command.project_id)
-                payload = handler(proj, command.payload)
+                payload = handler(proj, command_payload)
         except EditError:
             raise
         except Exception as e:
@@ -2658,7 +2711,7 @@ class EditService:
         if asset and not source_path and track.kind != "text" and self._store is not None:
             if not isinstance(asset, str):
                 raise EditError(ErrorCode.INVALID_ARGUMENT, "assetId must be a string")
-            registered = self._store.get_asset(asset)
+            registered = self._store.get_project_asset(proj.project_id, asset)
             if registered is None:
                 raise EditError(ErrorCode.INVALID_ARGUMENT, f"asset not found: {asset}")
             source_path = registered["path"]
@@ -3576,7 +3629,7 @@ class EditService:
                 ErrorCode.INVALID_ARGUMENT,
                 "asset.swap requires 'sourcePath' or 'assetId'")
         if not source_path:
-            asset = self._store.get_asset(asset_id) if self._store is not None else None
+            asset = self._store.get_project_asset(proj.project_id, asset_id) if self._store is not None else None
             if asset is not None:
                 source_path = asset.get("path")
             else:
@@ -4224,7 +4277,27 @@ class EditService:
         action = p.get("action", "add")
         clip = self._clip_by_id(proj, clip_id)
 
-        def parse_add(item: dict) -> tuple[str, Rational, float, str]:
+        if action == 'interpolate':
+            selected = p.get('keyframeIds')
+            if (not isinstance(selected,list) or not selected or len(selected)>1000
+                    or any(not isinstance(value,str) for value in selected) or len(set(selected))!=len(selected)):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, 'interpolate requires distinct keyframeIds (maximum 1000)')
+            interpolation = p.get('interpolation')
+            if interpolation not in Keyframe.VALID_INTERP:
+                raise EditError(ErrorCode.INVALID_ARGUMENT, 'invalid keyframe interpolation')
+            try:
+                controls = validate_bezier(p.get('bezier')) if interpolation == 'cubic-bezier' else None
+            except ValueError as error:
+                raise EditError(ErrorCode.INVALID_ARGUMENT, str(error)) from error
+            lane = clip.keyframes.get(param, [])
+            matched = [key for key in lane if key.id in selected]
+            if len(matched)!=len(selected):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, 'keyframe not found in the selected parameter')
+            for key in matched:
+                key.interpolation,key.bezier = interpolation,controls
+            return [{'type':'clip','id':clip_id,'change':'updated','count':len(matched)}]
+
+        def parse_add(item: dict) -> tuple[str, Rational, float, str, tuple[float, float, float, float] | None]:
             key_param = item.get("param", "")
             if not key_param:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
@@ -4419,6 +4492,7 @@ class EditService:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             "export.enqueue requires 'outPath'")
         queue_payload = dict(p)
+        queue_payload["outPath"] = self.output_path(proj.project_id, out_path)
         if p.get("sequenceId") is not None:
             from cutvoke.editing.sequence_tools import select
             proj = select(proj, p["sequenceId"])
@@ -4494,7 +4568,7 @@ class EditService:
         return [{"type": "template_list", "templates": items,
                  "count": len(items), "skipped": skipped}]
 
-    def _resolve_template_source(self, value: str) -> dict:
+    def _resolve_template_source(self, value: str, project_id: str = "") -> dict:
         """把 sources 里的一项解析成 {assetId, sourcePath}。
 
         绝对路径优先（存在即用）；否则当作 assetId 查素材账本。
@@ -4510,7 +4584,7 @@ class EditService:
         if self._store is None:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             f"无持久层，无法按 assetId 解析模板素材: {val}")
-        asset = self._store.get_asset(val)
+        asset = self._store.get_project_asset(project_id, val)
         if asset is None:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             f"未知素材 assetId: {val}")
@@ -4566,7 +4640,7 @@ class EditService:
                 raise EditError(
                     ErrorCode.INVALID_ARGUMENT,
                     f"sources[{key}] 必须是非空字符串（assetId 或绝对路径）")
-            resolved[str(key)] = self._resolve_template_source(val)
+            resolved[str(key)] = self._resolve_template_source(val, proj.project_id)
 
         clear = bool(p.get("clearExisting", False))
         if clear:
@@ -5115,39 +5189,50 @@ class EditService:
                         for item in clip.effects):
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             f"{slot}动画已存在；请用 effect.setAnimation 替换该动画槽位")
-        clip.effects.append({"effectId": effect_id, "version": version, "instanceId": new_id("fx"),
+        instance_id = new_id("fx")
+        clip.effects.append({"effectId": effect_id, "version": version, "instanceId": instance_id,
                              "params": params})
         # J01 最近使用：把该效果提到最近列表最前（去重，上限 24）
         rec = [e for e in proj.recent_effects if e != effect_id]
         proj.recent_effects = [effect_id] + rec
         del proj.recent_effects[24:]
         return [{"type": "clip", "id": clip_id, "change": "updated",
-                 "effectId": effect_id}]
+                "effectId": effect_id, "instanceId": instance_id}]
 
     def _h_effect_remove(self, proj: Project, p: dict) -> list[dict]:
-        """移除片段上的效果（按 effectId 删该片段全部实例）。
+        """按 instanceId 精确移除；只传 effectId 时保留按类型批量删除。
 
         payload: {clipId, effectId}
         移除转场 = 该片段回到与前一相邻片段直接拼接（无转场）。
         """
-        clip_id = p["clipId"]
-        effect_id = p["effectId"]
-        for track in proj.sequence.tracks:
-            for clip in track.clips:
-                if clip.id == clip_id:
-                    before = len(clip.effects)
-                    removed_instances = {effect_instance_id(e,index) for index,e in enumerate(clip.effects)
-                                         if e.get("effectId") == effect_id}
-                    clip.effects = [e for e in clip.effects
-                                    if e.get("effectId") != effect_id]
-                    clip.keyframes = {name: lane for name,lane in clip.keyframes.items()
-                                      if not (name.startswith("effect:") and name.split(":")[1] in removed_instances)}
-                    if len(clip.effects) == before:
-                        raise EditError(
-                            ErrorCode.INVALID_ARGUMENT,
-                            f"effect {effect_id} not found on clip {clip_id}")
-                    return [{"type": "clip", "id": clip_id, "change": "updated"}]
-        raise EditError(ErrorCode.INVALID_ARGUMENT, f"clip not found: {clip_id}")
+        clip = self._clip_by_id(proj, p['clipId'])
+        matches = self._effect_targets(clip, p)
+        removed_instances = {effect['instanceId'] for _index, effect in matches}
+        clip.effects = [effect for effect in clip.effects if effect['instanceId'] not in removed_instances]
+        clip.keyframes = {name: lane for name,lane in clip.keyframes.items()
+                          if not (name.startswith('effect:') and name.split(':')[1] in removed_instances)}
+        return [{"type": "clip", "id": clip.id, "change": "updated",
+                 "removedInstanceIds": sorted(removed_instances)}]
+
+    @staticmethod
+    def _effect_targets(clip, payload):
+        used = {effect['instanceId'] for effect in clip.effects if effect.get('instanceId')}
+        for index, effect in enumerate(clip.effects):
+            if not effect.get('instanceId'):
+                instance = effect_instance_id(effect, index)
+                effect['instanceId'] = instance if instance not in used else new_id('fx')
+                used.add(effect['instanceId'])
+        instance, effect_id = payload.get('instanceId'), payload.get('effectId')
+        if not instance and not effect_id:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, 'provide instanceId or effectId')
+        matches = [(index, effect) for index, effect in enumerate(clip.effects)
+                   if (not instance or effect['instanceId'] == instance)
+                   and (not effect_id or effect.get('effectId') == effect_id)]
+        if not matches:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, f'effect {instance or effect_id} not found on clip {clip.id}')
+        if instance and len(matches) != 1:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, 'duplicate effect instanceId; repair the effect stack first')
+        return matches
 
     def _h_effect_copy_visual(self, proj: Project, p: dict) -> list[dict]:
         """Copy a source clip's visual effect stack to many targets atomically.
@@ -5299,18 +5384,13 @@ class EditService:
         满足计划 6「用户能重排、旁路、复用，不会出现暗中覆盖」。
         """
         clip = self._clip_by_id(proj, p["clipId"])
-        eid = p["effectId"]
         enabled = bool(p.get("enabled", True))
-        hit = 0
-        for e in clip.effects:
-            if e.get("effectId") == eid:
-                e["enabled"] = enabled
-                hit += 1
-        if not hit:
-            raise EditError(ErrorCode.INVALID_ARGUMENT,
-                            f"effect {eid} not found on clip {clip.id}")
+        matches = self._effect_targets(clip, p)
+        for _index, effect in matches:
+            effect['enabled'] = enabled
         return [{"type": "clip", "id": clip.id, "change": "effect.bypass",
-                 "effectId": eid, "enabled": enabled, "count": hit}]
+                 "effectId": p.get('effectId'), "instanceIds": [e['instanceId'] for _,e in matches],
+                 "enabled": enabled, "count": len(matches)}]
 
     def _h_effect_reorder(self, proj: Project, p: dict) -> list[dict]:
         """重排效果栈：{clipId, effectId, toIndex} 或 {clipId, order:[effectId,...]}。
@@ -5318,6 +5398,17 @@ class EditService:
         列表顺序即渲染合成顺序（靠前先应用）。
         """
         clip = self._clip_by_id(proj, p["clipId"])
+        if clip.effects:
+            self._effect_targets(clip, {'effectId':clip.effects[0]['effectId']})
+        if p.get('instanceOrder') is not None:
+            order = p['instanceOrder']
+            if not isinstance(order, list) or not order or len(set(order)) != len(order):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, 'instanceOrder requires unique instance IDs')
+            by_id = {effect['instanceId']: effect for effect in clip.effects}
+            if any(identity not in by_id for identity in order):
+                raise EditError(ErrorCode.INVALID_ARGUMENT, 'instanceOrder contains an unknown instanceId')
+            clip.effects = [by_id[identity] for identity in order] + [e for e in clip.effects if e['instanceId'] not in order]
+            return [{'type':'clip','id':clip.id,'change':'effect.reorder','instanceOrder':[e['instanceId'] for e in clip.effects]}]
         order = p.get("order")
         if isinstance(order, list) and order:
             head: list[dict] = []
@@ -5328,15 +5419,7 @@ class EditService:
             rest = [e for e in clip.effects if not any(h is e for h in head)]
             clip.effects = head + rest
         else:
-            eid = p.get("effectId")
-            if not eid:
-                raise EditError(ErrorCode.INVALID_ARGUMENT,
-                                "effect.reorder requires effectId or order")
-            idx = next((i for i, e in enumerate(clip.effects)
-                        if e.get("effectId") == eid), None)
-            if idx is None:
-                raise EditError(ErrorCode.INVALID_ARGUMENT,
-                                f"effect {eid} not found on clip {clip.id}")
+            idx, _effect = self._effect_targets(clip, p)[0]
             item = clip.effects.pop(idx)
             to_index = max(0, min(int(p.get("toIndex", 0)), len(clip.effects)))
             clip.effects.insert(to_index, item)
@@ -5837,14 +5920,17 @@ class EditService:
         候选副本机制保证零污染回滚。效果区间是相对片段起点的有理数秒，
         只支持 cutvoke.fx 效果；crop 分支会先恢复画布尺寸再做区间混合。
         """
-        if "clipId" not in p or "effectId" not in p:
+        if "clipId" not in p or not (p.get('effectId') or p.get('instanceId')):
             raise EditError(ErrorCode.INVALID_ARGUMENT,
-                            "effect.update requires 'clipId' and 'effectId'")
+                            "effect.update requires clipId and instanceId or effectId")
         new_params = p.get("params")
-        if "params" in p and (not isinstance(new_params, dict) or not new_params):
+        replace_params = p.get('replaceParams', False)
+        if type(replace_params) is not bool:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, 'replaceParams must be a boolean')
+        if "params" in p and (not isinstance(new_params, dict) or (not new_params and not replace_params)):
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             "effect.update 'params' must be a non-empty object")
-        if not new_params and "range" not in p:
+        if "params" not in p and "range" not in p:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             "effect.update requires 'params' or 'range'")
         clip = None
@@ -5857,26 +5943,25 @@ class EditService:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             f"clip not found: {p['clipId']}")
         effects = clip.effects or []
+        matches = self._effect_targets(clip, p)
         requested_index = p.get("effectIndex")
         if requested_index is not None:
             if isinstance(requested_index, bool) or not isinstance(requested_index, int) \
                     or requested_index < 0 or requested_index >= len(effects):
                 raise EditError(ErrorCode.INVALID_ARGUMENT, "effectIndex is out of range")
             inst = effects[requested_index]
-            if inst.get("effectId") != p["effectId"]:
+            if not any(index == requested_index for index, _effect in matches):
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 "effectIndex does not match effectId")
             effect_index = requested_index
         else:
-            effect_index = next((i for i, e in enumerate(effects)
-                                 if e.get("effectId") == p["effectId"]), None)
-            inst = effects[effect_index] if effect_index is not None else None
+            effect_index, inst = matches[0]
         if inst is None:
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             f"effect not found on clip {p['clipId']}: {p['effectId']}")
-        eid = self._require_effect(str(p["effectId"]))
-        if new_params:
-            merged = dict(inst.get("params") or {})
+        eid = self._require_effect(str(inst['effectId']))
+        if "params" in p:
+            merged = {} if replace_params else dict(inst.get("params") or {})
             merged.update(new_params)
             inst["params"] = self._effects.validate_params(eid, merged)
         if "range" in p:
@@ -5898,7 +5983,7 @@ class EditService:
                                 f"effect range must satisfy 0 <= start < end <= {clip.duration}")
             inst["range"] = {"start": start.to_json(), "end": end.to_json()}
         return [{"type": "clip", "id": clip.id, "change": "effect.updated",
-                 "effectId": inst["effectId"], "effectIndex": effect_index}]
+                 "effectId": inst["effectId"], "effectIndex": effect_index, "instanceId": inst['instanceId']}]
 
     def _h_effect_set_animation(self, proj: Project, p: dict) -> list[dict]:
         clip_id = p.get("clipId")

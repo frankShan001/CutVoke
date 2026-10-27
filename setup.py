@@ -9,6 +9,10 @@ from setuptools.command.build_py import build_py
 
 class BuildWithEditor(build_py):
     def run(self) -> None:
+        if not getattr(self, "editable_mode", False):
+            import runpy
+            prepare = runpy.run_path(str(Path(__file__).resolve().parent / "tools/build/prepare_extension_payloads.py"))["prepare"]
+            prepare()
         # A repeated local build otherwise keeps obsolete package files in
         # build/lib, including __pycache__ from older namespace discovery.
         # Restrict cleanup to this repository's generated build directory.

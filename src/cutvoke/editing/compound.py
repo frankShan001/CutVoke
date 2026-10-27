@@ -177,22 +177,5 @@ def ungroup(service, seq, payload):
 
 def fresh_nested(sequence):
     """A second instance needs fresh child identities, without changing user text."""
-    raw = sequence.to_dict()
-    mapping = {}
-    def collect(value):
-        if isinstance(value,dict):
-            if isinstance(value.get("id"),str):
-                mapping[value["id"]] = new_id("copy")
-            for child in value.values(): collect(child)
-        elif isinstance(value,list):
-            for child in value: collect(child)
-    collect(raw)
-    references = {"id","attachedToClipId","activeTrackId","trackId","nestedTrackId","busId"}
-    def rewrite(value):
-        if isinstance(value,dict):
-            return {key:(mapping.get(child,child) if key in references and isinstance(child,str)
-                         else [mapping.get(item,item) for item in child] if key in {"trackIds","clipIds"}
-                         and isinstance(child,list) else rewrite(child)) for key,child in value.items()}
-        if isinstance(value,list): return [rewrite(child) for child in value]
-        return value
-    return Sequence.from_dict(rewrite(raw))
+    from cutvoke.editing.identity_clone import fresh_data
+    return Sequence.from_dict(fresh_data(sequence.to_dict()))

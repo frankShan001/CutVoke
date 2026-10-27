@@ -1,4 +1,4 @@
-"""External editor workflow tools. No model or generation service is involved.
+"""External editor tools, including explicitly invoked optional local models.
 
 Both MCP and HTTP use these adapters and the same EditService/preview queue.
 """
@@ -31,8 +31,18 @@ PAGE = {"offset": {"type": "integer", "minimum": 0}, "limit": LIMIT}
 PROJECT = {"projectId": STRING}
 REVISION = {**PROJECT, "expectedRevision": STRING}
 AGENT_TOOLS = [
+    _tool('transition_preview', 'Render quarter/middle/three-quarter transition pictures, optionally beside a plain dissolve. Read-only; returns at most six PNGs and their revision, without changing the project.',
+          {**REVISION,'clipId':STRING,'fractions':{'type':'array','minItems':1,'maxItems':3,
+             'items':{'type':'number','minimum':.05,'maximum':.95}},
+           'width':{'type':'integer','minimum':160,'maximum':1280,'default':640},
+           'compareDissolve':{'type':'boolean','default':True}},('projectId','clipId')),
+    _tool("project_directory", "Read a project's independent folder, or preview/migrate a legacy project. Migration copies referenced media and retained history, preserves originals, and requires the latest plan token. Close the app before physically moving a folder.",
+          {**PROJECT, "operation": {"type": "string", "enum": ["info", "plan", "migrate", "rollback"], "default": "info"},
+           "token": STRING, "directory": STRING}, ("projectId",)),
+    _tool("project_directory_open", "Open/register a moved or backed-up project directory, or its project.cutvoke file. An existing online copy with the same projectId must be closed and moved first.",
+          {"path": STRING}, ("path",)),
     _tool("editor_help", "START HERE if unfamiliar with CutVoke. Bundled workflow, units, recipes, command payload JSON schemas, effect schemas and error recovery; no external Skill/source-code access needed. Default {} returns a compact onboarding guide. Before editing, request topic=command with the command name; add effectId for exact effect params.",
-          {"topic": {"type": "string", "enum": ["overview", "time", "editing", "errors", "recipes", "command", "sharing"], "default": "overview"},
+          {"topic": {"type": "string", "enum": ["overview", "time", "editing", "errors", "recipes", "command", "sharing", "local-models", "agent-bridge"], "default": "overview"},
            "command": STRING, "effectId": STRING, "recipe": STRING}),
     _tool("effect_module_save", "Save a content-free reusable effect recipe locally (MIT). No project/media/text inputs accepted. Discover allowed schemas with effect_module_list(includeSchemas=true). Return privacyNotice verbatim to the user when proposing sharing.",
           {"recipe": RECIPE_SCHEMA}, ("recipe",)),
@@ -49,8 +59,8 @@ AGENT_TOOLS = [
           ("projectId", "expectedRevision")),
     _tool("commands_list", "按命令名检索编辑参数，返回每个命令的 payload inputSchema；先查询再填 payload。查具体效果的参数用 editor_help(topic=command, command=..., effectId=...)。批量编辑用 edit.batch。",
           {"type": STRING, "query": {"type": "string"}, **PAGE}),
-    _tool("media_import", "流式复制本机素材到持久素材库，探测尺寸/声音/时长；同一内容重复导入返回同一 assetId。不会创建时间线片段。",
-          {"paths": {"type": "array", "minItems": 1, "maxItems": 32, "items": STRING}}, ("paths",)),
+    _tool("media_import", "每批最多 32 个文件。流式复制本机素材到持久素材库，探测尺寸/声音/时长；传 projectId 保存到该工程素材表，同一内容重复导入返回同一 assetId。不会创建时间线片段。",
+          {**PROJECT, "paths": {"type": "array", "minItems": 1, "maxItems": 32, "items": STRING}}, ("paths",)),
     _tool("media_list", "分页检索持久素材库；可按类型、名称、工程已用/未用过滤。返回可直接用于 clip.insert 的 assetId。",
           {**PROJECT, "query": {"type": "string"}, "kind": {"type": "string", "enum": ["image", "video", "audio"]},
            "used": {"type": "boolean"}, **PAGE}),
@@ -83,6 +93,8 @@ AGENT_TOOLS = [
            "frameTimes": {"type": "array", "maxItems": 6, "items": {"type": "number", "minimum": 0}}},
           ("projectId", "expectedRevision")),
 ]
+from cutvoke.interfaces.local_models import tool_specs as _local_model_tools
+AGENT_TOOLS.extend(_local_model_tools())
 
 
 class AgentTools:
@@ -92,10 +104,47 @@ class AgentTools:
         self.render = api.render
 
     def call(self, name, arguments):
+        inherited_preview = False
+        if name == "preview_job" and arguments.get("jobId"):
+            try:
+                job = self.api._preview_preparation.get(arguments["jobId"])
+                inherited_preview = job.get("projectId") == arguments.get("projectId")
+            except KeyError:
+                pass
+        if arguments.get("assetId") and not arguments.get("projectId"):
+            from cutvoke.storage.project_directory import ProjectLibraryStore
+            store = self.service.store
+            if isinstance(store, ProjectLibraryStore):
+                owner = store.owner_of_asset(arguments["assetId"])
+                if owner:
+                    return AgentTools(self.api.project_api(owner)).call(name, arguments)
+        if arguments.get("projectId") and not inherited_preview and name not in ("project_clone", "project_directory"):
+            target = self.api.project_api(arguments["projectId"])
+            if target is not self.api:
+                return AgentTools(target).call(name, arguments)
         handler = getattr(self, name, None)
+        if name in {tool['name'] for tool in _local_model_tools()}:
+            from cutvoke.interfaces.local_models import call
+            return {'ok':True,**call(self,name,arguments)}
         if not any(tool["name"] == name for tool in AGENT_TOOLS) or handler is None:
             raise ValueError(f"unknown agent tool: {name}")
         return {"ok": True, **handler(arguments)}
+
+    def project_directory(self, arguments):
+        from cutvoke.interfaces.project_directories import directory_endpoint
+        operation = arguments.get("operation", "info")
+        parts = ["api", "v1", "projects", arguments["projectId"], "directory"]
+        if operation != "info":
+            parts.append(operation)
+        status, result = directory_endpoint(self.api, "GET" if operation == "info" else "POST", parts, arguments)
+        if status != 200:
+            raise ValueError(result.get("error", {}).get("message", "project directory operation failed"))
+        return result
+
+    def project_directory_open(self, arguments):
+        from cutvoke.interfaces.project_directories import directory_endpoint
+        _, result = directory_endpoint(self.api, "POST", ["api", "v1", "project-directories", "open"], arguments)
+        return result
 
     def _project(self, a):
         project = copy.deepcopy(self.service.get_project(a["projectId"]))
@@ -262,7 +311,37 @@ class AgentTools:
         page["presets"] = [p.to_dict() for p in page["presets"]]
         return page
 
-    def preview_frames(self, a):
+    def transition_preview(self, a):
+        from cutvoke.rendering.effects import find_transition
+        project=self._project(a)
+        clip=next((clip for track in project.sequence.tracks for clip in track.clips if clip.id==a['clipId']),None)
+        if clip is None: raise ValueError('transition clip not found')
+        transition=find_transition(clip,self.service._effects)
+        if transition is None: raise ValueError('clip has no transition')
+        duration=float(transition.get('params',{}).get('duration',.6))
+        track=next(track for track in project.sequence.tracks if any(item.id==clip.id for item in track.clips))
+        ordered=sorted(track.clips,key=lambda item:item.timeline_start)
+        index=next(i for i,item in enumerate(ordered) if item.id==clip.id)
+        if index==0 or ordered[index-1].timeline_end!=clip.timeline_start:
+            raise ValueError('transition preview requires an adjacent outgoing clip')
+        duration=min(duration,float(ordered[index-1].duration.to_fraction())/2,
+                     float(clip.duration.to_fraction())/2)
+        fractions=a.get('fractions',[.25,.5,.75])
+        times=[float(clip.timeline_start.to_fraction())+fraction*duration for fraction in fractions]
+        options={'projectId':a['projectId'],'times':times,'width':a.get('width',640)}
+        current=self.preview_frames(options,_project_override=project)
+        variants=[{'kind':'current','effectId':transition['effectId'],'frames':current['frames']}]
+        images=list(current['_images'])
+        if a.get('compareDissolve',True):
+            clip.effects=[effect for effect in clip.effects if not effect.get('effectId','').startswith('cutvoke.transition.')]
+            clip.effects.append({'effectId':'cutvoke.transition.crossfade','version':'1.0.0','params':{'duration':duration}})
+            dissolve=self.preview_frames(options,_project_override=project)
+            variants.append({'kind':'crossfade','frames':dissolve['frames']}); images.extend(dissolve['_images'])
+        return {'projectId':a['projectId'],'revision':project.revision,'clipId':clip.id,'fractions':fractions,
+                'effectiveDuration':duration,
+                'variants':variants,'_images':images}
+
+    def preview_frames(self, a, _project_override=None):
         from cutvoke.rendering.preview_prepare import preview_identity
         from cutvoke.domain.model import Project, Sequence, Track, Clip, AssetReference
         from cutvoke.domain.rational import Rational as R
@@ -270,7 +349,7 @@ class AgentTools:
         if target_count != 1:
             raise ValueError("provide exactly one of projectId, assetId or path")
         if a.get("projectId"):
-            project = self._project(a)
+            project = _project_override or self._project(a)
         else:
             if a.get("expectedRevision"):
                 raise ValueError("expectedRevision is only valid for a project")
@@ -363,7 +442,7 @@ class AgentTools:
     def project_package(self, a):
         from cutvoke.storage.projectpack import pack_project
         project = self._project(a)
-        path = Path(a["outPath"]).expanduser().resolve()
+        path = Path(self.service.output_path(project.project_id, a["outPath"], suffix=".cvkpkg")).expanduser().resolve()
         if path.exists() and not a.get("overwrite", False):
             raise ValueError("output exists; choose another outPath or explicitly set overwrite")
         output = pack_project(project, str(path))
@@ -382,6 +461,9 @@ class AgentTools:
             raise EditError(ErrorCode.REVISION_CONFLICT, 'project changed before archive snapshot', retryable=True)
         default = Path(self.api.media_dir).parent / 'archives' / (
             datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S-') + uuid.uuid4().hex[:8] + '.cvkpkg')
-        return write_archive(record, a.get('outPath', str(default)), self.render,
+        if self.api.workspace_root:
+            default = self.api.workspace_root / 'backups' / default.name
+        output = self.service.output_path(a['projectId'], a.get('outPath', str(default)), suffix='.cvkpkg')
+        return write_archive(record, output, self.render,
                              frame_times=a.get('frameTimes', []), overwrite=a.get('overwrite', False),
                              runtime=runtime_status(self.api.runtime_info))

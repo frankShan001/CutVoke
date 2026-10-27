@@ -3,6 +3,7 @@
 
 import { uploadAsset, probeMedia, type UploadOptions } from "./mediaApi";
 import { addSessionAsset, inferKind, type SessionAsset } from "./assetStore";
+import { activeProjectId } from "./projectScope";
 
 export interface UploadedMedia {
   assetId: string;
@@ -33,6 +34,8 @@ export function mediaFitsTrack(kind: SessionAsset["kind"], trackKind: string): b
 
 /** 上传单个文件：POST /assets → probe → 写入会话素材库。 */
 export async function uploadOneFile(file: File, options: UploadOptions = {}): Promise<UploadOneResult> {
+  const projectId = options.projectId === undefined ? activeProjectId() : options.projectId;
+  options = { ...options, projectId };
   const up = await uploadAsset(file, options);
   if (up.kind !== "ok") return { ok: false, name: file.name, message: up.message };
   const probe = await probeMedia(up.data.path);
@@ -52,7 +55,7 @@ export async function uploadOneFile(file: File, options: UploadOptions = {}): Pr
     kind,
     duration: dur,
   };
-  addSessionAsset({ ...media, available: true });
+  if (activeProjectId() === projectId) addSessionAsset({ ...media, available: true });
   return { ok: true, media };
 }
 
@@ -67,11 +70,13 @@ export async function uploadFiles(
   onProgress?: (progress: { completed: number; total: number; name: string; succeeded: number; failed: number; loaded: number; totalBytes: number }) => void,
   options: UploadOptions = {},
 ): Promise<number> {
+  options = { ...options, projectId: options.projectId === undefined ? activeProjectId() : options.projectId };
   let ok = 0;
   let index = 0;
   let failed = 0;
   let completed = 0;
   for (const f of files) {
+    if (activeProjectId() !== options.projectId) break;
     if (options.signal?.aborted) break;
     const notify = (loaded: number) => onProgress?.({ completed, total: files.length, name: f.name,
       succeeded: ok, failed, loaded, totalBytes: f.size });
@@ -79,7 +84,7 @@ export async function uploadFiles(
     const res = await uploadOneFile(f, { ...options, onProgress: (loaded, total) => {
       notify(loaded); options.onProgress?.(loaded, total);
     } });
-    if (options.signal?.aborted) break;
+    if (options.signal?.aborted || activeProjectId() !== options.projectId) break;
     if (!res.ok) {
       onError?.(res.name, res.message);
       failed++;

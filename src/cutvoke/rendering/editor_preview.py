@@ -11,6 +11,9 @@ def browser_titles(project):
     compare the same base-video identity against the current saved project.
     """
     preview = copy.deepcopy(project)
+    if any(c.compositing or c.role == "adjustment" for t in preview.sequence.tracks for c in t.clips):
+        preview._browser_titles = True
+        return preview
     for track in preview.sequence.tracks:
         if track.kind != "text":
             continue

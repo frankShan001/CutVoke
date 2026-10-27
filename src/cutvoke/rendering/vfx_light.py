@@ -13,18 +13,21 @@ from pathlib import Path
 import random
 import subprocess
 import tempfile
+import time
 import uuid
 
 from cutvoke.rendering.mask_motion import progress
 
-VERSION=3
+VERSION=4
 
 
 def schema():
+    from cutvoke.rendering.vfx_fusion import schema as fusion_schema
     def n(default,lo,hi,cn,integer=False):
         return dict(type='integer' if integer else 'number',default=default,
                     minimum=lo,maximum=hi,description={'zh-CN':cn})
     return {
+        **fusion_schema(),
         'layer': dict(type='string',enum=['back','front','reflection','all'],default='back',
                       description={'zh-CN':'光流空间层次'},**{'x-cutvoke-enum-labels':{
                           'back':{'zh-CN':'车身后方','en':'Behind subject'},
@@ -71,6 +74,7 @@ def anchor(params,time):
 def frame(params,width,height,time):
     from PIL import Image,ImageDraw,ImageFilter
     import numpy as np
+    from cutvoke.rendering.vfx_fusion import blur_alpha
     start,duration=float(params.get('start',0)),float(params.get('duration',1.7))
     fade=max(0.,min(1.,(time-start)/.10,(start+duration+.35-time)/.35))
     empty=Image.new('RGBA',(width,height))
@@ -137,7 +141,7 @@ def frame(params,width,height,time):
     # Additive-looking luminous halos with straight RGB and a blurred alpha.
     out=Image.new('RGBA',(width,height))
     for radius,opacity in [(width*.021,.32),(width*.007,.65)]:
-        a=field.filter(ImageFilter.GaussianBlur(radius))
+        a=blur_alpha(field,radius)
         a=a.point(lambda v:min(255,round(v*opacity*3)))
         glow=Image.new('RGBA',(width,height),(*colours[0],0));glow.putalpha(a)
         out=Image.alpha_composite(out,glow)
@@ -169,22 +173,28 @@ def frame(params,width,height,time):
         a=np.asarray(out).copy();a[:,:,3]=np.clip(a[:,:,3].astype(float)*intensity,0,255).astype('uint8')
         out=Image.fromarray(a)
     if reflected:out=out.filter(ImageFilter.GaussianBlur(width*.003))
-    return out
+    from cutvoke.rendering.vfx_fusion import constrain
+    return constrain(out,params,time)
 
 
-def cached_source(params,width,height,fps,duration,ffmpeg='ffmpeg',cancelled=None,*,renderer=None,kind='light',prefix_duration=None,transient_directory=None,start_time=0.):
+def cached_source(params,width,height,fps,duration,ffmpeg='ffmpeg',cancelled=None,*,renderer=None,kind='light',prefix_duration=None,transient_directory=None,start_time=0.,cache_directory=None,metrics=None):
     """Create an atomic, lossless disposable source; no pixels enter project JSON."""
-    identity=[VERSION,params,width,height,str(fps),round(duration,9)]
+    # Compositing controls do not change the generated RGBA light movie.
+    drawing={key:value for key,value in params.items() if key not in ('blendMode','highlightProtect','highlightThreshold')}
+    identity=[VERSION,drawing,width,height,str(fps),round(duration,9)]
     if start_time:
         identity.insert(0,round(start_time,12))
     if kind!='light':identity.insert(0,kind)
     key=hashlib.sha256(json.dumps(identity,
                                 sort_keys=True,separators=(',',':')).encode()).hexdigest()
-    directory=Path(tempfile.gettempdir())/'cutvoke-light-cache-v1';directory.mkdir(exist_ok=True)
+    directory=Path(cache_directory) if cache_directory else Path(tempfile.gettempdir())/'cutvoke-light-cache-v1'
+    directory.mkdir(parents=True,exist_ok=True)
     if transient_directory is not None and start_time:
         directory=Path(transient_directory)
     target=directory/(key+'.mkv')
-    if target.is_file() and target.stat().st_size>256:return str(target)
+    if target.is_file() and target.stat().st_size>256:
+        if metrics is not None: metrics.update(diskHit=True,generatedFrames=0)
+        return str(target)
     if prefix_duration is not None and prefix_duration < duration:
         if transient_directory is not None:
             directory=Path(transient_directory)
@@ -192,11 +202,14 @@ def cached_source(params,width,height,fps,duration,ffmpeg='ffmpeg',cancelled=Non
         identity[-1]=round(duration,9)
         key=hashlib.sha256(json.dumps(identity,sort_keys=True,separators=(',',':')).encode()).hexdigest()
         target=directory/(key+'.mkv')
-        if target.is_file() and target.stat().st_size>256:return str(target)
+        if target.is_file() and target.stat().st_size>256:
+            if metrics is not None: metrics.update(diskHit=True,generatedFrames=0)
+            return str(target)
     temporary=directory/(key+'-'+uuid.uuid4().hex+'.mkv')
     command=[ffmpeg,'-v','error','-y','-f','rawvideo','-pixel_format','rgba','-video_size',f'{width}x{height}',
              '-framerate',str(fps),'-i','pipe:0','-an','-c:v','ffv1','-level','3','-pix_fmt','bgra','-threads','2',str(temporary)]
     with tempfile.TemporaryFile() as errors:
+        started=time.monotonic()
         process=subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.DEVNULL,stderr=errors)
         try:
             for i in range(max(1,math.ceil(duration*float(fps)-1e-7))):
@@ -206,6 +219,7 @@ def cached_source(params,width,height,fps,duration,ffmpeg='ffmpeg',cancelled=Non
             if process.wait(timeout=120):
                 errors.seek(0);raise RuntimeError(errors.read().decode('utf-8','replace')[-1000:])
             os.replace(temporary,target)
+            if metrics is not None: metrics.update(diskHit=False,generatedFrames=max(1,math.ceil(duration*float(fps)-1e-7)),generationSeconds=time.monotonic()-started)
         except BaseException:
             if process.poll() is None:process.kill();process.wait(timeout=10)
             temporary.unlink(missing_ok=True)

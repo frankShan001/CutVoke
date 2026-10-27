@@ -24,6 +24,7 @@ export interface ResourceReference {
 }
 
 export interface EffectInstance {
+  compositing?: EffectCompositing;
   instanceId?: string;
   effectId: string;
   version: string;
@@ -34,8 +35,14 @@ export interface EffectInstance {
   range?: { start: Rational; end: Rational };
 }
 
+export interface EffectCompositing {
+  opacity?: number;
+  blendMode?: "normal" | "multiply" | "screen" | "add" | "difference";
+  region?: { x?: number; y?: number; width?: number; height?: number; feather?: number; invert?: boolean } | null;
+}
+
 /** 关键帧插值方式（与后端 Keyframe.VALID_INTERP 对齐）。 */
-export type KeyframeInterpolation = "linear" | "ease-in" | "ease-out" | "cubic-bezier";
+export type KeyframeInterpolation = "linear" | "ease-in" | "ease-out" | "cubic-bezier" | "hold";
 
 export interface Keyframe {
   id: string;
@@ -55,14 +62,19 @@ export type FrameInterpolation = "none" | "motion";
 export interface Clip {
   id: string;
   assetRef: AssetReference;
-  role?: "sticker";
+  role?: "sticker" | "adjustment";
+  compositing?: { matte?: { clipId: string; channel?: "alpha" | "luma"; invert?: boolean } | null; matteOnly?: boolean };
   timelineStart: Rational;
   timelineEnd: Rational;
   sourceStart: Rational;
   speed?: Rational;
   speedCurve?: SpeedCurve | null;
   freezeAt?: Rational | null;
-  nested?: unknown;
+  nested?: Sequence | null;
+  sequenceRef?: string;
+  propertyOverrides?: Record<string, number | string>;
+  motionPath?: { points: SpatialPoint[]; sourceOrigin: Rational; speedOrigin: Rational } | null;
+  propertyLinks?: Record<string, { source: { type?: "property" | "sine" | "time" | "constant"; clipId?: string; param?: string; amplitude?: number; frequency?: number; phase?: number; value?: number }; scale?: number; offset?: number; timeOffset?: number }>;
   /** Slow-motion frame synthesis; missing fields in older projects mean none. */
   frameInterpolation?: FrameInterpolation;
   /** 变速后是否保持源音频音高；旧工程缺省为 true。 */
@@ -82,6 +94,8 @@ export interface Clip {
   keyframes?: Record<string, Keyframe[]>;
 }
 
+export interface SpatialPoint { at?: number; x: number; y: number; inX?: number; inY?: number; outX?: number; outY?: number; roving?: boolean; timeEase?: [number, number, number, number] }
+
 export interface AudioMix {
   gainDb?: number;
   pan?: number;
@@ -95,7 +109,7 @@ export interface AudioMix {
 export interface Track {
   id: string;
   kind: string; // "video" | "audio" | "text" | "caption"
-  role?: "sticker";
+  role?: "sticker" | "adjustment";
   clips: Clip[];
   locked?: boolean;
   muted?: boolean;
@@ -104,6 +118,7 @@ export interface Track {
 }
 
 export interface Sequence {
+  exposedProperties?: { id: string; label?: string; clipId: string; param: string }[];
   id: string;
   width: number;
   height: number;

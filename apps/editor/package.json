@@ -13,7 +13,7 @@
     "i18n:check": "node scripts/check-i18n.mjs",
     "test:i18n": "node --test scripts/i18n.test.mjs",
     "test:preview-cache": "node --test scripts/preview-cache.test.mjs",
-    "test:basic": "node --test scripts/clip-timing.test.mjs scripts/project-sync.test.mjs scripts/timeline-media-cache.test.mjs scripts/import-media.test.mjs scripts/project-equivalence.test.mjs",
+    "test:basic": "node --test scripts/clip-timing.test.mjs scripts/project-sync.test.mjs scripts/timeline-media-cache.test.mjs scripts/import-media.test.mjs scripts/project-equivalence.test.mjs scripts/ae-workflow.test.mjs",
     "test:e2e": "npm run build && playwright test",
     "test:e2e:regressions": "playwright test e2e/editor.spec.ts e2e/i18n.spec.ts e2e/interactive-preview.spec.ts e2e/production-workflow.spec.ts e2e/preview-preload.spec.ts e2e/generic-keyframes.spec.ts --grep \"menus,|German editor shell|live audio gain|rapid edits|returning A|slow preparation|native acceptance|mirror and flip|text and freehand|prepared playback follows|generic curve editor persists\" --repeat-each=3"
   },

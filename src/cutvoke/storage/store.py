@@ -117,8 +117,13 @@ class ProjectStore:
     @_synchronized
     def backup_to(self, path: str) -> None:
         """Create a consistent SQLite backup including committed WAL contents."""
-        with sqlite3.connect(path) as backup:
+        # Connection.__exit__ commits but does not close the file handle.
+        # Explicit closure is required before a project folder can move on Windows.
+        backup = sqlite3.connect(path)
+        try:
             self._conn.backup(backup)
+        finally:
+            backup.close()
 
     @_synchronized
     def relocate_paths(self, **kwargs) -> dict:
@@ -574,6 +579,22 @@ class ProjectStore:
                 (project_id, lease_id),
             )
             return cur.rowcount == 1
+
+    @_synchronized
+    def release_edit_lease_status(self, *, project_id: str, lease_id: str) -> dict:
+        with self._transaction():
+            row = self._conn.execute('SELECT project_id,lease_id,owner,expires_at,acquired_at '
+                                     'FROM edit_leases WHERE project_id=?', (project_id,)).fetchone()
+            if row is None:
+                return {'status':'not-held','released':False,'locked':False,'lease':None}
+            current = self._lease_to_dict(row)
+            if current['expiresAt'] <= time.time():
+                self._conn.execute('DELETE FROM edit_leases WHERE project_id=?', (project_id,))
+                return {'status':'expired','released':False,'locked':False,'lease':None}
+            if current['leaseId'] != lease_id:
+                return {'status':'not-owner','released':False,'locked':True,'lease':current}
+            self._conn.execute('DELETE FROM edit_leases WHERE project_id=?', (project_id,))
+            return {'status':'released','released':True,'locked':False,'lease':None}
 
     @_synchronized
     def peek_history(self, project_id: str, depth: int) -> Optional[str]:
@@ -1076,6 +1097,10 @@ class ProjectStore:
             "sha256": row[13],
             "relativePath": row[14],
         }
+
+    def get_project_asset(self, project_id: str, asset_id: str) -> Optional[dict]:
+        """Resolve media in the authority used for this project's edits."""
+        return self.get_asset(asset_id)
 
     @_synchronized
     def list_assets(self) -> list[dict]:

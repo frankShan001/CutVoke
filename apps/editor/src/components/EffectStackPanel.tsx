@@ -20,6 +20,7 @@ import {
   reorderEffect,
   removeEffectFromClip,
   savePreset,
+  updateEffect,
 } from "../store/effectEdit";
 import { getEffectCatalog, listPresets, type EffectSpec, type Preset } from "../lib/effects";
 import { EffectRow } from "./effectStack/EffectRow";
@@ -48,6 +49,7 @@ export function EffectStackPanel({ active }: Props) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [copyTargets, setCopyTargets] = useState<string[]>([]);
   const [copyMode, setCopyMode] = useState<"replace" | "merge">("replace");
+  const [search,setSearch] = useState(''), [modifiedOnly,setModifiedOnly] = useState(false);
 
   useEffect(() => setCopyTargets([]), [pid, selectedClipId]);
 
@@ -97,6 +99,17 @@ export function EffectStackPanel({ active }: Props) {
     catalog.filter((spec) => ["fx", "filter", "color"].includes(spec.browseCategory))
       .map((spec) => spec.effectId),
   ), [catalog, locale]);
+  const visibleEffects = clipEffects.map((effect,index)=>({effect,index})).filter(({effect,index})=>{
+    const spec=catalog.find(item=>item.effectId===effect.effectId);
+    const words=`${spec?.name || ''} ${effect.effectId}`.toLocaleLowerCase();
+    if(!search.toLocaleLowerCase().trim().split(/\s+/).every(token=>words.includes(token)))return false;
+    if(!modifiedOnly)return true;
+    const prefix=`effect:${effect.instanceId || `legacy_${index}`}:`;
+    const clip=state.project?.sequence.tracks.flatMap(track=>track.clips).find(clip=>clip.id===selectedClipId);
+    return effect.enabled===false || !!effect.range || !!effect.compositing || Object.entries(effect.params || {}).some(([key,value])=>
+      JSON.stringify(value)!==JSON.stringify(spec?.defaults[key])) ||
+      Object.entries(clip?.keyframes || {}).some(([key,lane])=>key.startsWith(prefix) && lane.length>0);
+  });
   const visualEffectCount = clipEffects.filter((effect) => visualEffectIds.has(effect.effectId)).length;
   const targetClips = useMemo(() => (
     (state.project?.sequence.tracks ?? [])
@@ -154,14 +167,22 @@ export function EffectStackPanel({ active }: Props) {
         <p className="cv-empty">{tr("该片段还没有效果。到左侧「特效」或「滤镜」选择并应用到当前片段。")}</p>
       ) : (
         <div className="effect-stack">
-          {clipEffects.map((e, i) => (
+          <input className="cv-input" aria-label={tr('搜索当前效果栈')} placeholder={tr('搜索当前效果栈')} value={search} onChange={event=>setSearch(event.target.value)}/>
+          <label className="cv-hint"><input type="checkbox" checked={modifiedOnly} onChange={event=>setModifiedOnly(event.target.checked)}/>{tr('仅显示已修改')}</label>
+          {!visibleEffects.length ? <p className="cv-empty" role="status">{tr('没有匹配结果')}</p> : null}
+          {visibleEffects.map(({effect:e,index:i}) => (
             <EffectRow
-              key={`${i}:${String(e.effectId)}`}
+              key={e.instanceId || `legacy_${i}`}
               effect={e}
               index={i}
               total={clipEffects.length}
               catalog={catalog}
               busy={anyBusy || readOnly}
+              onEdit={()=>window.dispatchEvent(new CustomEvent('cutvoke:edit-effect',{detail:{effectId:e.effectId,
+                category:catalog.find(item=>item.effectId===e.effectId)?.category || 'fx',clipId:selectedClipId,
+                instanceId:e.instanceId || `legacy_${i}`}}))}
+              onReset={()=>{if(readOnly)return;void run(()=>updateEffect(dispatch,getLatestState() || state,{
+                clipId:String(selectedClipId),effectId:e.effectId,instanceId:e.instanceId || `legacy_${i}`,params:{},replaceParams:true}),`reset:${i}`);}}
               onMove={(dir) => {
                 if (readOnly) return;
                 const st = getLatestState() || state;
@@ -170,6 +191,7 @@ export function EffectStackPanel({ active }: Props) {
                     reorderEffect(dispatch, st, {
                       clipId: String(selectedClipId),
                       effectId: String(e.effectId),
+                      instanceId: e.instanceId || `legacy_${i}`,
                       toIndex: i + dir,
                     }),
                   `mv:${i}:${dir}`,
@@ -183,6 +205,7 @@ export function EffectStackPanel({ active }: Props) {
                     bypassEffect(dispatch, st, {
                       clipId: String(selectedClipId),
                       effectId: String(e.effectId),
+                      instanceId: e.instanceId || `legacy_${i}`,
                       enabled: e.enabled !== false ? false : true,
                     }),
                   `bp:${i}`,
@@ -196,6 +219,7 @@ export function EffectStackPanel({ active }: Props) {
                     removeEffectFromClip(dispatch, st, {
                       clipId: String(selectedClipId),
                       effectId: String(e.effectId),
+                      instanceId: e.instanceId || `legacy_${i}`,
                     }),
                   `rm:${i}`,
                 );

@@ -12,14 +12,18 @@ import {
   PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
+  Search,
+  Layers3,
+  Box,
 } from "lucide-react";
 import { Button } from "./ui";
 import { useEditor } from "../store/editor";
-import { loadProjects, redo, refreshProject, undo } from "../store/actions";
+import { getLatestState, loadProjects, redo, refreshProject, runCommand, undo } from "../store/actions";
 import { ToolbarTools } from "./ToolbarTools";
 import { CacheSettings } from "./CacheSettings";
 import { LanguageSelect } from "./LanguageSelect";
 import { RuntimeStatus } from "./RuntimeStatus";
+import { WorkspaceSettings } from "./WorkspaceSettings";
 
 export function TopToolbar({
   leftPanelOpen,
@@ -55,12 +59,28 @@ export function TopToolbar({
   const openTemplates = () => {
     dispatch({ type: "TEMPLATE_OPEN_SET", open: true });
   };
+  const addScene=async()=>{
+    const owner=state.currentId,clipId=`scene_${crypto.randomUUID().slice(0,12)}`;
+    const result=await runCommand(dispatch,state,'composition.scene3d',{clipId,timelineStart:state.playhead,timelineEnd:state.playhead+3});
+    if(result.ok && getLatestState()?.currentId===owner)dispatch({type:'CLIP_SELECTION_SET',clipIds:[clipId],primaryId:clipId,anchorId:clipId});
+  };
 
   return (
     <header className="topbar">
       <h1 className="topbar__title"><img src="/brand/icon-64.png" width="24" height="24" alt="" aria-hidden="true" draggable={false} />{tr("CutVoke 编辑器")}</h1>
       <span className="topbar__tag">{tr("本地 · 人工与 Agent 共用")}</span>
       <ToolbarTools />
+      <WorkspaceSettings />
+      <Button variant="ghost" size="sm" disabled={!state.project || !!state.editLock} aria-label={tr('添加三维场景')}
+        onClick={()=>void addScene()}>
+        <Box size={14}/><span className="topbar__btn-label">{tr('添加三维场景')}</span></Button>
+      <Button variant="ghost" size="sm" disabled={!state.project || !!state.editLock} aria-label={tr("添加调整层")}
+        onClick={() => void runCommand(dispatch, state, "composition.adjustment", { timelineStart: state.playhead,
+          timelineEnd: Math.max(state.playhead + 3, ...state.project!.sequence.tracks.flatMap(track => track.clips.map(clip => Number(clip.timelineEnd.num) / Number(clip.timelineEnd.den)))) })}>
+        <Layers3 size={14} /><span className="topbar__btn-label">{tr("添加调整层")}</span>
+      </Button>
+      <Button variant="ghost" size="sm" disabled={!!state.editLock} onClick={()=>window.dispatchEvent(new CustomEvent('cutvoke:quick-apply'))}
+        aria-label={tr('快速应用')} title={tr('搜索特效、预设和命令（Ctrl/⌘+Enter）')}><Search size={14}/><span className="topbar__btn-label">{tr('快速应用')}</span></Button>
       <Button
         variant="ghost"
         size="sm"
