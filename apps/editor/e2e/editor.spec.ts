@@ -1850,7 +1850,7 @@ test("cinematic optical atlas previews, exposes provenance, and inserts as an ov
   });
 });
 
-test("main-track auto-fit is independent from magnetism and leaves BGM independent", async ({ page, request }) => {
+for (const delayUndoSnapshot of [false, true]) test(`main-track auto-fit is independent from magnetism and leaves BGM independent${delayUndoSnapshot ? " with delayed undo snapshot" : ""}`, async ({ page, request }, testInfo) => {
   const { id, name, sources } = await createProject(request);
   for (let index = 3; index < 6; index += 1) {
     await apply(request, id, "clip.insert", {
@@ -1868,12 +1868,22 @@ test("main-track auto-fit is independent from magnetism and leaves BGM independe
   await page.getByRole("button", { name: "磁吸开关" }).click();
   const fitToggle = page.getByRole("button", { name: "主轨自动贴合开关" });
   await expect(fitToggle).toHaveAttribute("aria-pressed", "true");
+  const mainLane = page.locator(".timeline-track__lane[data-track-id='v1']");
+  const redClip = mainLane.locator('.clip-block[data-clip-id="color-0"]');
+  const movedClipIds: string[] = [];
+  page.on("request", outgoing => {
+    if (outgoing.method() !== "POST" || outgoing.url().split("?")[0] !== new URL(apiPath(id) + "/commands", outgoing.url()).href) return;
+    const command = outgoing.postDataJSON();
+    if (command?.type === "clip.move") movedClipIds.push(command.payload.clipId);
+  });
 
   const dragFirstClipToEnd = async () => {
-    const clip = page.locator(".timeline-track__lane[data-track-id='v1'] .clip-block").first();
-    const lane = page.locator(".timeline-track__lane[data-track-id='v1']");
-    const clipBox = await clip.boundingBox();
-    const laneBox = await lane.boundingBox();
+    // A backend revision does not prove that the undo snapshot is rendered.
+    // Resolve the intended identity after its actual UI position is restored.
+    await expect(redClip).toHaveAttribute("aria-label", /开始于 0\.000 秒/);
+    await expect(mainLane.locator(".clip-block").first()).toHaveAttribute("data-clip-id", "color-0");
+    const clipBox = await redClip.boundingBox();
+    const laneBox = await mainLane.boundingBox();
     expect(clipBox && laneBox).toBeTruthy();
     const pixelsPerSecond = clipBox!.width / 5;
     const sourceX = clipBox!.x + clipBox!.width / 2;
@@ -1897,14 +1907,45 @@ test("main-track auto-fit is independent from magnetism and leaves BGM independe
   expect(seconds(fittedMain.find((clip) => clip.id === "color-2")!.timelineStart)).toBe(5);
   expect(seconds(fittedMain.find((clip) => clip.id === "color-5")!.timelineStart)).toBe(20);
   expect(seconds(fitted.sequence.tracks.find((track) => track.id === "a1")!.clips[0].timelineStart)).toBe(0);
+  await expect(redClip).toHaveAttribute("aria-label", /开始于 25\.000 秒/);
+  await expect(mainLane.locator(".clip-block").first()).toHaveAttribute("data-clip-id", "color-1");
 
-  await page.getByRole("button", { name: "撤销" }).click();
-  await expect.poll(async () => {
-    const project = await readProject(request, id);
-    return project.sequence.tracks.find((track) => track.id === "v1")!.clips
-      .sort((a, b) => seconds(a.timelineStart) - seconds(b.timelineStart))
-      .map((clip) => seconds(clip.timelineStart));
-  }).toEqual([0, 5, 10, 15, 20, 25]);
+  // The old sorted-times predicate is already true before undo, despite the
+  // wrong first identity. Preserve that counterexample in the controlled case.
+  expect(fittedMain.map(clip => seconds(clip.timelineStart)).sort((a, b) => a - b)).toEqual([0, 5, 10, 15, 20, 25]);
+  let releaseUndoSnapshot!: () => void;
+  const undoSnapshotGate = new Promise<void>(resolve => { releaseUndoSnapshot = resolve; });
+  let holdUndoSnapshot = delayUndoSnapshot, heldUndoSnapshots = 0;
+  if (delayUndoSnapshot) await page.route(`**/projects/${id}/sync?*`, async route => {
+    const response = await route.fetch();
+    const snapshot = await response.json();
+    if (holdUndoSnapshot && snapshot.revision === String(BigInt(fitted.revision) + 1n) && !snapshot.unchanged) {
+      heldUndoSnapshots += 1;
+      await undoSnapshotGate;
+    }
+    await route.fulfill({ response });
+  });
+  try {
+    await page.getByRole("button", { name: "撤销" }).click();
+    await expect.poll(async () => {
+      const project = await readProject(request, id);
+      return project.sequence.tracks.find((track) => track.id === "v1")!.clips
+        .map(clip => [clip.id, seconds(clip.timelineStart)] as const)
+        .sort((a, b) => a[0].localeCompare(b[0]));
+    }).toEqual(Array.from({ length: 6 }, (_, index) => [`color-${index}`, index * 5]));
+    if (delayUndoSnapshot) {
+      await expect.poll(() => heldUndoSnapshots).toBeGreaterThan(0);
+      await expect(redClip).toHaveAttribute("aria-label", /开始于 25\.000 秒/);
+      await expect(mainLane.locator(".clip-block").first()).toHaveAttribute("data-clip-id", "color-1");
+      expect(movedClipIds).toEqual(["color-0"]);
+      await testInfo.attach("undo-readiness-counterexample", { contentType: "application/json", body: JSON.stringify({
+        backendRestored: true, uiSnapshotHeld: true, staleFirstClip: "color-1", intendedClip: "color-0",
+        sortedTimesBeforeUndo: [0, 5, 10, 15, 20, 25],
+      }) });
+    }
+  } finally { holdUndoSnapshot = false; releaseUndoSnapshot(); }
+  await expect(redClip).toHaveAttribute("aria-label", /开始于 0\.000 秒/);
+  await expect(mainLane.locator('.clip-block[data-clip-id="color-1"]')).toHaveAttribute("aria-label", /开始于 5\.000 秒/);
   await fitToggle.click();
   await expect(fitToggle).toHaveAttribute("aria-pressed", "false");
   await dragFirstClipToEnd();
@@ -1915,6 +1956,7 @@ test("main-track auto-fit is independent from magnetism and leaves BGM independe
   expect(seconds(gappedMain.find((clip) => clip.id === "color-2")!.timelineStart)).toBe(10);
   expect(seconds(gappedMain.find((clip) => clip.id === "color-5")!.timelineStart)).toBe(25);
   expect(seconds(gapped.sequence.tracks.find((track) => track.id === "a1")!.clips[0].timelineStart)).toBe(0);
+  expect(movedClipIds).toEqual(["color-0", "color-0"]);
   await page.reload();
   const reopened = await readProject(request, id);
   expect(seconds(reopened.sequence.tracks.find((track) => track.id === "v1")!.clips

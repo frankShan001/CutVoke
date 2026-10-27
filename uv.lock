@@ -520,7 +520,7 @@ wheels = [
 
 [[package]]
 name = "cutvoke"
-version = "0.3.3"
+version = "0.3.4"
 source = { editable = "." }
 dependencies = [
     { name = "cryptography" },
@@ -543,6 +543,7 @@ dev = [
     { name = "opencv-python-headless" },
     { name = "pillow" },
     { name = "pytest" },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
 ]
 graphics = [
     { name = "moderngl" },
@@ -576,6 +577,7 @@ requires-dist = [
     { name = "pillow", marker = "extra == 'dev'", specifier = ">=10" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7" },
     { name = "soundfile", marker = "extra == 'separation'", specifier = ">=0.12" },
+    { name = "tomli", marker = "python_full_version < '3.11' and extra == 'dev'", specifier = ">=2" },
     { name = "torch", marker = "extra == 'separation'", specifier = ">=2.0,<2.6" },
     { name = "torchaudio", marker = "extra == 'separation'", specifier = ">=2.0,<2.6" },
 ]

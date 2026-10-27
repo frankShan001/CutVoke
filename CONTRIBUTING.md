@@ -73,6 +73,12 @@ refreshed editor snapshot. A server revision or API node count alone does not
 prove UI readiness; gate the compact project sync response and retain exact
 multi-node timing, selection and single-command undo/redo assertions.
 
+Timeline actions after reorder or undo must verify clip identity together with
+position in the backend and the rendered snapshot before reading drag geometry.
+Sorted start times can remain identical when clip order changes. Use stable clip
+IDs and control delayed sync delivery; preserve exact movement and independent
+audio assertions.
+
 ## Engine boundaries
 
 1. Keep project time as `Rational`; floats belong at display/FFmpeg boundaries.
