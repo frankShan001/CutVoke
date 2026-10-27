@@ -206,7 +206,7 @@ async function main() {
       await client.rpc("initialize", { protocolVersion: "2024-11-05", capabilities: {}, clientInfo: { name: "portable-Windows-acceptance", version: "1" } });
       const identity = await client.call("runtime", {});
       assert.equal(identity.dataPath, runtime.dataPath);
-      const listed = await client.call("media_list", { projectId, query: asset.name, limit: 200 });
+      const listed = await client.call("media_list", { projectId, query: asset.name, limit: 50 });
       const sharedAsset = listed.assets.find(x => x.assetId === asset.assetId);
       assert.ok(sharedAsset?.available, "MCP must see the GUI asset in this project's ledger");
       assert.equal(fs.realpathSync(sharedAsset.path), fs.realpathSync(asset.path));

@@ -5814,6 +5814,10 @@ class RenderService:
         cmd: list[str] = [self.ffmpeg, "-y", "-nostdin",
                           "-filter_complex_threads", str(filter_threads),
                           "-filter_threads", str(filter_threads), *self._gpu_arguments(graph)]
+        if getattr(self._render_ctx, "profile", None) is not None:
+            # Identical bench intervals are distinct real frames. FFmpeg's
+            # default log compression hides them as "Last message repeated".
+            cmd += ["-loglevel", "repeat+info"]
         for input_index, src in enumerate(input_paths):
             cmd += ["-threads", "2"]
             if concat_input and input_index == 0:
