@@ -38,10 +38,11 @@ interface Props {
 }
 
 // Prefer bundled videos; missing examples render one frame after a deliberate hover.
-function ResourceThumbnail({ effect, coverId, sample, playing, disabled, projectId, revision, previewClipId, onPreview }: {
+function ResourceThumbnail({ effect, coverId, sample, catalogReady, playing, disabled, projectId, revision, previewClipId, onPreview }: {
   effect: ProjectResource;
   coverId?: string;
   sample: boolean;
+  catalogReady: boolean;
   playing: boolean;
   disabled: boolean;
   projectId: string | null;
@@ -72,7 +73,9 @@ function ResourceThumbnail({ effect, coverId, sample, playing, disabled, project
   }, [coverId, playing]);
   useEffect(() => {
     setHoverFrame(null); setFrameFailed(false); setFrameLoading(false);
-    if (!playing || sample || !projectId || !previewClipId) return;
+    // An unresolved catalog does not establish that a bundled example is
+    // missing. A slow catalog must never turn browsing into project rendering.
+    if (!catalogReady || !playing || sample || !projectId || !previewClipId) return;
     const controller = new AbortController();
     let url: string | null = null;
     // Missing examples render only after a deliberate hover, never while the
@@ -88,7 +91,7 @@ function ResourceThumbnail({ effect, coverId, sample, playing, disabled, project
         .finally(() => { if (!controller.signal.aborted) setFrameLoading(false); });
     }, 400);
     return () => { clearTimeout(timer); controller.abort(); if (url) URL.revokeObjectURL(url); };
-  }, [playing, sample, projectId, revision, previewClipId, effect.effectId]);
+  }, [catalogReady, playing, sample, projectId, revision, previewClipId, effect.effectId]);
   const Icon = iconForCategory(effect.category);
   return <button type="button" className="resource-card__thumbnail resource-card__thumbnail-button"
     disabled={disabled} onClick={event => onPreview(event.currentTarget)} aria-label={tr("预览{0}效果", effect.name)}
@@ -653,7 +656,7 @@ export function ResourcePanel({ active, family }: Props) {
                 onDragEnd={() => setEffectDrag(null)}
                 title={tr("拖到目标片段；键盘可选中效果卡片后按 Enter 应用到选中片段")}>
                 {e.browseCategory !== "audio" ? (
-                  <ResourceThumbnail effect={e} sample={sample} playing={active && previewingId === e.effectId && !samplePreset && !reducedMotion}
+                  <ResourceThumbnail effect={e} sample={sample} catalogReady={builtinPresets !== null} playing={active && previewingId === e.effectId && !samplePreset && !reducedMotion}
                     coverId={style?.presetId || styles.find(styleReady)?.presetId}
                     projectId={pid} revision={state.project?.revision} previewClipId={previewClipId}
                     disabled={!sample && !previewClipId} onPreview={button => {

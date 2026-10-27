@@ -315,7 +315,6 @@ test("agent edit lease keeps the browser read-only while showing agent edits, th
 
 test("resource covers never render the project while browsing; explicit previews retry and cancel", async ({ page, request }) => {
   const { id, name } = await createProject(request);
-  await openProject(page, name);
   let previewRequests = 0;
   let failNextPreview = true;
   let delayNextPreview = false;
@@ -341,12 +340,31 @@ test("resource covers never render the project while browsing; explicit previews
     }
     await route.fulfill({ status: 200, contentType: "image/png", body: previewImage });
   });
+  let releaseCatalog!: () => void;
+  const catalogGate = new Promise<void>(resolve => { releaseCatalog = resolve; });
+  await page.route("**/api/v1/presets", async route => {
+    await catalogGate;
+    await route.continue().catch(() => {});
+  });
+  await openProject(page, name);
+  await page.clock.install();
+  await page.clock.pauseAt(new Date(Date.now() + 100));
   const tabs = page.getByRole("tablist", { name: "创作域" });
   await tabs.getByRole("tab", { name: "转场", exact: true }).click();
   await expect(page.locator(".resource-effect-card:visible").first()).toBeVisible();
   await openEffectLibrary(page);
   const cards = page.locator(".resource-effect-grid:visible .resource-card");
   const card = cards.first();
+  try {
+    // Deliberately remain on the card longer than both hover timers while
+    // the catalog is unknown. This reproduces the slow-CI ordering exactly.
+    await card.hover();
+    await page.clock.runFor(1000);
+    expect(previewRequests).toBe(0);
+  } finally {
+    releaseCatalog();
+    await page.clock.resume();
+  }
   await card.scrollIntoViewIfNeeded();
   await expect(card.locator(".resource-card__thumbnail img")).toBeVisible();
   await expect.poll(() => card.locator(".resource-card__thumbnail img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
@@ -372,6 +390,28 @@ test("resource covers never render the project while browsing; explicit previews
   await expect(page.locator(".resource-preview")).toHaveCount(0);
   releaseDelayedPreview();
   await page.unroute(previewRoute);
+});
+
+test("resource hover renders a fallback after the catalog confirms no bundled sample", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await page.route("**/api/v1/presets", route => route.fulfill({ json: { presets: [] } }));
+  let requests = 0;
+  await page.route(/\/resource-preview\?/, async route => {
+    requests++;
+    const url = new URL(route.request().url());
+    expect(url.searchParams.get("effectId")).toBe("cutvoke.transition.blur");
+    expect(url.searchParams.get("clipId")).toBe("color-1");
+    await route.fulfill({ contentType: "image/png", body: readFileSync(imageFixture) });
+  });
+  await openProject(page, name);
+  await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "转场", exact: true }).click();
+  const card = page.locator('.resource-card[data-effect-id="cutvoke.transition.blur"]');
+  await expect(card).toBeVisible();
+  const before = await readProject(request, id);
+  await card.hover();
+  await expect(card.locator(".resource-card__hover-frame")).toBeVisible();
+  expect(requests).toBe(1);
+  expect((await readProject(request, id)).sequence).toEqual(before.sequence);
 });
 
 test("resource catalog load failures show the cause and can be retried", async ({ page, request }) => {
