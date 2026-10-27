@@ -24,6 +24,10 @@ work.mkdir(parents=True, exist_ok=True)
 lock = (root / 'apps/desktop/requirements-build.lock').read_text()
 without_crypto, replacements = re.subn(r'(?m)^cryptography==[^\n]+\n(?:[ \t]+--hash=[^\n]+\n)+', '', lock)
 assert replacements == 1
+# glcontext 3.1.0 has no CPython 3.13 Intel-macOS wheel. Retain the
+# pinned version and build its small C++ backend from verified upstream source.
+without_crypto, replacements = re.subn(r'(?m)^glcontext==[^\n]+\n(?:[ \t]+--hash=[^\n]+\n)+', '', without_crypto)
+assert replacements == 1
 build_lock = work / 'build-requirements.lock'
 build_lock.write_text(without_crypto + (root / 'apps/desktop/requirements-intel-crypto.lock').read_text())
 subprocess.run([sys.executable, '-m', 'pip', 'install', '--require-hashes', '--only-binary=:all:', '-r', str(build_lock)], check=True)
@@ -55,6 +59,9 @@ if not (output / 'SHA256.json').exists():
     env.update(OPENSSL_DIR=str(prefix), OPENSSL_STATIC='1', CARGO_NET_OFFLINE='true')
     wheels = output / 'wheels'
     wheels.mkdir(exist_ok=True)
+    graphics = work / 'glcontext-3.1.0'
+    subprocess.run([sys.executable, '-m', 'pip', 'wheel', '--no-deps', '--no-build-isolation', '--no-cache-dir',
+                    '--wheel-dir', str(wheels), str(graphics)], env=env, check=True)
     subprocess.run([sys.executable, '-m', 'pip', 'wheel', '--no-deps', '--no-build-isolation', '--no-cache-dir',
                     '--wheel-dir', str(wheels), str(crypto)], env=env, check=True)
     notices = output / 'licenses'
@@ -90,13 +97,19 @@ if not (output / 'SHA256.json').exists():
 
 for name, expected in json.loads((output / 'SHA256.json').read_text()).items():
     assert hashlib.sha256((output / name).read_bytes()).hexdigest() == expected, name
-wheel, = (output / 'wheels').glob('cryptography-50.0.2-*.whl')
-digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
 wheel_lock = work / 'runtime-wheel.lock'
-wheel_lock.write_text(f'cryptography==50.0.2 --hash=sha256:{digest}\n')
+wheel_pins = []
+for name, version in (('cryptography', '50.0.2'), ('glcontext', '3.1.0')):
+    wheel, = (output / 'wheels').glob(f'{name}-{version}-*.whl')
+    digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
+    wheel_pins.append(f'{name}=={version} --hash=sha256:{digest}\n')
+wheel_lock.write_text(''.join(wheel_pins))
 subprocess.run([sys.executable, '-m', 'pip', 'install', '--require-hashes', '--no-deps', '--no-index',
                 '--find-links', str(wheel.parent), '-r', str(wheel_lock)], check=True)
 print(json.dumps({'wheel': wheel.name, 'sha256': digest, 'source': 'pinned native Intel build'}, indent=2))
+subprocess.run([sys.executable, '-c',
+    'import glcontext.darwin; from importlib.metadata import version; '
+    'assert version("glcontext")=="3.1.0"'], check=True)
 subprocess.run([sys.executable, '-c',
     'from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey; '
     'from cryptography.hazmat.backends.openssl.backend import backend; '

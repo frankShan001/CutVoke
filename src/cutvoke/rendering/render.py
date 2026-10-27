@@ -2211,7 +2211,8 @@ class RenderService:
         if not any(track.visible and not track.muted and any(not clip.hidden for clip in track.clips)
                    for track in audio_seq.tracks):
             return False,[]
-        saved = {key: getattr(self._render_ctx, key, None) for key in
+        missing = object()
+        saved = {key: getattr(self._render_ctx, key, missing) for key in
                  ('export_audio_sequence', 'bounded_origin', 'clip_clocks', 'audio_origin_delta')}
         self._render_ctx.export_audio_sequence = None
         self._render_ctx.bounded_origin = None
@@ -2224,14 +2225,19 @@ class RenderService:
                 return False, warnings
             rate = seq.audio_sample_rate
             first, last = round(start * rate), round((start + duration) * rate)
-            graph += (f';[outv]nullsink;[outa]aresample={rate},apad=whole_len={last},'
+            graph += (f';[outa]aresample={rate},apad=whole_len={last},'
                       f'atrim=start_sample={first}:end_sample={last},asetpts=N/SR/TB[continuousa]')
             args, script = _filter_graph_arguments(self.ffmpeg, graph)
             command = [self.ffmpeg, '-y', '-nostdin', '-v', 'error', '-filter_complex_threads', '2']
             for path in inputs:
                 command += ['-threads', '1', '-i', path]
             command += [*args, '-map', '[continuousa]', '-ar', str(rate), '-ac', '2', '-c:a', 'pcm_f32le', out_path]
-            process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+            # Consume the finite 16px clock as an actual null output. FFmpeg 7
+            # can abort its scheduler when this independent overlay/scale graph
+            # ends in nullsink while only the audio component has an output.
+            command += ['-map', '[outv]', '-an', '-f', 'null', '-']
+            process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                       stderr=subprocess.PIPE, cwd=caption_cwd)
             try:
                 while True:
                     if cancel_event and cancel_event.is_set():
@@ -2249,7 +2255,10 @@ class RenderService:
             return True, warnings
         finally:
             for key, value in saved.items():
-                setattr(self._render_ctx, key, value)
+                if value is missing:
+                    delattr(self._render_ctx, key)
+                else:
+                    setattr(self._render_ctx, key, value)
             if script:
                 Path(script).unlink(missing_ok=True)
             if caption_cwd:
@@ -3394,7 +3403,7 @@ class RenderService:
         # 一步（overlay/fps/字幕合成）把 alpha 悄悄降成 yuv420p 后被编码器
         # 静默丢弃——宁可这里显式转换，也不让成片"看起来成功但没透明"。
         if alpha:
-            parts.append("[outv]format=yuva420p[outv]")
+            parts.append("[outv]format=rgba[outv]")
 
         if render_window is not None:
             # Keep original clocks inside clips/effects/ASS/audio delays. Only
@@ -3481,6 +3490,10 @@ class RenderService:
         变换，必须走能定位的画布路径，否则会被静默忽略。
         """
         if _is_image_src(clip.asset_ref.source_path):
+            return True
+        # Decoded alpha must meet the canvas before a working-space conversion
+        # can discard it, including materialized composition intermediates.
+        if clip.asset_ref.source_path and _pix_fmt_has_alpha(self.probe_media(clip.asset_ref.source_path).get('pix_fmt')):
             return True
         if _find_animations(clip):
             return True
@@ -3959,15 +3972,15 @@ class RenderService:
     def _working_video_filter(self, *, keep_alpha=False) -> str:
         """Pin matrix/range/chroma before branches can negotiate with neighbours.
 
-        Overlay beds are RGB so RGB effect layers cannot silently choose a
-        different YUV matrix. Every join and the completed graph use one 4:4:4
-        working space. Export conversion happens only after window assembly.
+        Keep packed RGB/RGBA between joins and window intermediates. Repeated
+        planar conversions add alpha units on FFmpeg 7 and let neighbouring
+        YUV filters choose conflicting matrices. Convert once at the encoder.
         """
         space=getattr(self._render_ctx,'working_color','bt709')
-        primaries,transfer,matrix=COLOR_SPACE_TRIPLE.get(space,COLOR_SPACE_TRIPLE['bt709'])
-        pixel_format='yuva444p' if keep_alpha or getattr(self._render_ctx,'alpha',False) else 'yuv444p'
-        return (f'scale=out_color_matrix={matrix}:out_range=tv,format={pixel_format},'
-                f'setparams=range=limited:color_primaries={primaries}:color_trc={transfer}:colorspace={matrix}')
+        primaries,transfer,_matrix=COLOR_SPACE_TRIPLE.get(space,COLOR_SPACE_TRIPLE['bt709'])
+        pixel_format='rgba' if keep_alpha or getattr(self._render_ctx,'alpha',False) else 'rgb24'
+        return (f'format={pixel_format},'
+                f'setparams=range=full:color_primaries={primaries}:color_trc={transfer}:colorspace=gbr')
 
     def _build_clip_plain(self, clip: Clip, seq: Sequence, get_input, parts: list[str],
                           vseg: list[int], fps_expr: str) -> str:
@@ -5204,7 +5217,7 @@ class RenderService:
                 # coverage to eight bits; it can add two alpha units on FFmpeg 6.
                 f"[{stem}_alpha][{stem}_matte]blend=all_mode=multiply:shortest=0:repeatlast=1,"
                 f"scale=flags=neighbor:sws_dither=none,format=gray[{stem}_coverage]",
-                f"[{stem}_rgb][{stem}_coverage]alphamerge,format=gbrap[{stem}_out]",
+                f"[{stem}_rgb][{stem}_coverage]alphamerge,format=rgba[{stem}_out]",
             ])
             return f'{stem}_out'
         if key in ("vlogSubjectLock", "vlogPunchIn"):
@@ -5798,7 +5811,7 @@ class RenderService:
             "h264_nvenc" if use_nvenc else "libx264")
         if lossless:
             cmd += [*filter_args, "-map", out_label, "-c:v", "ffv1", "-level", "3",
-                    "-threads", "2", "-pix_fmt", "yuva444p" if alpha else "yuv444p"]
+                    "-threads", "2", "-pix_fmt", "bgra" if alpha else "bgr0"]
             if has_audio:
                 cmd += ["-map", audio_label, "-c:a", "pcm_s16le"]
             if output_start is not None and output_duration is None:

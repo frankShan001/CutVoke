@@ -49,3 +49,23 @@ def test_profile_is_read_only_and_prefetch_cancellation_has_a_scoped_token(tmp_p
         assert api._prefetch_tokens[token].is_set()
     finally:
         api.close(); service.close(); store.close()
+
+
+def test_profile_attributes_real_intervals_to_each_effect_without_pointer_guesses(tmp_path):
+    service, store, renderer, command = setup(tmp_path)
+    try:
+        command('effect.add', clipId='base', effectId='cutvoke.fx.blur', params={})
+        command('effect.add', clipId='base', effectId='cutvoke.fx.invert', params={})
+        project = service.get_project('composition')
+        before = copy.deepcopy(project.to_dict())
+        from cutvoke.rendering.profiler import measure
+        report = measure(project, start=.1, duration=.3, maximum=320)
+        expected = {effect['instanceId'] for effect in project.sequence.tracks[0].clips[0].effects}
+        for run in report['runs']:
+            assert {effect['instanceId'] for effect in run['effects']} == expected
+            assert len(run['profilePasses']) == 2
+            assert all(effect['samples'] == 3 for effect in run['effects'])
+            assert all(0 <= effect['minSeconds'] <= effect['maxSeconds'] for effect in run['effects'])
+        assert project.to_dict() == before
+    finally:
+        service.close(); store.close()

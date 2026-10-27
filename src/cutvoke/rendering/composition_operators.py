@@ -12,6 +12,7 @@ PROCEDURAL = {"cutvoke.fx.fractalNoise", "cutvoke.fx.turbulentDisplace", "cutvok
 
 def specs():
     from cutvoke.rendering.effects import EffectSpec
+    from cutvoke.rendering.operator_descriptions import describe
     def num(default, low, high):
         return {"type": "number", "default": default, "minimum": low, "maximum": high}
     def integer(default, low, high):
@@ -46,7 +47,7 @@ def specs():
     from cutvoke.rendering.camera_plane import spec as camera_spec
     from cutvoke.rendering.scene3d import spec as scene_spec
     return [camera_spec(),scene_spec()] + [EffectSpec(id="cutvoke.fx." + key, version="1.0.0", name={"zh-CN": cn, "en": en}, category="fx",
-             parameters={"type": "object", "properties": props, "additionalProperties": False},
+             parameters={"type": "object", "properties": describe(props), "additionalProperties": False},
              implementation={"engine": "ffmpeg", "filter": key}, applies_to=("video", "image"),
              keywords=(key, en, cn), description={"zh-CN": "可组合基础算子；固定种子、归一化几何，与预览和导出共用实现。", "en": "Composable deterministic operator with bounded parameters and shared preview/export rendering."},
              license="AGPL-3.0-or-later") for key, cn, en, props in values]

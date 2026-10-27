@@ -41,6 +41,22 @@ def spec():
     def label(schema):
         for key,value in schema.get('properties',{}).items():
             if key in labels:value['x-cutvoke-label']=dict(zip(('zh-CN','en'),labels[key]))
+            descriptions={
+                'objects':('网格、材质和三维姿态对象列表','Objects with meshes, materials and 3D poses'),
+                'camera':('场景摄像机、观察目标及透视投影','Scene camera, target and perspective projection'),
+                'light':('点光源的位置、颜色、强度和环境光','Point light position, color, intensity and ambient illumination'),
+                'renderer':('自动选择、本机 OpenGL 或软件渲染','Automatic selection, local OpenGL or software rendering'),
+                'depthLayers':('逐像素透明深度层数；更多层增加合成成本','Per-pixel transparent depth layers; more layers increase compositing cost'),
+                'poseFrames':('按片段内秒数插值的姿态关键点','Pose keys interpolated in clip-local seconds'),
+                'intensity':('点光源亮度倍率','Point-light brightness multiplier'),
+                'ambient':('环境光亮度倍率','Ambient-light brightness multiplier'),
+                'color':('光源或材质颜色，十六进制 RGB','Light or material color as hexadecimal RGB'),
+                'x':('三维横向位置，场景世界坐标','Horizontal position in scene world units'),
+                'y':('三维纵向位置，场景世界坐标','Vertical position in scene world units'),
+                'z':('三维深度位置，场景世界坐标','Depth position in scene world units'),
+            }
+            if key in descriptions:value['description']=dict(zip(('zh-CN','en'),descriptions[key]))
+            elif key in labels:value['description']=dict(zip(('zh-CN','en'),labels[key]))
             label(value)
         if 'items' in schema:label(schema['items'])
     label(parameters)

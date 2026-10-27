@@ -23,9 +23,11 @@ def spec():
         bounds = (-85,85) if key in {"rotationX","rotationY"} else (-180,180) if key=="rotationZ" else (1.1,20) if key=="cameraDistance" else (10,150) if key=="focalLength" else (-4,4)
         return {"type":"number","default":value,"minimum":bounds[0],"maximum":bounds[1],
                 "unit":"deg" if key.startswith("rotation") else "mm" if key=="focalLength" else "H",
-                "x-cutvoke-label":{"zh-CN":labels[key][0],"en":labels[key][1]}, "x-cutvoke-step":.1}
+                "x-cutvoke-label":{"zh-CN":labels[key][0],"en":labels[key][1]},
+                "description":{"zh-CN":labels[key][0]+"；角度用度，位置以画面高度为单位，焦距用毫米",
+                               "en":labels[key][1]+"; angles in degrees, positions in canvas-height units, focal length in mm"}, "x-cutvoke-step":.1}
     properties={key:field(key,value) for key,value in DEFAULTS.items()}
-    properties["poseFrames"]={"type":"array","maxItems":32,"items":{"type":"object","properties":{
+    properties["poseFrames"]={"description":{"zh-CN":"按片段内秒数插值的姿态和摄像机关键点", "en":"Pose and camera keys interpolated in clip-local seconds"},"type":"array","maxItems":32,"items":{"type":"object","properties":{
         "at":{"type":"number","minimum":0,"maximum":86400},
         **{key:{k:v for k,v in schema.items() if k!='default'} for key,schema in properties.items()}},
         "required":["at"],"additionalProperties":False}}

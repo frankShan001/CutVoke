@@ -1,4 +1,6 @@
 # Build-only PEP 517 backend, official PyPI wheel hashes. Runtime/build dependencies use requirements-build.lock.
+wheel==0.48.0 \
+ --hash=sha256:3217dcc807155e45db462d7ef2431f5ddda0d7273b700d05a67b271ceb1287ab
 maturin==1.15.0 \
  --hash=sha256:6bf6dc62e22d4dcfd5a51244ff0d58975fa4979c48209fe84159617648956d82 \
  --hash=sha256:cd35772633f489841132bc8e71d6fc7f842df30b9c05cd5cdf1ee1ddcb744cc7 \

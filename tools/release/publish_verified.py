@@ -11,7 +11,10 @@ import shutil
 import subprocess
 import tarfile
 import time
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 is a supported development runtime.
+    import tomli as tomllib
 import urllib.error
 import urllib.request
 import zipfile
@@ -57,8 +60,11 @@ def created_draft_id(repo, tag, sha):
 
 
 def digest(path):
+    checksum = hashlib.sha256()
     with path.open('rb') as file:
-        return hashlib.file_digest(file, 'sha256').hexdigest()
+        for block in iter(lambda: file.read(1024 * 1024), b''):
+            checksum.update(block)
+    return checksum.hexdigest()
 
 
 def verify_info(info, version, sha, platform):
