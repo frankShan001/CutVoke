@@ -130,6 +130,31 @@ class BuiltinEffectExpansionTests(unittest.TestCase):
             if str(spec.implementation.get("filter", "")) in _AUDIO_FX_STEPS:
                 continue
             with self.subTest(effect_id=spec.id):
+                from cutvoke.rendering.composition_operators import PROCEDURAL
+                if spec.id in PROCEDURAL:
+                    # These operators consume a request-scoped source produced
+                    # by the public renderer, rather than a standalone filter.
+                    import copy
+                    import tempfile
+                    from pathlib import Path
+                    from PIL import Image
+                    from cutvoke.domain.model import AssetReference, Clip, Track
+                    from cutvoke.domain.rational import Rational
+                    with tempfile.TemporaryDirectory() as directory:
+                        source = Path(directory) / 'source.png'
+                        Image.new('RGB', (64, 64), 'white').save(source)
+                        project = EditService().create_project('defaults', width=64, height=64)
+                        project.sequence.tracks = [Track('v', 'video', [Clip('c',
+                            AssetReference('a', str(source)), Rational.of(0), Rational.of(1, 5), Rational.of(0),
+                            effects=[{'effectId': spec.id, 'params': spec.default_params()}])])]
+                        before = copy.deepcopy(project.to_dict())
+                        output = Path(directory) / 'frame.png'
+                        renderer.extract_frame(project, 0, str(output))
+                        with Image.open(output) as frame:
+                            self.assertEqual(frame.size, (64, 64))
+                            self.assertIsNotNone(frame.getbbox())
+                        self.assertEqual(project.to_dict(), before)
+                    continue
                 parts: list[str] = []
                 output = renderer._fx_one(
                     str(spec.implementation["filter"]), spec.default_params(),

@@ -2105,7 +2105,8 @@ class RenderService:
             # fps already produces zero-based, exact frame ticks. A following
             # identity setpts would strip rate/duration metadata on FFmpeg 7
             # and make its encoder drop/retime frames across chunk boundaries.
-            graph = f"[0:v]fps={frame_rate.numerator}/{frame_rate.denominator}[outv]"
+            graph = (f"[0:v]fps={frame_rate.numerator}/{frame_rate.denominator},"
+                     f"{self._working_video_filter(keep_alpha=alpha)}[outv]")
             if not _setpts_clears_frame_rate(self.ffmpeg):
                 graph = graph.replace("[outv]", ",setpts=N/FRAME_RATE/TB[outv]")
             if has_audio:
@@ -2211,7 +2212,8 @@ class RenderService:
         if not any(track.visible and not track.muted and any(not clip.hidden for clip in track.clips)
                    for track in audio_seq.tracks):
             return False,[]
-        saved = {key: getattr(self._render_ctx, key, None) for key in
+        missing = object()
+        saved = {key: getattr(self._render_ctx, key, missing) for key in
                  ('export_audio_sequence', 'bounded_origin', 'clip_clocks', 'audio_origin_delta')}
         self._render_ctx.export_audio_sequence = None
         self._render_ctx.bounded_origin = None
@@ -2224,14 +2226,19 @@ class RenderService:
                 return False, warnings
             rate = seq.audio_sample_rate
             first, last = round(start * rate), round((start + duration) * rate)
-            graph += (f';[outv]nullsink;[outa]aresample={rate},apad=whole_len={last},'
+            graph += (f';[outa]aresample={rate},apad=whole_len={last},'
                       f'atrim=start_sample={first}:end_sample={last},asetpts=N/SR/TB[continuousa]')
             args, script = _filter_graph_arguments(self.ffmpeg, graph)
             command = [self.ffmpeg, '-y', '-nostdin', '-v', 'error', '-filter_complex_threads', '2']
             for path in inputs:
                 command += ['-threads', '1', '-i', path]
             command += [*args, '-map', '[continuousa]', '-ar', str(rate), '-ac', '2', '-c:a', 'pcm_f32le', out_path]
-            process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+            # Consume the finite 16px clock as an actual null output. FFmpeg 7
+            # can abort its scheduler when this independent overlay/scale graph
+            # ends in nullsink while only the audio component has an output.
+            command += ['-map', '[outv]', '-an', '-f', 'null', '-']
+            process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                       stderr=subprocess.PIPE, cwd=caption_cwd)
             try:
                 while True:
                     if cancel_event and cancel_event.is_set():
@@ -2249,7 +2256,10 @@ class RenderService:
             return True, warnings
         finally:
             for key, value in saved.items():
-                setattr(self._render_ctx, key, value)
+                if value is missing:
+                    delattr(self._render_ctx, key)
+                else:
+                    setattr(self._render_ctx, key, value)
             if script:
                 Path(script).unlink(missing_ok=True)
             if caption_cwd:
@@ -3394,7 +3404,7 @@ class RenderService:
         # 一步（overlay/fps/字幕合成）把 alpha 悄悄降成 yuv420p 后被编码器
         # 静默丢弃——宁可这里显式转换，也不让成片"看起来成功但没透明"。
         if alpha:
-            parts.append("[outv]format=yuva420p[outv]")
+            parts.append("[outv]format=rgba[outv]")
 
         if render_window is not None:
             # Keep original clocks inside clips/effects/ASS/audio delays. Only
@@ -3481,6 +3491,11 @@ class RenderService:
         变换，必须走能定位的画布路径，否则会被静默忽略。
         """
         if _is_image_src(clip.asset_ref.source_path):
+            return True
+        # Decoded alpha must meet the canvas before a working-space conversion
+        # can discard it, including materialized composition intermediates.
+        if (os.path.isfile(clip.asset_ref.source_path)
+                and _pix_fmt_has_alpha(self.probe_media(clip.asset_ref.source_path).get('pix_fmt'))):
             return True
         if _find_animations(clip):
             return True
@@ -3812,6 +3827,14 @@ class RenderService:
                     _build_squeeze_transition(transition_outgoing, incoming, out,
                                               str(squeeze_axis), d, offset, parts)
                 else:
+                    if has_alpha:
+                        planar_yuv = any(p is not None for p in
+                                         (blur_pattern, camera_pattern, vlog_pattern))
+                        transition_outgoing = self._planar_alpha_for_transition(
+                            transition_outgoing, f'{out}from', parts, yuv=planar_yuv)
+                        incoming = self._planar_alpha_for_transition(
+                            incoming, f'{out}to', parts, yuv=planar_yuv)
+                        xfade_format = ''
                     clock = f"settb=expr={fps.denominator}/{fps.numerator},setpts=N"
                     clears_rate = _setpts_clears_frame_rate(self.ffmpeg)
                     if clears_rate:
@@ -3959,15 +3982,34 @@ class RenderService:
     def _working_video_filter(self, *, keep_alpha=False) -> str:
         """Pin matrix/range/chroma before branches can negotiate with neighbours.
 
-        Overlay beds are RGB so RGB effect layers cannot silently choose a
-        different YUV matrix. Every join and the completed graph use one 4:4:4
-        working space. Export conversion happens only after window assembly.
+        Keep packed RGB/RGBA between joins and window intermediates. Repeated
+        planar conversions add alpha units on FFmpeg 7 and let neighbouring
+        YUV filters choose conflicting matrices. Convert once at the encoder.
         """
         space=getattr(self._render_ctx,'working_color','bt709')
-        primaries,transfer,matrix=COLOR_SPACE_TRIPLE.get(space,COLOR_SPACE_TRIPLE['bt709'])
-        pixel_format='yuva444p' if keep_alpha or getattr(self._render_ctx,'alpha',False) else 'yuv444p'
-        return (f'scale=out_color_matrix={matrix}:out_range=tv,format={pixel_format},'
-                f'setparams=range=limited:color_primaries={primaries}:color_trc={transfer}:colorspace={matrix}')
+        primaries,transfer,_matrix=COLOR_SPACE_TRIPLE.get(space,COLOR_SPACE_TRIPLE['bt709'])
+        alpha = keep_alpha or getattr(self._render_ctx,'alpha',False)
+        pixel_format = 'rgba' if alpha else 'rgb24'
+        return (f'format={pixel_format},'
+                f'setparams=range=full:color_primaries={primaries}:color_trc={transfer}:colorspace=gbr')
+
+    def _planar_alpha_for_transition(self, source, output, parts, *, yuv=False):
+        """Preserve 8-bit coverage while satisfying xfade's planar input.
+
+        FFmpeg 7's packed RGBA -> planar conversion rounds intermediate alpha
+        upward (128 becomes 129), even outside the transition. Split coverage
+        before that conversion; mergeplanes copies the exact gray plane.
+        """
+        color_format = 'yuv444p' if yuv else 'gbrp'
+        output_format = 'yuva444p' if yuv else 'gbrap'
+        parts.append(
+            f'[{source}]format=rgba,split=2[{output}color][{output}alpha];'
+            f'[{output}color]format={color_format}[{output}planes];'
+            f'[{output}alpha]format=rgba,alphaextract,'
+            f'scale=in_range=full:out_range=full,format={color_format}[{output}coverage];'
+            f'[{output}planes][{output}coverage]'
+            f'mergeplanes=0x00010210:format={output_format}[{output}]')
+        return output
 
     def _build_clip_plain(self, clip: Clip, seq: Sequence, get_input, parts: list[str],
                           vseg: list[int], fps_expr: str) -> str:
@@ -5204,7 +5246,7 @@ class RenderService:
                 # coverage to eight bits; it can add two alpha units on FFmpeg 6.
                 f"[{stem}_alpha][{stem}_matte]blend=all_mode=multiply:shortest=0:repeatlast=1,"
                 f"scale=flags=neighbor:sws_dither=none,format=gray[{stem}_coverage]",
-                f"[{stem}_rgb][{stem}_coverage]alphamerge,format=gbrap[{stem}_out]",
+                f"[{stem}_rgb][{stem}_coverage]alphamerge,format=rgba[{stem}_out]",
             ])
             return f'{stem}_out'
         if key in ("vlogSubjectLock", "vlogPunchIn"):
@@ -5772,6 +5814,10 @@ class RenderService:
         cmd: list[str] = [self.ffmpeg, "-y", "-nostdin",
                           "-filter_complex_threads", str(filter_threads),
                           "-filter_threads", str(filter_threads), *self._gpu_arguments(graph)]
+        if getattr(self._render_ctx, "profile", None) is not None:
+            # Identical bench intervals are distinct real frames. FFmpeg's
+            # default log compression hides them as "Last message repeated".
+            cmd += ["-loglevel", "repeat+info"]
         for input_index, src in enumerate(input_paths):
             cmd += ["-threads", "2"]
             if concat_input and input_index == 0:
@@ -5798,7 +5844,7 @@ class RenderService:
             "h264_nvenc" if use_nvenc else "libx264")
         if lossless:
             cmd += [*filter_args, "-map", out_label, "-c:v", "ffv1", "-level", "3",
-                    "-threads", "2", "-pix_fmt", "yuva444p" if alpha else "yuv444p"]
+                    "-threads", "2", "-pix_fmt", "bgra" if alpha else "bgr0"]
             if has_audio:
                 cmd += ["-map", audio_label, "-c:a", "pcm_s16le"]
             if output_start is not None and output_duration is None:

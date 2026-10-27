@@ -1,7 +1,8 @@
+import { projectOutputPath } from "./projectDirectoryHelpers";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
-import { mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { resolve } from "node:path";
+import { basename, resolve } from "node:path";
 
 const image = fileURLToPath(new URL("../../../src/cutvoke/assets/stickers/decor_sparkles.png", import.meta.url));
 const audio = fileURLToPath(new URL("../../../src/cutvoke/assets/audio/tech_minimal.wav", import.meta.url));
@@ -32,7 +33,7 @@ async function projectWithImages(request: APIRequestContext, count = 1) {
   const assets: Array<{ assetId: string; path: string; name: string }> = [];
   for (let index = 0; index < count; index++) {
     const filename = `现场照片-${id}-${index}.png`;
-    const upload = await request.post(`/api/v1/assets?name=${encodeURIComponent(filename)}`, {
+    const upload = await request.post(`/api/v1/assets?name=${encodeURIComponent(filename)}&projectId=${encodeURIComponent(id)}`, {
       headers: { "Content-Type": "application/octet-stream" }, data: readFileSync(image),
     });
     expect(upload.ok()).toBeTruthy();
@@ -61,11 +62,11 @@ async function open(page: Page, name: string, repair = false, preparationTimeout
   await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible({ timeout: preparationTimeout });
 }
 
-async function exportDialog(page: Page, id: string) {
+async function exportDialog(page: Page, request: APIRequestContext, id: string) {
   await page.getByRole("button", { name: "导出", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "导出成片" });
   mkdirSync(resolve(evidence, "exports"), { recursive: true });
-  const path = resolve(evidence, "exports", `${id}.mp4`);
+  const path = await projectOutputPath(request, id, `${id}.mp4`);
   await dialog.getByLabel("输出文件路径").fill(path);
   await dialog.getByLabel("画质").selectOption("low");
   return { dialog, path };
@@ -84,8 +85,8 @@ async function removeQaAsset(path: string) {
   }, { timeout: 15_000, intervals: [100, 300, 1000] }).toBe(true);
 }
 
-async function restore(request: APIRequestContext, asset: { assetId: string }) {
-  await request.post(`/api/v1/assets/${encodeURIComponent(asset.assetId)}/relink?name=restored.png`, {
+async function restore(request: APIRequestContext, asset: { assetId: string }, id: string) {
+  await request.post(`/api/v1/assets/${encodeURIComponent(asset.assetId)}/relink?name=restored.png&projectId=${encodeURIComponent(id)}`, {
     headers: { "Content-Type": "application/octet-stream" }, data: readFileSync(image),
   });
 }
@@ -123,7 +124,7 @@ test("export preflight blocks missing media, locates the relink control, and exp
   await removeQaAsset(assets[0].path);
   try {
     const revision = (await current(request, id)).revision;
-    const { dialog, path } = await exportDialog(page, id);
+    const { dialog, path } = await exportDialog(page, request, id);
     await dialog.getByRole("button", { name: "开始导出" }).click();
     await expect(dialog.getByText("导出前检查未通过", { exact: true })).toBeVisible();
     await expect(dialog).toContainText(assets[0].name);
@@ -147,16 +148,17 @@ test("export preflight blocks missing media, locates the relink control, and exp
     const relinkedItem = page.locator(`.media-item[title*="${assets[0].assetId}"]`);
     await expect(relinkedItem).toBeVisible();
     await expect(relinkedItem).toContainText("decor_sparkles.png");
-    const reopened = await exportDialog(page, id);
+    const reopened = await exportDialog(page, request, id);
     await reopened.dialog.getByRole("button", { name: "开始导出" }).click();
     await expect(reopened.dialog.getByText("导出完成", { exact: false })).toBeVisible({ timeout: 75_000 });
     expect(statSync(path).size).toBeGreaterThan(0);
+    copyFileSync(path, resolve(evidence, "exports", basename(path)));
     const panel = await reopened.dialog.locator(".export-dialog__panel").boundingBox();
     expect(panel!.y).toBeGreaterThanOrEqual(0);
     expect(panel!.y + panel!.height).toBeLessThanOrEqual(page.viewportSize()!.height);
     await page.screenshot({ path: resolve(evidence, "06-recovered-export.png") });
   } finally {
-    await restore(request, assets[0]);
+    await restore(request, assets[0], id);
   }
 });
 
@@ -166,7 +168,7 @@ test("selected export passes its range to preflight and keeps out-of-range missi
   await removeQaAsset(assets[1].path);
   try {
     await open(page, name, true);
-    const { dialog, path } = await exportDialog(page, id);
+    const { dialog, path } = await exportDialog(page, request, id);
     await dialog.getByLabel("仅导出时间范围").check();
     await dialog.getByLabel("导出开始时间").fill("0");
     await dialog.getByLabel("导出结束时间").fill("1");
@@ -178,9 +180,10 @@ test("selected export passes its range to preflight and keeps out-of-range missi
     await expect(dialog.getByText("导出前检查未通过", { exact: true })).toHaveCount(0);
     await expect(dialog.getByText("导出完成", { exact: false })).toBeVisible({ timeout: 75_000 });
     expect(statSync(path).size).toBeGreaterThan(0);
+    copyFileSync(path, resolve(evidence, "exports", basename(path)));
     await expect(dialog.locator(".inspector__row").filter({ hasText: "时长" })).toContainText("1.00 秒");
   } finally {
-    await restore(request, assets[1]);
+    await restore(request, assets[1], id);
   }
 });
 
@@ -188,7 +191,7 @@ test("preflight request failure keeps export settings and allows an explicit ret
   test.setTimeout(90_000);
   const { id, name } = await projectWithImages(request);
   await open(page, name);
-  const { dialog, path } = await exportDialog(page, id);
+  const { dialog, path } = await exportDialog(page, request, id);
   let failed = false;
   await page.route(`**${api(id)}/commands`, async (route) => {
     if (route.request().postDataJSON()?.type === "project.preflight" && !failed) {
@@ -348,8 +351,9 @@ test("caption font selection renders the bundled face and survives undo, redo, r
   await expect(page.getByLabel("字幕字体", { exact: true })).toHaveValue("Noto Serif SC");
   await expect(page.getByRole("button", { name: "字幕加粗", exact: true })).toHaveAttribute("aria-pressed", "true");
   await page.screenshot({ path: resolve(evidence, "13-caption-font-reopened.png") });
-  const { dialog, path } = await exportDialog(page, id);
+  const { dialog, path } = await exportDialog(page, request, id);
   await dialog.getByRole("button", { name: "开始导出" }).click();
   await expect(dialog.getByText("导出完成", { exact: false })).toBeVisible({ timeout: 75_000 });
   expect(statSync(path).size).toBeGreaterThan(0);
+    copyFileSync(path, resolve(evidence, "exports", basename(path)));
 });

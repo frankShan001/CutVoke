@@ -24,7 +24,7 @@ test("Vlog effects edit, preview, localize and retain authored transition parame
   });
   await page.goto("/");
   await page.getByRole("button", { name: `打开工程 ${name}`, exact: true }).click();
-  await page.locator(".clip-block").filter({ hasText: "red.mp4" }).click();
+  await page.locator(".clip-block[data-clip-id='shot-0']").click();
   const addFromLibrary = async (name: string, action: string) => {
     await page.getByRole("button", { name: action, exact: true }).click();
     const card = page.locator(".resource-effect-library:visible .resource-card")

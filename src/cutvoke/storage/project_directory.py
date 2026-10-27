@@ -19,6 +19,7 @@ import time
 import uuid
 
 from cutvoke.domain.model import Project
+from cutvoke.domain.effect_files import effect_file_paths, map_effect_files
 from cutvoke.storage.store import ProjectStore, RevisionConflict
 from cutvoke.storage.workspace_paths import is_path_field
 
@@ -42,8 +43,11 @@ def _atomic_json(path, value):
 
 def _walk_paths(value, field=""):
     if isinstance(value, dict):
+        if 'effectId' in value:
+            yield from (path for path, _kind in effect_file_paths(value))
         for key, item in value.items():
-            yield from _walk_paths(item, key)
+            if key != 'params' or 'effectId' not in value:
+                yield from _walk_paths(item, key)
     elif isinstance(value, list):
         for item in value:
             yield from _walk_paths(item, field)
@@ -53,6 +57,10 @@ def _walk_paths(value, field=""):
 
 def _map_paths(value, replace, field=""):
     if isinstance(value, dict):
+        if 'effectId' in value:
+            mapped = map_effect_files(value, replace)
+            return {key: item if key == 'params' else _map_paths(item, replace, key)
+                    for key, item in mapped.items()}
         return {key: _map_paths(item, replace, key) for key, item in value.items()}
     if isinstance(value, list):
         return [_map_paths(item, replace, field) for item in value]
@@ -61,7 +69,7 @@ def _map_paths(value, replace, field=""):
 
 def _refs(value):
     if isinstance(value, dict):
-        if value.get("assetId") and value.get("sourcePath"):
+        if "assetId" in value and value.get("sourcePath"):
             yield value
         for item in value.values():
             yield from _refs(item)
@@ -206,12 +214,14 @@ class DirectoryProjectStore(ProjectStore):
                     return copied[value]
                 return value
             updated = _map_paths(data, own)
-            if updated != data:
-                owned = Project.from_dict(updated)
-                project.__dict__.update(owned.__dict__)
             original_names = {owned: Path(original).name for original, owned in copied.items()}
             seen = set()
             for ref in _refs(updated):
+                # sourcePath is a valid public insertion contract. Give these
+                # references an identity before registering copied media; an
+                # empty ID previously left the project ledger entirely empty.
+                if not ref["assetId"]:
+                    ref["assetId"] = "asset_" + _digest(ref["sourcePath"])
                 if ref["assetId"] in seen:
                     continue
                 seen.add(ref["assetId"])
@@ -231,6 +241,9 @@ class DirectoryProjectStore(ProjectStore):
                     has_audio=(original or {}).get("hasAudio", kind == "audio"),
                     width=(original or {}).get("width"), height=(original or {}).get("height"),
                     sha256=_digest(path), builtin=False)
+            if updated != data:
+                owned = Project.from_dict(updated)
+                project.__dict__.update(owned.__dict__)
             return copied
 
     def commit(self, project, **kwargs):

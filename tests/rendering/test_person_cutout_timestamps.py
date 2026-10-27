@@ -173,7 +173,9 @@ class PersonCutoutTimestampTests(unittest.TestCase):
         popen = subprocess.Popen
 
         def start_process(command, **kwargs):
-            if "cutvoke.rendering.sam2_worker" in command:
+            if any(Path(str(part)).name == "sam2_worker.py" for part in command):
+                self.assertEqual(command[1], "-I")
+                self.assertTrue(Path(command[2]).is_file())
                 # Replace only inference. The production extraction, worker
                 # supervision, mask reads and final encoder remain real.
                 frames_dir = Path(command[command.index("--frames-dir") + 1])

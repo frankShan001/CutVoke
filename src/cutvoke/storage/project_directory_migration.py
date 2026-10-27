@@ -130,7 +130,8 @@ def migrate_project(library, pid, *, token, directory=None):
                     asset["kind"], asset.get("duration"), int(asset.get("hasVideo", False)), int(asset.get("hasAudio", False)),
                     asset.get("width"), asset.get("height"), time.time(), 0, asset.get("audioRole", "unclassified"),
                     asset.get("sha256"), asset.get("relativePath")))
-        child.rewrite_paths(lambda value: mapping.get(value, value))
+        # Register from original paths so path-only media keeps its imported
+        # display name before paths become content-hash basenames.
         # Also register references that entered through Agent edits rather than
         # the shared media ledger, including media retained only in undo states.
         for table in ("projects", "history"):
@@ -139,6 +140,7 @@ def migrate_project(library, pid, *, token, directory=None):
                 if raw:
                     from cutvoke.domain.model import Project
                     child._own_project(Project.from_dict(json.loads(raw)))
+        child.rewrite_paths(lambda value: mapping.get(value, value))
         child._conn.execute("UPDATE projects SET updated_at=? WHERE project_id=?", (time.time(), pid))
         child.backup_to(str(root / "backups" / "initial.sqlite"))
         # Check again after long file copies. The old project is still authoritative.

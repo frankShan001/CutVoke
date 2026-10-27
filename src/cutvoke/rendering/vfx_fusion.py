@@ -29,8 +29,8 @@ def schema():
         'occlusionFeather':{**unit(0),'maximum':.2,'description':{'zh-CN':'遮挡轮廓羽化，占画面短边比例'}},
         'occlusionFollowAnchor':{'type':'boolean','default':False,'description':{'zh-CN':'遮挡轮廓随光源跟踪点平移'}},
         'reflectionRegion':{'type':'object','properties':{
-            'x':unit(0),'y':unit(0),'width':unit(1),'height':unit(1),
-            'feather':{**unit(0),'maximum':.2}},'additionalProperties':False,
+            'x':{**unit(0),'description':{'en':'Horizontal region origin as a fraction of canvas width'}},'y':{**unit(0),'description':{'en':'Vertical region origin as a fraction of canvas height'}},'width':{**unit(1),'description':{'en':'Region width as a fraction of canvas width'}},'height':{**unit(1),'description':{'en':'Region height as a fraction of canvas height'}},
+            'feather':{'description':{'en':'Feather width as a fraction of the shorter canvas edge'},**unit(0),'maximum':.2}},'additionalProperties':False,
             'description':{'zh-CN':'反射区域边界；留空使用完整画面'}},
         'highlightProtect':{**unit(0),'description':{'zh-CN':'保留原画面高光，减少亮部叠加过曝'}},
         'highlightThreshold':{**unit(.8),'maximum':.99,'description':{'zh-CN':'开始保护的原画面亮度'}},

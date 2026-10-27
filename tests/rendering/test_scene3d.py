@@ -50,7 +50,9 @@ def test_scene_layer_preview_export_mesh_import_and_undo_are_editable(tmp_path):
         project=service.get_project('composition');before=copy.deepcopy(project.to_dict())
         full,preview=tmp_path/'full.mp4',tmp_path/'preview.mp4'
         renderer.render(project,str(full),quality='high');renderer.render_preview_window(project,str(preview),1,.5)
-        assert np.abs(frames(full)[10:15]-frames(preview)).mean()<4
+        full_frames, preview_frames = frames(full), frames(preview)
+        assert len(full_frames) == 30 and len(preview_frames) == 5
+        assert np.abs(full_frames[10:15]-preview_frames).mean()<4
         png=tmp_path/'frame.png';renderer.extract_frame(project,1,str(png))
         still=np.asarray(Image.open(png).convert('RGB'));encoded=frames(full)[10]
         # YUV420 blurs the small fixture's hard colored edges. Check the

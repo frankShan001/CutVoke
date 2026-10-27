@@ -93,13 +93,14 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 1100px) {
   .topbar {
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-strong) var(--bg-2);
-    touch-action: pan-x;
+    /* New composition/workspace tools must leave undo and redo reachable.
+       Let flex rows grow the header instead of clipping controls off-screen. */
+    flex-wrap: wrap;
+    height: auto;
+    min-height: var(--toolbar-h);
+    padding-block: 4px;
   }
   .topbar__spacer {
     flex: 0 0 8px;

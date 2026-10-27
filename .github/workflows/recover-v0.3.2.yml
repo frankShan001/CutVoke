@@ -1,0 +1,36 @@
+name: Audit archived v0.3.2 release evidence
+
+on:
+  # Historical recovery is retired. Never publish on a source branch push.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-refs/tags/v0.3.2
+  cancel-in-progress: false
+
+jobs:
+  finish-verified-draft:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13.16'
+      - name: Read-only audit of historical source and public bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/release/recover_v032.py
+      - name: Retain verification evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: published-v0.3.2-verification
+          path: .artifacts/recovery/verification.json
+          if-no-files-found: warn

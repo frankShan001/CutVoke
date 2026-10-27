@@ -192,11 +192,20 @@ async function main() {
     await page.locator('input[type="file"][accept="video/*,audio/*,image/*"][multiple]').setInputFiles(media);
     let asset;
     await expect.poll(async () => {
-      asset = (await api("assets")).assets.find(x => x.name === path.basename(media));
+      asset = (await api(`assets?projectId=${encodeURIComponent(projectId)}`)).assets.find(x => x.name === path.basename(media));
       return Boolean(asset?.available);
     }, { timeout: 30_000 }).toBe(true);
-    assert.ok(asset.path.startsWith(path.join(data, "data")));
-    const uploaded = await fetch(origin + `/api/v1/assets/${asset.assetId}/media`);
+    const directory = await api(`projects/${projectId}/directory`);
+    assert.equal(directory.storageKind, "directory");
+    assert.equal(directory.projectId, projectId);
+    assert.ok(fs.existsSync(directory.entryPath));
+    assert.ok(fs.existsSync(path.join(directory.directory, "project.sqlite")));
+    const relativeMedia = path.relative(fs.realpathSync(directory.mediaDirectory), fs.realpathSync(asset.path));
+    assert.ok(relativeMedia && !relativeMedia.startsWith("..") && !path.isAbsolute(relativeMedia),
+      `Imported media must belong to this project: ${asset.path}`);
+    assert.equal((await api("assets")).assets.some(x => x.assetId === asset.assetId), false);
+    report.projectDirectory = directory;
+    const uploaded = await fetch(origin + `/api/v1/assets/${asset.assetId}/media?projectId=${encodeURIComponent(projectId)}`);
     assert.ok(uploaded.ok);
     assert.deepEqual(Buffer.from(await uploaded.arrayBuffer()), fs.readFileSync(media));
     const desktopInfo = await page.evaluate(() => window.cutvokeDesktop.info());
@@ -208,8 +217,18 @@ async function main() {
       await client.rpc("initialize", { protocolVersion: "2024-11-05", capabilities: {}, clientInfo: { name: "native-distribution-acceptance", version: "1" } });
       const identity = await client.call("runtime", {});
       assert.equal(identity.dataPath, runtime.dataPath);
-      const imported = await client.call("media_import", { paths: [media] });
-      assert.ok(imported.assets.length);
+      const listed = await client.call("media_list", { projectId, query: asset.name, limit: 50 });
+      const sharedAsset = listed.assets.find(x => x.assetId === asset.assetId);
+      assert.ok(sharedAsset?.available, "MCP must see the GUI asset in this project's ledger");
+      assert.equal(fs.realpathSync(sharedAsset.path), fs.realpathSync(asset.path));
+      const imported = await client.call("media_import", { projectId, paths: [media] });
+      assert.equal(imported.assets.length, 1);
+      // GUI uploads have independent IDs; MCP imports deduplicate by content.
+      const repeated = await client.call("media_import", { projectId, paths: [media] });
+      assert.equal(repeated.assets[0].assetId, imported.assets[0].assetId);
+      const mcpRelative = path.relative(fs.realpathSync(directory.mediaDirectory), fs.realpathSync(imported.assets[0].path));
+      assert.ok(mcpRelative && !mcpRelative.startsWith("..") && !path.isAbsolute(mcpRelative));
+      assert.deepEqual(fs.readFileSync(imported.assets[0].path), fs.readFileSync(media));
       const project = await api(`projects/${projectId}`);
       const lease = (await client.call("edit_lock", { projectId, action: "acquire", owner: "portable-qa" })).lease.leaseId;
       await client.call("command_apply", { projectId, type: "edit.batch", expectedRevision: project.revision,
@@ -240,19 +259,49 @@ async function main() {
     await page.screenshot({ path: path.join(out, "02-chinese-import-preview.png") });
     await page.getByRole("button", { name: "导出", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "导出成片" });
-    const exported = path.join(out, "中文 导出.mp4");
-    await dialog.getByLabel("输出文件路径").fill(exported);
-    await dialog.getByLabel("画质", { exact: true }).selectOption("low");
-    await dialog.getByRole("button", { name: "开始导出", exact: true }).click();
-    await expect(dialog.getByText("导出完成", { exact: false })).toBeVisible({ timeout: 120_000 });
-    await page.screenshot({ path: path.join(out, "03-export-completed.png") });
-    const probe = JSON.parse(run(ffprobe, ["-v", "error", "-show_streams", "-show_format", "-of", "json", exported], env));
-    assert.ok(probe.streams.some(x => x.codec_name === "h264"));
-    assert.ok(probe.streams.some(x => x.codec_name === "aac"));
-    assert.ok(Number(probe.format.duration) >= 2.9);
-    run(ffmpeg, ["-v", "error", "-nostdin", "-i", exported, "-f", "null", "-"], env);
-    run(ffmpeg, ["-v", "error", "-nostdin", "-ss", "1", "-i", exported, "-frames:v", "1", "-update", "1", "-y", path.join(out, "04-decoded-export-frame.png")], env);
-    report.exportProbe = probe;
+    report.exportRuns = [];
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const exported = path.join(directory.exportDirectory, attempt ? `中文 导出-${attempt + 1}.mp4` : "中文 导出.mp4");
+      await dialog.getByLabel("输出文件路径").fill(exported);
+      await dialog.getByLabel("画质", { exact: true }).selectOption("low");
+      await dialog.getByRole("button", { name: "开始导出", exact: true }).click();
+      try {
+        await expect(dialog.getByText("导出完成", { exact: false })).toBeVisible({ timeout: 120_000 });
+      } catch (error) {
+        // Capture the live worker before the application's finally/close path
+        // closes its ledger and obscures the original rendering failure.
+        const failure = report.exportFailure = { backendPid: runtime.processId };
+        try {
+          process.kill(runtime.processId, "SIGUSR2");
+          const response = await fetch(`${origin}/api/v1/projects/${projectId}/exports`, { signal: AbortSignal.timeout(3000) });
+          failure.jobs = await response.json();
+        } catch (diagnostic) { failure.jobDiagnostic = diagnostic.message; }
+        try {
+          const pairs = execFileSync("/bin/ps", ["-axo", "pid=,ppid="], { encoding: "utf8", timeout: 3000 })
+            .trim().split("\n").map(line => line.trim().split(/\s+/).map(Number));
+          const owned = new Set([runtime.processId]);
+          for (let pass = 0; pass < pairs.length; pass++) {
+            const count = owned.size;
+            for (const [pid, parent] of pairs) if (owned.has(parent)) owned.add(pid);
+            if (owned.size === count) break;
+          }
+          failure.processes = execFileSync("/bin/ps", ["-p", [...owned].join(","), "-o", "pid,ppid,state,%cpu,rss,etime,comm"],
+            { encoding: "utf8", timeout: 3000 });
+          process.kill(runtime.processId, "SIGUSR2");
+        } catch (diagnostic) { failure.processDiagnostic = diagnostic.message; }
+        await page.screenshot({ path: path.join(out, "export-failure.png") }).catch(() => {});
+        save(); throw error;
+      }
+      await page.screenshot({ path: path.join(out, attempt ? `03-export-completed-${attempt + 1}.png` : "03-export-completed.png") });
+      const probe = JSON.parse(run(ffprobe, ["-v", "error", "-show_streams", "-show_format", "-of", "json", exported], env));
+      assert.ok(probe.streams.some(x => x.codec_name === "h264"));
+      assert.ok(probe.streams.some(x => x.codec_name === "aac"));
+      assert.ok(Number(probe.format.duration) >= 2.9);
+      run(ffmpeg, ["-v", "error", "-nostdin", "-i", exported, "-f", "null", "-"], env);
+      run(ffmpeg, ["-v", "error", "-nostdin", "-ss", "1", "-i", exported, "-frames:v", "1", "-update", "1", "-y", path.join(out, attempt ? `04-decoded-export-frame-${attempt + 1}.png` : "04-decoded-export-frame.png")], env);
+      report.exportProbe = probe;
+      report.exportRuns.push({ path: exported, probe });
+    }
     report.checks.guiExportAndFullVideoAudioDecode = true;
     report.transitionClock = await verifyNativeTransition({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath });
     report.checks.threeShotTransitionClockAndPixels = true;

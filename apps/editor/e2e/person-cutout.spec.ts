@@ -62,7 +62,7 @@ test("person cutout panel submits, tracks, applies, and reports the undo point",
   await page.route("**/api/v1/person-cutout/status", (route) => route.fulfill({
     status: 200,
     contentType: "application/json",
-    body: JSON.stringify({ installed: true, modelReady: true, interactiveModelReady: true, ready: true,
+    body: JSON.stringify({ installed: true, modelReady: true, mediapipeReady: true, interactiveModelReady: true, ready: true,
       message: "本机人物分割已就绪（MediaPipe Selfie Segmentation，Apache-2.0）；视频只在本机处理。" }),
   }));
   await page.route("**/api/v1/person-cutout-jobs/job-person-e2e", (route) => {
@@ -134,7 +134,7 @@ test("person cutout panel submits, tracks, applies, and reports the undo point",
   await page.locator(".clip-block").first().click();
   await page.getByRole("tab", { name: "效果条" }).click();
   await expect(page.getByRole("heading", { name: "人物抠像" })).toBeVisible();
-  await expect(page.getByText("本机人物分割已就绪（MediaPipe Selfie Segmentation，Apache-2.0）；视频只在本机处理。")).toBeVisible();
+  await expect(page.getByText("抠像组件已就绪，建议先处理一小段检查效果。", { exact: true })).toBeVisible();
 
   await page.getByRole("radio", { name: "只保留我点选的人物" }).check();
   await page.getByRole("combobox", { name: "人物抠像跟踪方式" })

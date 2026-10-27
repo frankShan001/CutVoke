@@ -20,7 +20,7 @@ async function verifyNativeTransition({ origin, engine, ffmpeg, out, env, dataPa
     const source = path.join(out, `clock-${color}.mp4`);
     execFileSync(ffmpeg, ["-v", "error", "-nostdin", "-y", "-f", "lavfi", "-i",
       `color=c=${color}:s=160x90:r=15:d=1`, "-an", "-c:v", "libx264", "-pix_fmt", "yuv420p", source], { env, timeout: 30_000 });
-    const uploaded = await fetch(origin + "/api/v1/assets?name=" + encodeURIComponent(path.basename(source)), {
+    const uploaded = await fetch(origin + "/api/v1/assets?projectId=" + encodeURIComponent(projectId) + "&name=" + encodeURIComponent(path.basename(source)), {
       method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: fs.readFileSync(source),
       signal: AbortSignal.timeout(30_000),
     });
@@ -37,9 +37,11 @@ async function verifyNativeTransition({ origin, engine, ffmpeg, out, env, dataPa
   await api(`projects/${projectId}/commands`, { type: "effect.setTransition", expectedRevision: current.revision,
     commandId: crypto.randomUUID(), actor: { kind: "human", id: "native-clock-acceptance" },
     payload: { clipId: "green", effectId: "cutvoke.transition.crossfade", params: { duration: .3 } } });
+  const directory = await api(`projects/${projectId}/directory`);
+  assert.equal(directory.storageKind, "directory");
   const results = [];
   for (let round = 0; round < 3; round++) {
-    const output = path.join(out, `clock-export-${round}.mp4`);
+    const output = path.join(directory.exportDirectory, `clock-export-${round}.mp4`);
     execFileSync(engine, ["export", "--project", projectId, "--data", dataPath, "--out", output], {
       env, encoding: "utf8", timeout: 120_000, maxBuffer: 10 * 1024 * 1024,
     });

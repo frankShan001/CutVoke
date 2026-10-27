@@ -10,9 +10,10 @@ type Voice = { element: HTMLAudioElement; gain?: GainNode; analyser?: AnalyserNo
   signature: string; prepared: boolean; ready: boolean; url?: string; disposed?: boolean; failed?: boolean; hasAudio?: boolean };
 
 /** One gain envelope per clip. Moving a fader never re-encodes the mixed video. */
-export function InteractiveAudio({ playing, onReady, playbackClock }: {
+export function InteractiveAudio({ playing, onReady, playbackClock, onClockSource }: {
   playing: boolean; onReady(ready: boolean): void;
   playbackClock(): { time: number; playing: boolean } | null;
+  onClockSource(clock: (() => number) | null): void;
 }) {
   const { state } = useEditor();
   const project = useInteractionProject(state.project);
@@ -20,8 +21,8 @@ export function InteractiveAudio({ playing, onReady, playbackClock }: {
   const client = useRef(crypto.randomUUID()), serial = useRef(0);
   const voices = useRef(new Map<string, Voice>());
   const meter = useRef<HTMLOutputElement>(null);
-  const latest = useRef({ project, time: state.playhead, playing, onReady, playbackClock });
-  latest.current = { project, time: state.playhead, playing, onReady, playbackClock };
+  const latest = useRef({ project, time: state.playhead, playing, onReady, playbackClock, onClockSource });
+  latest.current = { project, time: state.playhead, playing, onReady, playbackClock, onClockSource };
   useEffect(() => {
     const unlock = () => { if (context.current?.state === "suspended") void context.current.resume(); };
     document.addEventListener("pointerdown", unlock);
@@ -76,7 +77,11 @@ export function InteractiveAudio({ playing, onReady, playbackClock }: {
             element.oncanplay = () => { owned.ready = true; };
             // Silent video sources legitimately have no audio stream.
             element.onerror = () => { owned.failed = true; owned.ready = true; };
-            if (!context.current) context.current = new AudioContext();
+            if (!context.current) {
+              const audioContext = new AudioContext();
+              context.current = audioContext;
+              latest.current.onClockSource(() => audioContext.currentTime);
+            }
             const source = context.current.createMediaElementSource(element);
             const gain = context.current.createGain(), analyser = context.current.createAnalyser();
             analyser.fftSize = 256;
@@ -141,7 +146,8 @@ export function InteractiveAudio({ playing, onReady, playbackClock }: {
     return () => {
       disposed = true; cancelAnimationFrame(frame);
       for (const voice of voices.current.values()) { voice.disposed = true; voice.controller.abort(); voice.element.pause(); voice.gain?.disconnect(); if (voice.url) URL.revokeObjectURL(voice.url); }
-      voices.current.clear(); void context.current?.close(); context.current = null;
+      voices.current.clear(); latest.current.onClockSource(null);
+      void context.current?.close(); context.current = null;
     };
   }, [state.currentId]);
   return <output ref={meter} data-testid="live-audio-meter" hidden />;

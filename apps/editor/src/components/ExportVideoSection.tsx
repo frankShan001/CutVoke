@@ -31,6 +31,9 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
   useSessionAssets();
   const [draft] = useState(() => savedExportSettings(state.currentId));
   const [outPath, setOutPath] = useState(draft?.outPath || "");
+  // Metadata may arrive after typing, clearing, or restoring an authored draft.
+  // It supplies a default only; the backend still resolves/validates exports.
+  const pathEdited = useRef(draft !== null);
   const [exportDirectory, setExportDirectory] = useState<string | null>(null);
   useEffect(() => {
     let cancelled = false;
@@ -38,8 +41,8 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       if (cancelled || !info.exportDirectory) return;
       const folder = info.exportDirectory;
       setExportDirectory(folder);
-      setOutPath(previous => previous.startsWith(folder) ? previous :
-        `${folder}${folder.includes("\\") ? "\\" : "/"}${previous.split(/[\\/]/).pop() || "video.mp4"}`);
+      setOutPath(previous => (previous || pathEdited.current) ? previous :
+        `${folder}${folder.includes("\\") ? "\\" : "/"}video.mp4`);
     }).catch(error => { if (!cancelled) showError(dispatch, error); });
     return () => { cancelled = true; };
   }, [state.currentId, dispatch]);
@@ -112,7 +115,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
         if (job) {
           setJob(job);
           if (!draft || ["queued", "running"].includes(job.status)) {
-            setOutPath(job.outPath);
+            if (!pathEdited.current || ["queued", "running"].includes(job.status)) setOutPath(job.outPath);
             if (["high", "medium", "low"].includes(job.quality)) setQuality(job.quality as ExportQuality);
             setVideoBitrate(job.request?.videoBitrateKbps?.toString() || "");
             setAudioBitrate(job.request?.audioBitrateKbps?.toString() || "");
@@ -322,7 +325,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
         <TextInput
           value={outPath}
           disabled={busy}
-          onChange={(e) => setOutPath(e.target.value)}
+          onChange={(e) => { pathEdited.current = true; setOutPath(e.target.value); }}
           placeholder={exportDirectory ? `${exportDirectory}/video.mp4` : tr("如：D:\\视频\\我的成片.mp4")}
           aria-label={tr("输出文件路径")}
         />

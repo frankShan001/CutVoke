@@ -181,11 +181,20 @@ async function main() {
     await page.locator('input[type="file"][accept="video/*,audio/*,image/*"][multiple]').setInputFiles(media);
     let asset;
     await expect.poll(async () => {
-      asset = (await api("assets")).assets.find(x => x.name === path.basename(media));
+      asset = (await api(`assets?projectId=${encodeURIComponent(projectId)}`)).assets.find(x => x.name === path.basename(media));
       return Boolean(asset?.available);
     }, { timeout: 30_000 }).toBe(true);
-    assert.ok(asset.path.startsWith(path.join(data, "data")));
-    const uploaded = await fetch(origin + `/api/v1/assets/${asset.assetId}/media`);
+    const directory = await api(`projects/${projectId}/directory`);
+    assert.equal(directory.storageKind, "directory");
+    assert.equal(directory.projectId, projectId);
+    assert.ok(fs.existsSync(directory.entryPath));
+    assert.ok(fs.existsSync(path.join(directory.directory, "project.sqlite")));
+    const relativeMedia = path.relative(fs.realpathSync(directory.mediaDirectory), fs.realpathSync(asset.path));
+    assert.ok(relativeMedia && !relativeMedia.startsWith("..") && !path.isAbsolute(relativeMedia),
+      `Imported media must belong to this project: ${asset.path}`);
+    assert.equal((await api("assets")).assets.some(x => x.assetId === asset.assetId), false);
+    report.projectDirectory = directory;
+    const uploaded = await fetch(origin + `/api/v1/assets/${asset.assetId}/media?projectId=${encodeURIComponent(projectId)}`);
     assert.ok(uploaded.ok);
     assert.deepEqual(Buffer.from(await uploaded.arrayBuffer()), fs.readFileSync(media));
     const desktopInfo = await page.evaluate(() => window.cutvokeDesktop.info());
@@ -197,8 +206,18 @@ async function main() {
       await client.rpc("initialize", { protocolVersion: "2024-11-05", capabilities: {}, clientInfo: { name: "portable-Windows-acceptance", version: "1" } });
       const identity = await client.call("runtime", {});
       assert.equal(identity.dataPath, runtime.dataPath);
-      const imported = await client.call("media_import", { paths: [media] });
-      assert.ok(imported.assets.length);
+      const listed = await client.call("media_list", { projectId, query: asset.name, limit: 50 });
+      const sharedAsset = listed.assets.find(x => x.assetId === asset.assetId);
+      assert.ok(sharedAsset?.available, "MCP must see the GUI asset in this project's ledger");
+      assert.equal(fs.realpathSync(sharedAsset.path), fs.realpathSync(asset.path));
+      const imported = await client.call("media_import", { projectId, paths: [media] });
+      assert.equal(imported.assets.length, 1);
+      // GUI uploads have independent IDs; MCP imports deduplicate by content.
+      const repeated = await client.call("media_import", { projectId, paths: [media] });
+      assert.equal(repeated.assets[0].assetId, imported.assets[0].assetId);
+      const mcpRelative = path.relative(fs.realpathSync(directory.mediaDirectory), fs.realpathSync(imported.assets[0].path));
+      assert.ok(mcpRelative && !mcpRelative.startsWith("..") && !path.isAbsolute(mcpRelative));
+      assert.deepEqual(fs.readFileSync(imported.assets[0].path), fs.readFileSync(media));
       const project = await api(`projects/${projectId}`);
       const lease = (await client.call("edit_lock", { projectId, action: "acquire", owner: "portable-qa" })).lease.leaseId;
       await client.call("command_apply", { projectId, type: "edit.batch", expectedRevision: project.revision,
@@ -233,7 +252,7 @@ async function main() {
     await page.screenshot({ path: path.join(out, "02-chinese-import-preview.png") });
     await page.getByRole("button", { name: "导出", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "导出成片" });
-    const exported = path.join(out, "中文 导出.mp4");
+    const exported = path.join(directory.exportDirectory, "中文 导出.mp4");
     await dialog.getByLabel("输出文件路径").fill(exported);
     await dialog.getByLabel("画质", { exact: true }).selectOption("low");
     await dialog.getByRole("button", { name: "开始导出", exact: true }).click();

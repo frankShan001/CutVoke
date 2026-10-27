@@ -11,7 +11,10 @@ import shutil
 import subprocess
 import tarfile
 import time
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 is a supported development runtime.
+    import tomli as tomllib
 import urllib.error
 import urllib.request
 import zipfile
@@ -39,9 +42,33 @@ def api(path):
     return json.loads(gh('api', path))
 
 
+def releases(repo):
+    pages = json.loads(gh('api', '--paginate', '--slurp', f'repos/{repo}/releases?per_page=100'))
+    return [release for page in pages for release in page]
+
+
+def created_draft_id(repo, tag, sha):
+    # The tag endpoint only returns published releases. Resolve the fresh draft
+    # through the authenticated listing and bind subsequent reads/writes to ID.
+    matches = [release for release in releases(repo) if release['tag_name'] == tag]
+    require(len(matches) == 1, 'Missing or ambiguous newly created draft')
+    release = matches[0]
+    require(release['draft'] and release['prerelease'] and release['target_commitish'] == sha,
+            'New draft identity mismatch')
+    require(isinstance(release['id'], int) and release['id'] > 0, 'Invalid new draft ID')
+    return release['id']
+
+
+def stream_digest(stream):
+    checksum = hashlib.sha256()
+    for block in iter(lambda: stream.read(1024 * 1024), b''):
+        checksum.update(block)
+    return checksum.hexdigest()
+
+
 def digest(path):
     with path.open('rb') as file:
-        return hashlib.file_digest(file, 'sha256').hexdigest()
+        return stream_digest(file)
 
 
 def verify_info(info, version, sha, platform):
@@ -119,8 +146,7 @@ def main():
             time.sleep(30)
 
     # A previous or independently created release is never overwritten.
-    existing = json.loads(gh('api', '--paginate', '--slurp', f'repos/{repo}/releases?per_page=100'))
-    require(not any(r['tag_name'] == tag for page in existing for r in page), 'Release already exists; refusing replacement')
+    require(not any(r['tag_name'] == tag for r in releases(repo)), 'Release already exists; refusing replacement')
     output = ROOT / '.artifacts/release'
     output.mkdir(parents=True, exist_ok=False)
     assets = []
@@ -162,22 +188,28 @@ def main():
     synchronized()
     gh('release', 'create', tag, '--repo', repo, '--target', sha, '--verify-tag', '--draft', '--prerelease',
        '--title', f'CutVoke {tag} — Cross-platform preview / 跨平台预览版', '--notes-file', str(note_file))
+    release_id = created_draft_id(repo, tag, sha)
     gh('release', 'upload', tag, '--repo', repo, *(str(p) for p in paths))
-    release = api(f'repos/{repo}/releases/tags/{tag}')
+    release = api(f'repos/{repo}/releases/{release_id}')
+    require(release['id'] == release_id and release['tag_name'] == tag
+            and release['target_commitish'] == sha, 'Draft identity changed')
     require(release['draft'] and release['prerelease'], 'Unexpected release state')
     require(len(release['assets']) == len(expected), 'Unexpected asset count')
     for asset in release['assets']:
         require((asset['size'], asset['digest']) == expected.get(asset['name']), 'Uploaded asset digest mismatch')
     synchronized()
-    gh('release', 'edit', tag, '--repo', repo, '--draft=false', '--prerelease')
-    published = api(f'repos/{repo}/releases/tags/{tag}')
+    gh('api', '--method', 'PATCH', f'repos/{repo}/releases/{release_id}',
+       '-F', 'draft=false', '-F', 'prerelease=true')
+    published = api(f'repos/{repo}/releases/{release_id}')
+    require(published['id'] == release_id and published['tag_name'] == tag
+            and published['target_commitish'] == sha, 'Published release identity mismatch')
     require(not published['draft'] and published['prerelease'], 'Publication not confirmed')
     # Verify public download bytes, not only API upload receipts.
     for asset in published['assets']:
         expected_url = f'https://github.com/{repo}/releases/download/{tag}/{asset["name"]}'
         require(asset['browser_download_url'] == expected_url, 'Download URL mismatch')
         with urllib.request.urlopen(expected_url, timeout=180) as response:
-            actual = hashlib.file_digest(response, 'sha256').hexdigest()
+            actual = stream_digest(response)
         require('sha256:' + actual == expected[asset['name']][1], 'Public download digest mismatch')
     print(published['html_url'], flush=True)
     with Path(os.environ['GITHUB_STEP_SUMMARY']).open('a', encoding='utf-8') as summary:

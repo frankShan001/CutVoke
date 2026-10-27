@@ -160,7 +160,10 @@ test("canvas production versions switch and OTIO download imports through the We
   await edit(request, id, "clip.insert", { trackId: "main", createTrackKind: "video", clipId: "source",
     sourcePath, timelineStart: rat(0), timelineEnd: rat(2) });
   const project = async () => (await (await request.get(`/api/v1/projects/${id}`)).json());
-  const originalId = (await project()).sequence.id;
+  const original = await project();
+  const originalId = original.sequence.id;
+  const ownedSourcePath = original.sequence.tracks[0].clips[0].assetRef.sourcePath;
+  expect(readFileSync(ownedSourcePath)).toEqual(readFileSync(sourcePath));
   await page.goto("/");
   await page.getByRole("button", { name: `打开工程 ${name}` }).click();
   await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible({ timeout: 45_000 });
@@ -202,7 +205,7 @@ test("canvas production versions switch and OTIO download imports through the We
   await expect.poll(async () => (await project()).sequences.length).toBe(3);
   current = await project();
   expect([current.sequence.width, current.sequence.height]).toEqual([72, 128]);
-  expect(current.sequence.tracks[0].clips[0].assetRef.sourcePath).toBe(sourcePath);
+  expect(current.sequence.tracks[0].clips[0].assetRef.sourcePath).toBe(ownedSourcePath);
   await page.getByRole("button", { name: "撤销", exact: true }).click();
   await expect.poll(async () => (await project()).sequences.length).toBe(2);
   await page.getByRole("button", { name: "重做", exact: true }).click();

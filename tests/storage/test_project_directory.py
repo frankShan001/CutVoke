@@ -233,3 +233,96 @@ def test_conflicting_commit_does_not_change_asset_ledger(tmp_path):
     assert store.get_asset("test-source") == original_asset
     assert store.load("one").revision == "0"
     store.close()
+
+
+def test_source_path_only_insert_gets_a_persistent_project_asset_identity(tmp_path):
+    from PIL import Image
+    import hashlib
+    source = tmp_path / '原始素材.png'
+    Image.new('RGB', (128, 72), 'blue').save(source)
+    raw = source.read_bytes()
+    store = DirectoryProjectStore(tmp_path / 'project', create_id='one')
+    try:
+        project = project_with_media('one', source)
+        project.sequence.tracks[0].clips[0].asset_ref.asset_id = ''
+        store.commit(project)
+        identity = 'asset_' + hashlib.sha256(raw).hexdigest()
+        reference = store.load('one').sequence.tracks[0].clips[0].asset_ref
+        assert reference.asset_id == identity
+        assert project.sequence.tracks[0].clips[0].asset_ref.asset_id == identity
+        asset = store.get_asset(identity)
+        assert asset['name'] == source.name
+        assert Path(asset['path']).read_bytes() == raw
+        assert Path(asset['path']).is_relative_to(store.root / 'media')
+        source.unlink()
+        service = EditService(store=store)
+        service.execute(Command(type='track.add', project_id='one', expected_revision='0', payload={'kind':'audio'}))
+        service.execute(Command(type='history.undo', project_id='one', expected_revision='1', payload={}))
+        assert store.load('one').sequence.tracks[0].clips[0].asset_ref.asset_id == identity
+        assert store.get_asset(identity)['name'] == '原始素材.png'
+    finally:
+        store.close()
+
+
+def test_path_only_migration_retains_original_media_names_in_current_and_undo_refs(tmp_path):
+    from PIL import Image
+    source = tmp_path / '迁移前的原始名字.png'
+    Image.new('RGB', (128, 72), 'red').save(source)
+    database = tmp_path / 'legacy.sqlite'
+    legacy = ProjectStore(str(database))
+    project = project_with_media('old', source)
+    project.sequence.tracks[0].clips[0].asset_ref.asset_id = ''
+    legacy.save(project)
+    service = EditService(store=legacy)
+    service.execute(Command(type='track.add', project_id='old', expected_revision='0', payload={'kind':'audio'}))
+    service.close(); legacy.close()
+    library = ProjectLibraryStore(str(database))
+    try:
+        plan = plan_migration(library, 'old')
+        migrate_project(library, 'old', token=plan['token'])
+        child = library._target('old')
+        assets = child.list_assets()
+        assert len(assets) == 1 and assets[0]['name'] == source.name
+        assert Path(assets[0]['path']).read_bytes() == source.read_bytes()
+        assert Path(assets[0]['path']).is_relative_to(child.root / 'media')
+        service = EditService(store=library)
+        service.execute(Command(type='history.undo', project_id='old', expected_revision='1', payload={}))
+        assert child.list_assets()[0]['name'] == source.name
+        service.close()
+    finally:
+        library.close()
+
+
+@pytest.mark.parametrize('mode', ['linear', 'smooth'])
+def test_effect_geometry_path_is_not_a_file_and_declared_dependencies_remain_owned(tmp_path, mode):
+    from PIL import Image
+    source, texture, lut = tmp_path/'source.png', tmp_path/'texture.png', tmp_path/'grade.cube'
+    Image.new('RGB',(128,72),'red').save(source)
+    Image.new('RGBA',(16,16),'blue').save(texture)
+    lut.write_text('LUT_3D_SIZE 2\n0 0 0\n1 0 0\n0 1 0\n1 1 0\n0 0 1\n1 0 1\n0 1 1\n1 1 1\n')
+    store = DirectoryProjectStore(tmp_path/'project', create_id='one')
+    try:
+        project = project_with_media('one', source)
+        store.commit(project)
+        service = EditService(store=store)
+        service.execute(Command(type='effect.add', project_id='one', expected_revision='0',
+            payload={'clipId':project.sequence.tracks[0].clips[0].id,
+                     'effectId':'cutvoke.fx.subjectLock','params':{'path':mode}}))
+        saved = store.load('one')
+        assert saved.sequence.tracks[0].clips[0].effects[0]['params']['path'] == mode
+        saved.sequence.tracks[0].clips[0].effects.extend([
+            {'effectId':'cutvoke.fx.lut','params':{'file':str(lut)}},
+            {'effectId':'cutvoke.fx.scene3d','params':{'objects':[{'id':'textured','shape':'plane','texturePath':str(texture)}]}}])
+        store.save(saved)
+        effects = store.load('one').sequence.tracks[0].clips[0].effects
+        owned_lut = Path(effects[1]['params']['file'])
+        owned_texture = Path(effects[2]['params']['objects'][0]['texturePath'])
+        assert owned_lut.is_relative_to(store.root/'media') and owned_lut.read_bytes() == lut.read_bytes()
+        assert owned_texture.is_relative_to(store.root/'media') and owned_texture.read_bytes() == texture.read_bytes()
+        service.execute(Command(type='history.undo', project_id='one', expected_revision='1', payload={}))
+        assert not store.load('one').sequence.tracks[0].clips[0].effects
+        service.execute(Command(type='history.redo', project_id='one', expected_revision='2', payload={}))
+        assert store.load('one').sequence.tracks[0].clips[0].effects[0]['params']['path'] == mode
+        service.close()
+    finally:
+        store.close()

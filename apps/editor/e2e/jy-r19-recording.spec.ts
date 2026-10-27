@@ -1,7 +1,8 @@
-import { structuralSignature, type Project } from "./projectEquivalence";
+import { hasBuiltinSticker, ownedStructuralSignature, projectOutputPath, sameMediaContent } from "./projectDirectoryHelpers";
+import { type Project } from "./projectEquivalence";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { basename, resolve } from "node:path";
 import { getBuiltinPackVersion } from "./resourcePackHelpers";
 
 test.use({ video: "on" });
@@ -381,9 +382,9 @@ test("JY-R19 records a six-clip editing, save, preview, export, and package work
   await page.getByRole("button", { name: "导出" }).click();
   const exportDialog = page.getByRole("dialog", { name: "导出成片" });
   await expect(exportDialog).toBeVisible();
-  const moviePath = resolve(outputDir, "cutvoke-six-clip-sample.mp4");
-  const coverPath = resolve(outputDir, "cutvoke-six-clip-cover.png");
-  const packPath = resolve(outputDir, "cutvoke-six-clip-sample.cutvokepack.zip");
+  const moviePath = await projectOutputPath(request, id, "cutvoke-six-clip-sample.mp4");
+  const coverPath = await projectOutputPath(request, id, "cutvoke-six-clip-cover.png");
+  const packPath = await projectOutputPath(request, id, "cutvoke-six-clip-sample.cutvokepack.zip");
   await exportDialog.getByLabel("输出文件路径").fill(moviePath);
   await exportDialog.getByRole("button", { name: "开始导出" }).click();
   await expect(exportDialog.getByText("导出完成")).toBeVisible({ timeout: 180_000 });
@@ -409,12 +410,13 @@ test("JY-R19 records a six-clip editing, save, preview, export, and package work
   expect(videoTrack.clips[1].effects.some((effect) => effect.effectId.startsWith("cutvoke.transition."))).toBe(true);
   expect(reopened.sequence.captions.some((caption) => caption.text === captionText)).toBe(true);
   expect(reopened.sequence.tracks.some((track) => track.kind === "audio"
-    && track.clips.some((clip) => clip.assetRef.sourcePath.endsWith(bgmFileName)))).toBe(true);
+    && track.clips.some((clip) => sameMediaContent(clip.assetRef.sourcePath, bgmPath)))).toBe(true);
   expect(reopened.sequence.tracks.some((track) => track.kind === "text" && track.clips.length === 1)).toBe(true);
   expect(reopened.sequence.tracks.some((track) => track.role === "sticker"
-    && track.clips.some((clip) => clip.assetRef.sourcePath.includes("botanical_cherry_blossom.png")))).toBe(true);
+    && track.clips.some((clip) => hasBuiltinSticker(clip, "botanical_cherry_blossom.png")))).toBe(true);
   const agentReplica = await createAgentReplica(request, reopened);
-  expect(structuralSignature(agentReplica)).toBe(structuralSignature(reopened));
+  expect(await ownedStructuralSignature(request, agentReplica)).toBe(await ownedStructuralSignature(request, reopened));
+  for (const file of [moviePath, coverPath, packPath]) copyFileSync(file, resolve(outputDir, basename(file)));
   writeFileSync(resolve(outputDir, "acceptance-report.json"), JSON.stringify({
     projectId: id,
     projectName: name,
@@ -437,10 +439,10 @@ test("JY-R19 records a six-clip editing, save, preview, export, and package work
     playerPreview,
     videoEffects: videoTrack.clips.map((clip) => ({ id: clip.id, effects: clip.effects.map((effect) => effect.effectId) })),
     outputs: {
-      movie: moviePath,
-      cover: coverPath,
+      movie: resolve(outputDir, basename(moviePath)),
+      cover: resolve(outputDir, basename(coverPath)),
       project: resolve(outputDir, "six-clip-project.json"),
-      package: packPath,
+      package: resolve(outputDir, basename(packPath)),
       previewFrames: previewFrames.map((time) => resolve(outputDir, `preview-${time.toFixed(2)}s.png`)),
       screenshot: resolve(outputDir, "operation-result.png"),
     },

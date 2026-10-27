@@ -16,25 +16,26 @@ from cutvoke.storage.store import ProjectStore
 from cutvoke.runtime import web_directory
 
 
-def seed_fixture(service: EditService, root: str) -> None:
+def seed_fixture(service: EditService, root: str, project_id: str = "e2e-fixture") -> None:
     paths: list[str] = []
     for color in ("red", "green", "blue"):
         path = os.path.join(root, f"{color}.mp4")
-        subprocess.run([
-            "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-            "-f", "lavfi", "-i", f"color=c={color}:s=160x90:r=15:d=5",
-            "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=5",
-            "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p",
-            "-c:a", "aac", path,
-        ], check=True, capture_output=True)
+        if not os.path.isfile(path):
+            subprocess.run([
+                "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+                "-f", "lavfi", "-i", f"color=c={color}:s=160x90:r=15:d=5",
+                "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=5",
+                "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+                "-c:a", "aac", path,
+            ], check=True, capture_output=True)
         paths.append(path)
-    project = service.create_project("e2e-fixture", width=160, height=90,
+    project = service.create_project(project_id, width=160, height=90,
                                      fps=Rational.of(15))
 
     def apply(kind: str, payload: dict, key: str) -> None:
         current = service.get_project(project.project_id)
         service.execute(Command(
-            type=kind, payload=payload, command_id=f"fixture-{key}",
+            type=kind, payload=payload, command_id=f"fixture-{project_id}-{key}",
             project_id=project.project_id, expected_revision=current.revision,
             actor=Actor("test", "browser-fixture"),
         ))
@@ -58,8 +59,14 @@ def main() -> None:
         raise RuntimeError("build the Web editor before starting e2e_server")
     port = int(os.environ.get("CUTVOKE_E2E_PORT", "8799"))
     with tempfile.TemporaryDirectory(prefix="cutvoke-e2e-") as root:
+        # The optional extension journal belongs to this disposable runtime.
+        # Status reads must never create files in the user's actual profile.
+        os.environ["CUTVOKE_EXTENSION_HOME"] = os.path.join(root, "extensions")
         service = EditService(store=ProjectStore(os.path.join(root, "projects.sqlite")))
         seed_fixture(service, root)
+        # Migration acceptance owns a separate legacy project. Reopening its
+        # moved copy must never replace the source fixture used by other files.
+        seed_fixture(service, root, "e2e-migration-fixture")
         if os.environ.get("CUTVOKE_E2E_FOLDERS") == "1":
             from cutvoke.storage.project_directory import ProjectLibraryStore
             service.close(); service.store.close()

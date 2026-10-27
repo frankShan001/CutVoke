@@ -100,7 +100,9 @@ export function Player() {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const playingRef = useRef(playing);
   playingRef.current = playing;
-  const audioTransportRef = useRef({ active: false, time: 0, started: 0 });
+  const nativeAudioClockRef = useRef<(() => number) | null>(null);
+  const onNativeAudioClock = useCallback((clock: (() => number) | null) => { nativeAudioClockRef.current = clock; }, []);
+  const audioTransportRef = useRef({ active: false, time: 0, started: 0, clock: null as (() => number) | null });
   const scrubbingRef = useRef(state.scrubbing);
   scrubbingRef.current = state.scrubbing;
   const scrubPausedVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -215,10 +217,16 @@ export function Player() {
     // segment handoffs must not pause or rewind a healthy sound stream.
     if (mode === "video" && (nativeAudioRef.current || audioTransportRef.current.active) && playingRef.current && !scrubbingRef.current) {
       const transport = audioTransportRef.current;
-      if (!transport.active) {
-        transport.active = true; transport.time = playheadRef.current; transport.started = performance.now();
+      const source = nativeAudioClockRef.current;
+      const now = source?.() ?? performance.now() / 1000;
+      if (!transport.active || transport.clock !== source) {
+        const prior = transport.clock?.() ?? performance.now() / 1000;
+        transport.time = transport.active ? transport.time + Math.max(0, prior - transport.started) : playheadRef.current;
+        transport.active = true; transport.clock = source; transport.started = now;
       }
-      return { time: Math.min(mediaEndSecs, transport.time + (performance.now() - transport.started) / 1000), playing: true };
+      // Wall time can outrun the actual audio device under load. Use the
+      // graph's clock so healthy voices are never repeatedly seeked forward.
+      return { time: Math.min(mediaEndSecs, transport.time + now - transport.started), playing: true };
     }
     audioTransportRef.current.active = false;
     if (scrubbingRef.current) return { time: playheadRef.current, playing: false };
@@ -615,7 +623,8 @@ export function Player() {
         const loop = loopRef.current;
         if (loop.enabled && loop.in != null && loop.out != null && loop.out > loop.in && time >= Math.min(loop.out, mediaEndSecs)) {
           time = loop.in;
-          audioTransportRef.current = { active: true, time, started: now };
+          const source = nativeAudioClockRef.current;
+          audioTransportRef.current = { active: true, time, started: source?.() ?? performance.now() / 1000, clock: source };
         }
         reportedVideoTimeRef.current = time;
         setVideoTime(time);
@@ -932,7 +941,7 @@ export function Player() {
             <span className="player__compare-label">{tr("正在生成调色前画面…")}</span>
           ) : null}
           {!state.opening && currentId && !showColorBefore && mode === "video" ? <InteractiveScene playing={playing} onReady={setNativeReady} /> : null}
-          {!state.opening && currentId ? <InteractiveAudio playing={playing} onReady={setNativeAudioReady} playbackClock={audioPlaybackClock} /> : null}
+          {!state.opening && currentId ? <InteractiveAudio playing={playing} onReady={setNativeAudioReady} playbackClock={audioPlaybackClock} onClockSource={onNativeAudioClock} /> : null}
           <InteractionStatus />
           <TransformCanvasOverlay />
           <MaskCanvasOverlay />

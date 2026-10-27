@@ -47,7 +47,8 @@ async function noPageOverflow(page: Page) {
   const overlaps = await page.locator(".topbar").evaluateAll(nodes => nodes.flatMap(node => {
     const children = [...node.children].map(child => ({ name: child.className, box: child.getBoundingClientRect() })).filter(item => item.box.width && item.box.height);
     return children.flatMap((a, index) => children.slice(index + 1).filter(b =>
-      Math.min(a.box.right, b.box.right) - Math.max(a.box.left, b.box.left) > 1).map(b => `${a.name}/${b.name}`));
+      Math.min(a.box.right, b.box.right) - Math.max(a.box.left, b.box.left) > 1 &&
+      Math.min(a.box.bottom, b.box.bottom) - Math.max(a.box.top, b.box.top) > 1).map(b => `${a.name}/${b.name}`));
   }));
   expect(overlaps).toEqual([]);
 }
@@ -136,8 +137,10 @@ for (const locale of ["zh-CN", "en", "de", "ar"]) {
       await page.locator("#creative-domain-media").press("ArrowLeft");
       await expect(page.locator("#creative-domain-music")).toHaveAttribute("aria-selected", "true");
     }
-    // Check a real rejected operation, with an empty path, in this locale.
+    // Directory projects prefill a valid export path. Explicitly clear it to
+    // exercise the same rejected empty-path operation in every locale.
     await page.locator(".tool-btn--export").click();
+    await page.locator(".export-dialog input").first().fill("");
     await page.locator(".export-dialog__actions .cv-btn--primary").first().click();
     const error = page.getByRole("alertdialog");
     await expect(error).toBeVisible();
@@ -165,7 +168,7 @@ test("German editor shell keeps toolbar controls inside the viewport when reveal
   await page.getByRole("button", { name: `打开工程 ${item.name}`, exact: true }).click();
   await expect(page.locator(".timeline")).toBeVisible({ timeout: 75_000 });
   await switchTo(page, "de");
-  for (const width of [1600, 1500, 1400, 1280, 1024]) {
+  for (const width of [1600, 1500, 1400, 1280, 1024, 760]) {
     await page.setViewportSize({ width, height: 960 });
     // Native reveal/focus scrolling must stay within intentional scroll areas.
     await page.locator(".topbar__sync").evaluate(node => node.scrollIntoView({ block: "nearest", inline: "nearest" }));
@@ -176,33 +179,66 @@ test("German editor shell keeps toolbar controls inside the viewport when reveal
   }
 });
 
-test("cross-tab language changes preserve an open dialog and its draft", async ({ page, request }) => {
-  const item = await fixture(request);
-  await page.goto("/");
-  await page.getByRole("button", { name: `打开工程 ${item.name}`, exact: true }).click();
-  await expect(page.locator(".timeline")).toBeVisible({ timeout: 75_000 });
-  const before = await current(request, item.id);
-  await switchTo(page, "en");
-  await page.locator(".tool-btn--export").click();
-  await page.getByLabel("Output file path", { exact: true }).fill("keep-this-name-ملف.mp4");
-  const other = await page.context().newPage();
-  await other.goto("/");
-  await switchTo(other, "de");
-  await expect(page.getByRole("dialog", { name: "Video exportieren", exact: true })).toBeVisible();
-  await expect(page.locator(".export-dialog input").first()).toHaveValue("keep-this-name-ملف.mp4");
-  await switchTo(other, "ar");
-  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-  await expect(page.getByRole("dialog", { name: "تصدير الفيديو", exact: true })).toBeVisible();
-  await noPageOverflow(page);
-  await page.locator(".export-dialog__close").click();
-  await page.setViewportSize({ width: 1200, height: 900 });
-  await noPageOverflow(page);
-  await switchTo(other, "de");
-  await expect(page.locator("html")).toHaveAttribute("lang", "de");
-  await noPageOverflow(page);
-  expect(await current(request, item.id)).toEqual(before);
-  await other.close();
-});
+for (const lateSource of ["directory", "history", "cleared directory"] as const) {
+  test(`cross-tab language changes preserve an open dialog and its draft (${lateSource})`, async ({ page, request }) => {
+    const item = await fixture(request);
+    const folder = (await (await request.get(`${api(item.id)}/directory`)).json()).exportDirectory;
+    const oldOutput = `${folder}/previous-export.mp4`;
+    let release!: () => void, requested = false;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    if (lateSource === "history") {
+      await page.route(`**${api(item.id)}/exports`, async route => {
+        requested = true; await gate;
+        await route.fulfill({ json: { jobs: [{ jobId: "completed-draft-fixture", projectId: item.id,
+          status: "succeeded", quality: "high", outPath: oldOutput, createdAt: Date.now() / 1000,
+          result: { output_path: oldOutput, duration: 5, width: 320, height: 180 }, error: null }] } }).catch(() => {});
+      });
+    } else {
+      await page.route(`**${api(item.id)}/directory`, async route => {
+        const response = await route.fetch(); requested = true; await gate;
+        await route.fulfill({ response }).catch(() => {});
+      });
+    }
+    try {
+      await page.goto("/");
+      await page.getByRole("button", { name: `打开工程 ${item.name}`, exact: true }).click();
+      await expect(page.locator(".timeline")).toBeVisible({ timeout: 75_000 });
+      const before = await current(request, item.id);
+      await switchTo(page, "en");
+      await page.locator(".tool-btn--export").click();
+      const input = page.locator(".export-dialog input").first();
+      await expect.poll(() => requested).toBe(true);
+      if (lateSource === "history") await expect(input).toHaveAttribute("placeholder", `${folder}/video.mp4`);
+      const value = lateSource === "cleared directory" ? "" : "keep-this-name-ملف.mp4";
+      await input.fill("temporary-name.mp4");
+      await input.fill(value);
+      const other = await page.context().newPage();
+      await other.goto("/");
+      await switchTo(other, "de");
+      await expect(page.getByRole("dialog", { name: "Video exportieren", exact: true })).toBeVisible();
+      release();
+      if (lateSource === "history") await expect(page.getByText(oldOutput, { exact: true })).toBeVisible();
+      else await expect(input).toHaveAttribute("placeholder", `${folder}/video.mp4`);
+      await expect(input).toHaveValue(value);
+      await switchTo(other, "ar");
+      await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+      await expect(page.getByRole("dialog", { name: "تصدير الفيديو", exact: true })).toBeVisible();
+      await expect(input).toHaveValue(value);
+      await noPageOverflow(page);
+      await page.locator(".export-dialog__close").click();
+      await page.setViewportSize({ width: 1200, height: 900 });
+      await noPageOverflow(page);
+      await switchTo(other, "de");
+      await expect(page.locator("html")).toHaveAttribute("lang", "de");
+      await noPageOverflow(page);
+      await page.locator(".tool-btn--export").click();
+      await expect(input).toHaveAttribute("placeholder", `${folder}/video.mp4`);
+      await expect(input).toHaveValue(value);
+      expect(await current(request, item.id)).toEqual(before);
+      await other.close();
+    } finally { release(); }
+  });
+}
 
 test("effect metadata requests follow the locale and keep registry IDs stable", async ({ page, request }) => {
   const item = await fixture(request);

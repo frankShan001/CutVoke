@@ -23,6 +23,8 @@ export default defineConfig({
     url: `${serverUrl}/api/v1/capabilities`,
     reuseExistingServer: !process.env.CI && (!process.env.CUTVOKE_E2E_PORT || process.env.CUTVOKE_E2E_REUSE === "1"),
     timeout: 120_000,
-    env: { CUTVOKE_E2E_PORT: port },
+    // Keep the seeded legacy project for migration coverage while all newly
+    // created projects use the same directory-backed library as shipped apps.
+    env: { CUTVOKE_E2E_PORT: port, CUTVOKE_E2E_FOLDERS: "1" },
   },
 });

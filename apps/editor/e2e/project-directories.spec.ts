@@ -7,7 +7,7 @@ test("folder creation, scoped media, legacy migration and reopening after a move
   test.setTimeout(120000);
   const evidence = resolve("../../.artifacts/project-directories");
   mkdirSync(evidence, { recursive: true });
-  await request.patch("/api/v1/projects/e2e-fixture", { data: { name: "e2e-fixture" } });
+  await request.patch("/api/v1/projects/e2e-migration-fixture", { data: { name: "e2e-migration-fixture" } });
   await page.goto("/");
   const name = `独立目录-${Date.now()}`;
   const root = join(tmpdir(), name);
@@ -35,7 +35,7 @@ test("folder creation, scoped media, legacy migration and reopening after a move
   const otherAssets = await (await request.get(`/api/v1/assets?projectId=${encodeURIComponent(other)}`)).json();
   expect(otherAssets.assets.some((asset: { assetId: string }) => asset.assetId === imported.assetId)).toBeFalsy();
   await page.getByRole("button", { name: "返回工程列表", exact: true }).click();
-  await page.getByRole("button", { name: /^打开工程 e2e-fixture$/, exact: true }).click();
+  await page.getByRole("button", { name: /^打开工程 e2e-migration-fixture$/, exact: true }).click();
   await page.getByRole("button", { name: "预览迁移到独立目录", exact: true }).click();
   await expect(page.locator(".project-directory")).toContainText("复制 3 个文件");
   const migrated = join(tmpdir(), `${name}-migrated`);
@@ -47,6 +47,8 @@ test("folder creation, scoped media, legacy migration and reopening after a move
   expect(migration.status(), JSON.stringify(await migration.json())).toBe(200);
   await expect(page.locator(".project-directory")).toContainText(migrated, { timeout: 60000 });
   expect(existsSync(join(migrated, "backups", "initial.sqlite"))).toBeTruthy();
+  const migratedAssets = await (await request.get("/api/v1/assets?projectId=e2e-migration-fixture")).json();
+  expect(migratedAssets.assets.filter((asset: { name: string }) => ["red.mp4", "green.mp4", "blue.mp4"].includes(asset.name))).toHaveLength(3);
   await page.getByRole("button", { name: "回退迁移", exact: true }).click();
   await expect(page.getByRole("button", { name: "预览迁移到独立目录", exact: true })).toBeVisible();
   // Rollback closes the independent database. Moving its retained copy is safe.
@@ -56,7 +58,7 @@ test("folder creation, scoped media, legacy migration and reopening after a move
   await page.getByRole("textbox", { name: "工程目录路径", exact: true }).fill(join(moved, "project.cutvoke"));
   await page.getByRole("button", { name: "打开工程目录", exact: true }).click();
   await expect(page.locator(".project-directory")).toContainText(moved);
-  const project = await (await request.get("/api/v1/projects/e2e-fixture")).json();
+  const project = await (await request.get("/api/v1/projects/e2e-migration-fixture")).json();
   expect(project.sequence.tracks[0].clips.every((clip: { assetRef: { sourcePath: string } }) => clip.assetRef.sourcePath.startsWith(moved))).toBeTruthy();
   await page.screenshot({ path: join(evidence, "moved-project-reopened.png") });
   expect(JSON.parse(readFileSync(join(moved, "project.cutvoke"), "utf8")).rootPath).toBe(moved);

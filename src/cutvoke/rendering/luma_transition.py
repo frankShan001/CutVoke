@@ -15,8 +15,8 @@ def controls():
             'required':['at','value'],'additionalProperties':False},
             'description':{'zh-CN':'阈值曲线；at 是转场进度，value 通常从 1 下降到 0'}},
         'localRegion':{'type':'object','properties':{
-            'x':unit(0),'y':unit(0),'width':unit(1),'height':unit(1),
-            'feather':{**unit(.05),'maximum':.5}},'additionalProperties':False,
+            'x':{**unit(0),'description':{'en':'Horizontal region origin as a fraction of canvas width'}},'y':{**unit(0),'description':{'en':'Vertical region origin as a fraction of canvas height'}},'width':{**unit(1),'description':{'en':'Region width as a fraction of canvas width'}},'height':{**unit(1),'description':{'en':'Region height as a fraction of canvas height'}},
+            'feather':{'description':{'en':'Feather width as a fraction of the shorter canvas edge'},**unit(.05),'maximum':.5}},'additionalProperties':False,
             'description':{'zh-CN':'局部亮度揭示区域；区域外使用普通叠化'}},
     }
     locales = 'zh-CN zh-TW en ja ko es fr de pt-BR ru ar'.split()

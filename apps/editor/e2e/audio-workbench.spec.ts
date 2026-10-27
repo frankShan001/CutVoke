@@ -59,7 +59,7 @@ test("microphone take can be auditioned, retaken, inserted and mixed with persis
   wav.writeUInt32LE(rate, 24); wav.writeUInt32LE(rate * 2, 28); wav.writeUInt16LE(2, 32); wav.writeUInt16LE(16, 34);
   wav.write("data", 36); wav.writeUInt32LE(samples * 2, 40);
   for (let index = 0; index < samples; index++) wav.writeInt16LE(Math.round(Math.sin(index / rate * 2 * Math.PI * 440) * 4000), 44 + index * 2);
-  const uploaded = await request.post("/api/v1/assets?name=exact-stem-1.860.wav", { data: wav, headers: { "Content-Type": "application/octet-stream" } });
+  const uploaded = await request.post(`/api/v1/assets?name=exact-stem-1.860.wav&projectId=${encodeURIComponent(id)}`, { data: wav, headers: { "Content-Type": "application/octet-stream" } });
   expect(uploaded.status()).toBe(201);
   const stemAsset = await uploaded.json();
   await page.route(`**/api/v1/projects/${id}/commands`, route => {
