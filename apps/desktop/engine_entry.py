@@ -4,6 +4,12 @@ from pathlib import Path
 import sys
 
 if getattr(sys, "frozen", False):
+    # Native QA can capture a stalled worker before teardown destroys evidence.
+    # Normal desktop launches do not install a diagnostic signal handler.
+    if os.name == "posix" and os.environ.get("CUTVOKE_DESKTOP_QA") == "1":
+        import faulthandler
+        import signal
+        faulthandler.register(signal.SIGUSR2, all_threads=True)
     binaries = Path(sys._MEIPASS) / "bin"
     os.environ["PATH"] = str(binaries) + os.pathsep + os.environ.get("PATH", "")
     # GUI child processes and stdio MCP must agree on Unicode on Windows,
