@@ -30,7 +30,10 @@ without_crypto, replacements = re.subn(r'(?m)^glcontext==[^\n]+\n(?:[ \t]+--hash
 assert replacements == 1
 build_lock = work / 'build-requirements.lock'
 build_lock.write_text(without_crypto + (root / 'apps/desktop/requirements-intel-crypto.lock').read_text())
-subprocess.run([sys.executable, '-m', 'pip', 'install', '--require-hashes', '--only-binary=:all:', '-r', str(build_lock)], check=True)
+# The complete lock is explicit. Its two source-built dependencies are
+# installed below; do not let ModernGL resolve an unpinned substitute for the
+# temporarily absent glcontext while bootstrapping the compiler environment.
+subprocess.run([sys.executable, '-m', 'pip', 'install', '--require-hashes', '--no-deps', '--only-binary=:all:', '-r', str(build_lock)], check=True)
 
 if not (output / 'SHA256.json').exists():
     sources = work / 'sources'
@@ -106,6 +109,7 @@ for name, version in (('cryptography', '50.0.2'), ('glcontext', '3.1.0')):
 wheel_lock.write_text(''.join(wheel_pins))
 subprocess.run([sys.executable, '-m', 'pip', 'install', '--require-hashes', '--no-deps', '--no-index',
                 '--find-links', str(wheel.parent), '-r', str(wheel_lock)], check=True)
+subprocess.run([sys.executable, '-m', 'pip', 'check'], check=True)
 print(json.dumps({'wheel': wheel.name, 'sha256': digest, 'source': 'pinned native Intel build'}, indent=2))
 subprocess.run([sys.executable, '-c',
     'import glcontext.darwin; from importlib.metadata import version; '

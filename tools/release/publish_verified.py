@@ -59,12 +59,16 @@ def created_draft_id(repo, tag, sha):
     return release['id']
 
 
-def digest(path):
+def stream_digest(stream):
     checksum = hashlib.sha256()
-    with path.open('rb') as file:
-        for block in iter(lambda: file.read(1024 * 1024), b''):
-            checksum.update(block)
+    for block in iter(lambda: stream.read(1024 * 1024), b''):
+        checksum.update(block)
     return checksum.hexdigest()
+
+
+def digest(path):
+    with path.open('rb') as file:
+        return stream_digest(file)
 
 
 def verify_info(info, version, sha, platform):
@@ -205,7 +209,7 @@ def main():
         expected_url = f'https://github.com/{repo}/releases/download/{tag}/{asset["name"]}'
         require(asset['browser_download_url'] == expected_url, 'Download URL mismatch')
         with urllib.request.urlopen(expected_url, timeout=180) as response:
-            actual = hashlib.file_digest(response, 'sha256').hexdigest()
+            actual = stream_digest(response)
         require('sha256:' + actual == expected[asset['name']][1], 'Public download digest mismatch')
     print(published['html_url'], flush=True)
     with Path(os.environ['GITHUB_STEP_SUMMARY']).open('a', encoding='utf-8') as summary:
