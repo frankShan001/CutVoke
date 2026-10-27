@@ -15,7 +15,7 @@
     "test:preview-cache": "node --test scripts/preview-cache.test.mjs",
     "test:basic": "node --test scripts/clip-timing.test.mjs scripts/project-sync.test.mjs scripts/timeline-media-cache.test.mjs scripts/import-media.test.mjs scripts/project-equivalence.test.mjs scripts/ae-workflow.test.mjs",
     "test:e2e": "npm run build && playwright test",
-    "test:e2e:regressions": "playwright test e2e/ae-workflow.spec.ts e2e/editor.spec.ts e2e/i18n.spec.ts e2e/interactive-preview.spec.ts e2e/production-workflow.spec.ts e2e/preview-preload.spec.ts e2e/generic-keyframes.spec.ts --grep \"cross-tab language changes|resource covers never render|resource hover renders a fallback|live audio stays continuous|timeline filter persists|continuous preparation stops|menus,|German editor shell|live audio gain|rapid edits|returning A|slow preparation|native acceptance|mirror and flip|text and freehand|prepared playback follows|generic curve editor persists\" --repeat-each=3"
+    "test:e2e:regressions": "playwright test e2e/ae-workflow.spec.ts e2e/editor.spec.ts e2e/i18n.spec.ts e2e/interactive-preview.spec.ts e2e/production-workflow.spec.ts e2e/preview-preload.spec.ts e2e/generic-keyframes.spec.ts --grep \"stale background preparation|attached overlays follow|cross-tab language changes|resource covers never render|resource hover renders a fallback|live audio stays continuous|timeline filter persists|continuous preparation stops|menus,|German editor shell|live audio gain|rapid edits|returning A|slow preparation|native acceptance|mirror and flip|text and freehand|prepared playback follows|generic curve editor persists\" --repeat-each=3"
   },
   "dependencies": {
     "lucide-react": "^0.454.0",

@@ -2,7 +2,7 @@ import { msg, tr, useLocale } from "../i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Check, Film, LoaderCircle, TriangleAlert } from "lucide-react";
 import { useEditor } from "../store/editor";
-import { refreshProject } from "../store/actions";
+import { getLatestState, refreshProject } from "../store/actions";
 import { ApiFailure } from "../lib/api";
 import { previewContentKey, previewRequest, type PreviewJob } from "../lib/previewPreparation";
 import { fetchPreviewFrame } from "../lib/mediaApi";
@@ -136,7 +136,19 @@ export function useProjectPreparation() {
       dispatch({ type: "PREPARED_PREVIEW_SET", preview: { projectId, contentKey, url } });
       if (openingRef.current) decodeTimerRef.current = window.setTimeout(
         () => setError(tr("首帧解码超时，请重试加载。")), 15000);
-    })().catch((failure: unknown) => {
+    })().catch(async (failure: unknown) => {
+      if (!signal.aborted && failure instanceof ApiFailure && failure.code === "REVISION_CONFLICT") {
+        // A local edit can commit before its new snapshot reaches this worker.
+        // Reconcile that immutable request without replacing the edit feedback
+        // with a false reload warning (or a generic ready message).
+        const refreshed = await refreshProject(dispatch, projectId, { quiet: true });
+        if (signal.aborted) return;
+        const latest = getLatestState();
+        if (refreshed && latest?.currentId === projectId && latest.project?.revision !== project.revision) {
+          setRetry(value => value + 1);
+          return;
+        }
+      }
       if (!signal.aborted && !jobId && failure instanceof ApiFailure && failure.status === 404) {
         dispatch({ type: "PROJECT_OPEN_READY", projectId });
         dispatch({ type: "STATUS_SET", severity: "warn",

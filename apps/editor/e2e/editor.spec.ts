@@ -3285,6 +3285,53 @@ test("attached overlays follow video moves, Alt keeps them in place, and unlinki
   await expect.poll(readPositions).toEqual({ video: 1.8, sticker: 1.5, attachedTo: null });
 });
 
+test("stale background preparation reconciles without replacing successful edit feedback", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  const submitted: string[] = [];
+  let conflict = 0;
+  let renderFailure = false;
+  const jobId = `reconciled-${id}`;
+  const running = { jobId, state: "running", phase: "rendering", completedWindows: 0,
+    totalWindows: 1, progress: 0, cached: false };
+  await page.route(`**/projects/${id}/preview-jobs`, async route => {
+    submitted.push(route.request().postDataJSON().revision);
+    if (submitted.length === 1) {
+      await gate;
+      const response = await route.fetch();
+      conflict = response.status();
+      await route.fulfill({ response }).catch(() => {});
+    } else await route.fulfill({ status: 202, json: running });
+  });
+  await page.route(`**/preview-jobs/${jobId}`, route => route.fulfill({ json: {
+    ...running, state: renderFailure ? "failed" : "running",
+    ...(renderFailure ? { error: "current preview decoder failure" } : {}),
+  } }));
+  await page.route(`**/preview-jobs/${jobId}/cancel`, route => route.fulfill({ json: { ...running, state: "cancelled" } }));
+  try {
+    await openProject(page, name);
+    await expect.poll(() => submitted.length).toBe(1);
+    await page.locator("#creative-domain-caption").click();
+    await page.getByRole("button", { name: "删除字幕 caption-one", exact: true }).click();
+    const feedback = page.locator(".statusbar__msg");
+    await expect(feedback).toHaveText("已删除字幕");
+    const latest = await readProject(request, id);
+    expect(latest.revision).not.toBe(submitted[0]);
+    expect(latest.sequence.captions).toHaveLength(0);
+    // Caption edits do not change the base-video content key, so the old
+    // worker remains live. Return the real backend's revision rejection now.
+    release();
+    await expect.poll(() => conflict).toBe(409);
+    await expect.poll(() => submitted).toEqual([submitted[0], latest.revision]);
+    await expect(feedback).toHaveText("已删除字幕");
+    await expect(page.getByText("工程已更新，请重新加载", { exact: true })).toHaveCount(0);
+    expect(await readProject(request, id)).toEqual(latest);
+    renderFailure = true;
+    await expect(feedback).toHaveText("current preview decoder failure");
+  } finally { release(); }
+});
+
 test("timeline range export is queued and reports the selected duration", async ({ page, request }) => {
   test.setTimeout(90_000);
   const { id, name } = await createProject(request);

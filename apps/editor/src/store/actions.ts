@@ -60,17 +60,18 @@ export async function selectProject(
   return refreshProject(dispatch, projectId);
 }
 
-/** 刷新工程（重置到最新 revision）。加载成功后状态栏显示"就绪"（不再长期"启动中"）。 */
+/** 刷新到最新 revision。默认显示"就绪"；后台协调可保留用户操作反馈。 */
 export async function refreshProject(
   dispatch: Dispatch<EditorAction>,
   projectId: string,
+  options: { quiet?: boolean } = {},
 ): Promise<boolean> {
   try {
     const project = await getProject(projectId);
     if (latestState && latestState.currentId !== projectId) return false;
     dispatch({ type: "PROJECT_LOADED", project });
     dispatch({ type: "SVC_UP", up: true });
-    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("就绪") });
+    if (!options.quiet) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("就绪") });
     return true;
   } catch (err) {
     if (latestState && latestState.currentId !== projectId) return false;
