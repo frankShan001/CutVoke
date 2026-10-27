@@ -1,0 +1,43 @@
+{
+  "releaseId": 420271003,
+  "tag": "v0.3.2",
+  "commit": "b80b67027ceaa3d01d9a9e68538be3baa20a6cb5",
+  "assets": [
+    {
+      "id": 664528671,
+      "name": "BUILD-INFO.json",
+      "size": 1569,
+      "digest": "sha256:bdfbe25655585a85d19c4db3f6d41b915ab3eb51cb93a39b08fb324ff783d671"
+    },
+    {
+      "id": 664528663,
+      "name": "CutVoke-0.3.2-linux-x64.tar.gz",
+      "size": 431355559,
+      "digest": "sha256:d30b96bfbdcb1ea51e4f245d009ad03db8af5cc071dc417651085b9ea3d433e9"
+    },
+    {
+      "id": 664528669,
+      "name": "CutVoke-0.3.2-macos-arm64.zip",
+      "size": 405573951,
+      "digest": "sha256:7a238cd8d2509906b361cc5b50c62b1e248530d184360b759e055ff631669a79"
+    },
+    {
+      "id": 664528668,
+      "name": "CutVoke-0.3.2-macos-x64.zip",
+      "size": 502249239,
+      "digest": "sha256:f1c6a797a1edd5cf3076bc2635b12c43393cb4faee412ab203a6c21112b49d3e"
+    },
+    {
+      "id": 664528675,
+      "name": "CutVoke-0.3.2-windows-x64-portable.zip",
+      "size": 437947409,
+      "digest": "sha256:41f9cca313366037b891d966d8323279ce0efd9c4b46a07175b764e3c989a758"
+    },
+    {
+      "id": 664528691,
+      "name": "SHA256SUMS",
+      "size": 392,
+      "digest": "sha256:cc6dc2ecb1923d07d954061374fd70e4f4c6b5f134ba4c6fcfe77a8f57372e53"
+    }
+  ]
+}
