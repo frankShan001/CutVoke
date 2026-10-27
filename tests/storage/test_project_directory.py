@@ -233,3 +233,32 @@ def test_conflicting_commit_does_not_change_asset_ledger(tmp_path):
     assert store.get_asset("test-source") == original_asset
     assert store.load("one").revision == "0"
     store.close()
+
+
+def test_source_path_only_insert_gets_a_persistent_project_asset_identity(tmp_path):
+    from PIL import Image
+    import hashlib
+    source = tmp_path / '原始素材.png'
+    Image.new('RGB', (128, 72), 'blue').save(source)
+    raw = source.read_bytes()
+    store = DirectoryProjectStore(tmp_path / 'project', create_id='one')
+    try:
+        project = project_with_media('one', source)
+        project.sequence.tracks[0].clips[0].asset_ref.asset_id = ''
+        store.commit(project)
+        identity = 'asset_' + hashlib.sha256(raw).hexdigest()
+        reference = store.load('one').sequence.tracks[0].clips[0].asset_ref
+        assert reference.asset_id == identity
+        assert project.sequence.tracks[0].clips[0].asset_ref.asset_id == identity
+        asset = store.get_asset(identity)
+        assert asset['name'] == source.name
+        assert Path(asset['path']).read_bytes() == raw
+        assert Path(asset['path']).is_relative_to(store.root / 'media')
+        source.unlink()
+        service = EditService(store=store)
+        service.execute(Command(type='track.add', project_id='one', expected_revision='0', payload={'kind':'audio'}))
+        service.execute(Command(type='history.undo', project_id='one', expected_revision='1', payload={}))
+        assert store.load('one').sequence.tracks[0].clips[0].asset_ref.asset_id == identity
+        assert store.get_asset(identity)['name'] == '原始素材.png'
+    finally:
+        store.close()

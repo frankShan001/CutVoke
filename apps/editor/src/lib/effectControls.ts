@@ -20,6 +20,8 @@ export interface ParamControl {
 }
 
 const PARAM_LABELS: Record<string, string> = {
+  // Axis names stay stable when richer schema help is added.
+  x: "x", y: "y", z: "z",
   get time() { return tr('关键帧时间（秒）'); },
   get at() { return tr('进度'); },
   get value() { return tr('数值'); },

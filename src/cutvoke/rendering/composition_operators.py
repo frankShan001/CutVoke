@@ -176,7 +176,12 @@ def vector_frame(params, width, height, time):
 def build(renderer, key, params, source, parts, counter):
     stem = f"operator{counter[0]}"; counter[0] += 1
     fps = getattr(renderer._render_ctx, 'sequence_fps', 30)
-    parts.append(f"[{source}]fps={fps}[{stem}clock]")
+    from cutvoke.rendering.render import _setpts_clears_frame_rate
+    # FFmpeg 6 overlay forwards EOF at its final frame's timestamp. fps would
+    # discard that real picture. A lookahead lets fps emit it; the enclosing
+    # clip canvas / adjustment's base still bounds the result to authored time.
+    lookahead = '' if _setpts_clears_frame_rate(renderer.ffmpeg) else 'tpad=stop_mode=clone:stop=1,'
+    parts.append(f"[{source}]{lookahead}fps={fps}[{stem}clock]")
     source = stem + "clock"
     if key == "waveWarp":
         amplitude, wavelength = float(params.get("amplitude", 12)), float(params.get("wavelength", 120))

@@ -56,3 +56,16 @@ test('modified properties include static authoring, animation, matte, binding an
   assert.deepEqual(rows.filter(row=>row.animated).map(row=>row.key),['keys:x','link:rotation','motionPath']);
   assert.deepEqual(clip,saved);
 });
+
+
+test('coordinate labels stay stable while descriptions remain accessible help', async () => {
+  const controlsSource = source('effectControls')
+    .replace('import { tr } from "../i18n";', 'const tr = text => text;')
+    .replace('import { getLocale } from "../i18n/locale";', 'const getLocale = () => "zh-CN";');
+  const { paramControls } = await import(url(controlsSource));
+  const description = { en: 'Vertical region origin as a fraction of canvas height' };
+  const controls = paramControls({ parameters: { properties: { y: { type: 'number', description } } } }, { y: .6 });
+  assert.equal(controls[0].label, 'y');
+  assert.equal(controls[0].description, description.en);
+  assert.equal(controls[0].value, .6);
+});

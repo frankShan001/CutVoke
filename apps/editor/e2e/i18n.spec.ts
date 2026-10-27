@@ -47,7 +47,8 @@ async function noPageOverflow(page: Page) {
   const overlaps = await page.locator(".topbar").evaluateAll(nodes => nodes.flatMap(node => {
     const children = [...node.children].map(child => ({ name: child.className, box: child.getBoundingClientRect() })).filter(item => item.box.width && item.box.height);
     return children.flatMap((a, index) => children.slice(index + 1).filter(b =>
-      Math.min(a.box.right, b.box.right) - Math.max(a.box.left, b.box.left) > 1).map(b => `${a.name}/${b.name}`));
+      Math.min(a.box.right, b.box.right) - Math.max(a.box.left, b.box.left) > 1 &&
+      Math.min(a.box.bottom, b.box.bottom) - Math.max(a.box.top, b.box.top) > 1).map(b => `${a.name}/${b.name}`));
   }));
   expect(overlaps).toEqual([]);
 }
@@ -165,7 +166,7 @@ test("German editor shell keeps toolbar controls inside the viewport when reveal
   await page.getByRole("button", { name: `打开工程 ${item.name}`, exact: true }).click();
   await expect(page.locator(".timeline")).toBeVisible({ timeout: 75_000 });
   await switchTo(page, "de");
-  for (const width of [1600, 1500, 1400, 1280, 1024]) {
+  for (const width of [1600, 1500, 1400, 1280, 1024, 760]) {
     await page.setViewportSize({ width, height: 960 });
     // Native reveal/focus scrolling must stay within intentional scroll areas.
     await page.locator(".topbar__sync").evaluate(node => node.scrollIntoView({ block: "nearest", inline: "nearest" }));

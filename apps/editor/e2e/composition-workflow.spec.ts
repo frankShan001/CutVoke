@@ -25,7 +25,7 @@ test('adjustment and exact effect compositing are editable and undoable in the b
   await open(page,id);await page.getByRole('tab',{name:'效果条',exact:true}).click();
   const row=page.locator('.effect-row').first();await row.locator('.effect-row__compositing summary').click();
   await row.getByRole('spinbutton',{name:'效果透明度',exact:true}).fill('0.5');await row.getByRole('spinbutton',{name:'效果透明度',exact:true}).blur();
-  await expect.poll(async()=>(await read(request,id)).sequence.tracks[0].clips[0].effects[0].compositing.opacity).toBe(.5);
+  await expect.poll(async()=>(await read(request,id)).sequence.tracks[0].clips[0].effects[0].compositing?.opacity).toBe(.5);
   await page.getByRole('button',{name:'撤销',exact:true}).click();
   await expect.poll(async()=>Object.hasOwn((await read(request,id)).sequence.tracks[0].clips[0].effects[0],'compositing')).toBe(false);
   await page.getByRole('button',{name:'添加调整层',exact:true}).click();
@@ -37,9 +37,9 @@ test('matte selector uses stable references and the server rejects cycles withou
   const id=await fixture(request,2);await open(page,id);
   const section=page.getByTestId('layer-compositing');await section.locator('summary').click();
   await section.getByLabel('轨道遮罩',{exact:true}).selectOption('c1');
-  await expect.poll(async()=>(await read(request,id)).sequence.tracks[0].clips[0].compositing.matte.clipId).toBe('c1');
+  await expect.poll(async()=>(await read(request,id)).sequence.tracks[0].clips[0].compositing?.matte?.clipId).toBe('c1');
   await section.getByText('反相',{exact:true}).click();
-  await expect.poll(async()=>(await read(request,id)).sequence.tracks[0].clips[0].compositing.matte.invert).toBe(true);
+  await expect.poll(async()=>(await read(request,id)).sequence.tracks[0].clips[0].compositing?.matte?.invert).toBe(true);
   const before=await read(request,id);
   const rejected=await request.post(`/api/v1/projects/${id}/commands`,{data:{type:'clip.composite',payload:{clipId:'c1',compositing:{matte:{clipId:'c0'}}},expectedRevision:before.revision,commandId:crypto.randomUUID()}});
   expect(rejected.ok()).toBe(false);expect((await read(request,id)).revision).toBe(before.revision);

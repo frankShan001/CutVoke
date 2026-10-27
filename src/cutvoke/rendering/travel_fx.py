@@ -76,17 +76,23 @@ def build_sidechain_ducks(groups, labels_by_clip, requests, parts, duration):
         parts.append(f"[{ref}]asplit={len(outputs)}"+"".join(f"[{x}]" for x in outputs))
     for i,(target,p,refs) in enumerate(active):
         side=f"duckside{i}"
+        # FFmpeg's sidechain framesync can stop with buffered samples still
+        # unread when an input reaches EOF. Supply a bounded silent drain tail
+        # to BOTH inputs, then retain only the authoritative project interval.
+        padded_duration = duration + 1
         ins="".join(f"[duckkey{i}_{j}]" for j in range(len(refs)))
         if len(refs)>1:
-            parts.append(f"{ins}amix=inputs={len(refs)}:normalize=0:duration=longest,apad=whole_dur={duration:.9f}[{side}]")
+            parts.append(f"{ins}amix=inputs={len(refs)}:normalize=0:duration=longest,apad=whole_dur={padded_duration:.9f}[{side}]")
         else:
-            parts.append(f"{ins}apad=whole_dur={duration:.9f}[{side}]")
+            parts.append(f"{ins}apad=whole_dur={padded_duration:.9f}[{side}]")
         floor=10**(float(p.get("reductionDb",-14))/20)
         threshold=10**(float(p.get("thresholdDb",-40))/20)
         attack=float(p.get("attackMs",10));release=float(p.get("releaseMs",300))
         parts.append(f"[{target}]asplit=2[duckdry{i}][duckwet{i}]")
-        parts.append(f"[duckwet{i}][{side}]sidechaincompress=threshold={threshold:.9f}:ratio=20:"
-                     f"attack={attack:.4f}:release={release:.4f}:level_sc=4:makeup=1[duckcomp{i}]")
+        parts.append(f"[duckwet{i}]apad=whole_dur={padded_duration:.9f}[duckwetpad{i}]")
+        parts.append(f"[duckwetpad{i}][{side}]sidechaincompress=threshold={threshold:.9f}:ratio=20:"
+                     f"attack={attack:.4f}:release={release:.4f}:level_sc=4:makeup=1,"
+                     f"atrim=duration={duration:.9f}[duckcomp{i}]")
         parts.append(f"[duckcomp{i}][duckdry{i}]amix=inputs=2:weights='{1-floor:.9f} {floor:.9f}':"
                      f"normalize=0:duration=longest[duckout{i}]")
         remap[target]=f"duckout{i}"

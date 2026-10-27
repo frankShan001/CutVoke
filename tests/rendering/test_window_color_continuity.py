@@ -164,3 +164,25 @@ def test_cancel_during_seam_verification_does_not_publish(tmp_path):
         renderer.render(project,str(path),quality='high',cancel_event=cancel,output_start=0,output_duration=17,
                         progress_callback=progress)
     assert not path.exists() and not list(tmp_path.glob('cutvoke-export-windows-*'))
+
+
+@pytest.mark.parametrize('yuv', [False, True])
+def test_planar_transition_inputs_keep_all_256_alpha_levels_exact(yuv):
+    # Compare real coverage bytes, including 128 where FFmpeg 7's ordinary
+    # packed-to-planar conversion rounds to 129. Both transition families must
+    # preserve coverage independently of their color-plane representation.
+    pixels = np.zeros((2, 256, 4), dtype=np.uint8)
+    pixels[:, :, :3] = [63, 127, 191]
+    pixels[:, :, 3] = np.arange(256, dtype=np.uint8)
+    renderer = RenderService(gpu_effects=False)
+    parts = []
+    renderer._planar_alpha_for_transition('0:v', 'planar', parts, yuv=yuv)
+    parts.append('[planar]alphaextract[out]')
+    result = subprocess.run([
+        'ffmpeg', '-v', 'error', '-nostdin', '-filter_complex_threads', '1',
+        '-f', 'rawvideo', '-pixel_format', 'rgba', '-video_size', '256x2',
+        '-i', 'pipe:0', '-filter_complex', ';'.join(parts), '-map', '[out]',
+        '-frames:v', '1', '-pixel_format', 'gray', '-f', 'rawvideo', 'pipe:1',
+    ], input=pixels.tobytes(), capture_output=True, check=True)
+    np.testing.assert_array_equal(np.frombuffer(result.stdout, np.uint8).reshape(2, 256),
+                                  pixels[:, :, 3])

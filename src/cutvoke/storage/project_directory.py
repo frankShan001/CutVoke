@@ -61,7 +61,7 @@ def _map_paths(value, replace, field=""):
 
 def _refs(value):
     if isinstance(value, dict):
-        if value.get("assetId") and value.get("sourcePath"):
+        if "assetId" in value and value.get("sourcePath"):
             yield value
         for item in value.values():
             yield from _refs(item)
@@ -206,12 +206,14 @@ class DirectoryProjectStore(ProjectStore):
                     return copied[value]
                 return value
             updated = _map_paths(data, own)
-            if updated != data:
-                owned = Project.from_dict(updated)
-                project.__dict__.update(owned.__dict__)
             original_names = {owned: Path(original).name for original, owned in copied.items()}
             seen = set()
             for ref in _refs(updated):
+                # sourcePath is a valid public insertion contract. Give these
+                # references an identity before registering copied media; an
+                # empty ID previously left the project ledger entirely empty.
+                if not ref["assetId"]:
+                    ref["assetId"] = "asset_" + _digest(ref["sourcePath"])
                 if ref["assetId"] in seen:
                     continue
                 seen.add(ref["assetId"])
@@ -231,6 +233,9 @@ class DirectoryProjectStore(ProjectStore):
                     has_audio=(original or {}).get("hasAudio", kind == "audio"),
                     width=(original or {}).get("width"), height=(original or {}).get("height"),
                     sha256=_digest(path), builtin=False)
+            if updated != data:
+                owned = Project.from_dict(updated)
+                project.__dict__.update(owned.__dict__)
             return copied
 
     def commit(self, project, **kwargs):

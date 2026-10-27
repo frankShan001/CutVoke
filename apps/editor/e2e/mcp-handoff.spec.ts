@@ -1,3 +1,4 @@
+import { projectOutputPath } from "./projectDirectoryHelpers";
 import { expect, test } from "@playwright/test";
 import { spawn, execFileSync } from "node:child_process";
 import { createInterface } from "node:readline";
@@ -52,10 +53,10 @@ test("stdio MCP imports stay visible when a human edits, previews and exports", 
     const initialized = await rpc("initialize", { protocolVersion: "2024-11-05", capabilities: {},
       clientInfo: { name: "browser-handoff", version: "1.0.0" } });
     expect(initialized.instructions).toContain("不包含您的视频、图片、音频、文字或字幕正文");
-    asset = (await call("media_import", { paths: [image] })).assets[0];
-    const repeat = (await call("media_import", { paths: [image] })).assets[0];
-    expect(repeat.assetId).toBe(asset.assetId);
     await call("create_project", { projectId: id, name, width: 320, height: 180, fps: 30 });
+    asset = (await call("media_import", { projectId: id, paths: [image] })).assets[0];
+    const repeat = (await call("media_import", { projectId: id, paths: [image] })).assets[0];
+    expect(repeat.assetId).toBe(asset.assetId);
     const lease = (await call("edit_lock", { projectId: id, action: "acquire", owner: "handoff-test" })).lease.leaseId;
     await call("command_apply", { projectId: id, expectedRevision: "0", editLeaseId: lease,
       commandId: `${id}-edit`, type: "edit.batch", payload: { commands: [
@@ -78,10 +79,14 @@ test("stdio MCP imports stay visible when a human edits, previews and exports", 
     child.stdin.end();
     expect(await closed, diagnostics).toBe(0);
   }
-  const entries = (await (await request.get("/api/v1/assets")).json()).assets;
-  expect(entries.filter((a: { name: string }) => a.name === asset.name).length).toBeGreaterThanOrEqual(2);
+  const globalEntries = (await (await request.get("/api/v1/assets")).json()).assets;
+  const entries = (await (await request.get(`/api/v1/assets?projectId=${encodeURIComponent(id)}`)).json()).assets;
+  const directory = await (await request.get(`/api/v1/projects/${id}/directory`)).json();
+  expect(asset.path.startsWith(directory.mediaDirectory)).toBe(true);
+  expect(globalEntries.some((a: { path: string }) => a.path === asset.path)).toBe(false);
+  expect(globalEntries.some((a: { name: string }) => a.name === asset.name)).toBe(true);
   expect(entries.find((a: { assetId: string }) => a.assetId === asset.assetId).available).toBe(true);
-  const media = await request.get(`/api/v1/assets/${asset.assetId}/media`);
+  const media = await request.get(`/api/v1/assets/${asset.assetId}/media?projectId=${encodeURIComponent(id)}`);
   expect(media.status()).toBe(200);
   expect(await media.body()).toEqual(readFileSync(image));
 
@@ -94,6 +99,7 @@ test("stdio MCP imports stay visible when a human edits, previews and exports", 
   await expect(card).toHaveCount(1);
   await expect(card).toContainText(asset.name);
   await expect(card).not.toContainText("文件丢失");
+  await card.scrollIntoViewIfNeeded();
   await expect(card.locator("img")).toBeVisible();
   await expect.poll(() => card.locator("img").evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "字幕", exact: true }).click();
@@ -133,7 +139,7 @@ test("stdio MCP imports stay visible when a human edits, previews and exports", 
   await page.screenshot({ path: resolve(evidence, "mcp-human-edit.png") });
   await page.getByRole("button", { name: "导出", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "导出成片" });
-  const output = resolve(evidence, `${id}.mp4`);
+  const output = await projectOutputPath(request, id, `${id}.mp4`);
   await dialog.getByLabel("输出文件路径").fill(output);
   await dialog.getByLabel("画质").selectOption("low");
   await dialog.getByRole("button", { name: "开始导出" }).click();

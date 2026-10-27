@@ -58,6 +58,9 @@ def main() -> None:
         raise RuntimeError("build the Web editor before starting e2e_server")
     port = int(os.environ.get("CUTVOKE_E2E_PORT", "8799"))
     with tempfile.TemporaryDirectory(prefix="cutvoke-e2e-") as root:
+        # The optional extension journal belongs to this disposable runtime.
+        # Status reads must never create files in the user's actual profile.
+        os.environ["CUTVOKE_EXTENSION_HOME"] = os.path.join(root, "extensions")
         service = EditService(store=ProjectStore(os.path.join(root, "projects.sqlite")))
         seed_fixture(service, root)
         if os.environ.get("CUTVOKE_E2E_FOLDERS") == "1":

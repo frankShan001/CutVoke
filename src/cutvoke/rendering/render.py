@@ -2105,7 +2105,8 @@ class RenderService:
             # fps already produces zero-based, exact frame ticks. A following
             # identity setpts would strip rate/duration metadata on FFmpeg 7
             # and make its encoder drop/retime frames across chunk boundaries.
-            graph = f"[0:v]fps={frame_rate.numerator}/{frame_rate.denominator}[outv]"
+            graph = (f"[0:v]fps={frame_rate.numerator}/{frame_rate.denominator},"
+                     f"{self._working_video_filter(keep_alpha=alpha)}[outv]")
             if not _setpts_clears_frame_rate(self.ffmpeg):
                 graph = graph.replace("[outv]", ",setpts=N/FRAME_RATE/TB[outv]")
             if has_audio:
@@ -3493,7 +3494,8 @@ class RenderService:
             return True
         # Decoded alpha must meet the canvas before a working-space conversion
         # can discard it, including materialized composition intermediates.
-        if clip.asset_ref.source_path and _pix_fmt_has_alpha(self.probe_media(clip.asset_ref.source_path).get('pix_fmt')):
+        if (os.path.isfile(clip.asset_ref.source_path)
+                and _pix_fmt_has_alpha(self.probe_media(clip.asset_ref.source_path).get('pix_fmt'))):
             return True
         if _find_animations(clip):
             return True
@@ -3825,6 +3827,14 @@ class RenderService:
                     _build_squeeze_transition(transition_outgoing, incoming, out,
                                               str(squeeze_axis), d, offset, parts)
                 else:
+                    if has_alpha:
+                        planar_yuv = any(p is not None for p in
+                                         (blur_pattern, camera_pattern, vlog_pattern))
+                        transition_outgoing = self._planar_alpha_for_transition(
+                            transition_outgoing, f'{out}from', parts, yuv=planar_yuv)
+                        incoming = self._planar_alpha_for_transition(
+                            incoming, f'{out}to', parts, yuv=planar_yuv)
+                        xfade_format = ''
                     clock = f"settb=expr={fps.denominator}/{fps.numerator},setpts=N"
                     clears_rate = _setpts_clears_frame_rate(self.ffmpeg)
                     if clears_rate:
@@ -3978,9 +3988,28 @@ class RenderService:
         """
         space=getattr(self._render_ctx,'working_color','bt709')
         primaries,transfer,_matrix=COLOR_SPACE_TRIPLE.get(space,COLOR_SPACE_TRIPLE['bt709'])
-        pixel_format='rgba' if keep_alpha or getattr(self._render_ctx,'alpha',False) else 'rgb24'
+        alpha = keep_alpha or getattr(self._render_ctx,'alpha',False)
+        pixel_format = 'rgba' if alpha else 'rgb24'
         return (f'format={pixel_format},'
                 f'setparams=range=full:color_primaries={primaries}:color_trc={transfer}:colorspace=gbr')
+
+    def _planar_alpha_for_transition(self, source, output, parts, *, yuv=False):
+        """Preserve 8-bit coverage while satisfying xfade's planar input.
+
+        FFmpeg 7's packed RGBA -> planar conversion rounds intermediate alpha
+        upward (128 becomes 129), even outside the transition. Split coverage
+        before that conversion; mergeplanes copies the exact gray plane.
+        """
+        color_format = 'yuv444p' if yuv else 'gbrp'
+        output_format = 'yuva444p' if yuv else 'gbrap'
+        parts.append(
+            f'[{source}]format=rgba,split=2[{output}color][{output}alpha];'
+            f'[{output}color]format={color_format}[{output}planes];'
+            f'[{output}alpha]format=rgba,alphaextract,'
+            f'scale=in_range=full:out_range=full,format={color_format}[{output}coverage];'
+            f'[{output}planes][{output}coverage]'
+            f'mergeplanes=0x00010210:format={output_format}[{output}]')
+        return output
 
     def _build_clip_plain(self, clip: Clip, seq: Sequence, get_input, parts: list[str],
                           vseg: list[int], fps_expr: str) -> str:

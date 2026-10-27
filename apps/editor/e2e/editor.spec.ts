@@ -1,3 +1,4 @@
+import { hasBuiltinSticker, projectOutputPath } from "./projectDirectoryHelpers";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -595,7 +596,7 @@ test("media and sticker catalog failures expose a retry in their own domains", a
   const { name } = await createProject(request);
   let assetsAvailable = false;
   let stickersAvailable = false;
-  await page.route("**/api/v1/assets", async (route) => {
+  await page.route(/\/api\/v1\/assets(?:\?.*)?$/, async (route) => {
     if (assetsAvailable) return route.continue();
     return route.fulfill({
       status: 503,
@@ -628,12 +629,12 @@ test("media and sticker catalog failures expose a retry in their own domains", a
   stickersAvailable = true;
   await stickerFailure.getByRole("button", { name: "重试贴纸库" }).click();
   await expect(page.locator(".sticker-card").first()).toBeVisible({ timeout: 15_000 });
-  await page.unroute("**/api/v1/assets");
+  await page.unroute(/\/api\/v1\/assets(?:\?.*)?$/);
   await page.unroute("**/api/v1/stickers");
 });
 
 test("six resource services can fail together and recover independently across domains", async ({ page, request }) => {
-  const { name, sources } = await createProject(request);
+  const { id, name, sources } = await createProject(request);
   let releaseAssetFailure!: () => void;
   let releaseStickerFailure!: () => void;
   let releaseEffectFailure!: () => void;
@@ -654,7 +655,7 @@ test("six resource services can fail together and recover independently across d
   let registryAvailable = false;
   let presetAvailable = false;
 
-  await page.route("**/api/v1/assets", async (route) => {
+  await page.route(/\/api\/v1\/assets(?:\?.*)?$/, async (route) => {
     assetRequestsStarted += 1;
     await assetFailureGate;
     if (assetsAvailable) return route.continue();
@@ -696,7 +697,8 @@ test("six resource services can fail together and recover independently across d
   await expect.poll(() => assetRequestsStarted).toBeGreaterThan(0);
   await expect(page.getByRole("status").filter({ hasText: "正在读取素材库" })).toBeVisible();
   await expect(page.locator(".media-empty .cv-empty")).toHaveCount(0);
-  const projectMediaName = sources[0].split(/[\\/]/).pop() || sources[0];
+  const pendingSource = (await readProject(request, id)).sequence.tracks[0].clips[0].assetRef.sourcePath;
+  const projectMediaName = pendingSource.split(/[\\/]/).pop() || pendingSource;
   await expect(page.locator(".media-item").filter({ hasText: projectMediaName }).first()).toBeVisible();
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "特效" }).click();
   await expect(page.getByRole("region", { name: "效果库", exact: true })
@@ -768,14 +770,14 @@ test("six resource services can fail together and recover independently across d
   await registryFailure.getByRole("button", { name: "重试资源目录" }).click();
   await expect(registry.getByText("尚未添加在线资源目录。")).toBeVisible();
   await expect(registry.getByRole("alert")).toHaveCount(0);
-  await page.unroute("**/api/v1/assets");
+  await page.unroute(/\/api\/v1\/assets(?:\?.*)?$/);
   await page.unroute("**/api/v1/stickers");
   await page.unroute("**/api/v1/projects/*/resources?*");
   await page.unroute("**/api/v1/presets");
 });
 
 const isolatedResourceFailures = [
-  { id: "assets", label: "素材", route: "**/api/v1/assets", message: "模拟素材单域故障" },
+  { id: "assets", label: "素材", route: /\/api\/v1\/assets(?:\?.*)?$/, message: "模拟素材单域故障" },
   { id: "stickers", label: "贴纸", route: "**/api/v1/stickers", message: "模拟贴纸单域故障" },
   { id: "effects", label: "效果目录", route: "**/api/v1/projects/*/resources?*", message: "模拟效果目录单域故障" },
   { id: "packs", label: "资源包状态", route: "**/api/v1/resource-packs", message: "模拟资源包状态单域故障" },
@@ -987,7 +989,7 @@ test("eight creative domains share keyboard navigation and preserve the selected
     await auditGate;
     await route.continue();
   });
-  await page.route("**/api/v1/assets", (route) => route.fulfill({
+  await page.route(/\/api\/v1\/assets(?:\?.*)?$/, (route) => route.fulfill({
     status: 200,
     contentType: "application/json",
     body: JSON.stringify({ assets: [] }),
@@ -1332,14 +1334,14 @@ test("music library classifies imported audio as background music or sound effec
   let savedRole = "unclassified";
   let failNextAudition = true;
   const auditionFixture = readFileSync(bgmFixture);
-  await page.route("**/api/v1/assets", (route) => route.fulfill({
+  await page.route(/\/api\/v1\/assets(?:\?.*)?$/, (route) => route.fulfill({
     status: 200,
     contentType: "application/json",
     body: JSON.stringify({ assets: [
       { ...importedAudio, audioRole: savedRole }, builtinAudio,
     ] }),
   }));
-  await page.route("**/api/v1/assets/audio-role-demo/media", async (route) => {
+  await page.route(/\/api\/v1\/assets\/audio-role-demo\/media(?:\?.*)?$/, async (route) => {
     if (failNextAudition) {
       failNextAudition = false;
       await route.fulfill({
@@ -1351,7 +1353,7 @@ test("music library classifies imported audio as background music or sound effec
     }
     await route.fulfill({ status: 200, contentType: "audio/wav", body: auditionFixture });
   });
-  await page.route("**/api/v1/assets/audio-role-demo", async (route) => {
+  await page.route(/\/api\/v1\/assets\/audio-role-demo(?:\?.*)?$/, async (route) => {
     if (route.request().method() !== "PATCH") return route.continue();
     savedRole = route.request().postDataJSON().audioRole;
     await route.fulfill({
@@ -1471,7 +1473,7 @@ test("botanical sticker atlas category previews and inserts a saved overlay", as
   await expect(page.getByText("已添加贴纸「樱花枝」到独立叠加轨")).toBeVisible();
   const hasSticker = async () => (await readProject(request, id)).sequence.tracks
     .flatMap((track) => track.clips)
-    .some((clip) => clip.assetRef.sourcePath.includes("botanical_cherry_blossom.png"));
+    .some((clip) => hasBuiltinSticker(clip, "botanical_cherry_blossom.png"));
   await expect.poll(hasSticker).toBe(true);
 
   await page.reload();
@@ -1502,7 +1504,7 @@ test("travel-vlog sticker atlas previews and inserts a saved overlay", async ({ 
   await expect(page.getByText("已添加贴纸「旅行路线地图」到独立叠加轨")).toBeVisible();
   const hasSticker = async () => (await readProject(request, id)).sequence.tracks
     .some((track) => track.role === "sticker" && track.clips
-      .some((clip) => clip.assetRef.sourcePath.includes("travel_map_route.png")));
+      .some((clip) => hasBuiltinSticker(clip, "travel_map_route.png")));
   await expect.poll(hasSticker).toBe(true);
 
   await page.reload();
@@ -1532,7 +1534,7 @@ test("food-and-drink sticker category previews and inserts a saved overlay", asy
   await expect(page.getByText("已添加贴纸「草莓奶油蛋糕」到独立叠加轨")).toBeVisible();
   const hasSticker = async () => (await readProject(request, id)).sequence.tracks
     .some((track) => track.role === "sticker" && track.clips
-      .some((clip) => clip.assetRef.sourcePath.includes("food_strawberry_cake.png")));
+      .some((clip) => hasBuiltinSticker(clip, "food_strawberry_cake.png")));
   await expect.poll(hasSticker).toBe(true);
 
   await page.reload();
@@ -1540,7 +1542,7 @@ test("food-and-drink sticker category previews and inserts a saved overlay", asy
   expect(await hasSticker()).toBe(true);
   const stickerClip = (await readProject(request, id)).sequence.tracks
     .find((track) => track.role === "sticker")?.clips
-    .find((clip) => clip.assetRef.sourcePath.includes("food_strawberry_cake.png"));
+    .find((clip) => hasBuiltinSticker(clip, "food_strawberry_cake.png"));
   expect(stickerClip).toBeTruthy();
   await apply(request, id, "effect.remove", {
     clipId: stickerClip!.id, effectId: "cutvoke.transform",
@@ -1581,7 +1583,7 @@ test("manga-motion atlas offers the expanded preset set and inserts a full-frame
   await expect(page.getByText("已添加贴纸「黑白放射冲击线」到独立叠加轨")).toBeVisible();
   const project = await readProject(request, id);
   const stickerClip = project.sequence.tracks.flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("manga_v2_bw_speed_burst.png"));
+    .find((clip) => hasBuiltinSticker(clip, "manga_v2_bw_speed_burst.png"));
   expect(stickerClip).toBeTruthy();
   expect(stickerClip?.assetRef.resourceRef).toMatchObject({
     resourceId: "cutvoke.sticker.manga_v2_bw_speed_burst",
@@ -1617,7 +1619,7 @@ test("pixel-game effect atlas previews, exposes provenance, and inserts at the d
   await expect(page.getByText("已添加贴纸「冰蓝像素护盾」到独立叠加轨")).toBeVisible();
   const project = await readProject(request, id);
   const stickerClip = project.sequence.tracks.flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("fxoverlay_pixel_shield.png"));
+    .find((clip) => hasBuiltinSticker(clip, "fxoverlay_pixel_shield.png"));
   expect(stickerClip).toBeTruthy();
   expect(stickerClip?.assetRef.resourceRef).toMatchObject({
     resourceId: "cutvoke.sticker.fxoverlay_pixel_shield",
@@ -1653,7 +1655,7 @@ test("glass/liquid refraction atlas previews, exposes provenance, and inserts as
   await expect(page.getByText("已添加贴纸「青碧水纹焦散」到独立叠加轨")).toBeVisible();
   const project = await readProject(request, id);
   const stickerClip = project.sequence.tracks.flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("fxoverlay_refraction_caustics_turquoise.png"));
+    .find((clip) => hasBuiltinSticker(clip, "fxoverlay_refraction_caustics_turquoise.png"));
   expect(stickerClip).toBeTruthy();
   expect(stickerClip?.assetRef.resourceRef).toMatchObject({
     resourceId: "cutvoke.sticker.fxoverlay_refraction_caustics_turquoise",
@@ -1689,7 +1691,7 @@ test("music-rhythm sticker atlas previews, exposes provenance, and inserts as an
   await expect(page.getByText("已添加贴纸「彩虹频谱光环」到独立叠加轨")).toBeVisible();
   const project = await readProject(request, id);
   const stickerClip = project.sequence.tracks.flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("audiofx_spectrum_halo_rainbow.png"));
+    .find((clip) => hasBuiltinSticker(clip, "audiofx_spectrum_halo_rainbow.png"));
   expect(stickerClip).toBeTruthy();
   expect(stickerClip?.assetRef.resourceRef).toMatchObject({
     resourceId: "cutvoke.sticker.audiofx_spectrum_halo_rainbow",
@@ -1725,7 +1727,7 @@ test("weather-atmosphere atlas previews, exposes provenance, and inserts as an o
   await expect(page.getByText("已添加贴纸「密集雨幕」到独立叠加轨")).toBeVisible();
   const project = await readProject(request, id);
   const stickerClip = project.sequence.tracks.flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("weatherfx_heavy_rain.png"));
+    .find((clip) => hasBuiltinSticker(clip, "weatherfx_heavy_rain.png"));
   expect(stickerClip).toBeTruthy();
   expect(stickerClip?.assetRef.resourceRef).toMatchObject({
     resourceId: "cutvoke.sticker.weatherfx_heavy_rain",
@@ -1761,7 +1763,7 @@ test("East Asian ink atlas previews, exposes provenance, and inserts as an overl
   await expect(page.getByText("已添加贴纸「朱红飞白笔势」到独立叠加轨")).toBeVisible();
   const project = await readProject(request, id);
   const stickerClip = project.sequence.tracks.flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("inkfx_vermilion_slash.png"));
+    .find((clip) => hasBuiltinSticker(clip, "inkfx_vermilion_slash.png"));
   expect(stickerClip).toBeTruthy();
   expect(stickerClip?.assetRef.resourceRef).toMatchObject({
     resourceId: "cutvoke.sticker.inkfx_vermilion_slash",
@@ -1797,7 +1799,7 @@ test("cinematic optical atlas previews, exposes provenance, and inserts as an ov
   await expect(page.getByText("已添加贴纸「玫瑰色镜头光斑」到独立叠加轨")).toBeVisible();
   const project = await readProject(request, id);
   const stickerClip = project.sequence.tracks.flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("cinematic_optical_flare_rose.png"));
+    .find((clip) => hasBuiltinSticker(clip, "cinematic_optical_flare_rose.png"));
   expect(stickerClip).toBeTruthy();
   expect(stickerClip?.assetRef.resourceRef).toMatchObject({
     resourceId: "cutvoke.sticker.cinematic_optical_flare_rose",
@@ -3074,7 +3076,7 @@ test("Web speed change on six clips leaves later shots and independent BGM in pl
   await page.getByRole("button", { name: "导出", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "导出成片" });
   await expect(dialog).toBeVisible();
-  const outputPath = resolve(process.cwd(), "../../output", `${id}.mp4`);
+  const outputPath = await projectOutputPath(request, id, `${id}.mp4`);
   await dialog.getByLabel("输出文件路径").fill(outputPath);
   await dialog.getByLabel("画质").selectOption("low");
   await dialog.getByRole("button", { name: "开始导出" }).click();
@@ -3140,7 +3142,7 @@ test("speed curve can be edited, undone, reopened, and exported from the Web edi
   await page.getByRole("button", { name: "重做" }).click();
   await expect.poll(curveState).toEqual(applied);
 
-  const outputPath = resolve(process.cwd(), "../../output", `${id}.mp4`);
+  const outputPath = await projectOutputPath(request, id, `${id}.mp4`);
   await page.getByRole("button", { name: "导出", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "导出成片" });
   await expect(dialog).toBeVisible();
@@ -3249,7 +3251,7 @@ test("timeline range export is queued and reports the selected duration", async 
   await page.getByRole("button", { name: "导出", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "导出成片" });
   await expect(dialog).toBeVisible();
-  const outputPath = resolve(process.cwd(), "../../output", `${id}-range.mp4`);
+  const outputPath = await projectOutputPath(request, id, `${id}-range.mp4`);
   await dialog.getByLabel("输出文件路径").fill(outputPath);
   await dialog.getByLabel("画质").selectOption("medium");
   await dialog.getByLabel("视频码率（kbps）").fill("1800");
@@ -3293,7 +3295,7 @@ test("transparent export UI writes a real ProRes MOV and restores its options", 
   await openProject(page, name);
   await page.getByRole("button", { name: "导出", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "导出成片" });
-  const outputPath = resolve(process.cwd(), "../../output", `${id}-alpha.mov`);
+  const outputPath = await projectOutputPath(request, id, `${id}-alpha.mov`);
   await dialog.getByLabel("输出文件路径").fill(outputPath.replace(/\.mov$/, ".mp4"));
   await dialog.getByLabel("透明背景（ProRes 4444）").check();
   await expect(dialog.getByLabel("输出文件路径")).toHaveValue(outputPath);
@@ -3422,7 +3424,7 @@ test("slow-motion interpolation can be enabled, undone, redone, and reopened", a
   await page.getByRole("tab", { name: "变速" }).click();
   await expect(page.getByLabel("慢动作补帧模式")).toHaveValue("motion");
   if (realFootagePath) {
-    const outputPath = resolve(process.cwd(), "../../output", `${id}-real-slow-motion.mp4`);
+    const outputPath = await projectOutputPath(request, id, `${id}-real-slow-motion.mp4`);
     await page.getByRole("button", { name: "导出", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "导出成片" });
     await expect(dialog).toBeVisible();
@@ -3766,7 +3768,7 @@ test("material texture atlas previews and adds a saved overlay sticker", async (
   await expect(page.getByText("已添加贴纸「虹彩镭射箔」到独立叠加轨")).toBeVisible();
   const hasMaterialSticker = async () => (await readProject(request, id)).sequence.tracks
     .flatMap((track) => track.clips)
-    .some((clip) => clip.assetRef.sourcePath.includes("material_holographic_foil.png"));
+    .some((clip) => hasBuiltinSticker(clip, "material_holographic_foil.png"));
   await expect.poll(hasMaterialSticker).toBe(true);
 
   await page.reload();
@@ -3796,7 +3798,7 @@ test("person atmosphere overlays preview as approved and survive reopening", asy
   await expect(page.getByText("已添加贴纸「青色霓虹光环」到独立叠加轨")).toBeVisible();
   const hasPersonOverlay = async () => (await readProject(request, id)).sequence.tracks
     .flatMap((track) => track.clips)
-    .some((clip) => clip.assetRef.sourcePath.includes("personfx_halo_cyan.png"));
+    .some((clip) => hasBuiltinSticker(clip, "personfx_halo_cyan.png"));
   await expect.poll(hasPersonOverlay).toBe(true);
 
   await page.reload();
@@ -3826,7 +3828,7 @@ test("generated hand-drawn marker stickers preview as approved and survive reope
 
   const hasMarkerSticker = async () => (await readProject(request, id)).sequence.tracks
     .flatMap((track) => track.clips)
-    .some((clip) => clip.assetRef.sourcePath.includes("marker_doodle_circle.png"));
+    .some((clip) => hasBuiltinSticker(clip, "marker_doodle_circle.png"));
   await expect.poll(hasMarkerSticker).toBe(true);
 
   await page.reload();
@@ -3851,7 +3853,7 @@ test("generated background texture fills the canvas by default and survives reop
   const textureTransform = async () => {
     const project = await readProject(request, id);
     const clip = project.sequence.tracks.flatMap((track) => track.clips)
-      .find((item) => item.assetRef.sourcePath.includes("texture_bg_underwater_caustics.png"));
+      .find((item) => hasBuiltinSticker(item, "texture_bg_underwater_caustics.png"));
     const params = clip?.effects.find((effect) => effect.effectId === "cutvoke.transform")?.params;
     return params ? { scale: params.scale, position: params.position } : null;
   };
@@ -3884,7 +3886,7 @@ test("generated educational stickers preview, apply and survive reopening", asyn
 
   const hasEducationSticker = async () => (await readProject(request, id)).sequence.tracks
     .flatMap((track) => track.clips)
-    .some((clip) => clip.assetRef.sourcePath.includes("learn_microscope.png"));
+    .some((clip) => hasBuiltinSticker(clip, "learn_microscope.png"));
   await expect.poll(hasEducationSticker).toBe(true);
   await page.reload();
   await openProject(page, name);
@@ -4075,7 +4077,7 @@ test("scrapbook decor atlas previews, exposes provenance, and inserts a saved ov
   await expect(page.getByText("已添加贴纸「鼠尾草折角纸片」到独立叠加轨")).toBeVisible();
   const stickerClip = () => readProject(request, id).then((project) => project.sequence.tracks
     .flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("scrapbook_corner_sprig.png")));
+    .find((clip) => hasBuiltinSticker(clip, "scrapbook_corner_sprig.png")));
   await expect.poll(stickerClip).toMatchObject({
     assetRef: { resourceRef: {
       resourceId: "cutvoke.sticker.scrapbook_corner_sprig",
@@ -4113,7 +4115,7 @@ test("natural-light atlas previews, exposes provenance, and inserts a full-frame
   await expect(page.getByText("已添加贴纸「金色窗光光束」到独立叠加轨")).toBeVisible();
   const stickerClip = () => readProject(request, id).then((project) => project.sequence.tracks
     .flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("natural_light_window_beams.png")));
+    .find((clip) => hasBuiltinSticker(clip, "natural_light_window_beams.png")));
   await expect.poll(stickerClip).toMatchObject({
     assetRef: { resourceRef: {
       resourceId: "cutvoke.sticker.natural_light_window_beams",
@@ -4151,7 +4153,7 @@ test("video-guidance atlas previews, exposes provenance, and inserts a sticker",
   await expect(page.getByText("已添加贴纸「青色弧线指引箭头」到独立叠加轨")).toBeVisible();
   const stickerClip = () => readProject(request, id).then((project) => project.sequence.tracks
     .flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("guide_pointer_arrow.png")));
+    .find((clip) => hasBuiltinSticker(clip, "guide_pointer_arrow.png")));
   await expect.poll(stickerClip).toMatchObject({
     assetRef: { resourceRef: {
       resourceId: "cutvoke.sticker.guide_pointer_arrow",
@@ -4187,7 +4189,7 @@ test("energy-light atlas previews, exposes provenance, and inserts a saved overl
   await expect(page.getByText("已添加贴纸「青色电弧」到独立叠加轨")).toBeVisible();
   const stickerClip = () => readProject(request, id).then((project) => project.sequence.tracks
     .flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("energy_arc_cyan.png")));
+    .find((clip) => hasBuiltinSticker(clip, "energy_arc_cyan.png")));
   await expect.poll(stickerClip).toMatchObject({
     assetRef: { resourceRef: {
       resourceId: "cutvoke.sticker.energy_arc_cyan",
@@ -4225,7 +4227,7 @@ test("stage-light atlas previews, exposes provenance, and inserts a scaled overl
   await expect(page.getByText("已添加贴纸「青紫激光扇」到独立叠加轨")).toBeVisible();
   const stickerClip = () => readProject(request, id).then((project) => project.sequence.tracks
     .flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("stage_light_laser_fan_cyan.png")));
+    .find((clip) => hasBuiltinSticker(clip, "stage_light_laser_fan_cyan.png")));
   await expect.poll(stickerClip).toMatchObject({
     assetRef: { resourceRef: {
       resourceId: "cutvoke.sticker.stage_light_laser_fan_cyan",
@@ -4263,7 +4265,7 @@ test("fantasy-energy atlas previews, exposes provenance, and inserts a sticker",
   await expect(page.getByText("已添加贴纸「紫晶传送门碎片」到独立叠加轨")).toBeVisible();
   const stickerClip = () => readProject(request, id).then((project) => project.sequence.tracks
     .flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("fxoverlay_fantasy_violet_portal.png")));
+    .find((clip) => hasBuiltinSticker(clip, "fxoverlay_fantasy_violet_portal.png")));
   await expect.poll(stickerClip).toMatchObject({
     assetRef: { resourceRef: {
       resourceId: "cutvoke.sticker.fxoverlay_fantasy_violet_portal",
@@ -4301,7 +4303,7 @@ test("product-promo atlas previews, exposes provenance, and inserts a sticker", 
   await expect(page.getByText("已添加贴纸「珍珠轨道环」到独立叠加轨")).toBeVisible();
   const stickerClip = () => readProject(request, id).then((project) => project.sequence.tracks
     .flatMap((track) => track.clips)
-    .find((clip) => clip.assetRef.sourcePath.includes("promo_orbit_rings.png")));
+    .find((clip) => hasBuiltinSticker(clip, "promo_orbit_rings.png")));
   await expect.poll(stickerClip).toMatchObject({
     assetRef: { resourceRef: {
       resourceId: "cutvoke.sticker.promo_orbit_rings",
