@@ -7,7 +7,7 @@
 <p align="center">用你熟悉的 AI 剪出初稿，随时回到编辑器精修。每一次修改，都留在可继续编辑的本地工程里。</p>
 
 <p align="center">
-  <a href="https://github.com/frankShan001/CutVoke/releases/tag/v0.3.3"><img src="https://img.shields.io/badge/v0.3.3-prerelease-527fca?style=flat-square" alt="v0.3.3 prerelease" /></a>
+  <a href="https://github.com/frankShan001/CutVoke/releases/tag/v0.3.4"><img src="https://img.shields.io/badge/v0.3.4-prerelease-527fca?style=flat-square" alt="v0.3.4 prerelease" /></a>
   <a href="https://github.com/frankShan001/CutVoke/actions/workflows/ci.yml"><img src="https://github.com/frankShan001/CutVoke/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-4d8a74?style=flat-square" alt="MIT license" /></a>
 </p>
@@ -121,14 +121,14 @@ flowchart LR
 
 **直接下载，解压启动。** 基础本地导入、剪辑、预览与 MP4 导出无需 AI 账号，也无需另装 Python、Node.js 或 FFmpeg。
 
-| 你的设备 | v0.3.3 预发布 |
+| 你的设备 | v0.3.4 预发布 |
 | --- | --- |
-| Windows x64 | [免安装 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-windows-x64-portable.zip) |
-| Mac · Apple Silicon | [arm64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-macos-arm64.zip) |
-| Mac · Intel | [x64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-macos-x64.zip) |
-| Linux x64 | [tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-linux-x64.tar.gz) |
+| Windows x64 | [免安装 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-windows-x64-portable.zip) |
+| Mac · Apple Silicon | [arm64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-macos-arm64.zip) |
+| Mac · Intel | [x64 ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-macos-x64.zip) |
+| Linux x64 | [tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-linux-x64.tar.gz) |
 
-[校验 SHA-256](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/SHA256SUMS) · [安装与排障](docs/user/installation.md) · [全部发行包](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.3)
+[校验 SHA-256](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/SHA256SUMS) · [安装与排障](docs/user/installation.md) · [全部发行包](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.4)
 
 > [!NOTE]
 > 上方视频案例使用源码版制作，复现工程包与源码启动说明见下方。
@@ -136,10 +136,10 @@ flowchart LR
 <details>
 <summary><strong>Windows 免安装便携版（x64 预发布）</strong></summary>
 
-[下载 Windows 便携版 0.3.3](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-windows-x64-portable.zip)，来自 [v0.3.3 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.3)。
+[下载 Windows 便携版 0.3.4](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-windows-x64-portable.zip)，来自 [v0.3.4 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.4)。
 
-1. 下载 ZIP 和 [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/SHA256SUMS)，用 `Get-FileHash -Algorithm SHA256` 核对 ZIP。
-2. 将 `CutVoke-0.3.3-windows-x64-portable.zip` **完整解压到可写文件夹**。
+1. 下载 ZIP 和 [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/SHA256SUMS)，用 `Get-FileHash -Algorithm SHA256` 核对 ZIP。
+2. 将 `CutVoke-0.3.4-windows-x64-portable.zip` **完整解压到可写文件夹**。
 3. 双击 **`CutVoke.exe`**，保留旁边的所有文件。
 
 没有安装向导，**无需管理员，也不用配置 Python、Node.js 或系统 FFmpeg**。基础本地导入、剪辑、预览和 MP4 导出不需要 AI 账号；外部 AI 客户端、云服务及可选语音/人物模型另有要求。
@@ -151,9 +151,9 @@ flowchart LR
 <details>
 <summary><strong>macOS（Apple Silicon / Intel）和 Linux（x64）</strong></summary>
 
-[v0.3.3 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.3) 的四个平台包均从标签对应提交重新构建。[BUILD-INFO.json](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/BUILD-INFO.json) 记录准确来源提交、成功的 CI/原生成品验收及文件哈希。旧版本继续保留。
+[v0.3.4 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.4) 的四个平台包均从标签对应提交重新构建。[BUILD-INFO.json](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/BUILD-INFO.json) 记录准确来源提交、成功的 CI/原生成品验收及文件哈希。旧版本继续保留。
 
-附件就是可直接解压的真实发行包，无需再取出 Actions 外层 ZIP。请核对 [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/SHA256SUMS)。内含编辑器、冻结后端、FFmpeg/ffprobe、资源、字体和许可，基础剪辑无需另装 Python、Node.js 或 FFmpeg。[安装与系统要求](docs/user/installation.md#macos-arm64--x64)和[原生验证记录](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/BUILD-INFO.json)列明准确范围。
+附件就是可直接解压的真实发行包，无需再取出 Actions 外层 ZIP。请核对 [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/SHA256SUMS)。内含编辑器、冻结后端、FFmpeg/ffprobe、资源、字体和许可，基础剪辑无需另装 Python、Node.js 或 FFmpeg。[安装与系统要求](docs/user/installation.md#macos-arm64--x64)和[原生验证记录](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/BUILD-INFO.json)列明准确范围。
 
 - **macOS 13+：**按芯片选择架构，解压后把 `CutVoke.app` 移到 `/Applications` 或 `~/Applications`。仅有 ad-hoc 完整性签名，**没有 Developer ID 和公证**，两种架构的 Gatekeeper 自动信任检查均拒绝。确认来源可信且 SHA256 一致后，可按 [Apple 针对该 app 的确认打开说明](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unknown-developer-mh40616/mac)，在尝试启动后到 **系统设置 → 隐私与安全性 → 仍要打开**确认；保持全局安全保护开启，无需购买开发者账号。实际自动执行环境为两种架构的 macOS 15，未宣称覆盖 macOS 13/14 或所有用户设备。
 - **Linux x64 / Ubuntu 22.04 基线：**保留执行权限和符号链接解压 tar.gz，在目录运行 `./cutvoke`。需图形桌面、glibc 2.35+、Electron 系统库和非特权用户命名空间沙箱；无需 FUSE。不支持 root、`noexec` 或阻止沙箱的系统策略，不使用 `--no-sandbox`。其他发行版、Wayland-only 和 Ubuntu 24.04 AppArmor 需独立验收。

@@ -2,16 +2,16 @@
 
 [English README](../../README.md) · [中文 README](../../README.zh-CN.md) · [Contributing](../../CONTRIBUTING.md)
 
-**[v0.3.3 prerelease / 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.3)** · [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/SHA256SUMS) · [BUILD-INFO.json](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/BUILD-INFO.json). All four archives are rebuilt from the tagged source commit and gated by same-commit CI and native acceptance. 四平台均从标签提交重新构建；来源、大小、哈希与验收运行见发布元数据。仍为未签名/未公证的预发布。
+**[v0.3.4 prerelease / 预发布](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.4)** · [SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/SHA256SUMS) · [BUILD-INFO.json](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/BUILD-INFO.json). All four archives are rebuilt from the tagged source commit and gated by same-commit CI and native acceptance. 四平台均从标签提交重新构建；来源、大小、哈希与验收运行见发布元数据。仍为未签名/未公证的预发布。
 
 | Platform | Current archive |
 | --- | --- |
-| Windows x64 | [Portable ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-windows-x64-portable.zip) |
-| macOS arm64 | [Apple Silicon ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-macos-arm64.zip) |
-| macOS x64 | [Intel ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-macos-x64.zip) |
-| Linux x64 | [tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-linux-x64.tar.gz) |
+| Windows x64 | [Portable ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-windows-x64-portable.zip) |
+| macOS arm64 | [Apple Silicon ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-macos-arm64.zip) |
+| macOS x64 | [Intel ZIP](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-macos-x64.zip) |
+| Linux x64 | [tar.gz](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-linux-x64.tar.gz) |
 
-Download the matching archive and SHA256SUMS. Preserve existing project/data folders when replacing the application. The older 0.3.1 tables and runner records below are historical evidence, not hashes for 0.3.3. 下载后核对同版本 SHA256；替换应用时保留工程数据。下方 0.3.1 表格及日志仅为历史证据，不适用于校验新版。
+Download the matching archive and SHA256SUMS. Preserve existing project/data folders when replacing the application. The older 0.3.1 tables and runner records below are historical evidence, not hashes for 0.3.4. 下载后核对同版本 SHA256；替换应用时保留工程数据。下方 0.3.1 表格及日志仅为历史证据，不适用于校验新版。
 
 ## Windows portable (x64)
 
@@ -75,15 +75,15 @@ Release 的二进制不会自动包含这些变更。
 卡片的静音 MP4 示例；没有内置示例的样式会在停留后显示工程静态预览，
 快速划过或移开会取消请求。加载列表不渲染工程；启用减少动态效果时不自动播放。
 
-### Download and start 0.3.3
+### Download and start 0.3.4
 
-**[Download 0.3.3 portable](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-windows-x64-portable.zip)** · [0.3.3 SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/SHA256SUMS) · [0.3.3 build and acceptance metadata](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/BUILD-INFO.json)
+**[Download 0.3.4 portable](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-windows-x64-portable.zip)** · [0.3.4 SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/SHA256SUMS) · [0.3.4 build and acceptance metadata](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/BUILD-INFO.json)
 
-Download `CutVoke-0.3.3-windows-x64-portable.zip` and its same-release `SHA256SUMS`. Verify it with `Get-FileHash -Algorithm SHA256 .\CutVoke-0.3.3-windows-x64-portable.zip`, comparing the result to that file's entry. Extract the ZIP completely to a writable folder and double-click **CutVoke.exe**. No installer, administrator permission, Python, Node.js or system FFmpeg configuration is needed. Use the matching release metadata for component versions and acceptance evidence.
+Download `CutVoke-0.3.4-windows-x64-portable.zip` and its same-release `SHA256SUMS`. Verify it with `Get-FileHash -Algorithm SHA256 .\CutVoke-0.3.4-windows-x64-portable.zip`, comparing the result to that file's entry. Extract the ZIP completely to a writable folder and double-click **CutVoke.exe**. No installer, administrator permission, Python, Node.js or system FFmpeg configuration is needed. Use the matching release metadata for component versions and acceptance evidence.
 
 ### Historical Windows 0.3.1 verification
 
-The following table and [successful Windows run](https://github.com/frankShan001/CutVoke/actions/runs/38845496400), including its [screenshots and test evidence](https://github.com/frankShan001/CutVoke/actions/runs/38845496400/artifacts/12023445833), describe **0.3.1 only**. They are retained for provenance and do not verify the current 0.3.3 download. The original Actions wrapper and runner evidence have their own retention limits.
+The following table and [successful Windows run](https://github.com/frankShan001/CutVoke/actions/runs/38845496400), including its [screenshots and test evidence](https://github.com/frankShan001/CutVoke/actions/runs/38845496400/artifacts/12023445833), describe **0.3.1 only**. They are retained for provenance and do not verify the current 0.3.4 download. The original Actions wrapper and runner evidence have their own retention limits.
 
 | Portable ZIP | Value |
 | --- | --- |
@@ -114,15 +114,15 @@ The package contains the built Web editor, Electron, a frozen Python backend, FF
 
 Basic local import, editing, preview and MP4 export work without an AI account. Optional external AI services/clients need their own configuration/account/network/key; optional speech/person models and dependencies are not bundled or claimed as part of basic offline operation.
 
-**中文启动说明：** 从 Release 下载当前 0.3.3 便携 ZIP，核对同版本的 SHA256SUMS，完整解压到可写目录，再双击 `CutVoke.exe`。无需安装或配置开发环境。工程、素材和缓存位置如上表；更新先关闭程序，保留 `CutVoke Data`，不要用测试库覆盖工程。包未签名，可能有 SmartScreen 提示。基础剪辑可本机离线完成，可选 AI/语音/人物功能另行配置。具体版本的自动验收以其发布元数据为准，人工设备体验边界见下表。
+**中文启动说明：** 从 Release 下载当前 0.3.4 便携 ZIP，核对同版本的 SHA256SUMS，完整解压到可写目录，再双击 `CutVoke.exe`。无需安装或配置开发环境。工程、素材和缓存位置如上表；更新先关闭程序，保留 `CutVoke Data`，不要用测试库覆盖工程。包未签名，可能有 SmartScreen 提示。基础剪辑可本机离线完成，可选 AI/语音/人物功能另行配置。具体版本的自动验收以其发布元数据为准，人工设备体验边界见下表。
 
 ## macOS (arm64 / x64)
 
-Current downloads: **[0.3.3 Apple Silicon](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-macos-arm64.zip)** or **[0.3.3 Intel](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-macos-x64.zip)**. Compare the selected archive against [0.3.3 SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/SHA256SUMS), using `shasum -a 256 CutVoke-0.3.3-macos-arm64.zip` (or the x64 filename). Exact build and acceptance runs are in [0.3.3 BUILD-INFO.json](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/BUILD-INFO.json).
+Current downloads: **[0.3.4 Apple Silicon](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-macos-arm64.zip)** or **[0.3.4 Intel](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-macos-x64.zip)**. Compare the selected archive against [0.3.4 SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/SHA256SUMS), using `shasum -a 256 CutVoke-0.3.4-macos-arm64.zip` (or the x64 filename). Exact build and acceptance runs are in [0.3.4 BUILD-INFO.json](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/BUILD-INFO.json).
 
 ### Historical macOS 0.3.1 verification
 
-The following table describes **0.3.1 only**: [successful native run 38845496409](https://github.com/frankShan001/CutVoke/actions/runs/38845496409), build `fdec479c4acbc3c685a5c8adbe8ec91621a7c194`. Those original archives remain available from the [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1); Actions evidence retains its original expiry. Their hashes do not verify 0.3.3.
+The following table describes **0.3.1 only**: [successful native run 38845496409](https://github.com/frankShan001/CutVoke/actions/runs/38845496409), build `fdec479c4acbc3c685a5c8adbe8ec91621a7c194`. Those original archives remain available from the [v0.3.1 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.1); Actions evidence retains its original expiry. Their hashes do not verify 0.3.4.
 
 | Inner archive / download | Size | SHA256 of the inner archive | Evidence |
 | --- | --- | --- | --- |
@@ -134,7 +134,7 @@ The original **Upload verified download** steps in the [native package workflow]
 ### Launch the current macOS package
 
 1. Apple Silicon (M-series): choose **CutVoke-macos-arm64**. Intel: choose **CutVoke-macos-x64**. These are separate native builds; no Rosetta requirement is introduced for Apple Silicon.
-2. Verify and extract the directly downloaded `CutVoke-0.3.3-macos-<arch>.zip` using its same-release checksum. Keep `START-HERE.txt`, hashes and `licenses/` for reference/redistribution.
+2. Verify and extract the directly downloaded `CutVoke-0.3.4-macos-<arch>.zip` using its same-release checksum. Keep `START-HERE.txt`, hashes and `licenses/` for reference/redistribution.
 3. Move `CutVoke.app` into `/Applications` or `~/Applications`, then open it. No Python, Node.js or FFmpeg install is needed for basic local editing.
 
 The declared minimum is **macOS 13 (Ventura)**, required by [Electron 44](https://www.electronjs.org/docs/latest/breaking-changes#removed-macos-12-support). Native images are audited for architecture, deployment target, unresolved build-machine paths and signature integrity. The actual automated execution baseline is macOS 15 on GitHub's separate Apple Silicon and Intel runners; macOS 13/14 and user hardware are not manually accepted by that run.
@@ -147,13 +147,13 @@ Data uses **`~/Library/Application Support/CutVoke/`**, outside the `.app`. The 
 
 ## Linux (x64)
 
-**[Download 0.3.3 Linux x64](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/CutVoke-0.3.3-linux-x64.tar.gz)** · [0.3.3 SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/SHA256SUMS) · [0.3.3 build and acceptance metadata](https://github.com/frankShan001/CutVoke/releases/download/v0.3.3/BUILD-INFO.json).
+**[Download 0.3.4 Linux x64](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/CutVoke-0.3.4-linux-x64.tar.gz)** · [0.3.4 SHA256SUMS](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/SHA256SUMS) · [0.3.4 build and acceptance metadata](https://github.com/frankShan001/CutVoke/releases/download/v0.3.4/BUILD-INFO.json).
 
-Download the current archive and its same-release checksum list; run `sha256sum -c SHA256SUMS` for the downloaded files, or compare `sha256sum CutVoke-0.3.3-linux-x64.tar.gz` against its exact entry. Preserve executable permissions and symlinks when extracting:
+Download the current archive and its same-release checksum list; run `sha256sum -c SHA256SUMS` for the downloaded files, or compare `sha256sum CutVoke-0.3.4-linux-x64.tar.gz` against its exact entry. Preserve executable permissions and symlinks when extracting:
 
 ```bash
-tar -xzf CutVoke-0.3.3-linux-x64.tar.gz
-cd CutVoke-0.3.3-linux-x64
+tar -xzf CutVoke-0.3.4-linux-x64.tar.gz
+cd CutVoke-0.3.4-linux-x64
 ./cutvoke
 ```
 
@@ -210,7 +210,7 @@ Use a new output directory for each demo. Open `http://127.0.0.1:8787` and selec
 
 FFmpeg 6.1 remains part of the existing Ubuntu regression path. FFmpeg 7.1's `setpts` clears frame-rate metadata: the renderer restores CFR after retiming and uses the explicit sequence rate when assembling animation frames. A cached behavior probe enables the extra xfade normalization only when needed, preserving the last alpha frame and short source handles on builds such as 6.1. Upgrading FFmpeg to hide an invalid graph is not required. A distribution's version number alone does not guarantee the required codecs or filters.
 
-The current project version is **0.3.3** in Python, MCP and desktop metadata, with current desktop downloads in the [v0.3.3 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.3). The explicitly historical 0.3.1 tables and runner results above retain their original versions, hashes and scope. Wheel/source candidates are developer distributions that still need Python and FFmpeg; they are not substitutes for the self-contained portable ZIP. See [candidate packaging](../development/prerelease.md).
+The current project version is **0.3.4** in Python, MCP and desktop metadata, with current desktop downloads in the [v0.3.4 prerelease](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.4). The explicitly historical 0.3.1 tables and runner results above retain their original versions, hashes and scope. Wheel/source candidates are developer distributions that still need Python and FFmpeg; they are not substitutes for the self-contained portable ZIP. See [candidate packaging](../development/prerelease.md).
 
 ## Troubleshooting
 
