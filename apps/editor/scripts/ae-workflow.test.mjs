@@ -69,3 +69,13 @@ test('coordinate labels stay stable while descriptions remain accessible help', 
   assert.equal(controls[0].description, description.en);
   assert.equal(controls[0].value, .6);
 });
+
+
+test('hashed project media remains searchable by its original ledger name',()=>{
+  const tracks=[{id:'v',kind:'video',clips:[{id:'c1',assetRef:{assetId:'owned',sourcePath:'/project/media/a9f47.mp4'},effects:[]}]}];
+  const names=new Map(),resolveName=ref=>names.get(ref.assetId) || '';
+  assert.deepEqual([...filterTimelineClips(tracks,'red','all',[],new Map(),resolveName)],[]);
+  names.set('owned','Red sunset.mov');
+  assert.deepEqual([...filterTimelineClips(tracks,'red sunset','all',[],new Map(),resolveName)],['c1']);
+  assert.deepEqual([...filterTimelineClips(tracks,'a9f47','all',[],new Map(),resolveName)],['c1']);
+});

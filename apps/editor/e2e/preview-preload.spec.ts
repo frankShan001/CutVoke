@@ -164,3 +164,33 @@ test("native acceptance waits for a submitted frame after clocks advance and sti
   await page.evaluate(() => { (window as any).__frameSubmission.black = true; });
   await expect(verifyNativePreview(page, expect, { cycles: 1 })).rejects.toThrow(/toBeGreaterThan/);
 });
+
+test("continuous preparation stops at the selected budget while window playback remains usable", async ({ page, request }) => {
+  const { id, name } = await fixture(request);
+  await page.addInitScript(() => localStorage.setItem("cutvoke.preview-budget.v1", JSON.stringify({ wallSeconds: 1 })));
+  const jobId = `budget-${crypto.randomUUID()}`;
+  const job = { jobId, projectId: id, state: "running", phase: "rendering", completedWindows: 0, totalWindows: 8, progress: 0 };
+  let cancellations = 0, polls = 0;
+  await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({ status: 202, json: job }));
+  await page.route(`**/preview-jobs/${jobId}`, route => { polls++; return route.fulfill({ json: job }); });
+  await page.route(`**/preview-jobs/${jobId}/cancel`, route => { cancellations++; return route.fulfill({ json: { ...job, state: "cancelled" } }); });
+  await page.goto("/");
+  await page.getByRole("button", { name: `打开工程 ${name}`, exact: true }).click();
+  await expect(page.getByRole("heading", { name: "时间线", exact: true })).toBeVisible();
+  await expect.poll(() => cancellations).toBeGreaterThan(0);
+  const stoppedAt = polls;
+  await page.waitForTimeout(600); // More than two 250ms status-poll intervals.
+  expect(polls).toBe(stoppedAt);
+  const video = page.locator("video.player__video");
+  await expect(video).toHaveAttribute("data-preview-source", /preview-window/);
+  await expect.poll(() => video.evaluate(element => element.readyState)).toBeGreaterThanOrEqual(2);
+  await page.getByRole("button", { name: "播放", exact: true }).click();
+  await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(.25);
+  const pixel = await video.evaluate(element => {
+    const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1;
+    const context = canvas.getContext("2d")!; context.drawImage(element, 0, 0, 1, 1);
+    return [...context.getImageData(0, 0, 1, 1).data];
+  });
+  expect(pixel[0]).toBeGreaterThan(220); expect(pixel[1]).toBeLessThan(25); expect(pixel[2]).toBeLessThan(25);
+  await page.getByRole("button", { name: "暂停", exact: true }).click();
+});

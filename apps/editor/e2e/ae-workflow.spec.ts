@@ -50,8 +50,13 @@ test('quick apply ranks scopes, respects input and modal focus, and uses undoabl
 test('timeline filter persists through selection and shortcuts without changing the rendered project',async({page,request})=>{
   const id=await fixture(request,3);
   await command(request,id,'clip.keyframe',{clipId:'c1',param:'opacity',time:0,value:.5,interpolation:'hold'});
+  let releaseAssets!:()=>void;
+  const assetGate=new Promise<void>(resolve=>{releaseAssets=resolve;});
+  await page.route(/\/api\/v1\/assets(?:\?.*)?$/,async route=>{await assetGate;await route.continue().catch(()=>{});});
   await open(page,id);const original=await read(request,id);
   const search=page.getByLabel('搜索片段、素材或特效');await search.fill('red');
+  await expect(page.locator('.timeline-track__lane .clip-block')).toHaveCount(0);
+  releaseAssets();
   await expect(page.locator('.timeline-track__lane .clip-block')).toHaveCount(1);
   await page.locator('.timeline__title').click();await page.keyboard.press('Control+a');
   await expect(page.getByText('已选 1 个片段',{exact:true})).toBeVisible();await expect(search).toHaveValue('red');

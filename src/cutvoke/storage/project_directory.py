@@ -19,6 +19,7 @@ import time
 import uuid
 
 from cutvoke.domain.model import Project
+from cutvoke.domain.effect_files import effect_file_paths, map_effect_files
 from cutvoke.storage.store import ProjectStore, RevisionConflict
 from cutvoke.storage.workspace_paths import is_path_field
 
@@ -42,8 +43,11 @@ def _atomic_json(path, value):
 
 def _walk_paths(value, field=""):
     if isinstance(value, dict):
+        if 'effectId' in value:
+            yield from (path for path, _kind in effect_file_paths(value))
         for key, item in value.items():
-            yield from _walk_paths(item, key)
+            if key != 'params' or 'effectId' not in value:
+                yield from _walk_paths(item, key)
     elif isinstance(value, list):
         for item in value:
             yield from _walk_paths(item, field)
@@ -53,6 +57,10 @@ def _walk_paths(value, field=""):
 
 def _map_paths(value, replace, field=""):
     if isinstance(value, dict):
+        if 'effectId' in value:
+            mapped = map_effect_files(value, replace)
+            return {key: item if key == 'params' else _map_paths(item, replace, key)
+                    for key, item in mapped.items()}
         return {key: _map_paths(item, replace, key) for key, item in value.items()}
     if isinstance(value, list):
         return [_map_paths(item, replace, field) for item in value]

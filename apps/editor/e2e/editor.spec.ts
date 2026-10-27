@@ -995,7 +995,7 @@ test("eight creative domains share keyboard navigation and preserve the selected
     body: JSON.stringify({ assets: [] }),
   }));
   await openProject(page, name);
-  await page.locator(".clip-block").filter({ hasText: "green.mp4" }).click();
+  await page.locator(".clip-block[data-clip-id='color-1']").click();
 
   const creativeTabs = page.getByRole("tablist", { name: "创作域" });
   const tabs = creativeTabs.getByRole("tab");
@@ -3357,7 +3357,7 @@ test("long export stays running beyond three minutes and recovers after closing 
   const { id, name } = await createProject(request);
   await openProject(page, name);
   const job = { jobId: "long-export", projectId: id, revision: "0", quality: "high",
-    outPath: "long-export.mp4", status: "running", result: null, error: null, createdAt: Date.now() / 1000 - 190 };
+    outPath: await projectOutputPath(request, id, "long-export.mp4"), status: "running", result: null, error: null, createdAt: Date.now() / 1000 - 190 };
   let offline = false;
   await page.route(`**/projects/${id}/exports`, async route => {
     if (offline) return route.abort();
@@ -3375,7 +3375,7 @@ test("long export stays running beyond three minutes and recovers after closing 
   await expect(dialog).not.toBeVisible();
   await page.getByRole("button", { name: "导出", exact: true }).click();
   await expect(dialog.getByText("导出进行中", { exact: false })).toBeVisible();
-  await expect(dialog.getByLabel("输出文件路径")).toHaveValue("long-export.mp4");
+  await expect(dialog.getByLabel("输出文件路径")).toHaveValue(job.outPath);
   job.status = "failed";
   const error = page.getByRole("alertdialog", { name: "操作未完成" });
   await expect(error).toBeVisible();
@@ -4464,9 +4464,13 @@ test("live audio does not go silent while the visual decoder buffers", async ({ 
   expect(paused).not.toBeNull();
 });
 
-test("live audio stays continuous when video frame callbacks are delayed", async ({ page, request }) => {
+for (const wallClockRate of [1, 1.25]) test(`live audio stays continuous when video frame callbacks are delayed${wallClockRate === 1 ? "" : " with wall-clock drift"}`, async ({ page, request }) => {
   const { name } = await createProject(request);
-  await page.addInitScript(() => {
+  await page.addInitScript(({ wallClockRate }) => {
+    if (wallClockRate !== 1) {
+      const nativeNow = performance.now.bind(performance), origin = nativeNow();
+      Object.defineProperty(performance, "now", { value: () => origin + (nativeNow() - origin) * wallClockRate });
+    }
     // The video clock still advances while costly frame presentation delays UI updates.
     HTMLVideoElement.prototype.requestVideoFrameCallback = () => 1;
     HTMLVideoElement.prototype.cancelVideoFrameCallback = () => {};
@@ -4477,7 +4481,7 @@ test("live audio stays continuous when video frame callbacks are delayed", async
       if (this instanceof HTMLAudioElement && !this.paused) seeks.push({at:performance.now(),from:this.currentTime,to:value,video:document.querySelector('video')?.currentTime || 0});
       descriptor.set!.call(this, value);
     } });
-  });
+  }, { wallClockRate });
   await openProject(page, name);
   const meter = page.getByTestId("live-audio-meter");
   await expect(meter).toHaveAttribute("data-ready", "true");
@@ -4501,7 +4505,12 @@ test("live audio stays continuous when video frame callbacks are delayed", async
 
 for (const prepared of [true, false]) {
   test(`live audio gain is audible before release and saves as one undo without restarting playback (${prepared ? "prepared" : "window handoff"})`, async ({ page, request }) => {
-    if (prepared) test.setTimeout(90_000); // Two real 30s preparations; interaction assertions keep their original limits.
+    if (prepared) {
+      test.setTimeout(90_000); // Two real preparations; interaction limits stay unchanged.
+      // This case explicitly selects continuous playback, beyond the default
+      // 15s background-work budget. Its existing 30s readiness limit remains.
+      await page.addInitScript(() => localStorage.setItem("cutvoke.preview-budget.v1", JSON.stringify({wallSeconds:120})));
+    }
     const { id, name } = await createProject(request);
     // A single real 30s tone leaves room to inspect a replacement preparation
     // without accidentally crossing a clip boundary or reaching transport end.

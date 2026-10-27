@@ -137,8 +137,10 @@ for (const locale of ["zh-CN", "en", "de", "ar"]) {
       await page.locator("#creative-domain-media").press("ArrowLeft");
       await expect(page.locator("#creative-domain-music")).toHaveAttribute("aria-selected", "true");
     }
-    // Check a real rejected operation, with an empty path, in this locale.
+    // Directory projects prefill a valid export path. Explicitly clear it to
+    // exercise the same rejected empty-path operation in every locale.
     await page.locator(".tool-btn--export").click();
+    await page.locator(".export-dialog input").first().fill("");
     await page.locator(".export-dialog__actions .cv-btn--primary").first().click();
     const error = page.getByRole("alertdialog");
     await expect(error).toBeVisible();

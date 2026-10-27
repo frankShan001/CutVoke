@@ -8,7 +8,7 @@ import { useEditor } from "../../store/editor";
 import { getLatestState } from "../../store/actions";
 import { insertClipAutoTrack } from "../../store/clipEdit";
 import { trackKindForMedia, uploadFiles } from "../../lib/importMedia";
-import { inferKind, type SessionAsset } from "../../lib/assetStore";
+import { assetDisplayName, inferKind, useSessionAssets, type SessionAsset } from "../../lib/assetStore";
 import { Ruler } from "./Ruler";
 import { TrackRow } from "./TrackRow";
 import { EffectTrackRow } from "./EffectTrackRow";
@@ -53,8 +53,9 @@ export function Timeline() {
   const tracks = state.project?.sequence.tracks || [];
   const captions = state.project?.sequence.captions || [];
   const selectionIds=selectedClipIds(state);
+  const sessionAssets=useSessionAssets();
   const matchingIds=useMemo(()=>filterTimelineClips(tracks,query,filterMode,selectionIds,
-    new Map(effectSpecs.map(spec=>[spec.effectId,spec.name]))),[tracks,query,filterMode,state.selectedClipIds,state.selection,effectSpecs]);
+    new Map(effectSpecs.map(spec=>[spec.effectId,spec.name])),assetDisplayName),[tracks,query,filterMode,state.selectedClipIds,state.selection,effectSpecs,sessionAssets]);
   const visibleIds=filtering ? matchingIds : undefined;
   const visibleTracks=filtering ? tracks.filter(track=>track.clips.some(clip=>matchingIds.has(clip.id))) : tracks;
   const hiddenSelected=filtering ? selectionIds.filter(id=>!matchingIds.has(id)).length : 0;
