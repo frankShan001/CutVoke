@@ -23,13 +23,13 @@ async function open(page: Page, request: APIRequestContext) {
   await expect(page.getByRole("heading", { name: "时间线", exact: true })).toBeVisible({ timeout: 45000 });
   return { id, name };
 }
-const list = async (request: APIRequestContext) => (await (await request.get("/api/v1/assets")).json()).assets as {
+const list = async (request: APIRequestContext, id: string) => (await (await request.get(`/api/v1/assets?projectId=${encodeURIComponent(id)}`)).json()).assets as {
   assetId: string; path: string; name: string; size: number; available: boolean; sha256?: string;
 }[];
 
 test("real upload reports bytes and filename then aborts the current and remaining queue", async ({ page, request }) => {
   test.setTimeout(90000);
-  await open(page, request);
+  const project = await open(page, request);
   const session = await page.context().newCDPSession(page);
   await session.send("Network.enable");
   await session.send("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: 10 * 1024 * 1024, uploadThroughput: 256 * 1024 });
@@ -45,10 +45,11 @@ test("real upload reports bytes and filename then aborts the current and remaini
   await progress.getByRole("button", { name: "取消当前及后续上传", exact: true }).click();
   await expect(progress).toContainText("上传已取消，后续文件未上传");
   await session.send("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
-  const fixture = await (await request.get("/api/v1/projects/e2e-fixture")).json();
-  const staging = join(dirname(fixture.sequence.tracks[0].clips[0].assetRef.sourcePath), "media", ".uploads");
+  const directory = await (await request.get(`/api/v1/projects/${project.id}/directory`)).json();
+  expect(directory.storageKind).toBe("directory");
+  const staging = join(directory.mediaDirectory, ".uploads");
   await expect.poll(() => existsSync(staging) ? readdirSync(staging).length : 0).toBe(0);
-  expect((await list(request)).some(asset => [basename(large), basename(next)].includes(asset.name))).toBe(false);
+  expect((await list(request, project.id)).some(asset => [basename(large), basename(next)].includes(asset.name))).toBe(false);
   writeFileSync(join(evidence, "cancel-verification.json"), JSON.stringify({ loaded, total: statSync(large).size,
     stagingFilesAfterCancel: existsSync(staging) ? readdirSync(staging) : [], remainingFileUploaded: false,
     builtResources: await page.evaluate(() => performance.getEntriesByType("resource").map(item => item.name).filter(name => /Workspace-.*\.js|index-.*\.js/.test(name))),
@@ -60,7 +61,7 @@ test("a valid video above 16 MiB uploads and relinks through the Web controls", 
   const project = await open(page, request);
   await page.locator('input[type="file"][multiple]').first().setInputFiles(large);
   await expect(page.getByText("导入结束：成功 1，失败 0", { exact: true })).toBeVisible({ timeout: 45000 });
-  const asset = (await list(request)).find(item => item.name === basename(large))!;
+  const asset = (await list(request, project.id)).find(item => item.name === basename(large))!;
   expect(asset.size).toBe(statSync(large).size);
   expect(asset.sha256).toMatch(/^[a-f0-9]{64}$/);
   unlinkSync(asset.path);
@@ -80,20 +81,25 @@ test("a valid video above 16 MiB uploads and relinks through the Web controls", 
 
 test("folder scan previews ambiguity and legacy confirmation before restoring selected media", async ({ page, request }) => {
   test.setTimeout(120000);
+  const project = await open(page, request);
   const upload = async (name: string) => {
-    const response = await request.post(`/api/v1/assets?name=${name}`, { data: readFileSync(sticker), headers: { "Content-Type": "application/octet-stream" } });
+    const response = await request.post(`/api/v1/assets?name=${name}&projectId=${encodeURIComponent(project.id)}`, { data: readFileSync(sticker), headers: { "Content-Type": "application/octet-stream" } });
     expect(response.ok(), await response.text()).toBeTruthy(); return response.json();
   };
   const known = await upload("known.png"), legacy = await upload("legacy.png");
-  const fixture = await (await request.get("/api/v1/projects/e2e-fixture")).json();
-  const database = join(dirname(fixture.sequence.tracks[0].clips[0].assetRef.sourcePath), "projects.sqlite");
-  execFileSync("python", ["-c", "import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); c.execute('UPDATE assets SET sha256=NULL WHERE asset_id=?',(sys.argv[2],)); c.commit(); c.close()", database, legacy.assetId]);
+  const directory = await (await request.get(`/api/v1/projects/${project.id}/directory`)).json();
+  expect(directory.storageKind).toBe("directory");
+  const database = join(directory.directory, "project.sqlite");
+  expect(existsSync(database)).toBe(true);
+  execFileSync("python", ["-c", "import sqlite3,sys; c=sqlite3.connect('file:'+sys.argv[1]+'?mode=rw',uri=True); c.execute('UPDATE assets SET sha256=NULL WHERE asset_id=?',(sys.argv[2],)); c.commit(); c.close()", database, legacy.assetId]);
   unlinkSync(known.path); unlinkSync(legacy.path);
   const folder = join(evidence, "relink-folder");
   mkdirSync(join(folder, "a"), { recursive: true }); mkdirSync(join(folder, "b"), { recursive: true });
   copyFileSync(sticker, join(folder, "a", "known.png")); copyFileSync(sticker, join(folder, "b", "known.png"));
   copyFileSync(sticker, join(folder, "legacy.png"));
-  const project = await open(page, request);
+  await page.reload();
+  await page.getByRole("button", { name: `打开工程 ${project.name}`, exact: true }).click();
+  await expect(page.getByRole("heading", { name: "时间线", exact: true })).toBeVisible();
   const before = await (await request.get(`/api/v1/projects/${project.id}`)).json();
   const panel = page.locator(".media-folder-relink");
   await panel.locator("summary").click();

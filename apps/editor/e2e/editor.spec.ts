@@ -1,4 +1,4 @@
-import { hasBuiltinSticker, projectOutputPath } from "./projectDirectoryHelpers";
+import { hasBuiltinSticker, projectOutputPath, sameMediaContent } from "./projectDirectoryHelpers";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -2361,18 +2361,18 @@ test("player explains missing media and lets the user retry a failed preview", a
 
 test("relinking a missing source restores the current preview window", async ({ page, request }) => {
   const assetName = `e2e-relink-${Date.now()}.png`;
-  const upload = await request.post(`/api/v1/assets?name=${encodeURIComponent(assetName)}`, {
-    headers: { "Content-Type": "application/octet-stream" },
-    data: readFileSync(imageFixture),
-  });
-  expect(upload.ok(), await upload.text()).toBeTruthy();
-  const asset = await upload.json() as { assetId: string; path: string };
   const id = `relink-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   const name = `回归 ${id}`;
   const created = await request.post("/api/v1/projects", {
     data: { projectId: id, name, width: 160, height: 90, fps: 15 },
   });
   expect(created.status()).toBe(201);
+  const upload = await request.post(`/api/v1/assets?name=${encodeURIComponent(assetName)}&projectId=${encodeURIComponent(id)}`, {
+    headers: { "Content-Type": "application/octet-stream" },
+    data: readFileSync(imageFixture),
+  });
+  expect(upload.ok(), await upload.text()).toBeTruthy();
+  const asset = await upload.json() as { assetId: string; path: string };
   await apply(request, id, "track.add", { trackId: "v1", kind: "video" });
   await apply(request, id, "clip.insert", {
     trackId: "v1", clipId: "relinked-image", sourcePath: asset.path,
@@ -2405,7 +2405,8 @@ test("relinking a missing source restores the current preview window", async ({ 
       (element as HTMLVideoElement).readyState)).toBeGreaterThan(1);
     await expect(previewError).toHaveCount(0);
     expect(statSync(asset.path).isFile()).toBe(true);
-    const listed = await request.get("/api/v1/assets");
+    expect(readFileSync(asset.path)).toEqual(readFileSync(imageFixture));
+    const listed = await request.get(`/api/v1/assets?projectId=${encodeURIComponent(id)}`);
     const assets = (await listed.json()).assets as Array<{ assetId: string; available: boolean }>;
     expect(assets.find((item) => item.assetId === asset.assetId)?.available).toBe(true);
   } finally {
@@ -2413,7 +2414,7 @@ test("relinking a missing source restores the current preview window", async ({ 
       statSync(asset.path);
     } catch {
       await request.post(
-        `/api/v1/assets/${encodeURIComponent(asset.assetId)}/relink?name=${encodeURIComponent(assetName)}`,
+        `/api/v1/assets/${encodeURIComponent(asset.assetId)}/relink?name=${encodeURIComponent(assetName)}&projectId=${encodeURIComponent(id)}`,
         { headers: { "Content-Type": "application/octet-stream" }, data: readFileSync(imageFixture) },
       );
     }
@@ -3464,7 +3465,8 @@ test("built-in composition backgrounds can be dragged onto an empty timeline", a
   await expect.poll(async () => (await readProject(request, id)).sequence.tracks.length).toBe(1);
   const project = await readProject(request, id);
   expect(project.sequence.tracks[0].clips).toHaveLength(1);
-  expect(project.sequence.tracks[0].clips[0].assetRef.sourcePath).toBe(whiteBackground?.path);
+  expect(project.sequence.tracks[0].clips[0].assetRef.assetId).toBe(whiteBackground!.assetId);
+  expect(sameMediaContent(project.sequence.tracks[0].clips[0].assetRef.sourcePath, whiteBackground!.path)).toBe(true);
 });
 
 test("crop canvas handles edit, undo, redo, and persist after reopening", async ({ page, request }) => {
