@@ -235,7 +235,7 @@ cutvoke mcp --data .artifacts/first-edit/data
 <details>
 <summary><strong>安装剪辑技能，并尝试一个创作任务</strong></summary>
 
-MCP 已自带 `editor_help`，能够查询当前命令、单位、范例与错误恢复。可选的 [cutvoke-editor 技能](skills/cutvoke-editor/SKILL.md) 进一步指导素材盘点、受众与目标、镜头节奏、声音字幕、克制转场、预览反馈与成片验收。
+MCP 自带 `editor_help`，支持当前命令、单位、范例与恢复；`topic="creative"` 提供按需读取的统一原则、分类指引和项目方案。可选的 [cutvoke-editor 技能](skills/cutvoke-editor/SKILL.md) 使用相同参考，覆盖 MV/艺术视觉、纪实旅行、叙事、讲解访谈、宣传展示。风格服从用户目标，以实际动态画面和声音验收表达，不以效果数量代替质量。来源与采用边界见[调研沉淀](docs/research/AI_EDITING_WORKFLOWS_2026-10-28.md)。
 
 标准 MCP 启动入口会自动切换到通过检查的新引擎，保持连接和已提交的渲染任务。详见[自动更新行为与边界](docs/production-workflow.md#runtime-changes--服务版本变化)；之前已经运行的旧启动器首次接入时需要重连一次。
 

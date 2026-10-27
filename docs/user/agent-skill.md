@@ -2,7 +2,15 @@
 
 [中文](agent-skill.zh-CN.md) · [Skill entry point](../../skills/cutvoke-editor/SKILL.md)
 
-The **cutvoke-editor** skill teaches an external AI how to plan an edit, inspect local media, build a recoverable timeline, refine captions and sound, and check the final result. CutVoke already provides interface onboarding through `editor_help`; this optional skill adds creative workflow and delivery discipline. It does not install a model or guarantee a beautiful result regardless of the source material.
+The **cutvoke-editor** skill teaches an external AI how to plan an edit, inspect local media, build a recoverable timeline, refine captions and sound, and check the final result. CutVoke also bundles its creative references through `editor_help`; the optional Skill supplies the entry workflow and local working conventions. It does not install a model or guarantee a beautiful result regardless of the source material.
+
+## Three layers, loaded on demand
+
+Use shared principles, the relevant purpose/work-type guide, then a plan for this project. Five branches cover music-video/art visual, documentary/travel, narrative, explanation/interview and promotion/showcase. Genre is a secondary influence; the user's requested expressive intensity determines the approach. A local correction reuses the approved direction and checks affected intervals, without a mandatory new treatment or full export.
+
+MCP-only clients first call `editor_help({"topic":"creative"})`, then load one document, for example `editor_help({"topic":"creative","guide":"music-video"})`. IDs also include `principles`, `project-plan`, `review` and optional `efficiency`. The same documents are available as `cutvoke://creative/<id>` resources. The index contains metadata, not all document bodies; no repository access or Skill installation is required. Build steps copy canonical Skill references verbatim into wheels, desktop and worker packages.
+
+For substantial expressive work, design observable changes and compare a short dynamic passage with a simple baseline before applying it widely. Report technical checks and visual/listening review separately. See the [research and adoption record](../research/AI_EDITING_WORKFLOWS_2026-10-28.md) for sources and limits.
 
 ## Copy or install
 
@@ -33,6 +41,8 @@ For another tool that can read Markdown instructions, point it at `skills/cutvok
 Configure a local MCP process as described in [external-agent-editing.md](external-agent-editing.md). Use an installed `cutvoke` executable, the checkout's activated environment, or the packaged Windows engine. Select the same `--data` directory for MCP and the editor. Start with `editor_help({})` and `runtime`.
 
 Example request after connecting:
+
+This calm example is one possible brief, not the default style for other work.
 
 > Use $cutvoke-editor to make a calm 12-second, 16:9 montage from the local media folder I selected. The audience is friends planning a quiet weekend. Keep one short title, readable captions, gentle motion and restrained transitions. Use only these files; keep intermediate files and the new MP4 inside this project's directory, review the actual frames and audio, and leave the timeline editable. When finished, extract verified, reusable effects without user content and archive them in the CutVoke installation directory. If music or media rights are unclear, flag that before adding material.
 

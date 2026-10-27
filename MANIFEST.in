@@ -3,6 +3,7 @@ include README.zh-CN.md CONTRIBUTING.md CONTRIBUTING.zh-CN.md SECURITY.md CHANGE
 include docs/*.md
 recursive-include docs/user *.md *.json
 recursive-include docs/development *.md *.json
+recursive-include docs/research *.md *.json
 recursive-include docs/images *.md *.json *.png *.svg
 prune docs/history
 prune private

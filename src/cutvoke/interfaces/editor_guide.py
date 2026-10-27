@@ -4,11 +4,14 @@ from __future__ import annotations
 import copy
 import json
 from cutvoke.editing.effect_modules import PRIVACY
+from cutvoke.interfaces.creative_guides import catalog as creative_catalog, document as creative_document, GUIDE_FILES
 
 
 INSTRUCTIONS = (
     "CutVoke is a local video editor controlled by this MCP server. Start with editor_help({}) "
     "for the workflow and conventions; no external skill or source-code access is needed. "
+    "For new or substantial creative edits read editor_help(topic='creative') and load only the relevant principle/workflow/project-plan documents. "
+    "Follow the user's expressive intent; demonstrate it with actual moving output and sound where available. Local corrections stay local. "
     "Use project_list/project_summary to identify the project, media_import/media_list for assets. "
     "Before an unfamiliar edit, call editor_help(topic='command', command='<type>') or commands_list; "
     "for effects also supply effectId to obtain its exact params schema. Never invent IDs or parameters. "
@@ -35,6 +38,7 @@ INSTRUCTIONS = (
 )
 
 GUIDES = {
+    "creative": creative_catalog(),
     "overview": {
         "title": "Start editing with CutVoke",
         "privacyNotice": PRIVACY,
@@ -47,12 +51,13 @@ GUIDES = {
             "During normal editing, preserve useful new effects as content-free modules. See sharing help. Whenever suggesting sharing, append its privacyNotice verbatim; do not include user footage, images, audio, text/captions, personal information, project files or paths. Never upload without explicit consent."],
         "workflow": [
             {"tools": ["runtime", "project_list", "project_summary"], "purpose": "Check the connected data directory; locate the requested project and current revision. Use create_project for a new edit or project_clone for an alternate version."},
+            {"tools": ["editor_help"], "purpose": "For new or substantial creative work use topic=creative: shared principles, a relevant work type, then this project's plan. Load one document with guide=<id>. Local corrections reuse approved direction. Effect counts and a successful export do not prove expression."},
             {"tools": ["media_list", "media_import", "media_inspect", "preview_frames"], "purpose": "Locate/import local files, inspect source duration and actual pictures. Imported assetId can be used directly in clip.insert."},
             {"tools": ["editor_help", "commands_list", "resources_list"], "purpose": "Get command schemas or a recipe; discover compatible effects/presets instead of guessing. resources_list is the preset catalog, distinct from MCP document resources."},
             {"tools": ["edit_lock", "command_preview", "command_apply"], "purpose": "Acquire a lease, preview supported edits without committing, apply with revision and stable commandId. edit.batch commits 1..32 changes atomically as one undo point. Use each returned revision for the next edit; renew the lease during long editing sessions."},
             {"tools": ["preview_frames", "preview_prepare", "preview_job"], "purpose": "Check text/effects/transition boundaries visually; prepare continuous preview if needed. Preparation is asynchronous. Keep jobId; poll about once per second with a bounded timeout, not a busy loop."},
             {"tools": ["command_apply", "export_job", "project_package", "edit_lock"], "purpose": "Run project.preflight, enqueue export, poll until succeeded, return result.output_path. Export uses the submitted snapshot; later edits do not change it. Package the editable project when requested. Release the lease in a finally step, including after failure."}],
-        "help": {"conventions": {"topic": "time"}, "editing": {"topic": "editing"},
+        "help": {"creative": {"topic": "creative"}, "conventions": {"topic": "time"}, "editing": {"topic": "editing"},
                  "recovery": {"topic": "errors"}, "examples": {"topic": "recipes"},
                  "command": {"topic": "command", "command": "clip.insert"},
                  "sharing": {"topic": "sharing"},"localModels":{"topic":"local-models"},"humanToAgent":{"topic":"agent-bridge"}},
@@ -191,6 +196,10 @@ class EditorGuide:
 
     def help(self, arguments):
         topic = arguments.get("topic", "overview")
+        if "guide" in arguments and topic != "creative":
+            raise ValueError("guide requires topic=creative")
+        if topic == "creative" and "guide" in arguments:
+            return creative_document(arguments["guide"])
         if topic == "command":
             name = arguments.get("command")
             if not name:
@@ -232,6 +241,8 @@ class EditorGuide:
         result.extend({"uri": f"cutvoke://recipe/{key}", "name": value["title"], "mimeType": "application/json"}
                       for key, value in RECIPES.items())
         result.append({"uri": "cutvoke://commands", "name": "Command index (schemas available individually)", "mimeType": "application/json"})
+        result.extend({"uri": f"cutvoke://creative/{key}", "name": entry[1], "mimeType": "application/json"}
+                      for key, entry in GUIDE_FILES.items())
         return result
 
     def read(self, uri):
@@ -242,6 +253,8 @@ class EditorGuide:
                       "uri": f"cutvoke://command/{item['type']}"} for item in self.service.command_catalog()]}
         elif uri.startswith("cutvoke://command/"):
             value = self.help({"topic": "command", "command": uri.removeprefix("cutvoke://command/")})
+        elif uri.startswith("cutvoke://creative/"):
+            value = creative_document(uri.removeprefix("cutvoke://creative/"))
         elif uri.startswith("cutvoke://guide/"):
             topic = uri.removeprefix("cutvoke://guide/")
             if topic not in GUIDES:

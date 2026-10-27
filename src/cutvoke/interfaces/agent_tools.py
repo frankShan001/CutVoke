@@ -17,6 +17,7 @@ from pathlib import Path
 from cutvoke.domain.protocol import ErrorCode
 from cutvoke.editing.service import EditError
 from cutvoke.editing.effect_modules import RECIPE_SCHEMA, PRIVACY
+from cutvoke.interfaces.creative_guides import GUIDE_FILES
 
 
 def _tool(name, description, properties, required=()):
@@ -41,8 +42,9 @@ AGENT_TOOLS = [
            "token": STRING, "directory": STRING}, ("projectId",)),
     _tool("project_directory_open", "Open/register a moved or backed-up project directory, or its project.cutvoke file. An existing online copy with the same projectId must be closed and moved first.",
           {"path": STRING}, ("path",)),
-    _tool("editor_help", "START HERE if unfamiliar with CutVoke. Bundled workflow, units, recipes, command payload JSON schemas, effect schemas and error recovery; no external Skill/source-code access needed. Default {} returns a compact onboarding guide. Before editing, request topic=command with the command name; add effectId for exact effect params.",
-          {"topic": {"type": "string", "enum": ["overview", "time", "editing", "errors", "recipes", "command", "sharing", "local-models", "agent-bridge"], "default": "overview"},
+    _tool("editor_help", "START HERE if unfamiliar with CutVoke. Default {} gives compact onboarding. For substantial creative work topic=creative gives a small three-layer index; add guide=<id> to load one principle/work-type/project-plan reference. Local corrections stay local. No external Skill/source-code access needed. Before unfamiliar edits request topic=command with command name and effectId for exact params.",
+          {"topic": {"type": "string", "enum": ["overview", "creative", "time", "editing", "errors", "recipes", "command", "sharing", "local-models", "agent-bridge"], "default": "overview"},
+           "guide": {"type": "string", "enum": list(GUIDE_FILES)},
            "command": STRING, "effectId": STRING, "recipe": STRING}),
     _tool("effect_module_save", "Save a content-free reusable effect recipe locally (MIT). No project/media/text inputs accepted. Discover allowed schemas with effect_module_list(includeSchemas=true). Return privacyNotice verbatim to the user when proposing sharing.",
           {"recipe": RECIPE_SCHEMA}, ("recipe",)),

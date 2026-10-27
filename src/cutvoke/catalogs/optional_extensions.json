@@ -59,7 +59,7 @@
         "191ac9529ae506ee",
         "e24338a717c1b7ad",
         "32f9c706009e16cc",
-        "a1506dc3b85d29b9"
+        "592ce0a2364bbfce"
       ],
       "models": {
         "semantic": "191ac9529ae506ee",
@@ -101,7 +101,7 @@
         "4a184e8fb1adb37e",
         "a2345aede8715ab1",
         "32f9c706009e16cc",
-        "a1506dc3b85d29b9"
+        "592ce0a2364bbfce"
       ],
       "models": {
         "sam2": "a2345aede8715ab1"
@@ -142,7 +142,7 @@
         "4a184e8fb1adb37e",
         "a2345aede8715ab1",
         "32f9c706009e16cc",
-        "a1506dc3b85d29b9"
+        "592ce0a2364bbfce"
       ],
       "models": {
         "sam2": "a2345aede8715ab1"
@@ -1082,14 +1082,14 @@
       "sources": [],
       "bundled": "antlr4_python3_runtime-4.9.3-py3-none-any.whl"
     },
-    "a1506dc3b85d29b9": {
-      "id": "a1506dc3b85d29b9",
+    "592ce0a2364bbfce": {
+      "id": "592ce0a2364bbfce",
       "filename": "cutvoke-workers.zip",
       "kind": "worker-code",
       "bundled": "cutvoke-workers.zip",
-      "sizeBytes": 694522,
-      "installedBytes": 2351308,
-      "sha256": "a1506dc3b85d29b98ace299bc56742314c7d7d58754c23afea9b23013d6dcc74",
+      "sizeBytes": 715328,
+      "installedBytes": 2393997,
+      "sha256": "592ce0a2364bbfcefa7863d4fc3344897849369fd82081e1d765c50ac0c3fce3",
       "sources": []
     }
   },

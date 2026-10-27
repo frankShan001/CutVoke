@@ -1235,6 +1235,9 @@ def _prepare_static_masks(method):
         from cutvoke.rendering.text_layers import prepare as prepare_text_layers
         project = prepare_text_layers(self, project, cancel)
         previous_scale=getattr(self._render_ctx,'preview_scale',1.0)
+        previous_working_color=getattr(self._render_ctx,'working_color','bt709')
+        self._render_ctx.working_color=(values.get('source_color_space') or
+            ('bt2020' if values.get('tone_map') not in (None,'none') else 'bt709'))
         preview_scale=1.0
         if method.__name__=='render_preview_window':
             from cutvoke.rendering.preview_quality import snapshot
@@ -1340,6 +1343,7 @@ def _prepare_static_masks(method):
             self._render_ctx.pixel_gpu=previous_pixel
             self._render_ctx.gpu_clips=previous_clips
             self._render_ctx.preview_scale=previous_scale
+            self._render_ctx.working_color=previous_working_color
             self._render_ctx.clip_clocks=previous_clocks
             self._render_ctx.bounded_origin=previous_origin
             self._render_ctx.export_audio_sequence=previous_audio_sequence
@@ -1882,7 +1886,8 @@ class RenderService:
         # 2. 编译 filter_complex 图 + 输入列表（有理数→float 仅在此层）
         #    _compile 在含字幕时会生成 ASS 临时目录（caption_cwd），需调用方清理。
         graph, input_paths, expected_duration, has_audio, warnings, caption_cwd = (
-            self._compile(seq, overlay_position, alpha=alpha, render_window=render_window))
+            self._compile(seq, overlay_position, alpha=alpha, render_window=render_window,
+                          frame_aligned_origin=True))
         warnings = preflight_warnings + warnings
         verify_duration = expected_duration
         if output_start is not None or output_duration is not None:
@@ -2021,16 +2026,18 @@ class RenderService:
             window_seconds = 4 if fragment_graph else 8
             window_duration = max(1, round(float(frame_rate) * window_seconds)) / float(frame_rate)
             inherited_gpu=getattr(self._render_ctx,'gpu',None)
+            inherited_color=getattr(self._render_ctx,'working_color','bt709')
             def render_chunk(interval):
                 cursor,chunk_duration=interval
                 self._render_ctx.gpu=inherited_gpu
+                self._render_ctx.working_color=inherited_color
                 self._render_ctx.gpu_clips={}
                 self._render_ctx.pixel_gpu=None
                 check_cancel()
                 compile_started = time.monotonic()
                 graph, inputs, _expected, chunk_audio, messages, caption_cwd = self._compile(
                     video_seq, overlay_position, alpha=alpha,
-                    render_window=(cursor, cursor + chunk_duration))
+                    render_window=(cursor, cursor + chunk_duration), frame_aligned_origin=True)
                 origin = self._render_ctx.compile_origin
                 compile_seconds = time.monotonic() - compile_started
                 path = temporary / f"window-{round(cursor*float(frame_rate)):09d}.mkv"
@@ -2083,6 +2090,12 @@ class RenderService:
                                 "speed": speed,
                                 "etaSeconds": max(0.0, duration-completed_seconds)/speed if speed else None})
             check_cancel()
+            if progress_callback:
+                progress_callback({'phase':'verifying'})
+            seam_started=time.monotonic()
+            video_verification=self._verify_window_seams(
+                video_seq,chunks,temporary,start,overlay_position,cancel_event,alpha,quality)
+            seam_seconds=time.monotonic()-seam_started
             manifest = temporary / "windows.ffconcat"
             lines = ["ffconcat version 1.0"]
             for path, chunk_duration in chunks:
@@ -2131,13 +2144,59 @@ class RenderService:
                 "warnings":warnings, "renderStrategy":"lossless-windows", "windowCount":len(chunks),
                 "audioStrategy":"continuous-pcm" if has_audio else "none",
                 "audioVerification":audio_verification,
+                "videoVerification":video_verification,
                 "timings":{"continuousAudioSeconds":audio_seconds,
+                           "seamVerificationSeconds":seam_seconds,
                            "compilationWorkerSeconds":sum(item['compile'] for item in window_metrics),
                            "compositionWorkerSeconds":sum(item['composite'] for item in window_metrics),
                            "encodingAndVerificationSeconds":time.monotonic()-encoding_started,
                            "totalWindowSeconds":time.monotonic()-stage_started},
                 "videoEncoder":getattr(self._render_ctx,"video_encoder","libx264"),
                 "encoderFallback":getattr(self._render_ctx,"encoder_fallback",False)}
+
+    def _verify_window_seams(self,seq,chunks,directory,start,overlay_position,cancel_event,alpha,quality):
+        """Check the real two boundary pictures against a fresh spanning graph.
+
+        This does not re-render the whole film. Genuine cuts and intentional
+        flashes are compared with their corresponding reference pictures.
+        """
+        from cutvoke.rendering.video_integrity import read_frames,compare_seam,VideoIntegrityError
+        import numpy as np
+        fps=seq.fps.to_fraction();rate=float(fps);cursor=start;reports=[]
+        scale=min(1.,320/seq.width,180/seq.height)
+        width=max(1,round(seq.width*scale));height=max(1,round(seq.height*scale))
+        saved_audio=getattr(self._render_ctx,'export_audio_sequence',None)
+        self._render_ctx.export_audio_sequence=None
+        try:
+            for index in range(1,len(chunks)):
+                cursor+=chunks[index-1][1]
+                if cancel_event is not None and cancel_event.is_set():
+                    raise RenderCancelled('video seam verification cancelled')
+                frame=math.ceil(cursor*rate-1e-7)
+                at=(frame-1)/rate;duration=2/rate
+                self._render_ctx.gpu_clips={};self._render_ctx.pixel_gpu=None
+                graph,inputs,_expected,_audio,_messages,cwd=self._compile(
+                    seq,overlay_position,alpha=alpha,render_window=(at,at+duration),frame_aligned_origin=True)
+                reference=Path(directory)/f'seam-{index:05d}.mkv'
+                try:
+                    self._run_ffmpeg(seq,graph,inputs,str(reference),quality,cancel_event,False,
+                        caption_cwd=cwd,alpha=alpha,output_start=at-self._render_ctx.compile_origin,
+                        output_duration=duration,lossless=True)
+                finally:
+                    if cwd:shutil.rmtree(cwd,ignore_errors=True)
+                options={'ffmpeg':self.ffmpeg,'fps':fps,'cancel_event':cancel_event}
+                expected=read_frames(reference,width,height,**options)
+                left=read_frames(chunks[index-1][0],width,height,tail=True,**options)[-1]
+                right=read_frames(chunks[index][0],width,height,count=1,**options)[0]
+                reports.append(compare_seam(np.stack([left,right]),expected,frame/rate,alpha=alpha))
+        except InterruptedError as error:
+            raise RenderCancelled(str(error)) from error
+        except VideoIntegrityError as error:
+            raise RenderError(str(error)) from error
+        finally:
+            self._render_ctx.export_audio_sequence=saved_audio
+        return {'status':'passed' if reports else 'not_required','comparison':'independent-seam-frames',
+                'sampleWidth':width,'sampleHeight':height,'boundaries':reports}
 
     def _render_continuous_audio(self, seq, out_path, start, duration, cancel_event=None):
         """Render only the original mixer, once, without decoding visual layers."""
@@ -2149,6 +2208,9 @@ class RenderService:
         audio_seq.tracks = [track for track in audio_seq.tracks if track.kind in {'audio', 'video'}]
         for track in audio_seq.tracks:
             track.kind = 'audio'
+        if not any(track.visible and not track.muted and any(not clip.hidden for clip in track.clips)
+                   for track in audio_seq.tracks):
+            return False,[]
         saved = {key: getattr(self._render_ctx, key, None) for key in
                  ('export_audio_sequence', 'bounded_origin', 'clip_clocks', 'audio_origin_delta')}
         self._render_ctx.export_audio_sequence = None
@@ -2843,7 +2905,7 @@ class RenderService:
 
         # 音频轨是否存在可见片段（用于「无可用音轨」warning 判定）
         audio_tracks = [t for t in seq.tracks if t.kind == "audio"]
-        audio_track_present = any(
+        audio_track_present = any(t.visible and not t.muted and
             any(not c.hidden for c in t.clips) for t in audio_tracks)
 
         # 统一输入索引：源文件只进 -i 一次，视频用 [i:v]、音频用 [i:a] 复用
@@ -2960,7 +3022,9 @@ class RenderService:
                     transparent_layer=transparent_layer,
                     video_duration=video_duration,
                     force_canvas=bool(mode.get("canvas", False) or
-                        (render_window is not None and original_canvas[track.id])))
+                        (render_window is not None and original_canvas[track.id])),
+                    preserve_alpha=transparent_layer or any(c.compositing.get("matte")
+                        for c in track.clips if not c.hidden))
             finally:
                 self._render_ctx.alpha = alpha
             track_streams.append((label, dur))
@@ -2980,7 +3044,7 @@ class RenderService:
             frame_rate = seq.fps.to_fraction()
             fps_value = f"{frame_rate.numerator}/{frame_rate.denominator}"
             audio_only_color = "black@0.0" if alpha else canvas_fill
-            audio_only_format = ",format=yuva420p" if alpha else ""
+            audio_only_format = ",format=rgba" if alpha else ",format=rgb24"
             parts.append(f"color=c={audio_only_color}:s={seq.width}x{seq.height}:"
                          f"r={fps_value}:d={audio_end:.6f}"
                          f"{audio_only_format}[audioonlyv]")
@@ -2998,7 +3062,7 @@ class RenderService:
                          if t.kind == "text" and t.visible for c in t.clips if not c.hidden), default=0)
         canvas_dur = max(max(track_durs), render_window[1] - origin if render_window else title_end)
         base_color = "black@0.0" if alpha else canvas_fill
-        base_format = ",format=yuva420p" if alpha else ""
+        base_format = ",format=rgba" if alpha else ",format=rgb24"
         parts.append(
             f"color=c={base_color}:s={seq.width}x{seq.height}:"
             f"r={fps_expr}:d={canvas_dur:.6f}{base_format}[trackbase]")
@@ -3038,7 +3102,7 @@ class RenderService:
         # 统一缩放到序列画布并规范帧率（输出符合 sequence 设置）
         parts.append(
             f"[{current}]scale={seq.width}:{seq.height},"
-            f"null[outv]")
+            f"{self._working_video_filter()}[outv]")
 
         # ---- 字幕叠加（F22/F24/M1 基础字幕进入成片）----
         # 与预览 extract_frame 复用同一段逻辑（prepare_caption_render 生成 ASS +
@@ -3276,8 +3340,10 @@ class RenderService:
                     delay_samples = max(0, round(relative_start * sr))
                     if delay_samples:
                         audio_fx += f",adelay={delay_samples}S:all=1"
+                    # Sample delays and asetrate use the sequence rate. Convert
+                    # 44.1 kHz inputs first, before applying 48 kHz sample counts.
                     parts.append(
-                        f"[{ai}:a]atrim=start={ss}:duration={src_dur},"
+                        f"[{ai}:a]atrim=start={ss}:duration={src_dur},aresample={sr},"
                         f"asetpts=PTS-STARTPTS{speed_filters}{audio_fx}"
                         f",aresample={sr},"
                         f"aformat=sample_fmts=fltp:sample_rates={sr}:"
@@ -3434,6 +3500,7 @@ class RenderService:
                             transparent_layer: bool = False,
                             video_duration=None,
                             force_canvas: bool = False,
+                            preserve_alpha: bool = False,
                             ) -> tuple[str, float]:
         """编译一条视频轨为单条视频流 [vtk{n}]，返回 (label, 时长秒)。
 
@@ -3464,6 +3531,10 @@ class RenderService:
             if c.compositing.get("matte"):
                 from cutvoke.rendering.compositing import matte
                 label = matte(self, c, label, seq, get_input, parts, vseg, fps_expr)
+            normalized=f"workclip{vseg[0]}"
+            vseg[0]+=1
+            parts.append(f"[{label}]{self._working_video_filter(keep_alpha=preserve_alpha)}[{normalized}]")
+            label=normalized
             clip_labels.append(label)
 
         # Reuse unused source frames after an outgoing clip's selected range as
@@ -3602,7 +3673,7 @@ class RenderService:
             bed = f"tlbed{n}"
             parts.append(
                 f"color=c=black@0.0:s={seq.width}x{seq.height}:"
-                f"r={fps_expr}:d={total_dur:.6f},format=yuva420p[{bed}]")
+                f"r={fps_expr}:d={total_dur:.6f},format=rgba[{bed}]")
             current = bed
             for i, (label, offset) in enumerate(zip(clip_labels, offsets)):
                 shifted = f"tlclip{n}_{i}"
@@ -3661,7 +3732,7 @@ class RenderService:
                 d_param = _duration_to_float(tr.get("params", {}).get("duration", 0.0))
                 d = min(d_param, clip_durs[i - 1] / 2.0, clip_durs[i] / 2.0)
                 if d_param <= 0 or d <= 0:
-                    current = self._concat2(current, clip_labels[i], parts)
+                    current = self._concat2(current, clip_labels[i], parts, keep_alpha=preserve_alpha)
                     film += clip_durs[i]
                     tl += clip_durs[i]
                     continue
@@ -3792,7 +3863,7 @@ class RenderService:
                 tl += clip_durs[i]
                 continue
             # 无转场：concat（画布合成轨尺寸已一致）
-            current = self._concat2(current, clip_labels[i], parts)
+            current = self._concat2(current, clip_labels[i], parts, keep_alpha=preserve_alpha)
             film += clip_durs[i]
             tl += clip_durs[i]
 
@@ -3853,20 +3924,20 @@ class RenderService:
         if at_start and canvas_size is not None:
             prefix = f"padstart{len(parts)}"
             width, height = canvas_size
-            fmt = ",format=yuva420p" if transparent else ""
+            fmt = ",format=rgba" if transparent else ",format=rgb24"
             color = "black@0.0" if transparent else "black"
             parts.append(f"color=c={color}:s={width}x{height}:r={fps_expr}:"
                          f"d={pad_secs:.9f}{fmt}[{prefix}]")
             lookahead = "" if clears_rate else ",tpad=stop_mode=clone:stop=1"
-            clock = ""
-            if not clears_rate:
-                if total_duration is None:
-                    raise RenderError("leading canvas padding requires its stream duration")
-                rate = Fraction(fps_expr)
-                clock = (f",trim=duration={total_duration:.9f},"
-                         f"settb=expr={rate.denominator}/{rate.numerator},setpts=N")
+            if total_duration is None:
+                raise RenderError("leading canvas padding requires its stream duration")
+            rate = Fraction(fps_expr)
+            # Concat's microsecond timestamps can land just after a frame tick.
+            # Rebuild the lattice before framesync, rather than resampling those
+            # rounded timestamps (which can repeat an animated picture).
             parts.append(f"[{prefix}][{label}]concat=n=2:v=1:a=0{lookahead},"
-                         f"fps={fps_expr}{clock}[{out}]")
+                         f"settb=expr={rate.denominator}/{rate.numerator},setpts=N,"
+                         f"fps={fps_expr},trim=duration={total_duration:.9f}[{out}]")
         elif at_start:
             parts.append(
                 f"[{label}]{before}tpad=start_mode=add:start_duration={pad_secs:.6f}{pad_color}"
@@ -3877,11 +3948,26 @@ class RenderService:
                 f",fps={fps_expr},setpts=PTS-STARTPTS[{out}]")
         return out
 
-    def _concat2(self, a: str, b: str, parts: list[str]) -> str:
+    def _concat2(self, a: str, b: str, parts: list[str], *, keep_alpha=False) -> str:
         """concat 两路视频为一个流（用于轨内无转场拼接）。"""
         out = f"cc{len(parts)}"
-        parts.append(f"[{a}][{b}]concat=n=2:v=1:a=0[{out}]")
+        parts.append(f"[{a}]{self._working_video_filter(keep_alpha=keep_alpha)}[{out}a];"
+                     f"[{b}]{self._working_video_filter(keep_alpha=keep_alpha)}[{out}b];"
+                     f"[{out}a][{out}b]concat=n=2:v=1:a=0[{out}]")
         return out
+
+    def _working_video_filter(self, *, keep_alpha=False) -> str:
+        """Pin matrix/range/chroma before branches can negotiate with neighbours.
+
+        Overlay beds are RGB so RGB effect layers cannot silently choose a
+        different YUV matrix. Every join and the completed graph use one 4:4:4
+        working space. Export conversion happens only after window assembly.
+        """
+        space=getattr(self._render_ctx,'working_color','bt709')
+        primaries,transfer,matrix=COLOR_SPACE_TRIPLE.get(space,COLOR_SPACE_TRIPLE['bt709'])
+        pixel_format='yuva444p' if keep_alpha or getattr(self._render_ctx,'alpha',False) else 'yuv444p'
+        return (f'scale=out_color_matrix={matrix}:out_range=tv,format={pixel_format},'
+                f'setparams=range=limited:color_primaries={primaries}:color_trc={transfer}:colorspace={matrix}')
 
     def _build_clip_plain(self, clip: Clip, seq: Sequence, get_input, parts: list[str],
                           vseg: list[int], fps_expr: str) -> str:
@@ -4072,8 +4158,10 @@ class RenderService:
 
         base = self._trim_speed_color(clip, get_input, parts, vseg, color, fps_expr)
         cur = f"kgeom{vseg[0]}"; vseg[0] += 1
+        # Keep subpixel interpolation in RGB until it meets the RGB canvas.
+        # A YUV round trip here adds quantization to slow fractional movement.
         parts.append(
-            f"[{base}]fps={fps_expr},scale={W}:{H},setsar=1,format=yuva444p,"
+            f"[{base}]fps={fps_expr},scale={W}:{H},setsar=1,format=gbrap,"
             f"pad={W + 4}:{H + 4}:2:2:color=black@0,"
             f"perspective={':'.join(corners)}:sense=destination:eval=frame:"
             f"interpolation=cubic,crop={W}:{H}:0:0[{cur}]")
@@ -5330,18 +5418,18 @@ class RenderService:
         if getattr(self._render_ctx, "alpha", False):
             parts.append(
                 f"color=c=black@0.0:s={W}x{H}:r={fps_expr}:d={dur:.6f},"
-                f"format=yuva420p[{bg}]")
+                f"format=rgba[{bg}]")
         else:
             parts.append(
-                f"color=c=black:s={W}x{H}:r={fps_expr}:d={dur:.6f}[{bg}]")
+                f"color=c=black:s={W}x{H}:r={fps_expr}:d={dur:.6f},format=rgb24[{bg}]")
         out = f"cv{vseg[0]}"
         vseg[0] += 1
         # 源帧率低于工程帧率时，动画子段可能只有一帧输入而有两帧画布。
         # 保持该子段末帧至画布结束，避免 eof_action=pass 在边界闪出黑帧。
-        # format=auto：跟随画布 alpha 格式，透明导出时不要把 alpha 压掉。
+        # Match the RGB canvas explicitly and retain its alpha for transparent export.
         parts.append(
             f"[{bg}][{src_label}]overlay=shortest=0:eof_action=repeat:"
-            f"format=auto:x={x}:y={y}[{out}]")
+            f"format=rgb:x={x}:y={y}[{out}]")
         # The color bed already emits the sequence frame clock. Resampling it
         # again loses its final frame on FFmpeg 6.1, including one-frame beds.
         fin = f"cf{vseg[0]}"
@@ -5638,7 +5726,10 @@ class RenderService:
         # 这样色彩管理是"导出级后处理"，完全不侵入既有效果/转场/字幕编译逻辑。
         out_label = "[outv]"
         original_graph = graph
-        if color_chain:
+        if lossless or (alpha and not color_chain):
+            graph=f"{graph};[outv]{self._working_video_filter()}[outvworking]"
+            out_label='[outvworking]'
+        elif color_chain:
             graph = f"{graph};[outv]{color_chain}[outvcm]"
             out_label = "[outvcm]"
         elif not alpha:
@@ -5707,7 +5798,7 @@ class RenderService:
             "h264_nvenc" if use_nvenc else "libx264")
         if lossless:
             cmd += [*filter_args, "-map", out_label, "-c:v", "ffv1", "-level", "3",
-                    "-threads", "2", "-pix_fmt", "yuva444p" if alpha else "yuv420p"]
+                    "-threads", "2", "-pix_fmt", "yuva444p" if alpha else "yuv444p"]
             if has_audio:
                 cmd += ["-map", audio_label, "-c:a", "pcm_s16le"]
             if output_start is not None and output_duration is None:

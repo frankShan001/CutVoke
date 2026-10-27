@@ -1,6 +1,6 @@
 # Review and delivery
 
-Make two passes: verify the edit's technical integrity, then whether the viewer receives the intended story. A passing command or `readyToRender:true` is not an artistic review.
+Review technical integrity and the applicable creative goal. A command, `readyToRender:true`, effect count or prepared preview is not perceptual acceptance. Keep checks proportional: a subtitle correction needs its interval, readability and relevant neighbors; a complete creative delivery needs an assessment of the work as a whole.
 
 ## What to inspect
 
@@ -11,6 +11,12 @@ Make two passes: verify the edit's technical integrity, then whether the viewer 
 - Final MP4 codec, dimensions, frame rate, duration and full decode. For example, `ffprobe -v error -show_streams -show_format -of json <output.mp4>` and `ffmpeg -v error -i <output.mp4> -f null -` check streams and decode when these tools are available.
 
 ## Refinement and handoff
+
+For a substantial expressive treatment compare a representative simple/untreated passage and designed version at matched source/time/quality conditions. Name the visible or audible difference and whether it serves the brief. Check onset, development, fastest motion/occlusion, handoff and resolution. If strong expression was requested and the addition is barely perceptible, revisit the design, timing or composition; a list of applied effects is not sufficient evidence.
+
+Use applicable dimensions rather than a universal taste score: understandable progression, picture/sound relationship, composition/readability, continuity, factual/message coherence and pacing. For speech/factual edits check source meaning and breaths; for teaching/demo work check the demonstrated action and reading time. Repeated musical sections should develop or deliberately reprise the intended idea. Static samples alone leave rhythm and continuous motion unverified.
+
+Record an actual time range, observation, change, new artifact/revision and recheck. During iteration, inspect changed ranges plus affected transitions, audio handoffs and downstream dependencies. For complete delivery, review the complete exported work where playback is possible. Check returned `audioVerification` / `videoVerification` within their stated limits; a passed seam sample cannot certify every pixel or artistic decision.
 
 Describe problems concretely: “The subtitle collides with the product at 4.2s” or “The last chord ends abruptly.” Repair the specific entities, preview the affected intervals and export the new revision to a new filename. Do not redesign an approved direction simply to add novelty.
 

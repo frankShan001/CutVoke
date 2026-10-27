@@ -1,57 +1,58 @@
 ---
 name: cutvoke-editor
-description: Edit local footage, images and audio into a reviewable CutVoke project through MCP or the local HTTP API. Use for planning, timeline edits, captions, sound and verified export, keeping generated files in the project folder and collecting reusable effects locally at completion.
+description: Edit local footage, images and audio in CutVoke through MCP or the local HTTP API. Use for targeted edits or a complete editable film, with on-demand guidance for music videos, documentary/travel, narrative, explanation/interview and promotion, project-local artifacts and review of actual output.
 ---
 
 # CutVoke editor
 
-Deliver a purposeful short edit, its editable project, and evidence of review. CutVoke executes edits; you supply story, selection, rhythm and judgment. Installing this skill adds guidance, not a model, media generator or guarantee of artistic quality.
+CutVoke executes edits; the external Agent supplies selection, story, rhythm, visual design and judgment. Follow the user's purpose and requested expressive intensity. Adding effects or completing an export does not demonstrate that the requested expression was achieved.
 
-## Connect and establish scope
+## Connect and route only the needed guidance
 
-- Read [connection.md](references/connection.md) when connecting or troubleshooting. Start with the connected `editor_help({})` and `runtime` tools; confirm the data directory and target project. The MCP engine and human editor must use the same database to hand off work.
-- Gather the intended audience, one takeaway, target duration/aspect ratio, permitted source folders, delivery path, and any required words or brand assets. Infer ordinary choices from supplied context; ask only for facts that change the edit.
-- Use `create_project` for a new edit, or `project_clone` for an alternate version. Edit an existing project only within the user's requested scope. Use a new output filename and `overwrite:false`; retain source media and an editable project. Do not silently replace files, rename originals, scan unrelated personal folders, upload media or add a paid/external generation service.
+Start with connected `editor_help({})` and `runtime`; confirm the intended project, current revision and shared data directory. Read [connection.md](references/connection.md) when connecting or recovering. No repository or external service is required for normal MCP editing.
 
-## Bind every output to the project
+Use three layers, with depth proportional to the work:
 
-Before generating files or editing the timeline, read [workspace.md](references/workspace.md), bind a stable absolute `projectRoot` to the target project ID and database, and record it in `project-workspace.json` inside that folder. Reuse that binding on subsequent edits. A cloned/new project gets its own folder. A shared media folder or the application's data directory is not automatically a project folder.
+1. **Shared principles:** for a new edit or substantial redesign read [principles.md](references/principles.md). For a local correction, apply relevant principles without restarting the creative process.
+2. **Purpose/work type:** choose the relevant reference below. Combine another only when it adds a real requirement; do not load every branch. Genre is a secondary influence, not an automatic effects recipe.
+3. **This project's plan:** for substantial work use [project-plan.md](references/project-plan.md), adapting it to available sources and uncertainty. Reuse an existing adequate plan. A local text or audio correction needs only the affected entities and review range.
 
-All Agent-created files belong under `projectRoot`: plans, prompts, scripts, generated/processed media, subtitles, previews, extracted frames, temporary files, logs, validation evidence, exports and editable packages. Set absolute output paths explicitly wherever supported, and direct child-process working/temp directories there. Do not use Desktop, Downloads, the skill folder or a global temp folder as a convenient output location. Keep the primary artifact in the project even when the user requests an additional delivery copy elsewhere.
+| Purpose/work type | Read when relevant | MCP guide ID |
+| --- | --- | --- |
+| MV, performance, artistic visual work | [music-video.md](references/workflows/music-video.md) | `music-video` |
+| Documentary, event, travel/vlog | [documentary.md](references/workflows/documentary.md) | `documentary` |
+| Fiction or character-led narrative | [narrative.md](references/workflows/narrative.md) | `narrative` |
+| Tutorial, explanation, interview | [explainer.md](references/workflows/explainer.md) | `explainer` |
+| Promotion, demonstration, showcase | [showcase.md](references/workflows/showcase.md) | `showcase` |
 
-CutVoke owns its configured database, imported-media library and internal caches; do not move them or rewrite their ledger. When a tool only produces an engine-managed artifact, retain a project-local review copy when accessible and record its returned ID/path. The other routine destination is the **content-free reusable-effect collection** under the verified CutVoke installation, described below. These instructions constrain Agent actions; they do not create an operating-system sandbox.
+MCP-only clients get the same guidance with `editor_help(topic="creative")` for a small index, then `editor_help(topic="creative", guide="<id>")` for one document. `principles`, `project-plan`, `review` and `efficiency` are also guide IDs. MCP document resources provide the same content; an installed Skill is optional.
 
-## Build the story from available media
+## Bind work to the editable project
 
-Read [editing.md](references/editing.md) for a creative planning pass and operation mapping.
+Before creating files, read [workspace.md](references/workspace.md), establish an absolute `projectRoot` bound to project ID/database, and reuse it on later edits. Keep Agent-created plans, scripts, media, temporary files, logs, review evidence, exports and packages there. Explicitly supply absolute output paths. CutVoke manages its database, imported-media library and internal caches; do not move those behind its ledger.
 
-1. Inventory authorized media with `media_list`, `media_inspect` and actual `preview_frames`. Use `media_import` for the persistent library shared with the browser. Check `available:true` and keep MCP and Web on the same database; exact legacy imports remain usable without moving files behind the ledger. Note duration, framing, usable action, speech, background sound and licensing. Technical inspection does not establish story meaning, rights, identity or artistic quality. Listen when audio playback is available; disclose when it is not.
-2. State a compact edit plan: opening hook, supporting beats, final takeaway; source in/out points, timeline lengths, title/caption copy and sound treatment. Match pace to the audience and material. Make the essential story readable before embellishing it.
-3. Discover supported effects with `effects_list` / `resources_list`. Request `editor_help(topic="command", command="…")` for each unfamiliar edit; add `effectId` for its precise schema. Help schemas describe the **payload**, not the outer `command_apply` arguments. Never invent IDs, parameters or a video generation capability.
+Use `create_project` for a new edit or `project_clone` for an alternate version when appropriate. Preserve source files, approved direction and editable entities. Use a new export filename with `overwrite:false` unless replacement is authorized. Do not silently upload media, install models, add paid services or publish. Preserve existing authorization and ask only for consequential missing information.
 
-## Execute with a recoverable project
+## Design and execute
 
-- Use exact rational seconds for timeline edits: `{"num":"3","den":"2"}` means 1.5 seconds. Keyframe time is clip-local; title/caption positions are normalized. Query the running help for other units.
-- Acquire `edit_lock` before grouped Agent edits. For supported commands, `command_preview` checks a proposed edit without rendering or committing. Commit the same payload/revision with `command_apply`, a stable `commandId`, and the acquired `editLeaseId`.
-- Use `edit.batch` for related edits that fit its current `allowedCommands` and batch limit. Keep the returned revision for the next operation. Release your lease in a finally step, including after failure; renew it during long editing work and release it before a long export.
-- For a local correction, use `project_lookup` and update only the requested entities. Do not rebuild the whole timeline to change a subtitle or swap one shot.
-- Preserve the user's current editing experience. Keep normal undo points and editable titles/effects; release the edit lease for human takeover. Do not restart the app, change GPU/cache/quality preferences, replace source media or flatten the timeline merely to make an edit easier. Do not lower export resolution, frame rate or audio quality for speed unless requested. Run heavy analysis/render jobs with bounded concurrency, avoid duplicate jobs and defer background work if it disrupts active playback or interaction.
-- Read `error.recovery` on failure. A lost response is retried with identical arguments and the same command ID. For a revision conflict, reread and reconcile the affected entities; do not blindly overwrite concurrent work. See [connection.md](references/connection.md) for dependency and job recovery.
+Read [editing.md](references/editing.md) for source selection and operation mapping. For a substantial expressive edit, describe visible/heard changes at key passages and prototype an uncertain passage before repeating the treatment. Compare actual dynamic results with a simple baseline. Neither restrained transitions nor maximum spectacle is the default. Continue within authorized scope without requiring routine approval checkpoints.
 
-## Review, refine and deliver
+Discover supported effects with `effects_list` / `resources_list`. Before unfamiliar commands request `editor_help(topic="command", command="…")`, adding `effectId` for its exact schema. These schemas describe the payload, not outer `command_apply` arguments. Never invent controls, IDs or automatic recognition/generation features.
 
-Read [review.md](references/review.md) before claiming completion.
+Acquire `edit_lock` before grouped Agent edits. Use `command_preview` where supported, then the same payload with `command_apply`, current `expectedRevision`, stable `commandId` and `editLeaseId`. Use supported `edit.batch` operations within its current limit. Keep returned revisions, renew leases as needed and release in a finally step, including before long export or human takeover. After errors follow `error.recovery`; retry a lost response with identical arguments and ID, reconcile conflicts before a new edit.
 
-Inspect opening/final frames, title and caption intervals, and both sides of each cut/transition with `preview_frames` (at most six times per call). Prepare continuous preview with `preview_prepare` / `preview_job`; watch timing and listen to the mix when possible. Fix specific problems and check the new revision.
+Use exact rational timeline seconds; keyframe time is clip-local. For a local correction use `project_lookup` and change only the requested entities. Keep normal undo points. Avoid settings changes, restarts, flattened timelines, duplicate jobs and unbounded heavy work that disrupts the user. Do not reduce final quality for speed without authorization. Read [efficiency.md](references/efficiency.md) when iteration cost matters.
 
-Run `project.preflight`, then `export.enqueue` with a new absolute output path under `projectRoot/exports/`. Keep the returned job ID; poll `export_job` about once per second with a bounded timeout. Export uses the submitted snapshot. Inspect the final MP4 rather than assuming preview success proves delivery. Use an explicit project-local output path for `project_package` when an editable portable handoff is requested.
+## Review and deliver actual results
 
-## Finish by collecting reusable effects
+Read [review.md](references/review.md) before claiming completion. Match review to the request: changed range and affected neighbors for local fixes; technical and applicable creative checks across a complete delivery. Verify actual returned images and continuous output/sound where supported. Preparing a preview is not watching it; disclose unavailable vision/listening without claiming perceptual acceptance.
 
-After the intended edit and its review are finished, **automatically review the effects actually used** and follow [effect-library.md](references/effect-library.md). Save worthwhile, verified, content-free recipes with `effect_module_save`; export each with `effect_module_export` to `projectRoot/effects/`, then copy the unchanged ZIP to `<verified CutVoke installRoot>/user-effects/`. Use content IDs to reuse identical entries. This local collection step needs no separate sharing request; it does not authorize publication or expanding the edit.
+When a media export is part of the request, run `project.preflight`, then `export.enqueue` with a project-local output path; retain job ID and exported revision and poll `export_job` with a bounded timeout. Inspect the final MP4. An edit-only correction can finish with the committed revision and affected review evidence, without re-exporting the film. Use `project_package` with a project-local path when a portable editable handoff is requested; an editable source project alone does not imply a new portable package. Return applicable output paths, project ID/revision/root, concrete changes, review evidence/limits and reusable-effect collection status.
 
-The registered, immediately reusable library remains beside the current database in `effect-modules/`; the install-directory ZIP collection is an additional archive. Do not claim that copying a ZIP registers it. Never include user footage, audio, text/caption content, screenshots, paths, prompts or project files in an effect package. Do not force unsupported treatments into a recipe, save every ordinary adjustment, modify an approved timeline to demonstrate reuse, or publish automatically. If nothing qualifies, say so. If installation discovery, permission or validation fails, retain the project-local result and report collection as pending instead of silently changing the destination.
+Keep completion states distinct: an authorized mechanical edit can be completed with sensory review pending. Label that gap explicitly; do not call it visually, musically or artistically accepted. The lack of sensory input does not by itself block unrelated mechanical work.
 
-Return the primary output path, project ID and exact exported revision, `projectRoot`, a concise change summary, review limits and collection status (module IDs and verified archive paths, no qualifying effects, or a concrete pending reason). When delivering or suggesting an effect package for sharing, include the tool's `privacyNotice` in the user's language verbatim. Preserve all source files and the editable project; clean up only known Agent-created temporary files within this project when cleanup is requested.
+When this task creates or materially changes a treatment worth reusing, follow [effect-library.md](references/effect-library.md) after the intended edit and review: collect verified content-free recipes with `effect_module_save` and `effect_module_export`, retaining project-local ZIPs and unchanged archives under the verified installation's `user-effects/`. The registered library is separate from that archive. Do not force unsupported treatments into recipes or include user media, text, paths, screenshots or projects. This local step does not authorize publication; show returned `privacyNotice` verbatim when proposing sharing.
 
-For a dependency and interface smoke check, run [scripts/demo.py](scripts/demo.py) with a **new** output directory. It uses only original procedural illustrations and synthetic chords, imports and edits over real stdio MCP, and creates an MP4, editable database, `.cvkpkg`, review frames and measured evidence. It starts/stops only its own temporary Web service to verify browser asset availability; `--import-mode upload` separately exercises HTTP upload. It is an example edit, not an automatic creative evaluator or footage selector.
+An edit that creates or materially changes no reusable treatment needs no new library scan, demonstration or archive; report that collection is not applicable. Existing verified identical recipes can be reused without duplication.
+
+For an integration smoke check, use [scripts/demo.py](scripts/demo.py) with a new isolated output directory. It exercises real stdio MCP with synthetic media, editable operations and export evidence. It does not evaluate artistic judgment or prove that an arbitrary film meets its brief.

@@ -235,7 +235,7 @@ cutvoke mcp --data .artifacts/first-edit/data
 <details>
 <summary><strong>Install the editing skill and try a creative task</strong></summary>
 
-MCP already includes `editor_help` for current commands, units, recipes and error recovery. The optional [cutvoke-editor skill](skills/cutvoke-editor/SKILL.md) adds guidance for media inventory, audience and goals, shot rhythm, sound/captions, restrained transitions, preview feedback and final review. It keeps Agent-created files in the project folder and automatically collects verified, content-free reusable effects at completion: registered in the current library, with ZIP copies in the project and the verified installation's `user-effects/` folder. Collection is local; publication requires explicit authorization.
+MCP includes `editor_help` for current commands, units, recipes and recovery, plus `topic="creative"` for on-demand principles, work-type guidance and a project plan. The optional [cutvoke-editor skill](skills/cutvoke-editor/SKILL.md) routes the same references for MV/art visual, documentary/travel, narrative, explanation/interview and promotion/showcase. Style follows the brief; review actual moving pictures and sound rather than effect counts. It keeps Agent-created files in the project folder and collects worthwhile verified, content-free new effects locally; publication requires explicit authorization. See the [research and adoption record](docs/research/AI_EDITING_WORKFLOWS_2026-10-28.md).
 
 The standard MCP launcher automatically activates healthy engine updates while keeping the connection and existing render jobs. See [automatic update behavior and limits](docs/production-workflow.md#runtime-changes--服务版本变化); previously running launchers need one initial reconnect.
 

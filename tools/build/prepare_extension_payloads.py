@@ -3,14 +3,17 @@ import hashlib
 import json
 from pathlib import Path
 import zipfile
+import runpy
 
 
 def prepare(root=None):
     root=Path(root or Path(__file__).resolve().parents[2]);package=root/'src'/'cutvoke'
+    runpy.run_path(str(root/'tools'/'build'/'prepare_editor_guides.py'))['prepare'](root)
     directory=package/'assets'/'extension_packages';directory.mkdir(parents=True,exist_ok=True)
     archive_path=directory/'cutvoke-workers.zip';expanded=0
     with zipfile.ZipFile(archive_path,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as archive:
-        for source in sorted(package.rglob('*.py')):
+        sources = [*package.rglob('*.py'), *(package/'assets'/'editor_guides').glob('*.md')]
+        for source in sorted(sources):
             if '__pycache__' in source.parts:continue
             name='cutvoke/'+source.relative_to(package).as_posix();payload=source.read_bytes();expanded+=len(payload)
             entry=zipfile.ZipInfo(name,(2024,1,1,0,0,0));entry.compress_type=zipfile.ZIP_DEFLATED;archive.writestr(entry,payload)

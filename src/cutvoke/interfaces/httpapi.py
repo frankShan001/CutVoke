@@ -79,7 +79,7 @@ from cutvoke.storage.media_uploads import (receive_upload, relative_path as medi
 
 # Bump when preview rendering changes so neither disk cache nor browser ETag can
 # treat media produced by an older renderer as current for the same project data.
-PREVIEW_RENDER_CACHE_VERSION = 34
+PREVIEW_RENDER_CACHE_VERSION = 35
 # Keep first playback and local edits bounded even on dense effect timelines.
 PREVIEW_WINDOW_SECONDS = 2
 ASSET_MEDIA_TYPES = {

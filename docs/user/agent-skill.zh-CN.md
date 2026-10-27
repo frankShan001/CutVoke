@@ -2,7 +2,15 @@
 
 [English](agent-skill.md) · [技能入口](../../skills/cutvoke-editor/SKILL.md)
 
-**cutvoke-editor** 技能帮助外部 AI 规划剪辑、盘点本地素材、建立可恢复的时间线、调整字幕与声音，并验收最终结果。CutVoke 已通过 `editor_help` 提供接口入门；这个可选技能补充的是创作流程和交付要求。它不会安装大模型，也不能保证任何素材都自动变成精美成片。
+**cutvoke-editor** 技能帮助外部 AI 规划剪辑、盘点本地素材、建立可恢复的时间线、调整字幕与声音，并验收最终结果。MCP 的 `editor_help` 同时内置创作参考，可选 Skill 提供工作流入口和本地工作约定。它不会安装大模型，也不能保证任何素材都自动变成精美成片。
+
+## 三层组织，按需读取
+
+先应用统一原则，再选择相关的创作目标/作品类型，最后落实本项目方案。五个分支覆盖 MV/艺术视觉、纪实旅行、叙事、讲解访谈、宣传展示；古风、科幻等题材作为补充，表达强度服从用户目标。局部修字沿用已确认方案，只检查受影响区间，不要求重新策划或全片导出。
+
+只连接 MCP 的 AI 先调用 `editor_help({"topic":"creative"})` 获得小型目录，再用例如 `editor_help({"topic":"creative","guide":"music-video"})` 读取一个正文。另有 `principles`、`project-plan`、`review` 和按需的 `efficiency`。资源 `cutvoke://creative/<id>` 提供相同内容。目录只含路由信息，不一次加载全部教程，不需要读取仓库或先安装 Skill。构建时从 Skill 原文复制到 wheel、桌面和工作进程包。
+
+重大创意修改要说明可见/可听的变化，先以短动态样段和简单版对照，再推广到全片。技术检查与视觉/听感验收分别报告。来源及采用边界见[调研与沉淀记录](../research/AI_EDITING_WORKFLOWS_2026-10-28.md)。
 
 ## 复制或安装
 
@@ -33,6 +41,8 @@ test ! -e "$HOME/.codex/skills/cutvoke-editor" && cp -R skills/cutvoke-editor "$
 按 [外部 Agent 接入说明](external-agent-editing.md) 配置本地 MCP 进程。可用已安装的 `cutvoke`、仓库中已激活的 Python 环境，或 Windows 安装版内置引擎。MCP 与编辑器必须选择同一 `--data` 目录，首先调用 `editor_help({})` 和 `runtime`。
 
 连接后的任务示例：
+
+下面的安静短片是一种具体需求，不是其他创作的默认风格。
 
 > 使用 $cutvoke-editor，把我选定的本地素材文件夹剪成一条安静的 12 秒、16:9 周末短片，面向想放松的朋友。保留一个简短标题、可读字幕、轻微运镜和克制转场。只用这些文件，把过程文件和新 MP4 放进这个工程目录，检查真实画面和声音，并保留可继续编辑的时间线。完成后提取已验证、适合复用且不含用户内容的效果，归档到 CutVoke 安装目录。音乐或素材授权不明确时，先指出问题再添加内容。
 
