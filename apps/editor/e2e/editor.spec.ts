@@ -1850,7 +1850,7 @@ test("cinematic optical atlas previews, exposes provenance, and inserts as an ov
   });
 });
 
-for (const delayUndoSnapshot of [false, true]) test(`main-track auto-fit is independent from magnetism and leaves BGM independent${delayUndoSnapshot ? " with delayed undo snapshot" : ""}`, async ({ page, request }, testInfo) => {
+for (const delayUndoSnapshot of [false, true]) test(`main-track auto-fit is independent from magnetism and leaves BGM independent${delayUndoSnapshot ? " with delayed undo snapshot and move commit" : ""}`, async ({ page, request }, testInfo) => {
   const { id, name, sources } = await createProject(request);
   for (let index = 3; index < 6; index += 1) {
     await apply(request, id, "clip.insert", {
@@ -1877,7 +1877,7 @@ for (const delayUndoSnapshot of [false, true]) test(`main-track auto-fit is inde
     if (command?.type === "clip.move") movedClipIds.push(command.payload.clipId);
   });
 
-  const dragFirstClipToEnd = async () => {
+  const dragFirstClipToEnd = async (beforeCommit?: () => Promise<void>) => {
     // A backend revision does not prove that the undo snapshot is rendered.
     // Resolve the intended identity after its actual UI position is restored.
     await expect(redClip).toHaveAttribute("aria-label", /开始于 0\.000 秒/);
@@ -1896,7 +1896,23 @@ for (const delayUndoSnapshot of [false, true]) test(`main-track auto-fit is inde
     if (await fitToggle.getAttribute("aria-pressed") === "true") {
       await expect(page.locator(".drag-time-tip")).toContainText("主轨贴合");
     }
+    const committed = page.waitForResponse(response => {
+      const outgoing = response.request();
+      if (outgoing.method() !== "POST" || !response.url().split("?")[0].endsWith(apiPath(id) + "/commands")) return false;
+      const command = outgoing.postDataJSON();
+      return command?.type === "clip.move" && command.payload.clipId === "color-0";
+    }, { timeout: 10_000 });
     await page.mouse.up();
+    await beforeCommit?.();
+    const response = await committed;
+    expect(response.status()).toBe(200);
+    const acknowledgement = await response.json();
+    expect(acknowledgement.commandId).toBe(response.request().postDataJSON().commandId);
+    const saved = await readProject(request, id);
+    expect(saved.revision).toBe(acknowledgement.revision);
+    const moved = saved.sequence.tracks.find(track => track.id === "v1")!.clips.find(clip => clip.id === "color-0")!;
+    const renderedStart = seconds(moved.timelineStart).toFixed(3).replace(".", "\\.");
+    await expect(redClip).toHaveAttribute("aria-label", new RegExp(`开始于 ${renderedStart} 秒`));
   };
 
   await dragFirstClipToEnd();
@@ -1948,7 +1964,30 @@ for (const delayUndoSnapshot of [false, true]) test(`main-track auto-fit is inde
   await expect(mainLane.locator('.clip-block[data-clip-id="color-1"]')).toHaveAttribute("aria-label", /开始于 5\.000 秒/);
   await fitToggle.click();
   await expect(fitToggle).toHaveAttribute("aria-pressed", "false");
-  await dragFirstClipToEnd();
+  let releaseMove!: () => void;
+  const moveGate = new Promise<void>(resolve => { releaseMove = resolve; });
+  let heldMove = false;
+  if (delayUndoSnapshot) await page.route(`**/projects/${id}/commands`, async route => {
+    const command = route.request().postDataJSON();
+    if (command?.type === "clip.move" && command.payload.clipId === "color-0") {
+      heldMove = true;
+      await moveGate;
+    }
+    await route.continue();
+  });
+  try {
+    await dragFirstClipToEnd(delayUndoSnapshot ? async () => {
+      await expect.poll(() => heldMove).toBe(true);
+      const pending = await readProject(request, id);
+      expect(seconds(pending.sequence.tracks.find(track => track.id === "v1")!.clips
+        .find(clip => clip.id === "color-0")!.timelineStart)).toBe(0);
+      await expect(redClip).toHaveAttribute("aria-label", /开始于 0\.000 秒/);
+      await testInfo.attach("pointer-release-before-commit", { contentType: "application/json", body: JSON.stringify({
+        pointerReleased: true, commandSubmissionHeld: true, backendStart: 0, intendedStart: 30,
+      }) });
+      releaseMove();
+    } : undefined);
+  } finally { releaseMove(); }
   const gapped = await readProject(request, id);
   const gappedMain = gapped.sequence.tracks.find((track) => track.id === "v1")!.clips;
   expect(seconds(gappedMain.find((clip) => clip.id === "color-0")!.timelineStart)).toBeCloseTo(30, 0);

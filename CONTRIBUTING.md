@@ -78,6 +78,8 @@ position in the backend and the rendered snapshot before reading drag geometry.
 Sorted start times can remain identical when clip order changes. Use stable clip
 IDs and control delayed sync delivery; preserve exact movement and independent
 audio assertions.
+Pointer release is not command completion: await the matching command
+acknowledgement and its rendered snapshot before checking saved positions.
 
 ## Engine boundaries
 
