@@ -285,7 +285,7 @@ async function main() {
             for (const [pid, parent] of pairs) if (owned.has(parent)) owned.add(pid);
             if (owned.size === count) break;
           }
-          failure.processes = execFileSync("/bin/ps", ["-p", [...owned].join(","), "-o", "pid,ppid,state,%cpu,rss,etime,comm"],
+          failure.processes = execFileSync("/bin/ps", ["-ww", "-p", [...owned].join(","), "-o", "pid,ppid,state,%cpu,rss,etime,command"],
             { encoding: "utf8", timeout: 3000 });
           process.kill(runtime.processId, "SIGUSR2");
         } catch (diagnostic) { failure.processDiagnostic = diagnostic.message; }

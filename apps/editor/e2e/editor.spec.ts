@@ -2651,6 +2651,10 @@ test("seam hotspot selects the incoming clip for transition preview, apply, repl
   await expect.poll(async () => (await transitionOfIncoming())?.effectId)
     .toMatch(/^cutvoke\.transition\./);
   const firstId = (await transitionOfIncoming())!.effectId;
+  const transitionBadge = page.locator(".zone-right .cv-badge--info");
+  const transitionName = (effectId: string) => catalog.effects
+    .find((effect: { effectId: string }) => effect.effectId === effectId)!.name as string;
+  await expect(transitionBadge).toHaveText(transitionName(firstId));
   await page.getByRole("button", { name: "预览当前转场" }).click();
   await expect(page.locator('.resource-preview img[alt="当前转场与时长在两段片段之间的真实预览帧"]'))
     .toBeVisible({ timeout: 20_000 });
@@ -2659,11 +2663,37 @@ test("seam hotspot selects the incoming clip for transition preview, apply, repl
   await expect.poll(async () => (await transitionOfIncoming())?.effectId)
     .not.toBe(firstId);
   const replacementId = (await transitionOfIncoming())!.effectId;
+  await expect(transitionBadge).toHaveText(transitionName(replacementId));
 
   await page.getByRole("button", { name: "撤销" }).click();
   await expect.poll(async () => (await transitionOfIncoming())?.effectId).toBe(firstId);
-  await page.getByRole("button", { name: "重做" }).click();
-  await expect.poll(async () => (await transitionOfIncoming())?.effectId).toBe(replacementId);
+  await expect(transitionBadge).toHaveText(transitionName(firstId));
+  const undone = await readProject(request, id);
+  let releaseRedo!: () => void;
+  const redoGate = new Promise<void>(resolve => { releaseRedo = resolve; });
+  let heldRedoSnapshots = 0;
+  await page.route(`**/projects/${id}/sync?*`, async route => {
+    const response = await route.fetch();
+    const snapshot = await response.json();
+    if (!snapshot.unchanged && snapshot.revision === String(BigInt(undone.revision) + 1n)) {
+      heldRedoSnapshots++;
+      await redoGate;
+    }
+    await route.fulfill({ response });
+  });
+  try {
+    await page.getByRole("button", { name: "重做" }).click();
+    await expect.poll(async () => (await transitionOfIncoming())?.effectId).toBe(replacementId);
+    await expect.poll(() => heldRedoSnapshots).toBeGreaterThan(0);
+    await expect(transitionBadge).toHaveText(transitionName(firstId));
+    await test.info().attach("redo-before-rendered-transition", { contentType: "application/json",
+      body: JSON.stringify({ backendEffect: replacementId, displayedEffect: firstId, snapshotHeld: true }) });
+    releaseRedo();
+    await expect(transitionBadge).toHaveText(transitionName(replacementId));
+  } finally {
+    releaseRedo();
+    await page.unrouteAll({ behavior: "wait" });
+  }
 
   await page.locator(".zone-right .cv-btn--danger").click();
   await expect.poll(transitionOfIncoming).toBeUndefined();
