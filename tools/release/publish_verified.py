@@ -3,6 +3,7 @@
 No asset replacement, historical build reuse, or test execution from artifacts.
 An interrupted upload leaves a draft for inspection; reruns never overwrite it.
 """
+import argparse
 import hashlib
 import json
 import os
@@ -10,12 +11,14 @@ from pathlib import Path
 import shutil
 import subprocess
 import tarfile
+import tempfile
 import time
 try:
     import tomllib
 except ModuleNotFoundError:  # Python 3.10 is a supported development runtime.
     import tomli as tomllib
 import urllib.error
+import urllib.parse
 import urllib.request
 import zipfile
 
@@ -110,6 +113,227 @@ def download_artifact(repo, artifact, destination):
         shutil.copyfileobj(source, target, 1024 * 1024)
     require(destination.stat().st_size == artifact['size_in_bytes'], 'Artifact size mismatch')
     require(artifact['digest'] == 'sha256:' + digest(destination), 'Artifact digest mismatch')
+
+
+# Explicit recovery is limited to the draft created by the accepted v0.3.4 run.
+# The recovery tool's branch SHA is deliberately separate from package provenance.
+RECOVERY_REPO = 'frankShan001/CutVoke'
+RECOVERY_ID = 426210812
+RECOVERY_SHA = '56daa1aac5327142ba0f271cc7490a1690c68bcb'
+RECOVERY_TAG = 'v0.3.4'
+RECOVERY_MANIFEST_ARTIFACT = 12787957504
+RECOVERY_PUBLICATION_RUN = 40623230980
+RECOVERY_MANIFEST_SHA256 = '96d3aeb0285b6f25d88b66ef832cc8349438a67532dc72b781baed4572465689'
+RECOVERY_BODY_SHA256 = 'c3681a69f917efd3301e88aca5ccf7dbcd55f7cc88cadbff99918e1c9546ba99'
+RECOVERY_RUNS = {'ci.yml': 40619269603, 'windows-portable.yml': 40619269502,
+                 'unix-packages.yml': 40619269546}
+RECOVERY_JOBS = {
+    'ci.yml': {'Python 3.10', 'Python 3.12', 'Python 3.13', 'Browser editing workflow'},
+    'windows-portable.yml': {'Build redistributable FFmpeg x64', 'Package and run Windows x64 portable'},
+    'unix-packages.yml': {'Build and accept macos-arm64', 'Build and accept macos-x64', 'Build and accept linux-x64'},
+}
+RECOVERY_OLD = {'v0.3.1': 415558347, 'v0.3.2': 420271003, 'v0.3.3': 424509643}
+
+
+def recovery_synchronized(*, publishing):
+    prefix = f'repos/{RECOVERY_REPO}'
+    ref = api(f'{prefix}/git/ref/tags/{RECOVERY_TAG}')['object']
+    require(ref['type'] == 'commit' and ref['sha'] == RECOVERY_SHA, 'Recovery tag changed')
+    if publishing:
+        require(api(f'{prefix}/branches/main')['commit']['sha'] == RECOVERY_SHA,
+                'main advanced; refusing draft publication')
+    for workflow, run_id in RECOVERY_RUNS.items():
+        run = api(f'{prefix}/actions/runs/{run_id}')
+        require(run['head_sha'] == RECOVERY_SHA and run['head_branch'] == 'main'
+                and run['event'] == 'push' and run['path'] == '.github/workflows/' + workflow,
+                'Recovery workflow/source mismatch')
+        require(run['status'] == 'completed' and run['conclusion'] == 'success',
+                'Recovery workflow not successful')
+        jobs = api(f'{prefix}/actions/runs/{run_id}/jobs?per_page=100')['jobs']
+        require(len(jobs) == len(RECOVERY_JOBS[workflow])
+                and {job['name'] for job in jobs} == RECOVERY_JOBS[workflow]
+                and all(job['status'] == 'completed' and job['conclusion'] == 'success' for job in jobs),
+                'Recovery job missing, skipped or unsuccessful')
+
+
+def recovery_release():
+    release = api(f'repos/{RECOVERY_REPO}/releases/{RECOVERY_ID}')
+    require(release['id'] == RECOVERY_ID and release['tag_name'] == RECOVERY_TAG
+            and release['target_commitish'] == RECOVERY_SHA and release['prerelease'],
+            'Recovery release ID/tag/source mismatch')
+    require(hashlib.sha256(release['body'].encode('utf-8')).hexdigest() == RECOVERY_BODY_SHA256,
+            'Recovery release notes changed')
+    return release
+
+
+def recovery_old_state():
+    state = {}
+    for tag, release_id in RECOVERY_OLD.items():
+        release = api(f'repos/{RECOVERY_REPO}/releases/{release_id}')
+        require(release['id'] == release_id and release['tag_name'] == tag and not release['draft'],
+                'Historical release identity changed')
+        state[tag] = {
+            'ref': api(f'repos/{RECOVERY_REPO}/git/ref/tags/{tag}')['object'],
+            'source': release['target_commitish'], 'prerelease': release['prerelease'],
+            'body': hashlib.sha256(release['body'].encode('utf-8')).hexdigest(),
+            'assets': sorted((a['id'], a['name'], a['size'], a['digest']) for a in release['assets']),
+        }
+    return state
+
+
+def recovery_assets(release, expected, *, complete=False):
+    assets = release['assets']
+    require(len({a['name'] for a in assets}) == len(assets), 'Duplicate recovery asset name')
+    require(set(a['name'] for a in assets) <= set(expected), 'Unexpected recovery asset')
+    for asset in assets:
+        require(asset['state'] == 'uploaded'
+                and (asset['size'], asset['digest']) == expected[asset['name']],
+                'Existing recovery asset hash/state mismatch')
+    if complete:
+        require(len(assets) == len(expected), 'Recovery assets incomplete')
+    return {a['name']: a for a in assets}
+
+
+def upload_recovery_asset(release, path):
+    # Use the draft's official upload_url and the existing Actions job token.
+    # Never change hosts, follow authenticated redirects, or replace an asset.
+    url = release['upload_url'].split('{', 1)[0]
+    require(url == f'https://uploads.github.com/repos/{RECOVERY_REPO}/releases/{RECOVERY_ID}/assets',
+            'Unexpected recovery upload URL')
+    url += '?' + urllib.parse.urlencode({'name': path.name})
+    with path.open('rb') as source:
+        request = urllib.request.Request(url, method='POST', data=source, headers={
+            'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'User-Agent': 'CutVoke-release',
+            'Content-Type': 'application/octet-stream', 'Content-Length': str(path.stat().st_size),
+            'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28',
+        })
+        try:
+            with urllib.request.build_opener(NoRedirect()).open(request, timeout=180) as response:
+                require(response.status == 201, 'Recovery upload not confirmed')
+                return json.load(response)
+        except urllib.error.HTTPError as error:
+            raise RuntimeError(f'Recovery upload HTTP {error.code}; stopping without replacement') from None
+
+
+def resume_release(release_id):
+    require(release_id == RECOVERY_ID, 'Only the bound v0.3.4 draft can be resumed')
+    require(os.environ.get('GITHUB_REPOSITORY') == RECOVERY_REPO
+            and os.environ.get('GITHUB_ACTIONS') == 'true'
+            and os.environ.get('GITHUB_EVENT_NAME') == 'workflow_dispatch'
+            and os.environ.get('GITHUB_REF', '').startswith('refs/heads/'),
+            'Recovery requires a manual repository Actions branch run')
+    release = recovery_release()
+    recovery_synchronized(publishing=release['draft'])
+    old_state = recovery_old_state()
+    output = ROOT / '.artifacts/release'
+    output.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix='resume-v034-', dir=output) as work_dir:
+        work = Path(work_dir)
+        manifest_path = output / 'BUILD-INFO.json'
+        if release['draft']:
+            artifact = api(f'repos/{RECOVERY_REPO}/actions/artifacts/{RECOVERY_MANIFEST_ARTIFACT}')
+            require(artifact['name'] == 'release-verification' and not artifact['expired']
+                    and artifact['workflow_run']['id'] == RECOVERY_PUBLICATION_RUN
+                    and artifact['workflow_run']['head_sha'] == RECOVERY_SHA,
+                    'Recovery manifest artifact source mismatch')
+            outer = work / 'manifest.zip'
+            download_artifact(RECOVERY_REPO, artifact, outer)
+            with zipfile.ZipFile(outer) as archive:
+                require(archive.namelist() == ['BUILD-INFO.json'], 'Unexpected recovery manifest archive')
+                manifest_path.write_bytes(archive.read('BUILD-INFO.json'))
+        else:
+            with urllib.request.urlopen(f'https://github.com/{RECOVERY_REPO}/releases/download/{RECOVERY_TAG}/BUILD-INFO.json', timeout=180) as source:
+                manifest_path.write_bytes(source.read())
+        require(digest(manifest_path) == RECOVERY_MANIFEST_SHA256, 'Recovery manifest hash mismatch')
+        manifest = json.loads(manifest_path.read_text('utf-8'))
+        checks = {key: f'https://github.com/{RECOVERY_REPO}/actions/runs/{value}' for key, value in RECOVERY_RUNS.items()}
+        require(manifest['version'] == '0.3.4' and manifest['tag'] == RECOVERY_TAG
+                and manifest['commit'] == RECOVERY_SHA and manifest['prerelease'] is True
+                and manifest['checks'] == checks and len(manifest['assets']) == 4,
+                'Recovery manifest binding mismatch')
+        sums = output / 'SHA256SUMS'
+        sums.write_text(''.join(f'{a["sha256"]}  {a["name"]}\n' for a in manifest['assets']), encoding='ascii')
+        expected = {'BUILD-INFO.json': (manifest_path.stat().st_size, 'sha256:' + digest(manifest_path)),
+                    'SHA256SUMS': (sums.stat().st_size, 'sha256:' + digest(sums))}
+        paths = []
+        for (platform, (workflow, artifact_name, suffix)), item in zip(PACKAGES.items(), manifest['assets']):
+            filename = f'CutVoke-0.3.4-{platform}{suffix}'
+            require(item['name'] == filename and item['run'] == checks[workflow], 'Recovery package run/name mismatch')
+            artifact = api(f'repos/{RECOVERY_REPO}/actions/artifacts/{item["artifactId"]}')
+            require(artifact['name'] == artifact_name and artifact['workflow_run']['head_sha'] == RECOVERY_SHA
+                    and artifact['workflow_run']['id'] == RECOVERY_RUNS[workflow], 'Recovery package artifact source mismatch')
+            expected[filename] = (item['bytes'], 'sha256:' + item['sha256'])
+            if release['draft']:
+                require(not artifact['expired'], 'Recovery package artifact expired')
+                outer = work / (platform + '-artifact.zip')
+                download_artifact(RECOVERY_REPO, artifact, outer)
+                with zipfile.ZipFile(outer) as archive:
+                    require(archive.namelist().count(filename) == 1, 'Recovery archive filename mismatch')
+                    info = json.loads(archive.read('download-info.json'))
+                    verify_info(info, '0.3.4', RECOVERY_SHA, platform)
+                    require(info['filename'] == filename and info['runUrl'] == checks[workflow]
+                            and info['bytes'] == item['bytes'] and info['sha256'] == item['sha256'],
+                            'Recovery build metadata mismatch')
+                    path = work / filename
+                    with archive.open(filename) as source, path.open('xb') as target:
+                        shutil.copyfileobj(source, target, 1024 * 1024)
+                require((path.stat().st_size, 'sha256:' + digest(path)) == expected[filename],
+                        'Recovery package digest mismatch')
+                verify_info(build_info(path), '0.3.4', RECOVERY_SHA, platform)
+                paths.append(path)
+                outer.unlink()
+        initial = recovery_assets(release, expected, complete=not release['draft'])
+        initial_ids = {name: asset['id'] for name, asset in initial.items()}
+        if release['draft']:
+            # All four actual archives have been checked before the first write.
+            for path in paths + [manifest_path, sums]:
+                recovery_synchronized(publishing=True)
+                current = recovery_release()
+                require(current['draft'], 'Recovery draft state changed during upload')
+                existing = recovery_assets(current, expected)
+                require(all(existing.get(name, {}).get('id') == asset_id for name, asset_id in initial_ids.items()),
+                        'Existing recovery asset ID changed')
+                if path.name not in existing:
+                    uploaded = upload_recovery_asset(current, path)
+                    require(uploaded['name'] == path.name and uploaded['state'] == 'uploaded'
+                            and (uploaded['size'], uploaded['digest']) == expected[path.name],
+                            'Recovery upload digest mismatch')
+            current = recovery_release()
+            require(current['draft'], 'Recovery draft state changed before publication')
+            recovery_assets(current, expected, complete=True)
+            recovery_synchronized(publishing=True)
+            gh('api', '--method', 'PATCH', f'repos/{RECOVERY_REPO}/releases/{RECOVERY_ID}',
+               '-F', 'draft=false', '-F', 'prerelease=true')
+        published = recovery_release()
+        require(not published['draft'], 'Recovery publication not confirmed')
+        final = recovery_assets(published, expected, complete=True)
+        require(all(final[name]['id'] == asset_id for name, asset_id in initial_ids.items()),
+                'Existing recovery assets replaced')
+        downloads = []
+        for name, asset in final.items():
+            url = f'https://github.com/{RECOVERY_REPO}/releases/download/{RECOVERY_TAG}/{name}'
+            require(asset['browser_download_url'] == url, 'Recovery public URL mismatch')
+            path = work / ('public-' + name)
+            with urllib.request.urlopen(url, timeout=180) as source, path.open('xb') as target:
+                shutil.copyfileobj(source, target, 1024 * 1024)
+            require((path.stat().st_size, 'sha256:' + digest(path)) == expected[name],
+                    'Recovery public download mismatch')
+            if name.startswith('CutVoke-'):
+                platform = next(platform for platform, (_, _, suffix) in PACKAGES.items()
+                                if name == f'CutVoke-0.3.4-{platform}{suffix}')
+                verify_info(build_info(path), '0.3.4', RECOVERY_SHA, platform)
+            downloads.append({'name': name, 'bytes': path.stat().st_size, 'sha256': digest(path), 'url': url})
+            path.unlink()
+        require(recovery_old_state() == old_state, 'Historical tags/releases/assets changed')
+        recovery_synchronized(publishing=False)
+        report = {'passed': True, 'releaseId': RECOVERY_ID, 'tag': RECOVERY_TAG,
+                  'source': RECOVERY_SHA, 'recoveryToolCommit': os.environ.get('GITHUB_SHA'),
+                  'checks': checks, 'verifiedPublicDownloads': downloads,
+                  'preservedAssetIds': initial_ids, 'oldReleasesUnchanged': True}
+        (output / 'recovery-verification.json').write_text(json.dumps(report, indent=2) + '\n')
+        print(f'Published and verified six public files at {published["html_url"]}', flush=True)
+        with Path(os.environ['GITHUB_STEP_SUMMARY']).open('a') as summary:
+            summary.write(f'Recovered existing release {RECOVERY_ID}; source `{RECOVERY_SHA}`; six public downloads verified.\n')
 
 
 def main():
@@ -217,4 +441,10 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--resume-release-id', type=int)
+    arguments = parser.parse_args()
+    if arguments.resume_release_id is None:
+        main()
+    else:
+        resume_release(arguments.resume_release_id)
