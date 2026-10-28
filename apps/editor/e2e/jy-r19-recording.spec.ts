@@ -398,9 +398,35 @@ test("JY-R19 records a six-clip editing, save, preview, export, and package work
 
   await page.keyboard.press("Escape");
   await expect(exportDialog).toHaveCount(0);
-  await page.reload();
+  // A reload returns to the project library. Hold its real response so this
+  // persistence check cannot accidentally depend on a fast project-list fetch.
+  let releaseProjects!: () => void;
+  let projectsReady!: () => void;
+  const projectsGate = new Promise<void>((resolve) => { releaseProjects = resolve; });
+  const projectsFetched = new Promise<void>((resolve) => { projectsReady = resolve; });
+  await page.route("**/api/v1/projects", async (route) => {
+    if (route.request().method() !== "GET") return route.continue();
+    const response = await route.fetch();
+    projectsReady();
+    await projectsGate;
+    await route.fulfill({ response });
+  });
   const reopen = page.getByRole("button", { name: `打开工程 ${name}` });
-  if (await reopen.isVisible().catch(() => false)) await reopen.click();
+  try {
+    await page.reload();
+    await projectsFetched;
+    await expect(reopen).toHaveCount(0);
+    await test.info().attach("reopen-before-project-list", {
+      body: JSON.stringify({ projectId: id, openButtonVisible: await reopen.isVisible(), listResponseHeld: true }),
+      contentType: "application/json",
+    });
+    const opening = reopen.click();
+    releaseProjects();
+    await opening;
+  } finally {
+    releaseProjects();
+    await page.unrouteAll({ behavior: "wait" });
+  }
   await expect(page.getByRole("heading", { name: "时间线" })).toBeVisible();
   const reopened = await readProject(request, id);
   const videoTrack = reopened.sequence.tracks.find((track) => track.id === "v1")!;

@@ -1850,7 +1850,7 @@ test("cinematic optical atlas previews, exposes provenance, and inserts as an ov
   });
 });
 
-for (const delayUndoSnapshot of [false, true]) test(`main-track auto-fit is independent from magnetism and leaves BGM independent${delayUndoSnapshot ? " with delayed undo snapshot" : ""}`, async ({ page, request }, testInfo) => {
+for (const delayUndoSnapshot of [false, true]) test(`main-track auto-fit is independent from magnetism and leaves BGM independent${delayUndoSnapshot ? " with delayed undo snapshot and move commit" : ""}`, async ({ page, request }, testInfo) => {
   const { id, name, sources } = await createProject(request);
   for (let index = 3; index < 6; index += 1) {
     await apply(request, id, "clip.insert", {
@@ -1877,7 +1877,7 @@ for (const delayUndoSnapshot of [false, true]) test(`main-track auto-fit is inde
     if (command?.type === "clip.move") movedClipIds.push(command.payload.clipId);
   });
 
-  const dragFirstClipToEnd = async () => {
+  const dragFirstClipToEnd = async (beforeCommit?: () => Promise<void>) => {
     // A backend revision does not prove that the undo snapshot is rendered.
     // Resolve the intended identity after its actual UI position is restored.
     await expect(redClip).toHaveAttribute("aria-label", /开始于 0\.000 秒/);
@@ -1896,7 +1896,23 @@ for (const delayUndoSnapshot of [false, true]) test(`main-track auto-fit is inde
     if (await fitToggle.getAttribute("aria-pressed") === "true") {
       await expect(page.locator(".drag-time-tip")).toContainText("主轨贴合");
     }
+    const committed = page.waitForResponse(response => {
+      const outgoing = response.request();
+      if (outgoing.method() !== "POST" || !response.url().split("?")[0].endsWith(apiPath(id) + "/commands")) return false;
+      const command = outgoing.postDataJSON();
+      return command?.type === "clip.move" && command.payload.clipId === "color-0";
+    }, { timeout: 10_000 });
     await page.mouse.up();
+    await beforeCommit?.();
+    const response = await committed;
+    expect(response.status()).toBe(200);
+    const acknowledgement = await response.json();
+    expect(acknowledgement.commandId).toBe(response.request().postDataJSON().commandId);
+    const saved = await readProject(request, id);
+    expect(saved.revision).toBe(acknowledgement.revision);
+    const moved = saved.sequence.tracks.find(track => track.id === "v1")!.clips.find(clip => clip.id === "color-0")!;
+    const renderedStart = seconds(moved.timelineStart).toFixed(3).replace(".", "\\.");
+    await expect(redClip).toHaveAttribute("aria-label", new RegExp(`开始于 ${renderedStart} 秒`));
   };
 
   await dragFirstClipToEnd();
@@ -1948,7 +1964,30 @@ for (const delayUndoSnapshot of [false, true]) test(`main-track auto-fit is inde
   await expect(mainLane.locator('.clip-block[data-clip-id="color-1"]')).toHaveAttribute("aria-label", /开始于 5\.000 秒/);
   await fitToggle.click();
   await expect(fitToggle).toHaveAttribute("aria-pressed", "false");
-  await dragFirstClipToEnd();
+  let releaseMove!: () => void;
+  const moveGate = new Promise<void>(resolve => { releaseMove = resolve; });
+  let heldMove = false;
+  if (delayUndoSnapshot) await page.route(`**/projects/${id}/commands`, async route => {
+    const command = route.request().postDataJSON();
+    if (command?.type === "clip.move" && command.payload.clipId === "color-0") {
+      heldMove = true;
+      await moveGate;
+    }
+    await route.continue();
+  });
+  try {
+    await dragFirstClipToEnd(delayUndoSnapshot ? async () => {
+      await expect.poll(() => heldMove).toBe(true);
+      const pending = await readProject(request, id);
+      expect(seconds(pending.sequence.tracks.find(track => track.id === "v1")!.clips
+        .find(clip => clip.id === "color-0")!.timelineStart)).toBe(0);
+      await expect(redClip).toHaveAttribute("aria-label", /开始于 0\.000 秒/);
+      await testInfo.attach("pointer-release-before-commit", { contentType: "application/json", body: JSON.stringify({
+        pointerReleased: true, commandSubmissionHeld: true, backendStart: 0, intendedStart: 30,
+      }) });
+      releaseMove();
+    } : undefined);
+  } finally { releaseMove(); }
   const gapped = await readProject(request, id);
   const gappedMain = gapped.sequence.tracks.find((track) => track.id === "v1")!.clips;
   expect(seconds(gappedMain.find((clip) => clip.id === "color-0")!.timelineStart)).toBeCloseTo(30, 0);
@@ -2612,6 +2651,10 @@ test("seam hotspot selects the incoming clip for transition preview, apply, repl
   await expect.poll(async () => (await transitionOfIncoming())?.effectId)
     .toMatch(/^cutvoke\.transition\./);
   const firstId = (await transitionOfIncoming())!.effectId;
+  const transitionBadge = page.locator(".zone-right .cv-badge--info");
+  const transitionName = (effectId: string) => catalog.effects
+    .find((effect: { effectId: string }) => effect.effectId === effectId)!.name as string;
+  await expect(transitionBadge).toHaveText(transitionName(firstId));
   await page.getByRole("button", { name: "预览当前转场" }).click();
   await expect(page.locator('.resource-preview img[alt="当前转场与时长在两段片段之间的真实预览帧"]'))
     .toBeVisible({ timeout: 20_000 });
@@ -2620,11 +2663,37 @@ test("seam hotspot selects the incoming clip for transition preview, apply, repl
   await expect.poll(async () => (await transitionOfIncoming())?.effectId)
     .not.toBe(firstId);
   const replacementId = (await transitionOfIncoming())!.effectId;
+  await expect(transitionBadge).toHaveText(transitionName(replacementId));
 
   await page.getByRole("button", { name: "撤销" }).click();
   await expect.poll(async () => (await transitionOfIncoming())?.effectId).toBe(firstId);
-  await page.getByRole("button", { name: "重做" }).click();
-  await expect.poll(async () => (await transitionOfIncoming())?.effectId).toBe(replacementId);
+  await expect(transitionBadge).toHaveText(transitionName(firstId));
+  const undone = await readProject(request, id);
+  let releaseRedo!: () => void;
+  const redoGate = new Promise<void>(resolve => { releaseRedo = resolve; });
+  let heldRedoSnapshots = 0;
+  await page.route(`**/projects/${id}/sync?*`, async route => {
+    const response = await route.fetch();
+    const snapshot = await response.json();
+    if (!snapshot.unchanged && snapshot.revision === String(BigInt(undone.revision) + 1n)) {
+      heldRedoSnapshots++;
+      await redoGate;
+    }
+    await route.fulfill({ response });
+  });
+  try {
+    await page.getByRole("button", { name: "重做" }).click();
+    await expect.poll(async () => (await transitionOfIncoming())?.effectId).toBe(replacementId);
+    await expect.poll(() => heldRedoSnapshots).toBeGreaterThan(0);
+    await expect(transitionBadge).toHaveText(transitionName(firstId));
+    await test.info().attach("redo-before-rendered-transition", { contentType: "application/json",
+      body: JSON.stringify({ backendEffect: replacementId, displayedEffect: firstId, snapshotHeld: true }) });
+    releaseRedo();
+    await expect(transitionBadge).toHaveText(transitionName(replacementId));
+  } finally {
+    releaseRedo();
+    await page.unrouteAll({ behavior: "wait" });
+  }
 
   await page.locator(".zone-right .cv-btn--danger").click();
   await expect.poll(transitionOfIncoming).toBeUndefined();
@@ -3328,50 +3397,62 @@ test("attached overlays follow video moves, Alt keeps them in place, and unlinki
 });
 
 test("stale background preparation reconciles without replacing successful edit feedback", async ({ page, request }) => {
-  const { id, name } = await createProject(request);
-  let release!: () => void;
-  const gate = new Promise<void>(resolve => { release = resolve; });
-  const submitted: string[] = [];
-  let conflict = 0;
-  let renderFailure = false;
-  const jobId = `reconciled-${id}`;
-  const running = { jobId, state: "running", phase: "rendering", completedWindows: 0,
-    totalWindows: 1, progress: 0, cached: false };
-  await page.route(`**/projects/${id}/preview-jobs`, async route => {
-    submitted.push(route.request().postDataJSON().revision);
-    if (submitted.length === 1) {
-      await gate;
-      const response = await route.fetch();
-      conflict = response.status();
-      await route.fulfill({ response }).catch(() => {});
-    } else await route.fulfill({ status: 202, json: running });
-  });
-  await page.route(`**/preview-jobs/${jobId}`, route => route.fulfill({ json: {
-    ...running, state: renderFailure ? "failed" : "running",
-    ...(renderFailure ? { error: "current preview decoder failure" } : {}),
-  } }));
-  await page.route(`**/preview-jobs/${jobId}/cancel`, route => route.fulfill({ json: { ...running, state: "cancelled" } }));
-  try {
-    await openProject(page, name);
-    await expect.poll(() => submitted.length).toBe(1);
-    await page.locator("#creative-domain-caption").click();
-    await page.getByRole("button", { name: "删除字幕 caption-one", exact: true }).click();
-    const feedback = page.locator(".statusbar__msg");
-    await expect(feedback).toHaveText("已删除字幕");
-    const latest = await readProject(request, id);
-    expect(latest.revision).not.toBe(submitted[0]);
-    expect(latest.sequence.captions).toHaveLength(0);
-    // Caption edits do not change the base-video content key, so the old
-    // worker remains live. Return the real backend's revision rejection now.
-    release();
-    await expect.poll(() => conflict).toBe(409);
-    await expect.poll(() => submitted).toEqual([submitted[0], latest.revision]);
-    await expect(feedback).toHaveText("已删除字幕");
-    await expect(page.getByText("工程已更新，请重新加载", { exact: true })).toHaveCount(0);
-    expect(await readProject(request, id)).toEqual(latest);
-    renderFailure = true;
-    await expect(feedback).toHaveText("current preview decoder failure");
-  } finally { release(); }
+  for (const transport of ["submission", "poll"] as const) {
+    const { id, name } = await createProject(request);
+    let release!: () => void;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const submitted: string[] = [];
+    let conflict = 0;
+    let renderFailure: "failed" | "cancelled" | null = null;
+    const jobId = `reconciled-${id}`;
+    const running = { jobId, state: "running", phase: "rendering", completedWindows: 0,
+      totalWindows: 1, progress: 0, cached: false };
+    await page.route(`**/projects/${id}/preview-jobs`, async route => {
+      submitted.push(route.request().postDataJSON().revision);
+      if (submitted.length === 1 && transport === "submission") {
+        await gate;
+        const response = await route.fetch();
+        conflict = response.status();
+        await route.fulfill({ response }).catch(() => {});
+      } else await route.fulfill({ status: 202, json: running });
+    });
+    await page.route(`**/preview-jobs/${jobId}`, async route => {
+      if (transport === "poll" && submitted.length === 1) {
+        await gate;
+        return route.fulfill({ json: { ...running, state: "cancelled",
+          error: "preview superseded by a newer edit" } });
+      }
+      return route.fulfill({ json: {
+        ...running, state: renderFailure || "running",
+        ...(renderFailure ? { error: renderFailure === "failed"
+          ? "current preview decoder failure" : "current preview cancellation" } : {}),
+      } });
+    });
+    await page.route(`**/preview-jobs/${jobId}/cancel`, route => route.fulfill({ json: { ...running, state: "cancelled" } }));
+    try {
+      await openProject(page, name);
+      await expect.poll(() => submitted.length).toBe(1);
+      await page.locator("#creative-domain-caption").click();
+      await page.getByRole("button", { name: "删除字幕 caption-one", exact: true }).click();
+      const feedback = page.locator(".statusbar__msg");
+      await expect(feedback).toHaveText("已删除字幕");
+      const latest = await readProject(request, id);
+      expect(latest.revision).not.toBe(submitted[0]);
+      expect(latest.sequence.captions).toHaveLength(0);
+      // Caption edits do not change the base-video content key, so the old
+      // worker remains live. Deliver either the real submission conflict or
+      // cancellation of its previously accepted, now obsolete job.
+      release();
+      if (transport === "submission") await expect.poll(() => conflict).toBe(409);
+      await expect.poll(() => submitted).toEqual([submitted[0], latest.revision]);
+      await expect(feedback).toHaveText("已删除字幕");
+      await expect(page.getByText("工程已更新，请重新加载", { exact: true })).toHaveCount(0);
+      expect(await readProject(request, id)).toEqual(latest);
+      renderFailure = transport === "submission" ? "failed" : "cancelled";
+      await expect(feedback).toHaveText(transport === "submission"
+        ? "current preview decoder failure" : "current preview cancellation");
+    } finally { release(); }
+  }
 });
 
 test("timeline range export is queued and reports the selected duration", async ({ page, request }) => {
