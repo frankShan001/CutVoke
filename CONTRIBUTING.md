@@ -80,6 +80,8 @@ IDs and control delayed sync delivery; preserve exact movement and independent
 audio assertions.
 Pointer release is not command completion: await the matching command
 acknowledgement and its rendered snapshot before checking saved positions.
+Reloading returns to the project library. Await the target project's open action;
+an immediate visibility probe can miss an in-flight project-list response.
 
 ## Engine boundaries
 

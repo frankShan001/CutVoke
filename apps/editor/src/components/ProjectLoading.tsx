@@ -117,6 +117,14 @@ export function useProjectPreparation() {
         if (signal.aborted) return;
         setJob(current); setPhase(current.phase); setProgress(Math.floor(current.progress * 0.9));
         if (current.state === "failed" || current.state === "cancelled") {
+          const latest = getLatestState();
+          if (current.state === "cancelled" && latest?.currentId === projectId &&
+              latest.project && latest.project.revision !== project.revision) {
+            // Polling can report cancellation after an edit invalidates an
+            // already accepted job. Reconcile it like submission-time conflict.
+            throw new ApiFailure({ status: 409, code: "REVISION_CONFLICT",
+              message: current.error || tr("预览准备已取消，请重试。"), retryable: true });
+          }
           throw new Error(current.error || tr("预览准备已取消，请重试。"));
         }
         if (current.state === "completed") break;
