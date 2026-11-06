@@ -45,7 +45,7 @@ AGENT_TOOLS = [
     _tool("project_directory_open", "Open/register a moved or backed-up project directory, or its project.cutvoke file. An existing online copy with the same projectId must be closed and moved first.",
           {"path": STRING}, ("path",)),
     _tool("editor_help", "START HERE if unfamiliar with CutVoke. Default {} gives compact onboarding. For substantial creative work topic=creative gives a small three-layer index; add guide=<id> to load one principle/work-type/project-plan reference. Local corrections stay local. No external Skill/source-code access needed. Before unfamiliar edits request topic=command with command name and effectId for exact params.",
-          {"topic": {"type": "string", "enum": ["overview", "creative", "time", "editing", "errors", "recipes", "command", "sharing", "local-models", "agent-bridge"], "default": "overview"},
+          {"topic": {"type": "string", "enum": ["overview", "creative", "time", "editing", "errors", "recipes", "command", "sharing", "local-models", "agent-bridge", "generated-media"], "default": "overview"},
            "guide": {"type": "string", "enum": list(GUIDE_FILES)},
            "command": STRING, "effectId": STRING, "recipe": STRING}),
     _tool("effect_module_save", "Save a content-free reusable effect recipe locally (MIT). No project/media/text inputs accepted. Discover allowed schemas with effect_module_list(includeSchemas=true). Return privacyNotice verbatim to the user when proposing sharing.",
@@ -66,6 +66,9 @@ AGENT_TOOLS = [
            "includeSchemas": {"type": "boolean", "default": True}, **PAGE}),
     _tool("media_import", "每批最多 32 个文件。流式复制本机素材到持久素材库，探测尺寸/声音/时长；传 projectId 保存到该工程素材表，同一内容重复导入返回同一 assetId。不会创建时间线片段。",
           {**PROJECT, "paths": {"type": "array", "minItems": 1, "maxItems": 32, "items": STRING}}, ("paths",)),
+    _tool("generated_media", "Inspect/import an externally rendered code-video manifest (v1). Verify declared source/output hashes and video frame contract; import returns an ordinary assetId and separate inert source ZIP. Never executes source, downloads dependencies, or changes the timeline. Use clip.insert/asset.swap with revision and lease for edits. Source ZIP is NOT included in project_package; retain both artifacts. Alpha pixels and creative quality require separate review.",
+          {**PROJECT, "operation": {"type": "string", "enum": ["inspect", "import"]},
+           "manifestPath": STRING}, ("projectId", "operation", "manifestPath")),
     _tool("media_list", "分页检索持久素材库；可按类型、名称、工程已用/未用过滤。返回可直接用于 clip.insert 的 assetId。",
           {**PROJECT, "query": {"type": "string"}, "kind": {"type": "string", "enum": ["image", "video", "audio"]},
            "used": {"type": "boolean"}, **PAGE}),
@@ -296,6 +299,30 @@ class AgentTools:
             filtered.append({**item, "used": is_used,
                              "available": self.api._asset_media_path(item) is not None})
         return {"revision": revision, **self._page(filtered, a, "assets")}
+
+    def generated_media(self, a):
+        from cutvoke.storage.generated_media import snapshot, inspect_render, publish_source_archive, file_hash
+        project = self._project(a)
+        with snapshot(a["manifestPath"]) as (manifest, stage, rendered):
+            result = inspect_render(manifest, rendered, self.render.ffprobe)
+            result.update({"projectId": project.project_id, "revision": project.revision,
+                           "timelineChanged": False, "operation": a["operation"]})
+            if a["operation"] == "import":
+                if not self.service.store:
+                    raise ValueError("persistent storage is required for generated_media import")
+                existing = self.service.store.get_asset(result["assetId"])
+                managed = self.api._imported_media_path(existing) if existing else None
+                if managed and managed.is_file() and file_hash(managed) != manifest["output"]["sha256"]:
+                    raise ValueError("existing generated media failed integrity check; restore/relink it before retrying")
+                # Import precisely the bytes checked above, using the same scoped
+                # ledger as Web uploads and ordinary media_import.
+                asset = self.media_import({"paths": [str(rendered)]})["assets"][0]
+                if asset["assetId"] != result["assetId"]:
+                    raise ValueError("generated-media import identity mismatch")
+                archive = publish_source_archive(manifest, stage,
+                    Path(self.api.media_dir) / ".generated", result["bundleId"])
+                result.update({"asset": asset, "sourceArchive": archive})
+            return result
 
     def _source(self, a):
         if bool(a.get("assetId")) == bool(a.get("path")):

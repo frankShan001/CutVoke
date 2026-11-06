@@ -1,5 +1,8 @@
 # 最小示例
 
+[代码视频素材桥接](generated-media/README.md) 演示原创代码动效、图表与透明标注的
+可追溯导入、局部替换，以及原生文字/音轨和可编辑工程包交付。
+
 ## 完整视频案例
 
 [CHASE THE LIGHT：原始素材与剪辑效果](showcases/chase-the-light/README.md) 包含四宫格原始素材展示、已完成的 V7 成片、两个可导入工程包及制作过程素材。大文件使用 Git LFS；克隆后运行 `git lfs pull`。

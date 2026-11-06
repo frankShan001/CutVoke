@@ -41,6 +41,14 @@ Read [editing.md](references/editing.md) for source selection and operation mapp
 
 Discover supported effects with `effects_list` / `resources_list`. Before unfamiliar commands request `editor_help(topic="command", command="…")`, adding `effectId` for its exact schema. These schemas describe the payload, not outer `command_apply` arguments. Never invent controls, IDs or automatic recognition/generation features.
 
+For externally rendered code scenes, read `editor_help(topic="generated-media")`.
+`generated_media` statically inspects/imports a hashed source/output manifest;
+it never executes code or edits the timeline. Use the returned ordinary asset
+with `clip.insert` or explicit `asset.swap` targets. Preserve native text/audio
+where useful and deliver its separate source ZIP alongside the editable package;
+`project_package` does not include that source ZIP. See the
+[bridge example](../../examples/generated-media/README.md).
+
 Acquire `edit_lock` before grouped Agent edits. Use `command_preview` where supported, then the same payload with `command_apply`, current `expectedRevision`, stable `commandId` and `editLeaseId`. Use supported `edit.batch` operations within its current limit. Keep returned revisions, renew leases as needed and release in a finally step, including before long export or human takeover. After errors follow `error.recovery`; retry a lost response with identical arguments and ID, reconcile conflicts before a new edit.
 
 Use exact rational timeline seconds; keyframe time is clip-local. For a local correction use `project_lookup` and change only the requested entities. Keep normal undo points. Avoid settings changes, restarts, flattened timelines, duplicate jobs and unbounded heavy work that disrupts the user. Do not reduce final quality for speed without authorization. Read [efficiency.md](references/efficiency.md) when iteration cost matters.

@@ -241,6 +241,8 @@ MCP 自带 `editor_help`，支持当前命令、单位、范例与恢复；`topi
 
 `creative_workflow` 提供按主题检索的中英文用途／风格配方，以及绑定版本的计划、审片与局修约定。局修复用已有事务预演，检查影响范围和保护区后由 Agent 显式提交。见[可调用闭环与合成素材 MCP 示例](skills/cutvoke-editor/references/creative-workflow.md)；这些检查不代表创作质量已验收。
 
+外部代码渲染素材可通过 `generated_media` 校验源码/输出哈希与帧合同后导入，并保留独立、不会自动执行的源码 ZIP。原生文字、音轨与指定片段替换继续可编辑。先读 `editor_help(topic="generated-media")`，再跑[离线桥接示例](examples/generated-media/README.md)。源码 ZIP 须与工程包分开交付；桥接不执行代码，也不认证艺术效果。
+
 标准 MCP 启动入口会自动切换到通过检查的新引擎，保持连接和已提交的渲染任务。详见[自动更新行为与边界](docs/production-workflow.md#runtime-changes--服务版本变化)；之前已经运行的旧启动器首次接入时需要重连一次。
 
 源码版仅使用 MCP 时，可运行 `python -m cutvoke doctor --mcp-only --json`，无需构建浏览器编辑器。能力发现先用 `editor_help`，再用 `commands_list(includeSchemas=false)` 搜索轻量命令索引，用 `editor_help(topic="command", command="…")` 获取选定命令的 payload schema。效果查询使用 `effects_list`；`capabilities` 返回较大的完整快照。详见[安装诊断](docs/user/installation.md)。

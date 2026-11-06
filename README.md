@@ -241,6 +241,8 @@ MCP includes `editor_help` for current commands, units, recipes and recovery, pl
 
 `creative_workflow` adds bounded bilingual purpose/style discovery and versioned plan/review/repair contracts. A repair dry run reuses the existing transaction preview and checks scope/protection before explicit submission. See the [callable workflow and synthetic MCP example](skills/cutvoke-editor/references/creative-workflow.md); these checks do not certify creative quality.
 
+For externally rendered code scenes, `generated_media` validates declared source/output hashes and frame contracts, imports ordinary media and retains a separate inert source ZIP. Native titles/audio and selected-clip replacement stay editable. Start with `editor_help(topic="generated-media")` and the [offline bridge example](examples/generated-media/README.md). Source ZIPs must accompany editable packages separately; this bridge does not execute code or certify artistic quality.
+
 The standard MCP launcher automatically activates healthy engine updates while keeping the connection and existing render jobs. See [automatic update behavior and limits](docs/production-workflow.md#runtime-changes--服务版本变化); previously running launchers need one initial reconnect.
 
 Source MCP-only installs can use `python -m cutvoke doctor --mcp-only --json` without building the browser editor. Start discovery with `editor_help`, then `commands_list(includeSchemas=false)` for a lightweight searchable index and `editor_help(topic="command", command="…")` for a selected payload schema. `effects_list` discovers effects; `capabilities` returns a large complete snapshot. See [installation diagnostics](docs/user/installation.md).

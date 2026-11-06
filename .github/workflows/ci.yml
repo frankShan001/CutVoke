@@ -146,12 +146,15 @@ jobs:
         working-directory: apps/editor
         run: npm run test:e2e
       - name: Repeat deterministic state orderings
-        # Coverage grew from 48 to 81 cases; 72 took 8.2min locally, while
-        # hosted full suites took 24min versus 22.1min locally. Bound this
-        # larger batch without changing any individual assertion deadlines.
+        # Give each existing regression group its own step budget. Their
+        # combined hosted duration can exceed 15min even when all tests pass.
         timeout-minutes: 15
         working-directory: apps/editor
-        run: npm run test:e2e:regressions
+        run: npm run test:e2e:regressions:state
+      - name: Repeat preview recovery and transcript orderings
+        timeout-minutes: 15
+        working-directory: apps/editor
+        run: npm run test:e2e:regressions:recovery
       - name: Preserve browser failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v7

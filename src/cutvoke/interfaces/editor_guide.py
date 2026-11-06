@@ -38,6 +38,29 @@ INSTRUCTIONS = (
 )
 
 GUIDES = {
+    "generated-media": {
+        "title": "External code-video material bridge (v1)",
+        "workflow": [
+            "Run trusted source in a separate renderer environment. CutVoke never executes the manifest's source or installs dependencies.",
+            "Declare every source, lockfile, font, media and license input with its relative POSIX path and SHA256. Include renderer version/build, params and seed.",
+            "Call generated_media(projectId=..., operation='inspect', manifestPath=...). Inspection hashes a temporary snapshot and decodes/counts frames; it creates no persistent asset or timeline edit.",
+            "Call operation='import' to retain an ordinary assetId and an inert content-addressed source ZIP. Identical imports reuse media and source identity; this is not a frame-render cache.",
+            "Use clip.insert or asset.swap with explicit clipIds, expectedRevision, commandId and edit lease. Preview before applying, then review actual frames, continuous output and sound.",
+            "Return sourceArchive separately alongside project_package. The ZIP excludes rendered media; the project package excludes the source ZIP. Both are needed for a source-plus-editable handoff."],
+        "limits": {"manifestBytes": 262144, "inputFiles": 128, "inputBytes": 33554432,
+                   "renderBytes": 536870912, "maxDimension": 4096, "maxFrames": 18000,
+                   "maxSeconds": 600, "inspectionTimeoutSeconds": 30},
+        "constraints": ["One zero-based CFR video stream, square pixels, explicit BT.709 primaries/transfer/matrix on decoded frames; no audio stream.",
+                        "MP4/MOV for opaque footage; straight alpha requires ProRes 4444 MOV. Premultiplied alpha, WebM, HDR and audio are outside v1.",
+                        "Hashes establish byte identity, not dependency completeness, source safety, reproducibility or artistic quality. Alpha pixels and straight-alpha interpretation require separate compositing checks.",
+                        "No native code clip, automatic parameter UI, arbitrary-code runner, source ZIP reimport, recursive dependency discovery or automatic rerender. Source archives can contain private data; no upload is performed."],
+        "manifestExample": {
+            "schemaVersion": 1, "renderer": {"name": "your-renderer", "version": "exact-version", "build": "runtime/renderer-build"},
+            "entrypoint": "scene.py", "files": [{"path": "scene.py", "sha256": "<64 lowercase hex characters>", "role": "source"}],
+            "params": {"accent": "teal"}, "seed": 0,
+            "output": {"path": "render.mp4", "sha256": "<64 lowercase hex characters>", "width": 640, "height": 360,
+                       "fps": {"num": 24, "den": 1}, "durationFrames": 72,
+                       "alphaMode": "opaque", "colorSpace": "bt709", "audioMode": "none"}}},
     "creative": creative_catalog(),
     "overview": {
         "title": "Start editing with CutVoke",
@@ -52,7 +75,7 @@ GUIDES = {
         "workflow": [
             {"tools": ["runtime", "project_list", "project_summary"], "purpose": "Check the connected data directory; locate the requested project and current revision. Use create_project for a new edit or project_clone for an alternate version."},
             {"tools": ["editor_help"], "purpose": "For new or substantial creative work use topic=creative: shared principles, a relevant work type, then this project's plan. Load one document with guide=<id>. Local corrections reuse approved direction. Effect counts and a successful export do not prove expression."},
-            {"tools": ["media_list", "media_import", "media_inspect", "preview_frames"], "purpose": "Locate/import local files, inspect source duration and actual pictures. Imported assetId can be used directly in clip.insert."},
+            {"tools": ["media_list", "media_import", "media_inspect", "generated_media", "preview_frames"], "purpose": "Locate/import local files, inspect source duration and actual pictures. generated_media inspects/imports external code renders with verified hashes and a separate source archive; it never executes code or changes the timeline. Keep the source ZIP separately from project_package. Imported assetId can be used directly in clip.insert or asset.swap."},
             {"tools": ["editor_help", "commands_list", "resources_list"], "purpose": "Get command schemas or a recipe; discover compatible effects/presets instead of guessing. resources_list is the preset catalog, distinct from MCP document resources."},
             {"tools": ["edit_lock", "command_preview", "command_apply"], "purpose": "Acquire a lease, preview supported edits without committing, apply with revision and stable commandId. edit.batch commits 1..32 changes atomically as one undo point. Use each returned revision for the next edit; renew the lease during long editing sessions."},
             {"tools": ["preview_frames", "preview_prepare", "preview_job"], "purpose": "Check text/effects/transition boundaries visually; prepare continuous preview if needed. Preparation is asynchronous. Keep jobId; poll about once per second with a bounded timeout, not a busy loop."},
@@ -60,7 +83,8 @@ GUIDES = {
         "help": {"creative": {"topic": "creative"}, "conventions": {"topic": "time"}, "editing": {"topic": "editing"},
                  "recovery": {"topic": "errors"}, "examples": {"topic": "recipes"},
                  "command": {"topic": "command", "command": "clip.insert"},
-                 "sharing": {"topic": "sharing"},"localModels":{"topic":"local-models"},"humanToAgent":{"topic":"agent-bridge"}},
+                 "sharing": {"topic": "sharing"},"localModels":{"topic":"local-models"},"humanToAgent":{"topic":"agent-bridge"},
+                 "generatedMedia": {"topic": "generated-media"}},
         "modelServices": False,"optionalLocalModels": True},
     "sharing": {
         "title": "Create reusable effects while editing; share settings only",
