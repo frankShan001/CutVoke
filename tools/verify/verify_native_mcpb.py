@@ -18,6 +18,7 @@ import signal
 import uuid
 import subprocess
 import threading
+import time
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -57,7 +58,8 @@ class Client:
                 except ValueError:
                     self.messages.put({'unexpectedStdout': line})
             self.messages.put({'stdioClosed': True})
-        threading.Thread(target=reader, daemon=True).start()
+        self.reader = threading.Thread(target=reader, daemon=True)
+        self.reader.start()
 
     def request(self, method, params=None):
         self.serial += 1
@@ -83,18 +85,42 @@ class Client:
         return result, raw
 
     def close(self):
+        process = self.process
         try:
-            self.process.stdin.close()
-            assert self.process.wait(timeout=20) == 0
+            process.stdin.close()
+            assert process.wait(timeout=20) == 0
         finally:
-            if self.process.poll() is None:
-                if os.name == 'nt':
-                    taskkill = Path(os.environ['SystemRoot']) / 'System32/taskkill.exe'
-                    subprocess.run([str(taskkill), '/PID', str(self.process.pid), '/T', '/F'], timeout=20, check=False, capture_output=True)
-                else:
-                    os.killpg(self.process.pid, signal.SIGKILL)
-                self.process.wait(timeout=20)
-            self.stderr.close()
+            try:
+                if process.poll() is None:
+                    if os.name == 'nt':
+                        taskkill = Path(os.environ['SystemRoot']) / 'System32/taskkill.exe'
+                        subprocess.run([str(taskkill), '/PID', str(process.pid), '/T', '/F'], timeout=20, check=False, capture_output=True)
+                    else:
+                        os.killpg(process.pid, signal.SIGKILL)
+                    process.wait(timeout=20)
+                self.reader.join(timeout=20)
+                assert not self.reader.is_alive(), 'Native stdout remains open after process exit'
+                process.stdout.close()
+            finally:
+                self.stderr.close()
+                # Release Popen too: on Windows it owns an OS process handle even
+                # after wait(). Do not keep the retired image alive during rename.
+                self.process = None
+
+
+def retire_install(install, destination):
+    # Allow bounded transient Windows scanner/file-handle settling, but never
+    # skip isolation, delete payloads or count a persistent lock as acceptance.
+    for attempt in range(21):
+        try:
+            install.rename(destination)
+            assert not install.exists(), 'First installation is still reachable'
+            return
+        except PermissionError:
+            if os.name != 'nt' or attempt == 20:
+                raise
+            print(f'Waiting for Windows installation handles: retirement retry {attempt + 1}/20', flush=True)
+            time.sleep(0.25)
 
 
 def main():
@@ -178,8 +204,7 @@ def main():
         finally:
             client.close()
         if iteration == 1:
-            install.rename(evidence / ('retired-' + uuid.uuid4().hex))
-            assert not install.exists()
+            retire_install(install, evidence / ('retired-' + uuid.uuid4().hex))
     (evidence / 'result.json').write_text(json.dumps({'ok': True, 'platform': info['platform'],
         'commit': info['commit'], 'bundleSha256': record['sha256'], 'officialCli': '2.1.2',
         'nativeStdio': True, 'emptyPath': True, 'sameVersionReinstall': True,
