@@ -98,3 +98,24 @@ Keep candidates unpublished until all applicable checks below are recorded:
    separate maintainer release/Registry workflow; this tool does not do it.
 
 Specification: <https://github.com/modelcontextprotocol/mcpb/blob/main/MANIFEST.md>.
+
+## Automated native MCPB smoke gate
+
+The native package workflows run `tools/verify/verify_native_mcpb.py` after
+portable acceptance on Windows x64, Linux x64, macOS x64 and macOS arm64.
+The verifier requires staging provenance to match the checkout and runner
+architecture. It builds a local candidate, unpacks and validates it with the
+official pinned MCPB CLI 2.1.2, then launches the manifest command with an empty
+PATH and an external Chinese/space-containing data directory.
+
+The test covers stdio discovery, import, a leased timeline edit, actual PNG
+preview and H.264 export, dimensions/duration and decoded red-frame pixels.
+A second fresh extraction must reopen the exact persisted project and render
+again. Only logs, probes and synthetic test pictures are uploaded as evidence;
+the candidate and unpacked native payload are not uploaded by this gate.
+
+Adding this gate is not evidence that it passed: inspect each exact-head run's
+`*-mcpb-evidence/result.json` and all native job conclusions. This is a native
+stdio / same-version reinstall test, not desktop MCPB host installation,
+architecture-selection UX, signing/quarantine acceptance or migration across
+versions. Those checks and the issue remain open.
