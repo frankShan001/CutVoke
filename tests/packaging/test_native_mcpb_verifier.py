@@ -38,6 +38,17 @@ class NativeVerifierTests(unittest.TestCase):
                 process.kill.assert_not_called()
                 self.assertTrue((root / 'transcript.jsonl').is_file())
 
+    def test_tool_argument_names_do_not_collide_with_dispatch(self):
+        client = module.Client.__new__(module.Client)
+        payload = {'ok': True, 'revision': '0'}
+        raw = {'content': [{'type': 'text', 'text': json.dumps(payload)}]}
+        client.request = mock.Mock(return_value=raw)
+        result, wire = client.call('create_project', name='MCPB 验收', tool_name='user-field', projectId='smoke')
+        self.assertEqual(result, payload)
+        self.assertEqual(wire, raw)
+        client.request.assert_called_once_with('tools/call', {
+            'name': 'create_project', 'arguments': {'name': 'MCPB 验收', 'tool_name': 'user-field', 'projectId': 'smoke'}})
+
     def test_nonzero_shutdown_rejected(self):
         client = module.Client.__new__(module.Client)
         client.process = mock.Mock()

@@ -134,9 +134,56 @@ class MCPBTests(unittest.TestCase):
             self.assertEqual(archive.read("engine/_internal/library-link.so"), (self.engine / "_internal/library.so").read_bytes())
 
     @unittest.skipIf(os.name == "nt", "POSIX symlink fixture")
-    def test_directory_link_rejected_without_publication(self):
+    def test_framework_directory_aliases_materialize_verified_files(self):
+        self.fixture("macos-arm64")
+        framework = self.engine / "_internal/Python.framework"
+        resources = framework / "Versions/3.13/Resources"
+        resources.mkdir(parents=True)
+        (resources / "Info.plist").write_text("fixture metadata")
+        (framework / "Versions/Current").symlink_to("3.13", target_is_directory=True)
+        (framework / "Resources").symlink_to("Versions/Current/Resources", target_is_directory=True)
+        self.rehash()
+        module.build(self.staging, self.output)
+        with zipfile.ZipFile(self.output) as archive:
+            for alias in ("Resources", "Versions/Current/Resources", "Versions/3.13/Resources"):
+                entry = archive.getinfo("engine/_internal/Python.framework/" + alias + "/Info.plist")
+                self.assertTrue(stat.S_ISREG(entry.external_attr >> 16))
+                self.assertEqual(archive.read(entry), b"fixture metadata")
+            self.assertFalse(any(item.is_dir() for item in archive.infolist()))
+        second = self.root / "repeat.mcpb"
+        self.assertEqual(module.digest(self.output), module.build(self.staging, second)["sha256"])
+
+    @unittest.skipIf(os.name == "nt", "POSIX symlink fixture")
+    def test_directory_alias_missing_or_untracked_content_rejected(self):
         (self.engine / "alias").symlink_to("_internal", target_is_directory=True)
-        with self.assertRaisesRegex(ValueError, "Directory or special symlink unsupported"):
+        victim = self.engine / "_internal/library.so"
+        victim.unlink()
+        with self.assertRaisesRegex(ValueError, "Missing manifested"):
+            module.build(self.staging, self.output)
+        victim.write_text("untracked")
+        self.rehash()
+        (self.engine / "_internal/extra").write_text("not in manifest")
+        with self.assertRaisesRegex(ValueError, "Unverified"):
+            module.build(self.staging, self.output)
+        self.assertFalse(self.output.exists())
+
+    @unittest.skipIf(os.name == "nt", "POSIX symlink fixture")
+    def test_directory_alias_cycle_escape_and_dangling_rejected(self):
+        link = self.engine / "_internal/alias"
+        for target, error in (("..", "Cyclic"), ("../../..", "Escaping"),
+                              ("missing", "Broken"), ("alias", "cyclic")):
+            with self.subTest(target=target):
+                link.symlink_to(target, target_is_directory=True)
+                with self.assertRaisesRegex(ValueError, error):
+                    module.build(self.staging, self.output)
+                self.assertFalse(self.output.exists())
+                link.unlink()
+
+    @unittest.skipIf(os.name == "nt", "POSIX special fixture")
+    def test_directory_alias_special_file_rejected(self):
+        (self.engine / "alias").symlink_to("_internal", target_is_directory=True)
+        os.mkfifo(self.engine / "_internal/fifo")
+        with self.assertRaisesRegex(ValueError, "Special file"):
             module.build(self.staging, self.output)
         self.assertFalse(self.output.exists())
 

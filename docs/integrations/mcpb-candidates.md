@@ -33,8 +33,9 @@ release upload or `server.json` generation occur.
   copied unchanged because engine paths are relocated in the bundle.
 - Ordinary permission bits are retained. Verified relative in-tree file symlinks
   are materialized as regular files with the resolved target bytes and mode,
-  because official CLI unpack does not recreate symlinks. Directory links are
-  explicitly rejected rather than silently dropping their descendants.
+  because official CLI unpack does not recreate symlinks. Directory aliases
+  are recursively materialized using canonical target files verified against the
+  portable manifest; cycles and broken links are rejected.
   Absolute/escaping links, symlinked payload roots/ancestors, special files and
   unsafe archive paths are rejected. Unix executable mode is required
   for engine/FFmpeg/ffprobe. Privileged permission bits are removed.
@@ -66,13 +67,18 @@ target text. The builder now materializes verified in-tree file links as regular
 files, using the resolved target's ordinary permission bits and rehashing the
 actual bytes while writing against the link's portable manifest checksum. The
 validated resolved path is retained instead of following a subsequently retargeted
-link. Directory links are rejected explicitly; immutable private staging remains
-required.
+link. Directory aliases (including macOS Python.framework paths) now expand
+recursively into ordinary files. The portable manifest does not enumerate files
+under directory aliases, so each expanded file uses its canonical target checksum;
+original file aliases must also match their own manifest entry. Cycles, escaping
+or broken links, unlisted files and special nodes fail. Immutable private staging
+remains required.
 
 A synthetic Linux bundle with a library link now passes official CLI unpack and
 manifest validation; the extracted alias is a regular file byte-identical to its
 target with mode 0755. Contract tests cover materialization, corruption rejection,
-link retargeting, directory-link rejection and deterministic bytes.
+link retargeting, framework directory-alias expansion, invalid directory targets
+and deterministic bytes.
 
 These probes use synthetic files, not native executables. They do not establish
 MCPB host installation, actual runtime operation, or cross-platform acceptance.

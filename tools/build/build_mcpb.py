@@ -90,30 +90,47 @@ def build(staging: Path, output: Path) -> dict:
     for source, destination in sources:
         if source.resolve(strict=True) != source:
             raise ValueError(f"Symlinked payload root: {source.name}")
+        # Validate link syntax even for links reached through another link. rglob
+        # deliberately does not follow directory links; expansion happens below.
         for path in [source, *sorted(source.rglob("*"))] if source.is_dir() else [source]:
-            name = destination if path == source else f"{destination}/{path.relative_to(source).as_posix()}"
-            safe_name(name)
-            mode = path.lstat().st_mode
-            read_path = path
             if path.is_symlink():
                 target = os.readlink(path)
-                # Materialize verified file links: official MCPB unpack does not restore links.
                 if os.path.isabs(target) or "\\" in target or ":" in target:
-                    raise ValueError(f"Unsafe symlink: {name}")
-                resolved = path.resolve(strict=True)
+                    raise ValueError(f"Unsafe symlink: {path.relative_to(staging)}")
+                try:
+                    resolved = path.resolve(strict=True)
+                except (OSError, RuntimeError) as error:
+                    raise ValueError(f"Broken or cyclic symlink: {path.relative_to(staging)}") from error
                 if not resolved.is_relative_to(source):
-                    raise ValueError(f"Escaping symlink: {name}")
-                if not resolved.is_file():
-                    raise ValueError(f"Directory or special symlink unsupported: {name}")
-                read_path = resolved
-                mode = resolved.stat().st_mode
-            elif not (stat.S_ISDIR(mode) or stat.S_ISREG(mode)):
-                raise ValueError(f"Special file: {name}")
-            if path.is_file():
-                relative = path.relative_to(staging).as_posix()
-                if hashes.get(relative) != digest(read_path):
+                    raise ValueError(f"Escaping symlink: {path.relative_to(staging)}")
+
+        def collect(path, name, ancestors):
+            safe_name(name)
+            # Store canonical paths, not aliases, so replacing a link during ZIP
+            # writing cannot redirect a read. Staging must still be immutable.
+            resolved = path.resolve(strict=True)
+            mode = resolved.lstat().st_mode
+            if stat.S_ISDIR(mode):
+                if resolved in ancestors:
+                    raise ValueError(f"Cyclic directory symlink: {name}")
+                for child in sorted(resolved.iterdir()):
+                    collect(child, f"{name}/{child.name}", ancestors | {resolved})
+            elif stat.S_ISREG(mode):
+                relative = resolved.relative_to(staging).as_posix()
+                expected = hashes.get(relative)
+                if expected != digest(resolved):
                     raise ValueError(f"Unverified file: {relative}")
-            entries.append((read_path, name, mode, hashes.get(path.relative_to(staging).as_posix())))
+                # Original file aliases are in the portable manifest. Directory
+                # aliases are not; their descendants use canonical target hashes.
+                if path.is_symlink():
+                    alias = path.relative_to(staging).as_posix()
+                    if hashes.get(alias) != expected:
+                        raise ValueError(f"Unverified file: {alias}")
+                entries.append((resolved, name, mode, expected))
+            else:
+                raise ValueError(f"Special file: {name}")
+
+        collect(source, destination, set())
     if suffix == "":
         for name in required[:3]:
             if not (staging / name).stat().st_mode & 0o111:

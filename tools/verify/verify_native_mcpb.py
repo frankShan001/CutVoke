@@ -76,8 +76,8 @@ class Client:
         self.process.stdin.write(json.dumps({'jsonrpc': '2.0', 'method': 'notifications/initialized'}) + '\n')
         self.process.stdin.flush()
 
-    def call(self, name, **arguments):
-        raw = self.request('tools/call', {'name': name, 'arguments': arguments})
+    def call(self, tool_name, /, **arguments):
+        raw = self.request('tools/call', {'name': tool_name, 'arguments': arguments})
         result = json.loads(next(c['text'] for c in raw['content'] if c['type'] == 'text'))
         assert result['ok'] and not raw.get('isError'), result
         return result, raw
