@@ -56,6 +56,7 @@ class MCPBTests(unittest.TestCase):
         with zipfile.ZipFile(self.output) as archive:
             manifest = json.loads(archive.read("manifest.json"))
             self.assertEqual(manifest["manifest_version"], "0.3")
+            self.assertFalse(any(item.is_dir() for item in archive.infolist()))
             self.assertEqual(manifest["server"]["mcp_config"]["args"], ["mcp", "--data", "${user_config.data_directory}"])
             self.assertEqual(manifest["compatibility"]["platforms"], ["linux"])
             self.assertEqual(archive.getinfo("engine/cutvoke-engine").external_attr >> 16 & 0o777, 0o755)
