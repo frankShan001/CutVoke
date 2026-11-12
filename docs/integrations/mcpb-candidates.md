@@ -46,6 +46,29 @@ storage **outside the extension installation directory** so extension replacemen
 cannot remove projects. This instruction is a client configuration requirement,
 not a path sandbox or an enforced boundary in this initial builder.
 
+## Official CLI probe (2026-11-12)
+
+Using `@anthropic-ai/mcpb@2.1.2` (the npm package named by the official
+`modelcontextprotocol/mcpb` repository), all four synthetic-layout manifests
+passed `mcpb validate`. This proves schema compatibility, not runtime readiness.
+
+`mcpb unpack` exposed an actual compatibility defect: explicit directory ZIP
+entries caused `EISDIR`. The builder now omits directory entries; parent folders
+are reconstructed from file paths (empty directories are not retained). The
+corrected Linux synthetic bundle unpacks successfully and restores the engine's
+`0755` mode. Packaging contract tests assert that no directory entries recur.
+
+**Remaining extraction blocker:** the same CLI turns a ZIP symlink entry into a
+regular file containing its target text. A synthetic `library-link.so` becomes
+an ordinary file containing `library.so`, not a usable library symlink. Preserved
+ZIP symlink metadata alone therefore does not qualify a native bundle. Do not
+use this CLI's unpacked output as native-runtime evidence or distribute candidates
+until the intended host's link extraction is verified (or a separately tested,
+checksum-preserving link-materialization design is implemented).
+
+These probes use synthetic files, not native executables. They do not establish
+MCPB host installation, actual runtime operation, or cross-platform acceptance.
+
 ## Before any distribution or Registry publication
 
 The fixture tests validate packaging logic, not working native binaries. This
