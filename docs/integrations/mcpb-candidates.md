@@ -31,9 +31,12 @@ release upload or `server.json` generation occur.
 - All selected files must match the portable `file-manifest.json`; missing listed
   dependencies, modified bytes and unlisted files fail. The input manifest is not
   copied unchanged because engine paths are relocated in the bundle.
-- Ordinary permission bits and safe relative in-tree symlinks are retained in ZIP
-  metadata. Absolute/escaping links, symlinked payload roots/ancestors, special
-  files and unsafe archive paths are rejected. Unix executable mode is required
+- Ordinary permission bits are retained. Verified relative in-tree file symlinks
+  are materialized as regular files with the resolved target bytes and mode,
+  because official CLI unpack does not recreate symlinks. Directory links are
+  explicitly rejected rather than silently dropping their descendants.
+  Absolute/escaping links, symlinked payload roots/ancestors, special files and
+  unsafe archive paths are rejected. Unix executable mode is required
   for engine/FFmpeg/ffprobe. Privileged permission bits are removed.
 - Regular-file bytes are rehashed as they are written to the archive. This is not
   a secure sandbox for concurrently hostile input: staging must stay private and
@@ -58,13 +61,18 @@ are reconstructed from file paths (empty directories are not retained). The
 corrected Linux synthetic bundle unpacks successfully and restores the engine's
 `0755` mode. Packaging contract tests assert that no directory entries recur.
 
-**Remaining extraction blocker:** the same CLI turns a ZIP symlink entry into a
-regular file containing its target text. A synthetic `library-link.so` becomes
-an ordinary file containing `library.so`, not a usable library symlink. Preserved
-ZIP symlink metadata alone therefore does not qualify a native bundle. Do not
-use this CLI's unpacked output as native-runtime evidence or distribute candidates
-until the intended host's link extraction is verified (or a separately tested,
-checksum-preserving link-materialization design is implemented).
+The same CLI also turns ZIP symlink entries into regular files containing their
+target text. The builder now materializes verified in-tree file links as regular
+files, using the resolved target's ordinary permission bits and rehashing the
+actual bytes while writing against the link's portable manifest checksum. The
+validated resolved path is retained instead of following a subsequently retargeted
+link. Directory links are rejected explicitly; immutable private staging remains
+required.
+
+A synthetic Linux bundle with a library link now passes official CLI unpack and
+manifest validation; the extracted alias is a regular file byte-identical to its
+target with mode 0755. Contract tests cover materialization, corruption rejection,
+link retargeting, directory-link rejection and deterministic bytes.
 
 These probes use synthetic files, not native executables. They do not establish
 MCPB host installation, actual runtime operation, or cross-platform acceptance.

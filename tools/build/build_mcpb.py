@@ -94,22 +94,26 @@ def build(staging: Path, output: Path) -> dict:
             name = destination if path == source else f"{destination}/{path.relative_to(source).as_posix()}"
             safe_name(name)
             mode = path.lstat().st_mode
-            target = None
+            read_path = path
             if path.is_symlink():
                 target = os.readlink(path)
-                # Relative links within this payload root retain identical layout in MCPB.
+                # Materialize verified file links: official MCPB unpack does not restore links.
                 if os.path.isabs(target) or "\\" in target or ":" in target:
                     raise ValueError(f"Unsafe symlink: {name}")
                 resolved = path.resolve(strict=True)
                 if not resolved.is_relative_to(source):
                     raise ValueError(f"Escaping symlink: {name}")
+                if not resolved.is_file():
+                    raise ValueError(f"Directory or special symlink unsupported: {name}")
+                read_path = resolved
+                mode = resolved.stat().st_mode
             elif not (stat.S_ISDIR(mode) or stat.S_ISREG(mode)):
                 raise ValueError(f"Special file: {name}")
             if path.is_file():
                 relative = path.relative_to(staging).as_posix()
-                if hashes.get(relative) != digest(path):
+                if hashes.get(relative) != digest(read_path):
                     raise ValueError(f"Unverified file: {relative}")
-            entries.append((path, name, mode, target))
+            entries.append((read_path, name, mode, hashes.get(path.relative_to(staging).as_posix())))
     if suffix == "":
         for name in required[:3]:
             if not (staging / name).stat().st_mode & 0o111:
@@ -129,7 +133,7 @@ def build(staging: Path, output: Path) -> dict:
     os.close(fd)
     try:
         with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
-            for path, name, mode, link_target in entries:
+            for path, name, mode, expected_hash in entries:
                 # Official MCPB CLI creates parents from file paths and treats every
                 # ZIP entry as a file. Explicit directory entries fail with EISDIR.
                 if stat.S_ISDIR(mode):
@@ -140,15 +144,13 @@ def build(staging: Path, output: Path) -> dict:
                 item.external_attr = (stat.S_IFMT(mode) | (mode & 0o777)) << 16
                 item.compress_type = zipfile.ZIP_DEFLATED
                 with archive.open(item, "w", force_zip64=True) as writer:
-                    if stat.S_ISLNK(mode):
-                        writer.write(link_target.encode("utf-8"))
-                    elif stat.S_ISREG(mode):
+                    if stat.S_ISREG(mode):
                         written = hashlib.sha256()
                         with path.open("rb") as reader:
                             for block in iter(lambda: reader.read(1024 * 1024), b""):
                                 writer.write(block)
                                 written.update(block)
-                        if written.hexdigest() != hashes[path.relative_to(staging).as_posix()]:
+                        if written.hexdigest() != expected_hash:
                             raise ValueError(f"Input changed during packaging: {name}")
             item = zipfile.ZipInfo("manifest.json", (1980, 1, 1, 0, 0, 0))
             item.create_system = 3

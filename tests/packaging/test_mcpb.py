@@ -131,7 +131,24 @@ class MCPBTests(unittest.TestCase):
         with mock.patch.object(zipfile.ZipFile, "open", mutate):
             module.build(self.staging, self.output)
         with zipfile.ZipFile(self.output) as archive:
-            self.assertEqual(archive.read("engine/_internal/library-link.so"), b"library.so")
+            self.assertEqual(archive.read("engine/_internal/library-link.so"), (self.engine / "_internal/library.so").read_bytes())
+
+    @unittest.skipIf(os.name == "nt", "POSIX symlink fixture")
+    def test_directory_link_rejected_without_publication(self):
+        (self.engine / "alias").symlink_to("_internal", target_is_directory=True)
+        with self.assertRaisesRegex(ValueError, "Directory or special symlink unsupported"):
+            module.build(self.staging, self.output)
+        self.assertFalse(self.output.exists())
+
+    @unittest.skipIf(os.name == "nt", "POSIX symlink fixture")
+    def test_link_target_corruption_rejected(self):
+        link = self.engine / "_internal/library-link.so"
+        link.symlink_to("library.so")
+        self.rehash()
+        (self.engine / "_internal/library.so").write_text("corrupt")
+        with self.assertRaisesRegex(ValueError, "Unverified file"):
+            module.build(self.staging, self.output)
+        self.assertFalse(self.output.exists())
 
     def test_unsafe_manifest_names(self):
         for name in ["../outside", "/absolute", "C:/file", "a\\b", "a//b", "a/./b"]:
@@ -141,15 +158,16 @@ class MCPBTests(unittest.TestCase):
                     module.build(self.staging, self.output)
 
     @unittest.skipIf(os.name == "nt", "POSIX symlink/mode fixtures")
-    def test_internal_symlink_preserved_and_escape_rejected(self):
+    def test_internal_symlink_materialized_and_escape_rejected(self):
         link = self.engine / "_internal/library-link.so"
         link.symlink_to("library.so")
         self.rehash()
         module.build(self.staging, self.output)
         with zipfile.ZipFile(self.output) as archive:
             entry = archive.getinfo("engine/_internal/library-link.so")
-            self.assertTrue(stat.S_ISLNK(entry.external_attr >> 16))
-            self.assertEqual(archive.read(entry), b"library.so")
+            self.assertTrue(stat.S_ISREG(entry.external_attr >> 16))
+            self.assertEqual(entry.external_attr >> 16 & 0o777, 0o755)
+            self.assertEqual(archive.read(entry), (self.engine / "_internal/library.so").read_bytes())
         link.unlink()
         (self.root / "outside").write_text("outside")
         link.symlink_to(self.root / "outside")
