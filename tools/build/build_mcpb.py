@@ -130,6 +130,10 @@ def build(staging: Path, output: Path) -> dict:
     try:
         with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
             for path, name, mode, link_target in entries:
+                # Official MCPB CLI creates parents from file paths and treats every
+                # ZIP entry as a file. Explicit directory entries fail with EISDIR.
+                if stat.S_ISDIR(mode):
+                    continue
                 item = zipfile.ZipInfo(name + ("/" if stat.S_ISDIR(mode) else ""), (1980, 1, 1, 0, 0, 0))
                 item.create_system = 3
                 # Preserve only ordinary rwx permissions, never setuid/setgid/sticky bits.
