@@ -85,9 +85,13 @@ MCPB host installation, actual runtime operation, or cross-platform acceptance.
 
 ## Before any distribution or Registry publication
 
-The fixture tests validate packaging logic, not working native binaries. This
-change has **no MCPB host installation or native-runtime acceptance yet**.
-Keep candidates unpublished until all applicable checks below are recorded:
+The fixture tests validate packaging logic, not working native binaries. The
+separate automated native smoke gate below can establish native stdio and
+same-version reinstall acceptance for a specific commit; consult its exact-head
+results rather than treating fixture tests as runtime evidence. Desktop MCPB host
+installation, signing/quarantine and cross-version migration remain separate
+acceptance requirements. Keep candidates unpublished until all applicable checks
+below are recorded:
 
 1. Validate `manifest.json` against the official MCPB schema/CLI.
 2. On Windows x64, Linux x64, macOS x64 and macOS arm64, install the matching
