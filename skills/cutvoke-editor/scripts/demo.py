@@ -228,9 +228,9 @@ class WebUploads:
         with self.opener.open(request, timeout=20) as response:
             return json.load(response)
 
-    def import_files(self, paths):
-        ids = [self.request("/api/v1/assets?" + urllib.parse.urlencode({"name": path.name}), path.read_bytes())["assetId"] for path in paths]
-        ledger = {a["assetId"]: a for a in self.request("/api/v1/assets")["assets"]}
+    def import_files(self, paths, project_id):
+        ids = [self.request("/api/v1/assets?" + urllib.parse.urlencode({"name": path.name, "projectId": project_id}), path.read_bytes())["assetId"] for path in paths]
+        ledger = {a["assetId"]: a for a in self.request("/api/v1/assets?" + urllib.parse.urlencode({"projectId": project_id}))["assets"]}
         assets = [ledger[asset_id] for asset_id in ids]
         if not all(a.get("available") for a in assets):
             raise RuntimeError("Supported browser upload did not produce available demo assets")
@@ -258,6 +258,13 @@ def run(command):
     if result.returncode:
         raise RuntimeError(result.stderr[-4000:])
     return result.stdout
+
+
+def project_outputs(mcp, project, output):
+    """Keep directory-project output inside its allowed export/backup roots."""
+    directory = mcp.call("project_directory", projectId=project)
+    return (Path(directory.get("exportDirectory", str(output))) / "trail-notes.mp4",
+            Path(directory.get("backupDirectory", str(output))) / "trail-notes.cvkpkg")
 
 
 def main():
@@ -300,20 +307,21 @@ def main():
         for name in ("edit.batch", "clip.insert", "clip.keyframe", "clip.audio", "caption.add", "export.enqueue"):
             mcp.call("editor_help", topic="command", command=name)
         mcp.call("editor_help", topic="command", command="effect.setTransition", effectId=args.effect_id)
+        created = mcp.call("create_project", projectId=project, name="Trail Notes · editable demo", width=WIDTH, height=HEIGHT, fps=30)
+        revision = created["revision"]
+        video, package = project_outputs(mcp, project, output)
         paths = [media / name for name in ("dawn.png", "lake.png", "dusk.png", "quiet-score.wav")]
         uploads = WebUploads(command, output / "data" / "projects.sqlite", output, args.effects_dir)
         if args.import_mode == "upload":
-            imported = uploads.import_files(paths)
+            imported = uploads.import_files(paths, project)
         else:
-            imported = mcp.call("media_import", paths=[str(path) for path in paths])["assets"]
-        browser_assets = {a["assetId"]: a for a in uploads.request("/api/v1/assets")["assets"]}
+            imported = mcp.call("media_import", projectId=project, paths=[str(path) for path in paths])["assets"]
+        browser_assets = {a["assetId"]: a for a in uploads.request("/api/v1/assets?" + urllib.parse.urlencode({"projectId": project}))["assets"]}
         browser_available = all(browser_assets.get(a["assetId"], {}).get("available") for a in imported)
         if not browser_available:
             raise RuntimeError("Imported demo media is unavailable to the human editor")
         for asset in imported:
             mcp.call("media_inspect", assetId=asset["assetId"])
-        created = mcp.call("create_project", projectId=project, name="Trail Notes · editable demo", width=WIDTH, height=HEIGHT, fps=30)
-        revision = created["revision"]
         lease = mcp.call("edit_lock", projectId=project, action="acquire", owner="cutvoke-skill-demo", ttlSeconds=120)["lease"]["leaseId"]
         rat = lambda n: {"num": str(n), "den": "1"}
         edits = []
@@ -356,10 +364,9 @@ def main():
         prepared = mcp.call("preview_prepare", projectId=project, expectedRevision=revision)
         ready = mcp.wait("preview_job", project, prepared["jobId"])
         job = mcp.call("command_apply", projectId=project, expectedRevision=revision, type="export.enqueue",
-                       commandId="export-trail-notes", payload={"outPath": str(output / "trail-notes.mp4"), "quality": "high", "overwrite": False})
+                       commandId="export-trail-notes", payload={"outPath": str(video), "quality": "high", "overwrite": False})
         exported = mcp.wait("export_job", project, job["changedEntities"][0]["jobId"])
-        mcp.call("project_package", projectId=project, expectedRevision=revision, outPath=str(output / "trail-notes.cvkpkg"))
-        video = output / "trail-notes.mp4"
+        mcp.call("project_package", projectId=project, expectedRevision=revision, outPath=str(package))
         probe = json.loads(run(["ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", str(video)]))
         streams = probe["streams"]
         v, a = next(s for s in streams if s["codec_type"] == "video"), next(s for s in streams if s["codec_type"] == "audio")
@@ -380,11 +387,12 @@ def main():
         if not (audio["startRms"] < audio["middleRms"] and audio["endRms"] < audio["middleRms"]):
             raise RuntimeError("Expected endpoint audio fades")
         evidence = {"projectId": project, "revision": revision, "duration": DURATION, "size": [WIDTH, HEIGHT],
+                    "videoPath": str(video.relative_to(output)), "packagePath": str(package.relative_to(output)),
                     "fps": "30/1", "codecs": ["h264", "aac"], "toolCount": len(tools), "effectId": args.effect_id,
                     "preflightReady": report["readyToRender"], "idempotentReplay": True, "fullDecode": True,
                     "importMode": args.import_mode, "browserAssetsAvailable": browser_available,
                     "sha256": hashlib.sha256(video.read_bytes()).hexdigest(), "audio": audio,
-                    "visualReview": "Inspect frames/frame-*.png and play trail-notes.mp4 before accepting artistic quality.",
+                    "visualReview": "Inspect frames/frame-*.png and play videoPath before accepting artistic quality.",
                     "sources": "Original procedural illustrations and synthesized chords; no user data or external service.",
                     "previewState": ready.get("state", ready.get("status")), "exportState": exported.get("state", exported.get("status"))}
         (output / "result.json").write_text(json.dumps(evidence, indent=2), encoding="utf-8")
