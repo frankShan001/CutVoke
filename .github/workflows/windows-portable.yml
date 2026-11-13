@@ -114,6 +114,27 @@ jobs:
           $env:PYTHONPATH = "$pwd/src;$pwd/.artifacts/windows-test-deps"
           $env:PATH = "$pwd/.artifacts/portable-ffmpeg/bin;$env:PATH"
           .artifacts/venv-portable/Scripts/python.exe -m pytest -q tests/storage/test_generated_source_handoff.py tests/storage/test_resource_install_paths.py tests/rendering/test_canvas_eof_clock.py tests/rendering/test_media_executable.py tests/interfaces/test_mcp_media_failures.py tests/integration/test_delivery_runtime.py
+      - name: Verify opt-in Quick Whip with real Chrome
+        timeout-minutes: 5
+        run: |
+          $env:PYTHONPATH = "$pwd/src;$pwd/.artifacts/windows-test-deps"
+          $env:PATH = "$pwd/.artifacts/venv-portable/Scripts;$pwd/.artifacts/portable-ffmpeg/bin;$env:PATH"
+          $env:CUTVOKE_E2E_PORT = "8801"
+          Push-Location apps/editor
+          npx playwright test --config playwright.quick-whip.config.ts
+          $testExit = $LASTEXITCODE
+          Pop-Location
+          exit $testExit
+      - name: Preserve Quick Whip Windows UI evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: quick-whip-windows-ui-evidence
+          path: |
+            .artifacts/quick-whip-ui/
+            .artifacts/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Freeze backend with bundled FFmpeg and product assets
         run: |
           $env:CUTVOKE_FFMPEG_DIR = (Resolve-Path .artifacts/portable-ffmpeg/bin).Path

@@ -142,6 +142,20 @@ jobs:
           npm run test:preview-cache
           npm run test:basic
           npx playwright install --with-deps chromium
+      - name: Verify opt-in Quick Whip in the editor
+        timeout-minutes: 5
+        working-directory: apps/editor
+        env:
+          CUTVOKE_E2E_PORT: "8801"
+        run: npm run build && npx playwright test --config playwright.quick-whip.config.ts
+      - name: Preserve Quick Whip UI evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: quick-whip-ui-evidence
+          path: .artifacts/quick-whip-ui/
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Run full editor scenarios
         id: editor_scenarios
         timeout-minutes: 40
