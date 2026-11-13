@@ -220,3 +220,79 @@ def test_legacy_materialized_fallback_survives_actual_store(tmp_path, mode):
     # should be silently reattached to the loaded project.
     assert restored.keyframes['x'][0].time == R.of(0)
     assert restored.keyframes['x'][-1].time == R.of(5)
+
+
+def encode_compat(clock):
+    """Prototype dual representation. Recovery is used only if still consistent."""
+    from cutvoke.domain.keyframes import crop_keyframes
+    return {'duration': clock.duration.to_json(),
+            'keyframes': {name: [k.to_dict() for k in crop_keyframes(
+                keys, clock.offset, clock.offset+clock.duration)]
+                for name, keys in clock.lanes.items()},
+            'prototypeRecovery': {'version': 1, 'offset': clock.offset.to_json(),
+                'lanes': {name: [k.to_dict() for k in keys]
+                          for name, keys in clock.lanes.items()}}}
+
+
+def decode_compat(wire):
+    """Return (clock, recovery retained). Never trust stale recovery authority.
+
+    Exact rematerialization comparison is conservative: a harmless old-client
+    rewrite may discard recovery. This is not an authenticated security format.
+    """
+    duration = R.from_json(**wire['duration'])
+    visible = {name: [Keyframe.from_dict(k) for k in keys]
+               for name, keys in wire['keyframes'].items()}
+    fallback = Clock(visible, R.of(0), duration)
+    recovery = wire.get('prototypeRecovery')
+    if not isinstance(recovery, dict) or recovery.get('version') != 1:
+        return fallback, False
+    try:
+        candidate = Clock({name: [Keyframe.from_dict(k) for k in keys]
+                          for name, keys in recovery['lanes'].items()},
+                          R.from_json(**recovery['offset']), duration)
+        if encode_compat(candidate)['keyframes'] == wire['keyframes']:
+            return candidate, True
+    except (KeyError, TypeError, ValueError, ZeroDivisionError):
+        pass
+    return fallback, False
+
+
+@pytest.mark.parametrize('mode', ['linear', 'ease-in', 'ease-out', 'hold', 'cubic-bezier'])
+def test_guarded_compat_recovery_and_stale_edits(tmp_path, mode):
+    keys = [Keyframe('a', R.of(0), 20, mode,
+                    (1/3, 0, 2/3, 1) if mode == 'cubic-bezier' else None),
+            Keyframe('b', R.of(10), 100)]
+    original = Clock({'x': keys}, R.of(0), R.of(10))
+    trimmed = original.trim(R.of(3), R.of(8))
+    path = tmp_path/'compat.json'
+    path.write_text(json.dumps(encode_compat(trimmed)))
+    wire = json.loads(path.read_text())
+    reopened, retained = decode_compat(wire)
+    assert retained
+    assert reopened.trim(R.of(-3), R.of(7)) == original
+    # Older client drops unknown recovery data: retain visible, do not invent it.
+    legacy = deepcopy(wire)
+    del legacy['prototypeRecovery']
+    fallback, retained = decode_compat(legacy)
+    assert not retained
+    for step in range(41):
+        assert fallback.value('x', R.of(step, 8)) == pytest.approx(
+            trimmed.value('x', R.of(step, 8)), abs=1e-8)
+    # Old client or partial write changes known fields while retaining unknown
+    # metadata. Comparing the entire materialization prevents resurrection.
+    for mutate in ['value', 'delete', 'retime', 'duration', 'recovery']:
+        stale = deepcopy(wire)
+        if mutate == 'value':
+            stale['keyframes']['x'][0]['value'] = 123
+        elif mutate == 'delete':
+            stale['keyframes'] = {}
+        elif mutate == 'retime':
+            stale['keyframes']['x'][-1]['time'] = R.of(4).to_json()
+        elif mutate == 'duration':
+            stale['duration'] = R.of(6).to_json()
+        else:
+            stale['prototypeRecovery']['version'] = 999
+        decoded, retained = decode_compat(stale)
+        assert not retained, mutate
+        assert {name: [k.to_dict() for k in keys] for name, keys in decoded.lanes.items()} == stale['keyframes']

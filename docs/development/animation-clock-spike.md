@@ -56,3 +56,15 @@ an alternative dual representation, not adoption of it. Reversible extension
 cannot survive an old-reader save unless another explicit protocol preserves it;
 never silently restore a stale sidecar after old-client edits. ProjectStore
 accepts the future schema marker `999`, confirming a bump is not a reader gate.
+
+## Guarded recovery codec experiment
+
+`encode_compat` materializes local visible curves; `decode_compat` accepts the
+canonical recovery only when rematerializing it exactly reproduces ALL visible
+lanes. Five mode tests reject stale value/deletion/retime/duration edits and
+unknown recovery versions, falling back to visible data instead of resurrecting
+stale animation. JSON roundtrip retains reversible extension when metadata is
+intact. Total **31 passed**. This is conservative consistency checking, not a
+security/authentication mechanism; innocuous serialization differences may lose
+recovery. Old-client writes that discard metadata still lose reversibility.
+This protocol remains isolated and is not adopted by production commands.
