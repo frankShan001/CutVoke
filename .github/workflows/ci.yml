@@ -40,12 +40,11 @@ jobs:
           cache: npm
           cache-dependency-path: apps/editor/package-lock.json
 
-      - name: Select official Ubuntu archive mirror
-        # Hosted Azure downloads stalled at about 26-43kB/s. Keep Ubuntu's
-        # signed package indexes and suites; change only the mirror endpoint.
+      - name: Inspect runner-provided Ubuntu mirrors
+        # Preserve the hosted image's official mirror ordering and fallback.
+        # Rewriting Azure to archive duplicated a host and prolonged DNS failures.
         run: |
           if [ -f /etc/apt/apt-mirrors.txt ]; then
-            sudo sed -i 's|https\?://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
             cat /etc/apt/apt-mirrors.txt
           fi
 
@@ -109,12 +108,14 @@ jobs:
         run: |
           npm ci --ignore-scripts
           npm run test:build-deps
-      - name: Select official Ubuntu archive mirror
+      - name: Inspect runner-provided Ubuntu mirrors
+        # Preserve the hosted image's official mirror ordering and fallback.
+        # Rewriting Azure to archive duplicated a host and prolonged DNS failures.
         run: |
           if [ -f /etc/apt/apt-mirrors.txt ]; then
-            sudo sed -i 's|https\?://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
             cat /etc/apt/apt-mirrors.txt
           fi
+
       # Keep installation phases separate so live job metadata identifies a
       # stalled apt index, FFmpeg package, pip resolver, or browser download.
       - name: Refresh Ubuntu package indexes
