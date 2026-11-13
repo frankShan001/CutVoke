@@ -3464,6 +3464,12 @@ class RenderService:
                 parts.append(f"[outa]apad=whole_dur={audio_end:.9f},"
                              f"atrim=end={audio_end:.9f},asetpts=PTS-STARTPTS[outa]")
 
+        elif has_audio:
+            # A short sound effect must not leave the delivery audio stream
+            # shorter than the picture timeline checked by audio integrity.
+            audio_end = max(audio_expected, video_expected + origin - audio_origin)
+            parts.append(f"[outa]apad=whole_dur={audio_end:.9f}[outa]")
+
         graph = ";".join(parts)
         graph = self._preview_seek_inputs(graph, input_paths, seq.fps.to_fraction())
         # 期望总时长取视频主轴与音频最长轨的较大者；amix duration=longest 与之对齐
