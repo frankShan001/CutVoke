@@ -120,3 +120,63 @@ def test_extension_before_original_origin_and_collision(tmp_path):
     assert Clock.open(tmp_path/'clock.json') == extended
     with pytest.raises(ValueError, match='collision'):
         extended.put('x', Keyframe('other', R.of(0), 4), R.of(1))
+
+
+def normalize_origin(clock):
+    """Design-only coordinate translation; offset and ALL lanes move together.
+
+    This is not a production migration. Persisting keys alone, or rebasing only
+    the edited lane, would change other animation. Derived lanes are excluded.
+    """
+    minimum = min((key.time for keys in clock.lanes.values() for key in keys),
+                  default=R.of(0))
+    shift = R.of(0) - minimum if minimum < R.of(0) else R.of(0)
+    return Clock({name: [replace(key, time=key.time + shift) for key in keys]
+                  for name, keys in clock.lanes.items()},
+                 clock.offset + shift, clock.duration)
+
+
+@pytest.mark.parametrize('fps', [R.of(24), R.of(30000, 1001)])
+@pytest.mark.parametrize('mode', ['linear', 'ease-in', 'ease-out', 'hold', 'cubic-bezier'])
+def test_atomic_origin_translation_preserves_all_lanes(tmp_path, fps, mode):
+    frame = R.of(1) / fps
+    duration = frame * R.of(60)
+    keys = [Keyframe('a', R.of(0), 20, mode,
+                    (1/3, 0, 2/3, 1) if mode == 'cubic-bezier' else None),
+            Keyframe('b', duration, 100)]
+    # Separate untouched lane exposes the bug in translating only edited keys.
+    source = Clock({'x': deepcopy(keys), 'opacity': deepcopy(keys)}, R.of(0), duration)
+    before = deepcopy(source)
+    extended = source.trim(frame*R.of(-10), frame*R.of(70))
+    extended.put('x', Keyframe('pre', R.of(0), 99), frame*R.of(2))
+    canonical = deepcopy(extended)
+    normalized = normalize_origin(extended)
+    assert source == before
+    assert normalized.offset == frame*R.of(-2)
+    assert all(k.time >= R.of(0) for keys in normalized.lanes.values() for k in keys)
+    assert normalize_origin(normalized) == normalized  # idempotent
+    for name in canonical.lanes:
+        for sample in range(81):
+            local = frame*R.of(sample)
+            assert normalized.value(name, local) == pytest.approx(canonical.value(name, local), abs=1e-8)
+    assert [k.id for k in normalized.lanes['x']] == [k.id for k in canonical.lanes['x']]
+    assert normalized.lanes['opacity'][0].time == frame*R.of(8)
+    path = tmp_path/'normalized.json'
+    normalized.save(path)
+    reopened = Clock.open(path)
+    assert reopened == normalized
+    # Multiple trim cycles add no fractional drift; restore both bounds exactly.
+    for _ in range(25):
+        reopened = reopened.trim(frame*R.of(3), reopened.duration-frame*R.of(4))
+        reopened = reopened.trim(frame*R.of(-3), reopened.duration+frame*R.of(4))
+    assert reopened == normalized
+    left, right = reopened.split(frame*R.of(17))
+    for part, origin in [(left, 0), (right, 17)]:
+        for sample in range(int((part.duration/frame).to_fraction())+1):
+            for name in reopened.lanes:
+                assert part.value(name, frame*R.of(sample)) == pytest.approx(
+                    canonical.value(name, frame*R.of(origin+sample)), abs=1e-8)
+    # Edit by existing identity after translation maps the new local time once.
+    right.put('x', Keyframe('pre', R.of(0), 41), frame*R.of(5))
+    assert right.value('x', frame*R.of(5)) == 41
+    assert left.value('x', frame*R.of(2)) == 99
