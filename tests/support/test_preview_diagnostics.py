@@ -64,7 +64,7 @@ def test_success_private_nested_and_restored():
     data = records(out)
     assert {r['stage'] for r in data} == {'preview', 'current', 'slot', 'extract', 'compile'}
     assert not any(x in out.getvalue() for x in ('private', 'secret', 'compiled', 'token'))
-    assert all(set(r) == {'stage','event','elapsed_s','thread_id','id','parent_id'} for r in data)
+    assert all(set(r) == {'stage','event','elapsed_s','t_s','thread_id','id','parent_id'} for r in data)
     assert all(r['elapsed_s'] >= 0 for r in data)
     starts = {r['stage']: r for r in data if r['event'] == 'start'}
     assert starts['compile']['parent_id'] == starts['extract']['id']
@@ -138,3 +138,59 @@ def test_start_is_flushed_before_stage_body():
     api.render._compile = check
     with install_preview_diagnostics(api, out, enabled=True):
         assert api.render._compile() == 123
+
+
+class CatalogApi(Api):
+    def __init__(self):
+        super().__init__()
+        self.child = Api()
+        self.child.render = self.render
+
+    def project_api(self, project_id):
+        return self.child
+
+
+def test_child_api_shared_renderer_and_restore():
+    api, out = CatalogApi(), io.StringIO()
+    objects = (api, api.child, api.render, api._frame_scheduler, api.child._frame_scheduler)
+    before = [dict(vars(obj)) for obj in objects]
+    with install_preview_diagnostics(api, out, enabled=True):
+        renderer_wrapper = api.render.extract_frame
+        child = api.project_api('private-id')
+        assert child is api.child
+        assert api.project_api('another-private-id') is child
+        assert api.render.extract_frame is renderer_wrapper
+        assert child._preview_frame_file('secret') == 'compiled'
+    before[-1]['released'] = True
+    assert before == [dict(vars(obj)) for obj in objects]
+    starts = [r for r in records(out) if r['event'] == 'start']
+    assert [r['stage'] for r in starts] == ['preview','current','slot','extract','compile']
+    assert all(r['t_s'] >= 0 for r in records(out))
+    assert [r['t_s'] for r in records(out)] == sorted(r['t_s'] for r in records(out))
+    assert 'private' not in out.getvalue() and 'secret' not in out.getvalue()
+
+
+def test_concurrent_child_install_deduplicates():
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+    api, out = CatalogApi(), io.StringIO()
+    barrier = threading.Barrier(8)
+    def request(index):
+        barrier.wait(timeout=5)
+        child = api.project_api('private-' + str(index))
+        return child._preview_frame_file('secret')
+    with install_preview_diagnostics(api, out, enabled=True):
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            assert list(pool.map(request, range(8))) == ['compiled'] * 8
+    starts = [r for r in records(out) if r['event'] == 'start']
+    for stage in ('preview','current','slot','extract','compile'):
+        assert sum(r['stage'] == stage for r in starts) == 8
+    assert len({r['id'] for r in starts}) == 40
+    by_id = {r['id']: r for r in starts}
+    for row in starts:
+        if row['parent_id'] is not None:
+            assert by_id[row['parent_id']]['thread_id'] == row['thread_id']
+    for obj, name in ((api,'project_api'), (api.child,'_preview_frame_file'),
+                      (api.child._frame_scheduler,'slot'), (api.render,'extract_frame')):
+        assert name not in vars(obj)
+    assert 'private' not in out.getvalue() and 'secret' not in out.getvalue()

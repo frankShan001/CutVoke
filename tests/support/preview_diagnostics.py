@@ -6,6 +6,9 @@ import json
 import threading
 import time
 
+# Shared process-local monotonic origin across diagnostic contexts.
+_PROCESS_ORIGIN = time.monotonic()
+
 
 @contextmanager
 def install_preview_diagnostics(api, output, *, enabled=False, max_records=10000):
@@ -24,6 +27,9 @@ def install_preview_diagnostics(api, output, *, enabled=False, max_records=10000
     serial = itertools.count(1)
     count = 0
     saved = []
+    install_lock = threading.RLock()
+    installed = set()
+    active = True
 
     def emit(stage, event, ident, parent, started):
         nonlocal count
@@ -33,7 +39,9 @@ def install_preview_diagnostics(api, output, *, enabled=False, max_records=10000
             if count == max_records:
                 stage, event = 'diagnostics', 'truncated'
             count += 1
-            record = dict(stage=stage, event=event, elapsed_s=time.monotonic()-started,
+            now = time.monotonic()
+            record = dict(stage=stage, event=event, elapsed_s=now-started,
+                          t_s=now-_PROCESS_ORIGIN,
                           thread_id=threading.get_ident(), id=ident, parent_id=parent)
             try:
                 output.write(json.dumps(record) + '\n')
@@ -62,11 +70,21 @@ def install_preview_diagnostics(api, output, *, enabled=False, max_records=10000
         finally:
             stack.pop()
 
-    def install(obj, name, stage, slot=False):
+    def install(obj, name, stage=None, slot=False, factory=False):
+        # Called only while holding install_lock; saved references prevent id reuse.
+        key = (id(obj), name)
+        if key in installed:
+            return
         original = getattr(obj, name)
         had = name in vars(obj)
         previous = vars(obj).get(name)
-        if slot:
+        if factory:
+            @wraps(original)
+            def wrapper(*args, **kwargs):
+                child = original(*args, **kwargs)
+                instrument(child)
+                return child
+        elif slot:
             @wraps(original)
             @contextmanager
             def wrapper(*args, **kwargs):
@@ -88,17 +106,28 @@ def install_preview_diagnostics(api, output, *, enabled=False, max_records=10000
                     return original(*args, **kwargs)
         setattr(obj, name, wrapper)
         saved.append((obj, name, had, previous))
+        installed.add(key)
+
+    def instrument(instance):
+        with install_lock:
+            if not active:
+                return
+            install(instance, '_preview_frame_file', 'preview')
+            install(instance._frame_scheduler, 'slot', 'slot', slot=True)
+            install(instance, '_require_current_preview', 'current')
+            install(instance.render, 'extract_frame', 'extract')
+            install(instance.render, '_compile', 'compile')
+            if hasattr(instance, 'project_api'):
+                install(instance, 'project_api', factory=True)
 
     try:
-        install(api, '_preview_frame_file', 'preview')
-        install(api._frame_scheduler, 'slot', 'slot', slot=True)
-        install(api, '_require_current_preview', 'current')
-        install(api.render, 'extract_frame', 'extract')
-        install(api.render, '_compile', 'compile')
+        instrument(api)
         yield
     finally:
-        for obj, name, had, previous in reversed(saved):
-            if had:
-                setattr(obj, name, previous)
-            else:
-                delattr(obj, name)
+        with install_lock:
+            active = False
+            for obj, name, had, previous in reversed(saved):
+                if had:
+                    setattr(obj, name, previous)
+                else:
+                    delattr(obj, name)
