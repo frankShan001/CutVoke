@@ -19,6 +19,7 @@ on:
       - src/**
       - apps/editor/**
       - tools/build/**
+      - tools/verify/verify_native_mcpb.py
       - tools/verify/verify_native_preview.cjs
       - tools/verify/verify_native_transition.cjs
       - tests/rendering/test_canvas_eof_clock.py
@@ -175,6 +176,21 @@ jobs:
             openbox > /tmp/cutvoke-openbox.log 2>&1 &
             node tools/verify/verify_portable_unix.cjs
           '
+      - name: Verify official MCPB extraction and native stdio with external data
+        timeout-minutes: 15
+        run: python tools/verify/verify_native_mcpb.py
+      - name: Preserve native MCPB evidence (not a distributable candidate)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.target }}-mcpb-evidence
+          path: |
+            .artifacts/acceptance/mcpb/*.json
+            .artifacts/acceptance/mcpb/*.jsonl
+            .artifacts/acceptance/mcpb/*.log
+            .artifacts/acceptance/mcpb/*.png
+          retention-days: 14
+          if-no-files-found: warn
       - name: Upload verified download
         uses: actions/upload-artifact@v7
         with:
