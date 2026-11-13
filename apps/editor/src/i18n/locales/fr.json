@@ -2212,5 +2212,14 @@
   "确认接管": "Confirmer la reprise",
   "确认接管编辑": "Confirmer la reprise de l’édition",
   "租约剩余 {0} 秒": "Droit d’édition : encore {0} s",
-  "租约已变化，请确认当前 Agent 后重试。": "Le droit d’édition a changé. Vérifiez l’agent actuel avant de réessayer."
+  "租约已变化，请确认当前 Agent 后重试。": "Le droit d’édition a changé. Vérifiez l’agent actuel avant de réessayer.",
+  "正在读取…": "Lecture…",
+  "查看本次租约的修改": "Examiner les modifications pendant ce bail",
+  "无法读取修改，请刷新工程后重试。": "Impossible de lire les modifications. Actualisez le projet et réessayez.",
+  "未记录此租约的起始版本。": "Aucune révision initiale enregistrée pour ce bail.",
+  "租约版本 {0} → {1}": "Révisions du bail {0} → {1}",
+  "仅包含版本化编辑，不含重命名、导出或其他无版本操作。": "Modifications versionnées uniquement ; les renommages, exports et autres opérations non versionnées sont exclus.",
+  "没有已提交的修改。": "Aucune modification validée.",
+  "版本 {0} → {1} · 命令 {2} · {3} 个对象": "Révision {0} → {1} · Commande {2} · {3} entités",
+  "仅显示最近的修改。": "Seules les modifications les plus récentes sont affichées."
 }

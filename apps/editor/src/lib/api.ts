@@ -239,6 +239,20 @@ export async function getEditLock(projectId: string): Promise<EditLockStatus> {
   } finally { globalThis.clearTimeout(timeout); }
 }
 
+export interface EditLeaseReview {
+  projectId: string;
+  leaseId: string;
+  available: boolean;
+  acquiredRevision: string | null;
+  revision: string;
+  hasMore: boolean;
+  changes: Array<{ previousRevision: string; revision: string; commandId: string; entityCount: number; entityKinds: Array<{ type: string; change: string; count: number }> }>;
+}
+
+export async function reviewEditLease(projectId: string, leaseId: string): Promise<EditLeaseReview> {
+  return post<EditLeaseReview>(`/projects/${encodeURIComponent(projectId)}/edit-lock/review`, { leaseId, limit: 20 });
+}
+
 export interface EditLockTakeoverStatus extends EditLockStatus {
   status: "taken-over" | "lease-changed" | "not-held" | "expired";
   takenOver: boolean;

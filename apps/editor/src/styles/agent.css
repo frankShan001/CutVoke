@@ -248,3 +248,7 @@
 
 .agent-edit-lock__confirm { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .agent-edit-lock__confirm p { flex-basis: 100%; margin: 0; }
+
+.agent-edit-lock__review { flex-basis: 100%; max-height: min(45vh, 320px); overflow: auto; overflow-wrap: anywhere; }
+.agent-edit-lock__review p { margin: 4px 0; }
+.agent-edit-lock__review ol { margin: 8px 0; padding-inline-start: 24px; }

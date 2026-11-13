@@ -249,3 +249,39 @@ test('an unresponsive lease poll times out conservatively and learns the replace
     expect(calls).toBeGreaterThan(1);
     release.release();
 });
+
+test('lease review shows only current committed summaries and ignores replaced-lease replies', async ({ page, request }) => {
+    const id = await seed(request, 'review'), lease = await lock(request, id, 'review-agent');
+    expect((await request.post(`/api/v1/projects/${id}/commands`, { data: {
+        type: 'track.add', payload: { trackId: 'lease-track', kind: 'audio' }, commandId: 'review-track',
+        expectedRevision: '1', editLeaseId: lease.leaseId, actor: { kind: 'agent', id: 'review-agent' }
+    } })).ok()).toBeTruthy();
+    await open(page, id);
+    const notice = page.locator('.agent-edit-lock');
+    await notice.getByRole('button', { name: '查看本次租约的修改', exact: true }).click();
+    const panel = notice.getByRole('region', { name: '查看本次租约的修改' });
+    await expect(panel).toContainText('租约版本 1 → 2');
+    await expect(panel).toContainText('track: created ×1');
+    await expect(panel).not.toContainText(`${id}-caption`);
+    await expect(panel).not.toContainText('Agent 原字幕');
+    mkdirSync(resolve('../../.artifacts/checks/lease-review'), { recursive: true });
+    await page.screenshot({ path: resolve('../../.artifacts/checks/lease-review/revisions.png') });
+
+    const held = gate(), arrived = gate(), delivered = gate();
+    await page.route(`**/projects/${id}/edit-lock/review`, async route => {
+        const response = await route.fetch(); arrived.release(); await held.promise; await route.fulfill({ response }); delivered.release();
+    });
+    await notice.getByRole('button', { name: '查看本次租约的修改', exact: true }).click();
+    await arrived.promise;
+    expect((await request.post(`/api/v1/projects/${id}/edit-lock/release`, { data: { leaseId: lease.leaseId } })).ok()).toBeTruthy();
+    await lock(request, id, 'replacement-agent');
+    await expect(notice).toContainText('replacement-agent', { timeout: 15000 });
+    held.release();
+    await delivered.promise;
+    await expect(panel).toHaveCount(0);
+    await page.unroute(`**/projects/${id}/edit-lock/review`);
+    await notice.getByRole('button', { name: '查看本次租约的修改', exact: true }).click();
+    await expect(panel).toContainText('租约版本 2 → 2');
+    await expect(panel).toContainText('没有已提交的修改。');
+    await expect(panel).not.toContainText('review-track');
+});

@@ -348,6 +348,7 @@ class EditService:
         # project_id -> [snapshot, ...]  重做栈（undo 时弹出的快照）
         self._redo_stack: dict[str, list[Project]] = {}
         self._edit_leases: dict[str, dict] = {}
+        self._lease_review_boundaries: dict[str, tuple[int, str]] = {}
         self._issued_edit_leases: set[tuple[str, str]] = set()
         self._memory_lease_guard = threading.RLock()
         # 可选持久化存储（T08）：传入则每次提交后持久化到 SQLite
@@ -1797,10 +1798,54 @@ class EditService:
                 "expiresAt": now + ttl,
                 "acquiredAt": current["acquiredAt"] if current else now,
             }
+            if current is None:
+                self._lease_review_boundaries[project_id] = (
+                    len(self._events.get(project_id, [])), self.get_project(project_id).revision)
             self._edit_leases[project_id] = lease
             return dict(lease)
         except EditLeaseConflict as e:
             raise self._lease_failure(e) from e
+
+    @_serialize_memory_lease
+    def review_edit_lease(self, project_id: str, lease_id: str, limit: int = 20) -> dict:
+        """Bounded revision summaries, not payloads or a complete audit of side effects."""
+        if not isinstance(lease_id, str) or not lease_id.strip():
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "leaseId is required")
+        if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 50:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "limit must be an integer from 1 to 50")
+        if self._store is not None:
+            try:
+                result = self._store.review_edit_lease(project_id, lease_id, limit)
+            except EditLeaseConflict as exc:
+                raise self._lease_failure(exc) from exc
+        else:
+            current = self.get_edit_lease(project_id)
+            if current is None or current["leaseId"] != lease_id:
+                raise EditError(ErrorCode.EDIT_LEASE_INVALID, "Edit lease changed or expired. Refresh the project.")
+            boundary = self._lease_review_boundaries.get(project_id)
+            events = self._events.get(project_id, [])[boundary[0]:] if boundary else []
+            result = dict(available=boundary is not None, acquiredRevision=boundary[1] if boundary else None,
+                          revision=self.get_project(project_id).revision,
+                          events=[e.to_dict() for e in events[-limit:]], hasMore=len(events) > limit)
+        # Whitelist metadata: changedEntities can contain caption text, paths, or
+        # nested snapshots. Never return those payloads from this review view.
+        def summary(event):
+            counts: dict[tuple[str, str], int] = {}
+            entities = event.get("changedEntities", [])
+            for entity in entities:
+                def label(key):
+                    value = str(entity.get(key, "other"))
+                    return value if len(value) <= 64 and value.replace("_", "").replace(".", "").isalnum() else "other"
+                key = (label("type"), label("change"))
+                if key not in counts and len(counts) >= 12:
+                    key = ("other", "other")
+                counts[key] = counts.get(key, 0) + 1
+            return dict(previousRevision=event.get("previousRevision", ""),
+                        revision=event.get("revision", ""), commandId=str(event.get("commandId", ""))[:256],
+                        entityCount=len(entities),
+                        entityKinds=[dict(type=k[0], change=k[1], count=v) for k, v in counts.items()])
+        result["changes"] = [summary(e) for e in result.pop("events")]
+        return dict(projectId=project_id, leaseId=lease_id, **result)
 
     @_serialize_memory_lease
     def renew_edit_lease(self, project_id: str, lease_id: str,
