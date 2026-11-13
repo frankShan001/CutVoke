@@ -1219,6 +1219,8 @@ def _prepare_static_masks(method):
         render_started=time.monotonic()
         arguments = signature.bind(self, project, *args, **kwargs)
         cancel = arguments.arguments.get("cancel_event")
+        if cancel is not None and cancel.is_set():
+            raise RenderCancelled("render cancelled before preparation")
         values = arguments.arguments
         callback = values.get('progress_callback')
         if callback:
