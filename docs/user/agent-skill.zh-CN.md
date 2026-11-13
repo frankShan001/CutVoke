@@ -67,7 +67,7 @@ cutvoke serve --data .artifacts/skill-demo/data
 
 打开 `http://127.0.0.1:8787`，选择 **Trail Notes · editable demo**。若已有服务占用 8787，使用空闲端口。脚本要求一个**尚不存在的输出目录**，自行绘制插画并合成和弦，不读取默认用户工程库，不下载模型，不调用外部服务。
 
-产物包含 `trail-notes.mp4`、`trail-notes.cvkpkg`、`data/projects.sqlite`、持久素材、六张真实预览帧、`result.json`、`calls.json` 和 MCP 诊断日志。保留整个目录即可继续编辑。默认使用内置叠化；[特效贡献指南](../../effects/README.md) 演示如何改用本地社区清单。
+产物包含工程 `exports/` 目录中的 `trail-notes.mp4`、`backups/` 中的 `trail-notes.cvkpkg`（`result.json` 的 `videoPath` 与 `packagePath` 记录相对路径）、`data/projects.sqlite`、持久素材、六张真实预览帧、`result.json`、`calls.json` 和 MCP 诊断日志。保留整个目录即可继续编辑。默认使用内置叠化；[特效贡献指南](../../effects/README.md) 演示如何改用本地社区清单。
 
 脚本默认通过真实 stdio MCP 导入、编辑，读取运行时 schema，执行预检、准备连续预览、导出 H.264/AAC，检查尺寸、帧率、时长及全片解码，测量音频峰值和首尾淡入淡出，并检查相同命令重试不会增加编辑版本。它只启停自己创建的临时 Web 服务，核对 MCP 导入的同一批素材在人工编辑器中可用。新导入使用统一路径，旧 MCP 导入按严格规则保持可用。详见 [演示截图及验证边界](../images/readme/README.md)；`--import-mode upload` 可单独检查本机 HTTP 上传路径。
 
