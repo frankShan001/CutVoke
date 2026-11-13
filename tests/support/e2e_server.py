@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from contextlib import ExitStack
 import subprocess
 import tempfile
 from pathlib import Path
@@ -73,7 +74,17 @@ def main() -> None:
             service = EditService(store=ProjectLibraryStore(os.path.join(root, "projects.sqlite")))
         api = HttpApi(service, RenderService(), media_dir=os.path.join(root, "media"))
         try:
-            serve(api, host="127.0.0.1", port=port, web_dir=str(web_dir))
+            with ExitStack() as diagnostics:
+                # Test-only, opt-in timing; never record paths, project content or errors.
+                if os.environ.get("CUTVOKE_E2E_PREVIEW_DIAGNOSTICS") == "1":
+                    from preview_diagnostics import install_preview_diagnostics
+                    logs = Path(__file__).resolve().parents[2] / ".artifacts" / "preview-diagnostics"
+                    logs.mkdir(parents=True, exist_ok=True)
+                    stream = diagnostics.enter_context(tempfile.NamedTemporaryFile(
+                        mode="w", encoding="utf-8", prefix="preview-", suffix=".jsonl",
+                        dir=logs, delete=False))
+                    diagnostics.enter_context(install_preview_diagnostics(api, stream, enabled=True))
+                serve(api, host="127.0.0.1", port=port, web_dir=str(web_dir))
         finally:
             api.close()
 
