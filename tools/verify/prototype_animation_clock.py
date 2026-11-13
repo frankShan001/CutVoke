@@ -180,3 +180,43 @@ def test_atomic_origin_translation_preserves_all_lanes(tmp_path, fps, mode):
     right.put('x', Keyframe('pre', R.of(0), 41), frame*R.of(5))
     assert right.value('x', frame*R.of(5)) == 41
     assert left.value('x', frame*R.of(2)) == 99
+
+
+@pytest.mark.parametrize('mode', ['linear', 'ease-in', 'ease-out', 'hold', 'cubic-bezier'])
+def test_legacy_materialized_fallback_survives_actual_store(tmp_path, mode):
+    """Probe compatibility alternative; recovery metadata is LOST on old save."""
+    from cutvoke.domain.keyframes import crop_keyframes
+    from cutvoke.domain.model import Clip, Project, Sequence, Track
+    from cutvoke.storage.store import ProjectStore
+    keys = [Keyframe('a', R.of(0), 20, mode,
+                    (1/3, 0, 2/3, 1) if mode == 'cubic-bezier' else None),
+            Keyframe('b', R.of(10), 100)]
+    canonical = Clock({'x': keys}, R.of(3), R.of(5))
+    visible = crop_keyframes(keys, R.of(3), R.of(8))
+    wire = {'id': 'c', 'assetRef': {'assetId': 'a'},
+            'timelineStart': R.of(0).to_json(), 'timelineEnd': R.of(5).to_json(),
+            'sourceStart': R.of(3).to_json(),
+            'keyframes': {'x': [k.to_dict() for k in visible]},
+            'prototypeRecovery': {'offset': R.of(3).to_json(),
+                                  'x': [k.to_dict() for k in keys]}}
+    clip = Clip.from_dict(wire)  # existing reader, not a new schema implementation
+    assert 'prototypeRecovery' not in clip.to_dict()
+    project = Project('999', 'p', 'r', Sequence('s', 160, 90, R.of(24),
+                       tracks=[Track('v', 'video', clips=[clip])]))
+    path = str(tmp_path/'legacy.sqlite')
+    with ProjectStore(path) as store:
+        store.save(project)
+    with ProjectStore(path) as store:
+        loaded = store.load('p')
+        assert loaded.schema_version == '999'  # bump alone is not rejection
+        restored = loaded.sequence.tracks[0].clips[0]
+        assert 'prototypeRecovery' not in restored.to_dict()
+        for sample in range(41):
+            local = R.of(sample, 8)
+            assert evaluate(restored.keyframes['x'], local) == pytest.approx(
+                canonical.value('x', local), abs=1e-8)
+    # Legacy rendering keeps visible motion, but cannot reconstruct original
+    # pre-trim keys after recovery metadata was discarded. No stale sidecar
+    # should be silently reattached to the loaded project.
+    assert restored.keyframes['x'][0].time == R.of(0)
+    assert restored.keyframes['x'][-1].time == R.of(5)

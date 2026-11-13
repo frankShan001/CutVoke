@@ -45,3 +45,14 @@ key; all readers must use the offset. An old reader ignoring it would still
 misrender. A safe integration still needs schema/version policy, atomic command
 history persistence, renderer/browser parity and derived-lane exclusion. No
 production model change is included or implied by these passing tests.
+
+## Legacy-reader materialized fallback probe
+
+Five additional tests use the real existing Clip reader and ProjectStore SQLite
+save/close/reopen. A visible local crop alongside hypothetical recovery metadata
+preserves visible interpolation in all five modes, but the old reader discards
+recovery metadata. Total: **26 passed**. This is a compatibility experiment for
+an alternative dual representation, not adoption of it. Reversible extension
+cannot survive an old-reader save unless another explicit protocol preserves it;
+never silently restore a stale sidecar after old-client edits. ProjectStore
+accepts the future schema marker `999`, confirming a bump is not a reader gate.
