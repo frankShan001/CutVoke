@@ -83,7 +83,7 @@ def main() -> None:
                     stream = diagnostics.enter_context(tempfile.NamedTemporaryFile(
                         mode="w", encoding="utf-8", prefix="preview-", suffix=".jsonl",
                         dir=logs, delete=False))
-                    diagnostics.enter_context(install_preview_diagnostics(api, stream, enabled=True))
+                    diagnostics.enter_context(install_preview_diagnostics(api, stream, enabled=True, compile_stages=True))
                 serve(api, host="127.0.0.1", port=port, web_dir=str(web_dir))
         finally:
             api.close()

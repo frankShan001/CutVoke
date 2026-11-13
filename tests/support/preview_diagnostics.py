@@ -1,6 +1,7 @@
 """Opt-in, test-server-only preview timing; never records arguments or errors."""
 from contextlib import contextmanager
 from functools import wraps
+import importlib
 import itertools
 import json
 import threading
@@ -8,14 +9,17 @@ import time
 
 # Shared process-local monotonic origin across diagnostic contexts.
 _PROCESS_ORIGIN = time.monotonic()
+_MODULE_INSTALL_LOCK = threading.Lock()
 
 
 @contextmanager
-def install_preview_diagnostics(api, output, *, enabled=False, max_records=10000):
+def install_preview_diagnostics(api, output, *, enabled=False, max_records=10000,
+                                compile_stages=False):
     """Temporarily instrument one isolated API instance; disabled by default.
 
     Enable only in an explicit e2e server opt-in. Exit after request threads have
-    stopped. Output failures are ignored so instrumentation cannot break previews.
+    stopped. compile_stages patches module call sites exclusively; install before
+    starting request threads. Output failures are ignored so instrumentation cannot break previews.
     """
     if not enabled:
         yield
@@ -30,6 +34,7 @@ def install_preview_diagnostics(api, output, *, enabled=False, max_records=10000
     install_lock = threading.RLock()
     installed = set()
     active = True
+    owns_modules = False
 
     def emit(stage, event, ident, parent, started):
         nonlocal count
@@ -70,7 +75,7 @@ def install_preview_diagnostics(api, output, *, enabled=False, max_records=10000
         finally:
             stack.pop()
 
-    def install(obj, name, stage=None, slot=False, factory=False):
+    def install(obj, name, stage=None, slot=False, factory=False, compile_only=False):
         # Called only while holding install_lock; saved references prevent id reuse.
         key = (id(obj), name)
         if key in installed:
@@ -102,8 +107,17 @@ def install_preview_diagnostics(api, output, *, enabled=False, max_records=10000
         else:
             @wraps(original)
             def wrapper(*args, **kwargs):
-                with span(stage):
+                depth = getattr(local, 'compile_depth', 0)
+                if compile_only and not depth:
                     return original(*args, **kwargs)
+                if stage == 'compile':
+                    local.compile_depth = depth + 1
+                try:
+                    with span(stage):
+                        return original(*args, **kwargs)
+                finally:
+                    if stage == 'compile':
+                        local.compile_depth = depth
         setattr(obj, name, wrapper)
         saved.append((obj, name, had, previous))
         installed.add(key)
@@ -117,10 +131,29 @@ def install_preview_diagnostics(api, output, *, enabled=False, max_records=10000
             install(instance, '_require_current_preview', 'current')
             install(instance.render, 'extract_frame', 'extract')
             install(instance.render, '_compile', 'compile')
+            if compile_stages:
+                for name, stage in (('probe_media', 'compile_probe'),
+                                    ('_build_video_track', 'compile_video')):
+                    if hasattr(instance.render, name):
+                        install(instance.render, name, stage, compile_only=True)
             if hasattr(instance, 'project_api'):
                 install(instance, 'project_api', factory=True)
 
     try:
+        if compile_stages:
+            owns_modules = _MODULE_INSTALL_LOCK.acquire(blocking=False)
+            if not owns_modules:
+                raise RuntimeError('compile diagnostics already installed')
+            targets = (
+                ('cutvoke.rendering.render', 'prepare_caption_render', 'caption_prepare'),
+                ('cutvoke.rendering.caption_render', '_caption_font_instance', 'caption_font'),
+                ('cutvoke.rendering.caption_render', '_font_source_digest', 'font_digest'),
+                ('fontTools.varLib.instancer', 'instantiateVariableFont', 'font_instantiate'),
+                ('cutvoke.rendering.caption_render', 'build_ass', 'caption_ass'),
+            )
+            with install_lock:
+                for module, name, stage in targets:
+                    install(importlib.import_module(module), name, stage, compile_only=True)
         instrument(api)
         yield
     finally:
@@ -131,3 +164,5 @@ def install_preview_diagnostics(api, output, *, enabled=False, max_records=10000
                     setattr(obj, name, previous)
                 else:
                     delattr(obj, name)
+        if owns_modules:
+            _MODULE_INSTALL_LOCK.release()

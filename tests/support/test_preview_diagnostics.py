@@ -194,3 +194,110 @@ def test_concurrent_child_install_deduplicates():
                       (api.child._frame_scheduler,'slot'), (api.render,'extract_frame')):
         assert name not in vars(obj)
     assert 'private' not in out.getvalue() and 'secret' not in out.getvalue()
+
+
+def compile_fixture(monkeypatch):
+    import cutvoke.rendering.render as rendering
+    import cutvoke.rendering.caption_render as caption
+    import fontTools.varLib.instancer as instancer
+    from functools import lru_cache
+    calls = []
+    @lru_cache(maxsize=16)
+    def digest(*args):
+        calls.append('digest')
+        return 1
+    monkeypatch.setattr(caption, '_font_source_digest', digest)
+    monkeypatch.setattr(instancer, 'instantiateVariableFont', lambda *a, **k: 2)
+    def font(*args, **kwargs):
+        from fontTools.varLib.instancer import instantiateVariableFont
+        return caption._font_source_digest('secret-path') + instantiateVariableFont('secret-font')
+    monkeypatch.setattr(caption, '_caption_font_instance', font)
+    monkeypatch.setattr(caption, 'build_ass', lambda *a, **k: 4)
+    def prepare(*args, **kwargs):
+        return caption._caption_font_instance() + caption.build_ass()
+    # Simulate render.py's already-imported function alias.
+    monkeypatch.setattr(caption, 'prepare_caption_render', prepare)
+    monkeypatch.setattr(rendering, 'prepare_caption_render', prepare)
+    api = Api()
+    api.render.probe_media = lambda *a: 5
+    api.render._build_video_track = lambda *a: 6
+    def compile(*args, **kwargs):
+        return api.render.probe_media('secret') + api.render._build_video_track() + rendering.prepare_caption_render()
+    api.render._compile = compile
+    return api, rendering, caption, instancer, digest, calls
+
+
+def test_compile_substages_alias_cache_scope_restore(monkeypatch):
+    api, rendering, caption, instancer, digest, calls = compile_fixture(monkeypatch)
+    targets = [(rendering,'prepare_caption_render'), (caption,'_caption_font_instance'),
+               (caption,'_font_source_digest'), (caption,'build_ass'),
+               (instancer,'instantiateVariableFont'), (api.render,'probe_media'),
+               (api.render,'_build_video_track')]
+    before = [getattr(obj,name) for obj,name in targets]
+    out = io.StringIO()
+    with install_preview_diagnostics(api, out, enabled=True, compile_stages=True):
+        assert rendering.prepare_caption_render() == 7
+        assert out.getvalue() == ''  # Outside compile, even on instrumented thread.
+        assert api.render._compile() == 18
+        assert api.render._compile() == 18
+    assert all(getattr(obj,name) is old for (obj,name),old in zip(targets,before))
+    assert calls == ['digest']  # The original cache was retained, not cleared.
+    assert digest.cache_info().hits == 2
+    expected = {'compile','compile_probe','compile_video','caption_prepare','caption_font',
+                'font_digest','font_instantiate','caption_ass'}
+    assert {r['stage'] for r in records(out)} == expected
+    assert 'secret' not in out.getvalue()
+
+
+def test_compile_modules_concurrent_exclusive_exception(monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    import threading
+    api, rendering, caption, instancer, digest, calls = compile_fixture(monkeypatch)
+    out = io.StringIO()
+    barrier = threading.Barrier(4)
+    def request(_):
+        barrier.wait(timeout=5)
+        return api.render._compile()
+    original = rendering.prepare_caption_render
+    with install_preview_diagnostics(api, out, enabled=True, compile_stages=True):
+        with pytest.raises(RuntimeError, match='already installed'):
+            with install_preview_diagnostics(Api(), io.StringIO(), enabled=True, compile_stages=True):
+                pass
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            assert list(pool.map(request, range(4))) == [18]*4
+    starts = [r for r in records(out) if r['event']=='start']
+    parents = {r['id']:r for r in starts}
+    for row in starts:
+        if row['parent_id'] is not None:
+            assert parents[row['parent_id']]['thread_id'] == row['thread_id']
+    assert sum(r['stage']=='caption_prepare' for r in starts) == 4
+    assert rendering.prepare_caption_render is original
+    error = RuntimeError('private error')
+    def fail(*a, **k):
+        raise error
+    monkeypatch.setattr(rendering, 'prepare_caption_render', fail)
+    with install_preview_diagnostics(api, out, enabled=True, compile_stages=True):
+        with pytest.raises(RuntimeError) as caught:
+            api.render._compile()
+        assert caught.value is error
+    assert rendering.prepare_caption_render is fail
+    assert 'private error' not in out.getvalue()
+
+
+def test_partial_install_failure_restores_and_unlocks(monkeypatch):
+    import preview_diagnostics as diagnostics
+    api, rendering, caption, instancer, digest, calls = compile_fixture(monkeypatch)
+    original = rendering.prepare_caption_render
+    real_import = diagnostics.importlib.import_module
+    def broken_import(name):
+        if name == 'cutvoke.rendering.caption_render':
+            raise ImportError('private import failure')
+        return real_import(name)
+    with monkeypatch.context() as patch:
+        patch.setattr(diagnostics.importlib, 'import_module', broken_import)
+        with pytest.raises(ImportError):
+            with install_preview_diagnostics(api, io.StringIO(), enabled=True, compile_stages=True):
+                pass
+    assert rendering.prepare_caption_render is original
+    with install_preview_diagnostics(api, io.StringIO(), enabled=True, compile_stages=True):
+        assert api.render._compile() == 18
