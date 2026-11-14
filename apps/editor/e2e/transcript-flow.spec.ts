@@ -360,3 +360,39 @@ test('a user keyboard seek within an audition cancels native audio before its bo
   await expect.poll(() => page.evaluate(() => (window as any).__transport.at(-1)?.time)).toBeCloseTo(expected, 4);
   await expect.poll(() => page.evaluate(() => (window as any).__transcriptAudio.every((audio: HTMLAudioElement) => audio.paused))).toBe(true);
 });
+
+for (const cancellation of ['pause', 'seek'] as const) {
+  test(`native startup held after real play settles cannot revive audio after ${cancellation}`, async ({ page, request }) => {
+    await page.addInitScript(() => {
+      const audio: HTMLAudioElement[] = [];
+      (window as any).__heldStartupAudio = audio;
+      (window as any).__heldStartupCount = 0;
+      (window as any).__releasedStartupCount = 0;
+      const gate = new Promise<void>(resolve => { (window as any).__releaseStartup = resolve; });
+      window.Audio = new Proxy(window.Audio, { construct(target, args) {
+        const element = Reflect.construct(target, args) as HTMLAudioElement;
+        const play = element.play.bind(element);
+        element.play = async () => {
+          await play(); // Actual media playback; only its acknowledgement is delayed.
+          (window as any).__heldStartupCount++;
+          await gate;
+          (window as any).__releasedStartupCount++;
+        };
+        audio.push(element); return element;
+      } });
+    });
+    const id = await fixture(request); const panel = await open(page, id);
+    await expect(page.getByTestId('live-audio-meter')).toHaveAttribute('data-ready', 'true', { timeout: 20_000 });
+    await panel.locator('.transcript-editor__sentence').first().getByRole('button', { name: '试听', exact: true }).click();
+    await expect.poll(() => page.evaluate(() => (window as any).__heldStartupCount), { intervals: [10, 20] }).toBeGreaterThan(0);
+    expect(await page.evaluate(() => (window as any).__heldStartupAudio.every((element: HTMLAudioElement) => element.paused || element.muted))).toBe(true);
+    expect(await page.evaluate(() => (window as any).__heldStartupAudio.some((element: HTMLAudioElement) => !element.paused && element.muted))).toBe(true);
+    if (cancellation === 'pause') await page.locator('.player__play').click();
+    else await panel.locator('.transcript-editor__sentence').filter({ hasText: '你好世界' }).getByRole('button', { name: '定位', exact: true }).click();
+    await expect(page.locator('.player__play')).toHaveAttribute('aria-label', '播放');
+    await page.evaluate(() => (window as any).__releaseStartup());
+    await expect.poll(() => page.evaluate(() => (window as any).__releasedStartupCount)).toBeGreaterThan(0);
+    await expect.poll(() => page.evaluate(() => (window as any).__heldStartupAudio.every((element: HTMLAudioElement) => element.paused))).toBe(true);
+    await expect(page.locator('.player__play')).toHaveAttribute('aria-label', '播放');
+  });
+}
