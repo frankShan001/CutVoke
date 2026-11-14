@@ -110,7 +110,11 @@ cost is accepted; do not silently choose the distribution tradeoff here.
 `tools/verify/probe_caption_subset_pixels.py` compares full and subset instances
 at both 400 and 700 using seven hard-coded synthetic strings only. It does not
 accept user text, media or projects. It requires the exact measured source digest
-and a new output directory. Font directories are separated from ASS, RGBA and logs.
+and a new output directory. This probe intentionally accepts only resolved POSIX
+ASCII output paths containing letters/digits and `_./-`; spaces, colons, quotes,
+commas and brackets are rejected rather than incorrectly escaped through FFmpeg's
+filter parser. This is a Linux-only experiment, not Windows portability coverage.
+ASS is explicitly UTF-8. Font directories are separated from ASS, RGBA and logs.
 
 ```
 python tools/verify/probe_caption_subset_pixels.py --source src/cutvoke/assets/fonts/NotoSansSC-VF.ttf --output-dir /tmp/new-font-pixel-probe
@@ -130,13 +134,20 @@ fallback to Noto Arabic, Devanagari and CJK for uncovered characters, for both
 full and subset. Logs remain local and contain synthetic ASS strings/font paths;
 do not feed user text into this diagnostic or upload user projects/logs. The
 script fails on FFmpeg errors, wrong source, unexpected frame length or pixel
-mismatch, including under optimized Python. Matching blank/fallback-only frames
-are not independently ruled out by the script. In this run fontselect logs were
-inspected and nonblack red-channel counts were 7,150/9,388 for 400/700. Inspect
-logs and frames when reproducing. Other OS/font fallback installations can produce different hashes.
+mismatch, including under optimized Python. It also rejects all-black RGB frames
+and logs lacking the exact experimental font selection, preventing fallback-only
+passes. This confirms selection, not per-glyph attribution; inspect logs/frames
+when reproducing. Nonblack red-channel counts were 7,150/9,388 for 400/700. Other OS/font fallback installations can produce different hashes.
 
 This improves the earlier shaping-only evidence but is NOT the production
 caption compiler/cache, browser 45-second acceptance, all sizes/rotations, hinting
 equivalence across rasterizers or Windows/macOS validation. The experimental
 rename is only for isolated selection, not an approved production alias/cache
 strategy. No resource architecture or production repair is adopted.
+
+Safety gate self-tests: `python tools/verify/probe_caption_subset_pixels.py --self-test`
+and the same command with `python -O` both passed one positive and eight negative
+cases (black frame, fallback-only log, wrong byte length, five unsafe paths).
+After adding these gates, the complete Linux 400/700 render comparison was rerun
+successfully with the same frame hashes. No Windows/macOS or production acceptance
+is implied by these probe checks.
