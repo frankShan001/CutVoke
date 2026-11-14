@@ -48,3 +48,8 @@ test('runtime executable and database identities must both match',()=>{
  assert.throws(()=>verifyRuntime({...r,dataPath:other},e,d));
  }finally{fs.rmSync(dir,{recursive:true});}
 });
+
+test('smoke fixture uses visible 24px text after domain 1080p scaling',()=>{
+ const {FIXTURE_FONT_SIZE}=require('./verify_native_caption_fonts.cjs');
+ assert.equal(FIXTURE_FONT_SIZE*180/1080,24);
+});

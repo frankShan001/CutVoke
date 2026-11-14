@@ -6,6 +6,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const {execFileSync} = require('node:child_process');
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+const FIXTURE_FONT_SIZE = 144; // Domain uses 1080p units: 24px at the 180p fixture.
 const SOURCE = 'd68bafcb48a2707749396aa12bbbd833cb70401f3a9a689fd2902c7e0d295964';
 function validateOrigin(origin) {
   const u = new URL(origin);
@@ -44,7 +45,7 @@ function verifyPixels(pixels, frames) {
   assert.equal(pixels.length, frames * 320 * 180 * 3);
   const frame = pixels.subarray(7 * 320 * 180 * 3, 8 * 320 * 180 * 3);
   const bright = [...frame].filter(v => v > 180).length;
-  assert.ok(bright > 100 && bright < frame.length / 2, 'missing caption or invalid background');
+  assert.ok(bright > 100 && bright < frame.length / 2, `missing caption or invalid background: brightChannels=${bright}`);
   return {frames, brightChannels:bright};
 }
 async function verifyNativeCaptionFonts({origin, engine, ffmpeg, out, env, dataPath, assets}) {
@@ -73,7 +74,7 @@ async function verifyNativeCaptionFonts({origin, engine, ffmpeg, out, env, dataP
     await command('clip.insert', {trackId:'v',clipId:'black',createTrackKind:'video',sourcePath:source,
       timelineStart:{num:0,den:1},timelineEnd:{num:1,den:1}});
     await command('caption.add', {captionId:'c',text:'字幕 Aa 123',start:{num:0,den:1},end:{num:1,den:1},
-      fontFamily:'Noto Sans SC',bold:weight===700,fontSize:32,color:'#FFFFFF'});
+      fontFamily:'Noto Sans SC',bold:weight===700,fontSize:FIXTURE_FONT_SIZE,color:'#FFFFFF'});
     const directory = await api(`projects/${id}/directory`);
     const target = path.join(directory.exportDirectory, 'font.mp4');
     const cache = fs.mkdtempSync(path.join(work, `cold-${weight}-`));
@@ -82,6 +83,7 @@ async function verifyNativeCaptionFonts({origin, engine, ffmpeg, out, env, dataP
     execFileSync(engine, ['export','--project',id,'--data',dataPath,'--out',target], {env:childEnv,timeout:45_000,maxBuffer:10*1024*1024});
     const seconds = (performance.now()-start)/1000;
     const evidence = verifyCache(cache,manifest,weight);
+    fs.writeFileSync(path.join(work, `cache-${weight}.json`), JSON.stringify({...evidence,seconds},null,2)+'\n','utf8');
     const pixels = execFileSync(ffmpeg,['-v','error','-nostdin','-i',target,'-pix_fmt','rgb24','-f','rawvideo','-'], {env,timeout:30_000,maxBuffer:4*1024*1024});
     results.push({...evidence,seconds,...verifyPixels(pixels,15)});
   }
@@ -89,4 +91,4 @@ async function verifyNativeCaptionFonts({origin, engine, ffmpeg, out, env, dataP
   fs.writeFileSync(path.join(work,'verification.json'),JSON.stringify(result,null,2)+'\n','utf8');
   return result;
 }
-module.exports = {verifyNativeCaptionFonts,verifyAssets,verifyCache,verifyPixels,validateOrigin,verifyRuntime};
+module.exports = {verifyNativeCaptionFonts,verifyAssets,verifyCache,verifyPixels,validateOrigin,verifyRuntime,FIXTURE_FONT_SIZE};
