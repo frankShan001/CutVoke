@@ -3413,13 +3413,22 @@ test("attached overlays follow video moves, Alt keeps them in place, and unlinki
 });
 
 test("stale background preparation reconciles without replacing successful edit feedback", async ({ page, request }) => {
-  for (const transport of ["submission", "poll"] as const) {
+  for (const transport of ["submission", "poll", "poll-before-ack"] as const) {
     const { id, name } = await createProject(request);
     let release!: () => void;
     const gate = new Promise<void>(resolve => { release = resolve; });
     const submitted: string[] = [];
     let conflict = 0;
     let renderFailure: "failed" | "cancelled" | null = null;
+    let releaseCommand!: () => void, committed!: () => void;
+    const commandGate = new Promise<void>(resolve => { releaseCommand = resolve; });
+    const stored = new Promise<void>(resolve => { committed = resolve; });
+    if (transport === "poll-before-ack") await page.route(`**/projects/${id}/commands`, async route => {
+      if (route.request().postDataJSON().type !== "caption.remove") return route.continue();
+      const response = await route.fetch();
+      expect(response.ok()).toBeTruthy();
+      committed(); await commandGate; await route.fulfill({ response });
+    });
     const jobId = `reconciled-${id}`;
     const running = { jobId, state: "running", phase: "rendering", completedWindows: 0,
       totalWindows: 1, progress: 0, cached: false };
@@ -3433,7 +3442,7 @@ test("stale background preparation reconciles without replacing successful edit 
       } else await route.fulfill({ status: 202, json: running });
     });
     await page.route(`**/preview-jobs/${jobId}`, async route => {
-      if (transport === "poll" && submitted.length === 1) {
+      if (transport !== "submission" && submitted.length === 1) {
         await gate;
         return route.fulfill({ json: { ...running, state: "cancelled",
           error: "preview superseded by a newer edit" } });
@@ -3451,7 +3460,8 @@ test("stale background preparation reconciles without replacing successful edit 
       await page.locator("#creative-domain-caption").click();
       await page.getByRole("button", { name: "删除字幕 caption-one", exact: true }).click();
       const feedback = page.locator(".statusbar__msg");
-      await expect(feedback).toHaveText("已删除字幕");
+      if (transport === "poll-before-ack") await stored;
+      else await expect(feedback).toHaveText("已删除字幕");
       const latest = await readProject(request, id);
       expect(latest.revision).not.toBe(submitted[0]);
       expect(latest.sequence.captions).toHaveLength(0);
@@ -3461,13 +3471,16 @@ test("stale background preparation reconciles without replacing successful edit 
       release();
       if (transport === "submission") await expect.poll(() => conflict).toBe(409);
       await expect.poll(() => submitted).toEqual([submitted[0], latest.revision]);
+      // The old job must reconcile while the command ACK is still withheld.
+      // No client snapshot/revision has been delivered by that command yet.
+      releaseCommand();
       await expect(feedback).toHaveText("已删除字幕");
       await expect(page.getByText("工程已更新，请重新加载", { exact: true })).toHaveCount(0);
       expect(await readProject(request, id)).toEqual(latest);
       renderFailure = transport === "submission" ? "failed" : "cancelled";
       await expect(feedback).toHaveText(transport === "submission"
         ? "current preview decoder failure" : "current preview cancellation");
-    } finally { release(); }
+    } finally { release(); releaseCommand(); }
   }
 });
 

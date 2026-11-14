@@ -3990,10 +3990,15 @@ class EditService:
                    "-ss", f"{s:.6f}", "-to", f"{e:.6f}",
                    "-acodec", "pcm_s16le", "-ar", "44100", out_path]
             try:
-                subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+                completed = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
             except subprocess.TimeoutExpired as ex:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 f"audio.splitSentences ffmpeg timeout: {ex}") from ex
+            if completed.returncode != 0:
+                raise EditError(
+                    ErrorCode.INVALID_ARGUMENT,
+                    f"audio.splitSentences failed at segment {cap['index']} "
+                    f"(ffmpeg exit code {completed.returncode})")
             segments_out.append({
                 "index": cap["index"],
                 "path": out_path,
