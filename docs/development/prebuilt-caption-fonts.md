@@ -13,7 +13,11 @@ Original source assets remain unchanged and shipped. Generated resources retain
 font copyright/name records other than the existing caption-family rename, and
 copy the original OFL-Sans.txt alongside a digest manifest. No binary is committed.
 
-The generator requires fontTools 4.66.1, matching the current desktop build lock.
+The generator pins fontTools 4.59.0 on Python 3.10 and 4.66.1 on Python >=3.11
+(the latter matches the current desktop lock). The build-system uses matching
+PEP508 markers; Python 3.10 remains supported. All axes are explicitly pinned
+and fvar absence is checked, without the newer static keyword unavailable in
+fontTools 4.59.0. Reproducibility is within a pinned toolchain, not across versions.
 It pins the source SHA256 and disables timestamp recalculation. Source updates
 require review of this recipe, not silent generation with another font.
 
@@ -53,3 +57,18 @@ title-edit/save/undo/IME at unchanged 45s, Windows/macOS/Linux packaged app test
 installer size measurement, license review and reproducibility on separate hosts.
 The earlier #61 subset/libass experiment is not acceptance of this production
 draft. Do not merge until review and the relevant delivery checks pass.
+
+## Review follow-up: verify the actual resource path
+
+verify_distribution now requires both font files, manifest and OFL in the wheel,
+and checks source/output/license hashes and original-license equality. The source
+archive must contain generator and runtime verifier.
+
+verify_packaged_caption_fonts.py uses actual packaged files with a fresh isolated
+cache for both weights, forbids runtime instantiateVariableFont, and compares the
+result byte-for-byte to the verified resource. --require-installed rejects the
+checkout source package. CI calls it after wheel installation. Browser CI explicitly
+generates and verifies assets before scenarios; it is still an editable-source
+browser run, not proof of a native packaged-app experience. The original fallback
+remains covered separately. Missing resources must fail this verifier, not pass
+by falling back. A green unrelated CI step is not proof of this path.

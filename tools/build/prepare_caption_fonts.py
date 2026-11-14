@@ -2,12 +2,13 @@
 import hashlib
 import json
 import os
+import sys
 from pathlib import Path
 import shutil
 import tempfile
 
 SOURCE_SHA = "d68bafcb48a2707749396aa12bbbd833cb70401f3a9a689fd2902c7e0d295964"
-VERSION = "4.66.1"
+VERSION = "4.59.0" if sys.version_info < (3, 11) else "4.66.1"
 
 
 def prepare(root=None):
@@ -31,7 +32,7 @@ def prepare(root=None):
         with TTFont(source, fontNumber=0, recalcTimestamp=False) as font:
             axes = {axis.axisTag: axis.defaultValue for axis in font["fvar"].axes}
             axes["wght"] = weight
-            instantiateVariableFont(font, axes, inplace=True, optimize=False, static=True)
+            instantiateVariableFont(font, axes, inplace=True, optimize=False)
             if "fvar" in font:
                 raise RuntimeError("incomplete instance")
             bold = weight == 700

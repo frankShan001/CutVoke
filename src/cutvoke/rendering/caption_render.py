@@ -290,7 +290,7 @@ def _caption_font_instance(family: str, bold: bool) -> tuple[str, str]:
                     if weight_axis is None or not weight_axis.minValue <= weight <= weight_axis.maxValue:
                         raise ValueError(f"font does not support weight {weight}")
                     axes["wght"] = weight
-                    instantiateVariableFont(font, axes, inplace=True, optimize=False, static=True)
+                    instantiateVariableFont(font, axes, inplace=True, optimize=False)
                     if "fvar" in font:
                         raise ValueError("font instance is still variable")
                     font["OS/2"].usWeightClass = weight
