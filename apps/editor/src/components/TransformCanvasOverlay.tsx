@@ -20,7 +20,9 @@ export function TransformCanvasOverlay() {
   const track = project?.sequence.tracks.find((item) => item.id === state.selection?.trackId);
   const clip = track?.clips.find((item) => item.id === state.selection?.clipId);
   const effect = clip?.effects?.find((item) => item.effectId === BUILTIN_TRANSFORM_ID && item.enabled !== false);
-  const paramsKey = JSON.stringify(state.project?.sequence.tracks.flatMap(t => t.clips).find(c => c.id === clip?.id)?.effects?.find(e => e.effectId === BUILTIN_TRANSFORM_ID)?.params || {});
+  const committedClip = state.project?.sequence.tracks.flatMap(t => t.clips).find(c => c.id === clip?.id);
+  const committedParams = committedClip?.effects?.find(e => e.effectId === BUILTIN_TRANSFORM_ID)?.params || {};
+  const paramsKey = JSON.stringify(committedParams);
   const width = project?.sequence.width || 1920;
   const height = project?.sequence.height || 1080;
   const params = effect?.params || {};
@@ -46,7 +48,27 @@ export function TransformCanvasOverlay() {
     gestureRef.current = null;
     previewRef.current = null;
     setPreview(null);
-  }, [clip?.id, paramsKey, state.editLock, state.playhead]);
+  }, [clip?.id, state.editLock, state.playhead]);
+
+  useEffect(() => {
+    const gesture = gestureRef.current;
+    if (gesture) {
+      // A previous gesture may finish saving after this one starts. Preserve the
+      // new gesture only when that acknowledgement matches its starting geometry.
+      // Read committed values, not the optimistic interaction overlay.
+      const position = committedParams.position as { x?: number; y?: number } | undefined;
+      const committed: Geometry = {
+        x: Math.round(evaluateKeyframes(committedClip?.keyframes?.x, localTime, Number(position?.x ?? 0))),
+        y: Math.round(evaluateKeyframes(committedClip?.keyframes?.y, localTime, Number(position?.y ?? 0))),
+        scale: evaluateKeyframes(committedClip?.keyframes?.scale, localTime, Number(committedParams.scale ?? 1)),
+        rotation: evaluateKeyframes(committedClip?.keyframes?.rotation, localTime, Number(committedParams.rotation ?? 0)),
+      };
+      if ((Object.keys(committed) as (keyof Geometry)[]).every(key => committed[key] === gesture.initial[key])) return;
+    }
+    gestureRef.current = null;
+    previewRef.current = null;
+    setPreview(null);
+  }, [paramsKey]);
 
   if (!project || !clip || !track || track.kind !== "video" || track.role === "sticker" ||
       track.visible === false || clip.hidden ||
