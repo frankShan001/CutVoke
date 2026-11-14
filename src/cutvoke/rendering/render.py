@@ -1226,6 +1226,8 @@ def _prepare_static_masks(method):
         if callback:
             callback({'phase':'preparing'})
         original_project=project
+        from cutvoke.rendering.window_cache import simple_snapshot
+        recovery_snapshot = simple_snapshot(project) if method.__name__ == "render" else None
         from cutvoke.domain.essential_properties import resolve as resolve_compositions
         project = resolve_compositions(project)
         from cutvoke.domain.spatial_path import resolve as resolve_spatial_paths
@@ -1283,6 +1285,8 @@ def _prepare_static_masks(method):
             self._render_ctx.bounded_origin=origin
             self._render_ctx.verified_input_paths={os.path.normcase(os.path.abspath(c.asset_ref.source_path))
                 for t in project.sequence.tracks for c in t.clips if c.id in clocks}
+        previous_recovery = getattr(self._render_ctx, "recovery_snapshot", None)
+        self._render_ctx.recovery_snapshot = recovery_snapshot
         previous = getattr(self._render_ctx, 'gpu', None)
         previous_pixel=getattr(self._render_ctx,'pixel_gpu',None)
         previous_clips=getattr(self._render_ctx,'gpu_clips',{})
@@ -1341,6 +1345,7 @@ def _prepare_static_masks(method):
                                 self._gpu_failed = True
                                 return prepared(self, original_project, *args, **kwargs)
         finally:
+            self._render_ctx.recovery_snapshot = previous_recovery
             self._render_ctx.gpu = previous
             self._render_ctx.pixel_gpu=previous_pixel
             self._render_ctx.gpu_clips=previous_clips
@@ -2005,7 +2010,8 @@ class RenderService:
         FFV1/PCM intermediates avoid repeated lossy video/AAC encoding and AAC
         priming gaps at window boundaries. The final concat has one media input,
         applies export color management once, and publishes only after verify.
-        All intermediates belong to this request's unique temporary directory.
+        Live inputs belong to this request's unique temporary directory.
+        Eligible completed video windows also enter a bounded disposable cache.
         """
         out_dir = os.path.dirname(os.path.abspath(out_path))
         warnings = list(preflight_warnings)
@@ -2013,6 +2019,13 @@ class RenderService:
         chunks = []
         stage_started = time.monotonic()
         window_metrics = []
+        from cutvoke.rendering.window_cache import recovery_session
+        recovery = recovery_session(
+            Path(out_dir) / ".cutvoke-render-cache",
+            getattr(self._render_ctx, "recovery_snapshot", None), self.ffmpeg,
+            [overlay_position, alpha, getattr(self._render_ctx, "working_color", "bt709"),
+             start, duration], cancel_event) if getattr(self._render_ctx, "gpu", None) is None else None
+        reused_windows = []
         completed_seconds = 0.0
         if progress_callback:
             progress_callback({"phase": "rendering", "fraction": 0.0,
@@ -2054,20 +2067,37 @@ class RenderService:
                 self._render_ctx.gpu_clips={}
                 self._render_ctx.pixel_gpu=None
                 check_cancel()
+                path = temporary / f"window-{round(cursor*float(frame_rate)):09d}.mkv"
+                cache_key = recovery.key(cursor, chunk_duration) if recovery else None
                 compile_started = time.monotonic()
                 graph, inputs, _expected, chunk_audio, messages, caption_cwd = self._compile(
                     video_seq, overlay_position, alpha=alpha,
                     render_window=(cursor, cursor + chunk_duration), frame_aligned_origin=True)
                 origin = self._render_ctx.compile_origin
                 compile_seconds = time.monotonic() - compile_started
-                path = temporary / f"window-{round(cursor*float(frame_rate)):09d}.mkv"
                 try:
+                    if recovery and recovery.unchanged() and recovery.cache.restore(cache_key, path):
+                        try:
+                            self._verify(str(path), chunk_duration, seq.width, seq.height,
+                                         expect_alpha=alpha)
+                            if recovery.unchanged():
+                                check_cancel()
+                                reused_windows.append(cache_key)
+                                window_metrics.append({"compile": compile_seconds, "composite": 0.0})
+                                return [(path, chunk_duration, messages)]
+                        except RenderCancelled:
+                            raise
+                        except RenderError:
+                            pass  # Invalid cache entries are disposable, never final output.
                     self._run_ffmpeg(seq, graph, inputs, str(path), quality,
                         cancel_event, False, caption_cwd=caption_cwd,
                         alpha=alpha, output_start=cursor - origin,
                         output_duration=chunk_duration, lossless=True)
                     self._verify(str(path), chunk_duration, seq.width, seq.height,
                                  expect_alpha=alpha)
+                    check_cancel()
+                    if recovery and recovery.unchanged():
+                        recovery.cache.publish(cache_key, path)
                     window_metrics.append({'compile':compile_seconds,
                                            'composite':time.monotonic()-compile_started-compile_seconds})
                 except RenderError as exc:
@@ -2163,6 +2193,7 @@ class RenderService:
                 "color_range":probe.get("color_range"),
                 "audio_start_time":probe.get("audio_start_time"), "video_start_time":probe.get("video_start_time"),
                 "warnings":warnings, "renderStrategy":"lossless-windows", "windowCount":len(chunks),
+                "reusedWindowCount":len(reused_windows),
                 "audioStrategy":"continuous-pcm" if has_audio else "none",
                 "audioVerification":audio_verification,
                 "videoVerification":video_verification,
