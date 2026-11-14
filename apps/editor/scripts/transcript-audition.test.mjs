@@ -195,7 +195,7 @@ test('clock observers cannot consume the audition start before native voices ini
   const exports = {};
   runInNewContext(output, { exports, performance: { now: () => deviceTime * 1000 }, mode: 'video', mediaEndSecs: 6,
     nativeAudioRef: { current: true }, playingRef: { current: true }, scrubbingRef: { current: false },
-    audioTransportRef: { current: transport }, nativeAudioClockRef: { current: () => deviceTime },
+    audioTransportRef: { current: transport }, nativeAudioPositionRef: { current: null }, nativeAudioClockRef: { current: () => deviceTime },
     playheadRef: { current: 3 }, auditionBoundary: { current: time => time >= 3.5 ? 3.5 : null } });
   // Player publication/RAF and audition polling can arrive before the delayed
   // native mix update. Neither may start or advance its source cursor.

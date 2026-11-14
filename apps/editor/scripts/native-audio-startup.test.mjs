@@ -144,7 +144,7 @@ test('real Player clock and audio update restart transport on image to video han
   const transport={current:{active:false,time:3,started:0,clock:null}};
   const globals={exports:{},mode:'image',mediaEndSecs:6,audioTransportRef:transport,playheadRef:{current:3},
     auditionBoundary:{current:()=>null},nativeAudioRef:{current:true},playingRef:{current:true},scrubbingRef:{current:false},
-    nativeAudioClockRef:{current:()=>deviceTime},performance:{now:()=>deviceTime*1000}};
+    nativeAudioPositionRef: { current: null }, nativeAudioClockRef:{current:()=>deviceTime},performance:{now:()=>deviceTime*1000}};
   runInNewContext(ts.transpileModule(`exports.clock=${callback}`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,globals);
   h.latest.current.playbackClock=globals.exports.clock;
   h.update();await flush();assert.equal(transport.current.active,false);assert.equal(h.element.paused,false);
@@ -154,4 +154,34 @@ test('real Player clock and audio update restart transport on image to video han
   deviceTime+=.1;assert.ok(Math.abs(globals.exports.clock().time-3.1)<.00001);
   assert.equal(globals.exports.clock().playing,true);
   const plays=h.stats.play;h.update();await flush();assert.equal(h.stats.play,plays); // No rearm every frame.
+});
+
+test('native cursor boundary uses the fastest unmuted voice with source speed and prepared mapping',()=>{
+  const source=readFileSync(new URL('../src/components/InteractiveAudio.tsx',import.meta.url),'utf8');
+  const file=ts.createSourceFile('InteractiveAudio.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);let fn;
+  const visit=node=>{if(ts.isFunctionDeclaration(node)&&node.name?.text==='nativeAudioPosition')fn=node.getText(file).replace('export ','');ts.forEachChild(node,visit);};visit(file);
+  const exports={};runInNewContext(ts.transpileModule(`${fn}; exports.position=nativeAudioPosition`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,{exports,rationalToSecs:v=>v||0});
+  const project={sequence:{tracks:[{clips:[{id:'a',sourceStart:10,timelineStart:3,speed:2},{id:'b',timelineStart:3,speed:1}]}]}};
+  const voices=new Map([['a',{ready:true,prepared:false,element:{currentTime:11.2,readyState:4,paused:false,muted:false}}],
+    ['b',{ready:true,prepared:true,element:{currentTime:.55,readyState:4,paused:false,muted:false}}]]);
+  assert.ok(Math.abs(exports.position(project,voices)-3.6)<.00001);
+  voices.get('a').element.muted=true;assert.equal(exports.position(project,voices),3.55);
+  voices.get('b').element.paused=true;assert.equal(exports.position(project,voices),null);
+});
+test('real Player deadline stops at the native cursor even when graph transport is behind, without a RAF',()=>{
+  const source=readFileSync(new URL('../src/components/Player.tsx',import.meta.url),'utf8');
+  const file=ts.createSourceFile('Player.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);let callback;
+  const visit=node=>{if(ts.isVariableDeclaration(node)&&node.name.getText(file)==='audioPlaybackClock')callback=node.initializer.arguments[0].getText(file);ts.forEachChild(node,visit);};visit(file);
+  for(const mode of ['video','image']) {
+    let cursor=null;const seen=[];
+    const clock=()=>10.47,transport={active:true,time:3,started:10,clock};
+    const globals={exports:{},mode,mediaEndSecs:6,audioTransportRef:{current:transport},playheadRef:{current:3},
+      auditionBoundary:{current:time=>{seen.push(time);return time>=3.5?3.5:null;}},nativeAudioRef:{current:true},playingRef:{current:true},scrubbingRef:{current:false},
+      nativeAudioPositionRef:{current:()=>cursor},nativeAudioClockRef:{current:clock},performance:{now:()=>10470}};
+    runInNewContext(ts.transpileModule(`exports.clock=${callback}`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,globals);
+    if(mode==='video')assert.ok(Math.abs(globals.exports.clock(false).time-3.47)<.00001);
+    else assert.equal(globals.exports.clock(false),null);
+    cursor=3.599546;const stopped=globals.exports.clock(false);
+    assert.equal(stopped.time,3.5);assert.equal(stopped.playing,false);assert.ok(seen.includes(cursor));
+  }
 });
