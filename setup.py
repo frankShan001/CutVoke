@@ -13,6 +13,7 @@ class BuildWithEditor(build_py):
             import runpy
             prepare = runpy.run_path(str(Path(__file__).resolve().parent / "tools/build/prepare_extension_payloads.py"))["prepare"]
             prepare()
+            runpy.run_path(str(Path(__file__).resolve().parent / "tools/build/prepare_caption_fonts.py"))["prepare"]()
         # A repeated local build otherwise keeps obsolete package files in
         # build/lib, including __pycache__ from older namespace discovery.
         # Restrict cleanup to this repository's generated build directory.

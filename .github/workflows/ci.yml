@@ -81,6 +81,7 @@ jobs:
           python -m build --sdist --wheel --outdir dist
           python tools/verify/verify_distribution.py dist
           python -m pip install --force-reinstall --no-deps dist/*.whl
+          python tools/verify/verify_packaged_caption_fonts.py --require-installed
           cutvoke doctor --json
           python -c "from pathlib import Path; import cutvoke; assert (Path(cutvoke.__file__).parent / 'web' / 'index.html').is_file()"
 
@@ -134,6 +135,12 @@ jobs:
           python -VV
           python -m pip --version
           python -m pip install -e ".[dev]"
+      - name: Generate and verify packaged caption resources for browser scenarios
+        timeout-minutes: 5
+        run: |
+          python -m pip install fontTools==4.66.1
+          python tools/build/prepare_caption_fonts.py
+          python tools/verify/verify_packaged_caption_fonts.py
       - name: Install browser and check editor helpers
         timeout-minutes: 15
         working-directory: apps/editor
