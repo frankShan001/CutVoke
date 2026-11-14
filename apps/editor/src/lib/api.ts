@@ -75,9 +75,10 @@ function normalizeError(data: unknown, status: number, path: string): ApiFailure
   });
 }
 
-async function get<T>(path: string): Promise<T> {
+async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
   const res = await fetch(API_BASE + path, {
     method: "GET",
+    signal,
     headers: { Accept: "application/json" },
   });
   const data = await readJson(res);
@@ -231,7 +232,34 @@ export interface EditLockStatus {
 
 /** GET /projects/{id}/edit-lock：只读查询 Agent 编辑租约。 */
 export async function getEditLock(projectId: string): Promise<EditLockStatus> {
-  return get<EditLockStatus>(`/projects/${encodeURIComponent(projectId)}/edit-lock`);
+  const controller = new AbortController();
+  const timeout = globalThis.setTimeout(() => controller.abort(), 10_000);
+  try {
+    return await get<EditLockStatus>(`/projects/${encodeURIComponent(projectId)}/edit-lock`, controller.signal);
+  } finally { globalThis.clearTimeout(timeout); }
+}
+
+export interface EditLeaseReview {
+  projectId: string;
+  leaseId: string;
+  available: boolean;
+  acquiredRevision: string | null;
+  revision: string;
+  hasMore: boolean;
+  changes: Array<{ previousRevision: string; revision: string; commandId: string; entityCount: number; entityKinds: Array<{ type: string; change: string; count: number }> }>;
+}
+
+export async function reviewEditLease(projectId: string, leaseId: string): Promise<EditLeaseReview> {
+  return post<EditLeaseReview>(`/projects/${encodeURIComponent(projectId)}/edit-lock/review`, { leaseId, limit: 20 });
+}
+
+export interface EditLockTakeoverStatus extends EditLockStatus {
+  status: "taken-over" | "lease-changed" | "not-held" | "expired";
+  takenOver: boolean;
+}
+
+export async function takeOverEditLock(projectId: string, leaseId: string): Promise<EditLockTakeoverStatus> {
+  return post<EditLockTakeoverStatus>(`/projects/${encodeURIComponent(projectId)}/edit-lock/takeover`, { leaseId });
 }
 
 /** GET /projects/{id}/summary */

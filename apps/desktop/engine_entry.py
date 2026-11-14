@@ -12,6 +12,7 @@ if getattr(sys, "frozen", False):
         import signal
         import time
         faulthandler.register(signal.SIGUSR2, all_threads=True)
+        print(f"CUTVOKE_QA_STACK_READY={os.getpid()}", file=sys.stderr, flush=True)
         def media_process_started(event, arguments):
             if event == "subprocess.Popen":
                 executable, argv, _cwd, _env = arguments

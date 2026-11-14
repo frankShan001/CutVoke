@@ -14,7 +14,7 @@
     "test:storage": "node --test storage.test.cjs",
     "test:settings": "node --test settings.test.cjs",
     "test:settings:electron": "node --test settings.electron.test.cjs",
-    "test:build-deps": "node --test build-dependencies.test.cjs",
+    "test:build-deps": "node --test build-dependencies.test.cjs qa-diagnostics.test.cjs",
     "test:i18n": "node --test i18n.test.cjs",
     "test:i18n:electron": "node --test i18n.electron.test.cjs",
     "package:unix": "electron-builder --config unix-builder.cjs --dir --config.directories.output=../../.artifacts/desktop"
@@ -33,6 +33,7 @@
     },
     "files": [
       "main.cjs",
+      "qa-diagnostics.cjs",
       "preload.cjs",
       "i18n.cjs",
       "storage.cjs",

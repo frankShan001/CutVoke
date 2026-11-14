@@ -75,7 +75,7 @@ def test_inspect_import_scoped_edit_swap_undo_and_package(fixture, tmp_path):
     assert library.get_project_asset("two", imported["assetId"]) is None
     archive = imported["sourceArchive"]
     assert sha(Path(archive["path"])) == archive["sha256"]
-    assert archive["includedInProjectPackage"] is False
+    assert archive["projectPackagePolicy"] == "include_when_referenced"
     with zipfile.ZipFile(archive["path"]) as zipped:
         assert set(zipped.namelist()) == {"manifest.json", "scene.py"}
         assert json.loads(zipped.read("manifest.json")) == manifest
@@ -120,9 +120,46 @@ def test_inspect_import_scoped_edit_swap_undo_and_package(fixture, tmp_path):
     apply("history.redo", {}, "3", "redo")
     package = call("project_package", projectId="one", expectedRevision="4", outPath="handoff.cvkpkg")
     restored, _, _ = unpack_project(package["path"], str(tmp_path / "restore"))
+    with zipfile.ZipFile(package["path"]) as zipped:
+        assert json.loads(zipped.read("manifest.json"))["packageFormat"] == 4
+        assert len([name for name in zipped.namelist() if name.startswith("sources/")]) == 2
+    assert not list((tmp_path / "restore").rglob("scene.py"))
     assert Path(restored.sequence.tracks[0].clips[0].asset_ref.source_path).is_file()
     assert restored.sequence.tracks[1].clips[0].effects[0]["params"]["content"] == "Editable"
     call("edit_lock", projectId="one", action="release", leaseId=lease)
+
+
+def test_source_tools_scope_http_restore_and_revision_preservation(fixture, tmp_path):
+    root, path, manifest, library, service, server, call = fixture
+    imported = call("generated_media", projectId="one", operation="import", manifestPath=str(path))
+    # Unused imports are not part of an editable-project source handoff.
+    assert call("generated_source", projectId="one", operation="list")["archives"] == []
+    call("command_apply", projectId="one", type="clip.insert", expectedRevision="0",
+         payload={"trackId": "v", "createTrackKind": "video", "clipId": "scene", "assetId": imported["assetId"],
+                  "timelineEnd": rat(1)})
+    before = copy.deepcopy(service.get_project("one").to_dict())
+    bundle = imported["bundleId"]
+    listed = call("generated_source", projectId="one", operation="list")
+    assert [item["bundleId"] for item in listed["archives"]] == [bundle]
+    assert call("generated_source", projectId="two", operation="list")["archives"] == []
+    missing = server.call_tool("generated_source", {"projectId": "two", "operation": "inspect", "bundleId": bundle})
+    assert not missing["ok"]
+    inspected = call("generated_source", projectId="one", operation="inspect", bundleId=bundle)
+    assert inspected["sourceArchive"]["manifest"] == manifest
+    api = server._agent_tools().api
+    status, result = api.handle("POST", "/api/v1/agent/generated_source",
+                              {"projectId": "one", "operation": "inspect", "bundleId": bundle})
+    assert status == 200 and result == inspected
+    target = tmp_path / "one" / "exports" / "recovered"
+    restored = call("generated_source", projectId="one", operation="restore", bundleId=bundle, outPath=str(target))
+    assert not restored["runtimeExecuted"] and not restored["restored"]["runtimeExecuted"]
+    assert (target / "scene.py").read_bytes() == (root / "scene.py").read_bytes()
+    assert not (target / "scene.mov").exists()
+    (target / "scene.py").write_text("user revision")
+    retry = server.call_tool("generated_source", {"projectId": "one", "operation": "restore", "bundleId": bundle, "outPath": str(target)})
+    assert not retry["ok"] and (target / "scene.py").read_text() == "user revision"
+    assert service.get_project("one").to_dict() == before
+    assert call("generated_source", projectId="one", operation="list") == listed
 
 
 @pytest.mark.parametrize("mutation", ["source", "render", "traversal", "absolute", "symlink", "duplicate", "nan",

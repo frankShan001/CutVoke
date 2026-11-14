@@ -92,9 +92,31 @@ test('keyframe easing is atomic and geometry can be edited and removed from its 
   await expect.poll(async()=>!!(await params()).reflectionRegion).toBe(true);
   await region.getByRole('spinbutton',{name:'y',exact:true}).fill('.6');await region.getByRole('spinbutton',{name:'y',exact:true}).blur();
   await expect.poll(async()=>(await params()).reflectionRegion.y).toBe(.6);
+  const expectedRegion=(await params()).reflectionRegion;
   await page.screenshot({path:'../../.artifacts/ae-workflow/geometry-controls.png'});
   await enabled.uncheck();await expect.poll(async()=>Object.hasOwn(await params(),'reflectionRegion')).toBe(false);
-  await page.getByRole('button',{name:'撤销',exact:true}).click();await expect.poll(async()=>(await params()).reflectionRegion.y).toBe(.6);
+  let releaseUndo!:()=>void,undoArrived!:()=>void;
+  const undoGate=new Promise<void>(resolve=>{releaseUndo=resolve;});
+  const undoSeen=new Promise<void>(resolve=>{undoArrived=resolve;});
+  const commands=`**/api/v1/projects/${id}/commands`;
+  await page.route(commands,async route=>{
+    if(route.request().method()==='POST'&&route.request().postDataJSON().type==='history.undo'){
+      undoArrived();await undoGate;
+    }
+    await route.continue();
+  });
+  try{
+    const acknowledgement=page.waitForResponse(response=>response.url().endsWith(`/api/v1/projects/${id}/commands`)
+      &&response.request().method()==='POST'&&response.request().postDataJSON().type==='history.undo');
+    await page.getByRole('button',{name:'撤销',exact:true}).click();await undoSeen;
+    // This is a valid intermediate state, not a failed undo. Reading .y here
+    // used to throw before expect.poll could retry on a slower backend.
+    expect((await params()).reflectionRegion).toBeUndefined();
+    releaseUndo();expect((await acknowledgement).ok()).toBeTruthy();
+    await expect.poll(async()=>(await params()).reflectionRegion).toEqual(expectedRegion);
+    await expect(enabled).toBeChecked();
+    await expect(region.getByRole('spinbutton',{name:'y',exact:true})).toHaveValue('0.6');
+  }finally{releaseUndo();await page.unroute(commands);}
 });
 
 test('effect search stays usable while preset loading is delayed',async({page,request})=>{

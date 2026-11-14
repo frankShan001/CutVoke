@@ -51,6 +51,7 @@ function isAgentActor(actor?: { kind: string; id: string }): boolean {
 
 /** 把一条 changedEntity 转成人类可读摘要，如「添加片段 clip_xxx」。 */
 function entitySummary(e: ChangedEntity): string {
+  if (e.type === "editLease" && e.change === "takenOver") return tr("人工接管编辑租约");
   const label = ENTITY_LABEL[e.type] || e.type;
   const verb = CHANGE_VERB[e.change] || e.change || tr("变更");
   return `${verb}${label} ${e.id}`;
@@ -158,6 +159,7 @@ export function AgentActivityPanel() {
 
   // 批量撤销到此活动之前的 revision（previousRevision）。
   const handleUndoTo = async (event: ProjectEvent) => {
+    if (event.type !== "project.changed") return;
     const target = Number(event.previousRevision || "0");
     if (busyRev === event.eventId) return;
     setBusyRev(event.eventId);
@@ -296,7 +298,7 @@ export function AgentActivityPanel() {
                       ))}
                     </ul>
 
-                    <div className="agent-event__foot">
+                    {ev.type === "project.changed" ? <div className="agent-event__foot">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -306,7 +308,7 @@ export function AgentActivityPanel() {
                         title={tr("连续撤销回到 revision {0}", ev.previousRevision)}
                       >
                         <Undo2 size={13} />{tr("撤销到此")}</Button>
-                    </div>
+                    </div> : null}
                   </li>
                 );
               })}

@@ -23,9 +23,9 @@ and final preview PNGs, receipts, runtime identities and render timings under
 listening and artistic acceptance unassessed. This is an engineering fixture,
 not proof of better artistic output or a comparison against HyperFrames/Remotion.
 
-Deliver `project/exports/editable.cvkpkg` **and** the `sourceArchive.path` ZIPs
-listed in `result.json`. The editable package contains media/text/audio but does
-not include code archives. Source ZIPs contain the manifest and declared inputs;
+Deliver `project/exports/editable.cvkpkg`: it contains editable media/text/audio
+and verified source ZIPs for referenced outputs. Unpacking retains inert ZIPs;
+`generated_source` explicitly restores inputs to a new directory. Source ZIPs contain the manifest and declared inputs;
 they exclude rendered media and do not execute or install anything on extraction.
 Retain the full project directory for original renders and easy local iteration.
 
@@ -41,8 +41,8 @@ no native HyperFrames or Remotion runtime/adapter is installed. See the
 所有输出写入新建的独立示例目录，不碰已有工程。示例代码由脚本显式调用，
 CutVoke 服务不会执行清单中的代码。
 
-交付时必须同时保留 `.cvkpkg` 和回执中列出的源码 ZIP；首版尚未把源码 ZIP
-嵌入工程包。自动检查覆盖帧数、解码、源 Alpha 像素和编辑状态，未完成连续
+交付 `.cvkpkg` 即携带已引用素材的源码 ZIP；解包仅保留归档，
+`generated_source` 可显式恢复到新目录，不执行源码。自动检查覆盖帧数、解码、源 Alpha 像素和编辑状态，未完成连续
 视听或艺术效果验收，也未证明比其他代码视频引擎更快。
 # Parameterized cache and local frame repair
 
@@ -72,6 +72,7 @@ cold 216-frame rendering, three warm cache plans, 24-frame repair and a full
 registration and warm plan/hash costs are recorded separately. Timing results
 are host-specific, not a cross-machine performance promise or artistic review.
 
-Keep `project/` for the index and source ZIPs. `.cvkpkg` alone excludes both.
+Keep `project/` for the cache index. `.cvkpkg` includes referenced source ZIPs
+but excludes cache metadata; use `generated_source` for explicit input recovery.
 Continuous playback, subjective listening, hostile-code isolation and
 cross-machine reproducibility are unassessed. See the [request/cache contract](../../docs/user/generated-render.md).

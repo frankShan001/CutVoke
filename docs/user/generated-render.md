@@ -88,10 +88,12 @@ ProRes; actual alpha pixels/compositing require separate inspection. Opaque MP4
 dimensions must be compatible with its encoder (the reference uses yuv420p).
 
 Keep the whole project folder to retain the index and `*.cvsource.zip` archives.
-The existing `.cvkpkg` package carries ordinary editable media but excludes
-source archives and the cache index. Deliver source ZIPs separately when needed;
-inside each archive `inputs/cutvoke-request.json` resolves its declared paths
-relative to `inputs/`. No ZIP reimport or automatic rerender is provided.
+The `.cvkpkg` package carries editable media and verified source archives for
+referenced outputs, including effective `inputs/cutvoke-request.json` requests.
+The cache index is excluded. `generated_source` lists/inspects these archives
+and explicitly restores one into a new directory without execution. Inside each
+archive the effective request resolves declared paths relative to `inputs/`.
+Restoring inputs does not register cache entries or rerender automatically.
 
 There is no parameter GUI, arbitrary-code runtime or isolation guarantee in this
 feature. A Docker capability probe alone is insufficient to establish safe

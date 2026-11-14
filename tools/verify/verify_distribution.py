@@ -5,6 +5,7 @@ import argparse
 import ast
 from email.parser import Parser
 import json
+import hashlib
 from pathlib import Path, PurePosixPath
 import tarfile
 import zipfile
@@ -49,6 +50,23 @@ def verify(directory: Path) -> dict:
                         "cutvoke/rendering/render.py", "cutvoke/storage/store.py",
                         "cutvoke/assets/fonts/NotoSansSC-VF.ttf",
                         "cutvoke/rendering/vlog_fx.py", "cutvoke/assets/effects/vlog-labels.json"])
+        prefix = "cutvoke/assets/caption_fonts/"
+        require(names, [prefix + name for name in
+                       ("manifest.json", "OFL-Sans.txt", "sans-400-v1.ttf", "sans-700-v1.ttf")])
+        manifest = json.loads(archive.read(prefix + "manifest.json"))
+        if manifest["recipe"] != 1:
+            raise ValueError("unsupported caption font recipe")
+        if hashlib.sha256(archive.read("cutvoke/assets/fonts/NotoSansSC-VF.ttf")).hexdigest() != manifest["source_sha256"]:
+            raise ValueError("caption source hash mismatch")
+        license_data = archive.read(prefix + "OFL-Sans.txt")
+        if (hashlib.sha256(license_data).hexdigest() != manifest["license_sha256"]
+                or license_data != archive.read("cutvoke/assets/fonts/OFL-Sans.txt")):
+            raise ValueError("caption font license mismatch")
+        for weight in (400, 700):
+            entry = manifest["instances"][str(weight)]
+            filename = f"sans-{weight}-v1.ttf"
+            if entry["filename"] != filename or hashlib.sha256(archive.read(prefix + filename)).hexdigest() != entry["sha256"]:
+                raise ValueError("caption font resource mismatch")
         if not any(n.startswith("cutvoke/web/assets/") and n.endswith(".js") for n in names):
             raise ValueError("wheel has no compiled editor JavaScript")
         metadata_name, = [n for n in names if n.endswith(".dist-info/METADATA")]
@@ -86,6 +104,7 @@ def verify(directory: Path) -> dict:
             "effects/README.md",
             "tools/verify/demo_vlog_effects.py",
             "tools/verify/check_layering.py", "tools/verify/verify_distribution.py",
+            "tools/build/prepare_caption_fonts.py", "tools/verify/verify_packaged_caption_fonts.py",
             "apps/desktop/package.json", "apps/desktop/engine.spec", ".github/workflows/ci.yml")])
         pkg = archive.extractfile(f"{root}/PKG-INFO")
         if pkg is None or Parser().parsestr(pkg.read().decode("utf-8"))["Version"] != version:

@@ -24,16 +24,46 @@ body:
     validations:
       required: true
 
+  - type: dropdown
+    id: install_type
+    attributes:
+      label: Install type / 安装类型
+      options:
+        - Windows portable / Windows 便携版
+        - macOS arm64 / Apple Silicon
+        - macOS x64 / Intel
+        - Linux x64
+        - Source checkout / 源码安装
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: CutVoke version / CutVoke 版本
+      description: Use the app version or downloaded package filename. For a source checkout, include the commit if known. 填写应用版本或下载包文件名；源码安装请尽量附上 commit。
+      placeholder: "0.3.5 / CutVoke-0.3.5-windows-x64-portable.zip"
+    validations:
+      required: true
+
   - type: textarea
     id: environment
     attributes:
       label: Environment
-      description: Include your operating system, Python version, browser, and `cutvoke doctor --json` output when relevant.
+      description: >-
+        Include your OS version and architecture. Desktop users do not need system Python or the `cutvoke` command;
+        paste the last approximately 50 relevant lines of `profile/logs/engine.log` in Logs below.
+        Find it inside `CutVoke Data` next to the Windows exe, `~/Library/Application Support/CutVoke/` on macOS,
+        or `${XDG_DATA_HOME:-~/.local/share}/CutVoke/` on Linux.
+        Source users should include Python, Node.js, browser and FFmpeg versions plus `cutvoke doctor --json`
+        (`cutvoke doctor --mcp-only --json` for MCP-only installs).
+        请填写系统版本与架构。桌面版无需系统 Python 或 `cutvoke` 命令，请在下方日志栏粘贴上述数据目录中
+        `profile/logs/engine.log` 末尾约 50 行相关内容；源码版请附上各依赖版本和 doctor 输出。
+        Remove private paths, tokens and media from all output. 所有输出请先移除私人路径、令牌及媒体信息。
       placeholder: |
         OS: Windows 11
-        Python: 3.12
-        Browser: Chrome 140
-        FFmpeg: 8.x
+        Architecture: x64
+        Source installs only / 仅源码安装: Python / Node.js / browser / FFmpeg versions and doctor output
     validations:
       required: true
 

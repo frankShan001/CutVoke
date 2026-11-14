@@ -8,6 +8,16 @@ import { getLatestState, runCommand, type ActionResult } from "./actions";
 import { applyAnimation, applyTransition } from "./clipEdit";
 import { addEffectToClip } from "./effectEdit";
 
+/** Only the initiating interaction may reveal a completed resource edit. */
+export function currentResourceTarget(origin: EditorState, clipId: string) {
+  const latest = getLatestState() || origin;
+  if (latest.currentId !== origin.currentId || latest.selectionVersion !== origin.selectionVersion
+      || latest.playheadSeekVersion !== origin.playheadSeekVersion) return null;
+  const track = latest.project?.sequence.tracks.find(item => item.clips.some(clip => clip.id === clipId));
+  const clip = track?.clips.find(item => item.id === clipId);
+  return track && clip ? { track, clip } : null;
+}
+
 /** Drop and keyboard application share the same validation and undoable commands. */
 export async function applyResourceToClip(dispatch: Dispatch<EditorAction>, state: EditorState,
   resource: EffectDragResource, effect: EffectSpec, clipId: string): Promise<ActionResult> {
@@ -43,12 +53,16 @@ export async function applyResourceToClip(dispatch: Dispatch<EditorAction>, stat
     : effect.category === "animation" ? await applyAnimation(dispatch, current, {
         clipId, animationId: effect.effectId, duration, params: effect.defaults })
     : await addEffectToClip(dispatch, current, { clipId, effectId: effect.effectId });
-  if (result.ok && (getLatestState() || current).currentId === current.currentId) {
-    dispatch({ type: "SELECTION_SET", selection: { trackId: track.id, clipId } });
-    dispatch({ type: "PLAYHEAD_SET", t: rationalToSecs(clip.timelineStart) });
+  // Saving the resource may finish after the user has selected another clip,
+  // sought, or left and reopened this project. Keep the saved edit, but let the
+  // newer interaction own selection, transport and every edit-effect listener.
+  const target = result.ok ? currentResourceTarget(current, clipId) : null;
+  if (target) {
+    dispatch({ type: "SELECTION_SET", selection: { trackId: target.track.id, clipId } });
+    dispatch({ type: "PLAYHEAD_SET", t: rationalToSecs(target.clip.timelineStart) });
     dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已应用「{0}」到选中片段", effect.name) });
     window.dispatchEvent(new CustomEvent("cutvoke:edit-effect", { detail: {
-      effectId: effect.effectId, category: effect.category, trackId: track.id, clipId,
+      effectId: effect.effectId, category: effect.category, trackId: target.track.id, clipId,
     } }));
   }
   return result;

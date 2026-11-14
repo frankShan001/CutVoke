@@ -94,11 +94,45 @@ rendered video and dependency directories are not included. Archives are local;
 they can contain private source/data and are not content-free effect recipes.
 No upload is performed.
 
-Keep the source ZIP(s) separately alongside `project_package`: the native
-`.cvkpkg` retains timeline media and editable native objects, **not** the source
-ZIPs. There is no automatic source archive reimport or bidirectional source/UI
-synchronization. To rerender, inspect the source and dependencies, use your
-trusted renderer environment, write a new manifest/output pair and import it.
+`project_package` automatically includes verified source archives whose declared
+output SHA256 matches media referenced by any top-level or nested sequence.
+Archives are deduplicated by bundle ID, not by clip count. Only bounded
+`.generated/*.cvsource.zip` companions of media directories are searched; arbitrary
+sibling directories, unused imports and undeclared dependencies are not collected.
+Import receipts expose `projectPackagePolicy="include_when_referenced"` in place
+of the former always-false `includedInProjectPackage` flag.
+
+Packages containing sources use **package format 4**; packages without sources
+retain formats 1–3. Older CutVoke builds explicitly reject format 4. New builds
+continue reading old packages. `inspect_package` reports the declared source
+inventory; source ZIP and input hashes are strictly verified on unpack. Duplicate
+archive names, unsafe paths, unsupported schemas/types and hash mismatches are
+hard errors, unlike historical ordinary-media compatibility warnings. Existing
+source archives are immutable: conflicting bytes fail instead of being replaced.
+Each source ZIP is limited to 32 MiB of inputs plus its manifest/ZIP overhead;
+at most 128 archives and 128 MiB total compressed source bytes per package.
+Packing verifies the exact copied bytes and atomically replaces the output only
+after the ZIP closes successfully, preserving an earlier delivery on failure.
+
+Unpacking retains verified ZIPs under `media/.generated/`; it does **not** extract
+or execute inputs. Import into an independent project collects those companion
+ZIPs, so moving the whole project preserves them. To inspect or recover inputs:
+
+```json
+{"projectId":"my-project","operation":"list"}
+{"projectId":"my-project","operation":"inspect","bundleId":"RETURNED_BUNDLE_ID"}
+{"projectId":"my-project","operation":"restore","bundleId":"RETURNED_BUNDLE_ID","outPath":"exports/recovered-scene"}
+```
+
+Call these with `generated_source` over MCP or
+`POST /api/v1/agent/generated_source`. Restoration requires a **new** destination;
+existing files, including a previous recovery with manual edits, are never
+overwritten. It writes the manifest and declared inputs only, with no render,
+dependency installation, cache registration or timeline revision. Restored scripts
+are untrusted data; review dependencies and licensing, then use a separately
+trusted renderer if you choose to rerender. There is no automatic rerender or
+bidirectional source/UI synchronization. A hash proves identity, not safety or
+reproducibility. Missing undeclared fonts/plugins cannot be inferred or recovered.
 
 ## 中文
 
@@ -111,6 +145,10 @@ trusted renderer environment, write a new manifest/output pair and import it.
 清单由调用方声明，哈希验证不等于安全、可复现或创意质量认证。
 
 透明素材仅支持 straight Alpha 的 ProRes 4444 MOV，必须另查实际合成像素。
-交付时保留 `.cvkpkg` 与源码 ZIP 两类文件；首版尚无源码包自动迁移、任意代码
-隔离运行时、编译/帧缓存、自动重渲或 GUI 参数编辑。性能和视听效果应使用
+工程包会携带所有序列（包括嵌套序列）已引用素材的源码 ZIP，并按 bundle ID 去重。
+新包使用格式 4，旧包继续兼容；旧版程序会明确拒绝格式 4。解包只保留 ZIP，
+不展开或执行源码。用 `generated_source` 的 list/inspect 查看，restore 显式恢复到
+全新目录；已有恢复中的人工修改不会被覆盖。源码哈希、重复条目、路径和格式
+错误会阻断迁移。未声明依赖、渲染缓存索引、任意代码隔离运行时、自动重渲或 GUI
+参数编辑尚未提供。性能和视听效果应使用
 真实作品另行比较，不能由一次导入或导出成功推断。

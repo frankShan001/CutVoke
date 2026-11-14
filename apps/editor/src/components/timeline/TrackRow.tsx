@@ -29,7 +29,7 @@ import { probeMedia } from "../../lib/mediaApi";
 import { effectLabel, type EffectSpec } from "../../lib/effects";
 import { isTransitionEffectId, transitionDurationSecs, TRANSITION_DND_TYPE } from "../../lib/transitions";
 import { EFFECT_DND_TYPE, getEffectDrag, setEffectDrag, clipAcceptsEffect, type EffectDragResource } from "../../lib/effectDrag";
-import { applyResourceToClip } from "../../store/resourceEdit";
+import { applyResourceToClip, currentResourceTarget } from "../../store/resourceEdit";
 import type { TimelineDragApi } from "./useTimelineDrag";
 import type { TimelineViewport } from "./useTimelineViewport";
 import { ClipMediaStrip } from "./ClipMediaStrip";
@@ -289,11 +289,15 @@ export const TrackRow = memo(function TrackRow({
       void operation
         .then((result) => {
           if (!result.ok) return;
-          dispatch({ type: "SELECTION_SET", selection: { trackId: track.id, clipId: clip.id,
+          const target = currentResourceTarget(latest, clip.id);
+          if (!target) return;
+          dispatch({ type: "SELECTION_SET", selection: { trackId: target.track.id, clipId: clip.id,
             effectId: payload.effectId, effectKind: "transition" } });
-          dispatch({ type: "PLAYHEAD_SET", t: clipStartSecs(clip) });
+          dispatch({ type: "PLAYHEAD_SET", t: clipStartSecs(target.clip) });
           window.dispatchEvent(new Event("cutvoke:open-transition"));
-          window.dispatchEvent(new CustomEvent("cutvoke:edit-effect", { detail: { effectId: payload.effectId, category: "transition" } }));
+          window.dispatchEvent(new CustomEvent("cutvoke:edit-effect", { detail: {
+            effectId: payload.effectId, category: "transition", trackId: target.track.id, clipId: clip.id,
+          } }));
         });
     } catch (error) {
       dispatch({ type: "STATUS_SET", severity: "warn", text: error instanceof Error ? error.message : msg("无效转场资源") });

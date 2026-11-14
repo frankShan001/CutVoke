@@ -140,6 +140,8 @@ export function TransitionPanel() {
   const durationSchema = selectedSpec?.parameters.properties?.duration;
   const minDuration = Math.max(.1, Number(durationSchema?.minimum ?? .1));
   const maxDuration = Math.min(5, Number(durationSchema?.maximum ?? 5));
+  const declaredStep = Number(durationSchema?.["x-cutvoke-step"]);
+  const durationStep = Number.isFinite(declaredStep) && declaredStep > 0 ? declaredStep : 0.1;
   const validDuration = Number.isFinite(requestedDuration) && requestedDuration >= minDuration && requestedDuration <= maxDuration;
   const effectiveDuration = validDuration ? Math.min(requestedDuration, transitionTarget.maxDuration) : 0;
   const currentName = currentFx
@@ -273,7 +275,7 @@ export function TransitionPanel() {
           ))}
         </div>
         <div style={{ marginTop: 6 }}>
-          <TextInput type="number" step="0.1" min={minDuration} max={maxDuration} value={duration} onChange={(e) => changeDuration(e.target.value)} />
+          <TextInput type="number" step={durationStep} min={minDuration} max={maxDuration} value={duration} onChange={(e) => changeDuration(e.target.value)} />
         </div>
         {transitionTarget.valid ? (
           <p className="cv-hint" role="status">{tr("最长可生效 ")}{transitionTarget.maxDuration.toFixed(2)}{tr("s；当前填写 ")}{validDuration ? tr("{0}s，实际 {1}s", requestedDuration.toFixed(2), effectiveDuration.toFixed(2)) : tr("无效时长")}{tr("。 转场从切点开始，不压短时间线；前段末帧作为过渡把手，不额外读取源素材。")}</p>

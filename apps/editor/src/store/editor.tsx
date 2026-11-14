@@ -73,6 +73,8 @@ export interface EditorState {
   error: ApiFailure | null;
   status: { severity: Severity; text: string | UiMessage };
   selection: Selection | null;
+  /** Changes for explicit selection/project actions, including leaving and returning. */
+  selectionVersion: number;
   selectedClipIds: string[];
   selectionAnchorId: string | null;
   /** 当前由字幕列表或预览画布选中的字幕；纯 UI 状态，不写入工程。 */
@@ -138,7 +140,7 @@ export type EditorAction =
   | { type: "EXPORT_OPEN_SET"; open: boolean }
   | { type: "AGENT_PANEL_OPEN_SET"; open: boolean }
   | { type: "TEMPLATE_OPEN_SET"; open: boolean }
-  | { type: "EDIT_LOCK_SET"; lease: EditLease | null }
+  | { type: "EDIT_LOCK_SET"; projectId: string; lease: EditLease | null }
   | { type: "CAPTION_DRAFT_PREVIEW_SET"; preview: CaptionDraftPreview | null }
   | { type: "TITLE_DRAFT_SET"; clipId: string; projectId: string; version: string; params: Record<string, unknown> | null }
   | { type: "CAPTION_SELECTION_SET"; captionId: string | null };
@@ -157,6 +159,7 @@ const initialState: EditorState = {
   error: null,
   status: { severity: "idle", get text() { return tr("启动中…"); } },
   selection: null,
+  selectionVersion: 0,
   selectedClipIds: [],
   selectionAnchorId: null,
   selectedCaptionId: null,
@@ -181,12 +184,13 @@ const initialState: EditorState = {
 function sameLeaseIdentity(current: EditLease | null, next: EditLease | null): boolean {
   if (current === next) return true;
   if (!current || !next) return false;
-  // expiresAt may move forward on each heartbeat, but the UI only cares whether
-  // the active lease/owner changed. Avoid rerendering the whole editor per poll.
+  // Unchanged polls do not rerender the editor. A renewal must update the
+  // deadline displayed by the handoff notice.
   return (
     current.projectId === next.projectId &&
     current.leaseId === next.leaseId &&
-    current.owner === next.owner
+    current.owner === next.owner && current.expiresAt === next.expiresAt &&
+    current.acquiredAt === next.acquiredAt
   );
 }
 
@@ -225,6 +229,7 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
         preparedPreview: null,
         projectName: action.name !== undefined ? action.name : state.projectName,
         selection: null,
+        selectionVersion: state.selectionVersion + 1,
         selectedClipIds: [],
         selectionAnchorId: null,
         selectedCaptionId: null,
@@ -253,6 +258,7 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
       return action.projectId === state.currentId ? { ...state, opening: false } : state;
     case "PROJECT_CLOSED":
       return { ...state, currentId: null, project: null, revision: "", playhead: 0,
+        selectionVersion: state.selectionVersion + 1,
         scrubbing: false, preparedPreview: null, opening: false, error: null, editLock: null, view: "home" };
     case "REVISION_SET":
       return { ...state, revision: action.revision };
@@ -270,6 +276,7 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
       return { ...state, status: { severity: action.severity, text: action.text } };
     case "SELECTION_SET":
       return { ...state, selection: action.selection,
+        selectionVersion: state.selectionVersion + 1,
         selectedClipIds: action.selection?.clipId && !action.selection.effectId ? [action.selection.clipId] : [],
         selectionAnchorId: action.selection?.clipId || null,
         selectedCaptionId: action.selection ? null : state.selectedCaptionId };
@@ -279,6 +286,7 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
       const primary = indexed.find(item => item.clipId === action.primaryId && ids.includes(item.clipId))
         || indexed.find(item => ids.includes(item.clipId));
       return { ...state, selectedClipIds: ids, selection: primary || null, selectedCaptionId: null,
+        selectionVersion: state.selectionVersion + 1,
         selectionAnchorId: action.anchorId === undefined ? (primary?.clipId || null) : action.anchorId };
     }
     case "SYNC":
@@ -308,6 +316,7 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
     case "TEMPLATE_OPEN_SET":
       return { ...state, templateOpen: action.open };
     case "EDIT_LOCK_SET":
+      if (action.projectId !== state.currentId) return state;
       if (sameLeaseIdentity(state.editLock, action.lease)) return state;
       return {
         ...state,
@@ -326,14 +335,17 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
       return { ...state, captionDraftPreview: action.preview };
     case "CAPTION_SELECTION_SET": {
       return { ...state, selectedCaptionId: action.captionId, selection: action.captionId ? null : state.selection,
+        selectionVersion: state.selectionVersion + 1,
         selectedClipIds: action.captionId ? [] : state.selectedClipIds };
     }
     case "RESET_SELECTION_FOR":
       if (!action.trackId) {
-        return { ...state, selection: null, selectedClipIds: [], selectionAnchorId: null };
+        return { ...state, selection: null, selectedClipIds: [], selectionAnchorId: null,
+          selectionVersion: state.selectionVersion + 1 };
       }
       if (state.selection && state.selection.trackId === action.trackId) {
-        return { ...state, selection: null, selectedClipIds: [], selectionAnchorId: null };
+        return { ...state, selection: null, selectedClipIds: [], selectionAnchorId: null,
+          selectionVersion: state.selectionVersion + 1 };
       }
       return state;
     default:

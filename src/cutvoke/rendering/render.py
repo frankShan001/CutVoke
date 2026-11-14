@@ -1219,11 +1219,15 @@ def _prepare_static_masks(method):
         render_started=time.monotonic()
         arguments = signature.bind(self, project, *args, **kwargs)
         cancel = arguments.arguments.get("cancel_event")
+        if cancel is not None and cancel.is_set():
+            raise RenderCancelled("render cancelled before preparation")
         values = arguments.arguments
         callback = values.get('progress_callback')
         if callback:
             callback({'phase':'preparing'})
         original_project=project
+        from cutvoke.rendering.window_cache import simple_snapshot
+        recovery_snapshot = simple_snapshot(project) if method.__name__ == "render" else None
         from cutvoke.domain.essential_properties import resolve as resolve_compositions
         project = resolve_compositions(project)
         from cutvoke.domain.spatial_path import resolve as resolve_spatial_paths
@@ -1281,6 +1285,8 @@ def _prepare_static_masks(method):
             self._render_ctx.bounded_origin=origin
             self._render_ctx.verified_input_paths={os.path.normcase(os.path.abspath(c.asset_ref.source_path))
                 for t in project.sequence.tracks for c in t.clips if c.id in clocks}
+        previous_recovery = getattr(self._render_ctx, "recovery_snapshot", None)
+        self._render_ctx.recovery_snapshot = recovery_snapshot
         previous = getattr(self._render_ctx, 'gpu', None)
         previous_pixel=getattr(self._render_ctx,'pixel_gpu',None)
         previous_clips=getattr(self._render_ctx,'gpu_clips',{})
@@ -1339,6 +1345,7 @@ def _prepare_static_masks(method):
                                 self._gpu_failed = True
                                 return prepared(self, original_project, *args, **kwargs)
         finally:
+            self._render_ctx.recovery_snapshot = previous_recovery
             self._render_ctx.gpu = previous
             self._render_ctx.pixel_gpu=previous_pixel
             self._render_ctx.gpu_clips=previous_clips
@@ -2003,7 +2010,8 @@ class RenderService:
         FFV1/PCM intermediates avoid repeated lossy video/AAC encoding and AAC
         priming gaps at window boundaries. The final concat has one media input,
         applies export color management once, and publishes only after verify.
-        All intermediates belong to this request's unique temporary directory.
+        Live inputs belong to this request's unique temporary directory.
+        Eligible completed video windows also enter a bounded disposable cache.
         """
         out_dir = os.path.dirname(os.path.abspath(out_path))
         warnings = list(preflight_warnings)
@@ -2011,6 +2019,13 @@ class RenderService:
         chunks = []
         stage_started = time.monotonic()
         window_metrics = []
+        from cutvoke.rendering.window_cache import recovery_session
+        recovery = recovery_session(
+            Path(out_dir) / ".cutvoke-render-cache",
+            getattr(self._render_ctx, "recovery_snapshot", None), self.ffmpeg,
+            [overlay_position, alpha, getattr(self._render_ctx, "working_color", "bt709"),
+             start, duration], cancel_event) if getattr(self._render_ctx, "gpu", None) is None else None
+        reused_windows = []
         completed_seconds = 0.0
         if progress_callback:
             progress_callback({"phase": "rendering", "fraction": 0.0,
@@ -2052,20 +2067,37 @@ class RenderService:
                 self._render_ctx.gpu_clips={}
                 self._render_ctx.pixel_gpu=None
                 check_cancel()
+                path = temporary / f"window-{round(cursor*float(frame_rate)):09d}.mkv"
+                cache_key = recovery.key(cursor, chunk_duration) if recovery else None
                 compile_started = time.monotonic()
                 graph, inputs, _expected, chunk_audio, messages, caption_cwd = self._compile(
                     video_seq, overlay_position, alpha=alpha,
                     render_window=(cursor, cursor + chunk_duration), frame_aligned_origin=True)
                 origin = self._render_ctx.compile_origin
                 compile_seconds = time.monotonic() - compile_started
-                path = temporary / f"window-{round(cursor*float(frame_rate)):09d}.mkv"
                 try:
+                    if recovery and recovery.unchanged() and recovery.cache.restore(cache_key, path):
+                        try:
+                            self._verify(str(path), chunk_duration, seq.width, seq.height,
+                                         expect_alpha=alpha)
+                            if recovery.unchanged():
+                                check_cancel()
+                                reused_windows.append(cache_key)
+                                window_metrics.append({"compile": compile_seconds, "composite": 0.0})
+                                return [(path, chunk_duration, messages)]
+                        except RenderCancelled:
+                            raise
+                        except RenderError:
+                            pass  # Invalid cache entries are disposable, never final output.
                     self._run_ffmpeg(seq, graph, inputs, str(path), quality,
                         cancel_event, False, caption_cwd=caption_cwd,
                         alpha=alpha, output_start=cursor - origin,
                         output_duration=chunk_duration, lossless=True)
                     self._verify(str(path), chunk_duration, seq.width, seq.height,
                                  expect_alpha=alpha)
+                    check_cancel()
+                    if recovery and recovery.unchanged():
+                        recovery.cache.publish(cache_key, path)
                     window_metrics.append({'compile':compile_seconds,
                                            'composite':time.monotonic()-compile_started-compile_seconds})
                 except RenderError as exc:
@@ -2161,6 +2193,7 @@ class RenderService:
                 "color_range":probe.get("color_range"),
                 "audio_start_time":probe.get("audio_start_time"), "video_start_time":probe.get("video_start_time"),
                 "warnings":warnings, "renderStrategy":"lossless-windows", "windowCount":len(chunks),
+                "reusedWindowCount":len(reused_windows),
                 "audioStrategy":"continuous-pcm" if has_audio else "none",
                 "audioVerification":audio_verification,
                 "videoVerification":video_verification,
@@ -2217,7 +2250,7 @@ class RenderService:
         return {'status':'passed' if reports else 'not_required','comparison':'independent-seam-frames',
                 'sampleWidth':width,'sampleHeight':height,'boundaries':reports}
 
-    def _render_continuous_audio(self, seq, out_path, start, duration, cancel_event=None):
+    def _render_continuous_audio(self, seq, out_path, start, duration, cancel_event=None, *, clock_end=None):
         """Render only the original mixer, once, without decoding visual layers."""
         audio_seq = copy.deepcopy(getattr(self._render_ctx, 'export_audio_sequence', None) or seq)
         # _compile supplies a dummy canvas for audio-only sequences. Its nullsink
@@ -2254,7 +2287,10 @@ class RenderService:
             # Consume the finite 16px clock as an actual null output. FFmpeg 7
             # can abort its scheduler when this independent overlay/scale graph
             # ends in nullsink while only the audio component has an output.
-            command += ['-map', '[outv]', '-an', '-f', 'null', '-']
+            command += ['-map', '[outv]', '-an']
+            if clock_end is not None:
+                command += ['-t', f'{clock_end:.9f}']
+            command += ['-f', 'null', '-']
             process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                                        stderr=subprocess.PIPE, cwd=caption_cwd)
             try:
@@ -2335,6 +2371,26 @@ class RenderService:
                 "recoveryMode": getattr(self._render_ctx, "window_recovery_mode", None),
                 "videoEncoder": getattr(self._render_ctx, "video_encoder", "libx264"),
                 "encoderFallback": getattr(self._render_ctx, "encoder_fallback", False)}
+
+    def render_audio_window(self, project: Project, out_path: str,
+                            start: float, duration: float,
+                            cancel_event: Optional[threading.Event] = None) -> dict[str, Any]:
+        """Inspect the same continuous PCM mixer used by export, on its sample clock.
+
+        Callers own temporary output cleanup and scheduling. This intentionally
+        retains the original mixer history (effects can depend on earlier audio).
+        """
+        # Resolve semantic controls, but never prepare/rasterize visual effects:
+        # they can replace a video source with a silent intermediate.
+        from cutvoke.domain.essential_properties import resolve as resolve_compositions
+        from cutvoke.domain.spatial_path import resolve as resolve_spatial_paths
+        from cutvoke.domain.controllers import resolve as resolve_controllers
+        project = resolve_controllers(resolve_spatial_paths(resolve_compositions(project)))
+        if any(c.nested is not None for t in project.sequence.tracks for c in t.clips):
+            raise RenderError("audio inspection of nested compounds is not supported; review an export instead")
+        has_audio, warnings = self._render_continuous_audio(
+            project.sequence, out_path, start, duration, cancel_event, clock_end=start + duration)
+        return {"has_audio": has_audio, "warnings": warnings}
 
     def render_audio_only(self, project: Project, out_path: str,
                           overwrite: bool = False,
@@ -3438,6 +3494,12 @@ class RenderService:
                 audio_end=render_window[1]-audio_origin
                 parts.append(f"[outa]apad=whole_dur={audio_end:.9f},"
                              f"atrim=end={audio_end:.9f},asetpts=PTS-STARTPTS[outa]")
+
+        elif has_audio:
+            # A short sound effect must not leave the delivery audio stream
+            # shorter than the picture timeline checked by audio integrity.
+            audio_end = max(audio_expected, video_expected + origin - audio_origin)
+            parts.append(f"[outa]apad=whole_dur={audio_end:.9f}[outa]")
 
         graph = ";".join(parts)
         graph = self._preview_seek_inputs(graph, input_paths, seq.fps.to_fraction())
