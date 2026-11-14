@@ -179,3 +179,37 @@ test('deadline observation cannot activate a device clock before the normal tran
   h.window.dispatchEvent(new Event(events.CANCEL_AUDITION_EVENT));
   assert.equal(h.timerCount(), 0);
 });
+
+test('clock observers cannot consume the audition start before native voices initialize', () => {
+  const source = readFileSync(new URL('../src/components/Player.tsx', import.meta.url), 'utf8');
+  const file = ts.createSourceFile('Player.tsx', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let callback;
+  const visit = node => {
+    if (ts.isVariableDeclaration(node) && node.name.getText(file) === 'audioPlaybackClock') callback = node.initializer.arguments[0].getText(file);
+    ts.forEachChild(node, visit);
+  };
+  visit(file); assert.ok(callback);
+  let deviceTime = 10;
+  const transport = { active: false, time: 3, started: 0, clock: null };
+  const output = ts.transpileModule(`exports.clock = ${callback}`, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+  const exports = {};
+  runInNewContext(output, { exports, performance: { now: () => deviceTime * 1000 }, mode: 'video', mediaEndSecs: 6,
+    nativeAudioRef: { current: true }, playingRef: { current: true }, scrubbingRef: { current: false },
+    audioTransportRef: { current: transport }, nativeAudioClockRef: { current: () => deviceTime },
+    playheadRef: { current: 3 }, auditionBoundary: { current: time => time >= 3.5 ? 3.5 : null } });
+  // Player publication/RAF and audition polling can arrive before the delayed
+  // native mix update. Neither may start or advance its source cursor.
+  assert.equal(exports.clock().playing, false);
+  deviceTime += .25;
+  assert.equal(exports.clock().time, 3);
+  assert.equal(transport.active, false);
+  assert.equal(exports.clock(true).time, 3);
+  assert.equal(exports.clock().playing, true);
+  deviceTime += .2;
+  assert.ok(Math.abs(exports.clock().time - 3.2) < .0001);
+  deviceTime += .4;
+  assert.equal(exports.clock().time, 3.5);
+  assert.equal(exports.clock().playing, false);
+  const audioSource = readFileSync(new URL('../src/components/InteractiveAudio.tsx', import.meta.url), 'utf8');
+  assert.match(audioSource, /latest\.current\.playbackClock\(true\)/);
+});
