@@ -366,6 +366,7 @@ for (const cancellation of ['pause', 'seek'] as const) {
     await page.addInitScript(() => {
       const audio: HTMLAudioElement[] = [];
       (window as any).__heldStartupAudio = audio;
+      (window as any).__requestedStartupCount = 0;
       (window as any).__heldStartupCount = 0;
       (window as any).__releasedStartupCount = 0;
       const gate = new Promise<void>(resolve => { (window as any).__releaseStartup = resolve; });
@@ -373,6 +374,7 @@ for (const cancellation of ['pause', 'seek'] as const) {
         const element = Reflect.construct(target, args) as HTMLAudioElement;
         const play = element.play.bind(element);
         element.play = async () => {
+          (window as any).__requestedStartupCount++;
           await play(); // Actual media playback; only its acknowledgement is delayed.
           (window as any).__heldStartupCount++;
           await gate;
@@ -384,15 +386,48 @@ for (const cancellation of ['pause', 'seek'] as const) {
     const id = await fixture(request); const panel = await open(page, id);
     await expect(page.getByTestId('live-audio-meter')).toHaveAttribute('data-ready', 'true', { timeout: 20_000 });
     await panel.locator('.transcript-editor__sentence').first().getByRole('button', { name: '试听', exact: true }).click();
-    await expect.poll(() => page.evaluate(() => (window as any).__heldStartupCount), { intervals: [10, 20] }).toBeGreaterThan(0);
-    expect(await page.evaluate(() => (window as any).__heldStartupAudio.every((element: HTMLAudioElement) => element.paused || element.muted))).toBe(true);
-    expect(await page.evaluate(() => (window as any).__heldStartupAudio.some((element: HTMLAudioElement) => !element.paused && element.muted))).toBe(true);
-    if (cancellation === 'pause') await page.locator('.player__play').click();
-    else await panel.locator('.transcript-editor__sentence').filter({ hasText: '你好世界' }).getByRole('button', { name: '定位', exact: true }).click();
+    await expect.poll(() => page.evaluate(() => {
+      const w = window as any;
+      return w.__requestedStartupCount > 0 && w.__heldStartupCount === w.__requestedStartupCount;
+    }), { intervals: [10, 20] }).toBe(true);
+    const cancelButton = cancellation === 'pause' ? page.locator('.player__play')
+      : panel.locator('.transcript-editor__sentence').filter({ hasText: '你好世界' }).getByRole('button', { name: '定位', exact: true });
+    // Check pending and dispatch cancellation in ONE browser task. The 2s
+    // timeout cannot interleave between this evidence and the actual action.
+    const pending = await cancelButton.evaluate(button => {
+      const w = window as any, audio = w.__heldStartupAudio as HTMLAudioElement[];
+      const snapshot = { requested: w.__requestedStartupCount, held: w.__heldStartupCount,
+        released: w.__releasedStartupCount, pending: audio.some(e => !e.paused && e.muted),
+        safe: audio.every(e => e.paused || e.muted), playing: document.querySelector('.player__play')?.getAttribute('aria-label') };
+      if (!snapshot.pending || !snapshot.safe || snapshot.playing !== '暂停' || snapshot.requested <= 0 ||
+        snapshot.held !== snapshot.requested || snapshot.released !== 0) throw new Error(`startup no longer pending: ${JSON.stringify(snapshot)}`);
+      (button as HTMLElement).click();
+      return snapshot;
+    });
+    expect(pending.held).toBeGreaterThan(0);
     await expect(page.locator('.player__play')).toHaveAttribute('aria-label', '播放');
+    if (cancellation === 'seek') await expect(page.locator('.timeline-ruler')).toHaveAttribute('aria-valuenow', '3');
     await page.evaluate(() => (window as any).__releaseStartup());
-    await expect.poll(() => page.evaluate(() => (window as any).__releasedStartupCount)).toBeGreaterThan(0);
+    await expect.poll(() => page.evaluate(() => ({ requested: (window as any).__requestedStartupCount,
+      held: (window as any).__heldStartupCount, released: (window as any).__releasedStartupCount })))
+      .toEqual({ requested: pending.requested, held: pending.held, released: pending.held });
     await expect.poll(() => page.evaluate(() => (window as any).__heldStartupAudio.every((element: HTMLAudioElement) => element.paused))).toBe(true);
-    await expect(page.locator('.player__play')).toHaveAttribute('aria-label', '播放');
+    // Check later render turns after ALL held acknowledgements settle.
+    const stable = await page.evaluate(async () => {
+      const samples = [];
+      for (let i = 0; i < 8; i++) {
+        await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+        const w = window as any;
+        samples.push({ requested: w.__requestedStartupCount, held: w.__heldStartupCount, released: w.__releasedStartupCount,
+          paused: (w.__heldStartupAudio as HTMLAudioElement[]).every(e => e.paused),
+          label: document.querySelector('.player__play')?.getAttribute('aria-label'),
+          time: Number(document.querySelector('.timeline-ruler')?.getAttribute('aria-valuenow')) });
+      }
+      return samples;
+    });
+    for (const sample of stable) {
+      expect(sample).toMatchObject({ requested: pending.requested, held: pending.held, released: pending.held, paused: true, label: '播放' });
+      if (cancellation === 'seek') expect(sample.time).toBe(3);
+    }
   });
 }
