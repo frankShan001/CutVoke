@@ -1,5 +1,7 @@
 # 最小示例
 
+[离线音频优先教程 / Offline audio-first tutorial](audio-first/README.md) 使用原创合成音验证音频分类、波形、混音淡化、可编辑字幕和工程包往返。
+
 [代码视频素材桥接](generated-media/README.md) 演示原创代码动效、图表与透明标注的
 可追溯导入、局部替换，以及原生文字/音轨和可编辑工程包交付。
 

@@ -144,12 +144,19 @@ jobs:
           npm run test:preview-cache
           npm run test:basic
           npx playwright install --with-deps chromium
+      - name: Verify audio-first tutorial in the editor
+        timeout-minutes: 8
+        working-directory: apps/editor
+        run: |
+          npm run build
+          npx playwright test --config=playwright.audio-tutorial.config.ts
       - name: Verify opt-in Quick Whip in the editor
+        if: ${{ !cancelled() }}
         timeout-minutes: 5
         working-directory: apps/editor
         env:
           CUTVOKE_E2E_PORT: "8801"
-        run: npm run build && npx playwright test --config playwright.quick-whip.config.ts
+        run: npm run build && npx playwright test --config playwright.quick-whip.config.ts --output=../../.artifacts/test-results/quick-whip
       - name: Preserve Quick Whip UI evidence
         if: always()
         uses: actions/upload-artifact@v7
@@ -159,6 +166,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Run full editor scenarios
+        if: ${{ !cancelled() }}
         id: editor_scenarios
         timeout-minutes: 40
         working-directory: apps/editor
