@@ -8,7 +8,10 @@ import { create, act } from 'react-test-renderer';
 import ts from 'typescript';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-async function harness(draft = null) {
+async function harness(draft = null, deferJobs = false) {
+  let resolveJobs;
+  const jobs = new Promise(resolve => { resolveJobs = resolve; });
+  if (!deferJobs) resolveJobs([]);
   let resolveDirectory;
   const directory = new Promise(resolve => { resolveDirectory = resolve; });
   const state = { currentId: 'p', project: { sequence: { tracks: [] } } };
@@ -22,7 +25,7 @@ async function harness(draft = null) {
     './ui': { Button: node('button'), Field: node('div'), Select: node('select'), TextInput: node('input'), Badge: node('span') },
     '../store/editor': { useEditor: () => ({ state, dispatch }), showError() {} },
     '../store/actions': { getLatestState: () => state },
-    '../lib/api': { listExportJobs: async () => [] },
+    '../lib/api': { listExportJobs: () => jobs },
     '../lib/assetStore': { useSessionAssets() {} }, '../lib/preflight': {},
     '../lib/rational': { rationalToSecs: () => 0 },
     '../lib/projectDirectories': { getProjectDirectory: () => directory },
@@ -36,6 +39,7 @@ async function harness(draft = null) {
   await act(async () => { tree = create(React.createElement(exports.ExportVideoSection, { onClose() {} })); });
   const input = () => tree.root.findAllByType('input').find(n => n.props['aria-label'] === '输出文件路径');
   return { input,
+    restore: job => act(async () => resolveJobs([job])),
     focus: () => act(async () => input().props.onFocus?.()),
     change: value => act(async () => input().props.onChange({ target: { value } })),
     resolve: () => act(async () => resolveDirectory({ exportDirectory: '/project/exports' })),
@@ -96,5 +100,45 @@ test('explicitly cleared input stays empty after blur', async () => {
     await h.focus(); await h.change(''); await h.resolve();
     await act(async () => h.input().props.onBlur());
     assert.equal(h.input().props.value, '');
+  } finally { await h.close(); }
+});
+
+const exportJob = status => ({ jobId: 'job-one', status, outPath: '/project/exports/history.mp4',
+  quality: 'low', createdAt: Date.now() / 1000,
+  result: status === 'succeeded' ? { output_path: '/project/exports/history.mp4', duration: 2, width: 320, height: 180 } : null });
+
+test('late completed job cannot replace focused input before its first change', async () => {
+  const h = await harness(null, true);
+  try {
+    await h.focus(); await h.restore(exportJob('succeeded')); await h.resolve();
+    assert.equal(h.input().props.value, '');
+    assert.equal(h.input().props.disabled, false);
+    // This untouched new draft uses the directory default on blur, not a
+    // previous completed job's destination. The old result remains separate.
+    await act(async () => h.input().props.onBlur());
+    assert.equal(h.input().props.value, '/project/exports/video.mp4');
+  } finally { await h.close(); }
+});
+test('late completed job preserves an authored path', async () => {
+  const h = await harness(null, true);
+  try {
+    await h.focus(); await h.change('/project/exports/authored.mp4');
+    await h.restore(exportJob('succeeded')); await h.resolve();
+    assert.equal(h.input().props.value, '/project/exports/authored.mp4');
+  } finally { await h.close(); }
+});
+test('completed job still restores its path before input focus', async () => {
+  const h = await harness(null, true);
+  try {
+    await h.restore(exportJob('succeeded')); await h.resolve(); await h.focus();
+    assert.equal(h.input().props.value, '/project/exports/history.mp4');
+  } finally { await h.close(); }
+});
+for (const status of ['queued', 'running']) test(`late ${status} job remains authoritative and locks the path`, async () => {
+  const h = await harness({ outPath: '/saved-draft.mp4' }, true);
+  try {
+    await h.focus(); await h.change('/new-draft.mp4'); await h.restore(exportJob(status)); await h.resolve();
+    assert.equal(h.input().props.value, '/project/exports/history.mp4');
+    assert.equal(h.input().props.disabled, true);
   } finally { await h.close(); }
 });
