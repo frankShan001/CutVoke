@@ -126,3 +126,31 @@ test('removing another selection does not overwrite a surviving user form draft'
     assert.equal(h.calls[0].time.num, '1.75');
   } finally { await h.close(); }
 });
+
+test('Bezier pointerUp blocks a stale form and commits only an explicitly selected node', async () => {
+  const a = { ...key('a', 1), interpolation: 'cubic-bezier', bezier: [.2, .1, .8, .9] };
+  const b = { ...key('b', 2), interpolation: 'cubic-bezier', bezier: [.7, .2, .9, .4] };
+  const h = await harness(clip([a, b]));
+  const release = () => ({ pointerId: 1, currentTarget: { dataset: { handle: '0' }, releasePointerCapture() {} } });
+  try {
+    await h.select('a'); await h.select('b'); await h.update(clip([a]));
+    // Also invoke the disabled button's handler directly: the guard must live
+    // in the handler, not only in the DOM's disabled attribute.
+    await act(async () => h.button('更新节点').props.onClick());
+    const staleRelease = release();
+    await act(async () => h.tree.root.findByProps({ 'aria-label': '缓动控制曲线' }).props.onPointerUp(staleRelease));
+    assert.equal(staleRelease.currentTarget.dataset.handle, undefined);
+    assert.equal(h.calls.length, 0);
+
+    await h.select('a'); await h.select('a');
+    await act(async () => h.tree.root.findByProps({ 'aria-label': 'Bezier x1' }).props.onChange({ target: { value: '.35' } }));
+    await h.update(clip([a])); // An unrelated refresh must preserve the draft.
+    const validRelease = release();
+    await act(async () => h.tree.root.findByProps({ 'aria-label': '缓动控制曲线' }).props.onPointerUp(validRelease));
+    assert.equal(validRelease.currentTarget.dataset.handle, undefined);
+    assert.equal(h.calls.length, 1);
+    assert.equal(h.calls[0].keyframeId, 'a');
+    assert.equal(h.calls[0].interpolation, 'cubic-bezier');
+    assert.deepEqual(Array.from(h.calls[0].bezier), [.35, .1, .8, .9]);
+  } finally { await h.close(); }
+});
