@@ -7,6 +7,7 @@ interface Options {
   video: RefObject<HTMLVideoElement | null>;
   windowStart: number;
   clock: (initialize?: boolean) => { time: number; playing: boolean } | null;
+  deadlinePosition?: () => number | null;
   seekVersion: number;
   play: () => void;
   pause: () => void;
@@ -84,9 +85,11 @@ export function useTranscriptAudition(options: Options) {
           const clock = now.clock(false), video = now.video.current;
           if (!active.current) return; // The shared clock may have stopped us.
           const time = clock?.time ?? (video && !video.paused ? now.windowStart + video.currentTime : now.playhead);
-          if (stopAtBoundary(time) !== null) return;
+          const nativeTime = now.deadlinePosition?.();
+          const deadlineTime = nativeTime != null ? Math.max(time, nativeTime) : time;
+          if (stopAtBoundary(deadlineTime) !== null) return;
           deadline.current = window.setTimeout(checkDeadline,
-            clock?.playing ? Math.max(1, (target.end - time) * 1000) : 25);
+            clock?.playing || nativeTime != null ? Math.max(1, (target.end - deadlineTime) * 1000) : 25);
         };
         checkDeadline();
         if (!active.current) return;

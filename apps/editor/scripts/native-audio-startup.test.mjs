@@ -96,10 +96,14 @@ function updateHarness(imageMode = false) {
   const voices=new Map([['a',voice]]);
   const latest={current:{project:{projectId:'p',revision:1,sequence:{id:'s',tracks:[{id:'t',kind:'audio',clips:[clip]}]}},scope:'p',seek:0,time:3,playing:true,scrubbing:false,transportMode:imageMode?'image':'video',
     onReady:()=>{}, playbackClock:(initialize,reset)=>{if(reset){stats.reset++;active=false;}if(initialize){stats.commit++;active=true;}return imageMode?null:{time:3,playing:active};}}};
-  const live={exports:{},latest,voices:{current:voices},startup:{current:host.start},context:{current:{state:'running',currentTime:10,resume:()=>Promise.resolve()}},
+  const live={exports:{},positionGeneration:{current:null},latest,voices:{current:voices},startup:{current:host.start},context:{current:{state:'running',currentTime:10,resume:()=>Promise.resolve()}},
     meter:{current:null},disposed:false,frame:0,requestAnimationFrame:()=>1,AUDIO_FX:new Set(['audio-effect']),rationalToSecs:v=>v||0,sourceTime:(_clip,time)=>time};
   runInNewContext(ts.transpileModule(`${generation}\nconst update=${update}; exports.update=update; exports.generation=nativeAudioGeneration`,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText,live);
-  return {update:live.exports.update,generation:live.exports.generation,stats,latest,element,clip};
+  let positionSource;
+  const findPosition=node=>{if(ts.isCallExpression(node)&&node.expression.getText(file)==='latest.current.onPositionSource'&&ts.isArrowFunction(node.arguments[0]))positionSource=node.arguments[0].getText(file);ts.forEachChild(node,findPosition);};findPosition(file);
+  live.nativeAudioPosition=()=>element.currentTime;
+  runInNewContext(ts.transpileModule(`exports.position=${positionSource}`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,live);
+  return {position:live.exports.position,update:live.exports.update,generation:live.exports.generation,stats,latest,element,clip};
 }
 test('real InteractiveAudio update preserves playback across live gain drag and unrelated revisions',async()=>{
   const h=updateHarness();h.update();await flush();assert.equal(h.stats.commit,1);const before={...h.stats};
@@ -165,6 +169,12 @@ test('native cursor boundary uses the fastest unmuted voice with source speed an
   const voices=new Map([['a',{ready:true,prepared:false,element:{currentTime:11.2,readyState:4,paused:false,muted:false}}],
     ['b',{ready:true,prepared:true,element:{currentTime:.55,readyState:4,paused:false,muted:false}}]]);
   assert.ok(Math.abs(exports.position(project,voices)-3.6)<.00001);
+  for (const patch of [{seeking:true}, {muted:true}]) {
+    Object.assign(voices.get('a').element, patch); assert.equal(exports.position(project,voices),3.55);
+    Object.assign(voices.get('a').element, {seeking:false,muted:false});
+  }
+  voices.get('a').gain={gain:{value:0}};assert.equal(exports.position(project,voices),3.55);
+  voices.get('a').gain.gain.value=1;voices.get('a').disposed=true;assert.equal(exports.position(project,voices),3.55);
   voices.get('a').element.muted=true;assert.equal(exports.position(project,voices),3.55);
   voices.get('b').element.paused=true;assert.equal(exports.position(project,voices),null);
 });
@@ -183,5 +193,14 @@ test('real Player deadline stops at the native cursor even when graph transport 
     else assert.equal(globals.exports.clock(false),null);
     cursor=3.599546;const stopped=globals.exports.clock(false);
     assert.equal(stopped.time,3.5);assert.equal(stopped.playing,false);assert.ok(seen.includes(cursor));
+  }
+});
+
+
+test('registered native position rejects a stale scope, source mapping or seek before the next audio update',async()=>{
+  for(const mutate of [h=>h.latest.current.scope='other',h=>h.latest.current.seek++,h=>h.latest.current.project.sequence.tracks[0].clips[0].sourceStart=1]) {
+    const h=updateHarness();assert.equal(h.position(),null);
+    h.update();await flush();assert.equal(h.position(),3);
+    mutate(h);assert.equal(h.position(),null); // No RAF update / replacement voice yet.
   }
 });

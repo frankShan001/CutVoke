@@ -24,14 +24,14 @@ export function nativeAudioGeneration(project: Project | null) {
 type Voice = { element: HTMLAudioElement; gain?: GainNode; analyser?: AnalyserNode; controller: AbortController;
   signature: string; prepared: boolean; ready: boolean; url?: string; disposed?: boolean; failed?: boolean; hasAudio?: boolean };
 
-/** Observe presented native cursors separately from the AudioContext clock.
+/** Observe eligible native media cursors separately from the AudioContext clock.
  * A device clock can lag one media element; audition bounds must also protect
- * the fastest audible voice. Pending/muted voices are not presented audio. */
+ * the fastest eligible voice. This is not a hardware presentation timestamp. */
 export function nativeAudioPosition(project: Project | null, voices: Map<string, Voice>): number | null {
   let position: number | null = null;
   for (const track of project?.sequence.tracks || []) for (const clip of track.clips) {
     const voice = voices.get(clip.id);
-    if (!voice || voice.failed || !voice.ready || voice.element.paused || voice.element.muted || voice.element.readyState < 1) continue;
+    if (!voice || voice.failed || voice.disposed || !voice.ready || voice.element.seeking || (voice.gain?.gain.value ?? 1) <= 0 || voice.element.paused || voice.element.muted || voice.element.readyState < 1) continue;
     const speed = rationalToSecs(clip.speed) || 1;
     const offset = voice.prepared ? voice.element.currentTime : (voice.element.currentTime - rationalToSecs(clip.sourceStart)) / speed;
     const time = rationalToSecs(clip.timelineStart) + offset;
@@ -54,6 +54,7 @@ export function InteractiveAudio({ playing, transportMode, onReady, playbackCloc
   const voices = useRef(new Map<string, Voice>());
   const startup = useRef(new NativeAudioStartup());
   const meter = useRef<HTMLOutputElement>(null);
+  const positionGeneration = useRef<string | null>(null);
   const latest = useRef({ project, scope: state.currentId, time: state.playhead, seek: state.playheadSeekVersion, scrubbing: state.scrubbing, playing, transportMode, onReady, playbackClock, onClockSource, onPositionSource });
   latest.current = { project, scope: state.currentId, time: state.playhead, seek: state.playheadSeekVersion, scrubbing: state.scrubbing, playing, transportMode, onReady, playbackClock, onClockSource, onPositionSource };
   useEffect(() => {
@@ -137,7 +138,12 @@ export function InteractiveAudio({ playing, transportMode, onReady, playbackCloc
               const audioContext = new AudioContext();
               context.current = audioContext;
               latest.current.onClockSource(() => audioContext.currentTime);
-              latest.current.onPositionSource(() => nativeAudioPosition(latest.current.project, voices.current));
+              latest.current.onPositionSource(() => {
+                const now = latest.current;
+                const key = JSON.stringify([now.scope, now.transportMode, nativeAudioGeneration(now.project), now.seek]);
+                return now.playing && !now.scrubbing && key === positionGeneration.current
+                  ? nativeAudioPosition(now.project, voices.current) : null;
+              });
             }
             const source = context.current.createMediaElementSource(element);
             const gain = context.current.createGain(), analyser = context.current.createAnalyser();
@@ -195,7 +201,11 @@ export function InteractiveAudio({ playing, transportMode, onReady, playbackCloc
           current: () => !disposed && latest.current.playing && !latest.current.scrubbing &&
             JSON.stringify([latest.current.scope, latest.current.transportMode, nativeAudioGeneration(latest.current.project), latest.current.seek]) === key,
           begin: () => { latest.current.playbackClock(false, true); },
-          commit: () => latest.current.playbackClock(true)?.playing ?? latest.current.playing,
+          commit: () => {
+            const accepted = latest.current.playbackClock(true)?.playing ?? latest.current.playing;
+            positionGeneration.current = accepted ? key : null;
+            return accepted;
+          },
           failed: () => { latest.current.playbackClock(false, true); latest.current.onReady(false); },
         });
         ready(phase !== 'failed');

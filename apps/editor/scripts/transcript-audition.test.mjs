@@ -213,3 +213,16 @@ test('clock observers cannot consume the audition start before native voices ini
   const audioSource = readFileSync(new URL('../src/components/InteractiveAudio.tsx', import.meta.url), 'utf8');
   assert.match(audioSource, /latest\.current\.playbackClock\(true\)/);
 });
+
+
+test('audition deadline uses the leading native cursor while graph time lags and RAF is withheld', () => {
+  const h = harness(); let native = 3.33;
+  h.render({ clock: () => ({ time: 3.2, playing: true }), deadlinePosition: () => native });
+  h.begin(); h.frame(3.2);
+  // The deadline starts at wall=0; 170ms remain for native, not graph's 300ms.
+  native = 3.499; h.advanceTimers(3.169);
+  assert.equal(h.running(), true);
+  native = 3.501; h.advanceTimers(3.171);
+  assert.equal(h.running(), false); assert.equal(h.audioStops(), 1);
+  assert.equal(h.seeks.at(-1), 3.5); assert.equal(h.timerCount(), 0);
+});

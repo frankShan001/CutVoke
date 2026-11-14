@@ -223,7 +223,7 @@ export function Player() {
       const end = auditionBoundary.current(time);
       return end === null ? { time, playing: running } : { time: end, playing: false };
     };
-    // Deadline observation must consider actual audible cursors as well as the
+    // Deadline observation must consider eligible native media cursors as well as the
     // graph clock. They can differ across native media elements under load.
     const audibleTime = playingRef.current ? nativeAudioPositionRef.current?.() : null;
     if (audibleTime != null) {
@@ -794,7 +794,7 @@ export function Player() {
   auditionBoundary.current = useTranscriptAudition({
     projectId: currentId, sequenceId: project?.sequence.id, revision: state.revision,
     end: mediaEndSecs, playhead, scrubbing: state.scrubbing, video: videoRef,
-    windowStart, clock: audioPlaybackClock, seekVersion: state.playheadSeekVersion,
+    windowStart, clock: audioPlaybackClock, deadlinePosition: () => playingRef.current ? nativeAudioPositionRef.current?.() ?? null : null, seekVersion: state.playheadSeekVersion,
     play: () => {
       // An audition is one bounded pass, including when a shorter transport
       // loop was already enabled. Update the ref before the next clock tick.
