@@ -1672,8 +1672,8 @@ class EditService:
                        from_seconds: Optional[float] = None,
                        to_seconds: Optional[float] = None,
                        fields: Optional[list[str]] = None,
-                       limit: int = 10) -> dict:
-        """Read only the captions or clips an Agent needs for a local edit."""
+                       limit: int = 10, require_unique: bool = False) -> dict:
+        """Read a bounded projection; count all matches before applying the limit."""
         if entity_type not in ("caption", "clip"):
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             "entityType must be 'caption' or 'clip'")
@@ -1682,6 +1682,8 @@ class EditService:
                             "entityId and textContains must be strings")
         if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= 50:
             raise EditError(ErrorCode.INVALID_ARGUMENT, "limit must be 1..50")
+        if not isinstance(require_unique, bool):
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "requireUnique must be a boolean")
         defaults = ({"id", "text", "start", "end"} if entity_type == "caption"
                     else {"id", "trackId", "sourceName", "timelineStart", "timelineEnd"})
         available = ({"id", "text", "start", "end", "fontFamily", "fontSize", "color",
@@ -1714,19 +1716,18 @@ class EditService:
 
         project = self.get_project(project_id)
         found: list[dict] = []
+        match_count = 0
         needle = text_contains.casefold()
         if entity_type == "caption":
-            candidates = ((c, c.to_dict()) for c in project.sequence.captions)
+            candidates = ((c, None) for c in project.sequence.captions)
         else:
-            candidates = (
-                (c, {**c.to_dict(), "trackId": track.id,
-                     "sourceName": c.asset_ref.source_path.replace("\\", "/").rsplit("/", 1)[-1]})
-                for track in project.sequence.tracks for c in track.clips
-            )
-        for entity, record in candidates:
+            candidates = ((c, track.id)
+                          for track in project.sequence.tracks for c in track.clips)
+        for entity, track_id in candidates:
             if entity_id and entity.id != entity_id:
                 continue
-            searchable = entity.text if entity_type == "caption" else record["sourceName"]
+            searchable = (entity.text if entity_type == "caption" else
+                          entity.asset_ref.source_path.replace("\\", "/").rsplit("/", 1)[-1])
             if needle and needle not in searchable.casefold():
                 continue
             start = entity.start if entity_type == "caption" else entity.timeline_start
@@ -1737,12 +1738,25 @@ class EditService:
                 continue
             if upper is not None and start >= upper:
                 continue
-            found.append({key: record[key] for key in selected})
-            if len(found) > limit:
-                break
+            match_count += 1
+            # Count even matches beyond the response limit, but do not serialize
+            # their full records (which may include large effect/keyframe data).
+            if len(found) < limit:
+                record = entity.to_dict()
+                if entity_type == "clip":
+                    record.update(trackId=track_id, sourceName=searchable)
+                found.append({key: record[key] for key in selected})
+        if require_unique and match_count > 1:
+            raise EditError(
+                ErrorCode.AMBIGUOUS_MATCH,
+                f"project_lookup matched {match_count} {entity_type} entities. "
+                "Narrow by time or an explicitly chosen entityId before editing; "
+                "limit does not disambiguate matches.",
+            )
         return {"projectId": project.project_id, "revision": project.revision,
-                "entityType": entity_type, "items": found[:limit],
-                "hasMore": len(found) > limit}
+                "entityType": entity_type, "items": found,
+                "hasMore": match_count > limit,
+                "matchCount": match_count, "ambiguous": match_count > 1}
 
     # ------------------------------------------------------------------
     # Agent 编辑租约：协调“可见但只读”，智能决策仍在外部 Agent。

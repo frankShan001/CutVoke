@@ -138,6 +138,8 @@ Agent 持有编辑租约时，编辑器显示持有者和剩余时间。点击**
 
 > *“按照 `cutvoke-editor` 的纪录片剪辑规范，把 `./raw_clips` 里的素材配合 `bgm.mp3` 剪成一段 60 秒的高燃混剪，审阅关键渲染帧确认切镜自然，完成后我会在编辑器界面里微调标题动画。”*
 
+单条字幕修改先用 `project_lookup(requireUnique=true)`：即使 `limit=1`，多匹配也会被拒绝。请用时间或明确选择的 ID 消歧，只有 `matchCount=1` 且目标符合意图时才修改。详见 [Agent 编辑指南](docs/user/external-agent-editing.md)。
+
 ## 核心功能亮点
 
 ### 1. 面向创作者的全功能多轨剪辑台
