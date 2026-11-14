@@ -13,7 +13,7 @@ type Voice = { element: HTMLAudioElement; gain?: GainNode; analyser?: AnalyserNo
 /** One gain envelope per clip. Moving a fader never re-encodes the mixed video. */
 export function InteractiveAudio({ playing, onReady, playbackClock, onClockSource }: {
   playing: boolean; onReady(ready: boolean): void;
-  playbackClock(): { time: number; playing: boolean } | null;
+  playbackClock(initialize?: boolean): { time: number; playing: boolean } | null;
   onClockSource(clock: (() => number) | null): void;
 }) {
   const { state } = useEditor();
@@ -55,7 +55,9 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
       const { project: snapshot, onReady: ready } = latest.current;
       // React's playhead follows presented frames and can lag the audio clock.
       // Seeking to that stale value repeatedly interrupts otherwise healthy audio.
-      const clock = latest.current.playbackClock();
+      // Only the voice update may initialize the native clock. Earlier player
+      // RAF observers must not consume the beginning of a short audition.
+      const clock = latest.current.playbackClock(true);
       const time = clock?.time ?? latest.current.time;
       const running = clock?.playing ?? latest.current.playing;
       const activeIds = new Set<string>();
