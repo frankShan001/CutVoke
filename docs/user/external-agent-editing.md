@@ -43,7 +43,11 @@ MCP 客户端的 `command` 应填写展开后的绝对路径，`args` 填写 `["
 
 ## 精确修改一句字幕
 
-先用 `project_lookup` 查出字幕 ID 和当前版本，再预演和提交。例如确认字幕 ID 为 `caption-1`、工程版本为 `8` 后：
+先用 `project_lookup` 查出字幕 ID 和当前版本。单条修改使用 `requireUnique: true`；只有 `matchCount=1` 且目标确实符合用户意图时，才能预演和提交。`matchCount` 是 ID、文本、时间条件全部过滤后的总数，`ambiguous` 表示多匹配，两者都在 `limit` 截断前计算。`hasMore` 继续表示还有未返回结果，`limit=1` 不代表唯一。
+
+例如多句字幕都包含“点击保存”时，唯一模式返回 `AMBIGUOUS_MATCH`，不会自行选择首条。根据用户指定的位置补充 `atSeconds` 或 `fromSeconds`/`toSeconds`；位置不明确时先不启用唯一模式列出候选，请用户明确选择，再用所选 `entityId` 和唯一模式复查。零匹配仍返回空列表，应停止并确认目标，不能猜 ID。MCP 使用布尔 `requireUnique`，HTTP GET 使用 `requireUnique=true/false`，Python 客户端使用 `require_unique=True/False`。
+
+例如确认字幕 ID 为 `caption-1`、工程版本为 `8` 后：
 
 ```json
 {

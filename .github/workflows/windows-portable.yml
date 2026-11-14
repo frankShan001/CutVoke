@@ -116,13 +116,20 @@ jobs:
           .artifacts/venv-portable/Scripts/python.exe -m pytest -q tests/storage/test_generated_source_handoff.py tests/storage/test_resource_install_paths.py tests/rendering/test_canvas_eof_clock.py tests/rendering/test_media_executable.py tests/interfaces/test_mcp_media_failures.py tests/integration/test_delivery_runtime.py
       - name: Verify opt-in Quick Whip with real Chrome
         timeout-minutes: 5
+        env:
+          CUTVOKE_QUICK_WHIP_DIAGNOSTICS: '1'
+          DEBUG: 'pw:webserver'
         run: |
           $env:PYTHONPATH = "$pwd/src;$pwd/.artifacts/windows-test-deps"
           $env:PATH = "$pwd/.artifacts/venv-portable/Scripts;$pwd/.artifacts/portable-ffmpeg/bin;$env:PATH"
           $env:CUTVOKE_E2E_PORT = "8801"
           Push-Location apps/editor
-          npx playwright test --config playwright.quick-whip.config.ts
+          New-Item -ItemType Directory -Force ../../.artifacts/quick-whip-startup | Out-Null
+          $startupLog = "../../.artifacts/quick-whip-startup/runner.log"
+          "[quick-whip-startup] launching Playwright" | Tee-Object -FilePath $startupLog
+          npx playwright test --config playwright.quick-whip.config.ts --reporter=line 2>&1 | Tee-Object -FilePath $startupLog -Append
           $testExit = $LASTEXITCODE
+          "[quick-whip-startup] exit=$testExit" | Tee-Object -FilePath $startupLog -Append
           Pop-Location
           exit $testExit
       - name: Preserve Quick Whip Windows UI evidence
@@ -132,6 +139,7 @@ jobs:
           name: quick-whip-windows-ui-evidence
           path: |
             .artifacts/quick-whip-ui/
+            .artifacts/quick-whip-startup/
             .artifacts/test-results/
           if-no-files-found: ignore
           retention-days: 7

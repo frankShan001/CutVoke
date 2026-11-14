@@ -140,3 +140,20 @@ test("clock and user-seek bookkeeping preserve editing-only subscriptions, while
   state = { ...state, revision: "1" };
   assert.notEqual(render(), before);
 });
+
+test("refresh exposes accepted server revision before React binds its snapshot", async () => {
+  const h = harness(); let observed;
+  const pending = h.mod.refreshProject(h.dispatch, "p", { quiet: true, onRefreshedRevision: revision => { observed = revision; } });
+  h.response.resolve(project("6"));
+  assert.equal(await pending, true);
+  assert.equal(observed, "6");
+  assert.equal(h.mod.getLatestState().project.revision, "5");
+});
+test("superseded refresh does not expose a revision for retry", async () => {
+  const h = harness(); let observed;
+  const pending = h.mod.refreshProject(h.dispatch, "p", { onRefreshedRevision: revision => { observed = revision; } });
+  h.mod.bindLatestState({ ...h.state, revision: "7" });
+  h.response.resolve(project("6"));
+  assert.equal(await pending, false);
+  assert.equal(observed, undefined);
+});
