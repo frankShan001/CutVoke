@@ -146,7 +146,10 @@ class MCP:
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 raise TimeoutError("MCP response timed out")
-            line = self.responses.get(timeout=remaining)
+            try:
+                line = self.responses.get(timeout=remaining)
+            except queue.Empty as exc:
+                raise TimeoutError("MCP response timed out") from exc
             if not line:
                 raise RuntimeError("MCP closed unexpectedly; inspect mcp.log")
             response = json.loads(line)

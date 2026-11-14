@@ -192,6 +192,14 @@ class MCPNotificationBoundaries(unittest.TestCase):
             with self.subTest(response=response), self.assertRaises(RuntimeError):
                 self.client([response]).rpc("tools/list", {})
 
+    def test_empty_queue_timeout_has_explicit_error(self):
+        client = self.client([])
+        with patch.object(client.responses, "get", side_effect=demo.queue.Empty) as get, \
+             patch.object(demo.time, "monotonic", side_effect=[0, 1]):
+            with self.assertRaisesRegex(TimeoutError, "MCP response timed out"):
+                client.rpc("tools/list", {})
+        get.assert_called_once_with(timeout=179)
+
     def test_notifications_do_not_extend_deadline(self):
         client = self.client([{"jsonrpc": "2.0", "method": "notifications/tools/list_changed"}])
         with patch.object(demo.time, "monotonic", side_effect=[0, 1, 181]):

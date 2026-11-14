@@ -173,6 +173,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Repeat unchanged title flow with independent cold servers and font caches
+        if: ${{ !cancelled() }}
         timeout-minutes: 10
         run: |
           python tools/verify/test_cold_title_flow.py
