@@ -104,3 +104,39 @@ Recommendation: evaluate B behind an isolated prototype first, not production.
 It offers much less storage but materially more shaping/cache validation than A.
 Choose A for the simplest complete-coverage behavior if the measured package
 cost is accepted; do not silently choose the distribution tradeoff here.
+
+## Follow-up: synthetic libass pixel experiment
+
+`tools/verify/probe_caption_subset_pixels.py` compares full and subset instances
+at both 400 and 700 using seven hard-coded synthetic strings only. It does not
+accept user text, media or projects. It requires the exact measured source digest
+and a new output directory. Font directories are separated from ASS, RGBA and logs.
+
+```
+python tools/verify/probe_caption_subset_pixels.py --source src/cutvoke/assets/fonts/NotoSansSC-VF.ttf --output-dir /tmp/new-font-pixel-probe
+```
+
+Actual Linux validation: Python 3.12.14, fontTools 4.68.0, FFmpeg 7.1.5,
+libass 0.17.3, FriBidi 1.0.16 and HarfBuzz-ng 10.2.0 (FFmpeg's shaper, not the
+uharfbuzz wheel's bundled version). Both 1280x720 RGBA frames at 32px with 2px
+outline were byte-identical, zero changed bytes. Complete/subset generation:
+400 = 12.338/1.087s, 700 = 12.799/1.288s; these timings include save/rename work.
+Frame SHA256:
+- 400: 2987a373ea438da3a28bac6b01242f3beaf76baa9e9538c7127a6ed362ff0fcc
+- 700: 2ebe4564b0da444db16433bd357c930b4435c296482a1bf90b12aecd3f4fb67e
+
+Inspected fontselect logs confirm CutVokePixelProbe selection and actual system
+fallback to Noto Arabic, Devanagari and CJK for uncovered characters, for both
+full and subset. Logs remain local and contain synthetic ASS strings/font paths;
+do not feed user text into this diagnostic or upload user projects/logs. The
+script fails on FFmpeg errors, wrong source, unexpected frame length or pixel
+mismatch, including under optimized Python. Matching blank/fallback-only frames
+are not independently ruled out by the script. In this run fontselect logs were
+inspected and nonblack red-channel counts were 7,150/9,388 for 400/700. Inspect
+logs and frames when reproducing. Other OS/font fallback installations can produce different hashes.
+
+This improves the earlier shaping-only evidence but is NOT the production
+caption compiler/cache, browser 45-second acceptance, all sizes/rotations, hinting
+equivalence across rasterizers or Windows/macOS validation. The experimental
+rename is only for isolated selection, not an approved production alias/cache
+strategy. No resource architecture or production repair is adopted.
