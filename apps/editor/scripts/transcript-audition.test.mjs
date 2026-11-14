@@ -213,3 +213,35 @@ test('clock observers cannot consume the audition start before native voices ini
   const audioSource = readFileSync(new URL('../src/components/InteractiveAudio.tsx', import.meta.url), 'utf8');
   assert.match(audioSource, /latest\.current\.playbackClock\(true\)/);
 });
+
+test('native mix waits for every voice before starting and positions all before play', () => {
+  const source = readFileSync(new URL('../src/components/InteractiveAudio.tsx', import.meta.url), 'utf8');
+  const file = ts.createSourceFile('InteractiveAudio.tsx', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let callback;
+  const visit = node => { if (ts.isVariableDeclaration(node) && node.name.getText(file) === 'update') callback = node.initializer.getText(file); ts.forEachChild(node, visit); };
+  visit(file); assert.ok(callback);
+  const clips = ['a', 'b'].map(id => ({ id, assetRef: { sourcePath: `${id}.wav` }, timelineStart: 0, timelineEnd: 6, speed: 1 }));
+  const events = [], voices = new Map();
+  for (const clip of clips) {
+    const element = { paused: true, currentTime: 0, readyState: 4, duration: 6,
+      pause() { this.paused = true; },
+      play() { events.push(['play', clip.id, this.currentTime]); this.paused = false; return Promise.resolve(); } };
+    voices.set(clip.id, { element, ready: clip.id === 'a', hasAudio: true, prepared: false,
+      signature: JSON.stringify(['p', clip.assetRef, [], undefined, undefined, null, null]) });
+  }
+  let active = false;
+  const latest = { current: { project: { projectId: 'p', sequence: { tracks: [{ kind: 'audio', clips }] } }, time: 3, playing: true,
+    onReady: ready => events.push(['ready', ready]),
+    playbackClock: initialize => { if (initialize) { events.push(['initialize', ...[...voices.values()].map(v => v.element.currentTime)]); active = true; } return { time: 3, playing: active }; } } };
+  const exports = {};
+  runInNewContext(ts.transpileModule(`exports.update = ${callback}`, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText,
+    { exports, latest, voices: { current: voices }, context: { current: { currentTime: 10, resume: () => Promise.resolve() } },
+      meter: { current: null }, disposed: true, AUDIO_FX: new Set(), rationalToSecs: value => value || 0, sourceTime: (_clip, time) => time });
+  exports.update();
+  assert.equal(active, false); assert.equal(events.some(e => e[0] === 'play'), false);
+  exports.update(); assert.equal(active, false);
+  voices.get('b').ready = true;
+  exports.update();
+  assert.deepEqual(events.filter(e => e[0] === 'initialize'), [['initialize', 3, 3]]);
+  assert.deepEqual(events.filter(e => e[0] === 'play'), [['play', 'a', 3], ['play', 'b', 3]]);
+});
