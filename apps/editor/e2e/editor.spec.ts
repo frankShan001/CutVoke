@@ -3428,9 +3428,11 @@ test("attached overlays follow video moves, Alt keeps them in place, and unlinki
       delete (window as any).__attachmentStatusDiagnostics;
       return record?.events || [];
     }).catch(() => []);
-    await testInfo.attach("attachment-status-ordering", {
-      body: JSON.stringify(events), contentType: "application/json",
-    });
+    try {
+      await testInfo.attach("attachment-status-ordering", {
+        body: JSON.stringify(events), contentType: "application/json",
+      });
+    } catch { /* Diagnostic attachment must not replace the original assertion. */ }
   }
   await page.getByRole("button", { name: "撤销" }).click();
   await expect.poll(readPositions).toEqual({ video: 0, sticker: 0.5, attachedTo: "parent-video" });
