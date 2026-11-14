@@ -1,3 +1,4 @@
+const { verifyNativeCaptionFonts } = require("./verify_native_caption_fonts.cjs");
 const { verifyNativePreview } = require("./verify_native_preview.cjs");
 const { verifyNativeTransition } = require("./verify_native_transition.cjs");
 const { verifyWindowsResourceInstall } = require("./verify_windows_resource_install.cjs");
@@ -267,6 +268,8 @@ async function main() {
     report.exportProbe = probe;
     report.checks.guiExportAndFullVideoAudioDecode = true;
     report.transitionClock = await verifyNativeTransition({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath });
+    report.captionFonts = await verifyNativeCaptionFonts({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath, assets: path.join(folder, "resources/engine/_internal/cutvoke/assets") });
+    report.checks.packagedCaptionColdExport = true;
     report.checks.threeShotTransitionClockAndPixels = true;
     const before = await api(`projects/${projectId}`);
     const pid = runtime.processId;

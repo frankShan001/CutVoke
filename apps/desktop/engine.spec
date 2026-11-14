@@ -8,6 +8,7 @@ from PyInstaller.utils.hooks import collect_submodules
 root = Path(SPECPATH).parent.parent
 import runpy
 runpy.run_path(str(root / 'tools/build/prepare_extension_payloads.py'))['prepare'](root)
+runpy.run_path(str(root / 'tools/build/prepare_caption_fonts.py'))['prepare'](root)
 # PyInstaller treats unavailable optional imports as warnings. These modules are
 # required for real projects (titles, masks, optical effects and image assets),
 # so reject a minimal build environment instead of shipping a broken renderer.

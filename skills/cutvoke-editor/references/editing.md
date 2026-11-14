@@ -36,6 +36,12 @@ Use runtime help for exact fields and supported commands:
 
 `createTrackKind` in `clip.insert` creates a **new** track; omit it when adding later clips to that track. Applying a transition targets the incoming clip and requires an adjacent previous clip on the same track. Verify sufficient source duration/transition handles and inspect the overlap; do not assume an effect can repair an unsuitable cut.
 
+### Resolve repeated caption text before editing
+
+`project_lookup` reports `matchCount` and `ambiguous` for all entities matching the ID/text/time filters, before `limit` truncates `items`. `hasMore` still indicates truncation; `limit=1` does not establish uniqueness. Use `requireUnique=true` for a single-target correction: multiple matches return `AMBIGUOUS_MATCH` without an edit, while zero matches still returns an empty list.
+
+If a line such as "Click Save" appears repeatedly, narrow using `atSeconds` or `fromSeconds`/`toSeconds` from the user's intent. If the intended occurrence is unclear, list candidates without the guard and ask for an explicit choice, then requery the chosen `entityId` with the guard. Proceed only when `matchCount=1` and the returned item is the intended target. Preview/update using that stable `captionId` and the returned revision; retain `expectedRevision` checks. Do not treat a fresh revision as proof that an arbitrary text match is the right caption.
+
 ## Sound, captions and expressive intent
 
 Let speech carry the story when present. Lower music underneath it; do not use music merely because the editor can add it. Cut irrelevant silences without erasing meaningful pauses. Check clicks at cuts, uneven loudness, clipping, and audible starts/ends. Automatic measurements can flag silence or peaks; they cannot certify an intelligible or emotionally appropriate mix.

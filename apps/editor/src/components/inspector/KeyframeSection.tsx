@@ -23,7 +23,8 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   const [kfValue, setKfValue] = useState("1");
   const [kfInterp, setKfInterp] = useState<KeyframeInterpolation>("linear");
   const [bezier,setBezier] = useState<Bezier>([.25,.1,.25,1]);
-  const [selected,setSelected] = useState<string[]>([]);
+  const [selectedIds,setSelected] = useState<string[]>([]);
+  const [formTarget,setFormTarget] = useState<{clipId:string;param:string;id:string} | null>(null);
   const [offset,setOffset] = useState("0");
   const [timeScale,setTimeScale] = useState("1");
   const [draft,setDraft] = useState<Keyframe[] | null>(null);
@@ -49,9 +50,19 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   });
   const spec = options.find(option=>option.name===param) || options[0];
   const lane = draft || [...(clip.keyframes?.[param] || [])].sort((a,b)=>rationalToSecs(a.time)-rationalToSecs(b.time));
+  const selected = selectedIds.filter(id => (clip.keyframes?.[param] || []).some(frame => frame.id === id));
+  const formMatchesSelection = selected.length === 1 && formTarget?.clipId === clip.id
+    && formTarget.param === param && formTarget.id === selected[0];
   const readOnly = Boolean(state.editLock) || saving;
   useEffect(()=>{setSelected([]);setDraft(null);setParam(audio?"volume":"opacity");},[clip.id,audio]);
   useEffect(()=>{setDraft(null);},[clip.keyframes]);
+  useEffect(()=>{
+    const valid = new Set((clip.keyframes?.[param] || []).map(frame => frame.id));
+    setSelected(current => {
+      const retained = current.filter(id => valid.has(id));
+      return retained.length === current.length ? current : retained;
+    });
+  },[clip.keyframes,param]);
   useEffect(()=>{
     const selectChannel=(event: Event)=>{
       const detail=(event as CustomEvent<{clipId:string;param:string}>).detail;
@@ -74,6 +85,7 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   const select = (frame: Keyframe, multiple=false) => {
     if (savingRef.current || state.editLock) return;
     setSelected(current=>multiple ? current.includes(frame.id) ? current.filter(id=>id!==frame.id) : [...current,frame.id] : [frame.id]);
+    setFormTarget({clipId:clip.id,param,id:frame.id});
     setKfTime(String(rationalToSecs(frame.time)));setKfValue(String(frame.value));
     setKfInterp(frame.interpolation);setBezier(frame.bezier || [.25,.1,.25,1]);
   };
@@ -146,7 +158,7 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
         const time=Number(kfTime),value=Number(kfValue);if(!Number.isFinite(time)||!Number.isFinite(value))return;
         void save(()=>addKeyframe(dispatch,getLatestState() || state,{clipId:clip.id,param,time,value,interpolation:kfInterp,...(kfInterp==="cubic-bezier"?{bezier}:{})}));
       }}><Plus size={10}/>{tr(" 添加")}</button>
-      {selected.length===1?<button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={readOnly} onClick={()=>void commit({action:"update",param,keyframeId:selected[0],time:secsToRational(Number(kfTime)),value:Number(kfValue),interpolation:kfInterp,...(kfInterp==="cubic-bezier"?{bezier}:{})})}>{tr("更新节点")}</button>:null}
+      {selected.length===1?<button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={readOnly || !formMatchesSelection} onClick={()=>{if(formMatchesSelection)void commit({action:"update",param,keyframeId:selected[0],time:secsToRational(Number(kfTime)),value:Number(kfValue),interpolation:kfInterp,...(kfInterp==="cubic-bezier"?{bezier}:{})});}}>{tr("更新节点")}</button>:null}
     </div>
     <div className="inspector__subrow" style={{gap:5,flexWrap:'wrap',marginTop:6}}>
       <button className="cv-chip" disabled={!selected.length || readOnly} onClick={()=>easeSelected('cubic-bezier',[.333333,0,.666667,1])}>{tr('缓入缓出')} <kbd>F9</kbd></button>
@@ -164,7 +176,7 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
         }} onPointerUp={event=>{
           if(event.currentTarget.dataset.handle===undefined)return;
           delete event.currentTarget.dataset.handle;event.currentTarget.releasePointerCapture(event.pointerId);
-          if(selected.length===1 && !readOnly)void commit({action:"update",param,keyframeId:selected[0],interpolation:"cubic-bezier",bezier});
+          if(formMatchesSelection && !readOnly)void commit({action:"update",param,keyframeId:selected[0],interpolation:"cubic-bezier",bezier});
         }} onPointerCancel={event=>{delete event.currentTarget.dataset.handle;}}>
         <path d={`M20,110 L${20+bezier[0]*120},${110-bezier[1]*100} M140,10 L${20+bezier[2]*120},${110-bezier[3]*100}`} fill="none" stroke="var(--text-dim)" />
         <path d={`M20,110 C${20+bezier[0]*120},${110-bezier[1]*100} ${20+bezier[2]*120},${110-bezier[3]*100} 140,10`} fill="none" stroke="var(--accent)" strokeWidth="2" />

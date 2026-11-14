@@ -141,13 +141,28 @@ class MCP:
         self.process.stdin.write(json.dumps({"jsonrpc": "2.0", "id": self.serial,
                                             "method": method, "params": params}) + "\n")
         self.process.stdin.flush()
-        line = self.responses.get(timeout=180)
-        if not line:
-            raise RuntimeError("MCP closed unexpectedly; inspect mcp.log")
-        response = json.loads(line)
-        if "error" in response:
-            raise RuntimeError(response["error"])
-        return response["result"]
+        deadline = time.monotonic() + 180
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("MCP response timed out")
+            line = self.responses.get(timeout=remaining)
+            if not line:
+                raise RuntimeError("MCP closed unexpectedly; inspect mcp.log")
+            response = json.loads(line)
+            if not isinstance(response, dict) or response.get("jsonrpc") != "2.0":
+                raise RuntimeError("Invalid MCP response")
+            # Hot reload may emit list-changed notifications before our reply.
+            # They do not reset the overall response deadline.
+            if "id" not in response and isinstance(response.get("method"), str):
+                continue
+            if response.get("id") != self.serial:
+                raise RuntimeError("Unexpected MCP response ID")
+            if "error" in response:
+                raise RuntimeError(response["error"])
+            if "result" not in response:
+                raise RuntimeError("MCP response has no result")
+            return response["result"]
 
     def call(self, tool_name, output_frames=None, **arguments):
         result = self.rpc("tools/call", {"name": tool_name, "arguments": arguments})

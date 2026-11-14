@@ -162,5 +162,41 @@ class DemoBoundaries(unittest.TestCase):
             process.wait.assert_called()
 
 
+
+
+class MCPNotificationBoundaries(unittest.TestCase):
+    def client(self, messages):
+        import queue, json
+        client = demo.MCP.__new__(demo.MCP)
+        client.serial = 0
+        client.process = MagicMock()
+        client.responses = queue.Queue()
+        for message in messages:
+            client.responses.put(json.dumps(message))
+        return client
+
+    def test_reload_notifications_do_not_replace_matching_response(self):
+        client = self.client([
+            {"jsonrpc": "2.0", "method": "notifications/tools/list_changed"},
+            {"jsonrpc": "2.0", "method": "notifications/resources/list_changed"},
+            {"jsonrpc": "2.0", "id": 1, "result": {"ok": True}},
+        ])
+        self.assertEqual(client.rpc("tools/list", {}), {"ok": True})
+
+    def test_wrong_id_and_error_are_not_silently_accepted(self):
+        for response in [
+            {"jsonrpc": "2.0", "id": 2, "result": {}},
+            {"jsonrpc": "2.0", "id": 1, "error": {"code": -1}},
+            {"jsonrpc": "2.0", "id": 1},
+        ]:
+            with self.subTest(response=response), self.assertRaises(RuntimeError):
+                self.client([response]).rpc("tools/list", {})
+
+    def test_notifications_do_not_extend_deadline(self):
+        client = self.client([{"jsonrpc": "2.0", "method": "notifications/tools/list_changed"}])
+        with patch.object(demo.time, "monotonic", side_effect=[0, 1, 181]):
+            with self.assertRaises(TimeoutError):
+                client.rpc("tools/list", {})
+
 if __name__ == "__main__":
     unittest.main()

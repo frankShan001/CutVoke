@@ -128,7 +128,7 @@ CutVoke uses a non-destructive, declarative timeline model shared across the vis
         └─────────────────────────────────────────────────┘
 ```
 
-While an agent holds an editing lease, the editor shows its owner and remaining time. Use **Take over editing** to end that specific lease and refresh the project before continuing. Completed edits are preserved; requests using the old lease are rejected.
+While an agent holds an editing lease, the editor shows its owner and remaining time. Use **Take over editing** to end that specific lease and refresh the project before continuing. Completed edits are preserved; requests using the old lease are rejected. **Review changes during this lease** shows the latest 20 committed revision summaries before takeover. It covers versioned edits only, not renames, exports or other unversioned operations. Older leases without a recorded boundary explicitly report unavailable history; this view ends with the lease.
 
 ### Example Prompts You Can Give Your AI Agent
 
@@ -137,6 +137,8 @@ Once CutVoke is connected to Claude Desktop, Cursor, or any MCP client, you can 
 > *"Inspect my current CutVoke timeline, remove silent pauses longer than 0.6s, add a smooth dissolve transition between scene changes, and generate English subtitles using local ASR."*
 
 > *"Use the `cutvoke-editor` documentary workflow to assemble the footage in `./raw_clips` into a 60-second highlight reel synced to `bgm.mp3`, review the rendered keyframes for any awkward cuts, and let me fine-tune the title animations in the UI."*
+
+For a single-caption correction, `project_lookup(requireUnique=true)` rejects multiple matches even with `limit=1`. Narrow by time or an explicitly chosen ID, and proceed only when `matchCount=1` identifies the intended caption. See the [agent editing guide](docs/user/external-agent-editing.md).
 
 ## Key Features
 

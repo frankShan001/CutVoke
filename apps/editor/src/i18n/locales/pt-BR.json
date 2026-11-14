@@ -2212,5 +2212,14 @@
   "确认接管": "Confirmar retomada",
   "确认接管编辑": "Confirmar retomada da edição",
   "租约剩余 {0} 秒": "A permissão expira em {0} s",
-  "租约已变化，请确认当前 Agent 后重试。": "A permissão mudou. Verifique o agente atual antes de tentar novamente."
+  "租约已变化，请确认当前 Agent 后重试。": "A permissão mudou. Verifique o agente atual antes de tentar novamente.",
+  "正在读取…": "Lendo…",
+  "查看本次租约的修改": "Revisar alterações durante esta concessão",
+  "无法读取修改，请刷新工程后重试。": "Não foi possível ler as alterações. Atualize o projeto e tente novamente.",
+  "未记录此租约的起始版本。": "Nenhuma revisão inicial foi registrada para esta concessão.",
+  "租约版本 {0} → {1}": "Revisões da concessão {0} → {1}",
+  "仅包含版本化编辑，不含重命名、导出或其他无版本操作。": "Apenas edições versionadas; exclui renomeações, exportações e outras operações sem versão.",
+  "没有已提交的修改。": "Nenhuma alteração confirmada.",
+  "版本 {0} → {1} · 命令 {2} · {3} 个对象": "Revisão {0} → {1} · Comando {2} · {3} entidades",
+  "仅显示最近的修改。": "Apenas as alterações mais recentes são exibidas."
 }

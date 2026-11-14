@@ -2212,5 +2212,14 @@
   "确认接管": "Übernahme bestätigen",
   "确认接管编辑": "Übernahme der Bearbeitung bestätigen",
   "租约剩余 {0} 秒": "Freigabe läuft in {0} s ab",
-  "租约已变化，请确认当前 Agent 后重试。": "Die Freigabe hat sich geändert. Prüfen Sie den aktuellen Agenten und versuchen Sie es erneut."
+  "租约已变化，请确认当前 Agent 后重试。": "Die Freigabe hat sich geändert. Prüfen Sie den aktuellen Agenten und versuchen Sie es erneut.",
+  "正在读取…": "Wird gelesen…",
+  "查看本次租约的修改": "Änderungen während dieser Sperre prüfen",
+  "无法读取修改，请刷新工程后重试。": "Änderungen konnten nicht gelesen werden. Projekt aktualisieren und erneut versuchen.",
+  "未记录此租约的起始版本。": "Für diese Sperre wurde keine Ausgangsversion erfasst.",
+  "租约版本 {0} → {1}": "Sperrversionen {0} → {1}",
+  "仅包含版本化编辑，不含重命名、导出或其他无版本操作。": "Nur versionierte Bearbeitungen; Umbenennen, Exportieren und andere unversionierte Vorgänge sind ausgeschlossen.",
+  "没有已提交的修改。": "Keine gespeicherten Änderungen.",
+  "版本 {0} → {1} · 命令 {2} · {3} 个对象": "Version {0} → {1} · Befehl {2} · {3} Objekte",
+  "仅显示最近的修改。": "Nur die neuesten Änderungen werden angezeigt."
 }

@@ -140,7 +140,7 @@ class MCPServer:
             },
             {
                 "name": "project_lookup",
-                "description": "按 ID、文字或时间范围读取少量字幕/片段，返回 revision 与指定字段。修改一句字幕时先用此工具定位，无需读取整个工程。",
+                "description": "按 ID、文字或时间范围读取少量字幕/片段，返回 revision、指定字段及截断前的 matchCount/ambiguous。requireUnique=true 拒绝多匹配；零匹配仍返回空列表。修改字幕前用时间或明确选择的 ID 消歧，不要直接选首条。",
                 "inputSchema": {
                     "type": "object",
                     "properties": {
@@ -155,6 +155,8 @@ class MCPServer:
                                    "description": "可选；只返回指定字段，id 与片段 trackId 始终返回"},
                         "limit": {"type": "integer", "minimum": 1, "maximum": 50,
                                   "default": 10},
+                        "requireUnique": {"type": "boolean", "default": False,
+                                          "description": "多于一个匹配时返回 AMBIGUOUS_MATCH；limit 不影响唯一性。零匹配仍为空列表。"},
                     },
                     "required": ["projectId", "entityType"],
                 },
@@ -432,6 +434,7 @@ class MCPServer:
             from_seconds=a.get("fromSeconds"),
             to_seconds=a.get("toSeconds"),
             fields=a.get("fields"), limit=a.get("limit", 10),
+            require_unique=a.get("requireUnique", False),
         )}
 
     def _command_apply(self, a: dict) -> dict:

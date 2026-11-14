@@ -66,7 +66,7 @@ export async function selectProject(
 export async function refreshProject(
   dispatch: Dispatch<EditorAction>,
   projectId: string,
-  options: { quiet?: boolean; signal?: AbortSignal; isCurrent?: () => boolean; reportError?: boolean } = {},
+  options: { quiet?: boolean; signal?: AbortSignal; isCurrent?: () => boolean; reportError?: boolean; onRefreshedRevision?: (revision: string) => void } = {},
 ): Promise<boolean> {
   const startedRevision = latestState?.currentId === projectId ? latestState.revision : undefined;
   // A response may outlive its preview worker, including leaving and reopening
@@ -76,6 +76,7 @@ export async function refreshProject(
   try {
     const project = await getProject(projectId);
     if (!current() || isOlderRevision(project.revision, latestState?.revision)) return false;
+    options.onRefreshedRevision?.(project.revision);
     dispatch({ type: "PROJECT_LOADED", project });
     dispatch({ type: "SVC_UP", up: true });
     if (!options.quiet) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("就绪") });

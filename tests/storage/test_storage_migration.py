@@ -77,7 +77,7 @@ def test_rejects_unsafe_or_busy_migration_without_changing_source(tmp_path, case
     else:
         with sqlite3.connect(source) as conn:
             if case == "lease":
-                conn.execute("INSERT INTO edit_leases VALUES('p','lease','agent',?,0)", (time.time() + 60,))
+                conn.execute("INSERT INTO edit_leases(project_id,lease_id,owner,expires_at,acquired_at) VALUES('p','lease','agent',?,0)", (time.time() + 60,))
             else:
                 conn.execute("INSERT INTO export_jobs(job_id,project_id,revision,request_hash,out_path,quality,status,created_at,updated_at) VALUES('j','p','r','h','out','high','running',0,0)")
     with pytest.raises(ValueError):
