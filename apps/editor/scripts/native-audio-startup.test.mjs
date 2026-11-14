@@ -92,12 +92,12 @@ function updateHarness(imageMode = false) {
     pause(){stats.pause++;this.paused=true;},play(){stats.play++;this.paused=false;return Promise.resolve();}});
   let cursor=3;Object.defineProperty(element,'currentTime',{get:()=>cursor,set:v=>{cursor=v;stats.seek++;}});
   const voice={element,prepared:false,ready:true,hasAudio:true,signature:JSON.stringify(['p',clip.assetRef,[],undefined,undefined,null,null]),
-    gain:{gain:{setValueAtTime:v=>stats.gains.push(v)}}};
+    controller:new AbortController(),gain:{disconnect:()=>{},gain:{setValueAtTime:v=>stats.gains.push(v)}}};
   const voices=new Map([['a',voice]]);
   const latest={current:{project:{projectId:'p',revision:1,sequence:{id:'s',tracks:[{id:'t',kind:'audio',clips:[clip]}]}},scope:'p',seek:0,time:3,playing:true,scrubbing:false,transportMode:imageMode?'image':'video',
     onReady:()=>{}, playbackClock:(initialize,reset)=>{if(reset){stats.reset++;active=false;}if(initialize){stats.commit++;active=true;}return imageMode?null:{time:3,playing:active};}}};
   const live={exports:{},positionGeneration:{current:null},latest,voices:{current:voices},startup:{current:host.start},context:{current:{state:'running',currentTime:10,resume:()=>Promise.resolve()}},
-    meter:{current:null},disposed:false,frame:0,requestAnimationFrame:()=>1,AUDIO_FX:new Set(['audio-effect']),rationalToSecs:v=>v||0,sourceTime:(_clip,time)=>time};
+    playbackEndSecs:tracks=>Math.max(...tracks.flatMap(t=>t.clips.map(c=>c.timelineEnd))),meter:{current:null},disposed:false,frame:0,requestAnimationFrame:()=>1,AUDIO_FX:new Set(['audio-effect']),rationalToSecs:v=>v||0,sourceTime:(_clip,time)=>time};
   runInNewContext(ts.transpileModule(`${generation}\nconst update=${update}; exports.update=update; exports.generation=nativeAudioGeneration`,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText,live);
   let positionSource;
   const findPosition=node=>{if(ts.isCallExpression(node)&&node.expression.getText(file)==='latest.current.onPositionSource'&&ts.isArrowFunction(node.arguments[0]))positionSource=node.arguments[0].getText(file);ts.forEachChild(node,findPosition);};findPosition(file);
@@ -202,5 +202,27 @@ test('registered native position rejects a stale scope, source mapping or seek b
     const h=updateHarness();assert.equal(h.position(),null);
     h.update();await flush();assert.equal(h.position(),3);
     mutate(h);assert.equal(h.position(),null); // No RAF update / replacement voice yet.
+  }
+});
+
+
+test('last voice cleanup leaves the endpoint clock running for Player finalization',async()=>{
+  const h=updateHarness(); h.update();await flush();const resets=h.stats.reset;
+  h.latest.current.playbackClock=(initialize,reset)=>{if(reset)h.stats.reset++;return {time:6,playing:true};};
+  h.element.removeAttribute=()=>{}; h.element.load=()=>{};
+  h.update();assert.equal(h.stats.reset,resets);assert.equal(h.element.paused,true);
+});
+test('real play handler honors the timeline seek while decoder still reports its former end',()=>{
+  const source=readFileSync(new URL('../src/components/Player.tsx',import.meta.url),'utf8');
+  const file=ts.createSourceFile('Player.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);let callback;
+  const visit=node=>{if(ts.isVariableDeclaration(node)&&node.name.getText(file)==='togglePlay')callback=node.initializer.getText(file);ts.forEachChild(node,visit);};visit(file);
+  for(const playhead of [14.8,15]){
+    const actions=[];let plays=0;
+    const globals={exports:{},currentId:'p',project:{},hasRenderable:true,playingRef:{current:false},audioTransportRef:{current:{}},
+      videoRef:{current:{paused:true,currentTime:15}},mode:'video',mediaEndSecs:15,playhead,windowStart:0,
+      reportedVideoTimeRef:{current:14.8},setVideoTime:()=>{},setPlaying:()=>{},requestVideoPlay:()=>plays++,dispatch:a=>actions.push(a)};
+    runInNewContext(ts.transpileModule(`exports.toggle=${callback}`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,globals);
+    globals.exports.toggle();assert.equal(plays,1);
+    assert.equal(actions.some(a=>a.type==='PLAYHEAD_SET'&&a.t===0),playhead===15);
   }
 });

@@ -6,6 +6,7 @@ import { probeMedia } from "../lib/mediaApi";
 import { rationalToSecs } from "../lib/rational";
 import { STOP_AUDITION_AUDIO_EVENT } from "../lib/transcript";
 import { NativeAudioStartup, type StartupVoice } from "../lib/nativeAudioStartup";
+import { playbackEndSecs } from "./playerUtils";
 import { sourceTime } from "./InteractiveScene";
 
 const AUDIO_FX = new Set(["cutvoke.fx.equalizer", "cutvoke.fx.compressor", "cutvoke.fx.loudnorm", "cutvoke.fx.pan", "cutvoke.fx.sidechainDuck"]);
@@ -193,7 +194,10 @@ export function InteractiveAudio({ playing, transportMode, onReady, playbackCloc
       const key = JSON.stringify([latest.current.scope, latest.current.transportMode, nativeAudioGeneration(snapshot), latest.current.seek]);
       if (!enabled || !latest.current.playing || latest.current.scrubbing) {
         startup.current.cancel();
-        if (!enabled) latest.current.playbackClock(false, true);
+        // At the sequence end the last voice is removed before Player's RAF
+        // can publish the endpoint. Preserve the running clock for that finalizer.
+        const reachedEnd = running && snapshot && time >= playbackEndSecs(snapshot.sequence.tracks);
+        if (!enabled && !reachedEnd) latest.current.playbackClock(false, true);
         for (const voice of voices.current.values()) voice.element.pause();
         ready(enabled);
       } else {

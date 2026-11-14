@@ -750,7 +750,9 @@ export function Player() {
     if (mode === "video" && v) {
       if (v.paused) {
         if (mediaEndSecs <= 0) return;
-        if (playhead >= mediaEndSecs - 0.01 || windowStart + v.currentTime >= mediaEndSecs - 0.01) {
+        // Explicit seeks update the timeline before the decoder catches up.
+        // A stale video cursor at its old endpoint must not restart from zero.
+        if (playhead >= mediaEndSecs - 0.01) {
           if (windowStart === 0) v.currentTime = 0;
           reportedVideoTimeRef.current = 0;
           setVideoTime(0);
