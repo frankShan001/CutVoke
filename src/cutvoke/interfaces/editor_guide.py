@@ -148,7 +148,8 @@ GUIDES = {
             "effect.setAnimation replaces only its entry/exit/loop/combined slot; an empty effectId clears the selected slot or all animation slots. Preserve or explicitly replace opacity keyframes using keyframePolicy.",
             "edit.batch supports only its returned allowedCommands and cannot nest. Query edit.batch schema and each child command first. Previews must use the same expectedRevision and payload as the eventual commit.",
             "Acquire edit_lock before grouped agent edits. Use lease.leaseId as command_apply.editLeaseId; renew before expiry, release even on failure. Avoid holding a lease throughout a long export.",
-            "For a precise correction, project_lookup locates clip/caption IDs and selected fields. Change only requested fields. history.undo/redo changes revision too; reread after undo."]},
+            "For a precise correction, project_lookup locates clip/caption IDs and selected fields. Change only requested fields. history.undo/redo changes revision too; reread after undo.",
+            "When multiple captions match the same text at the same time (e.g. a subtitle and a callout), request position/style fields such as y and fontSize so you can distinguish them. Ask the user which one to edit instead of patching the first hit.]},
     "errors": {
         "title": "Recovering from errors",
         "rules": [

@@ -83,6 +83,38 @@ class ProjectLookupTests(unittest.TestCase):
                 from_seconds=5, to_seconds=4,
             )
 
+    def test_identical_captions_at_same_time_are_both_returned_and_distinguishable(self) -> None:
+        # Two captions with identical text and timing but different position/style
+        # (e.g. a low subtitle vs a higher callout). Lookup must return both
+        # so the agent can distinguish them by y / fontSize.
+        self.project.sequence.captions.extend([
+            Caption(
+                id="cap-sub", text="Click Save", start=r(5), end=r(8),
+                y=0.85, fontSize=24,
+            ),
+            Caption(
+                id="cap-callout", text="Click Save", start=r(5), end=r(8),
+                y=0.25, fontSize=48,
+            ),
+        ])
+        result = self.service.project_lookup(
+            self.project.project_id,
+            entity_type="caption",
+            text_contains="Click Save",
+            at_seconds=6.0,
+            fields=["id", "text", "y", "fontSize"],
+        )
+        items = result["items"]
+        self.assertEqual(len(items), 2)
+        by_id = {item["id"]: item for item in items}
+        self.assertIn("cap-sub", by_id)
+        self.assertIn("cap-callout", by_id)
+        self.assertEqual(by_id["cap-sub"]["y"], 0.85)
+        self.assertEqual(by_id["cap-callout"]["y"], 0.25)
+        self.assertEqual(by_id["cap-sub"]["fontSize"], 24)
+        self.assertEqual(by_id["cap-callout"]["fontSize"], 48)
+        # When #35 lands, also assert result.get("matchCount") == 2 and result.get("ambiguous") is True
+
     def test_http_mcp_and_python_client_share_the_same_lookup(self) -> None:
         mcp = MCPServer(self.service)
         response = mcp.call_tool("project_lookup", {
