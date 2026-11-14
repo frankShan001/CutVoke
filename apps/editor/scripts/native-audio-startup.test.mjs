@@ -79,3 +79,58 @@ test('commit refusal leaves no audible native voice',async()=>{
   const h=harness();h.request.commit=()=>false;h.start.start(h.request);await h.unlock();h.plays.forEach(p=>p.resolve());await flush();
   assert.equal(h.failures(),1);assert.ok(h.elements.every(e=>e.paused&&e.muted));
 });
+
+function updateHarness(imageMode = false) {
+  const host = harness(), source = readFileSync(new URL('../src/components/InteractiveAudio.tsx',import.meta.url),'utf8');
+  const file=ts.createSourceFile('InteractiveAudio.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
+  let update,generation;
+  const visit=node=>{if(ts.isVariableDeclaration(node)&&node.name.getText(file)==='update')update=node.initializer.getText(file);
+    if(ts.isFunctionDeclaration(node)&&node.name?.text==='nativeAudioGeneration')generation=node.getText(file).replace('export ','');ts.forEachChild(node,visit);};visit(file);
+  const stats={pause:0,play:0,reset:0,commit:0,seek:0,gains:[]};let active=false;
+  const clip={id:'a',assetRef:{sourcePath:'a.wav'},timelineStart:0,timelineEnd:6,sourceStart:0,speed:1,volume:1};
+  const element=Object.assign(new EventTarget(),{paused:true,muted:false,readyState:4,duration:6,seeking:false,
+    pause(){stats.pause++;this.paused=true;},play(){stats.play++;this.paused=false;return Promise.resolve();}});
+  let cursor=3;Object.defineProperty(element,'currentTime',{get:()=>cursor,set:v=>{cursor=v;stats.seek++;}});
+  const voice={element,prepared:false,ready:true,hasAudio:true,signature:JSON.stringify(['p',clip.assetRef,[],undefined,undefined,null,null]),
+    gain:{gain:{setValueAtTime:v=>stats.gains.push(v)}}};
+  const voices=new Map([['a',voice]]);
+  const latest={current:{project:{projectId:'p',revision:1,sequence:{id:'s',tracks:[{id:'t',kind:'audio',clips:[clip]}]}},scope:'p',seek:0,time:3,playing:true,scrubbing:false,
+    onReady:()=>{}, playbackClock:(initialize,reset)=>{if(reset){stats.reset++;active=false;}if(initialize){stats.commit++;active=true;}return imageMode?null:{time:3,playing:active};}}};
+  const live={exports:{},latest,voices:{current:voices},startup:{current:host.start},context:{current:{state:'running',currentTime:10,resume:()=>Promise.resolve()}},
+    meter:{current:null},disposed:false,frame:0,requestAnimationFrame:()=>1,AUDIO_FX:new Set(['audio-effect']),rationalToSecs:v=>v||0,sourceTime:(_clip,time)=>time};
+  runInNewContext(ts.transpileModule(`${generation}\nconst update=${update}; exports.update=update; exports.generation=nativeAudioGeneration`,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText,live);
+  return {update:live.exports.update,generation:live.exports.generation,stats,latest,element,clip};
+}
+test('real InteractiveAudio update preserves playback across live gain drag and unrelated revisions',async()=>{
+  const h=updateHarness();h.update();await flush();assert.equal(h.stats.commit,1);const before={...h.stats};
+  for(const volume of [.8,.5,.2]){
+    h.latest.current.project=structuredClone(h.latest.current.project);h.latest.current.project.revision++;
+    h.latest.current.project.sequence.tracks[0].clips[0].volume=volume;h.update();await flush();
+  }
+  for(const key of ['pause','play','reset','commit','seek'])assert.equal(h.stats[key],before[key],key);
+  assert.deepEqual(h.stats.gains.slice(-3),[.8,.5,.2]);assert.equal(h.element.paused,false);
+});
+test('semantic audio generation ignores visual edits but invalidates source mapping, mute and mix changes',()=>{
+  const h=updateHarness(),original=h.latest.current.project,base=h.generation(original);
+  for(const mutate of [p=>p.revision++,p=>p.sequence.tracks[0].clips[0].volume=.3,p=>p.sequence.tracks[0].clips[0].fadeIn=.2,
+    p=>p.sequence.tracks[0].clips[0].effects=[{effectId:'visual',enabled:true}]]){const p=structuredClone(original);mutate(p);assert.equal(h.generation(p),base);}
+  for(const mutate of [p=>p.sequence.tracks[0].muted=true,p=>p.sequence.tracks[0].clips[0].sourceStart=1,
+    p=>p.sequence.tracks[0].clips[0].speed=2,p=>p.sequence.tracks[0].clips[0].assetRef.sourcePath='b.wav',p=>p.sequence.masterAudio={volume:2}]){
+    const p=structuredClone(original);mutate(p);assert.notEqual(h.generation(p),base);
+  }
+});
+test('image fallback with no native transport clock can still start audio',async()=>{
+  const h=updateHarness(true);h.update();await flush();assert.equal(h.stats.commit,1);assert.equal(h.element.paused,false);assert.equal(h.element.muted,false);
+});
+test('failed startup recovers after explicit pause then replay of the same scope',async()=>{
+  const h=harness();h.start.start(h.request);await h.unlock();h.plays[0].reject();await flush();assert.equal(h.start.start(h.request),'failed');
+  h.start.cancel();h.elements.forEach(e=>e.play=()=>{e.paused=false;return Promise.resolve();});
+  h.start.start(h.request);await flush();assert.equal(h.commit(),1);assert.ok(h.elements.every(e=>!e.paused&&!e.muted));
+});
+test('real update pause and replay explicitly rearm a failed native attempt',async()=>{
+  const h=updateHarness();const play=h.element.play;h.element.play=()=>Promise.reject(new Error('blocked'));
+  h.update();await flush();assert.equal(h.stats.commit,0);assert.equal(h.element.paused,true);
+  h.element.play=play;h.update();await flush();assert.equal(h.stats.commit,0); // Failure stays latched, no RAF retry storm.
+  h.latest.current.playing=false;h.update();h.latest.current.playing=true;h.update();await flush();
+  assert.equal(h.stats.commit,1);assert.equal(h.element.paused,false);assert.equal(h.element.muted,false);
+});

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import type { Project } from "../types/api";
 import { useEditor } from "../store/editor";
 import { pendingCommands, useInteractionProject } from "../store/interactive";
 import { probeMedia } from "../lib/mediaApi";
@@ -8,6 +9,18 @@ import { NativeAudioStartup, type StartupVoice } from "../lib/nativeAudioStartup
 import { sourceTime } from "./InteractiveScene";
 
 const AUDIO_FX = new Set(["cutvoke.fx.equalizer", "cutvoke.fx.compressor", "cutvoke.fx.loudnorm", "cutvoke.fx.pan", "cutvoke.fx.sidechainDuck"]);
+/** Only source/timing/mix changes invalidate startup. Live gain envelopes and
+ * unrelated project revisions must not interrupt healthy native playback. */
+export function nativeAudioGeneration(project: Project | null) {
+  if (!project) return null;
+  return JSON.stringify([project.projectId, project.sequence.id, project.sequence.masterAudio, project.sequence.audioBuses,
+    project.sequence.tracks.filter(track => ['audio', 'video'].includes(track.kind)).map(track =>
+      [track.id, track.kind, track.role, track.visible, track.muted, track.audioMix, track.clips.map(clip =>
+        [clip.id, clip.assetRef, clip.hidden, clip.nested, clip.freezeAt, clip.role, clip.sourceStart, clip.timelineStart,
+          clip.timelineEnd, clip.speed, clip.speedCurve, (clip as typeof clip & { pitch?: typeof clip.speed }).pitch,
+          clip.preservePitch, clip.audioFadeDuration, clip.audioFadeOffset, clip.keyframes?.volume,
+          (clip.effects || []).filter(effect => effect.enabled !== false && AUDIO_FX.has(effect.effectId))])])]);
+}
 type Voice = { element: HTMLAudioElement; gain?: GainNode; analyser?: AnalyserNode; controller: AbortController;
   signature: string; prepared: boolean; ready: boolean; url?: string; disposed?: boolean; failed?: boolean; hasAudio?: boolean };
 
@@ -153,7 +166,7 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
       }
       const enabled = hasAudio && allReady && !unsupportedMix && !sidechainMix;
       // Never play a partial native mix together with the server mix.
-      const key = JSON.stringify([latest.current.scope, snapshot?.projectId, snapshot?.revision, latest.current.seek]);
+      const key = JSON.stringify([latest.current.scope, nativeAudioGeneration(snapshot), latest.current.seek]);
       if (!enabled || !latest.current.playing || latest.current.scrubbing) {
         startup.current.cancel();
         if (!enabled) latest.current.playbackClock(false, true);
@@ -161,10 +174,10 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
         ready(enabled);
       } else {
         const phase = startup.current.start({ key, voices: playable, context: context.current!,
-          current: () => !disposed && latest.current.project === snapshot && latest.current.playing && !latest.current.scrubbing &&
-            JSON.stringify([latest.current.scope, latest.current.project?.projectId, latest.current.project?.revision, latest.current.seek]) === key,
+          current: () => !disposed && latest.current.playing && !latest.current.scrubbing &&
+            JSON.stringify([latest.current.scope, nativeAudioGeneration(latest.current.project), latest.current.seek]) === key,
           begin: () => { latest.current.playbackClock(false, true); },
-          commit: () => latest.current.playbackClock(true)?.playing === true,
+          commit: () => latest.current.playbackClock(true)?.playing ?? latest.current.playing,
           failed: () => { latest.current.playbackClock(false, true); latest.current.onReady(false); },
         });
         ready(phase !== 'failed');
