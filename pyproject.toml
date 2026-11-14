@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=68", "fontTools==4.66.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
