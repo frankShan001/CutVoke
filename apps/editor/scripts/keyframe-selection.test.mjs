@@ -95,3 +95,34 @@ test('switching parameter channels clears selection', async () => {
     assert.equal(h.checked('a'), false);
   } finally { await h.close(); }
 });
+
+test('deleting the last selected node cannot apply its form to the survivor', async () => {
+  const h = await harness(clip([key('a', 1), { ...key('b', 2), value: .8 }]));
+  try {
+    await h.select('a'); await h.select('b');
+    await h.update(clip([key('a', 1)]));
+    assert.equal(h.checked('a'), true);
+    assert.equal(h.button('更新节点').props.disabled, true);
+    assert.equal(h.calls.length, 0);
+    // Re-selecting the survivor explicitly loads its values before update.
+    await h.select('a'); await h.select('a');
+    assert.equal(h.button('更新节点').props.disabled, false);
+    await act(async () => h.button('更新节点').props.onClick());
+    assert.equal(h.calls[0].keyframeId, 'a');
+    assert.equal(h.calls[0].time.num, '1');
+    assert.equal(h.calls[0].value, .5);
+  } finally { await h.close(); }
+});
+
+test('removing another selection does not overwrite a surviving user form draft', async () => {
+  const h = await harness(clip([key('a', 1), key('b', 2)]));
+  try {
+    await h.select('b'); await h.select('a');
+    await act(async () => h.tree.root.findByProps({ 'aria-label': '关键帧时间（秒）' }).props.onChange({ target: { value: '1.75' } }));
+    await h.update(clip([key('a', 1)]));
+    assert.equal(h.button('更新节点').props.disabled, false);
+    await act(async () => h.button('更新节点').props.onClick());
+    assert.equal(h.calls[0].keyframeId, 'a');
+    assert.equal(h.calls[0].time.num, '1.75');
+  } finally { await h.close(); }
+});
