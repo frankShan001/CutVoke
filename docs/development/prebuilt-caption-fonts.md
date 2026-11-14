@@ -101,3 +101,18 @@ Actual Linux follow-up:
 - Latest source cache-isolation tests:22 passed,8subtests; real-resource verifier
   passes with runtime conversion forbidden. Cross-platform/native-app and latest
   head packaged browser acceptance remain pending; no merge approval.
+
+## Warm-cache integrity review
+
+v2 cache hits now hash cached bytes against the already-verified packaged bytes,
+in addition to font/alias/metric checks. Invalid or truncated cached data is
+replaced atomically from those bytes; the old entry remains until replacement
+succeeds. Legacy v1 fallback behavior is unchanged. This is corruption detection,
+not a signature or protection against a modified application/resource installation.
+
+Regression fixtures use real parseable static fonts and cover unchanged warm hits,
+truncation and altered horizontal metrics with unchanged alias. Damaged entries
+are restored exactly without invoking the instancer, unchanged hits do not replace.
+Latest focused result:25 tests and8subtests. Actual complete400/700 assets also
+passed both truncation and parseable-metric corruption repair with conversion
+forbidden. This does not replace native distribution/browser acceptance.

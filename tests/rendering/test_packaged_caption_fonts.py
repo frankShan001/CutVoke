@@ -121,3 +121,55 @@ def test_distinct_verified_resource_bytes_use_distinct_cache_keys(tmp_path, monk
         paths.append(path)
     assert paths[0] != paths[1]
     assert all("-v2-" in path for path in paths)
+
+
+def tiny_static_font(alias):
+    import io
+    from fontTools.fontBuilder import FontBuilder
+    from fontTools.pens.ttGlyphPen import TTGlyphPen
+    font = FontBuilder(1000, isTTF=True)
+    font.setupGlyphOrder([".notdef"])
+    font.setupCharacterMap({})
+    pen = TTGlyphPen(None)
+    pen.moveTo((0, 0)); pen.lineTo((100, 0)); pen.lineTo((100, 100)); pen.closePath()
+    font.setupGlyf({".notdef": pen.glyph()})
+    font.setupHorizontalMetrics({".notdef": (500, 0)})
+    font.setupHorizontalHeader(ascent=800, descent=-200)
+    font.setupNameTable({"familyName": alias, "styleName": "Regular"})
+    font.setupOS2(usWeightClass=400)
+    font.setupPost()
+    font.setupMaxp()
+    result = io.BytesIO()
+    font.save(result)
+    return result.getvalue()
+
+
+@pytest.mark.parametrize("damage", ["truncate", "parseable-metrics", "unchanged"])
+def test_warm_packaged_cache_integrity_repaired(tmp_path, monkeypatch, damage):
+    from fontTools.ttLib import TTFont
+    source = tmp_path / "source.ttf"
+    source.write_bytes(b"source")
+    digest = hashlib.sha256(b"source").hexdigest()
+    data = tiny_static_font(f"CutVoke Caption {digest[:12]}")
+    monkeypatch.setattr(c, "resolve_title_font", lambda *a, **k: str(source))
+    monkeypatch.setenv("CUTVOKE_FONT_CACHE", str(tmp_path / "cache"))
+    monkeypatch.setattr(c, "_packaged_caption_font", lambda *a: data)
+    monkeypatch.setattr(c, "_css_font_size_to_ass", lambda *a: 32)
+    _, path = c._caption_font_instance("Noto Sans SC", False)
+    if damage == "truncate":
+        Path(path).write_bytes(data[:12])
+    elif damage == "parseable-metrics":
+        with TTFont(path) as font:
+            font["hmtx"][".notdef"] = (900, 0)
+            font.save(path)
+        with TTFont(path) as font:
+            assert font["hmtx"][".notdef"][0] == 900
+            assert font["name"].getDebugName(1) == f"CutVoke Caption {digest[:12]}"
+    with patch.object(c.os, "replace", wraps=c.os.replace) as replace:
+        with patch("fontTools.varLib.instancer.instantiateVariableFont",
+                   side_effect=RuntimeError("must not instantiate")):
+            _, repeated = c._caption_font_instance("Noto Sans SC", False)
+    assert repeated == path
+    assert Path(path).read_bytes() == data
+    assert replace.call_count == (0 if damage == "unchanged" else 1)
+    assert not list(Path(path).parent.glob(".caption-*"))

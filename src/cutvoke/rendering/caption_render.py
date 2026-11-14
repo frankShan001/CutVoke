@@ -265,11 +265,20 @@ def _caption_font_instance(family: str, bold: bool) -> tuple[str, str]:
     with _CAPTION_FONT_LOCK:
         try:
             if target.is_file():
-                with TTFont(target, lazy=True) as cached:
-                    if "fvar" in cached or cached["name"].getDebugName(1) != alias:
-                        raise ValueError("invalid cached caption font")
-                _css_font_size_to_ass(32, family, str(target))
-                return alias, str(target)
+                try:
+                    if packaged is not None and hashlib.sha256(target.read_bytes()).digest() != hashlib.sha256(packaged).digest():
+                        raise ValueError("cached packaged font content mismatch")
+                    with TTFont(target, lazy=True) as cached:
+                        if "fvar" in cached or cached["name"].getDebugName(1) != alias:
+                            raise ValueError("invalid cached caption font")
+                    _css_font_size_to_ass(32, family, str(target))
+                    return alias, str(target)
+                except Exception:
+                    if packaged is None:
+                        raise
+                    # Keep the existing file until verified bytes replace it
+                    # atomically below. Hash checks detect corruption, not a
+                    # maliciously modified application/resource installation.
             if packaged is not None:
                 fd, temporary = tempfile.mkstemp(prefix=".caption-", suffix=".ttf", dir=cache)
                 with os.fdopen(fd, "wb") as stream:
