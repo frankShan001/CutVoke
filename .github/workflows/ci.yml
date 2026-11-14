@@ -165,6 +165,17 @@ jobs:
           path: .artifacts/quick-whip-ui/
           if-no-files-found: ignore
           retention-days: 7
+      - name: Repeat unchanged title flow with independent cold servers and font caches
+        timeout-minutes: 10
+        run: python tools/verify/verify_cold_title_flow.py
+      - name: Preserve cold title traces and verification
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cold-title-evidence
+          path: .artifacts/cold-title/
+          retention-days: 7
+          if-no-files-found: ignore
       - name: Run full editor scenarios
         id: editor_scenarios
         timeout-minutes: 40
