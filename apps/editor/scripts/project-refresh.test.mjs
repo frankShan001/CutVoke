@@ -13,7 +13,8 @@ function moduleAt(path, dependencies, extra = "") {
   } });
   const exports = {};
   runInNewContext(outputText, { exports, require: name => dependencies[name] || {}, Date, BigInt,
-    console, structuredClone, setTimeout, clearTimeout });
+    console, structuredClone, setTimeout, clearTimeout, AbortController, DOMException, Error,
+    window: { setTimeout: () => 1, clearTimeout: () => {}, addEventListener: () => {}, removeEventListener: () => {} } });
   return exports;
 }
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
@@ -140,3 +141,42 @@ test("clock and user-seek bookkeeping preserve editing-only subscriptions, while
   state = { ...state, revision: "1" };
   assert.notEqual(render(), before);
 });
+
+
+// Run the actual preparation effect with a server cancellation delivered before
+// a local command ACK/snapshot. This controls order without browser timing.
+for (const changed of [true, false]) {
+  test(`cancelled preview reconciles unseen commit (changed=${changed})`, async () => {
+    const effects = [], actions = [], retries = [];
+    let refreshes = 0, stateIndex = 0;
+    const state = { currentId: "p", view: "editor", opening: false,
+      project: { ...project("2"), sequence: { tracks: [{ kind: "video", clips: [{}] }], captions: [] } } };
+    class Failure extends Error { constructor(data) { super(data.message); Object.assign(this, data); } }
+    const preparation = moduleAt("../src/components/ProjectLoading.tsx", {
+      react: {
+        useEffect: effect => effects.push(effect), useMemo: fn => fn(), useRef: current => ({ current }),
+        useState: initial => { const index = stateIndex++; return [initial, value => { if (index === 0) retries.push(value); }]; },
+      },
+      "../store/editor": { useEditor: () => ({ state, dispatch: action => actions.push(action) }) },
+      "../store/actions": { getLatestState: () => state, refreshProject: async (_dispatch, _id, options) => {
+        refreshes++; assert.equal(options.quiet, true); assert.equal(options.isCurrent(), true);
+        if (changed) state.project = { ...state.project, revision: "3" };
+        return true;
+      } },
+      "../lib/previewPreparation": { previewContentKey: () => "same-base-video", previewRequest: async () => ({
+        jobId: "old", state: "cancelled", phase: "cancelled", progress: 0, error: "render cancelled before completion",
+      }) },
+      "../lib/previewBudget": { usePreviewBudget: () => ({ enabled: true, continuous: true, delayMs: 0, wallSeconds: 60 }) },
+      "../lib/api": { ApiFailure: Failure }, "../i18n": { tr: value => value, msg: value => value },
+    });
+    preparation.useProjectPreparation();
+    const cleanup = effects.at(-1)();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(refreshes, 1, "must consult server even while client snapshot still has revision 2");
+    assert.equal(retries.length, changed ? 1 : 0);
+    const feedback = actions.filter(action => action.type === "STATUS_SET");
+    assert.equal(feedback.length, changed ? 0 : 1);
+    if (!changed) assert.equal(feedback[0].text, "render cancelled before completion");
+    cleanup();
+  });
+}
