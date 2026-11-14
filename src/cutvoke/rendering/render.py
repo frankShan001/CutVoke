@@ -1219,6 +1219,8 @@ def _prepare_static_masks(method):
         render_started=time.monotonic()
         arguments = signature.bind(self, project, *args, **kwargs)
         cancel = arguments.arguments.get("cancel_event")
+        if cancel is not None and cancel.is_set():
+            raise RenderCancelled("render cancelled before preparation")
         values = arguments.arguments
         callback = values.get('progress_callback')
         if callback:
@@ -3492,6 +3494,12 @@ class RenderService:
                 audio_end=render_window[1]-audio_origin
                 parts.append(f"[outa]apad=whole_dur={audio_end:.9f},"
                              f"atrim=end={audio_end:.9f},asetpts=PTS-STARTPTS[outa]")
+
+        elif has_audio:
+            # A short sound effect must not leave the delivery audio stream
+            # shorter than the picture timeline checked by audio integrity.
+            audio_end = max(audio_expected, video_expected + origin - audio_origin)
+            parts.append(f"[outa]apad=whole_dur={audio_end:.9f}[outa]")
 
         graph = ";".join(parts)
         graph = self._preview_seek_inputs(graph, input_paths, seq.fps.to_fraction())

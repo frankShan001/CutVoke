@@ -2212,5 +2212,14 @@
   "确认接管": "Confirm takeover",
   "确认接管编辑": "Confirm editing takeover",
   "租约剩余 {0} 秒": "Lease expires in {0} s",
-  "租约已变化，请确认当前 Agent 后重试。": "The lease has changed. Check the current agent before trying again."
+  "租约已变化，请确认当前 Agent 后重试。": "The lease has changed. Check the current agent before trying again.",
+  "正在读取…": "Reading…",
+  "查看本次租约的修改": "Review changes during this lease",
+  "无法读取修改，请刷新工程后重试。": "Could not read changes. Refresh the project and try again.",
+  "未记录此租约的起始版本。": "No starting revision was recorded for this lease.",
+  "租约版本 {0} → {1}": "Lease revisions {0} → {1}",
+  "仅包含版本化编辑，不含重命名、导出或其他无版本操作。": "Versioned edits only; excludes renames, exports and other unversioned operations.",
+  "没有已提交的修改。": "No committed changes.",
+  "版本 {0} → {1} · 命令 {2} · {3} 个对象": "Revision {0} → {1} · Command {2} · {3} entities",
+  "仅显示最近的修改。": "Only the most recent changes are shown."
 }
