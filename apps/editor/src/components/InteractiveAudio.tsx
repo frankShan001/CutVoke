@@ -57,10 +57,11 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
       // Seeking to that stale value repeatedly interrupts otherwise healthy audio.
       // Only the voice update may initialize the native clock. Earlier player
       // RAF observers must not consume the beginning of a short audition.
-      const clock = latest.current.playbackClock(true);
+      const clock = latest.current.playbackClock(false);
       const time = clock?.time ?? latest.current.time;
       const running = clock?.playing ?? latest.current.playing;
       const activeIds = new Set<string>();
+      const playable: HTMLAudioElement[] = [];
       let hasAudio = false, allReady = true;
       // A sidechain needs the other clips' key streams. Keep the complete
       // server mix audible instead of preparing an isolated, unducked clip.
@@ -140,9 +141,7 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
           const envelope = Math.min(1, Math.max(0, fadeIn > 0 ? (time - start) / fadeIn : 1))
             * Math.min(1, Math.max(0, fadeOut > 0 ? (end - time) / fadeOut : 1));
           voice.gain?.gain.setValueAtTime(Math.max(0, volume * envelope), context.current!.currentTime);
-          if (running && element.paused) {
-            void context.current?.resume(); void element.play().catch(() => {});
-          } else if (!running) element.pause();
+          playable.push(element);
         }
       }
       for (const [id, voice] of voices.current) if (!activeIds.has(id)) {
@@ -152,6 +151,15 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
       const enabled = hasAudio && allReady && !unsupportedMix && !sidechainMix;
       // Never play a partial native mix together with the server mix.
       if (!enabled) for (const voice of voices.current.values()) voice.element.pause();
+      else {
+        // Commit playback only after every active voice is ready and positioned.
+        // A partially ready mix must neither start the transport nor any voice.
+        const start = latest.current.playbackClock(true);
+        if (start?.playing ?? latest.current.playing) {
+          void context.current?.resume();
+          for (const element of playable) if (element.paused) void element.play().catch(() => {});
+        } else for (const element of playable) element.pause();
+      }
       ready(enabled);
       if (meter.current) {
         let energy = 0;
