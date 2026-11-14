@@ -3911,8 +3911,48 @@ test("text and freehand masks edit on canvas and persist through undo and reopen
   await page.getByRole("button", { name: "撤销" }).click();
   await expect.poll(async () => Number(((await maskParams()).points as Array<{ x: number }>)[0].x))
     .toBeCloseTo(firstPointX, 3);
-  await page.getByRole("button", { name: "重做" }).click();
-  await expect.poll(async () => (await maskParams()).points).toEqual(pointsAfterAnchorEdit);
+  // The API can commit redo before the editor receives its refreshed snapshot.
+  // Hold that snapshot to prove the distinction, then drag only the displayed revision.
+  const beforeAnchorRedo = await readProject(request, id);
+  await expect(overlay).toHaveAttribute("data-source-revision", beforeAnchorRedo.revision);
+  await expect.poll(() => firstAnchor.evaluate(node => {
+    const circle = node as SVGCircleElement;
+    return circle.cx.baseVal.value / circle.ownerSVGElement!.viewBox.baseVal.width;
+  })).toBeCloseTo(firstPointX, 6);
+  const redoneRevision = String(BigInt(beforeAnchorRedo.revision) + 1n);
+  let releaseAnchorRedo!: () => void;
+  const anchorRedoGate = new Promise<void>(resolve => { releaseAnchorRedo = resolve; });
+  let heldAnchorRedo = 0;
+  const anchorSyncPattern = `**/projects/${id}/sync?*`;
+  await page.route(anchorSyncPattern, async route => {
+    const response = await route.fetch();
+    const snapshot = await response.json();
+    if (!snapshot.unchanged && snapshot.revision === redoneRevision) {
+      heldAnchorRedo++;
+      await anchorRedoGate;
+    }
+    await route.fulfill({ response });
+  });
+  try {
+    await page.getByRole("button", { name: "重做" }).click();
+    await expect.poll(async () => (await maskParams()).points).toEqual(pointsAfterAnchorEdit);
+    await expect.poll(() => heldAnchorRedo).toBeGreaterThan(0);
+    await expect(overlay).toHaveAttribute("data-source-revision", beforeAnchorRedo.revision);
+    releaseAnchorRedo();
+    await expect(overlay).toHaveAttribute("data-source-revision", redoneRevision);
+    const restoredAnchor = (pointsAfterAnchorEdit as Array<{ x: number; y: number }>)[0];
+    for (const axis of ["x", "y"] as const) {
+      await expect.poll(() => firstAnchor.evaluate((node, coordinate) => {
+        const circle = node as SVGCircleElement;
+        const viewBox = circle.ownerSVGElement!.viewBox.baseVal;
+        return coordinate === "x" ? circle.cx.baseVal.value / viewBox.width
+          : circle.cy.baseVal.value / viewBox.height;
+      }, axis)).toBeCloseTo(restoredAnchor[axis], 6);
+    }
+  } finally {
+    releaseAnchorRedo();
+    await page.unrouteAll({ behavior: "wait" });
+  }
 
   const anchorBox = await firstAnchor.boundingBox();
   expect(anchorBox).toBeTruthy();
