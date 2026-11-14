@@ -86,8 +86,6 @@ jobs:
 
   browser:
     name: Browser editing workflow
-    env:
-      CUTVOKE_E2E_PREVIEW_DIAGNOSTICS: "1"
     runs-on: ubuntu-24.04
     # Successful complete jobs took 19-30min; bound stalled hosted installs.
     timeout-minutes: 60
@@ -177,6 +175,17 @@ jobs:
         timeout-minutes: 15
         working-directory: apps/editor
         run: npm run test:e2e:regressions:recovery -- --output=../../.artifacts/test-results/recovery
+      - name: Capture isolated cold title preview diagnostics
+        # Leave the full suite unchanged. A fresh server/cache after it captures
+        # the complete existing title scenario before the bounded log fills.
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        working-directory: apps/editor
+        env:
+          CUTVOKE_E2E_PREVIEW_DIAGNOSTICS: "1"
+          CUTVOKE_E2E_PORT: "8809"
+        run: |
+          CUTVOKE_FONT_CACHE="$(mktemp -d)" npm run test:e2e -- --grep 'title edits preview immediately, save without applying, and share canvas selection' --output=../../.artifacts/test-results/title-diagnostics
       - name: Preserve bounded preview stage diagnostics
         if: always()
         uses: actions/upload-artifact@v7
