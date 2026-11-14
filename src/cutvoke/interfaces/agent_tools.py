@@ -68,7 +68,10 @@ AGENT_TOOLS = [
            "includeSchemas": {"type": "boolean", "default": True}, **PAGE}),
     _tool("media_import", "每批最多 32 个文件。流式复制本机素材到持久素材库，探测尺寸/声音/时长；传 projectId 保存到该工程素材表，同一内容重复导入返回同一 assetId。不会创建时间线片段。",
           {**PROJECT, "paths": {"type": "array", "minItems": 1, "maxItems": 32, "items": STRING}}, ("paths",)),
-    _tool("generated_media", "Inspect/import an externally rendered code-video manifest (v1). Verify declared source/output hashes and video frame contract; import returns an ordinary assetId and separate inert source ZIP. Never executes source, downloads dependencies, or changes the timeline. Use clip.insert/asset.swap with revision and lease for edits. Source ZIP is NOT included in project_package; retain both artifacts. Alpha pixels and creative quality require separate review.",
+    _tool("generated_source", "List or inspect verified inert source ZIPs for media used by this project, or explicitly restore one into a NEW outPath directory. Never overwrites existing files, executes source, installs dependencies or edits the timeline. project_package includes referenced archives; unpacking retains ZIPs without extracting inputs. Cache index and undeclared dependencies are excluded.",
+          {**PROJECT, "operation": {"type": "string", "enum": ["list", "inspect", "restore"]},
+           "bundleId": STRING, "outPath": STRING}, ("projectId", "operation")),
+    _tool("generated_media", "Inspect/import an externally rendered code-video manifest (v1). Verify declared source/output hashes and video frame contract; import returns an ordinary assetId and inert source ZIP. Never executes source, downloads dependencies, or changes the timeline. Use clip.insert/asset.swap with revision and lease for edits. project_package includes archives for referenced media; generated_source inspects/restores them explicitly. Alpha pixels and creative quality require separate review.",
           {**PROJECT, "operation": {"type": "string", "enum": ["inspect", "import"]},
            "manifestPath": STRING}, ("projectId", "operation", "manifestPath")),
     _tool("media_list", "分页检索持久素材库；可按类型、名称、工程已用/未用过滤。返回可直接用于 clip.insert 的 assetId。",
@@ -80,17 +83,27 @@ AGENT_TOOLS = [
           {"query": {"type": "string"}, "family": {"type": "string", "enum": ["fx", "transition", "animation", "text", "filter", "sticker", "personFx"]},
            "appliesTo": {"type": "string", "enum": ["image", "video", "audio", "text"]},
            "presetId": STRING, **PAGE}),
+    _tool("preview_compare", "Render same-timestamp before/after PNG pairs for a preview-supported command without committing it. Requires the current revision; at most 3 times / 6 images, ordered before then after for each time. Both sides include captions. Times must exist in both timelines. Local preview cache files are created; project, history and revision stay unchanged. Recheck revision before applying the command.",
+          {**REVISION, "type": STRING, "payload": {"type": "object"},
+           "times": {"type": "array", "minItems": 1, "maxItems": 3,
+                     "items": {"type": "number", "minimum": 0}},
+           "width": {"type": "integer", "minimum": 160, "maximum": 1920, "default": 960}},
+          ("projectId", "expectedRevision", "type", "payload", "times")),
     _tool("preview_frames", "查看工程或素材在指定秒数的实际画面，返回 PNG 图片供视觉检查。工程画面含文字轨和字幕，并标注渲染 revision；一次最多 6 帧。",
           {**REVISION, "assetId": STRING, "path": STRING,
            "times": {"type": "array", "minItems": 1, "maxItems": 6,
                      "items": {"type": "number", "minimum": 0}},
            "width": {"type": "integer", "minimum": 160, "maximum": 1920, "default": 960}}, ("times",)),
+    _tool("preview_audio", "Inspect composed timeline audio around a cut. Returns stereo WAV audio plus per-channel peak bins from the same samples, with revision and sample-clock bounds. Read-only, one window up to 5 seconds; nested compounds are rejected; mixer preparation can time out on complex projects. Peaks are not speech recognition or proof of a clean edit.",
+          {**REVISION, "time": {"type": "number", "minimum": 0},
+           "radius": {"type": "number", "minimum": 0.05, "maximum": 2.5, "default": 0.5}},
+          ("projectId", "expectedRevision", "time")),
     _tool("preview_prepare", "异步准备完整的连续预览；返回 jobId，随后调用 preview_job 查询或取消。视频底层含文字轨，字幕由人类编辑器叠加；视觉验收用 preview_frames。",
           REVISION, ("projectId", "expectedRevision")),
     _tool("preview_job", "查询/取消预览任务；完成返回本机可播放文件路径。标准 MCP 自动更新保留任务；整个服务关闭后可重新提交并复用磁盘缓存。",
           {**PROJECT, "jobId": STRING, "action": {"type": "string", "enum": ["status", "cancel"], "default": "status"}},
           ("projectId", "jobId")),
-    _tool("export_job", "非阻塞查询/取消导出任务。用 command_apply export.enqueue 创建任务，传 expectedRevision、outPath、quality、range；轮询本工具直到 succeeded，再读取 result.output_path。",
+    _tool("export_job", "非阻塞查询/取消导出任务。用 command_apply export.enqueue 创建任务，传 expectedRevision、outPath、quality、range；queued/running 时按返回的 pollAfterSeconds（秒）等待再查询；终态为 null，停止轮询，succeeded 时读取 result.output_path。使用有界超时。",
           {**PROJECT, "jobId": STRING, "action": {"type": "string", "enum": ["status", "cancel"], "default": "status"}},
           ("projectId", "jobId")),
     _tool("project_events", "分页读取实际操作者、修改对象与版本事件，用于核对 Agent 修改、人工接手和撤销历史。nextAfterSeq 可用于下次增量读取。",
@@ -330,6 +343,40 @@ class AgentTools:
         from cutvoke.interfaces.generated_render import GeneratedRender
         return GeneratedRender(self).call(a)
 
+    def generated_source(self, a):
+        from cutvoke.storage.generated_media import file_hash
+        from cutvoke.storage.generated_sources import referenced_sources, restore_source_archive, SHA
+        from cutvoke.storage.projectpack import _collect_asset_refs
+        project = self._project(a)
+        operation = a["operation"]
+        if operation == "list":
+            if a.get("bundleId") or a.get("outPath"):
+                raise ValueError("list accepts projectId and operation only")
+        elif not a.get("bundleId") or not SHA.fullmatch(a["bundleId"]):
+            raise ValueError("inspect/restore requires a lowercase SHA256 bundleId")
+        if operation == "restore" and not a.get("outPath"):
+            raise ValueError("restore requires a new outPath directory")
+        if operation == "inspect" and a.get("outPath"):
+            raise ValueError("inspect does not accept outPath")
+        paths = {Path(ref.source_path) for ref in _collect_asset_refs(project)}
+        if any(not path.is_file() for path in paths):
+            raise ValueError("relink missing project media before inspecting generated sources")
+        directories = {path.parent / ".generated" for path in paths}
+        directories.add(Path(self.api.media_dir) / ".generated")
+        archives = referenced_sources({file_hash(path) for path in paths}, directories)
+        result = {"projectId": project.project_id, "revision": project.revision,
+                  "timelineChanged": False, "runtimeExecuted": False}
+        if operation == "list":
+            return {**result, "archives": [{key: item[key] for key in
+                ("bundleId", "path", "sha256", "size", "outputSha256")} for item in archives]}
+        selected = next((item for item in archives if item["bundleId"] == a["bundleId"]), None)
+        if selected is None:
+            raise ValueError("source bundle not found for referenced project media")
+        if operation == "inspect":
+            return {**result, "sourceArchive": selected}
+        destination = self.service.output_path(project.project_id, a["outPath"], suffix="")
+        return {**result, "restored": restore_source_archive(selected, destination)}
+
     def _source(self, a):
         if bool(a.get("assetId")) == bool(a.get("path")):
             raise ValueError("provide exactly one of assetId or path")
@@ -387,6 +434,33 @@ class AgentTools:
         return {'projectId':a['projectId'],'revision':project.revision,'clipId':clip.id,'fractions':fractions,
                 'effectiveDuration':duration,
                 'variants':variants,'_images':images}
+
+    def preview_compare(self, a):
+        from cutvoke.domain.protocol import Actor, Command
+        result = self.service.preview_command(Command(
+            type=a["type"], payload=a["payload"], project_id=a["projectId"],
+            expected_revision=a["expectedRevision"], actor=Actor("mcp", "agent")),
+            include_project=True, include_before_project=True)
+        before, after = result.pop("beforeProject"), result.pop("project")
+        # Validate both bounds before producing any images, especially after cuts.
+        for label, project in (("before", before), ("after", after)):
+            duration = self.render._sequence_duration(project.sequence)
+            if any(at >= duration for at in a["times"]):
+                raise ValueError(f"times must be before the {label} timeline end ({duration}s)")
+        pairs, images = [], []
+        for at in a["times"]:
+            pair = {"time": at}
+            for label, project in (("before", before), ("after", after)):
+                rendered = self.preview_frames({"projectId": a["projectId"],
+                    "times": [at], "width": a.get("width", 960)}, _project_override=project)
+                frame = dict(rendered["frames"][0])
+                # Empty frames have no image block; indices make correspondence explicit.
+                frame["imageIndex"] = len(images) if rendered["_images"] else None
+                pair[label] = frame
+                images.extend(rendered["_images"])
+            pairs.append(pair)
+        return {"projectId": a["projectId"], "revision": before.revision,
+                "candidate": True, **result, "pairs": pairs, "_images": images}
 
     def preview_frames(self, a, _project_override=None):
         from cutvoke.rendering.preview_prepare import preview_identity
@@ -447,6 +521,12 @@ class AgentTools:
             images.append({"type": "image", "mimeType": "image/png", "data": base64.b64encode(data).decode()})
         return {"projectId": a.get("projectId"), "revision": project.revision, "frames": frames, "_images": images}
 
+    def preview_audio(self, a):
+        from cutvoke.rendering.audio_inspection import inspect_audio
+        project = self._project(a)
+        return inspect_audio(self.render, self.api._audio_scheduler, project,
+                             a["time"], a.get("radius", 0.5))
+
     def preview_prepare(self, a):
         return self.api._preview_preparation.submit(self._project(a))
 
@@ -466,14 +546,20 @@ class AgentTools:
         # Reading another interface's live ledger must not initialize a queue
         # (which also performs restart recovery of its own interrupted work).
         store = self.service.store
-        job = store.get_export_job(a["jobId"]) if store else self.api._export_queue().get(a["jobId"])
+        if store is not None:
+            job = store.get_export_job(a["jobId"])
+        else:
+            queue = self.service._export_queue
+            job = queue.get(a["jobId"]) if queue is not None else None
         if job is None or job["projectId"] != a["projectId"]:
             raise EditError("NOT_FOUND", "export job not found for this project")
         if a.get("action") == "cancel":
             queue = self.api._export_queue()
             queue.cancel(a["jobId"])
             job = queue.get(a["jobId"])
-        return job
+        # A response-only hint: never persist it or mutate the queue/ledger job.
+        # null means stop polling, not an immediate retry.
+        return dict(job, pollAfterSeconds=1 if job["status"] in ("queued", "running") else None)
 
     def project_events(self, a):
         project = self._project(a)

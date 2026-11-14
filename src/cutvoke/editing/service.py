@@ -11,6 +11,7 @@ from cutvoke.storage.font_catalog import TITLE_FONT_FAMILIES
 
 import contextlib
 import copy
+import functools
 import hashlib
 import json
 import math
@@ -29,7 +30,7 @@ from cutvoke.domain.protocol import Command, CommandResult, Event, Actor, ErrorC
 from cutvoke.domain.rational import Rational
 from cutvoke.domain.speed_curve import SpeedCurve
 from cutvoke.domain.invariants import validate_project
-from cutvoke.storage.store import EditLeaseConflict, ExportJobMismatch, ProjectStore, RevisionConflict
+from cutvoke.storage.store import EditLeaseInvalid, EditLeaseConflict, ExportJobMismatch, ProjectStore, RevisionConflict
 from cutvoke.rendering.effects import (EffectRegistry, EffectNotFound, EffectParamInvalid,
                       default_registry, animation_slot)
 from cutvoke.storage.preset_catalog import PresetCatalog, PresetInvalid
@@ -322,6 +323,17 @@ def _split_text_units(text: str, unit: str) -> list[str]:
     return [ln for ln in text.split("\n") if ln.strip()]
 
 
+def _serialize_memory_lease(fn):
+    """Memory-only services use one lock; SQLite services fence in transactions."""
+    @functools.wraps(fn)
+    def wrapped(self, *args, **kwargs):
+        if self._store is not None:
+            return fn(self, *args, **kwargs)
+        with self._memory_lease_guard:
+            return fn(self, *args, **kwargs)
+    return wrapped
+
+
 class EditService:
     def __init__(self, store: Optional["ProjectStore"] = None,
                  registry: Optional[EffectRegistry] = None, *, effect_modules_dir=None) -> None:
@@ -336,6 +348,9 @@ class EditService:
         # project_id -> [snapshot, ...]  重做栈（undo 时弹出的快照）
         self._redo_stack: dict[str, list[Project]] = {}
         self._edit_leases: dict[str, dict] = {}
+        self._lease_review_boundaries: dict[str, tuple[int, str]] = {}
+        self._issued_edit_leases: set[tuple[str, str]] = set()
+        self._memory_lease_guard = threading.RLock()
         # 可选持久化存储（T08）：传入则每次提交后持久化到 SQLite
         self._store = store
         # 效果注册表（T05/T17）：effect.add 按清单校验 ID 与参数
@@ -1396,9 +1411,12 @@ class EditService:
             raise EditError(ErrorCode.INVALID_ARGUMENT, "workspace relocation requires a persistent store and command context")
         try:
             result = self._store.relocate_paths(
+                project_id=command.project_id, edit_lease_id=command.edit_lease_id,
                 moves=payload.get("moves"), expected_projects=payload.get("expectedProjects"),
                 command_id=command.command_id, request_hash=self._request_hash(command),
                 actor={"kind": command.actor.kind, "id": command.actor.id} if command.actor else None)
+        except EditLeaseConflict as exc:
+            raise self._lease_failure(exc) from exc
         except RevisionConflict as exc:
             raise EditError(ErrorCode.REVISION_CONFLICT, str(exc), retryable=True) from exc
         except (ValueError, KeyError, OSError) as exc:
@@ -1531,6 +1549,7 @@ class EditService:
         self._redo_stack.setdefault(project_id, [])
         return loaded
 
+    @_serialize_memory_lease
     def rename_project(self, project_id: str, name: str,
                        *, edit_lease_id: str = "") -> bool:
         """重命名工程：仅改 name，不动 revision / 事件 / 历史。
@@ -1544,9 +1563,13 @@ class EditService:
             else:
                 return False
         self.assert_editable(project_id, edit_lease_id)
-        proj.name = name
         if self._store is not None:
-            self._store.rename_project(project_id, name)
+            try:
+                if not self._store.rename_project(project_id, name, edit_lease_id=edit_lease_id):
+                    return False
+            except EditLeaseConflict as exc:
+                raise self._lease_failure(exc) from exc
+        proj.name = name
         return True
 
     def get_project(self, project_id: str) -> Project:
@@ -1751,6 +1774,7 @@ class EditService:
                             "ttlSeconds must be positive")
         return max(5.0, min(value, 300.0))
 
+    @_serialize_memory_lease
     def get_edit_lease(self, project_id: str) -> Optional[dict]:
         if self._store is not None:
             if not self._store.exists(project_id):
@@ -1763,6 +1787,7 @@ class EditService:
             return None
         return dict(lease) if lease is not None else None
 
+    @_serialize_memory_lease
     def acquire_edit_lease(self, project_id: str, *, owner: str = "agent",
                            lease_id: str = "", ttl_seconds: float = 30.0) -> dict:
         self.get_project(project_id)
@@ -1778,17 +1803,65 @@ class EditService:
             if current is not None and current["leaseId"] != lease_id:
                 raise EditLeaseConflict(
                     f"project {project_id} is locked by {current['owner']}")
+            if current is None and (project_id, lease_id) in self._issued_edit_leases:
+                raise EditLeaseInvalid("Edit lease is invalid. Read the latest project and acquire a new lease.")
+            self._issued_edit_leases.add((project_id, lease_id))
             now = time.time()
             lease = {
                 "projectId": project_id, "leaseId": lease_id, "owner": owner,
                 "expiresAt": now + ttl,
                 "acquiredAt": current["acquiredAt"] if current else now,
             }
+            if current is None:
+                self._lease_review_boundaries[project_id] = (
+                    len(self._events.get(project_id, [])), self.get_project(project_id).revision)
             self._edit_leases[project_id] = lease
             return dict(lease)
         except EditLeaseConflict as e:
-            raise EditError(ErrorCode.EDIT_LOCKED, str(e), retryable=True) from e
+            raise self._lease_failure(e) from e
 
+    @_serialize_memory_lease
+    def review_edit_lease(self, project_id: str, lease_id: str, limit: int = 20) -> dict:
+        """Bounded revision summaries, not payloads or a complete audit of side effects."""
+        if not isinstance(lease_id, str) or not lease_id.strip():
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "leaseId is required")
+        if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 50:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "limit must be an integer from 1 to 50")
+        if self._store is not None:
+            try:
+                result = self._store.review_edit_lease(project_id, lease_id, limit)
+            except EditLeaseConflict as exc:
+                raise self._lease_failure(exc) from exc
+        else:
+            current = self.get_edit_lease(project_id)
+            if current is None or current["leaseId"] != lease_id:
+                raise EditError(ErrorCode.EDIT_LEASE_INVALID, "Edit lease changed or expired. Refresh the project.")
+            boundary = self._lease_review_boundaries.get(project_id)
+            events = self._events.get(project_id, [])[boundary[0]:] if boundary else []
+            result = dict(available=boundary is not None, acquiredRevision=boundary[1] if boundary else None,
+                          revision=self.get_project(project_id).revision,
+                          events=[e.to_dict() for e in events[-limit:]], hasMore=len(events) > limit)
+        # Whitelist metadata: changedEntities can contain caption text, paths, or
+        # nested snapshots. Never return those payloads from this review view.
+        def summary(event):
+            counts: dict[tuple[str, str], int] = {}
+            entities = event.get("changedEntities", [])
+            for entity in entities:
+                def label(key):
+                    value = str(entity.get(key, "other"))
+                    return value if len(value) <= 64 and value.replace("_", "").replace(".", "").isalnum() else "other"
+                key = (label("type"), label("change"))
+                if key not in counts and len(counts) >= 12:
+                    key = ("other", "other")
+                counts[key] = counts.get(key, 0) + 1
+            return dict(previousRevision=event.get("previousRevision", ""),
+                        revision=event.get("revision", ""), commandId=str(event.get("commandId", ""))[:256],
+                        entityCount=len(entities),
+                        entityKinds=[dict(type=k[0], change=k[1], count=v) for k, v in counts.items()])
+        result["changes"] = [summary(e) for e in result.pop("events")]
+        return dict(projectId=project_id, leaseId=lease_id, **result)
+
+    @_serialize_memory_lease
     def renew_edit_lease(self, project_id: str, lease_id: str,
                          ttl_seconds: float = 30.0) -> dict:
         self.get_project(project_id)
@@ -1805,10 +1878,11 @@ class EditService:
                 self._edit_leases[project_id] = current
                 lease = dict(current)
         if lease is None:
-            raise EditError(ErrorCode.EDIT_LOCKED,
-                            "edit lease is missing or expired", retryable=True)
+            raise EditError(ErrorCode.EDIT_LEASE_INVALID,
+                            "Edit lease is invalid. Read the latest project and acquire a new lease.")
         return lease
 
+    @_serialize_memory_lease
     def release_edit_lease_status(self, project_id: str, lease_id: str) -> dict:
         self.get_project(project_id)
         if self._store is not None:
@@ -1824,6 +1898,7 @@ class EditService:
         self._edit_leases.pop(project_id, None)
         return {'status':'released','released':True,'locked':False,'lease':None}
 
+    @_serialize_memory_lease
     def release_edit_lease(self, project_id: str, lease_id: str) -> bool:
         self.get_project(project_id)
         if self._store is not None:
@@ -1835,8 +1910,43 @@ class EditService:
         self._edit_leases.pop(project_id, None)
         return True
 
+    @staticmethod
+    def _lease_failure(exc: EditLeaseConflict) -> EditError:
+        return EditError(ErrorCode.EDIT_LEASE_INVALID if isinstance(exc, EditLeaseInvalid)
+                         else ErrorCode.EDIT_LOCKED, str(exc),
+                         retryable=not isinstance(exc, EditLeaseInvalid))
+
+    @_serialize_memory_lease
+    def takeover_edit_lease(self, project_id: str, lease_id: str, *, actor: Actor) -> dict:
+        """Explicit human handoff; never revoke a replacement lease from stale UI."""
+        project = self.get_project(project_id)
+        if not isinstance(lease_id, str) or not lease_id.strip():
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "leaseId is required")
+        if actor.kind != "human" or not actor.id:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "takeover requires a human actor")
+        event = Event(event_id=f"event_takeover_{uuid.uuid4().hex}", project_id=project_id,
+                      previous_revision=project.revision, revision=project.revision,
+                      command_id="", transaction_id="", actor=actor,
+                      type="edit.lease.takenOver")
+        if self._store is not None:
+            return self._store.takeover_edit_lease(project_id=project_id, lease_id=lease_id,
+                                                   event_payload=event.to_dict())
+        current = self.get_edit_lease(project_id)
+        if current is None:
+            return dict(status="not-held", takenOver=False, locked=False, lease=None)
+        if current["leaseId"] != lease_id:
+            return dict(status="lease-changed", takenOver=False, locked=True, lease=current)
+        self._edit_leases.pop(project_id, None)
+        event.changed_entities = [dict(type="editLease", id=lease_id, change="takenOver",
+                                       owner=current["owner"], at=time.time())]
+        self._events[project_id].append(event)
+        return dict(status="taken-over", takenOver=True, locked=False, lease=None)
+
     def assert_editable(self, project_id: str, lease_id: str = "") -> None:
         lease = self.get_edit_lease(project_id)
+        if lease_id and (lease is None or lease["leaseId"] != lease_id):
+            raise EditError(ErrorCode.EDIT_LEASE_INVALID,
+                            "Edit lease is invalid. Read the latest project and acquire a new lease.")
         if lease is not None and lease["leaseId"] != lease_id:
             raise EditError(
                 ErrorCode.EDIT_LOCKED,
@@ -1854,6 +1964,7 @@ class EditService:
         proj = self.get_project(project_id)
         return export_srt(proj.sequence.captions)
 
+    @_serialize_memory_lease
     def import_srt(self, project_id: str, srt_text: str,
                    actor: Optional[Actor] = None,
                    *, edit_lease_id: str = "") -> int:
@@ -1904,7 +2015,9 @@ class EditService:
                 self._store.commit(candidate, expected_prev_revision=previous,
                                    event_payload=event.to_dict(),
                                    history_push=history_push,
-                                   history_clear_redo=True)
+                                   history_clear_redo=True, edit_lease_id=edit_lease_id)
+            except EditLeaseConflict as exc:
+                raise self._lease_failure(exc) from exc
             except RevisionConflict as e:
                 raise EditError(ErrorCode.REVISION_CONFLICT, str(e),
                                 retryable=True) from e
@@ -1961,7 +2074,8 @@ class EditService:
                     f"track {track.id} is locked; unlock it before editing its clips",
                 )
 
-    def preview_command(self, command: Command, *, include_project: bool = False) -> dict:
+    def preview_command(self, command: Command, *, include_project: bool = False,
+                        include_before_project: bool = False) -> dict:
         """试算一个编辑命令（P4 AI 接续）：在候选副本上执行 handler 并校验，
         但**不提交、不持久化、不提 revision**，返回「会发生什么」。
 
@@ -1970,7 +2084,7 @@ class EditService:
         execute 同语义抛 EditError（版本冲突 / 参数非法 / 不变量违反），
         且内存状态零变化。
         """
-        proj = self.get_project(command.project_id)
+        proj = copy.deepcopy(self.get_project(command.project_id))
         if command.expected_revision != proj.revision:
             raise EditError(
                 ErrorCode.REVISION_CONFLICT,
@@ -2028,6 +2142,8 @@ class EditService:
         result = {"valid": True, "changedEntities": impact, "commandType": command.type}
         if include_project:
             result["project"] = candidate
+        if include_before_project:
+            result["beforeProject"] = proj
         return result
 
     def machine_schema(self, lang: str = "zh-CN") -> dict:
@@ -2221,6 +2337,7 @@ class EditService:
             return result
 
     # ---- 命令执行（统一入口） ----
+    @_serialize_memory_lease
     def execute(self, command: Command) -> CommandResult:
         """执行一个编辑命令，结果**持久化成功后才**可见（WP-01）。
 
@@ -2361,7 +2478,10 @@ class EditService:
                     history_push=history_push,
                     history_clear_redo=clear_redo,
                     history_pop_depth=history_pop_depth,
+                    edit_lease_id=command.edit_lease_id,
                 )
+            except EditLeaseConflict as exc:
+                raise self._lease_failure(exc) from exc
             except RevisionConflict as e:
                 # 另一进程已推进数据库：转协议错误码
                 raise EditError(ErrorCode.REVISION_CONFLICT, str(e), retryable=True) from e
@@ -3884,10 +4004,15 @@ class EditService:
                    "-ss", f"{s:.6f}", "-to", f"{e:.6f}",
                    "-acodec", "pcm_s16le", "-ar", "44100", out_path]
             try:
-                subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+                completed = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
             except subprocess.TimeoutExpired as ex:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 f"audio.splitSentences ffmpeg timeout: {ex}") from ex
+            if completed.returncode != 0:
+                raise EditError(
+                    ErrorCode.INVALID_ARGUMENT,
+                    f"audio.splitSentences failed at segment {cap['index']} "
+                    f"(ffmpeg exit code {completed.returncode})")
             segments_out.append({
                 "index": cap["index"],
                 "path": out_path,
@@ -6189,11 +6314,14 @@ class EditService:
             out: list[Event] = []
             for raw in raw_events:
                 try:
-                    if int(raw.get("revision", "0")) > int(revision):
+                    if (int(raw.get("revision", "0")) > int(revision) or
+                            (raw.get("type") == "edit.lease.takenOver" and
+                             int(raw.get("revision", "0")) == int(revision))):
                         out.append(Event.from_dict(raw))
                 except (TypeError, ValueError, KeyError):
                     # 损坏/旧格式事件不阻断正常补取；诊断仍可通过数据库查看。
                     continue
             return out
         events = self._events.get(project_id, [])
-        return [e for e in events if int(e.revision) > int(revision)]
+        return [e for e in events if int(e.revision) > int(revision) or
+                (e.type == "edit.lease.takenOver" and int(e.revision) == int(revision))]

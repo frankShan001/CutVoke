@@ -214,6 +214,17 @@ class DirectoryProjectStore(ProjectStore):
                     return copied[value]
                 return value
             updated = _map_paths(data, own)
+            # Package imports/clones collect the ZIP companions of referenced
+            # media too. The ZIP stays inert; no source extraction or execution.
+            external = {old: new for old, new in copied.items()
+                        if Path(old).expanduser().resolve().parent != Path(new).parent}
+            if external:
+                from cutvoke.storage.generated_sources import referenced_sources, retain_source_archive
+                directories = {Path(old).expanduser().resolve().parent / ".generated" for old in external}
+                directories = {path for path in directories if path.exists()}
+                hashes = {_digest(Path(new)) for new in external.values()} if directories else set()
+                for archive in referenced_sources(hashes, directories):
+                    retain_source_archive(archive, self.root / "media" / ".generated")
             original_names = {owned: Path(original).name for original, owned in copied.items()}
             seen = set()
             for ref in _refs(updated):
@@ -486,7 +497,7 @@ for _name in ("db_revision", "get_idempotent", "history_depth", "redo_depth", "g
               "peek_history", "pop_history", "load", "exists", "load_for_sync", "rename_project",
               "append_event", "events_since", "production_snapshot"):
     setattr(ProjectLibraryStore, _name, _project_method(_name))
-for _name in ("acquire_edit_lease", "renew_edit_lease", "release_edit_lease", "release_edit_lease_status", "create_export_job", "claim_export_job"):
+for _name in ("takeover_edit_lease", "acquire_edit_lease", "renew_edit_lease", "release_edit_lease", "release_edit_lease_status", "create_export_job", "claim_export_job"):
     setattr(ProjectLibraryStore, _name, _project_method(_name, keyword=True))
 for _name in ("finish_export_job", "get_export_job", "update_export_job_progress", "get_export_project_snapshot"):
     def _job_method(name):

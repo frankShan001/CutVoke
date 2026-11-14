@@ -128,6 +128,8 @@ CutVoke uses a non-destructive, declarative timeline model shared across the vis
         └─────────────────────────────────────────────────┘
 ```
 
+While an agent holds an editing lease, the editor shows its owner and remaining time. Use **Take over editing** to end that specific lease and refresh the project before continuing. Completed edits are preserved; requests using the old lease are rejected. **Review changes during this lease** shows the latest 20 committed revision summaries before takeover. It covers versioned edits only, not renames, exports or other unversioned operations. Older leases without a recorded boundary explicitly report unavailable history; this view ends with the lease.
+
 ### Example Prompts You Can Give Your AI Agent
 
 Once CutVoke is connected to Claude Desktop, Cursor, or any MCP client, you can hand off tedious tasks while keeping full creative control in the UI:
@@ -152,6 +154,8 @@ For a single-caption correction, `project_lookup(requireUnique=true)` rejects mu
 - **Pre-Built Agent Skills (`skills/cutvoke-editor/`)**: Includes specialized editing guides for **Music Videos** ([`music-video.md`](skills/cutvoke-editor/references/workflows/music-video.md)), **Documentaries & Vlogs** ([`documentary.md`](skills/cutvoke-editor/references/workflows/documentary.md)), **Narrative Films** ([`narrative.md`](skills/cutvoke-editor/references/workflows/narrative.md)), **Explainers & Tutorials** ([`explainer.md`](skills/cutvoke-editor/references/workflows/explainer.md)), and **Product Showcases** ([`showcase.md`](skills/cutvoke-editor/references/workflows/showcase.md)).
 - **CLI, HTTP API & Code-Video Automation**: Batch-render videos, import verified code-generated animations, or integrate CutVoke into custom media pipelines.
 
+For code-video handoffs, editable packages carry verified source ZIPs for referenced media. `generated_source` lists and inspects these archives and explicitly restores inputs into a new directory without executing code or certifying artistic quality. Render-cache indexes stay outside the package; keep the full project directory to retain them. See the [code-video bridge and source recovery example](examples/generated-media/README.md) and [cached rendering](docs/user/generated-render.md).
+
 ## Get Started
 
 ### Option 1: Download the Portable Desktop App (Recommended for Creators)
@@ -165,9 +169,13 @@ No Python or Node.js setup required. Download the latest pre-built package for y
 | **macOS** | Intel (x64) | [`CutVoke-0.3.5-macos-x64.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.5/CutVoke-0.3.5-macos-x64.zip) |
 | **Linux** | x64 | [`CutVoke-0.3.5-linux-x64.tar.gz`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.5/CutVoke-0.3.5-linux-x64.tar.gz) |
 
-> **Note**: Ensure [`ffmpeg` and `ffprobe`](https://ffmpeg.org/download.html) are available on your system PATH if not bundled in your environment. See [Pre-release Notes](docs/development/prerelease.md) for platform launch details.
+> **Note**: Desktop packages include FFmpeg and ffprobe; no system FFmpeg setup is needed. Only source installs (Option 3) require [`ffmpeg` and `ffprobe`](https://ffmpeg.org/download.html) on PATH. See [Pre-release Notes](docs/development/prerelease.md) for platform launch details.
 
 ### Option 2: Connect Your AI Agent (Claude Desktop / Cursor / MCP Clients)
+
+For a visual dry-run, call `preview_compare` with `projectId`, current `expectedRevision`, command `type`/`payload`, and 1–3 `times` (seconds). It returns before/after PNG pairs from the same snapshot, including captions, without committing the edit. Times must fit both timelines; `imageIndex` maps each nonempty side to its image block (zero-based, excluding the JSON text block). Check the pairs, then apply with the latest revision. Local preview-cache files are created; export/audio side-effect commands are rejected. This is a same-timestamp comparison, not source-time alignment after ripple edits.
+
+Async exports return a `jobId`; poll `export_job` after its `pollAfterSeconds` delay (currently 1 second while queued/running). A null hint means the job is terminal; stop polling and inspect its result or error. Use a bounded timeout.
 
 1. Launch the desktop app once. It writes `profile/mcp-config.json` in the CutVoke data folder with the absolute path of the bundled engine and your project library. Copy its `cutvoke` entry into your MCP client (e.g., `claude_desktop_config.json` or `.cursor/mcp.json`). It looks like this:
 
@@ -189,25 +197,32 @@ Use the values from your own file rather than this sketch. Per-client steps: [Cl
 
 ### Option 3: Run from Source (For Developers & Power Users)
 
-**Prerequisites**: Python `3.10+`, Node.js `18+`, and `ffmpeg` / `ffprobe` installed in system `PATH`.
+**Prerequisites**: Python `3.10+`, Node.js `20+` (CI uses Node.js `24`), and `ffmpeg` / `ffprobe` installed in system `PATH`. See [installation and tested environments](docs/user/installation.md) for required codecs and platform details.
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/frankShan001/CutVoke.git
 cd CutVoke
 
-# 2. Install the Python engine & CLI (using uv or pip)
-uv sync --extra dev
-# Or with standard pip:
-pip install -e ".[dev]"
-
-# 3. Start the Web Editor UI
-cd apps/editor
-npm install
-npm run dev
+# 2. Create a virtual environment
+python -m venv .venv
 ```
 
-Open `http://localhost:5173` in your browser (or run `start-cutvoke.cmd` on Windows).
+Before continuing, activate it with `source .venv/bin/activate` on Linux/macOS, or `.\.venv\Scripts\Activate.ps1` in Windows PowerShell. Then:
+
+```bash
+python -m pip install -e .
+
+# 3. Build the Web Editor and start the local service
+cd apps/editor
+npm ci
+npm run build
+cd ../..
+cutvoke doctor --json
+cutvoke serve
+```
+
+Open `http://127.0.0.1:8787` in your browser. Windows users can alternatively run `start-cutvoke.cmd --web` to start the browser workflow. This serves the built editor and its API together. `npm run dev` starts only Vite, not the CutVoke backend, so it is not the standalone installation flow. For contributor dependencies and checks, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 #### Built-in CLI Commands
 

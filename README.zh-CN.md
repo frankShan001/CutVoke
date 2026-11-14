@@ -128,6 +128,8 @@ CutVoke 采用非破坏性、声明式的共享时间线架构，打通了桌面
         └─────────────────────────────────────────────────┘
 ```
 
+Agent 持有编辑租约时，编辑器显示持有者和剩余时间。点击**接管编辑**可结束指定租约，并在刷新工程后继续手工编辑；已完成的修改会保留，携带旧租约的请求会被拒绝。 **查看本次租约的修改**会显示当前租约的最近 20 次已提交版本摘要，可在接管前检查。只包含版本化编辑，不含重命名、导出等操作；旧租约未记录起始边界时会明确提示，结束租约后不提供此视图。
+
 ### 你可以直接对 AI Agent 说的话（Prompt 示例）
 
 将 CutVoke 接入 Claude Desktop、Cursor 或任意支持 MCP 的智能体后，你可以把繁琐的机械操作交给 AI，自己专注于审美把控：
@@ -152,6 +154,8 @@ CutVoke 采用非破坏性、声明式的共享时间线架构，打通了桌面
 - **内置五大题材剪辑规范（`skills/cutvoke-editor/`）**：预置面向 **MV/音乐视觉**（[`music-video.md`](skills/cutvoke-editor/references/workflows/music-video.md)）、**纪录片/Vlog**（[`documentary.md`](skills/cutvoke-editor/references/workflows/documentary.md)）、**剧情叙事**（[`narrative.md`](skills/cutvoke-editor/references/workflows/narrative.md)）、**知识解说/教程**（[`explainer.md`](skills/cutvoke-editor/references/workflows/explainer.md)）与 **产品宣传片**（[`showcase.md`](skills/cutvoke-editor/references/workflows/showcase.md)）的专业 Agent 剪辑指南。
 - **CLI、HTTP API 与代码视频自动化**：支持脚本化批量渲染视频、导入经过校验的外部代码生成视频素材，或集成进你自己的自动化媒体工作流。
 
+代码视频交接时，工程包携带已引用素材经校验的源码 ZIP。`generated_source` 可查询、检查归档，并显式恢复到新目录，不执行源代码，也不认证艺术效果。缓存索引不随工程包迁移；保留完整工程目录才能保留索引。见[代码视频桥接与源码恢复示例](examples/generated-media/README.md)和[缓存渲染](docs/user/generated-render.md)。
+
 ## 快速开始
 
 ### 方式一：下载桌面免安装版（推荐普通创作者）
@@ -165,9 +169,13 @@ CutVoke 采用非破坏性、声明式的共享时间线架构，打通了桌面
 | **macOS** | Intel 芯片 (x64) | [`CutVoke-0.3.5-macos-x64.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.5/CutVoke-0.3.5-macos-x64.zip) |
 | **Linux** | 64位 (x64) | [`CutVoke-0.3.5-linux-x64.tar.gz`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.5/CutVoke-0.3.5-linux-x64.tar.gz) |
 
-> **提示**：请确保系统环境变量 `PATH` 中已安装 [`ffmpeg` 与 `ffprobe`](https://ffmpeg.org/download.html)。各系统首次启动说明可参考 [预发布说明](docs/development/prerelease.md)。
+> **提示**：桌面版已内置 FFmpeg 和 ffprobe，无需另行配置系统 FFmpeg。仅源码安装（方式三）需要将 [`ffmpeg` 与 `ffprobe`](https://ffmpeg.org/download.html) 配置到 `PATH`。各系统首次启动说明可参考 [预发布说明](docs/development/prerelease.md)。
 
 ### 方式二：接入 AI Agent（Claude Desktop / Cursor 等 MCP 客户端）
+
+可用 `preview_compare` 进行画面对比预演：传入 `projectId`、当前 `expectedRevision`、命令 `type`/`payload` 和 1–3 个秒数 `times`。工具从同一工程快照返回包含字幕的修改前/后 PNG，不提交编辑。时间点必须位于两侧时间线内；`imageIndex` 是对应图片块的零基索引（不计 JSON 文本块）。检查后再用最新版本提交。工具会生成本地预览缓存，但拒绝导出和音频处理等外部副作用命令。这是同一时间点对比，不是波纹剪辑后的源时间对齐。
+
+异步导出返回 `jobId`；按 `export_job` 返回的 `pollAfterSeconds` 等待后再查询（queued/running 时当前为 1 秒）。提示为 null 表示任务已到终态，应停止轮询并查看结果或错误。始终设置有界超时。
 
 1. 先启动一次桌面版。它会在数据目录写出 `profile/mcp-config.json`，其中包含内置引擎的绝对路径和你的工程库位置。把里面的 `cutvoke` 配置复制到 MCP 客户端（如 `claude_desktop_config.json` 或 `.cursor/mcp.json`），格式大致如下：
 
@@ -189,25 +197,32 @@ CutVoke 采用非破坏性、声明式的共享时间线架构，打通了桌面
 
 ### 方式三：从源码启动（面向开发者与进阶玩家）
 
-**前置环境**：Python `3.10+`、Node.js `18+`，且系统 `PATH` 中已配置好 `ffmpeg` 与 `ffprobe`。
+**前置环境**：Python `3.10+`、Node.js `20+`（CI 使用 Node.js `24`），且系统 `PATH` 中已配置好 `ffmpeg` 与 `ffprobe`。所需编解码器及各平台说明见 [安装与已验证环境](docs/user/installation.md)。
 
 ```bash
 # 1. 克隆仓库
 git clone https://github.com/frankShan001/CutVoke.git
 cd CutVoke
 
-# 2. 安装 Python 核心引擎与 CLI（推荐使用 uv，也支持 pip）
-uv sync --extra dev
-# 或者使用传统 pip：
-pip install -e ".[dev]"
-
-# 3. 启动 Web 剪辑器前端界面
-cd apps/editor
-npm install
-npm run dev
+# 2. 创建虚拟环境
+python -m venv .venv
 ```
 
-启动后在浏览器访问 `http://localhost:5173`（Windows 用户也可直接双击运行根目录的 `start-cutvoke.cmd`）。
+继续之前，请先激活虚拟环境：Linux/macOS 运行 `source .venv/bin/activate`，Windows PowerShell 运行 `.\.venv\Scripts\Activate.ps1`。然后执行：
+
+```bash
+python -m pip install -e .
+
+# 3. 构建 Web 剪辑器并启动本地服务
+cd apps/editor
+npm ci
+npm run build
+cd ../..
+cutvoke doctor --json
+cutvoke serve
+```
+
+启动后在浏览器访问 `http://127.0.0.1:8787`。Windows 用户也可改用 `start-cutvoke.cmd --web` 启动浏览器工作流。该服务同时提供构建后的剪辑器和 API。`npm run dev` 只启动 Vite，不会启动 CutVoke 后端，因此不能单独作为安装后的运行流程。贡献者依赖和检查步骤见 [贡献说明](CONTRIBUTING.zh-CN.md)。
 
 #### 内置命令行工具速查
 

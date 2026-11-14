@@ -105,6 +105,9 @@ async function start() {
   child = spawn(executable, [...prefix, "serve", "--host", "127.0.0.1", "--port", String(port), "--data", dataPath],
     { env, cwd: path.dirname(executable), windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
   let failure;
+  if (process.env.CUTVOKE_DESKTOP_QA === "1" && process.platform !== "win32") {
+    globalThis.__cutvokeQAStack = require("./qa-diagnostics.cjs").createStackCapture(child);
+  }
   child.once("error", error => { failure = error; });
   child.stdout.pipe(log, { end: false }); child.stderr.pipe(log, { end: false });
   child.once("exit", (code) => {

@@ -18,6 +18,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import stat
+import tempfile
 import zipfile
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -27,7 +30,7 @@ from typing import Optional
 from cutvoke.domain.model import Project
 
 # 当前模块支持的包格式版本。包格式比此值新 → 明确拒绝（见 check_compatibility）。
-SUPPORTED_PACKAGE_FORMAT = 3
+SUPPORTED_PACKAGE_FORMAT = 4
 
 # 生成工具版本（与 pyproject.toml 的 version 保持一致；不引入 import 以避免
 # 在未安装环境下解析失败）。
@@ -98,9 +101,11 @@ def _project_sequences(project: Project) -> list:
     sequences, seen = [], set()
     while pending:
         sequence = pending.pop(0)
-        if sequence.id in seen:
+        # Serialized compound copies can share an ID but hold different Python
+        # objects. Visit each occurrence so every reference is relocated.
+        if id(sequence) in seen:
             continue
-        seen.add(sequence.id)
+        seen.add(id(sequence))
         sequences.append(sequence)
         pending.extend(clip.nested for track in sequence.tracks for clip in track.clips
                        if clip.nested is not None)
@@ -266,8 +271,25 @@ def pack_project(project: Project, dest_pkg_path: str, *,
         effect_entries.append({'originalPath':source_path,'packagePath':pkg_path,'sha256':digest,'size':size,'resourceKind':'texture'})
         pkg_to_src.setdefault(pkg_path,src)
 
+    from cutvoke.storage.generated_sources import referenced_sources
+    directories = {src.parent / ".generated" for src in pkg_to_src.values()}
+    if media_root is not None:
+        directories.add(Path(media_root) / ".generated")
+    try:
+        sources = referenced_sources({item["sha256"] for item in asset_entries}, directories)
+    except ValueError as error:
+        raise ProjectPackError(str(error)) from error
+    source_entries = []
+    if sum(item["size"] for item in sources) > 128 * 1024 * 1024:
+        raise ProjectPackError("generated sources exceed 128 MiB per project package")
+    for item in sources:
+        name = "sources/" + item["bundleId"] + ".cvsource.zip"
+        source_entries.append({key: item[key] for key in ("bundleId", "outputSha256", "sha256", "size")})
+        source_entries[-1]["packagePath"] = name
+        pkg_to_src[name] = Path(item["path"])
+
     manifest = {
-        "packageFormat": 3 if effect_entries else 2 if lut_entries else 1,
+        "packageFormat": 4 if source_entries else 3 if effect_entries else 2 if lut_entries else 1,
         "projectId": project.project_id,
         "schemaVersion": project.schema_version,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
@@ -276,32 +298,40 @@ def pack_project(project: Project, dest_pkg_path: str, *,
         "luts": lut_entries,
     }
     if effect_entries:manifest['effectFiles']=effect_entries
+    if source_entries:manifest['generatedSources']=source_entries
 
-    # 第二阶段：写入 zip。manifest / project 用 writestr；素材流式写入。
-    # 素材按 pkg_path 去重，每个 pkg_path 仅流式写入一次（大文件不进内存）。
-    with zipfile.ZipFile(dest, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr(
-            "manifest.json",
-            json.dumps(manifest, ensure_ascii=False, indent=2),
-        )
-        zf.writestr(
-            "project.json",
-            json.dumps(project.to_dict(), ensure_ascii=False, indent=2),
-        )
-        for pkg_path, src in pkg_to_src.items():
-            _stream_copy_into_zip(zf, src, pkg_path)
-
+    # Verify the bytes actually copied, then atomically replace on the same
+    # filesystem. Interrupted writes and changing inputs preserve any old package.
+    expected = {entry["packagePath"]: (entry["sha256"], entry["size"])
+                for entry in [*asset_entries, *lut_entries, *effect_entries, *source_entries]}
+    if any(src.resolve() == dest.resolve() for src in pkg_to_src.values()):
+        raise ProjectPackError("package output must not replace a source file")
+    fd, pending = tempfile.mkstemp(dir=dest.parent, prefix=".project-package-", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w+b") as output:
+            with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as zf:
+                zf.writestr("manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2))
+                zf.writestr("project.json", json.dumps(project.to_dict(), ensure_ascii=False, indent=2))
+                for pkg_path, src in pkg_to_src.items():
+                    if _stream_copy_into_zip(zf, src, pkg_path) != expected[pkg_path]:
+                        raise ProjectPackError(f"source changed while packing: {src}")
+            output.flush()
+            os.fsync(output.fileno())
+        os.replace(pending, dest)
+    finally:
+        Path(pending).unlink(missing_ok=True)
     return str(dest)
 
 
-def _stream_copy_into_zip(zf: zipfile.ZipFile, src: Path, arcname: str) -> None:
-    """流式把源文件写入 zip 成员（边读边写，不整文件进内存）。"""
+def _stream_copy_into_zip(zf: zipfile.ZipFile, src: Path, arcname: str) -> tuple[str, int]:
+    """Hash the exact bytes written rather than trusting the earlier scan."""
+    digest, total = hashlib.sha256(), 0
     with open(src, "rb") as fsrc, zf.open(arcname, "w", force_zip64=True) as fdst:
-        while True:
-            chunk = fsrc.read(_CHUNK)
-            if not chunk:
-                break
+        while chunk := fsrc.read(_CHUNK):
+            digest.update(chunk)
+            total += len(chunk)
             fdst.write(chunk)
+    return digest.hexdigest(), total
 
 
 # ---------------------------------------------------------------------------
@@ -406,6 +436,76 @@ def inspect_package(pkg_path: str, *,
 # 解包 / 迁移
 # ---------------------------------------------------------------------------
 
+def _stage_package_sources(archive, stage):
+    """Strictly preflight every source before touching the destination."""
+    from cutvoke.storage.generated_sources import (
+        MAX_ARCHIVES, MAX_ARCHIVE_BYTES, SHA, _portable_name, _unique, read_source_archive,
+    )
+    try:
+        names = archive.namelist()
+        if len(names) != len(set(names)):
+            raise ValueError("duplicate project archive entry")
+        manifest = json.loads(archive.read("manifest.json"), object_pairs_hook=_unique)
+        check_compatibility(manifest)
+        Project.from_dict(json.loads(archive.read("project.json"), object_pairs_hook=_unique))
+        sources = manifest.get("generatedSources", [])
+        if not isinstance(sources, list) or len(sources) > MAX_ARCHIVES:
+            raise ValueError("invalid generatedSources list")
+        if sources and manifest.get("packageFormat") != 4:
+            raise ValueError("generatedSources requires project package format 4")
+        if any(name.startswith("sources/") for name in names) and not sources:
+            raise ValueError("undeclared generated source archive")
+        if not sources:
+            return []
+        for name in names:
+            _portable_name(name)
+        used = {item["sha256"] for item in manifest.get("assets", [])}
+        declared, bundles, result, total = set(), set(), [], 0
+        for entry in sources:
+            if not isinstance(entry, dict) or set(entry) != {"bundleId", "outputSha256", "packagePath", "size", "sha256"}:
+                raise ValueError("invalid generated source entry")
+            bundle, digest, size = entry["bundleId"], entry["sha256"], entry["size"]
+            if (not isinstance(bundle, str) or not SHA.fullmatch(bundle)
+                    or not isinstance(digest, str) or not SHA.fullmatch(digest)
+                    or type(size) is not int or not 0 < size <= MAX_ARCHIVE_BYTES):
+                raise ValueError("invalid generated source identity/size")
+            name = "sources/" + bundle + ".cvsource.zip"
+            if name != entry["packagePath"] or bundle in bundles:
+                raise ValueError("invalid or duplicate generated source path")
+            bundles.add(bundle)
+            declared.add(name)
+            total += size
+            if total > 128 * 1024 * 1024:
+                raise ValueError("generated sources exceed 128 MiB per project package")
+            info = archive.getinfo(name)
+            if (stat.S_IFMT(info.external_attr >> 16) not in (0, stat.S_IFREG)
+                    or info.flag_bits & 1 or info.compress_type not in
+                    (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED)):
+                raise ValueError("unsupported packaged source entry")
+            if info.file_size != size:
+                raise ValueError("source archive size mismatch")
+            target = stage / (bundle + ".cvsource.zip")
+            copied, h = 0, hashlib.sha256()
+            with archive.open(info) as incoming, target.open("xb") as outgoing:
+                while chunk := incoming.read(_CHUNK):
+                    copied += len(chunk)
+                    if copied > size:
+                        raise ValueError("source archive size limit exceeded")
+                    h.update(chunk)
+                    outgoing.write(chunk)
+            if copied != size or h.hexdigest() != digest:
+                raise ValueError("source archive SHA256/size mismatch")
+            checked, _ = read_source_archive(target, expected_sha=digest, expected_bundle=bundle)
+            if checked["outputSha256"] != entry["outputSha256"] or checked["outputSha256"] not in used:
+                raise ValueError("source archive does not describe referenced media")
+            result.append(checked)
+        if {name for name in names if name.startswith("sources/")} != declared:
+            raise ValueError("undeclared generated source archive")
+        return result
+    except (ValueError, KeyError, TypeError, zipfile.BadZipFile) as error:
+        raise ProjectPackError(str(error)) from error
+
+
 def unpack_project(pkg_path: str, dest_dir: str, *,
                    overwrite: bool = False) -> tuple[Project, dict, list]:
     """把包解包到 dest_dir，并重写素材路径为新目录下绝对路径。
@@ -424,9 +524,35 @@ def unpack_project(pkg_path: str, dest_dir: str, *,
     if not pkg.exists():
         raise ProjectPackError(f"包文件不存在：{pkg_path}")
 
+    with zipfile.ZipFile(pkg, "r") as archive, tempfile.TemporaryDirectory(prefix="cutvoke-source-check-") as temporary:
+        staged = _stage_package_sources(archive, Path(temporary))
+        dest = Path(dest_dir)
+        if staged:
+            from cutvoke.storage.generated_sources import validate_source_directory
+            try:
+                validate_source_directory(dest / "media" / ".generated")
+            except ValueError as error:
+                raise ProjectPackError(str(error)) from error
+        # Existing immutable archives are checked before media can be overwritten.
+        from cutvoke.storage.generated_sources import read_source_archive, retain_source_archive
+        for item in staged:
+            target = dest / "media" / ".generated" / (item["bundleId"] + ".cvsource.zip")
+            if target.exists() or target.is_symlink():
+                try:
+                    read_source_archive(target, expected_sha=item["sha256"], expected_bundle=item["bundleId"])
+                except ValueError as error:
+                    raise ProjectPackError(str(error)) from error
+        # No source files are extracted here; retain only the verified ZIPs.
+        if dest.exists() and not overwrite and any(dest.iterdir()):
+            raise ProjectPackError(f"目标目录非空：{dest_dir}（确认无误可传 overwrite=True）")
+        for item in staged:
+            try:
+                retain_source_archive(item, dest / "media" / ".generated")
+            except ValueError as error:
+                raise ProjectPackError(str(error)) from error
     dest = Path(dest_dir)
     if dest.exists():
-        if not overwrite and any(dest.iterdir()):
+        if not staged and not overwrite and any(dest.iterdir()):
             raise ProjectPackError(
                 f"目标目录非空：{dest_dir}（确认无误可传 overwrite=True）"
             )

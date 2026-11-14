@@ -48,13 +48,13 @@ GUIDES = {
             "Call operation='register' with the same request/overrides, expectedRequestKey, renderPath and renderSha256. Stale keys, hashes, codec, frame timing/dimensions/count or explicit BT.709 errors reject registration. The effective request and declared inputs enter a separate inert source archive.",
             "On a verified exact/covering cache hit use assetId AND mediaSourceStart. For covering windows this is (requestedStartFrame-renderedStartFrame)/fps, not absolute logical time. previewCall uses existing preview_frames with source-local times. Inspect returned pictures and the final composite separately.",
             "Native timeline writes still require command_preview, revision, commandId and lease. To repair a subwindow, split its clip at both boundaries, trim the middle sourceStart to the new asset offset, then asset.swap only that middle clip in one edit.batch. Derive IDs from returned changes, preserve native text/audio and review output.",
-            "Use operation='status' with projectId only for index counts. Keep the entire project folder for cache/source ZIPs; project_package includes ordinary media but excludes both the source archives and cache index."],
+            "Use operation='status' with projectId only for index counts. Keep the entire project folder for cache/source ZIPs; project_package includes referenced source archives and ordinary media; the cache index stays outside it. Use generated_source for explicit input restoration."],
         "constraints": [
             "paramsSchema is a closed flat object with 1..32 ASCII named fields, all required. Scalars and scalar arrays only. Numbers require finite minimum/maximum within ±1e12, strings minLength/maxLength<=2048, arrays minItems/maxItems<=64; scalar enum<=32. No expressions, refs, patterns, defaults or nested objects.",
             "Requests<=256 KiB, <=127 inputs, 32 MiB total including archived request; output<=512 MiB. Silent H.264 MP4 or ProRes 4444 MOV, explicit BT.709, square pixels, 16..4096 dimensions, rational 1..120 fps, <=18000 frames and <=600 seconds. Straight alpha requires ProRes; alpha pixels and creative quality are unassessed.",
             "Cache keys cover declared parameters/schema, inputs, bindings, renderer/build, seed, profile, full output contract and frame range. Covering reuse differs only in frame range. Logical clock/dependency completeness/profile are declared by the external renderer, not attested by CutVoke.",
             "Every cache hit rehashes managed media and source archive. Changed/missing bytes miss; observed different outputs for one request disable reuse for that retained composition. This is not proof of determinism. LRU removes index metadata only (max256 entries); media/source ZIPs remain.",
-            "No arbitrary-code runtime, isolation guarantee, render job, parameter GUI, ZIP reimport, automatic rerender or delivery scheduling. A miss requires external work. Native clips and project editing remain authoritative."],
+            "No arbitrary-code runtime, isolation guarantee, render job, parameter GUI, automatic rerender or delivery scheduling. A miss requires external work. Native clips and project editing remain authoritative."],
         "requestExample": {
             "kind": "cutvoke.generated-render-request", "schemaVersion": 1,
             "renderer": {"name": "trusted-renderer", "version": "exact-version", "build": "runtime/dependency-build"},
@@ -73,14 +73,14 @@ GUIDES = {
             "Call generated_media(projectId=..., operation='inspect', manifestPath=...). Inspection hashes a temporary snapshot and decodes/counts frames; it creates no persistent asset or timeline edit.",
             "Call operation='import' to retain an ordinary assetId and an inert content-addressed source ZIP. Identical imports reuse media and source identity; this is not a frame-render cache.",
             "Use clip.insert or asset.swap with explicit clipIds, expectedRevision, commandId and edit lease. Preview before applying, then review actual frames, continuous output and sound.",
-            "Return sourceArchive separately alongside project_package. The ZIP excludes rendered media; the project package excludes the source ZIP. Both are needed for a source-plus-editable handoff."],
+            "project_package includes verified source ZIPs for referenced media (format 4); unpacking retains ZIPs without extracting inputs. Use generated_source list/inspect, then explicit restore with bundleId and a NEW outPath directory. No execution or dependency installation."],
         "limits": {"manifestBytes": 262144, "inputFiles": 128, "inputBytes": 33554432,
                    "renderBytes": 536870912, "maxDimension": 4096, "maxFrames": 18000,
                    "maxSeconds": 600, "inspectionTimeoutSeconds": 30},
         "constraints": ["One zero-based CFR video stream, square pixels, explicit BT.709 primaries/transfer/matrix on decoded frames; no audio stream.",
                         "MP4/MOV for opaque footage; straight alpha requires ProRes 4444 MOV. Premultiplied alpha, WebM, HDR and audio are outside v1.",
                         "Hashes establish byte identity, not dependency completeness, source safety, reproducibility or artistic quality. Alpha pixels and straight-alpha interpretation require separate compositing checks.",
-                        "No native code clip, automatic parameter UI, arbitrary-code runner, source ZIP reimport, recursive dependency discovery or automatic rerender. Source archives can contain private data; no upload is performed."],
+                        "No native code clip, automatic parameter UI, arbitrary-code runner, source recursive dependency discovery or automatic rerender. Source archives can contain private data; no upload is performed."],
         "manifestExample": {
             "schemaVersion": 1, "renderer": {"name": "your-renderer", "version": "exact-version", "build": "runtime/renderer-build"},
             "entrypoint": "scene.py", "files": [{"path": "scene.py", "sha256": "<64 lowercase hex characters>", "role": "source"}],
@@ -102,7 +102,7 @@ GUIDES = {
         "workflow": [
             {"tools": ["runtime", "project_list", "project_summary"], "purpose": "Check the connected data directory; locate the requested project and current revision. Use create_project for a new edit or project_clone for an alternate version."},
             {"tools": ["editor_help"], "purpose": "For new or substantial creative work use topic=creative: shared principles, a relevant work type, then this project's plan. Load one document with guide=<id>. Local corrections reuse approved direction. Effect counts and a successful export do not prove expression."},
-            {"tools": ["media_list", "media_import", "media_inspect", "generated_media", "generated_render", "preview_frames"], "purpose": "Locate/import local files and inspect actual pictures. generated_media imports external code renders; generated_render plans parameterized absolute frame windows and reuses verified exact/covering cached media. Neither executes source or edits the timeline. Keep source ZIPs separately from project_package. Use assetId plus returned mediaSourceStart in native edits."},
+            {"tools": ["media_list", "media_import", "media_inspect", "generated_media", "generated_render", "generated_source", "preview_frames"], "purpose": "Locate/import local files and inspect actual pictures. generated_media imports external code renders; generated_render plans parameterized absolute frame windows and reuses verified exact/covering cached media. Neither executes source or edits the timeline. project_package includes referenced inert source ZIPs; use generated_source to inspect/restore into a new directory. Use assetId plus returned mediaSourceStart in native edits."},
             {"tools": ["editor_help", "commands_list", "resources_list"], "purpose": "Get command schemas or a recipe; discover compatible effects/presets instead of guessing. resources_list is the preset catalog, distinct from MCP document resources."},
             {"tools": ["edit_lock", "command_preview", "command_apply"], "purpose": "Acquire a lease, preview supported edits without committing, apply with revision and stable commandId. edit.batch commits 1..32 changes atomically as one undo point. Use each returned revision for the next edit; renew the lease during long editing sessions."},
             {"tools": ["preview_frames", "preview_prepare", "preview_job"], "purpose": "Check text/effects/transition boundaries visually; prepare continuous preview if needed. Preparation is asynchronous. Keep jobId; poll about once per second with a bounded timeout, not a busy loop."},
@@ -238,7 +238,7 @@ RECIPES = {
         "steps": [
             {"tool": "command_preview", "arguments": {"projectId": "<PROJECT>", "expectedRevision": "<REVISION>", "type": "project.preflight", "payload": {}}},
             {"tool": "command_apply", "arguments": {"projectId": "<PROJECT>", "expectedRevision": "<REVISION>", "commandId": "<COMMAND_ID>", "type": "export.enqueue", "payload": {"outPath": "<ABSOLUTE_MP4_PATH>", "quality": "high", "overwrite": False}}},
-            {"tool": "export_job", "arguments": {"projectId": "<PROJECT>", "jobId": "<JOB_ID>"}, "repeat": "About once per second until status=succeeded; use result.output_path. Stop and read error on failed/cancelled/interrupted, or report a bounded timeout."},
+            {"tool": "export_job", "arguments": {"projectId": "<PROJECT>", "jobId": "<JOB_ID>"}, "repeat": "Wait pollAfterSeconds seconds between export_job calls while status is queued/running (currently 1). pollAfterSeconds=null means terminal: stop polling, use result.output_path on succeeded, or read error on failed/cancelled/interrupted. Keep a bounded timeout."},
             {"tool": "project_package", "arguments": {"projectId": "<PROJECT>", "expectedRevision": "<REVISION>", "outPath": "<ABSOLUTE_PACKAGE_PATH>"}}]},
 }
 
@@ -329,6 +329,7 @@ def recovery(code, arguments):
         "INVALID_ARGUMENT": "Read the indicated field and exact schema, correct it, then preview again. Do not repeat identical invalid arguments.",
         "AMBIGUOUS_MATCH": "Narrow project_lookup by time or an explicitly chosen entityId, then retry with requireUnique=true. If intent is unclear, list candidates and ask which one. Never use limit=1 or the first hit to bypass ambiguity.",
         "EDIT_LOCKED": "Read project_summary lease state. Wait or ask for human takeover; do not steal another editor's lease.",
+        "EDIT_LEASE_INVALID": "Read the latest project and discard the stale edit plan. Wait for a new human handoff before acquiring a fresh lease. Do not retry or renew the old token, and never automatically reclaim editing after human takeover.",
         "ASSET_MISSING": "Inspect the reported path; locate/import the intended source and use asset.swap to relink affected clips.",
         "ASSET_CHANGED": "Inspect the intended source again, confirm its identity/duration, and relink before retrying.",
         "EFFECT_UNAVAILABLE": "Discover a supported effect using resources_list/effects_list and request its exact schema.",

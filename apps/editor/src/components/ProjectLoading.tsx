@@ -124,11 +124,11 @@ export function useProjectPreparation() {
         if (!isCurrent()) return;
         setJob(current); setPhase(current.phase); setProgress(Math.floor(current.progress * 0.9));
         if (current.state === "failed" || current.state === "cancelled") {
-          const latest = getLatestState();
-          if (current.state === "cancelled" && latest?.currentId === projectId &&
-              latest.project && latest.project.revision !== project.revision) {
-            // Polling can report cancellation after an edit invalidates an
-            // already accepted job. Reconcile it like submission-time conflict.
+          if (current.state === "cancelled") {
+            // The server may cancel an old job before the local command ACK or
+            // sync snapshot arrives. Reconcile even while the client revision
+            // still looks unchanged; the catch path keeps genuine cancellations
+            // visible when the refreshed revision has not advanced.
             throw new ApiFailure({ status: 409, code: "REVISION_CONFLICT",
               message: current.error || tr("预览准备已取消，请重试。"), retryable: true });
           }
@@ -156,10 +156,13 @@ export function useProjectPreparation() {
         // A local edit can commit before its new snapshot reaches this worker.
         // Reconcile that immutable request without replacing the edit feedback
         // with a false reload warning (or a generic ready message).
-        const refreshed = await refreshProject(dispatch, projectId, { quiet: true, signal, isCurrent });
+        let refreshedRevision: string | undefined;
+        const refreshed = await refreshProject(dispatch, projectId, { quiet: true, signal, isCurrent,
+          onRefreshedRevision: revision => { refreshedRevision = revision; } });
         if (!isCurrent()) return;
         const latest = getLatestState();
-        if (latest?.currentId === projectId && latest.project?.revision !== project.revision) {
+        if ((refreshed && refreshedRevision !== undefined && refreshedRevision !== project.revision) ||
+            (latest?.currentId === projectId && latest.project?.revision !== project.revision)) {
           setRetry(value => value + 1);
           return;
         }

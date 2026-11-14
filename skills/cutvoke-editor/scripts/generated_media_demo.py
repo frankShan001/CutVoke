@@ -31,6 +31,29 @@ def write_json(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding="utf8")
 
 
+
+def verify_source_handoff(mcp, project_id, project_root, package_directory):
+    """Exercise explicit recovery without importing or running restored code."""
+    archives = mcp.call("generated_source", projectId=project_id, operation="list")["archives"]
+    assert archives
+    assert not list(package_directory.rglob("scene.py"))
+    for item in archives:
+        bundle = item["bundleId"]
+        archived = package_directory / "media" / ".generated" / (bundle + ".cvsource.zip")
+        assert digest(archived) == item["sha256"]
+        inspected = mcp.call("generated_source", projectId=project_id, operation="inspect", bundleId=bundle)
+        target = project_root / "exports" / "recovered-sources" / bundle
+        restored = mcp.call("generated_source", projectId=project_id, operation="restore", bundleId=bundle, outPath=str(target))
+        assert not restored["runtimeExecuted"]
+        manifest = inspected["sourceArchive"]["manifest"]
+        assert json.loads((target / "manifest.json").read_bytes()) == manifest
+        for entry in manifest["files"]:
+            assert digest(target / entry["path"]) == entry["sha256"]
+        assert not (target / manifest["output"]["path"]).exists()
+    return {"archives": len(archives), "zipAndInputHashesVerified": True,
+            "unpackKeptInputsUnexpanded": True, "explicitRestoreWithoutExecution": True}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path, help="New isolated directory")
@@ -167,6 +190,7 @@ def main():
         assert rms(samples[:4800]) < middle * .2 and rms(samples[-4800:]) < middle * .2
         package = mcp.call("project_package", projectId="code-bridge", expectedRevision=revision, outPath="editable.cvkpkg")
         restored, _, _ = unpack_project(package["path"], str(project_root / "package-check"))
+        source_handoff = verify_source_handoff(mcp, "code-bridge", project_root, project_root / "package-check")
         assert len(restored.sequence.tracks) == 4
         assert all(Path(clip.asset_ref.source_path).is_file() for track in restored.sequence.tracks if track.kind != "text" for clip in track.clips)
         # Read the persisted project after all edits, verify other code slots and native text survived.
@@ -184,9 +208,9 @@ def main():
                    "projectPackage": package["path"], "receipts": receipts, "renderSeconds": timings, "runtime": runtime,
                    "checks": {"frames": 216, "durationSeconds": 9, "fullDecode": True, "sourceAlphaPixels": True,
                               "finalCompositePixels": True, "audioNonSilentUnclippedFades": True,
-                              "selectedSwapUndoRedo": True, "nativeTitles": True, "packageRoundtrip": True},
+                              "selectedSwapUndoRedo": True, "nativeTitles": True, "packageRoundtrip": True, "sourceHandoff": source_handoff},
                    "unassessed": ["continuous visual playback", "subjective listening", "artistic quality", "cross-machine reproducibility"],
-                   "limitations": ["source ZIPs must accompany the project package separately", "no arbitrary-code runtime or local frame cache"]})
+                   "limitations": ["render cache index and undeclared dependencies are not packaged", "no arbitrary-code runtime or local frame cache"]})
         print(json.dumps({"projectRoot": str(project_root), "video": str(video), "evidence": str(evidence / "result.json")}, ensure_ascii=False))
     finally:
         mcp.close(output)

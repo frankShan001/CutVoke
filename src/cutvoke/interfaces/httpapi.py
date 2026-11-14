@@ -2288,6 +2288,11 @@ class HttpApi:
                 return 200, {"locked": True, "lease": lease}
 
             if method == "POST" and len(parts) == 6 \
+                    and parts[4] == "edit-lock" and parts[5] == "review":
+                return 200, self.service.review_edit_lease(
+                    pid, body.get("leaseId", ""), body.get("limit", 20))
+
+            if method == "POST" and len(parts) == 6 \
                     and parts[4] == "edit-lock" and parts[5] == "renew":
                 lease = self.service.renew_edit_lease(
                     pid, body.get("leaseId", ""), body.get("ttlSeconds", 30))
@@ -2296,6 +2301,11 @@ class HttpApi:
             if method == "POST" and len(parts) == 6 \
                     and parts[4] == "edit-lock" and parts[5] == "release":
                 return 200, self.service.release_edit_lease_status(pid, body.get('leaseId', ''))
+
+            if method == "POST" and len(parts) == 6 \
+                    and parts[4] == "edit-lock" and parts[5] == "takeover":
+                return 200, self.service.takeover_edit_lease(
+                    pid, body.get("leaseId", ""), actor=Actor("human", "web-editor"))
 
             if method == "GET" and len(parts) == 4:
                 proj = self.service.get_project(pid)

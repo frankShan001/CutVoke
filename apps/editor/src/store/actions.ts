@@ -11,6 +11,7 @@ import {
   createProject as apiCreate,
   enqueueExportProject as apiEnqueueExport,
   getEditLock,
+  takeOverEditLock,
   type ExportQuality,
   getProject,
   listEvents,
@@ -65,7 +66,7 @@ export async function selectProject(
 export async function refreshProject(
   dispatch: Dispatch<EditorAction>,
   projectId: string,
-  options: { quiet?: boolean; signal?: AbortSignal; isCurrent?: () => boolean } = {},
+  options: { quiet?: boolean; signal?: AbortSignal; isCurrent?: () => boolean; reportError?: boolean; onRefreshedRevision?: (revision: string) => void } = {},
 ): Promise<boolean> {
   const startedRevision = latestState?.currentId === projectId ? latestState.revision : undefined;
   // A response may outlive its preview worker, including leaving and reopening
@@ -75,6 +76,7 @@ export async function refreshProject(
   try {
     const project = await getProject(projectId);
     if (!current() || isOlderRevision(project.revision, latestState?.revision)) return false;
+    options.onRefreshedRevision?.(project.revision);
     dispatch({ type: "PROJECT_LOADED", project });
     dispatch({ type: "SVC_UP", up: true });
     if (!options.quiet) dispatch({ type: "STATUS_SET", severity: "ok", text: msg("就绪") });
@@ -83,25 +85,63 @@ export async function refreshProject(
     if (!current()) return false;
     if (options.quiet && startedRevision !== undefined && latestState?.revision !== startedRevision) return false;
     dispatch({ type: "SYNC_STATE_SET", syncState: "error" });
-    showError(dispatch, err);
+    if (options.reportError !== false) showError(dispatch, err);
     return false;
   }
 }
 
-/** 轮询 Agent 编辑租约；读取失败时保留上一次状态，避免网络抖动误解锁。 */
-export async function pollEditLock(
-  dispatch: Dispatch<EditorAction>,
-  state: EditorState,
-): Promise<void> {
-  if (!state.currentId) {
-    dispatch({ type: "EDIT_LOCK_SET", lease: null });
-    return;
-  }
+let editLockGeneration = 0;
+let editLockPoll = 0;
+const takingOver = new Set<string>();
+const editLockRequests = new Map<string, { generation: number; request: number }>();
+
+/** Accept only the latest poll for the current project and handoff generation. */
+export async function pollEditLock(dispatch: Dispatch<EditorAction>, state: EditorState): Promise<void> {
+  const projectId = state.currentId;
+  if (!projectId || takingOver.has(projectId)) return;
+  const generation = editLockGeneration;
+  if (editLockRequests.get(projectId)?.generation === generation) return;
+  const request = ++editLockPoll;
+  editLockRequests.set(projectId, { generation, request });
+  const current = () => latestState?.currentId === projectId && generation === editLockGeneration &&
+    request === editLockPoll && !takingOver.has(projectId);
   try {
-    const status = await getEditLock(state.currentId);
-    dispatch({ type: "EDIT_LOCK_SET", lease: status.locked ? status.lease : null });
+    const status = await getEditLock(projectId);
+    if (!current()) return;
+    // Handoff includes a fresh project snapshot before exposing human controls.
+    if (!status.locked && latestState?.editLock &&
+        !await refreshProject(dispatch, projectId, { quiet: true, isCurrent: current, reportError: false })) return;
+    if (current()) dispatch({ type: "EDIT_LOCK_SET", projectId, lease: status.locked ? status.lease : null });
   } catch {
-    // 锁状态宁可保守保持，也不因一次断网让人工操作穿透 Agent 编辑窗口。
+    // Keep the last known lease on transport failure.
+  } finally {
+    if (editLockRequests.get(projectId)?.request === request) editLockRequests.delete(projectId);
+  }
+}
+
+export async function takeOverEditing(dispatch: Dispatch<EditorAction>, projectId: string, leaseId: string): Promise<boolean> {
+  if (latestState?.currentId !== projectId || latestState.editLock?.leaseId !== leaseId || takingOver.has(projectId)) return false;
+  takingOver.add(projectId);
+  const generation = ++editLockGeneration;
+  ++editLockPoll;
+  const current = () => latestState?.currentId === projectId && generation === editLockGeneration;
+  try {
+    const status = await takeOverEditLock(projectId, leaseId);
+    if (!current()) return false;
+    if (status.locked) {
+      dispatch({ type: "EDIT_LOCK_SET", projectId, lease: status.lease });
+      dispatch({ type: "STATUS_SET", severity: "warn", text: msg("租约已变化，请确认当前 Agent 后重试。") });
+      return false;
+    }
+    if (!await refreshProject(dispatch, projectId, { quiet: true, isCurrent: current }) || !current()) return false;
+    dispatch({ type: "EDIT_LOCK_SET", projectId, lease: null });
+    dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已接管编辑，工程已刷新。") });
+    return true;
+  } catch (error) {
+    if (current()) showError(dispatch, error);
+    return false;
+  } finally {
+    takingOver.delete(projectId);
   }
 }
 
@@ -186,6 +226,11 @@ function forgetLocalCommand(projectId: string, commandId: string): void {
 }
 
 export function bindLatestState(s: EditorState) {
+  if (s.currentId !== latestState?.currentId || s.view !== latestState?.view) {
+    ++editLockGeneration;
+    ++editLockPoll;
+    editLockRequests.clear();
+  }
   latestState = s;
 }
 /** 读取最新绑定的状态（拖拽提交等非渲染上下文使用）。 */

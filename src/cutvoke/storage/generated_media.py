@@ -52,7 +52,7 @@ def _text(value, label):
         raise ValueError(f"{label} must be nonempty text, at most 200 characters")
 
 
-def _file_entry(value, root, label):
+def _validate_file_entry(value, label):
     name = value.get("path")
     if (not isinstance(name, str) or not name or len(name) > 240 or "\\" in name
             or ":" in name or "\x00" in name
@@ -62,6 +62,11 @@ def _file_entry(value, root, label):
     expected = value.get("sha256")
     if not isinstance(expected, str) or not SHA.fullmatch(expected):
         raise ValueError(f"{label}.sha256 must be lowercase SHA256")
+    return name
+
+
+def _file_entry(value, root, label):
+    name = _validate_file_entry(value, label)
     path = root / name
     if any(parent.is_symlink() for parent in (path, *path.parents) if parent != root):
         raise ValueError(f"{label}: symbolic links are not allowed")
@@ -85,6 +90,15 @@ def load_manifest(path):
             result[key] = value
         return result
     manifest = json.loads(raw, object_pairs_hook=unique)
+    validate_manifest(manifest)
+    for item in manifest["files"]:
+        _file_entry(item, path.parent, "input")
+    _file_entry(manifest["output"], path.parent, "output")
+    return manifest, path.parent
+
+
+def validate_manifest(manifest):
+    """Validate the v1 contract without accessing inputs or executing source."""
     _object(manifest, ("schemaVersion", "renderer", "entrypoint", "files", "params", "seed", "output"), "manifest")
     if type(manifest["schemaVersion"]) is not int or manifest["schemaVersion"] != 1:
         raise ValueError("unsupported generated-media schemaVersion; expected 1")
@@ -100,7 +114,7 @@ def load_manifest(path):
     names = set()
     for item in files:
         _object(item, ("path", "sha256", "role"), "files item")
-        _file_entry(item, path.parent, "input")
+        _validate_file_entry(item, "input")
         if item["path"] in names or item["path"] == "manifest.json":
             raise ValueError("duplicate or reserved input path")
         names.add(item["path"])
@@ -110,7 +124,7 @@ def load_manifest(path):
         raise ValueError("entrypoint must be a declared source file")
     out = manifest["output"]
     _object(out, ("path", "sha256", "width", "height", "fps", "durationFrames", "alphaMode", "colorSpace", "audioMode"), "output")
-    _file_entry(out, path.parent, "output")
+    _validate_file_entry(out, "output")
     if out["path"] in names or out["path"] == "manifest.json":
         raise ValueError("output must be separate from source inputs")
     for key in ("width", "height"):
@@ -129,7 +143,7 @@ def load_manifest(path):
         raise ValueError("v1 accepts MP4 or MOV; straight alpha requires ProRes 4444 MOV")
     # Reject NaN/Infinity and bound serialized parameters; source bytes are inert.
     canonical(manifest)
-    return manifest, path.parent
+    return manifest
 
 
 def _copy_checked(source, destination, expected, limit):
@@ -226,7 +240,7 @@ def inspect_render(manifest, path, ffprobe):
 
 
 def publish_source_archive(manifest, stage, directory, bundle_id):
-    """An inert source handoff, independently portable from the editable media package."""
+    """Publish inert inputs; referenced archives can travel in a project package."""
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     target = directory / f"{bundle_id}.cvsource.zip"
@@ -260,4 +274,4 @@ def publish_source_archive(manifest, stage, directory, bundle_id):
     finally:
         Path(pending_name).unlink(missing_ok=True)
     return {"path": str(target), "sha256": digest,
-            "includesRenderedMedia": False, "includedInProjectPackage": False}
+            "includesRenderedMedia": False, "projectPackagePolicy": "include_when_referenced"}

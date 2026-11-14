@@ -1,3 +1,5 @@
+const { verifyNativeCaptionFonts } = require("./verify_native_caption_fonts.cjs");
+const { scheduleStackCapture } = require("../../apps/desktop/qa-diagnostics.cjs");
 const { verifyNativePreview } = require("./verify_native_preview.cjs");
 const { verifyNativeTransition } = require("./verify_native_transition.cjs");
 // Extract and run the exact Unix download, with a sandboxed visible renderer.
@@ -106,7 +108,9 @@ async function main() {
   run(ffmpeg, ["-v", "error", "-nostdin", "-f", "lavfi", "-i", "testsrc2=size=640x360:rate=30", "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000", "-t", "3", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-y", media], env);
   const occupied = net.createServer(socket => socket.end("unrelated occupied port"));
   await new Promise((resolve, reject) => { occupied.once("error", reject); occupied.listen(8787, "127.0.0.1", resolve); });
-  let electronApp, origin, runtime, page;
+  let electronApp, origin, runtime, page, stackIdentity;
+  const captureStack = () => electronApp.evaluate((_electron, identity) =>
+    globalThis.__cutvokeQAStack?.capture(identity) ?? false, stackIdentity);
   async function launch() {
     electronApp = await _electron.launch({ executablePath: executable, cwd: out,
       env: { ...env, CUTVOKE_DESKTOP_QA: "1", CUTVOKE_DESKTOP_QA_SHOW: "1" }, chromiumSandbox: true, timeout: 120_000 });
@@ -116,6 +120,8 @@ async function main() {
     await page.getByTestId("language-select").waitFor({ timeout: 120_000 });
     origin = new URL(page.url()).origin;
     runtime = await (await fetch(origin + "/api/v1/runtime")).json();
+    stackIdentity = await electronApp.evaluate(() => globalThis.__cutvokeQAStack?.identity() ?? null);
+    if (stackIdentity?.pid !== runtime.processId) stackIdentity = null;
     assert.equal(path.normalize(runtime.dataPath), path.join(data, "data/projects.sqlite"));
     assert.equal(path.normalize(runtime.pythonExecutable), engine);
     assert.notEqual(new URL(origin).port, "8787");
@@ -265,6 +271,11 @@ async function main() {
       await dialog.getByLabel("输出文件路径").fill(exported);
       await dialog.getByLabel("画质", { exact: true }).selectOption("low");
       await dialog.getByRole("button", { name: "开始导出", exact: true }).click();
+      // One bounded diagnostic while preparation is still live. This neither
+      // prewarms work nor changes the completion deadline or acceptance checks.
+      const cancelStackCapture = scheduleStackCapture(captureStack, diagnostic => {
+        console.log(`${new Date().toISOString()} export ${attempt + 1} 60s stack: ${JSON.stringify(diagnostic)}`);
+      });
       try {
         await expect(dialog.getByText("导出完成", { exact: false })).toBeVisible({ timeout: 120_000 });
       } catch (error) {
@@ -272,7 +283,7 @@ async function main() {
         // closes its ledger and obscures the original rendering failure.
         const failure = report.exportFailure = { backendPid: runtime.processId };
         try {
-          process.kill(runtime.processId, "SIGUSR2");
+          await captureStack();
           const response = await fetch(`${origin}/api/v1/projects/${projectId}/exports`, { signal: AbortSignal.timeout(3000) });
           failure.jobs = await response.json();
         } catch (diagnostic) { failure.jobDiagnostic = diagnostic.message; }
@@ -287,11 +298,11 @@ async function main() {
           }
           failure.processes = execFileSync("/bin/ps", ["-ww", "-p", [...owned].join(","), "-o", "pid,ppid,state,%cpu,rss,etime,command"],
             { encoding: "utf8", timeout: 3000 });
-          process.kill(runtime.processId, "SIGUSR2");
+          await captureStack();
         } catch (diagnostic) { failure.processDiagnostic = diagnostic.message; }
         await page.screenshot({ path: path.join(out, "export-failure.png") }).catch(() => {});
         save(); throw error;
-      }
+      } finally { cancelStackCapture(); }
       await page.screenshot({ path: path.join(out, attempt ? `03-export-completed-${attempt + 1}.png` : "03-export-completed.png") });
       const probe = JSON.parse(run(ffprobe, ["-v", "error", "-show_streams", "-show_format", "-of", "json", exported], env));
       assert.ok(probe.streams.some(x => x.codec_name === "h264"));
@@ -304,6 +315,8 @@ async function main() {
     }
     report.checks.guiExportAndFullVideoAudioDecode = true;
     report.transitionClock = await verifyNativeTransition({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath });
+    report.captionFonts = await verifyNativeCaptionFonts({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath, assets: path.join(resources, "engine/_internal/cutvoke/assets") });
+    report.checks.packagedCaptionColdExport = true;
     report.checks.threeShotTransitionClockAndPixels = true;
     const before = await api(`projects/${projectId}`);
     const pid = runtime.processId;

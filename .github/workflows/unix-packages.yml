@@ -65,13 +65,15 @@ jobs:
           cache-dependency-path: |
             apps/desktop/package-lock.json
             apps/editor/package-lock.json
-      - name: Select official Ubuntu archive mirror
+      - name: Inspect runner-provided Ubuntu mirrors
         if: runner.os == 'Linux'
+        # Preserve the hosted image's official mirror ordering and fallback.
+        # Rewriting Azure to archive duplicated a host and prolonged DNS failures.
         run: |
           if [ -f /etc/apt/apt-mirrors.txt ]; then
-            sudo sed -i 's|https\?://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
             cat /etc/apt/apt-mirrors.txt
           fi
+
       - name: Refresh Ubuntu package indexes
         if: runner.os == 'Linux'
         timeout-minutes: 5

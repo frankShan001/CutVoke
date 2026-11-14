@@ -2934,13 +2934,18 @@ test("video audio controls explain unavailable source audio and allow probe retr
 });
 
 test("title edits preview immediately, save without applying, and share canvas selection", async ({ page, request }) => {
+  const started = Date.now();
+  const mark = (phase: string) => console.info(`[title-live-edit] ${phase}: ${Date.now() - started}ms`);
+  mark("fixture");
   const { id, name } = await createProject(request, 1920, 1080);
   await apply(request, id, "clip.insert", {
     trackId: "live-title-track", createTrackKind: "text", clipId: "live-title",
     text: { content: "追逐夜色", fontSize: 100, bold: true, x: .4, y: .7, animIn: 0, animOut: 0 },
     timelineStart: { num: 4, den: 1 }, timelineEnd: { num: 8, den: 1 },
   });
+  mark("open project");
   await openProject(page, name);
+  mark("timeline title selection");
   const block = page.locator('[data-clip-id="live-title"]');
   const bounds = await block.boundingBox();
   expect(bounds).not.toBeNull();
@@ -2951,6 +2956,7 @@ test("title edits preview immediately, save without applying, and share canvas s
   const layer = page.locator('[data-title-clip-id="live-title"]');
   await expect(layer).toHaveAttribute("data-selected", "true");
   await expect(layer.locator(".player__title-selection")).toHaveCount(1);
+  mark("canvas title selection");
   await page.locator('[data-clip-id="color-1"]').click();
   await expect(layer).toHaveAttribute("data-selected", "false");
   await layer.click();
@@ -2968,26 +2974,31 @@ test("title edits preview immediately, save without applying, and share canvas s
     }
     await route.continue();
   });
-  await input.fill("追逐梦想");
-  await expect(layer.locator("text").last()).toHaveText("追逐梦想");
-  await expect.poll(() => titleSaves).toBe(1);
-  expect((await readProject(request, id)).sequence.tracks.flatMap(t => t.clips)
-    .find(c => c.id === "live-title")!.effects[0].params!.content).toBe("追逐夜色");
-  // A newer draft must survive the older command response.
-  await input.fill("追逐梦想，一路向前");
-  await expect(layer.locator("text").last()).toHaveText("追逐梦想，一路向前");
-  release();
+  try {
+    mark("hold first autosave");
+    await input.fill("追逐梦想");
+    await expect(layer.locator("text").last()).toHaveText("追逐梦想");
+    await expect.poll(() => titleSaves).toBe(1);
+    expect((await readProject(request, id)).sequence.tracks.flatMap(t => t.clips)
+      .find(c => c.id === "live-title")!.effects[0].params!.content).toBe("追逐夜色");
+    mark("newer draft while first save is held");
+    // A newer draft must survive the older command response.
+    await input.fill("追逐梦想，一路向前");
+    await expect(layer.locator("text").last()).toHaveText("追逐梦想，一路向前");
+  } finally { release(); }
   await expect.poll(async () => (await readProject(request, id)).sequence.tracks.flatMap(t => t.clips)
     .find(c => c.id === "live-title")!.effects[0].params!.content).toBe("追逐梦想，一路向前");
   await expect(input).toHaveValue("追逐梦想，一路向前");
   await expect(title.getByText("已自动保存", { exact: true })).toBeVisible();
   const source = await page.locator("video").first().getAttribute("data-preview-source");
+  mark("undo pending draft");
   await input.fill("马上撤销");
   await expect(layer.locator("text").last()).toHaveText("马上撤销");
   await page.getByRole("button", { name: "撤销", exact: true }).click();
   await expect(input).toHaveValue("追逐梦想，一路向前");
   await expect(layer.locator("text").last()).toHaveText("追逐梦想，一路向前");
   expect(await page.locator("video").first().getAttribute("data-preview-source")).toBe(source);
+  mark("IME composition");
   const savesBeforeComposition = titleSaves;
   await input.dispatchEvent("compositionstart");
   await input.fill("中文输入中的文字");
@@ -2997,13 +3008,18 @@ test("title edits preview immediately, save without applying, and share canvas s
   await input.dispatchEvent("compositionend");
   await expect.poll(async () => (await readProject(request, id)).sequence.tracks.flatMap(t => t.clips)
     .find(c => c.id === "live-title")!.effects[0].params!.content).toBe("中文输入中的文字");
+  mark("restore saved draft");
   await input.fill("追逐梦想，一路向前");
   await expect(title.getByText("已自动保存", { exact: true })).toBeVisible();
+  mark("capture editor");
   await page.screenshot({ path: "../../.artifacts/title-live-edit.png" });
+  mark("capture canvas");
   await page.locator(".player__canvas-frame").screenshot({ path: "../../.artifacts/title-live-canvas.png" });
+  mark("render reference frame");
   const frame = await request.get(`${apiPath(id)}/preview-frame?t=5.466667&size=1920x1080`);
   expect(frame.ok()).toBeTruthy();
   writeFileSync("../../.artifacts/title-render-reference.png", await frame.body());
+  mark("complete");
 });
 
 test("title inspector explains why invalid title settings cannot be applied", async ({ page, request }) => {
@@ -3397,13 +3413,22 @@ test("attached overlays follow video moves, Alt keeps them in place, and unlinki
 });
 
 test("stale background preparation reconciles without replacing successful edit feedback", async ({ page, request }) => {
-  for (const transport of ["submission", "poll"] as const) {
+  for (const transport of ["submission", "poll", "poll-before-ack"] as const) {
     const { id, name } = await createProject(request);
     let release!: () => void;
     const gate = new Promise<void>(resolve => { release = resolve; });
     const submitted: string[] = [];
     let conflict = 0;
     let renderFailure: "failed" | "cancelled" | null = null;
+    let releaseCommand!: () => void, committed!: () => void;
+    const commandGate = new Promise<void>(resolve => { releaseCommand = resolve; });
+    const stored = new Promise<void>(resolve => { committed = resolve; });
+    if (transport === "poll-before-ack") await page.route(`**/projects/${id}/commands`, async route => {
+      if (route.request().postDataJSON().type !== "caption.remove") return route.continue();
+      const response = await route.fetch();
+      expect(response.ok()).toBeTruthy();
+      committed(); await commandGate; await route.fulfill({ response });
+    });
     const jobId = `reconciled-${id}`;
     const running = { jobId, state: "running", phase: "rendering", completedWindows: 0,
       totalWindows: 1, progress: 0, cached: false };
@@ -3417,7 +3442,7 @@ test("stale background preparation reconciles without replacing successful edit 
       } else await route.fulfill({ status: 202, json: running });
     });
     await page.route(`**/preview-jobs/${jobId}`, async route => {
-      if (transport === "poll" && submitted.length === 1) {
+      if (transport !== "submission" && submitted.length === 1) {
         await gate;
         return route.fulfill({ json: { ...running, state: "cancelled",
           error: "preview superseded by a newer edit" } });
@@ -3435,7 +3460,8 @@ test("stale background preparation reconciles without replacing successful edit 
       await page.locator("#creative-domain-caption").click();
       await page.getByRole("button", { name: "删除字幕 caption-one", exact: true }).click();
       const feedback = page.locator(".statusbar__msg");
-      await expect(feedback).toHaveText("已删除字幕");
+      if (transport === "poll-before-ack") await stored;
+      else await expect(feedback).toHaveText("已删除字幕");
       const latest = await readProject(request, id);
       expect(latest.revision).not.toBe(submitted[0]);
       expect(latest.sequence.captions).toHaveLength(0);
@@ -3445,13 +3471,16 @@ test("stale background preparation reconciles without replacing successful edit 
       release();
       if (transport === "submission") await expect.poll(() => conflict).toBe(409);
       await expect.poll(() => submitted).toEqual([submitted[0], latest.revision]);
+      // The old job must reconcile while the command ACK is still withheld.
+      // No client snapshot/revision has been delivered by that command yet.
+      releaseCommand();
       await expect(feedback).toHaveText("已删除字幕");
       await expect(page.getByText("工程已更新，请重新加载", { exact: true })).toHaveCount(0);
       expect(await readProject(request, id)).toEqual(latest);
       renderFailure = transport === "submission" ? "failed" : "cancelled";
       await expect(feedback).toHaveText(transport === "submission"
         ? "current preview decoder failure" : "current preview cancellation");
-    } finally { release(); }
+    } finally { release(); releaseCommand(); }
   }
 });
 
@@ -3882,8 +3911,48 @@ test("text and freehand masks edit on canvas and persist through undo and reopen
   await page.getByRole("button", { name: "撤销" }).click();
   await expect.poll(async () => Number(((await maskParams()).points as Array<{ x: number }>)[0].x))
     .toBeCloseTo(firstPointX, 3);
-  await page.getByRole("button", { name: "重做" }).click();
-  await expect.poll(async () => (await maskParams()).points).toEqual(pointsAfterAnchorEdit);
+  // The API can commit redo before the editor receives its refreshed snapshot.
+  // Hold that snapshot to prove the distinction, then drag only the displayed revision.
+  const beforeAnchorRedo = await readProject(request, id);
+  await expect(overlay).toHaveAttribute("data-source-revision", beforeAnchorRedo.revision);
+  await expect.poll(() => firstAnchor.evaluate(node => {
+    const circle = node as SVGCircleElement;
+    return circle.cx.baseVal.value / circle.ownerSVGElement!.viewBox.baseVal.width;
+  })).toBeCloseTo(firstPointX, 6);
+  const redoneRevision = String(BigInt(beforeAnchorRedo.revision) + 1n);
+  let releaseAnchorRedo!: () => void;
+  const anchorRedoGate = new Promise<void>(resolve => { releaseAnchorRedo = resolve; });
+  let heldAnchorRedo = 0;
+  const anchorSyncPattern = `**/projects/${id}/sync?*`;
+  await page.route(anchorSyncPattern, async route => {
+    const response = await route.fetch();
+    const snapshot = await response.json();
+    if (!snapshot.unchanged && snapshot.revision === redoneRevision) {
+      heldAnchorRedo++;
+      await anchorRedoGate;
+    }
+    await route.fulfill({ response });
+  });
+  try {
+    await page.getByRole("button", { name: "重做" }).click();
+    await expect.poll(async () => (await maskParams()).points).toEqual(pointsAfterAnchorEdit);
+    await expect.poll(() => heldAnchorRedo).toBeGreaterThan(0);
+    await expect(overlay).toHaveAttribute("data-source-revision", beforeAnchorRedo.revision);
+    releaseAnchorRedo();
+    await expect(overlay).toHaveAttribute("data-source-revision", redoneRevision);
+    const restoredAnchor = (pointsAfterAnchorEdit as Array<{ x: number; y: number }>)[0];
+    for (const axis of ["x", "y"] as const) {
+      await expect.poll(() => firstAnchor.evaluate((node, coordinate) => {
+        const circle = node as SVGCircleElement;
+        const viewBox = circle.ownerSVGElement!.viewBox.baseVal;
+        return coordinate === "x" ? circle.cx.baseVal.value / viewBox.width
+          : circle.cy.baseVal.value / viewBox.height;
+      }, axis)).toBeCloseTo(restoredAnchor[axis], 6);
+    }
+  } finally {
+    releaseAnchorRedo();
+    await page.unrouteAll({ behavior: "wait" });
+  }
 
   const anchorBox = await firstAnchor.boundingBox();
   expect(anchorBox).toBeTruthy();
@@ -4765,7 +4834,7 @@ for (const prepared of [true, false]) {
     await page.locator('[data-clip-id="color-0"]').click();
     const meter = page.getByTestId("live-audio-meter"), volume = page.getByRole("slider", { name: "片段音量" });
     await expect(meter).toHaveAttribute("data-ready", "true");
-    const box = await volume.boundingBox(), baseline = (await readProject(request, id)).revision;
+    const baseline = (await readProject(request, id)).revision;
     const source = await video.getAttribute("src"), identity = await video.getAttribute("data-preview-identity");
     const lease = prepared ? source!.replace(/\/media$/, "/keepalive") : "";
     const leases = keepalives.filter(url => url.endsWith(lease)).length;
@@ -4777,9 +4846,21 @@ for (const prepared of [true, false]) {
       w.gainVoice.addEventListener("pause", () => w.gainPauses++);
       return { source: w.gainVoice.src, time: w.gainVoice.currentTime };
     });
+    // Playback/focus can scroll the inspector after its initial layout. Model
+    // that ordering explicitly and measure the actual hit target just before
+    // dragging, rather than using pre-playback coordinates.
+    await volume.scrollIntoViewIfNeeded();
+    const beforeScroll = await volume.boundingBox();
+    expect(beforeScroll).toBeTruthy();
+    await page.locator('.zone-right__scroll').evaluate(element => { element.scrollTop += 24; });
+    await expect.poll(async () => (await volume.boundingBox())?.y).not.toBe(beforeScroll!.y);
+    await volume.hover();
+    const box = await volume.boundingBox();
+    expect(box).toBeTruthy();
     await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
     await page.mouse.down();
     await page.mouse.move(box!.x + 1, box!.y + box!.height / 2, { steps: 3 });
+    await expect(volume).toHaveValue('0');
     await expect.poll(async () => Number(await meter.getAttribute("data-rms"))).toBeLessThan(.001);
     if (prepared) await page.waitForTimeout(600); // Held gain must not auto-save.
     else {

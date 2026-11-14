@@ -48,16 +48,19 @@ For parameter changes or local frame windows, also read
 save the effective request/key, use an independently trusted external renderer
 on a miss, and use returned `mediaSourceStart` on a covering cache hit. Source
 execution is disabled. Keep native titles/audio editable; preview an atomic
-split/trim/swap batch for a local repair. Source archives and the cache index
-remain outside `.cvkpkg`. See [request/cache details](../../docs/user/generated-render.md).
+split/trim/swap batch for a local repair. Referenced source archives travel inside `.cvkpkg`; the cache index
+remains outside it. Use `generated_source` to inspect or explicitly restore
+inputs into a new directory without executing them. See [request/cache details](../../docs/user/generated-render.md).
 `generated_media` statically inspects/imports a hashed source/output manifest;
 it never executes code or edits the timeline. Use the returned ordinary asset
 with `clip.insert` or explicit `asset.swap` targets. Preserve native text/audio
-where useful and deliver its separate source ZIP alongside the editable package;
-`project_package` does not include that source ZIP. See the
+where useful. `project_package` includes verified source ZIPs for media referenced
+by the edit; unused imports and undeclared dependencies are excluded. See the
 [bridge example](../../examples/generated-media/README.md).
 
-Acquire `edit_lock` before grouped Agent edits. Use `command_preview` where supported, then the same payload with `command_apply`, current `expectedRevision`, stable `commandId` and `editLeaseId`. Use supported `edit.batch` operations within its current limit. Keep returned revisions, renew leases as needed and release in a finally step, including before long export or human takeover. After errors follow `error.recovery`; retry a lost response with identical arguments and ID, reconcile conflicts before a new edit.
+For visual changes, use `preview_compare` with the same preview-supported command and current revision before committing. Request 1–3 timestamps that exist in both timelines; inspect each before/after pair and its zero-based imageIndex (image blocks only). This writes preview cache files, not project/history. Same timestamps do not mean the same source moment after ripple cuts; it does not audition audio. Re-read and reconcile if the revision changes before applying.
+
+Acquire `edit_lock` before grouped Agent edits. Use `command_preview` where supported, then the same payload with `command_apply`, current `expectedRevision`, stable `commandId` and `editLeaseId`. Use supported `edit.batch` operations within its current limit. Keep returned revisions, renew leases as needed and release in a finally step, including before long export or human takeover. After errors follow `error.recovery`; retry a lost response with identical arguments and ID, reconcile conflicts before a new edit. On `EDIT_LEASE_INVALID`, stop the stale plan, read the latest project, and wait for a new human handoff before acquiring a fresh lease. Never renew/reuse the old token or automatically reclaim editing after human takeover.
 
 Use exact rational timeline seconds; keyframe time is clip-local. For a local correction use `project_lookup` with `requireUnique=true` and proceed only when `matchCount=1` identifies the intended entity. Multiple text matches require a time filter or an explicit choice of `entityId`; never pick the first hit or use `limit=1` to bypass ambiguity. Zero matches returns an empty list: stop and clarify. Change only the requested entities. Keep normal undo points. Avoid settings changes, restarts, flattened timelines, duplicate jobs and unbounded heavy work that disrupts the user. Do not reduce final quality for speed without authorization. Read [efficiency.md](references/efficiency.md) when iteration cost matters.
 
@@ -65,7 +68,7 @@ Use exact rational timeline seconds; keyframe time is clip-local. For a local co
 
 Read [review.md](references/review.md) before claiming completion. Match review to the request: changed range and affected neighbors for local fixes; technical and applicable creative checks across a complete delivery. Verify actual returned images and continuous output/sound where supported. Preparing a preview is not watching it; disclose unavailable vision/listening without claiming perceptual acceptance.
 
-When a media export is part of the request, run `project.preflight`, then `export.enqueue` with a project-local output path; retain job ID and exported revision and poll `export_job` with a bounded timeout. Inspect the final MP4. An edit-only correction can finish with the committed revision and affected review evidence, without re-exporting the film. Use `project_package` with a project-local path when a portable editable handoff is requested; an editable source project alone does not imply a new portable package. Return applicable output paths, project ID/revision/root, concrete changes, review evidence/limits and reusable-effect collection status.
+When a media export is part of the request, run `project.preflight`, then `export.enqueue` with a project-local output path; retain job ID and exported revision and poll `export_job` with a bounded timeout, waiting its `pollAfterSeconds` between calls while queued/running. A null hint means terminal: stop polling and inspect the result or error. Inspect the final MP4. An edit-only correction can finish with the committed revision and affected review evidence, without re-exporting the film. Use `project_package` with a project-local path when a portable editable handoff is requested; an editable source project alone does not imply a new portable package. Return applicable output paths, project ID/revision/root, concrete changes, review evidence/limits and reusable-effect collection status.
 
 Keep completion states distinct: an authorized mechanical edit can be completed with sensory review pending. Label that gap explicitly; do not call it visually, musically or artistically accepted. The lack of sensory input does not by itself block unrelated mechanical work.
 

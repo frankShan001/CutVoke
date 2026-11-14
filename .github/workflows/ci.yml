@@ -40,12 +40,11 @@ jobs:
           cache: npm
           cache-dependency-path: apps/editor/package-lock.json
 
-      - name: Select official Ubuntu archive mirror
-        # Hosted Azure downloads stalled at about 26-43kB/s. Keep Ubuntu's
-        # signed package indexes and suites; change only the mirror endpoint.
+      - name: Inspect runner-provided Ubuntu mirrors
+        # Preserve the hosted image's official mirror ordering and fallback.
+        # Rewriting Azure to archive duplicated a host and prolonged DNS failures.
         run: |
           if [ -f /etc/apt/apt-mirrors.txt ]; then
-            sudo sed -i 's|https\?://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
             cat /etc/apt/apt-mirrors.txt
           fi
 
@@ -82,11 +81,14 @@ jobs:
           python -m build --sdist --wheel --outdir dist
           python tools/verify/verify_distribution.py dist
           python -m pip install --force-reinstall --no-deps dist/*.whl
+          python tools/verify/verify_packaged_caption_fonts.py --require-installed
           cutvoke doctor --json
           python -c "from pathlib import Path; import cutvoke; assert (Path(cutvoke.__file__).parent / 'web' / 'index.html').is_file()"
 
   browser:
     name: Browser editing workflow
+    env:
+      CUTVOKE_E2E_PREVIEW_DIAGNOSTICS: "1"
     runs-on: ubuntu-24.04
     # Successful complete jobs took 19-30min; bound stalled hosted installs.
     timeout-minutes: 60
@@ -109,12 +111,14 @@ jobs:
         run: |
           npm ci --ignore-scripts
           npm run test:build-deps
-      - name: Select official Ubuntu archive mirror
+      - name: Inspect runner-provided Ubuntu mirrors
+        # Preserve the hosted image's official mirror ordering and fallback.
+        # Rewriting Azure to archive duplicated a host and prolonged DNS failures.
         run: |
           if [ -f /etc/apt/apt-mirrors.txt ]; then
-            sudo sed -i 's|https\?://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
             cat /etc/apt/apt-mirrors.txt
           fi
+
       # Keep installation phases separate so live job metadata identifies a
       # stalled apt index, FFmpeg package, pip resolver, or browser download.
       - name: Refresh Ubuntu package indexes
@@ -131,6 +135,12 @@ jobs:
           python -VV
           python -m pip --version
           python -m pip install -e ".[dev]"
+      - name: Generate and verify packaged caption resources for browser scenarios
+        timeout-minutes: 5
+        run: |
+          python -m pip install fontTools==4.66.1
+          python tools/build/prepare_caption_fonts.py
+          python tools/verify/verify_packaged_caption_fonts.py
       - name: Install browser and check editor helpers
         timeout-minutes: 15
         working-directory: apps/editor
@@ -141,20 +151,47 @@ jobs:
           npm run test:preview-cache
           npm run test:basic
           npx playwright install --with-deps chromium
+      - name: Verify opt-in Quick Whip in the editor
+        timeout-minutes: 5
+        working-directory: apps/editor
+        env:
+          CUTVOKE_E2E_PORT: "8801"
+        run: npm run build && npx playwright test --config playwright.quick-whip.config.ts
+      - name: Preserve Quick Whip UI evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: quick-whip-ui-evidence
+          path: .artifacts/quick-whip-ui/
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Run full editor scenarios
+        id: editor_scenarios
         timeout-minutes: 40
         working-directory: apps/editor
-        run: npm run test:e2e
+        run: npm run test:e2e -- --output=../../.artifacts/test-results/full
       - name: Repeat deterministic state orderings
+        # Complete independent regressions after a scenario failure. Keep each
+        # output directory separate so a later run cannot erase earlier traces.
+        if: ${{ !cancelled() && (steps.editor_scenarios.outcome == 'success' || steps.editor_scenarios.outcome == 'failure') }}
         # Give each existing regression group its own step budget. Their
         # combined hosted duration can exceed 15min even when all tests pass.
         timeout-minutes: 15
         working-directory: apps/editor
-        run: npm run test:e2e:regressions:state
+        run: npm run test:e2e:regressions:state -- --output=../../.artifacts/test-results/state
       - name: Repeat preview recovery and transcript orderings
+        if: ${{ !cancelled() && (steps.editor_scenarios.outcome == 'success' || steps.editor_scenarios.outcome == 'failure') }}
         timeout-minutes: 15
         working-directory: apps/editor
-        run: npm run test:e2e:regressions:recovery
+        run: npm run test:e2e:regressions:recovery -- --output=../../.artifacts/test-results/recovery
+      - name: Preserve bounded preview stage diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: preview-stage-diagnostics
+          path: .artifacts/preview-diagnostics/*.jsonl
+          retention-days: 7
+          if-no-files-found: ignore
       - name: Preserve browser failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v7

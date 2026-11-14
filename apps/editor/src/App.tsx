@@ -15,6 +15,7 @@ import { ErrorModal } from "./components/ErrorModal";
 import { HomeView } from "./components/HomeView";
 import { TemplateGallery } from "./components/TemplateGallery";
 import { ExportDialog } from "./components/ExportDialog";
+import { EditLeaseNotice } from "./components/EditLeaseNotice";
 import { AgentActivityPanel } from "./components/AgentActivityPanel";
 import { QuickApply } from "./components/QuickApply";
 import { CompositionNavigator } from "./components/CompositionNavigator";
@@ -275,15 +276,8 @@ function AppShell() {
       {state.exportOpen ? <ExportDialog /> : null}
       {state.templateOpen ? <TemplateGallery /> : null}
       <AgentActivityPanel />
-      {state.editLock ? (
-        <div className="agent-edit-lock" role="status" aria-live="polite">
-          <div className="agent-edit-lock__card">
-            <strong>{tr("Agent 正在编辑")}</strong>
-            <span>{state.editLock.owner}{tr(" · 页面暂时只读")}</span>
-            <small>{tr("工程内容会继续更新，Agent 完成后页面将自动恢复编辑。")}</small>
-          </div>
-        </div>
-      ) : null}
+      {state.editLock && state.currentId ? <EditLeaseNotice key={`${state.currentId}:${state.editLock.leaseId}:${state.editLock.owner}`}
+        projectId={state.currentId} lease={state.editLock} /> : null}
     </div>
     {state.opening ? <ProjectLoading preparation={preparation} /> : null}
     </>

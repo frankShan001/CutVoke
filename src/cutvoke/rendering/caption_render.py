@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import os
 import hashlib
+import json
 import re
 import shutil
 import struct
@@ -202,6 +203,39 @@ def _font_source_digest(path: str, modified_ns: int, byte_size: int) -> str:
     return digest.hexdigest()
 
 
+def _packaged_caption_font(source: str, digest: str, weight: int, alias: str) -> Optional[bytes]:
+    """Optional verified complete instance; never substitute custom fonts."""
+    if os.environ.get("CUTVOKE_FONT"):
+        return None
+    if Path(source).resolve() != (Path(_PACKAGE_FONTS_DIR) / "NotoSansSC-VF.ttf").resolve():
+        return None
+    directory = Path(_PACKAGE_FONTS_DIR).parent / "caption_fonts"
+    try:
+        from fontTools.ttLib import TTFont
+        import io
+        manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+        if manifest["recipe"] != 1 or manifest["source_sha256"] != digest:
+            return None
+        if hashlib.sha256((directory / "OFL-Sans.txt").read_bytes()).hexdigest() != manifest["license_sha256"]:
+            return None
+        entry = manifest["instances"][str(weight)]
+        # Do not accept paths supplied by a malformed manifest.
+        filename = f"sans-{weight}-v1.ttf"
+        if entry["filename"] != filename:
+            return None
+        data = (directory / filename).read_bytes()
+        if hashlib.sha256(data).hexdigest() != entry["sha256"]:
+            return None
+        with TTFont(io.BytesIO(data), lazy=True) as font:
+            if ("fvar" in font or font["name"].getDebugName(1) != alias
+                    or font["OS/2"].usWeightClass != weight):
+                return None
+        return data
+    except Exception:
+        # These assets are only an optimization; retain the original conversion.
+        return None
+
+
 def _caption_font_instance(family: str, bold: bool) -> tuple[str, str]:
     """Return an atomic cached 400/700 instance for the browser caption lane.
 
@@ -222,16 +256,44 @@ def _caption_font_instance(family: str, bold: bool) -> tuple[str, str]:
              if os.environ.get("CUTVOKE_FONT_CACHE")
              else Path(tempfile.gettempdir()) / "cutvoke-caption-fonts")
     cache.mkdir(parents=True, exist_ok=True)
-    target = cache / f"{digest}-{weight}-v1.ttf"
+    packaged = _packaged_caption_font(source, digest, weight, alias)
+    # FontTools versions can alter BASE/GPOS/GSUB even for the same source.
+    # Bind packaged caches to the verified output bytes, not just source/weight.
+    suffix = f"v2-{hashlib.sha256(packaged).hexdigest()}" if packaged is not None else "v1"
+    target = cache / f"{digest}-{weight}-{suffix}.ttf"
     temporary: Optional[str] = None
     with _CAPTION_FONT_LOCK:
         try:
             if target.is_file():
-                with TTFont(target, lazy=True) as cached:
-                    if "fvar" in cached or cached["name"].getDebugName(1) != alias:
-                        raise ValueError("invalid cached caption font")
-                _css_font_size_to_ass(32, family, str(target))
-                return alias, str(target)
+                try:
+                    if packaged is not None and hashlib.sha256(target.read_bytes()).digest() != hashlib.sha256(packaged).digest():
+                        raise ValueError("cached packaged font content mismatch")
+                    with TTFont(target, lazy=True) as cached:
+                        if "fvar" in cached or cached["name"].getDebugName(1) != alias:
+                            raise ValueError("invalid cached caption font")
+                    _css_font_size_to_ass(32, family, str(target))
+                    return alias, str(target)
+                except Exception:
+                    if packaged is None:
+                        raise
+                    # Keep the existing file until verified bytes replace it
+                    # atomically below. Hash checks detect corruption, not a
+                    # maliciously modified application/resource installation.
+            if packaged is not None:
+                fd, temporary = tempfile.mkstemp(prefix=".caption-", suffix=".ttf", dir=cache)
+                with os.fdopen(fd, "wb") as stream:
+                    stream.write(packaged)
+                try:
+                    _css_font_size_to_ass(32, family, temporary)
+                except Exception:
+                    os.remove(temporary)
+                    temporary = None
+                    target = cache / f"{digest}-{weight}-v1.ttf"
+                    # Optional asset failed semantic validation: use the source.
+                else:
+                    os.replace(temporary, target)
+                    temporary = None
+                    return alias, str(target)
             with TTFont(source, fontNumber=0) as font:
                 variable = "fvar" in font
                 if variable:
@@ -241,7 +303,7 @@ def _caption_font_instance(family: str, bold: bool) -> tuple[str, str]:
                     if weight_axis is None or not weight_axis.minValue <= weight <= weight_axis.maxValue:
                         raise ValueError(f"font does not support weight {weight}")
                     axes["wght"] = weight
-                    instantiateVariableFont(font, axes, inplace=True, optimize=False, static=True)
+                    instantiateVariableFont(font, axes, inplace=True, optimize=False)
                     if "fvar" in font:
                         raise ValueError("font instance is still variable")
                     font["OS/2"].usWeightClass = weight

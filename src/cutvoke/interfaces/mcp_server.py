@@ -619,8 +619,9 @@ class MCPServer:
             arguments = params.get("arguments", {})
             result = self.call_tool(params.get("name", ""), arguments)
             images = result.pop("_images", [])
+            audio = result.pop("_audio", [])
             return {"jsonrpc": "2.0", "id": rid, "result": {
-                "content": [{"type": "text", "text": json.dumps(result, ensure_ascii=False)}, *images],
+                "content": [{"type": "text", "text": json.dumps(result, ensure_ascii=False)}, *images, *audio],
                 "isError": not result.get("ok", False),
             }}
         if method == "ping":

@@ -19,7 +19,7 @@ import numpy as np
 from PIL import Image, __version__ as pillow_version
 
 from demo import MCP, run, score
-from generated_media_demo import rat, write_json, digest
+from generated_media_demo import rat, write_json, digest, verify_source_handoff
 from cutvoke.storage.project_directory import ProjectLibraryStore
 from cutvoke.storage.projectpack import unpack_project
 
@@ -218,6 +218,7 @@ def main():
         assert rms(samples[:4800]) < middle * .2 and rms(samples[-4800:]) < middle * .2
         package = mcp.call("project_package", projectId="cache-demo", expectedRevision=revision, outPath="editable.cvkpkg")
         restored, _, _ = unpack_project(package["path"], str(project / "package-check"))
+        source_handoff = verify_source_handoff(mcp, "cache-demo", project, project / "package-check")
         assert restored.sequence.tracks[2].clips[0].effects[0]["params"]["content"] == "CODE + EDITABLE TIMELINE"
         assert sum(len(track.clips) for track in restored.sequence.tracks) == 8
         result = {"output": str(video), "projectPackage": package["path"], "runtime": runtime,
@@ -230,7 +231,7 @@ def main():
                       "absoluteRawFrameHashesEqualFullSlice": True, "atomicLocalRepairUndoRedo": True,
                       "unchangedOutsideRepairPixels": True, "repairedPixels": True, "alphaCompositeCorner": True,
                       "expiredShotClearedBehindAlpha": True,
-                      "nativeTitlePreserved": True, "audioNonSilentUnclippedFades": True, "fullDecode216Frames": True, "packageRoundtrip": True},
+                      "nativeTitlePreserved": True, "audioNonSilentUnclippedFades": True, "fullDecode216Frames": True, "packageRoundtrip": True, "sourceHandoff": source_handoff},
                   "unassessed": ["continuous visual playback", "subjective listening", "artistic quality", "hostile renderer isolation", "cross-machine reproducibility"]}
         write_json(evidence / "result.json", result)
         print(json.dumps({"video": str(video), "evidence": str(evidence / "result.json"), "benchmark": result["benchmark"]}))
