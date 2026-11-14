@@ -63,6 +63,8 @@ def _run_silencedetect(path: str, min_silence: float,
                            timeout=_FFMPEG_TIMEOUT)
     except subprocess.TimeoutExpired as e:
         raise RuntimeError(f"silencedetect timeout on {path}") from e
+    if r.returncode != 0:
+        raise RuntimeError(f"silencedetect failed (ffmpeg exit code {r.returncode})")
     out = r.stderr
 
     starts: list[float] = []
