@@ -98,21 +98,42 @@ test('Chinese word selection locates exact timing and ordinary caption editing n
 });
 
 for (const delayedFrames of [false, true]) {
-test(`transcript audition stops actual video and native audio at the selected word boundary${delayedFrames ? ' with delayed animation frames' : ''}`, async ({ page, request }) => {
+test(`transcript audition stops actual video and native audio at the selected word boundary${delayedFrames ? ' with delayed animation frames' : ''}`, async ({ page, request }, testInfo) => {
+  try {
   await page.addInitScript(() => {
     const captured: HTMLAudioElement[] = []; (window as any).__transcriptAudio = captured;
+    // Bounded numeric/event-only evidence: never record source URLs or project paths.
+    const began = performance.now();
+    const events: object[] = []; let dropped = 0;
+    const record = (kind: string, value: object) => {
+      // Keep the initial startup evidence even if transport ticks flood the tail.
+      if (events.length === 240) { events.splice(120, 1); dropped++; }
+      events.push({ ms: performance.now() - began, kind, ...value });
+    };
+    (window as any).__auditionEvidence = () => ({ events, dropped });
     const Original = window.Audio;
     (window as any).__nativePauseTimes = [];
     (window as any).__nativePlayTimes = [];
     window.Audio = new Proxy(Original, { construct(target, args) {
       const audio = Reflect.construct(target, args) as HTMLAudioElement;
+      const voice = captured.length;
+      const state = () => ({ voice, time: audio.currentTime, paused: audio.paused,
+        muted: audio.muted, seeking: audio.seeking, readyState: audio.readyState,
+        networkState: audio.networkState, errorCode: audio.error?.code ?? null });
+      for (const kind of ['play', 'playing', 'pause', 'seeking', 'seeked', 'waiting', 'stalled', 'timeupdate', 'ended', 'error', 'loadeddata', 'canplay']) {
+        audio.addEventListener(kind, () => record(kind, state()));
+      }
       const pause = audio.pause.bind(audio), play = audio.play.bind(audio);
-      audio.play = () => { (window as any).__nativePlayTimes.push(audio.currentTime); return play(); };
-      audio.pause = () => { if (!audio.paused) (window as any).__nativePauseTimes.push(audio.currentTime); pause(); };
+      audio.play = () => { record('play-call', state()); (window as any).__nativePlayTimes.push(audio.currentTime); return play(); };
+      audio.pause = () => { record('pause-call', state()); if (!audio.paused) (window as any).__nativePauseTimes.push(audio.currentTime); pause(); };
       captured.push(audio); return audio;
     } });
     (window as any).__transport = [];
-    window.addEventListener('cutvoke:transport-clock', event => (window as any).__transport.push((event as CustomEvent).detail));
+    window.addEventListener('cutvoke:transport-clock', event => {
+      const detail = (event as CustomEvent).detail;
+      (window as any).__transport.push(detail);
+      record('transport', { time: detail.time, playing: detail.playing });
+    });
   });
   const id = await fixture(request); const panel = await open(page, id);
   await expect(page.getByTestId('live-audio-meter')).toHaveAttribute('data-ready', 'true', { timeout: 20_000 });
@@ -159,6 +180,24 @@ test(`transcript audition stops actual video and native audio at the selected wo
   await expect(page.locator('.player__play')).toHaveAttribute('aria-label', '播放');
   await expect(page.locator('.statusbar__msg')).toHaveText('已暂停');
   await expect.poll(() => page.evaluate(() => (window as any).__transcriptAudio.every((audio: HTMLAudioElement) => audio.paused))).toBe(true);
+  } catch (error) {
+    // Diagnostics must not replace the original failure, even if the page crashed.
+    try {
+      const evidence = await page.evaluate(() => ({
+        ...((window as any).__auditionEvidence?.() ?? {}),
+        voices: ((window as any).__transcriptAudio ?? []).slice(0, 16).map((audio: HTMLAudioElement, voice: number) => ({
+          voice, time: audio.currentTime, paused: audio.paused, muted: audio.muted,
+          seeking: audio.seeking, readyState: audio.readyState, errorCode: audio.error?.code ?? null,
+        })),
+        nativeStarts: ((window as any).__nativePlayTimes ?? []).slice(-80),
+        nativePauses: ((window as any).__nativePauseTimes ?? []).slice(-80),
+      }));
+      await testInfo.attach('audition-media-timeline', {
+        body: JSON.stringify({ delayedFrames, ...evidence }, null, 2), contentType: 'application/json',
+      });
+    } catch { /* Preserve the original assertion/page failure. */ }
+    throw error;
+  }
 });
 
 }

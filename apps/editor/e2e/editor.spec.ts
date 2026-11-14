@@ -3342,7 +3342,7 @@ test("speed curve can be edited, undone, reopened, and exported from the Web edi
   unlinkSync(outputPath);
 });
 
-test("attached overlays follow video moves, Alt keeps them in place, and unlinking persists", async ({ page, request }) => {
+test("attached overlays follow video moves, Alt keeps them in place, and unlinking persists", async ({ page, request }, testInfo) => {
   const fixture = await readProject(request, "e2e-fixture");
   const sourcePath = fixture.sequence.tracks[0].clips[0].assetRef.sourcePath;
   const id = `attached-move-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -3396,10 +3396,44 @@ test("attached overlays follow video moves, Alt keeps them in place, and unlinki
     if (holdAlt) await page.keyboard.up("Alt");
   };
 
+  // Observe only this synthetic scenario's status categories; never collect
+  // arbitrary status text (which can contain paths) or change product timing.
+  await page.evaluate(() => {
+    const node = document.querySelector(".statusbar__msg");
+    if (!node) throw new Error("Status bar missing before attachment move");
+    const events: { at: number; status: string }[] = [];
+    const started = performance.now();
+    const capture = () => {
+      const text = node.textContent || "";
+      const status = text === "已移动片段，1 个关联片段同步移动" ? "attached-move-success"
+        : text === "就绪" ? "ready"
+        : text === "连续预览失败，已切换到单帧预览" ? "preview-fallback"
+        : "other";
+      if (events.length < 80) events.push({ at: performance.now() - started, status });
+    };
+    const observer = new MutationObserver(capture);
+    observer.observe(node, { childList: true, characterData: true, subtree: true });
+    capture();
+    (window as any).__attachmentStatusDiagnostics = { events, observer };
+  });
   // A two-second clip shifted by half its width moves exactly one second.
-  await moveBy(0.5);
-  await expect.poll(readPositions).toEqual({ video: 1, sticker: 1.5, attachedTo: "parent-video" });
-  await expect(page.getByText("已移动片段，1 个关联片段同步移动")).toBeVisible();
+  try {
+    await moveBy(0.5);
+    await expect.poll(readPositions).toEqual({ video: 1, sticker: 1.5, attachedTo: "parent-video" });
+    await expect(page.getByText("已移动片段，1 个关联片段同步移动")).toBeVisible();
+  } finally {
+    const events = await page.evaluate(() => {
+      const record = (window as any).__attachmentStatusDiagnostics;
+      record?.observer.disconnect();
+      delete (window as any).__attachmentStatusDiagnostics;
+      return record?.events || [];
+    }).catch(() => []);
+    try {
+      await testInfo.attach("attachment-status-ordering", {
+        body: JSON.stringify(events), contentType: "application/json",
+      });
+    } catch { /* Diagnostic attachment must not replace the original assertion. */ }
+  }
   await page.getByRole("button", { name: "撤销" }).click();
   await expect.poll(readPositions).toEqual({ video: 0, sticker: 0.5, attachedTo: "parent-video" });
   await page.getByRole("button", { name: "重做" }).click();
