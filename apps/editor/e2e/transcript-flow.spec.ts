@@ -105,12 +105,20 @@ test(`transcript audition stops actual video and native audio at the selected wo
     // Bounded numeric/event-only evidence: never record source URLs or project paths.
     const began = performance.now();
     const events: object[] = []; let dropped = 0;
+    const critical: object[] = []; let criticalDropped = 0;
     const record = (kind: string, value: object) => {
       // Keep the initial startup evidence even if transport ticks flood the tail.
       if (events.length === 240) { events.splice(120, 1); dropped++; }
-      events.push({ ms: performance.now() - began, kind, ...value });
+      const sample = { ms: performance.now() - began, kind, ...value };
+      events.push(sample);
+      // Keep actual media transitions separate from per-frame transport/pause noise.
+      if (kind !== 'transport' && kind !== 'timeupdate' &&
+          (kind !== 'pause-call' || (value as { paused?: boolean }).paused === false)) {
+        if (critical.length === 160) { critical.splice(80, 1); criticalDropped++; }
+        critical.push(sample);
+      }
     };
-    (window as any).__auditionEvidence = () => ({ events, dropped });
+    (window as any).__auditionEvidence = () => ({ events, dropped, critical, criticalDropped });
     const Original = window.Audio;
     (window as any).__nativePauseTimes = [];
     (window as any).__nativePlayTimes = [];
@@ -364,7 +372,8 @@ test('obsolete transcript trial cannot block or clear a newer trial after sequen
   await expect(confirmButton(page)).toBeVisible();
 });
 
-test('a user keyboard seek within an audition cancels native audio before its boundary', async ({ page, request }) => {
+test('a user keyboard seek within an audition cancels native audio before its boundary', async ({ page, request }, testInfo) => {
+  try {
   await page.addInitScript(() => {
     const elements: HTMLAudioElement[] = []; (window as any).__transcriptAudio = elements;
     window.Audio = new Proxy(window.Audio, { construct(target, args) { const audio = Reflect.construct(target, args); elements.push(audio); return audio; } });
@@ -374,10 +383,16 @@ test('a user keyboard seek within an audition cancels native audio before its bo
   const id = await fixture(request); const panel = await open(page, id);
   await expect(page.getByTestId('live-audio-meter')).toHaveAttribute('data-ready', 'true', { timeout: 20_000 });
   await page.evaluate(() => {
+    const samples: object[] = []; let dropped = 0;
+    (window as any).__keyboardEvidence = () => ({ samples, dropped });
     (window as any).__keyboardSeek = new Promise<number>(resolve => {
       const seekWhileRunning = (event: Event) => {
         const sample = (event as CustomEvent).detail;
         const audio = (window as any).__transcriptAudio as HTMLAudioElement[];
+        if (samples.length === 160) { samples.splice(80, 1); dropped++; }
+        samples.push({ time: sample.time, playing: sample.playing,
+          rulerTime: Number(document.querySelector('.timeline-ruler')?.getAttribute('aria-valuenow')),
+          voices: audio.slice(0, 16).map(element => ({ time: element.currentTime, paused: element.paused, readyState: element.readyState })) });
         if (!sample.playing || sample.time < 1.1 || sample.time >= 1.8 || !audio.some(element => !element.paused)) return;
         const ruler = document.querySelector<HTMLElement>('.timeline-ruler')!;
         const before = Number(ruler.getAttribute('aria-valuenow'));
@@ -398,6 +413,13 @@ test('a user keyboard seek within an audition cancels native audio before its bo
   await expect(page.locator('.player__play')).toHaveAttribute('aria-label', '播放');
   await expect.poll(() => page.evaluate(() => (window as any).__transport.at(-1)?.time)).toBeCloseTo(expected, 4);
   await expect.poll(() => page.evaluate(() => (window as any).__transcriptAudio.every((audio: HTMLAudioElement) => audio.paused))).toBe(true);
+  } catch (error) {
+    try {
+      const evidence = await page.evaluate(() => (window as any).__keyboardEvidence?.());
+      await testInfo.attach('audition-keyboard-timeline', { body: JSON.stringify(evidence), contentType: 'application/json' });
+    } catch { /* Keep the original failure when the page cannot respond. */ }
+    throw error;
+  }
 });
 
 for (const cancellation of ['pause', 'seek'] as const) {
