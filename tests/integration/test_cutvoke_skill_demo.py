@@ -14,6 +14,82 @@ spec.loader.exec_module(demo)
 
 
 class DemoBoundaries(unittest.TestCase):
+    def test_imports_belong_to_created_project_in_both_modes(self):
+        class StopBeforeEdit(RuntimeError):
+            pass
+
+        for mode in ("mcp", "upload"):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as directory:
+                output = Path(directory) / "new"
+                calls = []
+                assets = [{"assetId": f"asset-{i}", "available": True} for i in range(4)]
+                client = MagicMock()
+                def call(tool_name, **arguments):
+                    calls.append((tool_name, arguments))
+                    if tool_name == "project_list":
+                        return {"projects": []}
+                    if tool_name == "create_project":
+                        return {"revision": 0}
+                    if tool_name == "project_directory":
+                        return {"exportDirectory": str(output / "project/exports"),
+                                "backupDirectory": str(output / "project/backups")}
+                    if tool_name == "media_import":
+                        self.assertTrue(any(n == "create_project" for n, _ in calls))
+                        self.assertEqual(arguments["projectId"], "trail-notes")
+                        return {"assets": assets}
+                    if tool_name == "edit_lock":
+                        return {"lease": {"leaseId": "test-lease"}}
+                    if tool_name == "command_preview":
+                        raise StopBeforeEdit()
+                    return {}
+                client.call.side_effect = call
+                client.rpc.return_value = {"tools": []}
+                upload = MagicMock()
+                upload.request.return_value = {"assets": assets}
+                def import_files(paths, project_id):
+                    self.assertTrue(any(n == "create_project" for n, _ in calls))
+                    self.assertEqual(project_id, "trail-notes")
+                    return assets
+                upload.import_files.side_effect = import_files
+                with patch.object(demo.sys, "argv", ["demo", "--output", str(output), "--import-mode", mode]), \
+                     patch.object(demo.shutil, "which", return_value="ffmpeg"), \
+                     patch.object(demo, "png"), patch.object(demo, "score"), \
+                     patch.object(demo, "MCP", return_value=client), \
+                     patch.object(demo, "WebUploads", return_value=upload):
+                    with self.assertRaises(StopBeforeEdit):
+                        demo.main()
+                upload.request.assert_called_once_with("/api/v1/assets?projectId=trail-notes")
+                self.assertEqual(sum(n == "create_project" for n, _ in calls), 1)
+                self.assertEqual(sum(n == "media_import" for n, _ in calls), mode == "mcp")
+                client.close.assert_called_once_with(output)
+                upload.close.assert_called_once()
+
+    def test_project_outputs_use_independent_roots_and_legacy_fallback(self):
+        output = Path("fresh-demo")
+        client = MagicMock()
+        client.call.return_value = {"exportDirectory": str(output / "project/exports"),
+                                    "backupDirectory": str(output / "project/backups")}
+        video, package = demo.project_outputs(client, "trail-notes", output)
+        self.assertEqual(video.relative_to(output).as_posix(), "project/exports/trail-notes.mp4")
+        self.assertEqual(package.relative_to(output).as_posix(), "project/backups/trail-notes.cvkpkg")
+        client.call.assert_called_once_with("project_directory", projectId="trail-notes")
+        client.call.return_value = {"storageKind": "legacy", "directory": None}
+        self.assertEqual(demo.project_outputs(client, "legacy", output),
+                         (output / "trail-notes.mp4", output / "trail-notes.cvkpkg"))
+
+    def test_uploads_include_project_for_write_and_read(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "original.png"
+            path.write_bytes(b"synthetic")
+            upload = demo.WebUploads.__new__(demo.WebUploads)
+            asset = {"assetId": "one", "available": True}
+            upload.request = MagicMock(side_effect=[{"assetId": "one"}, {"assets": [asset]}])
+            self.assertEqual(upload.import_files([path], "project with space"), [asset])
+            self.assertEqual(upload.request.call_args_list[0].args,
+                ("/api/v1/assets?name=original.png&projectId=project+with+space", b"synthetic"))
+            self.assertEqual(upload.request.call_args_list[1].args,
+                ("/api/v1/assets?projectId=project+with+space",))
+
     def test_existing_output_is_preserved(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)
@@ -85,6 +161,50 @@ class DemoBoundaries(unittest.TestCase):
             self.assertTrue((output / "calls.json").is_file())
             process.wait.assert_called()
 
+
+
+
+class MCPNotificationBoundaries(unittest.TestCase):
+    def client(self, messages):
+        import queue, json
+        client = demo.MCP.__new__(demo.MCP)
+        client.serial = 0
+        client.process = MagicMock()
+        client.responses = queue.Queue()
+        for message in messages:
+            client.responses.put(json.dumps(message))
+        return client
+
+    def test_reload_notifications_do_not_replace_matching_response(self):
+        client = self.client([
+            {"jsonrpc": "2.0", "method": "notifications/tools/list_changed"},
+            {"jsonrpc": "2.0", "method": "notifications/resources/list_changed"},
+            {"jsonrpc": "2.0", "id": 1, "result": {"ok": True}},
+        ])
+        self.assertEqual(client.rpc("tools/list", {}), {"ok": True})
+
+    def test_wrong_id_and_error_are_not_silently_accepted(self):
+        for response in [
+            {"jsonrpc": "2.0", "id": 2, "result": {}},
+            {"jsonrpc": "2.0", "id": 1, "error": {"code": -1}},
+            {"jsonrpc": "2.0", "id": 1},
+        ]:
+            with self.subTest(response=response), self.assertRaises(RuntimeError):
+                self.client([response]).rpc("tools/list", {})
+
+    def test_empty_queue_timeout_has_explicit_error(self):
+        client = self.client([])
+        with patch.object(client.responses, "get", side_effect=demo.queue.Empty) as get, \
+             patch.object(demo.time, "monotonic", side_effect=[0, 1]):
+            with self.assertRaisesRegex(TimeoutError, "MCP response timed out"):
+                client.rpc("tools/list", {})
+        get.assert_called_once_with(timeout=179)
+
+    def test_notifications_do_not_extend_deadline(self):
+        client = self.client([{"jsonrpc": "2.0", "method": "notifications/tools/list_changed"}])
+        with patch.object(demo.time, "monotonic", side_effect=[0, 1, 181]):
+            with self.assertRaises(TimeoutError):
+                client.rpc("tools/list", {})
 
 if __name__ == "__main__":
     unittest.main()

@@ -11,14 +11,14 @@ async function apply(request: APIRequestContext, id: string, type: string, paylo
     commandId: `transcript-${Date.now()}-${Math.random()}`, actor: { kind: "human", id: "synthetic-test" } } });
   expect(response.ok(), await response.text()).toBeTruthy(); return read(request, id);
 }
-async function fixture(request: APIRequestContext) {
+async function fixture(request: APIRequestContext, audioEnd = 5) {
   const source = (await read(request, "e2e-fixture")).sequence.tracks[0].clips[0].assetRef.sourcePath;
   const id = `transcript-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   const response = await request.post('/api/v1/projects', { data: { projectId: id, name: id, width: 160, height: 90, fps: 15 } });
   expect(response.status()).toBe(201);
   for (const kind of ['video', 'audio']) {
     await apply(request, id, 'track.add', { trackId: kind, kind });
-    await apply(request, id, 'clip.insert', { clipId: `${kind}-clip`, trackId: kind, sourcePath: kind === 'audio' ? fileURLToPath(new URL('../../../src/cutvoke/assets/audio/tech_minimal.wav', import.meta.url)) : source, timelineStart: r(0), timelineEnd: r(5) });
+    await apply(request, id, 'clip.insert', { clipId: `${kind}-clip`, trackId: kind, sourcePath: kind === 'audio' ? fileURLToPath(new URL('../../../src/cutvoke/assets/audio/tech_minimal.wav', import.meta.url)) : source, timelineStart: r(0), timelineEnd: r(kind === 'audio' ? audioEnd : 5) });
   }
   await apply(request, id, 'caption.add', { captionId: 'a', text: '你好，开场句子', start: r(1), end: r(2) });
   await apply(request, id, 'caption.add', { captionId: 'b', text: '你好，重叠句子', start: r(3, 2), end: r(3) });
@@ -98,21 +98,42 @@ test('Chinese word selection locates exact timing and ordinary caption editing n
 });
 
 for (const delayedFrames of [false, true]) {
-test(`transcript audition stops actual video and native audio at the selected word boundary${delayedFrames ? ' with delayed animation frames' : ''}`, async ({ page, request }) => {
+test(`transcript audition stops actual video and native audio at the selected word boundary${delayedFrames ? ' with delayed animation frames' : ''}`, async ({ page, request }, testInfo) => {
+  try {
   await page.addInitScript(() => {
     const captured: HTMLAudioElement[] = []; (window as any).__transcriptAudio = captured;
+    // Bounded numeric/event-only evidence: never record source URLs or project paths.
+    const began = performance.now();
+    const events: object[] = []; let dropped = 0;
+    const record = (kind: string, value: object) => {
+      // Keep the initial startup evidence even if transport ticks flood the tail.
+      if (events.length === 240) { events.splice(120, 1); dropped++; }
+      events.push({ ms: performance.now() - began, kind, ...value });
+    };
+    (window as any).__auditionEvidence = () => ({ events, dropped });
     const Original = window.Audio;
     (window as any).__nativePauseTimes = [];
     (window as any).__nativePlayTimes = [];
     window.Audio = new Proxy(Original, { construct(target, args) {
       const audio = Reflect.construct(target, args) as HTMLAudioElement;
+      const voice = captured.length;
+      const state = () => ({ voice, time: audio.currentTime, paused: audio.paused,
+        muted: audio.muted, seeking: audio.seeking, readyState: audio.readyState,
+        networkState: audio.networkState, errorCode: audio.error?.code ?? null });
+      for (const kind of ['play', 'playing', 'pause', 'seeking', 'seeked', 'waiting', 'stalled', 'timeupdate', 'ended', 'error', 'loadeddata', 'canplay']) {
+        audio.addEventListener(kind, () => record(kind, state()));
+      }
       const pause = audio.pause.bind(audio), play = audio.play.bind(audio);
-      audio.play = () => { (window as any).__nativePlayTimes.push(audio.currentTime); return play(); };
-      audio.pause = () => { if (!audio.paused) (window as any).__nativePauseTimes.push(audio.currentTime); pause(); };
+      audio.play = () => { record('play-call', state()); (window as any).__nativePlayTimes.push(audio.currentTime); return play(); };
+      audio.pause = () => { record('pause-call', state()); if (!audio.paused) (window as any).__nativePauseTimes.push(audio.currentTime); pause(); };
       captured.push(audio); return audio;
     } });
     (window as any).__transport = [];
-    window.addEventListener('cutvoke:transport-clock', event => (window as any).__transport.push((event as CustomEvent).detail));
+    window.addEventListener('cutvoke:transport-clock', event => {
+      const detail = (event as CustomEvent).detail;
+      (window as any).__transport.push(detail);
+      record('transport', { time: detail.time, playing: detail.playing });
+    });
   });
   const id = await fixture(request); const panel = await open(page, id);
   await expect(page.getByTestId('live-audio-meter')).toHaveAttribute('data-ready', 'true', { timeout: 20_000 });
@@ -159,6 +180,24 @@ test(`transcript audition stops actual video and native audio at the selected wo
   await expect(page.locator('.player__play')).toHaveAttribute('aria-label', '播放');
   await expect(page.locator('.statusbar__msg')).toHaveText('已暂停');
   await expect.poll(() => page.evaluate(() => (window as any).__transcriptAudio.every((audio: HTMLAudioElement) => audio.paused))).toBe(true);
+  } catch (error) {
+    // Diagnostics must not replace the original failure, even if the page crashed.
+    try {
+      const evidence = await page.evaluate(() => ({
+        ...((window as any).__auditionEvidence?.() ?? {}),
+        voices: ((window as any).__transcriptAudio ?? []).slice(0, 16).map((audio: HTMLAudioElement, voice: number) => ({
+          voice, time: audio.currentTime, paused: audio.paused, muted: audio.muted,
+          seeking: audio.seeking, readyState: audio.readyState, errorCode: audio.error?.code ?? null,
+        })),
+        nativeStarts: ((window as any).__nativePlayTimes ?? []).slice(-80),
+        nativePauses: ((window as any).__nativePauseTimes ?? []).slice(-80),
+      }));
+      await testInfo.attach('audition-media-timeline', {
+        body: JSON.stringify({ delayedFrames, ...evidence }, null, 2), contentType: 'application/json',
+      });
+    } catch { /* Preserve the original assertion/page failure. */ }
+    throw error;
+  }
 });
 
 }
@@ -359,4 +398,148 @@ test('a user keyboard seek within an audition cancels native audio before its bo
   await expect(page.locator('.player__play')).toHaveAttribute('aria-label', '播放');
   await expect.poll(() => page.evaluate(() => (window as any).__transport.at(-1)?.time)).toBeCloseTo(expected, 4);
   await expect.poll(() => page.evaluate(() => (window as any).__transcriptAudio.every((audio: HTMLAudioElement) => audio.paused))).toBe(true);
+});
+
+for (const cancellation of ['pause', 'seek'] as const) {
+  test(`native startup held after real play settles cannot revive audio after ${cancellation}`, async ({ page, request }) => {
+    await page.addInitScript(() => {
+      const audio: HTMLAudioElement[] = [];
+      (window as any).__heldStartupAudio = audio;
+      (window as any).__requestedStartupCount = 0;
+      (window as any).__heldStartupCount = 0;
+      (window as any).__releasedStartupCount = 0;
+      const gate = new Promise<void>(resolve => { (window as any).__releaseStartup = resolve; });
+      window.Audio = new Proxy(window.Audio, { construct(target, args) {
+        const element = Reflect.construct(target, args) as HTMLAudioElement;
+        const play = element.play.bind(element);
+        element.play = async () => {
+          (window as any).__requestedStartupCount++;
+          await play(); // Actual media playback; only its acknowledgement is delayed.
+          (window as any).__heldStartupCount++;
+          await gate;
+          (window as any).__releasedStartupCount++;
+        };
+        audio.push(element); return element;
+      } });
+    });
+    const id = await fixture(request); const panel = await open(page, id);
+    await expect(page.getByTestId('live-audio-meter')).toHaveAttribute('data-ready', 'true', { timeout: 20_000 });
+    await panel.locator('.transcript-editor__sentence').first().getByRole('button', { name: '试听', exact: true }).click();
+    await expect.poll(() => page.evaluate(() => {
+      const w = window as any;
+      return w.__requestedStartupCount > 0 && w.__heldStartupCount === w.__requestedStartupCount;
+    }), { intervals: [10, 20] }).toBe(true);
+    const cancelButton = cancellation === 'pause' ? page.locator('.player__play')
+      : panel.locator('.transcript-editor__sentence').filter({ hasText: '你好世界' }).getByRole('button', { name: '定位', exact: true });
+    // Check pending and dispatch cancellation in ONE browser task. The 2s
+    // timeout cannot interleave between this evidence and the actual action.
+    const pending = await cancelButton.evaluate(button => {
+      const w = window as any, audio = w.__heldStartupAudio as HTMLAudioElement[];
+      const snapshot = { requested: w.__requestedStartupCount, held: w.__heldStartupCount,
+        released: w.__releasedStartupCount, pending: audio.some(e => !e.paused && e.muted),
+        safe: audio.every(e => e.paused || e.muted), playing: document.querySelector('.player__play')?.getAttribute('aria-label') };
+      if (!snapshot.pending || !snapshot.safe || snapshot.playing !== '暂停' || snapshot.requested <= 0 ||
+        snapshot.held !== snapshot.requested || snapshot.released !== 0) throw new Error(`startup no longer pending: ${JSON.stringify(snapshot)}`);
+      (button as HTMLElement).click();
+      return snapshot;
+    });
+    expect(pending.held).toBeGreaterThan(0);
+    await expect(page.locator('.player__play')).toHaveAttribute('aria-label', '播放');
+    if (cancellation === 'seek') await expect(page.locator('.timeline-ruler')).toHaveAttribute('aria-valuenow', '3');
+    await page.evaluate(() => (window as any).__releaseStartup());
+    await expect.poll(() => page.evaluate(() => ({ requested: (window as any).__requestedStartupCount,
+      held: (window as any).__heldStartupCount, released: (window as any).__releasedStartupCount })))
+      .toEqual({ requested: pending.requested, held: pending.held, released: pending.held });
+    await expect.poll(() => page.evaluate(() => (window as any).__heldStartupAudio.every((element: HTMLAudioElement) => element.paused))).toBe(true);
+    // Check later render turns after ALL held acknowledgements settle.
+    const stable = await page.evaluate(async () => {
+      const samples = [];
+      for (let i = 0; i < 8; i++) {
+        await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+        const w = window as any;
+        samples.push({ requested: w.__requestedStartupCount, held: w.__heldStartupCount, released: w.__releasedStartupCount,
+          paused: (w.__heldStartupAudio as HTMLAudioElement[]).every(e => e.paused),
+          label: document.querySelector('.player__play')?.getAttribute('aria-label'),
+          time: Number(document.querySelector('.timeline-ruler')?.getAttribute('aria-valuenow')) });
+      }
+      return samples;
+    });
+    for (const sample of stable) {
+      expect(sample).toMatchObject({ requested: pending.requested, held: pending.held, released: pending.held, paused: true, label: '播放' });
+      if (cancellation === 'seek') expect(sample.time).toBe(3);
+    }
+  });
+}
+
+
+test('native audio survives video to image to video recovery without a new seek or source', async ({ page, request }) => {
+  await page.addInitScript(() => {
+    const audios: HTMLAudioElement[] = [];
+    (window as any).__roundtripAudios = audios;
+    const Original = window.Audio;
+    window.Audio = new Proxy(Original, { construct(target, args) {
+      const audio = Reflect.construct(target, args) as HTMLAudioElement;
+      audios.push(audio); return audio;
+    } });
+    (window as any).__roundtripClock = null;
+    window.addEventListener('cutvoke:transport-clock', event => {
+      (window as any).__roundtripClock = (event as CustomEvent).detail;
+    });
+  });
+  const id = await fixture(request, 12);
+  const persisted = await read(request, id);
+  const audioSource = persisted.sequence.tracks.find((t: any) => t.id === 'audio').clips[0].assetRef.sourcePath as string;
+  await open(page, id);
+  // Directory-backed projects import assets under content-hash filenames.
+  // Identify this exact persisted source, not the original library basename.
+  await page.evaluate(source => { (window as any).__roundtripSource = source; }, audioSource);
+  const video = page.locator('video.player__video');
+  const meter = page.getByTestId('live-audio-meter');
+  await expect(meter).toHaveAttribute('data-ready', 'true', { timeout: 20_000 });
+  await expect.poll(() => video.evaluate(v => (v as HTMLVideoElement).readyState)).toBeGreaterThan(1);
+  await page.getByRole('button', { name: '播放', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => (window as any).__roundtripAudios.some((a: HTMLAudioElement) =>
+    a.src && new URL(a.src).searchParams.get('path') === (window as any).__roundtripSource && !a.paused && !a.muted && a.currentTime > .1))).toBe(true);
+  // Inject only the decoder failure signal. Audio elements, AudioContext,
+  // React mode transitions and the subsequent visual edit remain real.
+  await video.evaluate(v => {
+    (window as any).__roundtripVoice = (window as any).__roundtripAudios.find((a: HTMLAudioElement) => a.src && new URL(a.src).searchParams.get('path') === (window as any).__roundtripSource);
+    Object.defineProperty(v, 'error', { configurable: true, value: { code: 3, message: 'controlled decoder failure' } });
+    v.dispatchEvent(new Event('error'));
+  });
+  await expect(video).toHaveCount(0);
+  await expect(page.locator('.player__play')).toHaveAttribute('aria-label', '暂停');
+  await expect.poll(() => page.evaluate(() => {
+    const a = (window as any).__roundtripVoice as HTMLAudioElement;
+    return !a.paused && !a.muted;
+  })).toBe(true);
+  const imageCursor = await page.evaluate(() => (window as any).__roundtripVoice.currentTime as number);
+  const before = await read(request, id);
+  // Only a visual effect changes. No transport command, source, audio mapping,
+  // project identity or explicit seek changes across this recovery.
+  await apply(request, id, 'effect.add', { clipId: 'video-clip', effectId: 'cutvoke.fx.vibrance', params: { intensity: .25 } });
+  await expect(video).toHaveCount(1);
+  await expect.poll(() => page.evaluate(() => {
+    const a = (window as any).__roundtripVoice as HTMLAudioElement;
+    const clock = (window as any).__roundtripClock;
+    return !a.paused && !a.muted && clock?.playing && clock.time > 0;
+  })).toBe(true);
+  await expect.poll(() => page.evaluate(() => Number(document.querySelector('[data-testid="live-audio-meter"]')?.getAttribute('data-rms')))).toBeGreaterThan(.001);
+  const resumed = await page.evaluate(() => ({ time: (window as any).__roundtripVoice.currentTime as number,
+    transport: (window as any).__roundtripClock.time as number }));
+  expect(resumed.time).toBeGreaterThanOrEqual(imageCursor - .15);
+  await expect.poll(() => page.evaluate(() => (window as any).__roundtripVoice.currentTime as number)).toBeGreaterThan(resumed.time + .1);
+  await expect.poll(() => page.evaluate(() => (window as any).__roundtripClock.time as number)).toBeGreaterThan(resumed.transport + .1);
+  const samples = await page.evaluate(async () => {
+    const result: boolean[] = [];
+    for (let i = 0; i < 8; i++) {
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+      const a = (window as any).__roundtripVoice as HTMLAudioElement;
+      result.push(!a.paused && !a.muted && (window as any).__roundtripClock.playing);
+    }
+    return result;
+  });
+  expect(samples).toEqual(Array(8).fill(true));
+  expect((await read(request, id)).sequence.tracks.find((t: any) => t.id === 'audio')).toEqual(before.sequence.tracks.find((t: any) => t.id === 'audio'));
+  await page.getByRole('button', { name: '暂停', exact: true }).click();
 });

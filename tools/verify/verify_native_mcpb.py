@@ -68,11 +68,29 @@ class Client:
             request['params'] = params
         self.process.stdin.write(json.dumps(request, ensure_ascii=False) + '\n')
         self.process.stdin.flush()
-        response = self.messages.get(timeout=180)
-        with self.log.open('a', encoding='utf-8') as stream:
-            stream.write(json.dumps({'request': request, 'response': response}, ensure_ascii=False) + '\n')
-        assert response.get('id') == self.serial and 'error' not in response, response
-        return response['result']
+        deadline = time.monotonic() + 180
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError('MCP response timed out')
+            try:
+                response = self.messages.get(timeout=remaining)
+            except queue.Empty as error:
+                raise TimeoutError('MCP response timed out') from error
+            with self.log.open('a', encoding='utf-8') as stream:
+                stream.write(json.dumps({'request': request, 'response': response}, ensure_ascii=False) + '\n')
+            if not isinstance(response, dict) or response.get('jsonrpc') != '2.0':
+                raise RuntimeError('Invalid MCP response; inspect transcript.jsonl')
+            # Native servers may send asynchronous list-changed notifications.
+            # Ignore only notification envelopes, without restarting the deadline.
+            if ('id' not in response and isinstance(response.get('method'), str)
+                    and 'result' not in response and 'error' not in response):
+                continue
+            if type(response.get('id')) is not int or response['id'] != self.serial:
+                raise RuntimeError('Unexpected MCP response ID')
+            if 'method' in response or 'error' in response or 'result' not in response:
+                raise RuntimeError('Invalid or failed MCP response; inspect transcript.jsonl')
+            return response['result']
 
     def initialized(self):
         self.process.stdin.write(json.dumps({'jsonrpc': '2.0', 'method': 'notifications/initialized'}) + '\n')

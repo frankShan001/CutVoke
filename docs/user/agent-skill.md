@@ -4,6 +4,8 @@
 
 The **cutvoke-editor** skill teaches an external AI how to plan an edit, inspect local media, build a recoverable timeline, refine captions and sound, and check the final result. CutVoke also bundles its creative references through `editor_help`; the optional Skill supplies the entry workflow and local working conventions. It does not install a model or guarantee a beautiful result regardless of the source material.
 
+For a first dialogue-led edit, try the [talking-head and interview prompt pack](prompts-talking-head.md): ten requests with tool guidance, review checks and a reproducible synthetic-media verifier.
+
 ## Three layers, loaded on demand
 
 Use shared principles, the relevant purpose/work-type guide, then a plan for this project. Five branches cover music-video/art visual, documentary/travel, narrative, explanation/interview and promotion/showcase. Genre is a secondary influence; the user's requested expressive intensity determines the approach. A local correction reuses the approved direction and checks affected intervals, without a mandatory new treatment or full export.
@@ -67,7 +69,7 @@ cutvoke serve --data .artifacts/skill-demo/data
 
 Open `http://127.0.0.1:8787` and select **Trail Notes · editable demo**. Run the server on a free port if another service is already using 8787. The script requires a **new** output directory and creates its own original illustrations and synthesized chords. It does not read the default user library, download models or call an external service.
 
-Outputs include `trail-notes.mp4`, `trail-notes.cvkpkg`, `data/projects.sqlite`, managed media, six real preview frames, `result.json`, `calls.json`, and a diagnostic MCP log. Keep the directory for an editable handoff. The default uses a built-in dissolve; [the effects contribution guide](../../effects/README.md) shows the same demo with the local community manifest.
+Outputs include `trail-notes.mp4` in the project `exports/` directory and `trail-notes.cvkpkg` in `backups/` (their relative paths are recorded as `videoPath` and `packagePath` in `result.json`), `data/projects.sqlite`, managed media, six real preview frames, `result.json`, `calls.json`, and a diagnostic MCP log. Keep the directory for an editable handoff. The default uses a built-in dissolve; [the effects contribution guide](../../effects/README.md) shows the same demo with the local community manifest.
 
 The script imports and edits media over real stdio MCP, reads runtime schemas, preflights, prepares continuous preview, exports H.264/AAC, checks dimensions/frame rate/duration and full decode, and measures audio peaks and endpoint fades. It starts/stops only its own temporary Web service to verify browser asset availability, and checks that command replay does not create another editing revision. See [the demonstration and validation boundaries](../images/readme/README.md). `--import-mode upload` separately exercises the loopback Web upload API.
 

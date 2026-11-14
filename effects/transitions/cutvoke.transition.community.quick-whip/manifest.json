@@ -1,0 +1,85 @@
+{
+  "id": "cutvoke.transition.community.quick-whip",
+  "version": "1.0.0",
+  "name": {
+    "en": "Quick Whip",
+    "zh-CN": "快速甩动",
+    "zh-TW": "快速甩動",
+    "ja": "クイックウィップ",
+    "ko": "빠른 휩 전환",
+    "es": "Barrido rápido",
+    "fr": "Balayage rapide",
+    "de": "Schneller Schwenk",
+    "pt-BR": "Deslize rápido",
+    "ru": "Быстрый сдвиг",
+    "ar": "انتقال خاطف"
+  },
+  "description": {
+    "en": "A fast leftward sweep for energetic vlogs and Shorts, using FFmpeg's existing smoothleft transition. No added motion blur.",
+    "zh-CN": "适合活力 Vlog 与短视频的快速向左扫切，复用 FFmpeg 已有 smoothleft 转场，不额外添加运动模糊。",
+    "zh-TW": "適合活力 Vlog 與短影音的快速向左掃切，使用 FFmpeg 現有的 smoothleft 轉場，不額外加入動態模糊。",
+    "ja": "躍動感のある Vlog やショート動画向けの高速な左方向ワイプ。FFmpeg の既存 smoothleft トランジションを使用し、モーションブラーは追加しません。",
+    "ko": "활기찬 브이로그와 쇼츠를 위한 빠른 왼쪽 와이프 전환입니다. FFmpeg의 기존 smoothleft 전환을 사용하며 모션 블러를 추가하지 않습니다.",
+    "es": "Un barrido rápido hacia la izquierda para vlogs y vídeos cortos dinámicos. Usa la transición smoothleft de FFmpeg, sin desenfoque de movimiento añadido.",
+    "fr": "Un balayage rapide vers la gauche pour les vlogs et les vidéos courtes dynamiques. Utilise la transition smoothleft de FFmpeg, sans ajout de flou de mouvement.",
+    "de": "Ein schneller Wischübergang nach links für dynamische Vlogs und Kurzvideos. Verwendet den vorhandenen smoothleft-Übergang von FFmpeg, ohne zusätzliche Bewegungsunschärfe.",
+    "pt-BR": "Uma transição rápida de varredura para a esquerda para vlogs e vídeos curtos dinâmicos. Usa a transição smoothleft do FFmpeg, sem adicionar desfoque de movimento.",
+    "ru": "Быстрый переход со стиранием влево для динамичных влогов и коротких видео. Использует готовый переход smoothleft из FFmpeg без дополнительного размытия движения.",
+    "ar": "انتقال سريع بالمسح نحو اليسار لمدونات الفيديو والمقاطع القصيرة الحيوية. يستخدم انتقال smoothleft الموجود في FFmpeg دون إضافة ضبابية الحركة."
+  },
+  "category": "transition",
+  "subcategory": "位移",
+  "author": {
+    "name": "CutVoke contributors"
+  },
+  "license": "MIT",
+  "inputs": [
+    "video:a",
+    "video:b"
+  ],
+  "output": "video",
+  "appliesTo": [
+    "image",
+    "video"
+  ],
+  "keywords": [
+    "whip",
+    "slide",
+    "left",
+    "quick",
+    "vlog",
+    "shorts",
+    "甩动",
+    "向左"
+  ],
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "duration": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 0.6,
+        "default": 0.25,
+        "unit": "s",
+        "x-cutvoke-step": 0.05
+      }
+    },
+    "additionalProperties": false
+  },
+  "implementation": {
+    "engine": "ffmpeg-xfade",
+    "filter": "xfade",
+    "transition": "smoothleft"
+  },
+  "preview": "A CutVoke-rendered midpoint between two original synthetic geometric scenes. Run the documented checks and demo to inspect motion.",
+  "x-cutvoke-min-core": "0.1.0",
+  "x-cutvoke-contribution": {
+    "previewFile": "preview.png",
+    "testedWith": {
+      "python": "3.12.14",
+      "ffmpeg": "7.1.5",
+      "platform": "Linux x86_64 (Debian 13)"
+    },
+    "notes": "Machine-drafted locale metadata, not native-speaker reviewed. Existing smoothleft mapping only; no added motion blur or executable plugin. Opt-in contribution, not a bundled gallery preset. Compatibility metadata is descriptive, not an enforced version gate."
+  }
+}

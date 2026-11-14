@@ -148,7 +148,7 @@ GUIDES = {
             "effect.setAnimation replaces only its entry/exit/loop/combined slot; an empty effectId clears the selected slot or all animation slots. Preserve or explicitly replace opacity keyframes using keyframePolicy.",
             "edit.batch supports only its returned allowedCommands and cannot nest. Query edit.batch schema and each child command first. Previews must use the same expectedRevision and payload as the eventual commit.",
             "Acquire edit_lock before grouped agent edits. Use lease.leaseId as command_apply.editLeaseId; renew before expiry, release even on failure. Avoid holding a lease throughout a long export.",
-            "For a precise correction, project_lookup locates clip/caption IDs and selected fields. Change only requested fields. history.undo/redo changes revision too; reread after undo."]},
+            "For a precise correction, project_lookup returns matchCount and ambiguous before limit. Use requireUnique=true; zero matches still returns an empty list. Multiple hits require a time filter or an explicitly chosen entityId; never pick the first match. Change only requested fields. history.undo/redo changes revision too; reread after undo."]},
     "errors": {
         "title": "Recovering from errors",
         "rules": [
@@ -157,6 +157,7 @@ GUIDES = {
             "Only adopt a non-empty returned revision. Some project-independent read/analysis commands return an empty revision; keep the last project revision. export.enqueue returns its frozen snapshot revision without advancing it.",
             "REVISION_CONFLICT: reread project_summary and the affected entities, reconcile with the user's intent, then prepare a new command. Do not blindly replace expectedRevision and resend.",
             "INVALID_ARGUMENT: query that command's help/schema, fix the indicated field, and preview again. Do not loop the same invalid payload.",
+            "AMBIGUOUS_MATCH: narrow project_lookup by time or an explicitly chosen entityId. limit=1 does not make a search unique. Do not edit until the intended target is resolved.",
             "EDIT_LOCKED: wait for the current editor or ask the user to take over; never silently steal/release someone else's lease.",
             "ASSET_MISSING/ASSET_CHANGED: inspect the reported source and use media_list/media_import plus asset.swap to relink the intended media. Do not substitute unrelated files.",
             "EFFECT_UNAVAILABLE or insufficient transition handles: discover a supported effect, check its appliesTo and adjacent clips/durations, then retry a revised edit.",
@@ -227,7 +228,8 @@ RECIPES = {
     "caption-fix": {
         "title": "Precisely replace one caption",
         "steps": [
-            {"tool": "project_lookup", "arguments": {"projectId": "<PROJECT>", "entityType": "caption", "textContains": "<OLD_TEXT>"}},
+            {"tool": "project_lookup", "arguments": {"projectId": "<PROJECT>", "entityType": "caption", "textContains": "<OLD_TEXT>", "requireUnique": True}},
+            {"tool": "project_lookup", "reuse": "Proceed only when matchCount=1 and the item is the intended caption. On AMBIGUOUS_MATCH, narrow by atSeconds/fromSeconds/toSeconds from the user's intent, or list candidates without requireUnique and ask for an explicit choice, then requery that entityId with requireUnique=true. Never guess an ID or pick the first hit. On zero matches stop and clarify. Use the resolved lookup revision and id for the preview."},
             {"tool": "editor_help", "arguments": {"topic": "command", "command": "caption.update"}},
             {"tool": "command_preview", "arguments": {"projectId": "<PROJECT>", "expectedRevision": "<REVISION>", "type": "caption.update", "payload": {"captionId": "<CAPTION_ID>", "text": "<NEW_TEXT>"}}},
             {"tool": "command_apply", "reuse": "Acquire a lease, commit identical preview arguments with stable commandId and editLeaseId, then inspect a frame inside the caption and release the lease."}]},
@@ -325,6 +327,7 @@ def recovery(code, arguments):
         "REVISION_CONFLICT": "Read project_summary and affected entities; reconcile changes, preview a newly planned edit, and use a new commandId. Do not blindly resend with a changed revision.",
         "IDEMPOTENCY_MISMATCH": "This commandId was already used for different arguments. Retry the original arguments or assign a new ID to the new edit.",
         "INVALID_ARGUMENT": "Read the indicated field and exact schema, correct it, then preview again. Do not repeat identical invalid arguments.",
+        "AMBIGUOUS_MATCH": "Narrow project_lookup by time or an explicitly chosen entityId, then retry with requireUnique=true. If intent is unclear, list candidates and ask which one. Never use limit=1 or the first hit to bypass ambiguity.",
         "EDIT_LOCKED": "Read project_summary lease state. Wait or ask for human takeover; do not steal another editor's lease.",
         "EDIT_LEASE_INVALID": "Read the latest project and discard the stale edit plan. Wait for a new human handoff before acquiring a fresh lease. Do not retry or renew the old token, and never automatically reclaim editing after human takeover.",
         "ASSET_MISSING": "Inspect the reported path; locate/import the intended source and use asset.swap to relink affected clips.",

@@ -2,6 +2,7 @@
 import importlib.util
 import io
 import json
+import queue
 from pathlib import Path
 import tempfile
 import unittest
@@ -22,7 +23,7 @@ class NativeVerifierTests(unittest.TestCase):
             (install / 'manifest.json').write_text(json.dumps({'server': {'mcp_config': {
                 'command': '${__dirname}/engine/cutvoke-engine',
                 'args': ['mcp', '--data', '${user_config.data_directory}']}}}), 'utf-8')
-            process = mock.Mock(stdin=io.StringIO(), stdout=io.StringIO('{"id":1,"result":{"tools":[]}}\n'))
+            process = mock.Mock(stdin=io.StringIO(), stdout=io.StringIO('{"jsonrpc":"2.0","id":1,"result":{"tools":[]}}\n'))
             process.wait.return_value = 0
             process.poll.return_value = 0
             with mock.patch.object(module.subprocess, 'Popen', return_value=process) as popen:
@@ -107,6 +108,58 @@ class NativeVerifierTests(unittest.TestCase):
         install.exists.return_value = True
         with self.assertRaises(AssertionError):
             module.retire_install(install, 'retired')
+
+
+class NativeResponseTests(unittest.TestCase):
+    def client(self, messages):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        client = module.Client.__new__(module.Client)
+        client.serial = 0
+        client.process = mock.Mock(stdin=io.StringIO())
+        client.log = Path(directory.name) / 'transcript.jsonl'
+        client.messages = queue.Queue()
+        for message in messages:
+            client.messages.put(message)
+        return client
+
+    def test_notifications_before_matching_response(self):
+        client = self.client([
+            {'jsonrpc': '2.0', 'method': 'notifications/tools/list_changed'},
+            {'jsonrpc': '2.0', 'method': 'notifications/resources/list_changed'},
+            {'jsonrpc': '2.0', 'id': 1, 'result': {'tools': []}},
+        ])
+        self.assertEqual(client.request('tools/list'), {'tools': []})
+        self.assertEqual(len(client.log.read_text().splitlines()), 3)
+
+    def test_invalid_envelopes_and_ids_fail_closed(self):
+        for response in [
+            [], {'stdioClosed': True}, {'unexpectedStdout': 'noise'},
+            {'id': 1, 'result': {}},
+            *[{'jsonrpc': '2.0', 'id': value, 'result': {}}
+              for value in (2, None, True, 1.0, '1')],
+            {'jsonrpc': '2.0', 'id': 1, 'error': {'code': -1}},
+            {'jsonrpc': '2.0', 'id': 1},
+            {'jsonrpc': '2.0', 'method': 'notice', 'result': {}},
+            {'jsonrpc': '2.0', 'id': 1, 'method': 'request', 'result': {}},
+        ]:
+            with self.subTest(response=response), self.assertRaises(RuntimeError):
+                self.client([response]).request('tools/list')
+
+    def test_notifications_do_not_restart_deadline(self):
+        client = self.client([{'jsonrpc': '2.0', 'method': 'notifications/tools/list_changed'}])
+        with mock.patch.object(module.time, 'monotonic', side_effect=[0, 1, 181]):
+            with self.assertRaises(TimeoutError):
+                client.request('tools/list')
+
+    def test_empty_queue_is_explicit_timeout(self):
+        client = self.client([])
+        client.messages = mock.Mock()
+        client.messages.get.side_effect = queue.Empty
+        with mock.patch.object(module.time, 'monotonic', side_effect=[0, 1]):
+            with self.assertRaises(TimeoutError):
+                client.request('tools/list')
+        client.messages.get.assert_called_once_with(timeout=179)
 
 
 if __name__ == '__main__':

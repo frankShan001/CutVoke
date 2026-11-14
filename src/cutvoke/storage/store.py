@@ -235,6 +235,13 @@ class ProjectStore:
             )
             """
         )
+        # Existing leases predate the recorded review boundary. Leave them NULL
+        # rather than guessing which historical changes belong to them.
+        with self._transaction():
+            columns = {row[1] for row in self._conn.execute("PRAGMA table_info(edit_leases)")}
+            for name, kind in (("start_seq", "INTEGER"), ("start_revision", "TEXT")):
+                if name not in columns:
+                    self._conn.execute(f"ALTER TABLE edit_leases ADD COLUMN {name} {kind}")
         # Never resurrect a retired token, including a delayed acquire request.
         self._conn.execute(
             "CREATE TABLE IF NOT EXISTS edit_lease_tokens ("
@@ -568,16 +575,23 @@ class ProjectStore:
                 raise EditLeaseInvalid("Edit lease is invalid. Read the latest project and acquire a new lease.")
             self._conn.execute("INSERT OR IGNORE INTO edit_lease_tokens VALUES (?, ?)",
                                (project_id, lease_id))
-            acquired_at = row[4] if row is not None and row[1] == lease_id else now
+            acquired_at = row[4] if same_live else now
             expires_at = now + ttl
+            boundary = self._conn.execute(
+                "SELECT start_seq, start_revision FROM edit_leases WHERE project_id=?",
+                (project_id,)).fetchone() if same_live else None
+            start_seq, start_revision = boundary if boundary is not None else (
+                self._conn.execute("SELECT COALESCE(MAX(seq), -1) FROM events WHERE project_id=?",
+                                   (project_id,)).fetchone()[0], self.db_revision(project_id))
             self._conn.execute(
                 "INSERT INTO edit_leases "
-                "(project_id, lease_id, owner, expires_at, acquired_at) "
-                "VALUES (?, ?, ?, ?, ?) "
+                "(project_id, lease_id, owner, expires_at, acquired_at, start_seq, start_revision) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?) "
                 "ON CONFLICT(project_id) DO UPDATE SET lease_id=excluded.lease_id, "
                 "owner=excluded.owner, expires_at=excluded.expires_at, "
-                "acquired_at=excluded.acquired_at",
-                (project_id, lease_id, owner, expires_at, acquired_at),
+                "acquired_at=excluded.acquired_at, start_seq=excluded.start_seq, "
+                "start_revision=excluded.start_revision",
+                (project_id, lease_id, owner, expires_at, acquired_at, start_seq, start_revision),
             )
         return {
             "projectId": project_id,
@@ -586,6 +600,25 @@ class ProjectStore:
             "expiresAt": expires_at,
             "acquiredAt": acquired_at,
         }
+
+    @_synchronized
+    def review_edit_lease(self, project_id: str, lease_id: str, limit: int) -> dict:
+        """Read one observed live lease and its event window in one snapshot."""
+        with self._transaction(immediate=False):
+            row = self._conn.execute(
+                "SELECT lease_id, expires_at, start_seq, start_revision FROM edit_leases "
+                "WHERE project_id=?", (project_id,)).fetchone()
+            if row is None or row[0] != lease_id or float(row[1]) <= time.time():
+                raise EditLeaseInvalid("Edit lease changed or expired. Refresh the project.")
+            revision = self.db_revision(project_id)
+            if row[2] is None or row[3] is None:
+                return dict(available=False, acquiredRevision=None, revision=revision, events=[], hasMore=False)
+            records = self._conn.execute(
+                "SELECT payload_json FROM events WHERE project_id=? AND seq>? "
+                "ORDER BY seq DESC LIMIT ?", (project_id, row[2], limit + 1)).fetchall()
+            return dict(available=True, acquiredRevision=row[3], revision=revision,
+                        events=[json.loads(r[0]) for r in reversed(records[:limit])],
+                        hasMore=len(records) > limit)
 
     @_synchronized
     def renew_edit_lease(self, *, project_id: str, lease_id: str,

@@ -44,3 +44,6 @@ apps/editor/playwright-report/
 apps/editor/node_modules/
 apps/desktop/node_modules/
 apps/editor/dist/
+
+# Deterministic build outputs, generated for wheel and desktop packages.
+src/cutvoke/assets/caption_fonts/

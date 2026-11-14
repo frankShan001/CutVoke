@@ -348,6 +348,7 @@ class EditService:
         # project_id -> [snapshot, ...]  重做栈（undo 时弹出的快照）
         self._redo_stack: dict[str, list[Project]] = {}
         self._edit_leases: dict[str, dict] = {}
+        self._lease_review_boundaries: dict[str, tuple[int, str]] = {}
         self._issued_edit_leases: set[tuple[str, str]] = set()
         self._memory_lease_guard = threading.RLock()
         # 可选持久化存储（T08）：传入则每次提交后持久化到 SQLite
@@ -1671,8 +1672,8 @@ class EditService:
                        from_seconds: Optional[float] = None,
                        to_seconds: Optional[float] = None,
                        fields: Optional[list[str]] = None,
-                       limit: int = 10) -> dict:
-        """Read only the captions or clips an Agent needs for a local edit."""
+                       limit: int = 10, require_unique: bool = False) -> dict:
+        """Read a bounded projection; count all matches before applying the limit."""
         if entity_type not in ("caption", "clip"):
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             "entityType must be 'caption' or 'clip'")
@@ -1681,6 +1682,8 @@ class EditService:
                             "entityId and textContains must be strings")
         if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= 50:
             raise EditError(ErrorCode.INVALID_ARGUMENT, "limit must be 1..50")
+        if not isinstance(require_unique, bool):
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "requireUnique must be a boolean")
         defaults = ({"id", "text", "start", "end"} if entity_type == "caption"
                     else {"id", "trackId", "sourceName", "timelineStart", "timelineEnd"})
         available = ({"id", "text", "start", "end", "fontFamily", "fontSize", "color",
@@ -1713,19 +1716,18 @@ class EditService:
 
         project = self.get_project(project_id)
         found: list[dict] = []
+        match_count = 0
         needle = text_contains.casefold()
         if entity_type == "caption":
-            candidates = ((c, c.to_dict()) for c in project.sequence.captions)
+            candidates = ((c, None) for c in project.sequence.captions)
         else:
-            candidates = (
-                (c, {**c.to_dict(), "trackId": track.id,
-                     "sourceName": c.asset_ref.source_path.replace("\\", "/").rsplit("/", 1)[-1]})
-                for track in project.sequence.tracks for c in track.clips
-            )
-        for entity, record in candidates:
+            candidates = ((c, track.id)
+                          for track in project.sequence.tracks for c in track.clips)
+        for entity, track_id in candidates:
             if entity_id and entity.id != entity_id:
                 continue
-            searchable = entity.text if entity_type == "caption" else record["sourceName"]
+            searchable = (entity.text if entity_type == "caption" else
+                          entity.asset_ref.source_path.replace("\\", "/").rsplit("/", 1)[-1])
             if needle and needle not in searchable.casefold():
                 continue
             start = entity.start if entity_type == "caption" else entity.timeline_start
@@ -1736,12 +1738,25 @@ class EditService:
                 continue
             if upper is not None and start >= upper:
                 continue
-            found.append({key: record[key] for key in selected})
-            if len(found) > limit:
-                break
+            match_count += 1
+            # Count even matches beyond the response limit, but do not serialize
+            # their full records (which may include large effect/keyframe data).
+            if len(found) < limit:
+                record = entity.to_dict()
+                if entity_type == "clip":
+                    record.update(trackId=track_id, sourceName=searchable)
+                found.append({key: record[key] for key in selected})
+        if require_unique and match_count > 1:
+            raise EditError(
+                ErrorCode.AMBIGUOUS_MATCH,
+                f"project_lookup matched {match_count} {entity_type} entities. "
+                "Narrow by time or an explicitly chosen entityId before editing; "
+                "limit does not disambiguate matches.",
+            )
         return {"projectId": project.project_id, "revision": project.revision,
-                "entityType": entity_type, "items": found[:limit],
-                "hasMore": len(found) > limit}
+                "entityType": entity_type, "items": found,
+                "hasMore": match_count > limit,
+                "matchCount": match_count, "ambiguous": match_count > 1}
 
     # ------------------------------------------------------------------
     # Agent 编辑租约：协调“可见但只读”，智能决策仍在外部 Agent。
@@ -1797,10 +1812,54 @@ class EditService:
                 "expiresAt": now + ttl,
                 "acquiredAt": current["acquiredAt"] if current else now,
             }
+            if current is None:
+                self._lease_review_boundaries[project_id] = (
+                    len(self._events.get(project_id, [])), self.get_project(project_id).revision)
             self._edit_leases[project_id] = lease
             return dict(lease)
         except EditLeaseConflict as e:
             raise self._lease_failure(e) from e
+
+    @_serialize_memory_lease
+    def review_edit_lease(self, project_id: str, lease_id: str, limit: int = 20) -> dict:
+        """Bounded revision summaries, not payloads or a complete audit of side effects."""
+        if not isinstance(lease_id, str) or not lease_id.strip():
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "leaseId is required")
+        if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 50:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "limit must be an integer from 1 to 50")
+        if self._store is not None:
+            try:
+                result = self._store.review_edit_lease(project_id, lease_id, limit)
+            except EditLeaseConflict as exc:
+                raise self._lease_failure(exc) from exc
+        else:
+            current = self.get_edit_lease(project_id)
+            if current is None or current["leaseId"] != lease_id:
+                raise EditError(ErrorCode.EDIT_LEASE_INVALID, "Edit lease changed or expired. Refresh the project.")
+            boundary = self._lease_review_boundaries.get(project_id)
+            events = self._events.get(project_id, [])[boundary[0]:] if boundary else []
+            result = dict(available=boundary is not None, acquiredRevision=boundary[1] if boundary else None,
+                          revision=self.get_project(project_id).revision,
+                          events=[e.to_dict() for e in events[-limit:]], hasMore=len(events) > limit)
+        # Whitelist metadata: changedEntities can contain caption text, paths, or
+        # nested snapshots. Never return those payloads from this review view.
+        def summary(event):
+            counts: dict[tuple[str, str], int] = {}
+            entities = event.get("changedEntities", [])
+            for entity in entities:
+                def label(key):
+                    value = str(entity.get(key, "other"))
+                    return value if len(value) <= 64 and value.replace("_", "").replace(".", "").isalnum() else "other"
+                key = (label("type"), label("change"))
+                if key not in counts and len(counts) >= 12:
+                    key = ("other", "other")
+                counts[key] = counts.get(key, 0) + 1
+            return dict(previousRevision=event.get("previousRevision", ""),
+                        revision=event.get("revision", ""), commandId=str(event.get("commandId", ""))[:256],
+                        entityCount=len(entities),
+                        entityKinds=[dict(type=k[0], change=k[1], count=v) for k, v in counts.items()])
+        result["changes"] = [summary(e) for e in result.pop("events")]
+        return dict(projectId=project_id, leaseId=lease_id, **result)
 
     @_serialize_memory_lease
     def renew_edit_lease(self, project_id: str, lease_id: str,
@@ -3945,10 +4004,15 @@ class EditService:
                    "-ss", f"{s:.6f}", "-to", f"{e:.6f}",
                    "-acodec", "pcm_s16le", "-ar", "44100", out_path]
             try:
-                subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+                completed = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
             except subprocess.TimeoutExpired as ex:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 f"audio.splitSentences ffmpeg timeout: {ex}") from ex
+            if completed.returncode != 0:
+                raise EditError(
+                    ErrorCode.INVALID_ARGUMENT,
+                    f"audio.splitSentences failed at segment {cap['index']} "
+                    f"(ffmpeg exit code {completed.returncode})")
             segments_out.append({
                 "index": cap["index"],
                 "path": out_path,
