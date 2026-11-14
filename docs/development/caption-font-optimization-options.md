@@ -25,7 +25,8 @@ never silently select packaged output for another source.
 
 ### B. Subset before instantiation
 
-The accompanying explicit probe retains all layout features/scripts, glyph IDs,
+The probe requests all layout features/scripts, but the subsetter still prunes
+them according to the selected glyph closure. It requests retained glyph IDs,
 .notdef outlines and NFC/NFD closure. With seven synthetic text fixtures it took
 0.549s subsetting plus 0.398s instantiation. Output: 320,684 bytes; zlib level-9
 10,104 bytes. Two repeated same-environment builds were byte-identical with
@@ -33,6 +34,7 @@ recalcTimestamp=False: SHA256
 64df65670c44d3b1cc6b517fde6c6541c5217005b002aa3642d50beba4cf6b46.
 The test compares actual HarfBuzz glyph IDs/clusters/positions and exact outlines
 and horizontal metrics of 34 selected glyphs against the complete static font.
+This does not compare hinting instructions or libass rasterization.
 
 Two actual failed experiments matter:
 - Raw input characters plus full GSUB closure alone changed the shaping of
@@ -54,8 +56,20 @@ current `_caption_font_instance('Noto Sans SC', True)` in a fresh explicit
 CUTVOKE_FONT_CACHE, then pass its returned file:
 
 ```
-python tools/verify/probe_caption_subset.py --source src/cutvoke/assets/fonts/NotoSansSC-VF.ttf --baseline /absolute/path/to/full-700.ttf
+python tools/verify/probe_caption_subset.py --source src/cutvoke/assets/fonts/NotoSansSC-VF.ttf --baseline /absolute/path/to/full-700.ttf \
+  --expected-source-sha256 d68bafcb48a2707749396aa12bbbd833cb70401f3a9a689fd2902c7e0d295964 \
+  --expected-baseline-sha256 <digest-recorded-at-baseline-generation>
 ```
+
+The probe fails with a nonzero exit even under `python -O`. It verifies supplied
+input digests, a weight-only variable source covering 700, and a static 700 baseline,
+then reports input hashes, axes/weight classes, Python/fontTools/uharfbuzz/HarfBuzz
+versions. Record the baseline digest during trusted baseline generation; accepting
+an arbitrary input's own hash does not establish its provenance. For the measured
+baseline above the digest was
+`2c1ee6fbd1a57bdaa6950ccec3ef5888e7f88cd2c683a6e24ae2e69a10b2c2ab`;
+another build may differ due to timestamps. Metadata and hash checks alone do not
+prove that a baseline was generated from this source by the required recipe.
 
 ## Gates before adopting B
 
