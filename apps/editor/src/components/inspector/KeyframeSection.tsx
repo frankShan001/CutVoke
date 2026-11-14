@@ -23,7 +23,7 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   const [kfValue, setKfValue] = useState("1");
   const [kfInterp, setKfInterp] = useState<KeyframeInterpolation>("linear");
   const [bezier,setBezier] = useState<Bezier>([.25,.1,.25,1]);
-  const [selected,setSelected] = useState<string[]>([]);
+  const [selectedIds,setSelected] = useState<string[]>([]);
   const [offset,setOffset] = useState("0");
   const [timeScale,setTimeScale] = useState("1");
   const [draft,setDraft] = useState<Keyframe[] | null>(null);
@@ -49,9 +49,17 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   });
   const spec = options.find(option=>option.name===param) || options[0];
   const lane = draft || [...(clip.keyframes?.[param] || [])].sort((a,b)=>rationalToSecs(a.time)-rationalToSecs(b.time));
+  const selected = selectedIds.filter(id => (clip.keyframes?.[param] || []).some(frame => frame.id === id));
   const readOnly = Boolean(state.editLock) || saving;
   useEffect(()=>{setSelected([]);setDraft(null);setParam(audio?"volume":"opacity");},[clip.id,audio]);
   useEffect(()=>{setDraft(null);},[clip.keyframes]);
+  useEffect(()=>{
+    const valid = new Set((clip.keyframes?.[param] || []).map(frame => frame.id));
+    setSelected(current => {
+      const retained = current.filter(id => valid.has(id));
+      return retained.length === current.length ? current : retained;
+    });
+  },[clip.keyframes,param]);
   useEffect(()=>{
     const selectChannel=(event: Event)=>{
       const detail=(event as CustomEvent<{clipId:string;param:string}>).detail;
