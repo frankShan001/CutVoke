@@ -2430,7 +2430,11 @@ test("prepared playback follows the ruler, stops at the end, and survives an Age
   await ruler.press("End");
   await expect(ruler).toHaveAttribute("aria-valuenow", "15");
   await page.getByRole("button", { name: "停止" }).click();
-  await page.mouse.click(bounds!.x + 14.8 * 40, bounds!.y + bounds!.height / 2);
+  // Use the ruler's frame-aware navigation rather than cached pixel bounds:
+  // layout/scroll changes after Stop must not turn the near-end seek into a no-op.
+  await ruler.press("End");
+  for (let frame = 0; frame < 3; frame++) await ruler.press("ArrowLeft");
+  await expect.poll(async () => Number(await ruler.getAttribute("aria-valuenow"))).toBeCloseTo(14.8, 4);
   await page.getByRole("button", { name: "播放", exact: true }).click();
   await expect(page.getByRole("button", { name: "播放", exact: true })).toBeVisible({ timeout: 8_000 });
   await expect(ruler).toHaveAttribute("aria-valuenow", "15");
