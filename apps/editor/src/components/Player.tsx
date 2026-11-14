@@ -482,7 +482,9 @@ export function Player() {
     const v = event.currentTarget;
     if (v !== videoRef.current) return;
     if (scrubbingRef.current) return;
-    if (audioTransportRef.current.active && playingRef.current) return;
+    // A ready native mix owns the start even before its asynchronous startup
+    // commits. Preview video can already advance while the audio RAF is delayed.
+    if ((nativeAudioRef.current || audioTransportRef.current.active) && playingRef.current) return;
     const absoluteTime = windowStart + v.currentTime;
     // A native preview can be stale or longer than the current editable sequence.
     // The editor's content boundary is authoritative for both playback and scrubbing.

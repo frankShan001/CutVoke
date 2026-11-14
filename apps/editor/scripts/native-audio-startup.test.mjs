@@ -226,3 +226,33 @@ test('real play handler honors the timeline seek while decoder still reports its
     assert.equal(actions.some(a=>a.type==='PLAYHEAD_SET'&&a.t===0),playhead===15);
   }
 });
+
+// Execute Player's actual callback: a video timeupdate may arrive before the
+// delayed native-audio RAF starts/commits the already-ready mix.
+function playerTimeupdate({ native = true, active = false, playing = true } = {}) {
+  const source = readFileSync(new URL('../src/components/Player.tsx', import.meta.url), 'utf8');
+  const file = ts.createSourceFile('Player.tsx', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let callback;
+  const visit = node => {
+    if (ts.isVariableDeclaration(node) && node.name.getText(file) === 'onTimeUpdate') callback = node.initializer.arguments[0].getText(file);
+    ts.forEachChild(node, visit);
+  }; visit(file);
+  const video = { currentTime: 3.217, paused: !playing }, actions = [], times = [];
+  const context = { exports: {}, videoRef: { current: video }, scrubbingRef: { current: false },
+    nativeAudioRef: { current: native }, audioTransportRef: { current: { active } }, playingRef: { current: playing },
+    windowStart: 0, loopRef: { current: { enabled: false, in: null, out: null } }, mode: 'video',
+    usePrepared: true, mediaEndSecs: 6, setVideoTime: t => times.push(t), playheadRef: { current: 3 },
+    reportedVideoTimeRef: { current: 3 }, suppressSeek: { current: false }, dispatchRef: { current: action => actions.push(action) } };
+  runInNewContext(ts.transpileModule(`exports.callback = ${callback}`, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText, context);
+  context.exports.callback({ currentTarget: video });
+  return { actions, times };
+}
+test('ready native mix owns start position before asynchronous startup commits', () => {
+  const result = playerTimeupdate();
+  assert.equal(result.actions.length, 0, 'preview video must not advance the selected audio start');
+  assert.equal(result.times.length, 0);
+});
+test('video remains the fallback clock without a ready native mix', () => {
+  const result = playerTimeupdate({ native: false });
+  assert.equal(result.actions[0].t, 3.217);
+});
