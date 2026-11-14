@@ -4,12 +4,14 @@ import json
 import os
 from pathlib import Path
 import socket
+import signal
+import shutil
 import subprocess
 import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[2]
-SCENARIO = "^title edits preview immediately, save without applying, and share canvas selection$"
+SCENARIO = "title edits preview immediately, save without applying, and share canvas selection$"
 
 
 def available_port():
@@ -34,6 +36,28 @@ def verify_cache(cache, assets):
     return {"weight": 700, "sha256": expected, "cache": name}
 
 
+def run_bounded(command, *, timeout=180, grace=5, **kwargs):
+    # This hosted acceptance helper is POSIX-only; own the entire process group.
+    if os.name != "posix":
+        raise RuntimeError("cold title acceptance currently requires POSIX")
+    process = subprocess.Popen(command, start_new_session=True, **kwargs)
+    try:
+        return process.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        os.killpg(process.pid, signal.SIGTERM)
+        try:
+            process.wait(timeout=grace)
+        except subprocess.TimeoutExpired:
+            pass
+        # Kill remaining members of our group, including detached npx children.
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.wait()
+        return 124
+
+
 def main():
     out = ROOT / ".artifacts/cold-title"
     out.mkdir(parents=True, exist_ok=True)
@@ -49,24 +73,32 @@ def main():
                        CUTVOKE_E2E_PORT=str(port), CUTVOKE_FONT_CACHE=str(cache),
                        CUTVOKE_E2E_PREVIEW_DIAGNOSTICS="1")
             env.pop("CUTVOKE_FONT", None)
+            screenshots = [ROOT / ".artifacts" / name for name in (
+                "title-live-edit.png", "title-live-canvas.png", "title-render-reference.png")]
+            before = {p: p.stat().st_mtime_ns if p.exists() else None for p in screenshots}
             started = time.monotonic()
-            result = subprocess.run(["npx", "playwright", "test", "e2e/editor.spec.ts",
+            exit_code = run_bounded(["npx", "playwright", "test", "e2e/editor.spec.ts",
                 "--grep", SCENARIO, "--workers=1", "--retries=0", "--trace=on",
                 f"--output={out / str(run)}"], cwd=ROOT / "apps/editor", env=env)
+            evidence = out / str(run)
+            evidence.mkdir(parents=True, exist_ok=True)
+            for screenshot in screenshots:
+                if screenshot.exists() and screenshot.stat().st_mtime_ns != before[screenshot]:
+                    shutil.copy2(screenshot, evidence / screenshot.name)
             record = {"run": run, "port": port, "freshServer": True, "initialCacheEntries": 0,
                       "testTimeoutMs": 45000, "processSeconds": time.monotonic() - started,
-                      "exitCode": result.returncode,
+                      "exitCode": exit_code,
                       "scope": "processSeconds includes server startup; test duration is in Playwright trace"}
             reports.append(record)
             (out / "verification.json").write_text(json.dumps(reports, indent=2) + "\n", "utf-8")
-            if result.returncode:
+            if exit_code:
                 raise RuntimeError(f"title flow failed in independent cold run {run}")
             with socket.socket() as sock:
                 sock.settimeout(1)
                 if sock.connect_ex(("127.0.0.1", port)) == 0:
                     raise RuntimeError("Playwright server still listening after scenario")
             record["packagedBoldCache"] = verify_cache(cache, assets)
-            record["serverStopped"] = True
+            record["serverPortClosed"] = True
             (out / "verification.json").write_text(json.dumps(reports, indent=2) + "\n", "utf-8")
 
 
