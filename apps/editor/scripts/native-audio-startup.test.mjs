@@ -1,0 +1,81 @@
+import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import ts from 'typescript';
+const deferred = () => { let resolve, reject; const promise = new Promise((a,b) => { resolve=a; reject=b; }); return { promise, resolve, reject }; };
+const flush = async () => { for(let i=0;i<20;i++) await Promise.resolve(); };
+function harness() {
+  const timers = new Map(); let timer=0;
+  const exports = {};
+  runInNewContext(ts.transpileModule(readFileSync(new URL('../src/lib/nativeAudioStartup.ts', import.meta.url),'utf8'),
+    { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText,
+    { exports, AbortController, setTimeout: f => { timers.set(++timer,f); return timer; }, clearTimeout: id => timers.delete(id) });
+  let commits=0, failures=0, current=true;
+  const resume=deferred();
+  const context={ state:'suspended', resume:()=>resume.promise };
+  const plays=[deferred(),deferred()];
+  const elements=plays.map(play => Object.assign(new EventTarget(), { paused:true, muted:false, currentTime:3, seeking:false,
+    pause(){this.paused=true;}, play(){return play.promise.then(()=>{this.paused=false;});} }));
+  const voices=elements.map(element=>({element,time:3}));
+  const start=new exports.NativeAudioStartup();
+  const request={key:'a',voices,context,current:()=>current,commit:()=>{commits++;return true;},failed:()=>failures++};
+  return {start,request,context,resume,plays,elements,timers,commit:()=>commits,failures:()=>failures,setCurrent:v=>current=v,
+    unlock:async()=>{context.state='running';resume.resolve();await flush();}};
+}
+test('suspended context and delayed play keep transport uncommitted and all voices muted',async()=>{
+  const h=harness();h.start.start(h.request);await flush();assert.equal(h.commit(),0);
+  await h.unlock();h.plays[0].resolve();await flush();h.elements[0].currentTime=3.3;
+  assert.equal(h.commit(),0);assert.ok(h.elements.every(e=>e.muted));
+  h.plays[1].resolve();await flush();assert.equal(h.commit(),1);
+  assert.ok(h.elements.every(e=>!e.muted && e.currentTime===3));assert.equal(h.timers.size,0);
+});
+test('partial success then rejection rolls every voice back and latches failure',async()=>{
+  const h=harness();h.start.start(h.request);await h.unlock();h.plays[0].resolve();await flush();h.plays[1].reject();await flush();
+  assert.equal(h.commit(),0);assert.equal(h.failures(),1);assert.ok(h.elements.every(e=>e.paused&&e.muted));
+  assert.equal(h.start.start(h.request),'failed');assert.equal(h.timers.size,0);
+});
+test('pause or scope change before late play resolution never commits or leaves stale voice running',async()=>{
+  for(const cancel of [false,true]){
+    const h=harness();h.start.start(h.request);await h.unlock();h.setCurrent(false);if(cancel)h.start.cancel();
+    h.plays.forEach(p=>p.resolve());await flush();assert.equal(h.commit(),0);assert.equal(h.failures(),0);assert.ok(h.elements.every(e=>e.paused&&e.muted));
+  }
+});
+test('a stale resolution cannot pause voices now owned by a new generation',async()=>{
+  const h=harness();h.start.start(h.request);await h.unlock();h.start.cancel();
+  const old=h.plays.slice();const newer=[deferred(),deferred()];
+  h.elements.forEach((e,i)=>e.play=()=>newer[i].promise.then(()=>{e.paused=false;}));
+  h.start.start({...h.request,key:'b'});await flush();newer.forEach(p=>p.resolve());await flush();assert.equal(h.commit(),1);
+  old.forEach(p=>p.resolve());await flush();assert.equal(h.commit(),1);assert.ok(h.elements.every(e=>!e.paused));
+});
+test('seek completion is a barrier before playback and after asynchronous preparation',async()=>{
+  const h=harness();h.elements.forEach(e=>e.seeking=true);h.start.start(h.request);await h.unlock();
+  h.plays.forEach(p=>p.resolve());await flush();assert.equal(h.commit(),0);
+  h.elements.forEach(e=>e.dispatchEvent(new Event('seeked')));await flush();assert.equal(h.commit(),0);
+  h.elements.forEach(e=>{e.seeking=false;e.dispatchEvent(new Event('seeked'));});await flush();assert.equal(h.commit(),1);
+});
+test('resume rejection and non-running context fail closed without transport',async()=>{
+  for(const rejection of [true,false]){const h=harness();h.start.start(h.request);if(rejection)h.resume.reject();else h.resume.resolve();await flush();assert.equal(h.commit(),0);assert.equal(h.failures(),1);assert.ok(h.elements.every(e=>e.paused&&e.muted));}
+});
+test('bounded startup timeout rolls back and late completion cannot revive it',async()=>{
+  const h=harness();h.start.start(h.request);await h.unlock();[...h.timers.values()][0]();await flush();
+  h.plays.forEach(p=>p.resolve());await flush();assert.equal(h.commit(),0);assert.equal(h.failures(),1);assert.ok(h.elements.every(e=>e.paused&&e.muted));
+});
+test('cancelled seek listeners cannot commit when old seeked arrives',async()=>{
+  const h=harness();h.elements.forEach(e=>e.seeking=true);h.start.start(h.request);await h.unlock();h.start.cancel();
+  h.elements.forEach(e=>e.dispatchEvent(new Event('seeked')));await flush();assert.equal(h.commit(),0);assert.equal(h.failures(),0);assert.equal(h.timers.size,0);
+});
+test('a voice advancing too far during another seek fails closed rather than skipping the start',async()=>{
+  const h=harness();h.start.start(h.request);await h.unlock();h.elements.forEach(e=>e.seeking=true);h.plays.forEach(p=>p.resolve());await flush();
+  h.elements[0].seeking=false;h.elements[0].dispatchEvent(new Event('seeked'));h.elements[0].currentTime=3.2;
+  h.elements[1].seeking=false;h.elements[1].dispatchEvent(new Event('seeked'));await flush();
+  assert.equal(h.commit(),0);assert.equal(h.failures(),1);assert.ok(h.elements.every(e=>e.paused&&e.muted));
+});
+test('context interruption after startup rolls the mix back without a second commit',async()=>{
+  const h=harness();h.start.start(h.request);await h.unlock();h.plays.forEach(p=>p.resolve());await flush();assert.equal(h.commit(),1);
+  h.context.state='suspended';assert.equal(h.start.start(h.request),'failed');assert.equal(h.commit(),1);assert.equal(h.failures(),1);assert.ok(h.elements.every(e=>e.paused&&e.muted));
+});
+test('commit refusal leaves no audible native voice',async()=>{
+  const h=harness();h.request.commit=()=>false;h.start.start(h.request);await h.unlock();h.plays.forEach(p=>p.resolve());await flush();
+  assert.equal(h.failures(),1);assert.ok(h.elements.every(e=>e.paused&&e.muted));
+});

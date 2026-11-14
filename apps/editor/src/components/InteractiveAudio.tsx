@@ -4,6 +4,7 @@ import { pendingCommands, useInteractionProject } from "../store/interactive";
 import { probeMedia } from "../lib/mediaApi";
 import { rationalToSecs } from "../lib/rational";
 import { STOP_AUDITION_AUDIO_EVENT } from "../lib/transcript";
+import { NativeAudioStartup, type StartupVoice } from "../lib/nativeAudioStartup";
 import { sourceTime } from "./InteractiveScene";
 
 const AUDIO_FX = new Set(["cutvoke.fx.equalizer", "cutvoke.fx.compressor", "cutvoke.fx.loudnorm", "cutvoke.fx.pan", "cutvoke.fx.sidechainDuck"]);
@@ -13,7 +14,7 @@ type Voice = { element: HTMLAudioElement; gain?: GainNode; analyser?: AnalyserNo
 /** One gain envelope per clip. Moving a fader never re-encodes the mixed video. */
 export function InteractiveAudio({ playing, onReady, playbackClock, onClockSource }: {
   playing: boolean; onReady(ready: boolean): void;
-  playbackClock(initialize?: boolean): { time: number; playing: boolean } | null;
+  playbackClock(initialize?: boolean, reset?: boolean): { time: number; playing: boolean } | null;
   onClockSource(clock: (() => number) | null): void;
 }) {
   const { state } = useEditor();
@@ -21,11 +22,13 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
   const context = useRef<AudioContext | null>(null);
   const client = useRef(crypto.randomUUID()), serial = useRef(0);
   const voices = useRef(new Map<string, Voice>());
+  const startup = useRef(new NativeAudioStartup());
   const meter = useRef<HTMLOutputElement>(null);
-  const latest = useRef({ project, time: state.playhead, playing, onReady, playbackClock, onClockSource });
-  latest.current = { project, time: state.playhead, playing, onReady, playbackClock, onClockSource };
+  const latest = useRef({ project, scope: state.currentId, time: state.playhead, seek: state.playheadSeekVersion, scrubbing: state.scrubbing, playing, onReady, playbackClock, onClockSource });
+  latest.current = { project, scope: state.currentId, time: state.playhead, seek: state.playheadSeekVersion, scrubbing: state.scrubbing, playing, onReady, playbackClock, onClockSource };
   useEffect(() => {
     const pause = (event: Event) => {
+      startup.current.cancel();
       const time = (event as CustomEvent<{ time?: number }>).detail?.time;
       for (const [id, voice] of voices.current) {
         voice.element.pause();
@@ -61,7 +64,7 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
       const time = clock?.time ?? latest.current.time;
       const running = clock?.playing ?? latest.current.playing;
       const activeIds = new Set<string>();
-      const playable: HTMLAudioElement[] = [];
+      const playable: StartupVoice[] = [];
       let hasAudio = false, allReady = true;
       // A sidechain needs the other clips' key streams. Keep the complete
       // server mix audible instead of preparing an isolated, unducked clip.
@@ -131,17 +134,17 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
           const element = voice.element;
           // During a window handoff/buffer stall, stop before repositioning.
           // Otherwise the old voice runs ahead while the new video is starting.
-          if (!running && !element.paused) element.pause();
+          if (!running && !startup.current.pending(element) && !element.paused) element.pause();
           element.preservesPitch = clip.preservePitch !== false;
           const target = voice.prepared ? time - start : sourceTime(clip, time);
-          if (element.readyState >= 1 && Math.abs(element.currentTime - target) > (running ? .14 : .02)) element.currentTime = Math.min(Math.max(0, element.duration - .001), target);
+          if (!startup.current.pending(element) && element.readyState >= 1 && Math.abs(element.currentTime - target) > (running ? .14 : .02)) element.currentTime = Math.min(Math.max(0, element.duration - .001), target);
           element.playbackRate = voice.prepared ? 1 : Math.min(16, Math.max(.0625, rationalToSecs(clip.speed) || 1));
           const fadeIn = rationalToSecs(clip.fadeIn) || 0, fadeOut = rationalToSecs(clip.fadeOut) || 0;
           const volume = clip.volume ? rationalToSecs(clip.volume) : 1;
           const envelope = Math.min(1, Math.max(0, fadeIn > 0 ? (time - start) / fadeIn : 1))
             * Math.min(1, Math.max(0, fadeOut > 0 ? (end - time) / fadeOut : 1));
           voice.gain?.gain.setValueAtTime(Math.max(0, volume * envelope), context.current!.currentTime);
-          playable.push(element);
+          playable.push({ element, time: Math.min(Math.max(0, element.duration - .001), target) });
         }
       }
       for (const [id, voice] of voices.current) if (!activeIds.has(id)) {
@@ -150,17 +153,22 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
       }
       const enabled = hasAudio && allReady && !unsupportedMix && !sidechainMix;
       // Never play a partial native mix together with the server mix.
-      if (!enabled) for (const voice of voices.current.values()) voice.element.pause();
-      else {
-        // Commit playback only after every active voice is ready and positioned.
-        // A partially ready mix must neither start the transport nor any voice.
-        const start = latest.current.playbackClock(true);
-        if (start?.playing ?? latest.current.playing) {
-          void context.current?.resume();
-          for (const element of playable) if (element.paused) void element.play().catch(() => {});
-        } else for (const element of playable) element.pause();
+      const key = JSON.stringify([latest.current.scope, snapshot?.projectId, snapshot?.revision, latest.current.seek]);
+      if (!enabled || !latest.current.playing || latest.current.scrubbing) {
+        startup.current.cancel();
+        if (!enabled) latest.current.playbackClock(false, true);
+        for (const voice of voices.current.values()) voice.element.pause();
+        ready(enabled);
+      } else {
+        const phase = startup.current.start({ key, voices: playable, context: context.current!,
+          current: () => !disposed && latest.current.project === snapshot && latest.current.playing && !latest.current.scrubbing &&
+            JSON.stringify([latest.current.scope, latest.current.project?.projectId, latest.current.project?.revision, latest.current.seek]) === key,
+          begin: () => { latest.current.playbackClock(false, true); },
+          commit: () => latest.current.playbackClock(true)?.playing === true,
+          failed: () => { latest.current.playbackClock(false, true); latest.current.onReady(false); },
+        });
+        ready(phase !== 'failed');
       }
-      ready(enabled);
       if (meter.current) {
         let energy = 0;
         for (const voice of voices.current.values()) if (voice.analyser) {
@@ -174,7 +182,7 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
     };
     frame = requestAnimationFrame(update);
     return () => {
-      disposed = true; cancelAnimationFrame(frame);
+      disposed = true; startup.current.cancel(); cancelAnimationFrame(frame);
       for (const voice of voices.current.values()) { voice.disposed = true; voice.controller.abort(); voice.element.pause(); voice.gain?.disconnect(); if (voice.url) URL.revokeObjectURL(voice.url); }
       voices.current.clear(); latest.current.onClockSource(null);
       void context.current?.close(); context.current = null;

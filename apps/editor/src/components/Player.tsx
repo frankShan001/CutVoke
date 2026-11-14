@@ -215,14 +215,15 @@ export function Player() {
   const windowBoundsRef = useRef({ start: windowStart, end: windowEnd, source: videoUrl });
   windowBoundsRef.current = { start: windowStart, end: windowEnd, source: videoUrl };
   const auditionBoundary = useRef<(time: number) => number | null>(() => null);
-  const audioPlaybackClock = useCallback((initialize = false) => {
+  const audioPlaybackClock = useCallback((initialize = false, reset = false) => {
+    if (reset) { audioTransportRef.current.active = false; return { time: playheadRef.current, playing: false }; }
     const bounded = (time: number, running: boolean) => {
       const end = auditionBoundary.current(time);
       return end === null ? { time, playing: running } : { time: end, playing: false };
     };
     // With a ready native mix, audio owns the transport. Video decoding and
     // segment handoffs must not pause or rewind a healthy sound stream.
-    if (mode === "video" && (nativeAudioRef.current || audioTransportRef.current.active) && playingRef.current && !scrubbingRef.current) {
+    if (mode === "video" && (nativeAudioRef.current || audioTransportRef.current.active || (initialize && nativeAudioClockRef.current)) && playingRef.current && !scrubbingRef.current) {
       const transport = audioTransportRef.current;
       const source = nativeAudioClockRef.current;
       const now = source?.() ?? performance.now() / 1000;
