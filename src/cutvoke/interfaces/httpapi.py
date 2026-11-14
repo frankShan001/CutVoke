@@ -2339,6 +2339,12 @@ class HttpApi:
                 except (TypeError, ValueError):
                     raise EditError(ErrorCode.INVALID_ARGUMENT,
                                     "limit must be 1..50") from None
+                require_unique = body.get("requireUnique", False)
+                if isinstance(require_unique, str):
+                    if require_unique.lower() not in ("true", "false"):
+                        raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                        "requireUnique must be true or false")
+                    require_unique = require_unique.lower() == "true"
                 raw_fields = body.get("fields")
                 fields = raw_fields.split(",") if isinstance(raw_fields, str) else None
                 return 200, self.service.project_lookup(
@@ -2348,7 +2354,7 @@ class HttpApi:
                     at_seconds=body.get("atSeconds"),
                     from_seconds=body.get("fromSeconds"),
                     to_seconds=body.get("toSeconds"),
-                    fields=fields, limit=limit,
+                    fields=fields, limit=limit, require_unique=require_unique,
                 )
 
             if method == "POST" and len(parts) == 5 and parts[4] == "commands":
@@ -3226,7 +3232,7 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             for key in ("category", "subcategory", "family", "qualifiedOnly", "effectId", "clipId", "duration", "lang", "path", "w",
                         "q", "appliesTo", "favoritesOnly", "recentOnly", "rev",
                         "entityType", "entityId", "textContains", "atSeconds", "compareClipId",
-                        "fromSeconds", "toSeconds", "fields", "limit", "index", "editorTitles",
+                        "fromSeconds", "toSeconds", "fields", "limit", "requireUnique", "index", "editorTitles",
                         "token", "kind", "from", "to", "trackId", "time", "projectId"):
                 if key in qs:
                     body[key] = qs[key][0]

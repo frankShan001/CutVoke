@@ -138,6 +138,8 @@ Once CutVoke is connected to Claude Desktop, Cursor, or any MCP client, you can 
 
 > *"Use the `cutvoke-editor` documentary workflow to assemble the footage in `./raw_clips` into a 60-second highlight reel synced to `bgm.mp3`, review the rendered keyframes for any awkward cuts, and let me fine-tune the title animations in the UI."*
 
+For a single-caption correction, `project_lookup(requireUnique=true)` rejects multiple matches even with `limit=1`. Narrow by time or an explicitly chosen ID, and proceed only when `matchCount=1` identifies the intended caption. See the [agent editing guide](docs/user/external-agent-editing.md).
+
 ## Key Features
 
 ### 1. Visual Multi-Track Editor Built for Creators

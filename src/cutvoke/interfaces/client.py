@@ -96,9 +96,13 @@ class CutVokeClient:
                        from_seconds: Optional[float] = None,
                        to_seconds: Optional[float] = None,
                        fields: Optional[list[str]] = None,
-                       limit: int = 10) -> dict:
+                       limit: int = 10, require_unique: bool = False) -> dict:
         """按需读取目标字幕或片段及指定字段，并取得可直接用于写入的 revision。"""
+        if not isinstance(require_unique, bool):
+            raise ValueError("require_unique must be a boolean")
         query: dict[str, Any] = {"entityType": entity_type, "limit": limit}
+        if require_unique:
+            query["requireUnique"] = "true"
         if entity_id:
             query["entityId"] = entity_id
         if text_contains:
