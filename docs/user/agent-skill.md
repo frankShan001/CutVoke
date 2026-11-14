@@ -4,6 +4,8 @@
 
 The **cutvoke-editor** skill teaches an external AI how to plan an edit, inspect local media, build a recoverable timeline, refine captions and sound, and check the final result. CutVoke also bundles its creative references through `editor_help`; the optional Skill supplies the entry workflow and local working conventions. It does not install a model or guarantee a beautiful result regardless of the source material.
 
+For a first dialogue-led edit, try the [talking-head and interview prompt pack](prompts-talking-head.md): ten requests with tool guidance, review checks and a reproducible synthetic-media verifier.
+
 ## Three layers, loaded on demand
 
 Use shared principles, the relevant purpose/work-type guide, then a plan for this project. Five branches cover music-video/art visual, documentary/travel, narrative, explanation/interview and promotion/showcase. Genre is a secondary influence; the user's requested expressive intensity determines the approach. A local correction reuses the approved direction and checks affected intervals, without a mandatory new treatment or full export.
