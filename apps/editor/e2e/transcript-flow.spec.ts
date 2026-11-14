@@ -447,18 +447,24 @@ test('native audio survives video to image to video recovery without a new seek 
       (window as any).__roundtripClock = (event as CustomEvent).detail;
     });
   });
-  const id = await fixture(request, 12); await open(page, id);
+  const id = await fixture(request, 12);
+  const persisted = await read(request, id);
+  const audioSource = persisted.sequence.tracks.find((t: any) => t.id === 'audio').clips[0].assetRef.sourcePath as string;
+  await open(page, id);
+  // Directory-backed projects import assets under content-hash filenames.
+  // Identify this exact persisted source, not the original library basename.
+  await page.evaluate(source => { (window as any).__roundtripSource = source; }, audioSource);
   const video = page.locator('video.player__video');
   const meter = page.getByTestId('live-audio-meter');
   await expect(meter).toHaveAttribute('data-ready', 'true', { timeout: 20_000 });
   await expect.poll(() => video.evaluate(v => (v as HTMLVideoElement).readyState)).toBeGreaterThan(1);
   await page.getByRole('button', { name: '播放', exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as any).__roundtripAudios.some((a: HTMLAudioElement) =>
-    a.src.includes('tech_minimal') && !a.paused && !a.muted && a.currentTime > .1))).toBe(true);
+    a.src && new URL(a.src).searchParams.get('path') === (window as any).__roundtripSource && !a.paused && !a.muted && a.currentTime > .1))).toBe(true);
   // Inject only the decoder failure signal. Audio elements, AudioContext,
   // React mode transitions and the subsequent visual edit remain real.
   await video.evaluate(v => {
-    (window as any).__roundtripVoice = (window as any).__roundtripAudios.find((a: HTMLAudioElement) => a.src.includes('tech_minimal'));
+    (window as any).__roundtripVoice = (window as any).__roundtripAudios.find((a: HTMLAudioElement) => a.src && new URL(a.src).searchParams.get('path') === (window as any).__roundtripSource);
     Object.defineProperty(v, 'error', { configurable: true, value: { code: 3, message: 'controlled decoder failure' } });
     v.dispatchEvent(new Event('error'));
   });
