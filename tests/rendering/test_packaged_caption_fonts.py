@@ -105,3 +105,19 @@ def test_semantically_invalid_packaged_font_uses_original_path(tmp_path, monkeyp
             c._caption_font_instance("Noto Sans SC", False)
     original.assert_called_once_with(str(source), fontNumber=0)
     assert not list((tmp_path / "cache").iterdir())
+
+
+def test_distinct_verified_resource_bytes_use_distinct_cache_keys(tmp_path, monkeypatch):
+    source = tmp_path / "source.ttf"
+    source.write_bytes(b"source")
+    monkeypatch.setattr(c, "resolve_title_font", lambda *a, **k: str(source))
+    monkeypatch.setenv("CUTVOKE_FONT_CACHE", str(tmp_path / "cache"))
+    monkeypatch.setattr(c, "_css_font_size_to_ass", lambda *a: 32)
+    paths = []
+    for data in (b"version-a", b"version-b"):
+        monkeypatch.setattr(c, "_packaged_caption_font", lambda *a: data)
+        _, path = c._caption_font_instance("Noto Sans SC", False)
+        assert Path(path).read_bytes() == data
+        paths.append(path)
+    assert paths[0] != paths[1]
+    assert all("-v2-" in path for path in paths)

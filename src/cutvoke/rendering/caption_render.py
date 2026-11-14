@@ -256,7 +256,11 @@ def _caption_font_instance(family: str, bold: bool) -> tuple[str, str]:
              if os.environ.get("CUTVOKE_FONT_CACHE")
              else Path(tempfile.gettempdir()) / "cutvoke-caption-fonts")
     cache.mkdir(parents=True, exist_ok=True)
-    target = cache / f"{digest}-{weight}-v1.ttf"
+    packaged = _packaged_caption_font(source, digest, weight, alias)
+    # FontTools versions can alter BASE/GPOS/GSUB even for the same source.
+    # Bind packaged caches to the verified output bytes, not just source/weight.
+    suffix = f"v2-{hashlib.sha256(packaged).hexdigest()}" if packaged is not None else "v1"
+    target = cache / f"{digest}-{weight}-{suffix}.ttf"
     temporary: Optional[str] = None
     with _CAPTION_FONT_LOCK:
         try:
@@ -266,7 +270,6 @@ def _caption_font_instance(family: str, bold: bool) -> tuple[str, str]:
                         raise ValueError("invalid cached caption font")
                 _css_font_size_to_ass(32, family, str(target))
                 return alias, str(target)
-            packaged = _packaged_caption_font(source, digest, weight, alias)
             if packaged is not None:
                 fd, temporary = tempfile.mkstemp(prefix=".caption-", suffix=".ttf", dir=cache)
                 with os.fdopen(fd, "wb") as stream:
@@ -276,6 +279,7 @@ def _caption_font_instance(family: str, bold: bool) -> tuple[str, str]:
                 except Exception:
                     os.remove(temporary)
                     temporary = None
+                    target = cache / f"{digest}-{weight}-v1.ttf"
                     # Optional asset failed semantic validation: use the source.
                 else:
                     os.replace(temporary, target)

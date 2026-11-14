@@ -33,9 +33,11 @@ require review of this recipe, not silent generation with another font.
 - Runtime uses packaged data only for the exact bundled source path and digest,
   never when CUTVOKE_FONT is set. It checks resource hash, filename, license hash,
   static status, family alias, weight and metrics, then atomically publishes into
-  the existing CUTVOKE_FONT_CACHE path.
+  the existing CUTVOKE_FONT_CACHE directory. Packaged filenames use v2 plus the
+  verified resource SHA256; fallback retains v1. Different fontTools outputs
+  must not share an entry, even if source/weight match.
 - Missing, malformed or corrupt optional assets fall back to original conversion.
-  No cache-key/alias contract change or arbitrary manifest path is allowed.
+  Family aliases remain unchanged; no arbitrary manifest path is allowed.
 
 ## Actual Linux verification
 
@@ -72,3 +74,30 @@ generates and verifies assets before scenarios; it is still an editable-source
 browser run, not proof of a native packaged-app experience. The original fallback
 remains covered separately. Missing resources must fail this verifier, not pass
 by falling back. A green unrelated CI step is not proof of this path.
+
+## Cross-version review and cache isolation
+
+4.59.0 and 4.66.1 outputs differ in BASE/GPOS/GSUB, not just head timestamps.
+For example BASE is 266 versus 210 bytes. Therefore packaged cache keys now
+include the verified output SHA256. This avoids reusing a prior toolchain's cached
+output; unchanged legacy fallback continues using v1. A regression verifies two
+different packaged byte sequences cannot address the same cache file. The cache
+root and public return interface do not change.
+
+Actual Linux follow-up:
+- 4.59.0 built resources versus its own CUTVOKE_FONT fallback: all non-head
+  tables byte-identical for both weights (fallback took 19.126/16.129s in this run).
+- 4.66.1 same-version table comparison was already recorded above.
+- Eight real libass render cases: both weights × 4.59/4.66 packaged/fallback.
+  Seven fixed synthetic strings at 1280x720,32px,2pxoutline produced identical
+  frames and HarfBuzz glyph-ID/cluster/position tuples in all eight cases.
+  Fontselect was checked and frames were nonblack. These limited fixtures do
+  NOT prove all-Unicode layout equivalence, hence cache isolation remains needed.
+- Extracted the actual Python3.10 sdist from the prior candidate and built a wheel
+  in an isolated environment, installed it, and passed --require-installed with
+  runtime conversion forbidden for both weights (0.097/0.040s). This roundtrip
+  tests the pre-cache-isolation candidate, not a claim that later edits were
+  present in that archive.
+- Latest source cache-isolation tests:22 passed,8subtests; real-resource verifier
+  passes with runtime conversion forbidden. Cross-platform/native-app and latest
+  head packaged browser acceptance remain pending; no merge approval.
