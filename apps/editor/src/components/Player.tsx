@@ -215,7 +215,7 @@ export function Player() {
   const windowBoundsRef = useRef({ start: windowStart, end: windowEnd, source: videoUrl });
   windowBoundsRef.current = { start: windowStart, end: windowEnd, source: videoUrl };
   const auditionBoundary = useRef<(time: number) => number | null>(() => null);
-  const audioPlaybackClock = useCallback((initialize = true) => {
+  const audioPlaybackClock = useCallback((initialize = false) => {
     const bounded = (time: number, running: boolean) => {
       const end = auditionBoundary.current(time);
       return end === null ? { time, playing: running } : { time: end, playing: false };
@@ -226,7 +226,7 @@ export function Player() {
       const transport = audioTransportRef.current;
       const source = nativeAudioClockRef.current;
       const now = source?.() ?? performance.now() / 1000;
-      // A deadline observes progress; it must not start this clock before the
+      // Observers (publication, video and audition) must not start this clock before the
       // native-audio update gets its first frame and actually starts voices.
       if (!transport.active && !initialize) return { time: playheadRef.current, playing: false };
       if (!transport.active || transport.clock !== source) {
