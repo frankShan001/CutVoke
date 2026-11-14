@@ -94,7 +94,7 @@ function updateHarness(imageMode = false) {
   const voice={element,prepared:false,ready:true,hasAudio:true,signature:JSON.stringify(['p',clip.assetRef,[],undefined,undefined,null,null]),
     gain:{gain:{setValueAtTime:v=>stats.gains.push(v)}}};
   const voices=new Map([['a',voice]]);
-  const latest={current:{project:{projectId:'p',revision:1,sequence:{id:'s',tracks:[{id:'t',kind:'audio',clips:[clip]}]}},scope:'p',seek:0,time:3,playing:true,scrubbing:false,
+  const latest={current:{project:{projectId:'p',revision:1,sequence:{id:'s',tracks:[{id:'t',kind:'audio',clips:[clip]}]}},scope:'p',seek:0,time:3,playing:true,scrubbing:false,transportMode:imageMode?'image':'video',
     onReady:()=>{}, playbackClock:(initialize,reset)=>{if(reset){stats.reset++;active=false;}if(initialize){stats.commit++;active=true;}return imageMode?null:{time:3,playing:active};}}};
   const live={exports:{},latest,voices:{current:voices},startup:{current:host.start},context:{current:{state:'running',currentTime:10,resume:()=>Promise.resolve()}},
     meter:{current:null},disposed:false,frame:0,requestAnimationFrame:()=>1,AUDIO_FX:new Set(['audio-effect']),rationalToSecs:v=>v||0,sourceTime:(_clip,time)=>time};
@@ -133,4 +133,25 @@ test('real update pause and replay explicitly rearm a failed native attempt',asy
   h.element.play=play;h.update();await flush();assert.equal(h.stats.commit,0); // Failure stays latched, no RAF retry storm.
   h.latest.current.playing=false;h.update();h.latest.current.playing=true;h.update();await flush();
   assert.equal(h.stats.commit,1);assert.equal(h.element.paused,false);assert.equal(h.element.muted,false);
+});
+
+test('real Player clock and audio update restart transport on image to video handoff without seek or pause intent',async()=>{
+  const h=updateHarness(true);
+  const source=readFileSync(new URL('../src/components/Player.tsx',import.meta.url),'utf8');
+  const file=ts.createSourceFile('Player.tsx',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);let callback;
+  const visit=node=>{if(ts.isVariableDeclaration(node)&&node.name.getText(file)==='audioPlaybackClock')callback=node.initializer.arguments[0].getText(file);ts.forEachChild(node,visit);};visit(file);
+  let deviceTime=10;
+  const transport={current:{active:false,time:3,started:0,clock:null}};
+  const globals={exports:{},mode:'image',mediaEndSecs:6,audioTransportRef:transport,playheadRef:{current:3},
+    auditionBoundary:{current:()=>null},nativeAudioRef:{current:true},playingRef:{current:true},scrubbingRef:{current:false},
+    nativeAudioClockRef:{current:()=>deviceTime},performance:{now:()=>deviceTime*1000}};
+  runInNewContext(ts.transpileModule(`exports.clock=${callback}`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,globals);
+  h.latest.current.playbackClock=globals.exports.clock;
+  h.update();await flush();assert.equal(transport.current.active,false);assert.equal(h.element.paused,false);
+  // Same project, same source, same seekVersion, and playing remains true.
+  globals.mode='video';h.latest.current.transportMode='video';h.update();await flush();
+  assert.equal(transport.current.active,true);assert.equal(h.element.paused,false);assert.equal(h.element.muted,false);
+  deviceTime+=.1;assert.ok(Math.abs(globals.exports.clock().time-3.1)<.00001);
+  assert.equal(globals.exports.clock().playing,true);
+  const plays=h.stats.play;h.update();await flush();assert.equal(h.stats.play,plays); // No rearm every frame.
 });

@@ -25,8 +25,8 @@ type Voice = { element: HTMLAudioElement; gain?: GainNode; analyser?: AnalyserNo
   signature: string; prepared: boolean; ready: boolean; url?: string; disposed?: boolean; failed?: boolean; hasAudio?: boolean };
 
 /** One gain envelope per clip. Moving a fader never re-encodes the mixed video. */
-export function InteractiveAudio({ playing, onReady, playbackClock, onClockSource }: {
-  playing: boolean; onReady(ready: boolean): void;
+export function InteractiveAudio({ playing, transportMode, onReady, playbackClock, onClockSource }: {
+  playing: boolean; transportMode: "image" | "video"; onReady(ready: boolean): void;
   playbackClock(initialize?: boolean, reset?: boolean): { time: number; playing: boolean } | null;
   onClockSource(clock: (() => number) | null): void;
 }) {
@@ -37,8 +37,8 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
   const voices = useRef(new Map<string, Voice>());
   const startup = useRef(new NativeAudioStartup());
   const meter = useRef<HTMLOutputElement>(null);
-  const latest = useRef({ project, scope: state.currentId, time: state.playhead, seek: state.playheadSeekVersion, scrubbing: state.scrubbing, playing, onReady, playbackClock, onClockSource });
-  latest.current = { project, scope: state.currentId, time: state.playhead, seek: state.playheadSeekVersion, scrubbing: state.scrubbing, playing, onReady, playbackClock, onClockSource };
+  const latest = useRef({ project, scope: state.currentId, time: state.playhead, seek: state.playheadSeekVersion, scrubbing: state.scrubbing, playing, transportMode, onReady, playbackClock, onClockSource });
+  latest.current = { project, scope: state.currentId, time: state.playhead, seek: state.playheadSeekVersion, scrubbing: state.scrubbing, playing, transportMode, onReady, playbackClock, onClockSource };
   useEffect(() => {
     const pause = (event: Event) => {
       startup.current.cancel();
@@ -166,7 +166,7 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
       }
       const enabled = hasAudio && allReady && !unsupportedMix && !sidechainMix;
       // Never play a partial native mix together with the server mix.
-      const key = JSON.stringify([latest.current.scope, nativeAudioGeneration(snapshot), latest.current.seek]);
+      const key = JSON.stringify([latest.current.scope, latest.current.transportMode, nativeAudioGeneration(snapshot), latest.current.seek]);
       if (!enabled || !latest.current.playing || latest.current.scrubbing) {
         startup.current.cancel();
         if (!enabled) latest.current.playbackClock(false, true);
@@ -175,7 +175,7 @@ export function InteractiveAudio({ playing, onReady, playbackClock, onClockSourc
       } else {
         const phase = startup.current.start({ key, voices: playable, context: context.current!,
           current: () => !disposed && latest.current.playing && !latest.current.scrubbing &&
-            JSON.stringify([latest.current.scope, nativeAudioGeneration(latest.current.project), latest.current.seek]) === key,
+            JSON.stringify([latest.current.scope, latest.current.transportMode, nativeAudioGeneration(latest.current.project), latest.current.seek]) === key,
           begin: () => { latest.current.playbackClock(false, true); },
           commit: () => latest.current.playbackClock(true)?.playing ?? latest.current.playing,
           failed: () => { latest.current.playbackClock(false, true); latest.current.onReady(false); },

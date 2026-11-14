@@ -993,7 +993,7 @@ export function Player() {
             <span className="player__compare-label">{tr("正在生成调色前画面…")}</span>
           ) : null}
           {!state.opening && currentId && !showColorBefore && mode === "video" ? <InteractiveScene playing={playing} onReady={setNativeReady} /> : null}
-          {!state.opening && currentId ? <InteractiveAudio playing={playing} onReady={setNativeAudioReady} playbackClock={audioPlaybackClock} onClockSource={onNativeAudioClock} /> : null}
+          {!state.opening && currentId ? <InteractiveAudio playing={playing} transportMode={mode} onReady={setNativeAudioReady} playbackClock={audioPlaybackClock} onClockSource={onNativeAudioClock} /> : null}
           <InteractionStatus />
           <TransformCanvasOverlay />
           <MaskCanvasOverlay />
