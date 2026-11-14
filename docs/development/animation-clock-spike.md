@@ -68,3 +68,14 @@ intact. Total **31 passed**. This is conservative consistency checking, not a
 security/authentication mechanism; innocuous serialization differences may lose
 recovery. Old-client writes that discard metadata still lose reversibility.
 This protocol remains isolated and is not adopted by production commands.
+
+## Malformed optional recovery regression
+
+A malformed `prototypeRecovery.lanes` container (including a list or null), or
+non-object key entries, previously raised `AttributeError` instead of retaining
+valid visible motion. Structural checks now reject these optional recovery
+payloads before parsing. Six regression cases preserve all sampled visible
+values and leave input data unchanged. Cloud validation: **37 passed** with
+`PYTHONPATH=src python -m pytest tools/verify/prototype_animation_clock.py -q`.
+Only the isolated prototype changed. This is not a production trim fix, nor
+approval of the dual-representation format; old-client saves still lose recovery.

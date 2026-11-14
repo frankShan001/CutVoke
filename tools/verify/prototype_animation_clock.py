@@ -248,6 +248,11 @@ def decode_compat(wire):
     if not isinstance(recovery, dict) or recovery.get('version') != 1:
         return fallback, False
     try:
+        lanes = recovery['lanes']
+        if not isinstance(lanes, dict) or any(
+                not isinstance(keys, list) or any(not isinstance(k, dict) for k in keys)
+                for keys in lanes.values()):
+            return fallback, False
         candidate = Clock({name: [Keyframe.from_dict(k) for k in keys]
                           for name, keys in recovery['lanes'].items()},
                           R.from_json(**recovery['offset']), duration)
@@ -296,3 +301,19 @@ def test_guarded_compat_recovery_and_stale_edits(tmp_path, mode):
         decoded, retained = decode_compat(stale)
         assert not retained, mutate
         assert {name: [k.to_dict() for k in keys] for name, keys in decoded.lanes.items()} == stale['keyframes']
+
+
+@pytest.mark.parametrize('lanes', [None, [], 'invalid', {'x': None},
+                                  {'x': [None]}, {'x': ['invalid']}])
+def test_malformed_optional_recovery_keeps_visible_motion(lanes):
+    """A corrupt optional sidecar must not prevent loading valid visible data."""
+    original = Clock({'x': [Keyframe('a', R.of(0), 20),
+                            Keyframe('b', R.of(10), 100)]}, R.of(3), R.of(5))
+    wire = encode_compat(original)
+    wire['prototypeRecovery']['lanes'] = lanes
+    decoded, retained = decode_compat(wire)
+    assert not retained
+    for sample in range(41):
+        local = R.of(sample, 8)
+        assert decoded.value('x', local) == pytest.approx(original.value('x', local))
+    assert wire['prototypeRecovery']['lanes'] == lanes
