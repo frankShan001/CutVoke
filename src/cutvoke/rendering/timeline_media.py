@@ -127,6 +127,22 @@ def _waveform(render, source: str, clip, start: float, end: float, width: int, t
     image.save(target)
 
 
+def _valid_strip(path: Path, kind: str, width: int) -> bool:
+    """Validate bounded cached PNGs before reuse, including chunk checksums."""
+    try:
+        with path.open("rb") as source:
+            with Image.open(source) as image:
+                if image.format != "PNG" or image.size != (width, 36 if kind == "waveform" else 48):
+                    return False
+                image.verify()
+            source.seek(0)
+            with Image.open(source) as image:
+                image.load()
+        return True
+    except (OSError, ValueError, SyntaxError):
+        return False
+
+
 def timeline_media(*, render, clip, cache_dir: Path, kind: str, width: int,
                    start: float = 0, end: float | None = None) -> Path | None:
     """Return source-mapped PNG for a visible portion of one ordinary clip.
@@ -154,7 +170,7 @@ def timeline_media(*, render, clip, cache_dir: Path, kind: str, width: int,
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
     output = cache_dir / f"{digest}.png"
-    if output.is_file():
+    if _valid_strip(output, kind, width):
         try:
             os.utime(output, None)
             return output
@@ -165,13 +181,13 @@ def timeline_media(*, render, clip, cache_dir: Path, kind: str, width: int,
 
 
 def _build_strip(render, clip, source, cache_dir, output, kind, width, start, end):
-    if output.is_file():
+    if _valid_strip(output, kind, width):
         return output
     if not _WORKERS.acquire(timeout=30):
         raise RenderError("Timeline media is busy, please retry")
     temporary = cache_dir / f"{output.stem}-{uuid.uuid4().hex}.tmp.png"
     try:
-        if output.is_file():
+        if _valid_strip(output, kind, width):
             return output
         info = render.probe_media(str(source))
         if kind == "waveform":
@@ -206,7 +222,7 @@ def _build_strip(render, clip, source, cache_dir, output, kind, width, start, en
         except OSError:
             # A different HTTP/MCP process may have published the same complete
             # hash while a Windows reader holds its destination open.
-            if not output.is_file() or output.stat().st_size == 0:
+            if not _valid_strip(output, kind, width):
                 raise
         _prune(cache_dir)
         return output
