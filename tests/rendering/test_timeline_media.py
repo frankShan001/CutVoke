@@ -115,7 +115,8 @@ def test_invalid_ranges_fail_without_decoder(media, tmp_path):
             strip(tmp_path, clip(video), start=start, end=end)
 
 
-def test_same_source_strips_share_one_inflight_decode(media, tmp_path):
+@pytest.mark.parametrize("damaged", [False, True])
+def test_same_source_strips_share_one_inflight_decode(media, tmp_path, damaged):
     from concurrent.futures import ThreadPoolExecutor
     import threading
     video, _ = media
@@ -125,6 +126,9 @@ def test_same_source_strips_share_one_inflight_decode(media, tmp_path):
         with lock:
             calls.append(kwargs.get("time"))
         return original(*args, **kwargs)
+    if damaged:
+        cached = timeline_media(render=renderer, clip=clip(video), cache_dir=tmp_path, kind="thumbnail", width=192)
+        cached.write_bytes(b"broken cached image")
     renderer.thumbnail_media = counted
     def request(index):
         item = clip(video)
@@ -148,3 +152,34 @@ def test_peer_process_publishes_same_cache_while_windows_target_is_open(media, t
     output = strip(tmp_path, clip(video))
     assert Image.open(output).size == (192, 48)
     assert len(list(tmp_path.glob("*.png"))) == 1
+
+@pytest.mark.parametrize('kind', ['thumbnail', 'waveform'])
+@pytest.mark.parametrize('damage', ['empty', 'truncated', 'bad-crc', 'wrong-size'])
+def test_damaged_cached_strip_is_rebuilt(media, tmp_path, kind, damage):
+    source = media[0 if kind == 'thumbnail' else 1]
+    item = clip(source)
+    path = strip(tmp_path, item, kind)
+    before = path.read_bytes()
+    if damage == 'empty':
+        path.write_bytes(b'')
+    elif damage == 'truncated':
+        path.write_bytes(before[:40])
+    elif damage == 'bad-crc':
+        damaged = bytearray(before)
+        damaged[before.index(b'IDAT') + 5] ^= 1
+        path.write_bytes(damaged)
+    else:
+        Image.new('RGBA', (2, 2)).save(path)
+    assert strip(tmp_path, item, kind) == path
+    assert path.read_bytes() == before
+
+
+def test_failed_replace_does_not_accept_corrupt_peer_cache(media, tmp_path, monkeypatch):
+    import cutvoke.rendering.timeline_media as module
+    def corrupt_peer(source, destination):
+        Path(destination).write_bytes(b'not a png')
+        raise PermissionError(13, 'target held open')
+    monkeypatch.setattr(module.os, 'replace', corrupt_peer)
+    with pytest.raises(PermissionError):
+        strip(tmp_path, clip(media[0]))
+    assert not list(tmp_path.glob('*.tmp.png'))
