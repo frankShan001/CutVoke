@@ -430,6 +430,22 @@ test('obsolete transcript trial cannot block or clear a newer trial after sequen
 });
 
 test('a user keyboard seek within an audition cancels native audio before its boundary', async ({ page, request }, testInfo) => {
+  // Cache bounded, numeric evidence in the runner before the global test timeout.
+  // A page evaluation in catch may be unavailable after Playwright cancels the test.
+  const evidencePrefix = 'cutvoke-test-keyboard-evidence:';
+  let retainedEvidence: string | undefined;
+  let snapshots = 0;
+  const retainEvidence = (message: { text(): string }) => {
+    const text = message.text();
+    if (text.startsWith(evidencePrefix) && text.length <= 262144 && snapshots < 2) {
+      retainedEvidence = text.slice(evidencePrefix.length);
+      // Persist before the test deadline, not only from its cancelled catch block.
+      void testInfo.attach(`audition-keyboard-checkpoint-${++snapshots}`, {
+        body: retainedEvidence, contentType: 'application/json',
+      }).catch(() => { /* Diagnostics must not replace the test failure. */ });
+    }
+  };
+  page.on('console', retainEvidence);
   try {
   await page.addInitScript(() => {
     const elements: HTMLAudioElement[] = []; (window as any).__transcriptAudio = elements;
@@ -442,6 +458,11 @@ test('a user keyboard seek within an audition cancels native audio before its bo
   await page.evaluate(() => {
     const samples: object[] = []; let dropped = 0;
     (window as any).__keyboardEvidence = () => ({ samples, dropped });
+    // At most two emissions: the first observed playback stop, and one fallback.
+    // This does not participate in the keyboard predicate, promise or timeout.
+    const emitEvidence = () => console.debug('cutvoke-test-keyboard-evidence:' + JSON.stringify({ samples, dropped }));
+    setTimeout(emitEvidence, 5000);
+    let observedPlaying = false, emittedStop = false;
     (window as any).__keyboardSeek = new Promise<number>(resolve => {
       const seekWhileRunning = (event: Event) => {
         const sample = (event as CustomEvent).detail;
@@ -450,6 +471,10 @@ test('a user keyboard seek within an audition cancels native audio before its bo
         samples.push({ time: sample.time, playing: sample.playing,
           rulerTime: Number(document.querySelector('.timeline-ruler')?.getAttribute('aria-valuenow')),
           voices: audio.slice(0, 16).map(element => ({ time: element.currentTime, paused: element.paused, readyState: element.readyState })) });
+        if (sample.playing) observedPlaying = true;
+        if (observedPlaying && !sample.playing && !emittedStop) {
+          emittedStop = true; emitEvidence();
+        }
         if (!sample.playing || sample.time < 1.1 || sample.time >= 1.8 || !audio.some(element => !element.paused)) return;
         const ruler = document.querySelector<HTMLElement>('.timeline-ruler')!;
         const before = Number(ruler.getAttribute('aria-valuenow'));
@@ -472,10 +497,17 @@ test('a user keyboard seek within an audition cancels native audio before its bo
   await expect.poll(() => page.evaluate(() => (window as any).__transcriptAudio.every((audio: HTMLAudioElement) => audio.paused))).toBe(true);
   } catch (error) {
     try {
-      const evidence = await page.evaluate(() => (window as any).__keyboardEvidence?.());
-      await testInfo.attach('audition-keyboard-timeline', { body: JSON.stringify(evidence), contentType: 'application/json' });
+      // Prefer a fresh snapshot when possible, but never discard the runner cache.
+      let evidence = retainedEvidence;
+      try {
+        const current = await page.evaluate(() => (window as any).__keyboardEvidence?.());
+        if (current) evidence = JSON.stringify(current);
+      } catch { /* The original global timeout may already have closed the page. */ }
+      if (evidence) await testInfo.attach('audition-keyboard-timeline', { body: evidence, contentType: 'application/json' });
     } catch { /* Keep the original failure when the page cannot respond. */ }
     throw error;
+  } finally {
+    page.off('console', retainEvidence);
   }
 });
 
