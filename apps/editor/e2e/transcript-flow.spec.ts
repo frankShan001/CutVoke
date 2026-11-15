@@ -285,14 +285,48 @@ test('a lease acquired after trial blocks confirmed transcript deletion', async 
   }
 });
 
-test('audition ignores prior loop bounds and stops detached audio synchronously when hidden', async ({ page, request }) => {
+test('audition ignores prior loop bounds and stops detached audio synchronously when hidden', async ({ page, request }, testInfo) => {
+  try {
   await page.addInitScript(() => {
-    const elements: HTMLAudioElement[] = []; (window as any).__transcriptAudio = elements;
-    window.Audio = new Proxy(window.Audio, { construct(target, args) { const audio = Reflect.construct(target, args); elements.push(audio); return audio; } });
-    const history: Array<{ time: number; playing: boolean; audioRunning: boolean }> = [];
-    (window as any).__auditionHistory = history;
+    const captured: HTMLAudioElement[] = []; (window as any).__transcriptAudio = captured;
+    // Bounded numeric/event-only evidence: never record source URLs or project paths.
+    const began = performance.now();
+    const events: object[] = []; let dropped = 0;
+    const critical: object[] = []; let criticalDropped = 0;
+    const record = (kind: string, value: object) => {
+      // Keep the initial startup evidence even if transport ticks flood the tail.
+      if (events.length === 240) { events.splice(120, 1); dropped++; }
+      const sample = { ms: performance.now() - began, kind, ...value };
+      events.push(sample);
+      // Keep actual media transitions separate from per-frame transport/pause noise.
+      if (kind !== 'transport' && kind !== 'timeupdate' &&
+          (kind !== 'pause-call' || (value as { paused?: boolean }).paused === false)) {
+        if (critical.length === 160) { critical.splice(80, 1); criticalDropped++; }
+        critical.push(sample);
+      }
+    };
+    (window as any).__auditionEvidence = () => ({ events, dropped, critical, criticalDropped });
+    const Original = window.Audio;
+    window.Audio = new Proxy(Original, { construct(target, args) {
+      const audio = Reflect.construct(target, args) as HTMLAudioElement;
+      const voice = captured.length;
+      const state = () => ({ voice, time: audio.currentTime, paused: audio.paused,
+        muted: audio.muted, seeking: audio.seeking, readyState: audio.readyState,
+        networkState: audio.networkState, errorCode: audio.error?.code ?? null });
+      for (const kind of ['play', 'playing', 'pause', 'seeking', 'seeked', 'waiting', 'stalled', 'timeupdate', 'ended', 'error', 'loadeddata', 'canplay']) {
+        audio.addEventListener(kind, () => record(kind, state()));
+      }
+      const pause = audio.pause.bind(audio), play = audio.play.bind(audio);
+      audio.play = () => { record('play-call', state()); return play(); };
+      audio.pause = () => { record('pause-call', state()); pause(); };
+      captured.push(audio); return audio;
+    } });
+    (window as any).__auditionHistory = [];
     window.addEventListener('cutvoke:transport-clock', event => {
-      history.push({ ...(event as CustomEvent).detail, audioRunning: elements.some(audio => !audio.paused) });
+      const detail = (event as CustomEvent).detail;
+      const history = (window as any).__auditionHistory;
+      history.push({ ...detail, audioRunning: captured.some(audio => !audio.paused) });
+      record('transport', { time: detail.time, playing: detail.playing });
     });
   });
   const id = await fixture(request); const panel = await open(page, id);
@@ -335,6 +369,29 @@ test('audition ignores prior loop bounds and stops detached audio synchronously 
   const pausedImmediately = await page.evaluate(() => (window as any).__hiddenStopVerified);
   expect(pausedImmediately).toBe(true);
   await expect(page.locator('.player__play')).toHaveAttribute('aria-label', '播放');
+  } catch (error) {
+    try {
+      const evidence = await page.evaluate(() => {
+        const history = (window as any).__auditionHistory ?? [];
+        const retained = history.length <= 240 ? history : [...history.slice(0, 120), ...history.slice(-120)];
+        return ({
+        ...((window as any).__auditionEvidence?.() ?? {}),
+        history: retained.map((sample: { time: number; playing: boolean; end?: number; audioRunning: boolean }) => ({
+          time: sample.time, playing: sample.playing, end: sample.end, audioRunning: sample.audioRunning,
+        })),
+        historyDropped: history.length - retained.length,
+        voices: ((window as any).__transcriptAudio ?? []).slice(0, 16).map((audio: HTMLAudioElement, voice: number) => ({
+          voice, time: audio.currentTime, paused: audio.paused, seeking: audio.seeking,
+          readyState: audio.readyState, errorCode: audio.error?.code ?? null,
+        })),
+      });
+      });
+      await testInfo.attach('audition-loop-hidden-media-timeline', {
+        body: JSON.stringify(evidence, null, 2), contentType: 'application/json',
+      });
+    } catch { /* Preserve the original assertion/page failure. */ }
+    throw error;
+  }
 });
 
 test('obsolete transcript trial cannot block or clear a newer trial after sequence switch', async ({ page, request }) => {
