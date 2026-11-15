@@ -307,8 +307,6 @@ test('audition ignores prior loop bounds and stops detached audio synchronously 
     };
     (window as any).__auditionEvidence = () => ({ events, dropped, critical, criticalDropped });
     const Original = window.Audio;
-    (window as any).__nativePauseTimes = [];
-    (window as any).__nativePlayTimes = [];
     window.Audio = new Proxy(Original, { construct(target, args) {
       const audio = Reflect.construct(target, args) as HTMLAudioElement;
       const voice = captured.length;
@@ -319,8 +317,8 @@ test('audition ignores prior loop bounds and stops detached audio synchronously 
         audio.addEventListener(kind, () => record(kind, state()));
       }
       const pause = audio.pause.bind(audio), play = audio.play.bind(audio);
-      audio.play = () => { record('play-call', state()); (window as any).__nativePlayTimes.push(audio.currentTime); return play(); };
-      audio.pause = () => { record('pause-call', state()); if (!audio.paused) (window as any).__nativePauseTimes.push(audio.currentTime); pause(); };
+      audio.play = () => { record('play-call', state()); return play(); };
+      audio.pause = () => { record('pause-call', state()); pause(); };
       captured.push(audio); return audio;
     } });
     (window as any).__auditionHistory = [];
@@ -373,14 +371,21 @@ test('audition ignores prior loop bounds and stops detached audio synchronously 
   await expect(page.locator('.player__play')).toHaveAttribute('aria-label', '播放');
   } catch (error) {
     try {
-      const evidence = await page.evaluate(() => ({
+      const evidence = await page.evaluate(() => {
+        const history = (window as any).__auditionHistory ?? [];
+        const retained = history.length <= 240 ? history : [...history.slice(0, 120), ...history.slice(-120)];
+        return ({
         ...((window as any).__auditionEvidence?.() ?? {}),
-        history: (window as any).__auditionHistory ?? [],
+        history: retained.map((sample: { time: number; playing: boolean; end?: number; audioRunning: boolean }) => ({
+          time: sample.time, playing: sample.playing, end: sample.end, audioRunning: sample.audioRunning,
+        })),
+        historyDropped: history.length - retained.length,
         voices: ((window as any).__transcriptAudio ?? []).slice(0, 16).map((audio: HTMLAudioElement, voice: number) => ({
           voice, time: audio.currentTime, paused: audio.paused, seeking: audio.seeking,
           readyState: audio.readyState, errorCode: audio.error?.code ?? null,
         })),
-      }));
+      });
+      });
       await testInfo.attach('audition-loop-hidden-media-timeline', {
         body: JSON.stringify(evidence, null, 2), contentType: 'application/json',
       });
