@@ -4882,11 +4882,27 @@ for (const prepared of [true, false]) {
         }).catch(() => {});
       });
     }
-    await page.addInitScript((frameDiagnostics: boolean) => {
+    await page.addInitScript(({ frameDiagnostics, injectSeek }: { frameDiagnostics: boolean; injectSeek: boolean }) => {
       const voices: HTMLAudioElement[] = [];
       const frames: Array<{ source: string; identity: string; rgba: number[] }> = [];
       (window as typeof window & { gainVoices: typeof voices }).gainVoices = voices;
       (window as typeof window & { gainFrames: typeof frames }).gainFrames = frames;
+      // Counterfactual probe only: force a real decode invalidation before the
+      // unchanged observer samples an already-delivered loadeddata event.
+      // This demonstrates a possible ordering, not the cause of the original failure.
+      if (injectSeek) {
+        let injected = false;
+        document.addEventListener("loadeddata", event => {
+          const video = event.target;
+          if (injected || !(video instanceof HTMLVideoElement) || !video.matches(".player__video") ||
+              new URL(video.dataset.previewSource || "", location.href).searchParams.get("index") !== "1") return;
+          injected = true;
+          const before = { readyState: video.readyState, seeking: video.seeking, currentTime: video.currentTime };
+          video.currentTime = Math.min(.25, Math.max(.1, video.currentTime + .1));
+          console.debug("cutvoke-gain-frame:" + JSON.stringify({ phase: "injected-seek", index: "1", at: performance.now(), before,
+            readyState: video.readyState, seeking: video.seeking, currentTime: video.currentTime }));
+        }, true);
+      }
       document.addEventListener("loadeddata", event => {
         const video = event.target;
         if (!(video instanceof HTMLVideoElement) || !video.matches(".player__video")) return;
@@ -4913,7 +4929,11 @@ for (const prepared of [true, false]) {
           try { const context = canvas.getContext("2d")!; context.drawImage(video, 0, 0, 1, 1, 0, 0, 1, 1); rgba = [...context.getImageData(0, 0, 1, 1).data]; }
           catch (e) { error = e instanceof Error ? e.name : "unknown"; }
           const hold = document.querySelector<HTMLCanvasElement>(".player__continuity-frame");
-          console.debug("cutvoke-gain-frame:" + JSON.stringify({ phase, index,
+          let holdRgba: number[] | null = null;
+          if (hold && hold.width && hold.height) {
+            try { holdRgba = [...hold.getContext("2d")!.getImageData(0, 0, 1, 1).data]; } catch {}
+          }
+          console.debug("cutvoke-gain-frame:" + JSON.stringify({ phase, index, holdRgba,
             at: performance.now(), readyState: video.readyState, seeking: video.seeking,
             paused: video.paused, currentTime: video.currentTime, width: video.videoWidth,
             height: video.videoHeight, visible: getComputedStyle(video).visibility,
@@ -4937,7 +4957,7 @@ for (const prepared of [true, false]) {
           }, true);
         }
       }
-    }, frameDiagnostics);
+    }, { frameDiagnostics, injectSeek: process.env.CUTVOKE_GAIN_INJECT_SEEK === "1" });
     await openProject(page, name);
     const video = page.locator("video.player__video"), ruler = page.getByRole("slider", { name: "时间线播放头", exact: true });
     await expect(video).toHaveAttribute(prepared ? "src" : "data-preview-source", prepared ? /preview-jobs\/[^/]+\/media/ : /index=0/, { timeout: prepared ? 30_000 : 10_000 });

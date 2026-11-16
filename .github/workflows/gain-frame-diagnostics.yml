@@ -36,7 +36,8 @@ jobs:
         working-directory: apps/editor
         env:
           CUTVOKE_GAIN_FRAME_DIAGNOSTICS: '1'
-        run: npx playwright test e2e/editor.spec.ts --grep 'live audio gain.*window handoff' --repeat-each=30 --workers=1 --trace=on --output=../../.artifacts/gain-frame-diagnostics
+          CUTVOKE_GAIN_INJECT_SEEK: '1'
+        run: npx playwright test e2e/editor.spec.ts --grep 'live audio gain.*window handoff' --repeat-each=3 --workers=1 --trace=on --output=../../.artifacts/gain-frame-diagnostics
       - name: Preserve diagnostics and traces
         if: always()
         uses: actions/upload-artifact@v7
