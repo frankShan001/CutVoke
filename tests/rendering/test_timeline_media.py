@@ -145,7 +145,12 @@ def test_same_source_strips_share_one_inflight_decode(media, tmp_path, damaged):
 def test_peer_process_publishes_same_cache_while_windows_target_is_open(media, tmp_path, monkeypatch):
     import cutvoke.rendering.timeline_media as module
     video, _ = media
+    original_replace = module.os.replace
     def peer_wins(source, destination):
+        # Only the final shared strip publication races with the peer.
+        # Individual decoded frames now have their own atomic publication.
+        if Path(source).name.startswith(".thumbnail-"):
+            return original_replace(source, destination)
         Path(destination).write_bytes(Path(source).read_bytes())
         raise PermissionError(13, "Windows reader currently holds target open")
     monkeypatch.setattr(module.os, "replace", peer_wins)

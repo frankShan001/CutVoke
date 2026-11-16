@@ -104,7 +104,7 @@ export class PreviewSegmentCache {
     try {
       let blob: Blob | null = null;
       for (let attempt = 0; !blob; attempt++) {
-        let retryable = true;
+        let retryable = true, cancelled = false;
         try {
           const requestUrl = entry.priority > 0
             ? `${entry.source}${entry.source.includes("?") ? "&" : "?"}prefetch=1&prefetchToken=${entry.token}` : entry.source;
@@ -112,7 +112,20 @@ export class PreviewSegmentCache {
           if (!response.ok) {
             retryable = response.status === 408 || response.status === 429 || response.status >= 500;
             let message = tr("预览视频段失败（HTTP {0}）", response.status);
-            try { const body = await response.json(); message = body.error?.message || message; } catch { /* keep status */ }
+            let code: unknown;
+            try { const body = await response.json(); message = body.error?.message || message; code = body.error?.code; } catch { /* keep status */ }
+            // A newer edit can cancel the old server render before its save
+            // acknowledgement updates this browser's scope. Keep the current
+            // composed frame while bounded retries obtain a fresh snapshot.
+            // Exhaustion still reports an error instead of leaving an endless load.
+            if (response.status === 409 && code === "PREVIEW_CANCELLED") {
+              // A live foreground lease can keep the same source across edits
+              // (e.g. native audio gain), or upgrade an in-flight prefetch. Its
+              // next attempt must read the newest server snapshot. Orphaned
+              // work, by contrast, has nobody to display an error to.
+              if (!entry.refs) throw new DOMException(message, "AbortError");
+              retryable = true; cancelled = true;
+            }
             throw new Error(message);
           }
           blob = await response.blob();
@@ -121,7 +134,11 @@ export class PreviewSegmentCache {
           if (entry.controller.signal.aborted || !retryable || attempt >= 2) throw error;
           await new Promise<void>((resolve, reject) => {
             const cancel = () => { clearTimeout(timer); reject(new DOMException("Preview scope closed", "AbortError")); };
-            const timer = setTimeout(() => { entry.controller.signal.removeEventListener("abort", cancel); resolve(); }, 200 * (attempt + 1));
+            const timer = setTimeout(() => {
+              entry.controller.signal.removeEventListener("abort", cancel);
+              if (cancelled && !entry.refs) reject(new DOMException("Preview lease released", "AbortError"));
+              else resolve();
+            }, 200 * (attempt + 1));
             entry.controller.signal.addEventListener("abort", cancel, { once: true });
           });
         }

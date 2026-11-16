@@ -165,7 +165,7 @@ def timeline_media(*, render, clip, cache_dir: Path, kind: str, width: int,
                "consumed": clip.consumed_source_duration.to_json(),
                "curve": clip.speed_curve.to_dict() if clip.speed_curve else None,
                "freeze": clip.freeze_at.to_json() if clip.freeze_at else None}
-    digest = hashlib.sha256(json.dumps([4, str(source.resolve()), stat.st_size, stat.st_mtime_ns,
+    digest = hashlib.sha256(json.dumps([5 if kind == "thumbnail" else 4, str(source.resolve()), stat.st_size, stat.st_mtime_ns,
                            kind, width, round(start, 6), round(end, 6), mapping], sort_keys=True).encode()).hexdigest()
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)

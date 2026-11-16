@@ -16,11 +16,19 @@ export function usePreviewSegments(scope: string, source: string, enabled: boole
     });
   }, [cache]);
   useEffect(() => {
-    if (!enabled || !source) return;
+    if (!enabled || !source) {
+      // Clear failures while disabled, before a consumer can observe them on
+      // the first render after re-enabling the same source.
+      setResult(previous => previous?.error ? null : previous);
+      return;
+    }
     // Paused edits/seeks show a composed frame before starting an uncached
     // video render. Cached windows remain instant, including while scrubbing.
     if (deferLoading && !cache.peek(source)) return;
     let alive = true;
+    // Re-enabling/retrying the same source must not retain a previous failure.
+    setResult(previous => previous?.cache === cache && previous.source === source && previous.error
+      ? { cache, source } : previous);
     const lease = cache.acquire(source);
     void lease.promise.then(media => {
       if (alive) setResult({ cache, source, media });
