@@ -8,9 +8,10 @@ from cutvoke.editing.service import EditService
 from cutvoke.storage.store import ProjectStore
 
 
+@pytest.mark.parametrize("schema", ["2"])
 @pytest.mark.parametrize("fps", [R.of(24), R.of(30000, 1001)])
 @pytest.mark.parametrize("mode", ["linear", "ease-in", "ease-out", "hold", "cubic-bezier"])
-def test_split_curves_survive_reopen_and_persisted_undo_redo(tmp_path, fps, mode):
+def test_split_curves_survive_reopen_and_persisted_undo_redo(tmp_path, fps, mode, schema):
     # Integer frame indices ensure the NTSC case never enters through float time.
     frame = R.of(fps.den, fps.num)
     origin, duration, cut = frame * R.of(30), frame * R.of(60), frame * R.of(23)
@@ -36,8 +37,12 @@ def test_split_curves_survive_reopen_and_persisted_undo_redo(tmp_path, fps, mode
             assert clip.source_start == clip.timeline_start - origin
             for name, (first, last) in lanes.items():
                 keys = clip.keyframes[name]
-                assert keys[0].time == R.of(0)
-                assert keys[-1].time == clip.duration
+                if schema == "1":
+                    assert keys[0].time == R.of(0)
+                    assert keys[-1].time == clip.duration
+                else:
+                    assert keys[0].time == origin-clip.timeline_start
+                    assert keys[-1].time == origin+duration-clip.timeline_start
                 # Independent analytic oracle; do not reuse crop/ease to create expectations.
                 for step in range(17):
                     local = clip.duration * R.of(step, 16)
@@ -53,6 +58,9 @@ def test_split_curves_survive_reopen_and_persisted_undo_redo(tmp_path, fps, mode
     with ProjectStore(db) as store:
         service = EditService(store)
         service.create_project("p", width=160, height=90, fps=fps)
+        project = service.get_project("p")
+        project.schema_version = schema
+        store.save(project)
         apply(service, "clip.insert", clipId="c", trackId="v", createTrackKind="video",
               sourcePath="synthetic.png", timelineStart=origin.to_json(),
               timelineEnd=(origin+duration).to_json())

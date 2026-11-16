@@ -34,6 +34,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
   // Metadata may arrive after typing, clearing, or restoring an authored draft.
   // It supplies a default only; the backend still resolves/validates exports.
   const pathEdited = useRef(draft !== null);
+  const pathFocused = useRef(false);
   const [exportDirectory, setExportDirectory] = useState<string | null>(null);
   useEffect(() => {
     let cancelled = false;
@@ -41,7 +42,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       if (cancelled || !info.exportDirectory) return;
       const folder = info.exportDirectory;
       setExportDirectory(folder);
-      setOutPath(previous => (previous || pathEdited.current) ? previous :
+      setOutPath(previous => (previous || pathEdited.current || pathFocused.current) ? previous :
         `${folder}${folder.includes("\\") ? "\\" : "/"}video.mp4`);
     }).catch(error => { if (!cancelled) showError(dispatch, error); });
     return () => { cancelled = true; };
@@ -115,7 +116,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
         if (job) {
           setJob(job);
           if (!draft || ["queued", "running"].includes(job.status)) {
-            if (!pathEdited.current || ["queued", "running"].includes(job.status)) setOutPath(job.outPath);
+            if ((!pathEdited.current && !pathFocused.current) || ["queued", "running"].includes(job.status)) setOutPath(job.outPath);
             if (["high", "medium", "low"].includes(job.quality)) setQuality(job.quality as ExportQuality);
             setVideoBitrate(job.request?.videoBitrateKbps?.toString() || "");
             setAudioBitrate(job.request?.audioBitrateKbps?.toString() || "");
@@ -325,6 +326,14 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
         <TextInput
           value={outPath}
           disabled={busy}
+          // Focus starts an edit before the first input event (including paste/fill).
+          // A late default must not move the caret or prefix the intended path.
+          onFocus={() => { pathFocused.current = true; }}
+          onBlur={() => {
+            pathFocused.current = false;
+            if (!pathEdited.current && exportDirectory) setOutPath(previous => previous ||
+              `${exportDirectory}${exportDirectory.includes("\\") ? "\\" : "/"}video.mp4`);
+          }}
           onChange={(e) => { pathEdited.current = true; setOutPath(e.target.value); }}
           placeholder={exportDirectory ? `${exportDirectory}/video.mp4` : tr("如：D:\\视频\\我的成片.mp4")}
           aria-label={tr("输出文件路径")}

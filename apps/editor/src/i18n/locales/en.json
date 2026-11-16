@@ -2221,5 +2221,12 @@
   "仅包含版本化编辑，不含重命名、导出或其他无版本操作。": "Versioned edits only; excludes renames, exports and other unversioned operations.",
   "没有已提交的修改。": "No committed changes.",
   "版本 {0} → {1} · 命令 {2} · {3} 个对象": "Revision {0} → {1} · Command {2} · {3} entities",
-  "仅显示最近的修改。": "Only the most recent changes are shown."
+  "仅显示最近的修改。": "Only the most recent changes are shown.",
+  "不支持的工程格式": "Unsupported project format",
+  "旧工程需要转换": "Convert legacy project",
+  "工程 {0} 使用格式 {1}，当前版本需要格式 {2}。": "Project {0} uses format {1}; this version requires format {2}.",
+  "转换将在新目录中创建副本，原工程保留不变。新副本不能用旧版本编辑器打开。关闭将不打开或转换工程。": "Conversion creates a copy in a new directory and leaves the original unchanged. Older editors cannot open the new copy. Close leaves the project unopened and unconverted.",
+  "转换中…": "Converting…",
+  "转换副本并打开": "Convert copy and open",
+  "原资源包保留不变。": "The original package remains unchanged."
 }

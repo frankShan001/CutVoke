@@ -16,8 +16,10 @@ class SelectedTransitionRecipeTests(unittest.TestCase):
     def setUp(self):
         self.service = EditService()
         self.project = self.service.create_project('selected-transition-test')
+        # Direct fixtures must match the current v2 project clock contract.
+        # Keep the strict before/after comparison; do not strip clock metadata.
         self.project.sequence.tracks = [Track('video', 'video', [
-            Clip(str(i), AssetReference('image', 'synthetic.png'), Rational.of(i), Rational.of(i+1), Rational.of(0))
+            Clip(str(i), AssetReference('image', 'synthetic.png'), Rational.of(i), Rational.of(i+1), Rational.of(0), keyframe_time_domain="signed-local")
             for i in range(5)])]
 
     def command(self, kind, payload, identity):
@@ -69,7 +71,7 @@ class SelectedTransitionRecipeTests(unittest.TestCase):
 
     def test_no_cross_track_boundary_or_invalid_parameters(self):
         self.project.sequence.tracks.append(Track('other', 'video', [
-            Clip('other-clip', AssetReference('image', 'synthetic.png'), Rational.of(1), Rational.of(2), Rational.of(0))]))
+            Clip('other-clip', AssetReference('image', 'synthetic.png'), Rational.of(1), Rational.of(2), Rational.of(0), keyframe_time_domain="signed-local")]))
         with self.assertRaises(ValueError):
             recipe.selected_transition_batch(self.project, ['0', 'other-clip'])
         for duration in (0, -1, True, float('nan'), float('inf')):
@@ -80,7 +82,7 @@ class SelectedTransitionRecipeTests(unittest.TestCase):
 
     def test_32_boundary_limit_never_silently_splits(self):
         self.project.sequence.tracks[0].clips = [
-            Clip(str(i), AssetReference('image', 'synthetic.png'), Rational.of(i), Rational.of(i+1), Rational.of(0))
+            Clip(str(i), AssetReference('image', 'synthetic.png'), Rational.of(i), Rational.of(i+1), Rational.of(0), keyframe_time_domain="signed-local")
             for i in range(34)]
         self.assertEqual(len(recipe.selected_transition_batch(self.project, [str(i) for i in range(33)])['commands']), 32)
         with self.assertRaisesRegex(ValueError, '32'):

@@ -339,6 +339,8 @@ class Clip:
     hidden: bool = False
     # 参数关键帧：按参数名分组（先支持 opacity）。渲染生效留 M2 完整版（T22）。
     keyframes: dict[str, list[Keyframe]] = field(default_factory=dict)
+    # v2 retains manual nodes outside the visible clip for reversible trimming.
+    keyframe_time_domain: str = "local"
     # 音频（D06 F27/F28）：相对音量（1.0=原声）、淡入淡出时长（秒，0=无）
     volume: Rational = field(default_factory=lambda: Rational.of(1, 1))
     fade_in: Rational = field(default_factory=lambda: Rational.of(0, 1))
@@ -480,6 +482,8 @@ class Clip:
                 for name, kfs in self.keyframes.items()
             },
         }
+        if self.keyframe_time_domain != "local":
+            data["keyframeTimeDomain"] = self.keyframe_time_domain
         if self.role:
             data["role"] = self.role
         if self.compositing:
@@ -527,6 +531,7 @@ class Clip:
             freeze_at=(Rational.from_json(**d["freezeAt"])
                        if d.get("freezeAt") else None),
             keyframes=keyframes,
+            keyframe_time_domain=d.get("keyframeTimeDomain", "local"),
             nested=Sequence.from_dict(d["nested"]) if d.get("nested") else None,
             role=d.get("role", ""),
             compositing=d.get("compositing", {}),
@@ -799,6 +804,14 @@ class Sequence:
                    exposed_properties=d.get("exposedProperties", []))
 
 
+LEGACY_PROJECT_SCHEMAS = ("1", "1.0")
+CURRENT_PROJECT_SCHEMA = "2"
+
+
+class UnsupportedProjectSchema(Exception):
+    """Format refusal must not be swallowed as corrupt legacy JSON fallback."""
+
+
 @dataclass
 class Project:
     """工程：schemaVersion + projectId + revision + 序列(可多个) + 依赖锁定（7.1）。
@@ -822,6 +835,8 @@ class Project:
     presets: list[dict] = field(default_factory=list)
 
     def __post_init__(self):
+        if self.schema_version not in (*LEGACY_PROJECT_SCHEMAS, CURRENT_PROJECT_SCHEMA):
+            raise UnsupportedProjectSchema("unsupported project schema")
         # 兼容旧构造（只传了 sequence）：填充 sequences 与 active_sequence_id
         if not self.sequences:
             self.sequences = [self.sequence]
@@ -833,6 +848,23 @@ class Project:
                 if s.id == self.active_sequence_id:
                     self.sequence = s
                     break
+
+        def clock(sequence):
+            for track in sequence.tracks:
+                for clip in track.clips:
+                    if clip.keyframe_time_domain not in ("local", "signed-local"):
+                        raise UnsupportedProjectSchema("unknown animation clock")
+                    if self.schema_version in LEGACY_PROJECT_SCHEMAS:
+                        if clip.keyframe_time_domain != "local" or any(
+                                key.time < Rational.of(0)
+                                for lane in clip.keyframes.values() for key in lane):
+                            raise UnsupportedProjectSchema("signed animation requires project format 2")
+                    else:
+                        clip.keyframe_time_domain = "signed-local"
+                    if clip.nested is not None:
+                        clock(clip.nested)
+        for sequence in self.sequences:
+            clock(sequence)
 
     @property
     def active_sequence(self) -> Sequence:
@@ -864,6 +896,8 @@ class Project:
 
     @classmethod
     def from_dict(cls, d: dict) -> "Project":
+        if d.get("schemaVersion") not in (*LEGACY_PROJECT_SCHEMAS, CURRENT_PROJECT_SCHEMA):
+            raise UnsupportedProjectSchema("unsupported project schema")
         seqs = [Sequence.from_dict(s) for s in d.get("sequences", [])]
         if not seqs:
             seq = Sequence.from_dict(d["sequence"])

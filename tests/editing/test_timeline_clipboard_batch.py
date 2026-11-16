@@ -91,7 +91,9 @@ class TimelineClipboardBatchTests(unittest.TestCase):
             [(Rational.of(0), Rational.of(2)), (Rational.of(2), Rational.of(6)), (Rational.of(6), Rational.of(8))])
         self.assertEqual(ordered[1].volume, Rational.of(1))  # copied state, not the later edit
         self.assertEqual(ordered[2].source_start, Rational.of(2))
-        self.assertAlmostEqual(ordered[2].keyframes["volume"][0].value, .5)
+        from cutvoke.domain.keyframes import evaluate
+        self.assertAlmostEqual(evaluate(ordered[2].keyframes["volume"], Rational.of(0)), .5)
+        self.assertEqual(ordered[2].keyframes["volume"][0].time, Rational.of(-2))
         self.assertEqual([(c.start,c.end) for c in self.service.get_project("p").sequence.captions],
                          [(Rational.of(1),Rational.of(2)),(Rational.of(6),Rational.of(7))])
 

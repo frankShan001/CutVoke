@@ -2440,9 +2440,9 @@ test("prepared playback follows the ruler, stops at the end, and survives an Age
   await expect(ruler).toHaveAttribute("aria-valuenow", "15");
 
   await page.reload();
-  if (await page.getByRole("button", { name: `打开工程 ${name}` }).isVisible()) {
-    await page.getByRole("button", { name: `打开工程 ${name}` }).click();
-  }
+  // Reload starts on Home; await the async project list instead of making a
+  // one-shot isVisible decision before its response has arrived.
+  await page.getByRole("button", { name: `打开工程 ${name}`, exact: true }).click();
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "字幕" }).click();
   await expect(page.getByRole("button", { name: "选择字幕 caption-one" }))
     .toContainText("AI 已修正");
@@ -2840,6 +2840,20 @@ test("video transforms stay in sync between canvas and inspector while audio hid
   await expect(keyframeStatus).toContainText("X 1 个");
   await page.getByRole("button", { name: "删除水平位置 X关键帧 t=0.00s" }).click();
   await expect.poll(transformKeyframeCount).toBe(0);
+  // The server may persist a move before its response reaches the UI. Start
+  // the following resize from the optimistic geometry while that ack is late.
+  let delayedMoveAck = false;
+  let releaseMoveAck!: () => void;
+  const moveAckGate = new Promise<void>(resolve => { releaseMoveAck = resolve; });
+  await page.route(`**/api/v1/projects/${id}/commands`, async route => {
+    const command = route.request().postDataJSON();
+    if (!delayedMoveAck && command.type === "effect.update" && Number(command.payload?.params?.position?.x) > 12) {
+      delayedMoveAck = true;
+      const response = await route.fetch();
+      await moveAckGate;
+      await route.fulfill({ response });
+    } else await route.continue();
+  });
   const moveHandle = page.getByRole("button", { name: "拖动画面位置" });
   const outlineBox = await moveHandle.boundingBox();
   expect(outlineBox).toBeTruthy();
@@ -2857,6 +2871,16 @@ test("video transforms stay in sync between canvas and inspector while audio hid
   expect(handleBox).toBeTruthy();
   await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
   await page.mouse.down();
+  await page.mouse.move(handleBox!.x + handleBox!.width / 2 - 20, handleBox!.y + handleBox!.height / 2 - 15, { steps: 2 });
+  const moveResponse = page.waitForResponse(response => {
+    if (!response.url().endsWith(`/projects/${id}/commands`) || response.request().method() !== "POST") return false;
+    const command = response.request().postDataJSON();
+    return command.type === "effect.update" && Number(command.payload?.params?.position?.x) === movedX;
+  });
+  expect(delayedMoveAck).toBe(true);
+  releaseMoveAck();
+  await (await moveResponse).finished();
+  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   await page.mouse.move(handleBox!.x + handleBox!.width / 2 - 60, handleBox!.y + handleBox!.height / 2 - 45, { steps: 6 });
   await page.mouse.up();
   await expect.poll(async () => (await readTransform())?.scale || 1).toBeGreaterThan(1.1);
@@ -3342,7 +3366,7 @@ test("speed curve can be edited, undone, reopened, and exported from the Web edi
   unlinkSync(outputPath);
 });
 
-test("attached overlays follow video moves, Alt keeps them in place, and unlinking persists", async ({ page, request }) => {
+test("attached overlays follow video moves, Alt keeps them in place, and unlinking persists", async ({ page, request }, testInfo) => {
   const fixture = await readProject(request, "e2e-fixture");
   const sourcePath = fixture.sequence.tracks[0].clips[0].assetRef.sourcePath;
   const id = `attached-move-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -3396,10 +3420,44 @@ test("attached overlays follow video moves, Alt keeps them in place, and unlinki
     if (holdAlt) await page.keyboard.up("Alt");
   };
 
+  // Observe only this synthetic scenario's status categories; never collect
+  // arbitrary status text (which can contain paths) or change product timing.
+  await page.evaluate(() => {
+    const node = document.querySelector(".statusbar__msg");
+    if (!node) throw new Error("Status bar missing before attachment move");
+    const events: { at: number; status: string }[] = [];
+    const started = performance.now();
+    const capture = () => {
+      const text = node.textContent || "";
+      const status = text === "已移动片段，1 个关联片段同步移动" ? "attached-move-success"
+        : text === "就绪" ? "ready"
+        : text === "连续预览失败，已切换到单帧预览" ? "preview-fallback"
+        : "other";
+      if (events.length < 80) events.push({ at: performance.now() - started, status });
+    };
+    const observer = new MutationObserver(capture);
+    observer.observe(node, { childList: true, characterData: true, subtree: true });
+    capture();
+    (window as any).__attachmentStatusDiagnostics = { events, observer };
+  });
   // A two-second clip shifted by half its width moves exactly one second.
-  await moveBy(0.5);
-  await expect.poll(readPositions).toEqual({ video: 1, sticker: 1.5, attachedTo: "parent-video" });
-  await expect(page.getByText("已移动片段，1 个关联片段同步移动")).toBeVisible();
+  try {
+    await moveBy(0.5);
+    await expect.poll(readPositions).toEqual({ video: 1, sticker: 1.5, attachedTo: "parent-video" });
+    await expect(page.getByText("已移动片段，1 个关联片段同步移动")).toBeVisible();
+  } finally {
+    const events = await page.evaluate(() => {
+      const record = (window as any).__attachmentStatusDiagnostics;
+      record?.observer.disconnect();
+      delete (window as any).__attachmentStatusDiagnostics;
+      return record?.events || [];
+    }).catch(() => []);
+    try {
+      await testInfo.attach("attachment-status-ordering", {
+        body: JSON.stringify(events), contentType: "application/json",
+      });
+    } catch { /* Diagnostic attachment must not replace the original assertion. */ }
+  }
   await page.getByRole("button", { name: "撤销" }).click();
   await expect.poll(readPositions).toEqual({ video: 0, sticker: 0.5, attachedTo: "parent-video" });
   await page.getByRole("button", { name: "重做" }).click();
