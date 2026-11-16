@@ -2875,7 +2875,21 @@ class HttpApi:
             else:
                 project, mapping, warnings = unpack_project(pkg, target_dir)
             # 导入为服务内的新工程（生成新 id，避免与现有工程冲突）。
-            imported = self.service.import_project(project)
+            try:
+                imported = self.service.import_project(project)
+            except Exception:
+                if not converting:
+                    raise
+                # Publication and registration are separate transactions. An
+                # exception may arrive after a successful durable commit: keep
+                # the verified copy, never delete it or blindly retry import.
+                return 500, {"error": {
+                    "code": "PACKAGE_CONVERSION_IMPORT_UNCONFIRMED",
+                    "message": "副本已验证，但导入未确认。已保留转换副本，请核查工程列表和副本目录后再操作；不要直接重复转换。",
+                    "retryable": False,
+                    "details": {"verifiedCopyPath": str(target_dir),
+                                "importStatus": "unconfirmed"},
+                }}
             # 统计该工程引用的去重素材数。
             asset_ids: set[str] = set()
             for track in imported.sequence.tracks:

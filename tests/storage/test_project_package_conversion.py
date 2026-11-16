@@ -187,3 +187,59 @@ def test_http_explicit_conversion_destination_and_symlink_refusal(tmp_path):
             assert store.list_all()==before and not list(real.iterdir())
             assert old.read_bytes()==original
         finally:api.close()
+
+
+@pytest.mark.parametrize('failure_stage', ['catalogue_registration', 'after_commit'])
+def test_http_import_failure_preserves_verified_copy_without_claiming_success(tmp_path, monkeypatch, failure_stage):
+    from cutvoke.editing.service import EditService
+    from cutvoke.interfaces.httpapi import HttpApi
+    from cutvoke.rendering.render import RenderService
+    from cutvoke.storage.project_directory import ProjectLibraryStore
+
+    old, _ = old_package(tmp_path, media=True)
+    original = old.read_bytes()
+    target = tmp_path / 'verified-copy'
+    with ProjectLibraryStore(str(tmp_path / 'library.sqlite')) as store:
+        service = EditService(store)
+        calls = []
+        real_import = service.import_project
+        if failure_stage == 'catalogue_registration':
+            # Child snapshot commits first; fail only catalogue registration.
+            store._conn.execute("""CREATE TRIGGER fail_registration
+                BEFORE INSERT ON project_directories BEGIN
+                SELECT RAISE(ABORT, 'injected catalogue failure'); END""")
+            store._conn.commit()
+        def failing_import(project):
+            calls.append(project)
+            result = real_import(project)
+            if failure_stage == 'after_commit':
+                raise RuntimeError('injected error after durable import')
+            return result
+        monkeypatch.setattr(service, 'import_project', failing_import)
+        api = HttpApi(service, RenderService(), media_dir=str(tmp_path / 'media'))
+        try:
+            plan = inspect_package_format(old)
+            status, result = api.handle('POST', '/api/v1/packages/format/convert', {
+                'path': str(old), 'token': plan['token'], 'targetDir': str(target)})
+            assert status == 500
+            assert 'projectId' not in result
+            error = result['error']
+            assert error['code'] == 'PACKAGE_CONVERSION_IMPORT_UNCONFIRMED'
+            assert error['retryable'] is False
+            assert error['details'] == {'verifiedCopyPath': str(target), 'importStatus': 'unconfirmed'}
+            assert '副本已验证，但导入未确认' in error['message']
+            assert len(calls) == 1  # no hidden retry
+            assert target.is_dir() and any(target.rglob('*.png'))
+            assert old.read_bytes() == original
+            if failure_stage == 'catalogue_registration':
+                assert store.list_all() == []
+                assert service._projects == {}
+            else:
+                assert store.list_all() == [calls[0].project_id]
+                loaded = store.load(calls[0].project_id)
+                assert loaded.schema_version == '2'
+                for track in loaded.sequence.tracks:
+                    for clip in track.clips:
+                        assert Path(clip.asset_ref.source_path).is_file()
+        finally:
+            api.close()
