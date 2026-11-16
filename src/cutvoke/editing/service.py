@@ -1602,9 +1602,12 @@ class EditService:
 
     def project_sync(self, project_id: str, known_token: Optional[str] = None) -> dict:
         """Return a compact full snapshot only when authoritative state changed."""
-        self.get_project(project_id)  # reject legacy before sync can bypass get_project
         if self._store is not None:
-            state = self._store.load_for_sync(project_id, known_token)
+            from cutvoke.storage.project_format import ProjectFormatError
+            try:
+                state = self._store.load_for_sync(project_id, known_token)
+            except ProjectFormatError as error:
+                raise EditError("PROJECT_CONVERSION_REQUIRED", str(error)) from error
             if state is None:
                 raise EditError(ErrorCode.INVALID_ARGUMENT, f"project not found: {project_id}")
             token, revision, project = state
@@ -1619,6 +1622,7 @@ class EditService:
         result = {"projectId": project_id, "revision": revision, "token": token,
                   "unchanged": project is None}
         if project is not None:
+            self._require_current_format(project)
             result["project"] = project.to_dict(compact=True)
         return result
 
@@ -3174,8 +3178,7 @@ class EditService:
 
     @staticmethod
     def _enable_signed_clocks(project):
-        if project.schema_version != "2":
-            return
+        EditService._require_current_format(project)
         def enable(sequence):
             for track in sequence.tracks:
                 for clip in track.clips:

@@ -1065,10 +1065,13 @@ class ProjectStore:
         """
         with self._transaction(immediate=False):
             row = self._conn.execute(
-                "SELECT revision, name, updated_at FROM projects WHERE project_id=?",
+                "SELECT revision, name, updated_at, schema_version FROM projects WHERE project_id=?",
                 (project_id,)).fetchone()
             if row is None:
                 return None
+            if row[3] != "2":
+                from cutvoke.storage.project_format import ProjectFormatError
+                raise ProjectFormatError("PROJECT_CONVERSION_REQUIRED: convert a copy or close")
             token = hashlib.sha256(json.dumps([project_id, *row], ensure_ascii=False,
                                              separators=(",", ":")).encode()).hexdigest()
             return token, row[0], None if token == known_token else self.load(project_id)

@@ -2227,5 +2227,6 @@
   "工程 {0} 使用格式 {1}，当前版本需要格式 {2}。": "O projeto {0} usa o formato {1}; esta versão exige o formato {2}.",
   "转换将在新目录中创建副本，原工程保留不变。新副本不能用旧版本编辑器打开。关闭将不打开或转换工程。": "A conversão cria uma cópia em uma nova pasta e mantém o original inalterado. Editores antigos não podem abrir a nova cópia. Fechar não abre nem converte o projeto.",
   "转换中…": "Convertendo…",
-  "转换副本并打开": "Converter cópia e abrir"
+  "转换副本并打开": "Converter cópia e abrir",
+  "原资源包保留不变。": "O pacote original permanece inalterado."
 }

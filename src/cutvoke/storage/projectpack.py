@@ -438,7 +438,7 @@ def inspect_package(pkg_path: str, *,
 # 解包 / 迁移
 # ---------------------------------------------------------------------------
 
-def _stage_package_sources(archive, stage):
+def _stage_package_sources(archive, stage, *, convert_legacy=False):
     """Strictly preflight every source before touching the destination."""
     from cutvoke.storage.generated_sources import (
         MAX_ARCHIVES, MAX_ARCHIVE_BYTES, SHA, _portable_name, _unique, read_source_archive,
@@ -449,7 +449,7 @@ def _stage_package_sources(archive, stage):
             raise ValueError("duplicate project archive entry")
         manifest = json.loads(archive.read("manifest.json"), object_pairs_hook=_unique)
         check_compatibility(manifest)
-        _project_from_wire(json.loads(archive.read("project.json"), object_pairs_hook=_unique))
+        _project_from_wire(json.loads(archive.read("project.json"), object_pairs_hook=_unique), convert_legacy=convert_legacy)
         sources = manifest.get("generatedSources", [])
         if not isinstance(sources, list) or len(sources) > MAX_ARCHIVES:
             raise ValueError("invalid generatedSources list")
@@ -509,7 +509,7 @@ def _stage_package_sources(archive, stage):
 
 
 def unpack_project(pkg_path: str, dest_dir: str, *,
-                   overwrite: bool = False) -> tuple[Project, dict, list]:
+                   overwrite: bool = False, _convert_legacy: bool = False) -> tuple[Project, dict, list]:
     """把包解包到 dest_dir，并重写素材路径为新目录下绝对路径。
 
     返回 (project, 素材路径映射, 警告列表)：
@@ -527,7 +527,7 @@ def unpack_project(pkg_path: str, dest_dir: str, *,
         raise ProjectPackError(f"包文件不存在：{pkg_path}")
 
     with zipfile.ZipFile(pkg, "r") as archive, tempfile.TemporaryDirectory(prefix="cutvoke-source-check-") as temporary:
-        staged = _stage_package_sources(archive, Path(temporary))
+        staged = _stage_package_sources(archive, Path(temporary), convert_legacy=_convert_legacy)
         dest = Path(dest_dir)
         if staged:
             from cutvoke.storage.generated_sources import validate_source_directory
@@ -564,7 +564,7 @@ def unpack_project(pkg_path: str, dest_dir: str, *,
     with zipfile.ZipFile(pkg, "r") as zf:
         manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
         project = _project_from_wire(
-            json.loads(zf.read("project.json").decode("utf-8"))
+            json.loads(zf.read("project.json").decode("utf-8")), convert_legacy=_convert_legacy
         )
 
         # 兼容性硬判定（包格式过新会抛错）。
@@ -644,9 +644,12 @@ def unpack_project(pkg_path: str, dest_dir: str, *,
     return project, mapping, warnings
 
 
-def _project_from_wire(value):
+def _project_from_wire(value, *, convert_legacy=False):
     from cutvoke.storage.project_format import read_current_snapshot, ProjectFormatError
     try:
+        if convert_legacy:
+            from cutvoke.storage.project_format import convert_snapshot
+            value = convert_snapshot(value)
         return Project.from_dict(read_current_snapshot(value))
     except ProjectFormatError as error:
         raise ProjectPackError("PROJECT_CONVERSION_REQUIRED: open the original project, convert a copy, then export a new package") from error

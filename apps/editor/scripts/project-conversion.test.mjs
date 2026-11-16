@@ -7,8 +7,10 @@ import * as jsx from 'react/jsx-runtime';
 import { create, act } from 'react-test-renderer';
 import ts from 'typescript';
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-async function harness({ status = 'legacy', deferred = false, failure = false } = {}) {
+async function harness({ status = 'legacy', deferred = false, failure = false, inspectDeferred = false } = {}) {
   const calls = [];
+  let resolveInspect;
+  const inspectionDone = new Promise(resolve => { resolveInspect = resolve; });
   let resolveConvert;
   const done = new Promise(resolve => { resolveConvert = resolve; });
   const inspected = { status, sourceVersion: 1, targetVersion: 2, token: 'plan', projectId: 'old', name: 'Old' };
@@ -19,9 +21,9 @@ async function harness({ status = 'legacy', deferred = false, failure = false } 
     'lucide-react': new Proxy({}, { get: () => () => null }),
     '../store/editor': { useEditor: () => ({ state: { projects: [{ id: 'old', name: 'Old' }] }, dispatch: a => calls.push(a) }), showError: (_, e) => calls.push(['error', String(e)]) },
     '../store/actions': { loadProjects: async () => {}, selectProject: (...a) => calls.push(['select', a[1]]), createProject() {}, renameProject() {} },
-    '../lib/api': { invalidateProject() {}, openPackage() {} },
+    '../lib/api': { invalidateProject() {}, openPackage: async path => { calls.push(["package-open", path]); return {projectId:"imported",name:"Imported",warnings:[]}; } },
     '../lib/projectDirectories': {
-      inspectProjectFormat: async source => { calls.push(['inspect', source]); return inspected; },
+      inspectProjectFormat: async source => { calls.push(['inspect', source]); if (inspectDeferred) await inspectionDone; return inspected; },
       openProjectDirectory: async () => { calls.push(['open']); return inspected; },
       convertProjectCopy: async (source, token) => { calls.push(['convert', source, token]); if (failure) throw Error('stale'); if (deferred) await done; return { projectId: 'copy', name: 'Copy' }; },
     },
@@ -40,6 +42,11 @@ async function harness({ status = 'legacy', deferred = false, failure = false } 
       await act(async () => tree.root.findByProps({ 'aria-label': '工程目录路径' }).props.onChange({ target: { value: '/old/project' } }));
       await act(async () => button('打开工程目录').props.onClick());
     },
+    package: async (twice = false) => {
+      await act(async () => tree.root.findByProps({ 'aria-label': '资源包路径' }).props.onChange({ target: { value: '/old/bundle.cutvokepack' } }));
+      await act(async () => { const b = tree.root.findByProps({ 'aria-label': '解包打开' }); b.props.onClick(); if (twice) b.props.onClick(); });
+    },
+    inspectResolve: () => act(async () => resolveInspect()),
     close: () => act(async () => button('关闭').props.onClick()),
     convert: () => act(async () => button('转换副本并打开').props.onClick()),
     doubleConvert: () => act(async () => { const b = button('转换副本并打开'); b.props.onClick(); b.props.onClick(); }),
@@ -90,4 +97,29 @@ test('directory conversion binds the inspected path and token', async () => {
   assert.equal(call[1].path, '/old/project'); assert.equal(call[2], 'plan');
   assert.equal(h.calls.filter(x => x[0] === 'open').length, 0);
   await h.unmount();
+});
+
+test('legacy package close only inspects and does not unpack', async () => {
+  const h = await harness(); await h.package(); await h.close();
+  assert.equal(h.calls.filter(x => ['convert','package-open','select'].includes(x[0])).length, 0);
+  await h.unmount();
+});
+test('explicit package conversion binds path/token and opens returned copy', async () => {
+  const h = await harness(); await h.package(); await h.convert();
+  const call = h.calls.find(x => x[0] === 'convert');
+  assert.equal(call[1].kind, 'package'); assert.equal(call[1].path, '/old/bundle.cutvokepack');
+  assert.equal(call[2], 'plan'); assert.equal(h.calls.filter(x => x[0] === 'package-open').length, 0);
+  assert.deepEqual(h.calls.filter(x => x[0] === 'select'), [['select','copy']]); await h.unmount();
+});
+test('current package follows existing import path without conversion', async () => {
+  const h = await harness({status:'current'}); await h.package();
+  assert.equal(h.calls.filter(x => x[0] === 'package-open').length, 1);
+  assert.equal(h.calls.filter(x => x[0] === 'convert').length, 0);
+  assert.equal(h.tree.root.findAllByType('dialog').length, 0); await h.unmount();
+});
+test('duplicate package click inspects once; unmount blocks delayed inspection import', async () => {
+  const h = await harness({status:'current',inspectDeferred:true}); await h.package(true);
+  assert.equal(h.calls.filter(x => x[0] === 'inspect').length, 1);
+  await h.unmount(); await h.inspectResolve();
+  assert.equal(h.calls.filter(x => x[0] === 'package-open').length, 0);
 });

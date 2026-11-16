@@ -54,7 +54,33 @@ def source_manifest(database, pid):
 def database_token(conn, pid, database):
     token = state_token(conn, pid)
     manifest = source_manifest(database, pid)
-    return hashlib.sha256(token.encode() + manifest[1]).hexdigest() if manifest else token
+    info = manifest[0] if manifest else None
+    from cutvoke.storage.project_directory import _walk_paths, _digest
+    names, ids = set(), set()
+    prefix = 'cv2_' if conn.execute("SELECT 1 FROM sqlite_master WHERE name='cv2_projects'").fetchone() else ''
+    for table, column in [('projects','project_json'),('projects','sequence_json'),('history','snapshot_json')]:
+        for (raw,) in conn.execute(f'SELECT {column} FROM {prefix}{table} WHERE project_id=?', (pid,)):
+            if raw:
+                document = json.loads(raw)
+                names.update(name for name in _walk_paths(document) if name)
+                ids.update(asset_refs(document))
+    for aid, name in conn.execute(f'SELECT asset_id,path FROM {prefix}assets'):
+        if aid in ids and name:
+            names.add(name)
+    files = []
+    directories, hashes = set(), set()
+    for name in sorted(names):
+        source = resolve_source_file(name, database, info)
+        digest = _digest(source) if source.is_file() else None
+        files.append((name, str(source), digest))
+        if digest:
+            hashes.add(digest)
+            if (source.parent / '.generated').exists():
+                directories.add(source.parent / '.generated')
+    from cutvoke.storage.generated_sources import referenced_sources
+    companions = [(item['path'], item['sha256']) for item in referenced_sources(hashes, directories)]
+    payload = token.encode() + (manifest[1] if manifest else b'') + json.dumps([files, companions],sort_keys=True).encode()
+    return hashlib.sha256(payload).hexdigest()
 
 
 def resolve_source_file(name, database, manifest):
@@ -242,7 +268,32 @@ def convert_copy(database, pid, token, destination, *, shared=None):
                     return isinstance(value, list) and any(has_path(v) for v in value)
                 if not any(has_path(document) for document in documents):
                     raise ProjectFormatError('Missing asset dependency: ' + asset_id)
+        # Preserve declared generated source companions inertly; never execute
+        # or extract source code while converting a project.
+        from cutvoke.storage.generated_sources import referenced_sources, retain_source_archive
+        from cutvoke.storage.project_directory import _digest
+        directories = {resolve_source_file(name, database, source_info).parent / '.generated' for name in mapping}
+        directories = {path for path in directories if path.exists()}
+        hashes = {_digest(Path(name)) for name in mapping.values()}
+        for archive in referenced_sources(hashes, directories):
+            retain_source_archive(archive, child.root / 'media' / '.generated')
         child.rewrite_paths(lambda value: mapping.get(value,value))
+        # Register sourcePath-only media in both the live document and undo
+        # snapshots, preserving human-readable names rather than hash basenames.
+        original_names = {owned: Path(name.replace('\\','/')).name for name, owned in mapping.items()}
+        current = child.load(new_id)
+        child._own_project(current)
+        child.save(current)
+        for rowid, raw in list(child._conn.execute('SELECT rowid,snapshot_json FROM history')):
+            if raw:
+                historical = Project.from_dict(json.loads(raw))
+                child._own_project(historical)
+                child._conn.execute('UPDATE history SET snapshot_json=? WHERE rowid=?',
+                                    (json.dumps(historical.to_dict(),ensure_ascii=False), rowid))
+        for aid, path in child._conn.execute('SELECT asset_id,path FROM assets').fetchall():
+            if path in original_names:
+                child._conn.execute('UPDATE assets SET name=? WHERE asset_id=?', (original_names[path],aid))
+
         from cutvoke.domain.invariants import validate_project
         validation = validate_project(child.load(new_id))
         if not validation.structurally_valid:

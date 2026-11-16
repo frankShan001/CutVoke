@@ -111,3 +111,20 @@ def test_model_recursively_marks_v2_and_rejects_legacy_signed():
     with pytest.raises(UnsupportedProjectSchema): Project.from_dict(wire)
     wire['schemaVersion']='999'
     with pytest.raises(UnsupportedProjectSchema): Project.from_dict(wire)
+
+
+def test_legacy_history_cannot_downgrade_current_project(tmp_path):
+    import json
+    from cutvoke.editing.service import EditError
+    with ProjectStore(str(tmp_path/'history.sqlite')) as store:
+        service=EditService(store);project=service.create_project('p')
+        service.execute(Command('track.add',{'trackId':'v','kind':'video'},'add','p',project.revision,Actor('human','test')))
+        raw=store.peek_history('p',0);old=json.loads(raw);old['schemaVersion']='1'
+        store._conn.execute('UPDATE history SET snapshot_json=? WHERE project_id=? AND depth=0',(json.dumps(old),'p'))
+        before=store.load('p').to_dict()
+        with pytest.raises(EditError) as error:
+            service.execute(Command('history.undo',{},'undo','p',before['revision'],Actor('human','test')))
+        assert error.value.code=='PROJECT_CONVERSION_REQUIRED'
+        assert store.load('p').to_dict()==before
+        assert json.loads(store.peek_history('p',0))==old
+        assert store.get_idempotent('p','undo') is None

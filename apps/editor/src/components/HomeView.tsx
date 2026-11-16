@@ -107,25 +107,14 @@ export function HomeView() {
       showError(dispatch, { status: 400, code: "INVALID_ARGUMENT", message: tr("请填写资源包路径") });
       return;
     }
-    setPackBusy(true);
-    setPackWarnings([]);
-    try {
-      const res = await openPackage(trimmed);
-      setPackWarnings(res.warnings || []);
-      await loadProjects(dispatch);
-      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已解包导入工程：{0}", res.name || res.projectId) });
-      setPackPath("");
-    } catch (err) {
-      showError(dispatch, err);
-    } finally {
-      setPackBusy(false);
-    }
+    return requestOpen({ kind: "package", path: trimmed });
   };
 
   const requestOpen = async (source: ProjectOpenSource) => {
     if (opening.current || conversion) return;
     opening.current = true;
     setDirectoryBusy(true);
+    if (source.kind === "package") { setPackBusy(true); setPackWarnings([]); }
     try {
       const inspection = await inspectProjectFormat(source);
       if (!alive.current) return;
@@ -134,6 +123,16 @@ export function HomeView() {
         return;
       }
       if (inspection.status !== "current") throw new Error(tr("不支持的工程格式"));
+      if (source.kind === "package") {
+        const result = await openPackage(source.path);
+        if (!alive.current) return;
+        setPackWarnings(result.warnings || []);
+        await loadProjects(dispatch);
+        if (!alive.current) return;
+        dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已解包导入工程：{0}", result.name || result.projectId) });
+        setPackPath("");
+        return;
+      }
       const result = source.kind === "directory"
         ? await openProjectDirectory(source.path)
         : { projectId: inspection.projectId, name: inspection.name };
@@ -146,7 +145,7 @@ export function HomeView() {
     } catch (error) { if (alive.current) showError(dispatch, error); }
     finally {
       opening.current = false;
-      if (alive.current) setDirectoryBusy(false);
+      if (alive.current) { setDirectoryBusy(false); setPackBusy(false); }
     }
   };
 
@@ -162,6 +161,10 @@ export function HomeView() {
     try {
       const result = await convertProjectCopy(conversion.source, conversion.inspection.token);
       if (!alive.current) return;
+      if (conversion.source.kind === "package") {
+        setPackWarnings(result.warnings || []);
+        setPackPath("");
+      }
       invalidateProject(result.projectId);
       await loadProjects(dispatch);
       if (!alive.current) return;
@@ -204,6 +207,7 @@ export function HomeView() {
         <p>{tr("工程 {0} 使用格式 {1}，当前版本需要格式 {2}。", conversion.inspection.name || conversion.inspection.projectId,
           conversion.inspection.sourceVersion, conversion.inspection.targetVersion)}</p>
         <p>{tr("转换将在新目录中创建副本，原工程保留不变。新副本不能用旧版本编辑器打开。关闭将不打开或转换工程。")}</p>
+        {conversion.source.kind === "package" && <p>{tr("原资源包保留不变。")}</p>}
         <div style={{ display: "flex", gap: 12 }}>
           <button className="cv-btn cv-btn--md" autoFocus disabled={conversionBusy} onClick={closeConversion}>{tr("关闭")}</button>
           <button className="cv-btn cv-btn--primary cv-btn--md" disabled={conversionBusy} onClick={() => void confirmConversion()}>
@@ -284,7 +288,7 @@ export function HomeView() {
           <button
             className="cv-btn cv-btn--md"
             onClick={() => void handleOpenPackage()}
-            disabled={packBusy}
+            disabled={packBusy || directoryBusy}
             aria-label={tr("解包打开")}
           >
             <PackageOpen size={14} />

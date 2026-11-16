@@ -19,6 +19,7 @@ import time
 import uuid
 
 from cutvoke.domain.model import Project
+from cutvoke.storage.project_format import ProjectFormatError
 from cutvoke.domain.effect_files import effect_file_paths, map_effect_files
 from cutvoke.storage.store import ProjectStore, RevisionConflict
 from cutvoke.storage.workspace_paths import is_path_field
@@ -454,7 +455,7 @@ class ProjectLibraryStore(ProjectStore):
                 child = self._target(pid)
                 item = next(p for p in child.list_projects() if p["id"] == pid)
                 rows[pid] = {**item, "storageKind": "directory", "directory": root, "available": True}
-            except (OSError, ValueError, StopIteration):
+            except (OSError, ValueError, ProjectFormatError, StopIteration):
                 previous = rows.get(pid, {"id": pid, "name": pid, "revision": "", "updatedAt": ""})
                 rows[pid] = {**previous, "storageKind": "directory", "directory": root, "available": False}
         return sorted(rows.values(), key=lambda p: p["updatedAt"], reverse=True)

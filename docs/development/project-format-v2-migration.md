@@ -19,12 +19,21 @@ leases/jobs; completed old job receipts and idempotency records are not replayed
 in the new identity. Source token changes abort publication. Failed destinations
 remain `preparing` and cannot be opened. Original project media is not deleted.
 
-This is work in progress, not merge-ready. The original directory migration and
-rollback endpoints are disabled in favor of the explicit format conversion.
-Old package import is fail-closed pending its own explicit conversion UI; users
-must convert the original project then export a v2 package. Global library
-relocation and old migration test contracts still need updating for the new
-storage layout. Full CI/platform and actual browser acceptance are not complete.
+This is work in progress, not merge-ready. Legacy package opening now has the
+same explicit Convert copy / Close choice: a token-bound immutable archive copy
+is preflighted and must pass complete-media validation before registration.
+The original directory copy-switch and rollback functions refuse in-place
+operation. Global library relocation understands v2 child databases/WAL and
+active ASR/export/lease guards. Declared file resources, asset-ID-only references,
+history and generated source ZIP companions are copied without executing source.
+Global fonts/plugins referenced by installation names remain runtime dependencies,
+as before; this does not claim a fully standalone bundle of all installed tools.
+
+Actual old source acceptance was run against both 879841a and released v0.3.5:
+directory/package readers refuse v2, and raw old-store writes cannot alter the
+v2 authoritative snapshot. Focused integrated migration/package/source/history
+checks passed 97 tests and 5 subtests after the follow-up fixes. Full CI/platform
+and actual new conversion browser end-to-end acceptance are not yet complete.
 
 The project-format envelope codec is currently used for package boundaries;
 the SQLite boundary uses namespaced tables rather than the envelope.

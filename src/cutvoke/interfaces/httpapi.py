@@ -2855,8 +2855,13 @@ class HttpApi:
         # 解包打开（J10）：POST /api/v1/packages/open
         #   body {packagePath, targetDir?} → 解包出工程 + 素材 → 作为新工程导入服务。
         #   targetDir 受限在 media_dir 上级目录内（防路径穿越），缺省自动生成唯一目录。
-        if method == "POST" and parts == ["api", "v1", "packages", "open"]:
-            pkg = body.get("packagePath")
+        if method == "POST" and parts == ["api", "v1", "packages", "format", "inspect"]:
+            from cutvoke.storage.project_package_conversion import inspect_package_format
+            return 200, inspect_package_format(body.get("path", ""))
+        if method == "POST" and parts in (["api", "v1", "packages", "open"],
+                                          ["api", "v1", "packages", "format", "convert"]):
+            converting = parts[-1] == "convert"
+            pkg = body.get("path") if converting else body.get("packagePath")
             if not pkg:
                 return 400, {"error": {"code": "INVALID_ARGUMENT",
                                        "message": "open requires packagePath"}}
@@ -2864,7 +2869,11 @@ class HttpApi:
                 target_dir = self._resolve_unpack_target(body.get("targetDir"))
             except GovernanceError as e:
                 return 400, {"error": {"code": e.code, "message": str(e)}}
-            project, mapping, warnings = unpack_project(pkg, target_dir)
+            if converting:
+                from cutvoke.storage.project_package_conversion import convert_package_copy
+                project, mapping, warnings = convert_package_copy(pkg, body.get("token"), target_dir)
+            else:
+                project, mapping, warnings = unpack_project(pkg, target_dir)
             # 导入为服务内的新工程（生成新 id，避免与现有工程冲突）。
             imported = self.service.import_project(project)
             # 统计该工程引用的去重素材数。

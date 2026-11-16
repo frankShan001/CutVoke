@@ -24,14 +24,16 @@ export interface ProjectFormatInspection {
   projectId: string;
   name: string;
 }
-export type ProjectOpenSource = { kind: "directory"; path: string } | { kind: "recent"; projectId: string };
-export interface OpenedProject { projectId: string; name: string; directory?: string }
+export type ProjectOpenSource = { kind: "directory"; path: string } | { kind: "recent"; projectId: string } | { kind: "package"; path: string };
+export interface OpenedProject { projectId: string; name: string; directory?: string; warnings?: string[] }
 export function inspectProjectFormat(source: ProjectOpenSource) {
+  if (source.kind === "package") return previewRequest<ProjectFormatInspection>("packages/format/inspect", undefined, { path: source.path });
   return source.kind === "directory"
     ? previewRequest<ProjectFormatInspection>("project-directories/inspect", undefined, { path: source.path })
     : previewRequest<ProjectFormatInspection>(`projects/${encodeURIComponent(source.projectId)}/format/inspect`, undefined, {});
 }
 export function convertProjectCopy(source: ProjectOpenSource, token: string) {
+  if (source.kind === "package") return previewRequest<OpenedProject>("packages/format/convert", undefined, { path: source.path, token });
   return source.kind === "directory"
     ? previewRequest<OpenedProject>("project-directories/convert", undefined, { path: source.path, token })
     : previewRequest<OpenedProject>(`projects/${encodeURIComponent(source.projectId)}/format/convert`, undefined, { token });
