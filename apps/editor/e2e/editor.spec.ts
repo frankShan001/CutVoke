@@ -4870,7 +4870,19 @@ for (const prepared of [true, false]) {
       if (response.url().endsWith("/keepalive") && response.ok()) keepalives.push(response.url());
     });
     if (!prepared) await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({ status: 404, json: {} }));
-    await page.addInitScript(() => {
+    // Opt-in diagnostics only; no application events, readiness gates or assertions changed.
+    const frameDiagnostics = process.env.CUTVOKE_GAIN_FRAME_DIAGNOSTICS === "1";
+    if (frameDiagnostics) {
+      let retained = 0;
+      page.on("console", message => {
+        const text = message.text(), prefix = "cutvoke-gain-frame:";
+        if (!text.startsWith(prefix) || text.length > 16384 || retained >= 64) return;
+        void test.info().attach(`gain-frame-${++retained}`, {
+          body: text.slice(prefix.length), contentType: "application/json",
+        }).catch(() => {});
+      });
+    }
+    await page.addInitScript((frameDiagnostics: boolean) => {
       const voices: HTMLAudioElement[] = [];
       const frames: Array<{ source: string; identity: string; rgba: number[] }> = [];
       (window as typeof window & { gainVoices: typeof voices }).gainVoices = voices;
@@ -4888,19 +4900,7 @@ for (const prepared of [true, false]) {
         if (this instanceof HTMLAudioElement && !voices.includes(this)) voices.push(this);
         return play.call(this);
       };
-    });
-    // Opt-in diagnostics only; no application events, readiness gates or assertions changed.
-    const frameDiagnostics = process.env.CUTVOKE_GAIN_FRAME_DIAGNOSTICS === "1";
-    if (frameDiagnostics) {
-      let retained = 0;
-      page.on("console", message => {
-        const text = message.text(), prefix = "cutvoke-gain-frame:";
-        if (!text.startsWith(prefix) || text.length > 16384 || retained >= 64) return;
-        void test.info().attach(`gain-frame-${++retained}`, {
-          body: text.slice(prefix.length), contentType: "application/json",
-        }).catch(() => {});
-      });
-      await page.addInitScript(() => {
+      if (frameDiagnostics) {
         let retained = 0;
         const seen = new WeakSet<HTMLVideoElement>();
         const sample = (video: HTMLVideoElement, phase: string, metadata?: VideoFrameCallbackMetadata) => {
@@ -4936,8 +4936,8 @@ for (const prepared of [true, false]) {
             }
           }, true);
         }
-      });
-    }
+      }
+    }, frameDiagnostics);
     await openProject(page, name);
     const video = page.locator("video.player__video"), ruler = page.getByRole("slider", { name: "时间线播放头", exact: true });
     await expect(video).toHaveAttribute(prepared ? "src" : "data-preview-source", prepared ? /preview-jobs\/[^/]+\/media/ : /index=0/, { timeout: prepared ? 30_000 : 10_000 });
