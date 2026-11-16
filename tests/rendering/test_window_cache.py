@@ -11,6 +11,8 @@ from unittest.mock import patch
 
 from PIL import Image
 from cutvoke.domain.model import AssetReference, Clip, Track, Caption
+from cutvoke.domain.keyframes import Keyframe
+from cutvoke.domain.invariants import validate_project
 from cutvoke.domain.rational import Rational
 from cutvoke.editing.service import EditService
 from cutvoke.rendering.render import RenderService, RenderError, RenderCancelled
@@ -136,6 +138,63 @@ class RealRecovery(unittest.TestCase):
             Image.new('RGB', (64, 48), 'blue').save(root / 'source.png')
             changed = renderer.render(project, str(root / 'changed.mp4'))
             self.assertEqual(changed['reusedWindowCount'], 0)
+
+    def test_snapshot_edit_invalidates_then_warm_matches_independent_cold(self):
+        """A late keyframe edit invalidates all windows, not just its own window."""
+        with tempfile.TemporaryDirectory() as tmp, patch('os.cpu_count', return_value=1):
+            root = Path(tmp)
+            project = self.project(root)
+            changed = copy.deepcopy(project)
+            late_clip = changed.sequence.tracks[0].clips[-1]
+            self.assertGreaterEqual(late_clip.timeline_start.to_fraction(), 16)
+            late_clip.keyframes['opacity'] = [Keyframe('late-opacity', r(0), .5)]
+            for document in (project, changed):
+                validation = validate_project(document)
+                self.assertTrue(validation.structurally_valid, validation.to_dict())
+                self.assertTrue(validation.renderable, validation.to_dict())
+                self.assertIsNotNone(simple_snapshot(document))
+
+            def export(document, path, expected_reused):
+                renderer = RenderService(gpu_effects=False)
+                with patch.object(renderer, '_render_in_windows', wraps=renderer._render_in_windows) as windows, \
+                        patch.object(renderer, '_render_continuous_audio', wraps=renderer._render_continuous_audio) as audio, \
+                        patch.object(renderer, '_verify_window_seams', wraps=renderer._verify_window_seams) as seams:
+                    result = renderer.render(document, str(path))
+                self.assertEqual(windows.call_count, 1)
+                self.assertEqual(audio.call_count, 1)
+                self.assertEqual(seams.call_count, 1)
+                self.assertEqual(result['renderStrategy'], 'lossless-windows')
+                self.assertEqual(result['windowCount'], 3)
+                self.assertEqual(result['reusedWindowCount'], expected_reused)
+                self.assertIsNotNone(result['audioVerification'])
+
+            baseline, edited, warm = (root / name for name in ('baseline.mp4', 'edited.mp4', 'warm.mp4'))
+            cold_dir = root / 'independent-cold'
+            cold_dir.mkdir()
+            cold = cold_dir / 'cold.mp4'
+            export(project, baseline, 0)
+            # The changed node lies outside the first two eight-second windows.
+            # Full-snapshot recovery must not reuse those windows either.
+            export(changed, edited, 0)
+            export(changed, warm, 3)
+            export(changed, cold, 0)
+            for kind, options in (
+                    ('video', ['-an', '-f', 'rawvideo', '-pix_fmt', 'rgb24']),
+                    ('audio', ['-vn', '-f', 'f32le', '-acodec', 'pcm_f32le'])):
+                with self.subTest(kind=kind):
+                    def decode(path):
+                        return subprocess.run(['ffmpeg', '-v', 'error', '-i', str(path), *options, 'pipe:1'],
+                                              check=True, capture_output=True).stdout
+                    reference = decode(cold)
+                    self.assertTrue(reference)
+                    self.assertEqual(decode(edited), reference)
+                    self.assertEqual(decode(warm), reference)
+                    if kind == 'video':
+                        self.assertNotEqual(decode(baseline), reference)
+                    else:
+                        self.assertEqual(decode(baseline), reference)
+            self.assertFalse(list(root.glob('cutvoke-export-windows-*')))
+            self.assertFalse(list(cold_dir.glob('cutvoke-export-windows-*')))
 
     def test_identity_fallback_cancellation_and_changes(self):
         with tempfile.TemporaryDirectory() as tmp:
