@@ -8,7 +8,7 @@
 
 *An open-source, local-first video editor where human creators and AI agents collaborate on the same non-destructive timeline—complete with visual editing, MCP integration, and reusable community effects.*
 
-[![Release](https://img.shields.io/github/v/release/frankShan001/CutVoke?include_prereleases&label=Release&color=blue)](https://github.com/frankShan001/CutVoke/releases)
+[![Release](https://img.shields.io/github/v/release/frankShan001/CutVoke?include_prereleases&label=Release&color=blue)](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![MCP Ready](https://img.shields.io/badge/MCP-Agent--Native-8A2BE2)](docs/user/LOCAL_DELIVERY_MCP.md)
@@ -16,7 +16,7 @@
 
 [**English**](README.md) | [**简体中文**](README.zh-CN.md)
 
-[Download Desktop App](https://github.com/frankShan001/CutVoke/releases) · [What's New in v0.3.5](docs/development/release-notes-v0.3.5.md) · [Watch Showcases](examples/showcases/) · [Connect AI Agents](docs/user/LOCAL_DELIVERY_MCP.md) · [Contribute Effects](CONTRIBUTING.md)
+[Download Desktop App](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [What's New in v0.3.6](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [Watch Showcases](examples/showcases/) · [Connect AI Agents](docs/user/LOCAL_DELIVERY_MCP.md) · [Contribute Effects](CONTRIBUTING.md)
 
 </div>
 
@@ -25,24 +25,33 @@
 </p>
 
 > **CutVoke is an open-source, local video editor your AI agent can drive over MCP — and you can open the same timeline and fix anything by hand.**
-> Instagram's new Edits for Mac also exposes an MCP server, but it is macOS-only (Apple silicon) and needs an Instagram sign-in. CutVoke runs on **Windows · macOS · Linux**, needs no account for local editing, and its source is MIT-licensed.
+> CutVoke runs on **Windows · macOS · Linux**, needs no account for local editing, and its source is MIT-licensed. Choose your own AI agent; external AI services may have separate accounts, costs and data policies.
 > Works with Claude Code, Codex, Cursor, Claude Desktop, or any MCP client.
 
 **Connect your agent in 30 seconds**
 
-1. [Download CutVoke v0.3.5](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.5) and launch it once.
+1. [Download CutVoke v0.3.6](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) and launch it once.
 2. Open `profile/mcp-config.json` in the CutVoke data folder (Windows portable: `CutVoke Data` next to the exe · macOS: `~/Library/Application Support/CutVoke/` · Linux: `${XDG_DATA_HOME:-~/.local/share}/CutVoke/`). It already contains the bundled engine command, so no Python install is needed.
 3. Add the `cutvoke` entry to your agent: [Claude Code](docs/integrations/claude-code.md) · [Codex](docs/integrations/codex.md) · [Cursor](docs/integrations/cursor.md). Then ask: *"Cut the silences, add captions, make a 9:16 version, and show me a few frames before you export."*
 
 ⭐ **If CutVoke is useful to you, a star helps other creators find it.**
 
-## What's New in v0.3.5
+## What's New in v0.3.6 Preview
 
-- **Transcript-Driven Editing**: Locate, audition, and delete clips by word or sentence with impact preview and single-step synced undo.
-- **AI Proposal & Evidence Review**: Propose timeline edits, inspect rendered frame evidence, and apply local patches via MCP.
-- **Code-Video Import & Cached Rendering**: Verify and import external code-generated videos with frame-window render caching.
-- **Faster Cold Start & Exact Frame Cuts**: Direct WAV/background metadata reads and unified frame-clock cuts across all framerates.
-- **3D Engine, Mattes & GPU Preview (v0.3.3–v0.3.4)**: OpenGL 3D layers, Alpha/Luma track mattes, adjustment layers, 5 AI genre guides, and GPU preview ([Release Notes](docs/development/release-notes-v0.3.5.md) · [Changelog](CHANGELOG.md)).
+- **More Reliable Media Handling**: Transparent VP8/VP9 WebM compositing, corrupt thumbnail/waveform cache rebuilding, short-audio export tails, and export-path editing fixes.
+- **Safer Human + Agent Collaboration**: Explicit editing takeover, lease revision review, local audio inspection, and editable generated-source handoffs.
+- **Editing Reliability Improvements**: Native audition startup, stale keyframe selection, and cancellation handling improvements. Some intermittent playback issues remain under investigation.
+- **Four Download Targets**: Windows x64, Linux x64, macOS Apple Silicon and Intel. See the [release notes and verified downloads](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6).
+
+> **Download vs. source:** v0.3.6 is a frozen preview, not current `main`. Later project-format migration and thumbnail-seeking changes are **not included**. Source `main` now identifies older projects and offers **Convert copy and open** or **Close**, preserving the original. Use the [v0.3.6 source tree](https://github.com/frankShan001/CutVoke/tree/v0.3.6) for documentation matching the download; unlabelled repository documentation follows `main`.
+
+### Before You Update
+
+Close CutVoke and back up your projects and media. Keep the previous app available until your own projects have been checked.
+
+- **Export-window reuse is disabled in all four v0.3.6 packages.** Normal export works, but retrying does not resume completed windows. This is separate from the code-video generation cache.
+- Intermittent audition/keyboard timeouts and manual keyframe misalignment after split/left trim are not fully resolved. Long portrait captions have clipped in Linux export tests; other platforms and preview parity are not yet verified. Inspect these cases before final delivery.
+- Packaged-app and offline MCPB checks passed, but do not establish real-client installation, cross-version migration, physical-device behavior or first launch after quarantine. macOS packages are ad-hoc signed, **not Developer ID signed or notarized**. See the [full release limitations](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6).
 
 ## Watch Product Overview
 
@@ -160,14 +169,16 @@ For code-video handoffs, editable packages carry verified source ZIPs for refere
 
 ### Option 1: Download the Portable Desktop App (Recommended for Creators)
 
-No Python or Node.js setup required. Download the latest pre-built package for your platform from [**GitHub Releases (v0.3.5)**](https://github.com/frankShan001/CutVoke/releases), extract the archive, and launch CutVoke:
+No Python or Node.js setup required. Download the v0.3.6 preview package for your platform from [**GitHub Releases (v0.3.6)**](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6), extract the archive, and launch CutVoke:
 
-| Platform | Architecture | Package Download (v0.3.5) |
+| Platform | Architecture | Package Download (v0.3.6) |
 | :--- | :--- | :--- |
-| **Windows** | x64 (Portable) | [`CutVoke-0.3.5-windows-x64-portable.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.5/CutVoke-0.3.5-windows-x64-portable.zip) |
-| **macOS** | Apple Silicon (M1–M4, arm64) | [`CutVoke-0.3.5-macos-arm64.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.5/CutVoke-0.3.5-macos-arm64.zip) |
-| **macOS** | Intel (x64) | [`CutVoke-0.3.5-macos-x64.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.5/CutVoke-0.3.5-macos-x64.zip) |
-| **Linux** | x64 | [`CutVoke-0.3.5-linux-x64.tar.gz`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.5/CutVoke-0.3.5-linux-x64.tar.gz) |
+| **Windows** | x64 (Portable) | [`CutVoke-0.3.6-windows-x64-portable.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.6/CutVoke-0.3.6-windows-x64-portable.zip) |
+| **macOS** | Apple Silicon (arm64) | [`CutVoke-0.3.6-macos-arm64.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.6/CutVoke-0.3.6-macos-arm64.zip) |
+| **macOS** | Intel (x64) | [`CutVoke-0.3.6-macos-x64.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.6/CutVoke-0.3.6-macos-x64.zip) |
+| **Linux** | x64 | [`CutVoke-0.3.6-linux-x64.tar.gz`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.6/CutVoke-0.3.6-linux-x64.tar.gz) |
+
+[SHA-256 checksums](https://github.com/frankShan001/CutVoke/releases/download/v0.3.6/SHA256SUMS) · [Build and acceptance record](https://github.com/frankShan001/CutVoke/releases/download/v0.3.6/BUILD-INFO.json) · [All releases / previous versions](https://github.com/frankShan001/CutVoke/releases)
 
 > **Note**: Desktop packages include FFmpeg and ffprobe; no system FFmpeg setup is needed. Only source installs (Option 3) require [`ffmpeg` and `ffprobe`](https://ffmpeg.org/download.html) on PATH. See [Pre-release Notes](docs/development/prerelease.md) for platform launch details.
 
@@ -196,6 +207,8 @@ Use the values from your own file rather than this sketch. Per-client steps: [Cl
 2. Load the built-in [**`cutvoke-editor` Skill**](skills/cutvoke-editor/) into your coding or creative agent so it understands CutVoke's timeline schema, genre pacing guides, and effect catalogs. Full instructions are available in the [Agent Skill Guide](docs/user/agent-skill.md).
 
 ### Option 3: Run from Source (For Developers & Power Users)
+
+The default clone follows development `main`. To run the released preview source instead, run `git checkout v0.3.6` after cloning and before installing dependencies. Do not assume projects converted by newer source builds remain readable in v0.3.6.
 
 **Prerequisites**: Python `3.10+`, Node.js `20+` (CI uses Node.js `24`), and `ffmpeg` / `ffprobe` installed in system `PATH`. See [installation and tested environments](docs/user/installation.md) for required codecs and platform details.
 
@@ -284,7 +297,7 @@ CutVoke/
 | **VFX, Motion & 3D** | [Cinematic VFX](docs/cinematic-vfx.md) · [Moving Masks](docs/moving-masks.md) · [Title Motion](docs/title-motion.md) · [Animation Workflow](docs/user/ANIMATION_WORKFLOW.md) · [Compositing Workflow](docs/user/COMPOSITING_WORKFLOW.md) · [Local 3D & Models](docs/user/LOCAL_3D_AND_MODELS.md) |
 | **Audio & Captions** | [Audio Workbench](docs/user/AUDIO_WORKBENCH.md) · [Local ASR (Offline Captions)](docs/user/LOCAL_ASR.md) |
 | **AI Agent & MCP** | [Local Delivery MCP](docs/user/LOCAL_DELIVERY_MCP.md) · [Agent Skill Setup](docs/user/agent-skill.md) · [CutVoke Editor Skill](skills/cutvoke-editor/) |
-| **Release Notes & Dev** | [v0.3.5 Release Notes](docs/development/release-notes-v0.3.5.md) · [v0.3.4 Release Notes](docs/development/release-notes-v0.3.4.md) · [Project Layout](docs/development/project-layout.md) · [Render Performance](docs/development/render-performance.md) |
+| **Release Notes & Dev** | [v0.3.6 Release Notes](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [v0.3.5 Release Notes](docs/development/release-notes-v0.3.5.md) · [Project Layout](docs/development/project-layout.md) · [Render Performance](docs/development/render-performance.md) |
 
 ## License & Security
 
