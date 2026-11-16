@@ -1,5 +1,5 @@
 // Shared by browser regression coverage and all four packaged-app acceptances.
-async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3 } = {}) {
+async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3, onDiagnostic = () => {} } = {}) {
   const video = page.locator("video.player__video");
   const ruler = page.getByRole("slider", { name: "时间线播放头", exact: true });
   const samples = [];
@@ -14,7 +14,38 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3 
     // must not consume a short clip before its first playing frame is observed.
     const observerKey = `__cutvokeNativePreview_${Date.now()}_${cycle}`;
     await page.evaluate(({ timeout, key }) => {
-      const state = { promise: null, cancel: null };
+      // Strict allowlist: no URLs, DOM text, media paths or exception messages.
+      const state = { promise: null, cancel: null, diagnostic: { events: [], counts: {}, dropped: 0 } };
+      const started = Date.now(), nodes = new WeakMap();
+      let nextNode = 0, previousState = "";
+      const number = value => Number.isFinite(value) ? value : null;
+      const record = (event, video, metadata) => {
+        try {
+          const d = state.diagnostic;
+          d.counts[event] = Math.min(1_000_000, (d.counts[event] || 0) + 1);
+          let identity = null;
+          if (video) {
+            identity = nodes.get(video);
+            if (!identity) { identity = { id: ++nextNode, source: video.currentSrc, generation: 1 }; nodes.set(video, identity); }
+            else if (identity.source !== video.currentSrc) { identity.source = video.currentSrc; identity.generation++; }
+          }
+          const entry = { event, elapsedMs: Date.now() - started, node: identity?.id ?? null,
+            sourceGeneration: identity?.generation ?? null, paused: video ? Boolean(video.paused) : null,
+            seeking: video ? Boolean(video.seeking) : null, ended: video ? Boolean(video.ended) : null,
+            readyState: number(video?.readyState), time: number(video?.currentTime) };
+          if (metadata) { entry.mediaTime = number(metadata.mediaTime); entry.presentedFrames = number(metadata.presentedFrames); }
+          // Poll transitions, not the continuously advancing clock. Preserve the
+          // final state on timeout even when no compositor callback ever arrives.
+          if (event === "state") {
+            const signature = JSON.stringify([entry.node, entry.sourceGeneration, entry.paused, entry.seeking, entry.ended, entry.readyState]);
+            if (signature === previousState) return;
+            previousState = signature;
+          }
+          if (d.events.length === 64) { d.events.shift(); d.dropped = Math.min(1_000_000, d.dropped + 1); }
+          d.events.push(entry);
+        } catch { /* Diagnostic collection must not interrupt the observer. */ }
+      };
+      state.snapshot = () => { record("snapshot", document.querySelector("video.player__video")); return state.diagnostic; };
       window[key] = state;
       state.promise = new Promise((resolve, reject) => {
         let target = null, source = "", callback = null, generation = 0, done = false;
@@ -27,19 +58,25 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3 
         const arm = () => {
           if (done) return;
           const current = document.querySelector("video.player__video");
+          record("state", current);
           if (!current || current.paused || current.seeking) return;
           if (typeof current.requestVideoFrameCallback !== "function") {
-            cleanup(); reject(new Error("Preview compositor frame callbacks unavailable")); return;
+            record("unavailable", current); cleanup(); reject(new Error("Preview compositor frame callbacks unavailable")); return;
           }
           if (current === target && current.currentSrc === source && callback !== null) return;
           if (target && callback !== null) target.cancelVideoFrameCallback(callback);
           target = current; source = current.currentSrc;
           const registered = ++generation;
+          record("arm", current);
           callback = current.requestVideoFrameCallback((_, metadata) => {
-            if (done || registered !== generation) return;
+            if (done) return;
+            if (registered !== generation) { record("stale-generation", current, metadata); return; }
             callback = null;
-            if (current !== document.querySelector("video.player__video") || current.currentSrc !== source ||
-                current.paused || current.seeking || metadata.mediaTime <= .25) { arm(); return; }
+            const reason = current !== document.querySelector("video.player__video") ? "inactive-node"
+              : current.currentSrc !== source ? "changed-source" : current.paused ? "paused"
+              : current.seeking ? "seeking" : metadata.mediaTime <= .25 ? "early-frame" : null;
+            record(reason || "accepted", current, metadata);
+            if (reason) { arm(); return; }
             try {
               const canvas = document.createElement("canvas");
               canvas.width = current.videoWidth; canvas.height = current.videoHeight;
@@ -54,7 +91,7 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3 
           });
         };
         const watch = setInterval(arm, 16);
-        const deadline = setTimeout(() => { cleanup(); reject(new Error("No submitted playing preview frame")); }, timeout);
+        const deadline = setTimeout(() => { record("deadline", document.querySelector("video.player__video")); cleanup(); reject(new Error("No submitted playing preview frame")); }, timeout);
         arm();
       });
       // A failed Play/locator assertion can outlive the observer's deadline.
@@ -73,7 +110,14 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3 
       // pool/source handoff while waiting, rejecting callbacks from old sources.
       frame = await page.evaluate(key => window[key].promise, observerKey);
     } finally {
-      await page.evaluate(key => { window[key]?.cancel(); delete window[key]; }, observerKey);
+      const diagnostic = await page.evaluate(key => {
+        const state = window[key];
+        if (!state) return null;
+        try { return state.snapshot(); } catch { return null; }
+        finally { state.cancel(); delete window[key]; }
+      }, observerKey).catch(() => null);
+      // Diagnostics never change acceptance or hide the original failure.
+      try { if (diagnostic) onDiagnostic({ cycle, ...diagnostic }); } catch {}
     }
     expect(frame.width).toBeGreaterThan(0); expect(frame.height).toBeGreaterThan(0);
     expect(frame.energy, JSON.stringify(frame)).toBeGreaterThan(0);
