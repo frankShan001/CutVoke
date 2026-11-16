@@ -64,3 +64,21 @@ def test_ambiguous_envelope_and_nested_future_schema_rejected():
     current['document']['schemaVersion'] = '999'
     with pytest.raises(ProjectFormatError):
         inspect_snapshot(current)
+
+
+def test_historical_one_dot_zero_is_legacy_not_current():
+    source = legacy()
+    source['schemaVersion'] = '1.0'
+    before = deepcopy(source)
+    assert Project.from_dict(source).schema_version == '1.0'
+    assert inspect_snapshot(source) is ProjectFormat.LEGACY
+    with pytest.raises(ProjectFormatError): read_current_snapshot(source)
+    converted = convert_snapshot(source)
+    assert source == before
+    assert read_current_snapshot(converted)['schemaVersion'] == '2'
+
+
+@pytest.mark.parametrize('version', ['1.1', '1.0.0', '2.0', 1, 2])
+def test_unrecognized_schema_spellings_are_not_assumed_compatible(version):
+    source = legacy(); source['schemaVersion'] = version
+    with pytest.raises(ProjectFormatError): inspect_snapshot(source)

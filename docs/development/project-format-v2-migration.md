@@ -78,3 +78,28 @@ the SQLite boundary uses namespaced tables rather than the envelope.
   opacity/volume; constant/reverse/curved speed and freeze behavior.
 - Browser preview and real product export frames/audio; exact-head full CI and
   platform packages. Isolated codec tests or passing #56 prototype are not these.
+
+## Historical schema spellings
+
+Both `1` and `1.0` are recognized as legacy project schemas, never current.
+The pre-v2 model accepted `1.0`, and repository VFR/transition fixtures exercise
+that representation. Detection reports the exact `sourceSchemaVersion` alongside
+container generation `sourceVersion: 1`. Explicit copy conversion upgrades current
+and history snapshots to `2`; the original schema string and source bytes remain
+unchanged. The service still refuses to edit either legacy spelling. Unknown
+strings such as `1.1`, `1.0.0` and `2.0` are not guessed compatible.
+
+### Package conversion publication gate
+
+Legacy package conversion validates a private extracted snapshot before creating
+its requested destination. It rejects symlink targets/ancestors, colliding or
+non-portable member names, conflicting original-path mappings, missing/checksum
+failures and stale original-package tokens. Exclusive publication never replaces
+an existing destination; IO failure removes only files/directories created by
+that attempt and retains concurrent writers' objects. Registration happens only
+after publication returns. Installed fonts/plugins remain runtime dependencies.
+
+The real browser conversion test covers Close (no catalogue/source change) and
+Convert (new schema-2 identity, original unchanged) for directories and packages.
+Local browser execution may be unavailable in restricted cloud environments;
+test discovery or fixture validation is not a substitute for CI browser passage.

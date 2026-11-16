@@ -81,3 +81,109 @@ def test_http_package_conversion_is_explicit_and_registers_only_verified_copy(tm
             assert store.load(result['projectId']).schema_version=='2'
         finally:api.close()
     assert old.read_bytes()==original
+
+
+def test_failed_checksum_leaves_no_destination_or_parent(tmp_path):
+    old,_=old_package(tmp_path,media=True)
+    damaged=tmp_path/'damaged.zip'
+    with zipfile.ZipFile(old) as src,zipfile.ZipFile(damaged,'w') as dst:
+        for item in src.infolist():dst.writestr(item,b'bad' if item.filename.startswith('media/') else src.read(item))
+    before=damaged.read_bytes();plan=inspect_package_format(damaged)
+    with pytest.raises(ProjectPackError):convert_package_copy(damaged,plan['token'],tmp_path/'absent'/'copy')
+    assert not (tmp_path/'absent').exists()
+    assert damaged.read_bytes()==before
+
+
+@pytest.mark.parametrize('name',['media/../escape.png','media/a\\b.png','media/NUL.png','media/a./b.png'])
+def test_unsafe_media_members_never_touch_destination(tmp_path,name):
+    old,_=old_package(tmp_path,media=True);bad=tmp_path/'bad.zip'
+    with zipfile.ZipFile(old) as src,zipfile.ZipFile(bad,'w') as dst:
+        for item in src.infolist():
+            raw=src.read(item)
+            if item.filename=='manifest.json':
+                data=json.loads(raw);data['assets'][0]['packagePath']=name;raw=json.dumps(data).encode()
+            dst.writestr(name if item.filename.startswith('media/') else item.filename,raw)
+    plan=inspect_package_format(bad)
+    with pytest.raises(ProjectPackError):convert_package_copy(bad,plan['token'],tmp_path/'copy')
+    assert not (tmp_path/'copy').exists()
+    assert not (tmp_path/'escape.png').exists()
+
+
+def test_symlink_destination_cannot_write_outside(tmp_path):
+    old,_=old_package(tmp_path,media=True);outside=tmp_path/'outside';outside.mkdir()
+    link=tmp_path/'link'
+    try:link.symlink_to(outside,target_is_directory=True)
+    except OSError:pytest.skip('symlink creation unavailable on this platform')
+    plan=inspect_package_format(old)
+    with pytest.raises(ProjectPackError,match='symlink'):
+        convert_package_copy(old,plan['token'],link/'copy')
+    assert not list(outside.iterdir())
+
+
+def test_source_changed_during_unpack_never_publishes(tmp_path,monkeypatch):
+    from cutvoke.storage import project_package_conversion as conversion
+    old,_=old_package(tmp_path,media=True);plan=inspect_package_format(old)
+    unpack=conversion.unpack_project
+    def changing(*args,**kwargs):
+        result=unpack(*args,**kwargs)
+        old.write_bytes(old.read_bytes()+b'concurrent change')
+        return result
+    monkeypatch.setattr(conversion,'unpack_project',changing)
+    with pytest.raises(ProjectPackError,match='changed during conversion'):
+        convert_package_copy(old,plan['token'],tmp_path/'copy')
+    assert old.read_bytes().endswith(b'concurrent change')
+    assert not (tmp_path/'copy').exists()
+
+
+def test_publication_io_failure_removes_only_created_output(tmp_path,monkeypatch):
+    from cutvoke.storage import project_package_conversion as conversion
+    old,_=old_package(tmp_path,media=True);plan=inspect_package_format(old);original=old.read_bytes()
+    def fail(source,target,*args,**kwargs):
+        target.write(b'partial')
+        raise OSError('injected disk full')
+    monkeypatch.setattr(conversion.shutil,'copyfileobj',fail)
+    with pytest.raises(OSError,match='disk full'):
+        convert_package_copy(old,plan['token'],tmp_path/'new-parent'/'copy')
+    assert not (tmp_path/'new-parent').exists() and old.read_bytes()==original
+
+
+def test_concurrent_destination_creation_is_never_overwritten(tmp_path,monkeypatch):
+    from cutvoke.storage import project_package_conversion as conversion
+    old,_=old_package(tmp_path,media=True);plan=inspect_package_format(old)
+    destination=tmp_path/'copy';publish=conversion._publish_new_copy
+    def race(stage,target):
+        destination.mkdir();(destination/'other-writer').write_text('keep')
+        return publish(stage,target)
+    monkeypatch.setattr(conversion,'_publish_new_copy',race)
+    with pytest.raises(ProjectPackError,match='new destination'):
+        convert_package_copy(old,plan['token'],destination)
+    assert list(destination.iterdir())==[destination/'other-writer']
+    assert (destination/'other-writer').read_text()=='keep'
+
+
+def test_http_explicit_conversion_destination_and_symlink_refusal(tmp_path):
+    from cutvoke.editing.service import EditService
+    from cutvoke.interfaces.httpapi import HttpApi
+    from cutvoke.rendering.render import RenderService
+    from cutvoke.storage.project_directory import ProjectLibraryStore
+    old,_=old_package(tmp_path,media=True);original=old.read_bytes()
+    with ProjectLibraryStore(str(tmp_path/'library.sqlite')) as store:
+        api=HttpApi(EditService(store),RenderService(),media_dir=str(tmp_path/'media'))
+        try:
+            status,plan=api.handle('POST','/api/v1/packages/format/inspect',{'path':str(old)})
+            assert status==200
+            status,result=api.handle('POST','/api/v1/packages/format/convert',
+                {'path':str(old),'token':plan['token'],'targetDir':'manual/converted'})
+            assert status==200,result
+            assert store.load(result['projectId']).schema_version=='2'
+            assert list((tmp_path/'manual'/'converted'/'media').iterdir())
+            before=store.list_all()
+            real=tmp_path/'real';real.mkdir();link=tmp_path/'link'
+            try:link.symlink_to(real,target_is_directory=True)
+            except OSError:pytest.skip('symlink creation unavailable on this platform')
+            status,error=api.handle('POST','/api/v1/packages/format/convert',
+                {'path':str(old),'token':plan['token'],'targetDir':'link/converted'})
+            assert status==400,error
+            assert store.list_all()==before and not list(real.iterdir())
+            assert old.read_bytes()==original
+        finally:api.close()

@@ -63,15 +63,14 @@ def main() -> None:
         # The optional extension journal belongs to this disposable runtime.
         # Status reads must never create files in the user's actual profile.
         os.environ["CUTVOKE_EXTENSION_HOME"] = os.path.join(root, "extensions")
-        service = EditService(store=ProjectStore(os.path.join(root, "projects.sqlite")))
+        # Ordinary browser/QA fixtures must use the shipped current-format
+        # store. Seeding plain projects.sqlite first creates a legacy catalogue
+        # that the conversion gate correctly refuses before editor tests run.
+        from cutvoke.storage.project_directory import ProjectLibraryStore
+        service = EditService(store=ProjectLibraryStore(os.path.join(root, "projects.sqlite")))
         seed_fixture(service, root)
-        # Migration acceptance owns a separate legacy project. Reopening its
-        # moved copy must never replace the source fixture used by other files.
-        seed_fixture(service, root, "e2e-migration-fixture")
-        if os.environ.get("CUTVOKE_E2E_FOLDERS") == "1":
-            from cutvoke.storage.project_directory import ProjectLibraryStore
-            service.close(); service.store.close()
-            service = EditService(store=ProjectLibraryStore(os.path.join(root, "projects.sqlite")))
+        # Old-format conversion tests create independent disposable fixtures.
+        # Never make the shared e2e-fixture require a conversion choice.
         api = HttpApi(service, RenderService(), media_dir=os.path.join(root, "media"))
         try:
             with ExitStack() as diagnostics:

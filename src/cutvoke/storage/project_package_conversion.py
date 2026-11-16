@@ -2,6 +2,7 @@
 from __future__ import annotations
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -51,6 +52,62 @@ def inspect_package_format(path):
             'name':document.get('name') or document['projectId']}
 
 
+
+def _publish_new_copy(stage, destination):
+    """Exclusive files; failed publication removes only objects we created.
+
+    Never replace a caller/concurrent writer's directory, file or symlink.
+    Publication stays unregistered until the caller receives a complete copy.
+    """
+    target = Path(destination).expanduser().absolute()
+    for path in (target, *target.parents):
+        if path.is_symlink():
+            raise ProjectPackError('Conversion destination cannot contain symlinks')
+    if target.exists():
+        raise ProjectPackError('Conversion requires a new destination directory')
+    directories, files = [], []
+    try:
+        absent = []
+        parent = target.parent
+        while not parent.exists():
+            absent.append(parent)
+            parent = parent.parent
+        for directory in [*reversed(absent), target]:
+            directory.mkdir()  # exclusive; never accept a concurrent creation
+            directories.append((directory, directory.stat()))
+        for source in sorted(Path(stage).rglob('*')):
+            output = target / source.relative_to(stage)
+            # Reject changed parent identities before creating directories or
+            # opening leaves; a replaced parent must not redirect extraction.
+            for directory, identity in directories:
+                now = directory.lstat()
+                if directory.is_symlink() or (now.st_dev,now.st_ino)!=(identity.st_dev,identity.st_ino):
+                    raise ProjectPackError('Conversion destination changed during publication')
+            if source.is_dir():
+                output.mkdir()
+                directories.append((output, output.stat()))
+            else:
+                with output.open('xb') as outgoing:
+                    identity = os.fstat(outgoing.fileno())
+                    files.append((output, identity))
+                    with source.open('rb') as incoming:
+                        shutil.copyfileobj(incoming,outgoing)
+                    outgoing.flush()
+                    os.fsync(outgoing.fileno())
+    except BaseException:
+        for output, identity in reversed(files):
+            try:
+                now=output.lstat()
+                if (now.st_dev,now.st_ino)==(identity.st_dev,identity.st_ino):output.unlink()
+            except OSError:pass
+        for directory, identity in reversed(directories):
+            try:
+                now=directory.lstat()
+                if (now.st_dev,now.st_ino)==(identity.st_dev,identity.st_ino):directory.rmdir()
+            except OSError:pass  # retain any concurrent writer's files
+        raise
+    return target
+
 def convert_package_copy(path,token,destination):
     """Caller obtains explicit Convert choice; never registered on failed checks."""
     source=Path(path).expanduser().resolve()
@@ -65,16 +122,31 @@ def convert_package_copy(path,token,destination):
             raise ProjectPackError('Package changed while copying')
         with zipfile.ZipFile(snapshot) as archive:
             manifest=json.loads(archive.read('manifest.json'))
+            from cutvoke.storage.generated_sources import _portable_name
             destinations={}
+            original_paths={}
+            for name in archive.namelist():
+                try:_portable_name(name)
+                except ValueError as error:raise ProjectPackError(str(error)) from error
             for item in [*manifest.get('assets',[]),*manifest.get('luts',[]),*manifest.get('effectFiles',[])]:
+                if not isinstance(item,dict):
+                    raise ProjectPackError('Invalid media manifest entry')
                 name=item.get('packagePath','')
+                original=item.get('originalPath')
+                if not isinstance(original,str) or not original:
+                    raise ProjectPackError('Invalid original media path')
+                identity=(name,item.get('sha256'))
+                if original in original_paths and original_paths[original]!=identity:
+                    raise ProjectPackError('Conflicting original media mappings')
+                original_paths[original]=identity
                 if not isinstance(name,str) or not name.startswith('media/') or "\\" in name:
                     raise ProjectPackError('Invalid media package path')
                 target=Path(name).name.casefold()
                 previous=destinations.setdefault(target,name)
                 if previous!=name:
                     raise ProjectPackError('Media names collide at extraction destination')
-        project,mapping,warnings=unpack_project(str(snapshot),str(destination),_convert_legacy=True)
+        stage=Path(temporary)/'verified'
+        project,mapping,warnings=unpack_project(str(snapshot),str(stage),_convert_legacy=True)
         # A normal package may allow recovery warnings; conversion cannot mark
         # an incomplete or checksum-mismatched copy successful.
         if warnings:
@@ -85,4 +157,13 @@ def convert_package_copy(path,token,destination):
             raise ProjectPackError('Converted project failed validation: '+'; '.join(result.errors+result.warnings))
         if _digest(source)!=token:
             raise ProjectPackError('Original package changed during conversion; copy not registered')
+        target=Path(destination).expanduser().absolute()
+        from cutvoke.storage.project_directory import _map_paths
+        from cutvoke.domain.model import Project
+        def relocate(value):
+            path=Path(value)
+            return str(target/path.relative_to(stage)) if path.is_absolute() and path.is_relative_to(stage) else value
+        project=Project.from_dict(_map_paths(project.to_dict(),relocate))
+        mapping={original:relocate(value) for original,value in mapping.items()}
+        _publish_new_copy(stage,target)
         return project,mapping,warnings

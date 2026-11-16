@@ -1,13 +1,14 @@
 """Explicit project format boundary for the Issue 55 migration work.
 
-This codec is intentionally not wired to open/save entry points yet. Detection
-must precede opening a writable ProjectStore. Conversion is a separate,
+The directory, snapshot and copy-migration entry points use this boundary.
+Detection must precede opening a writable ProjectStore. Conversion is a separate,
 user-confirmed action; reading never converts or edits the supplied snapshot.
 """
 from __future__ import annotations
 
 from copy import deepcopy
 from enum import Enum
+from cutvoke.domain.model import LEGACY_PROJECT_SCHEMAS
 
 FORMAT = "cutvoke.project-v2"
 VERSION = 2
@@ -33,12 +34,13 @@ def inspect_snapshot(value: object) -> ProjectFormat:
             raise ProjectFormatError("Ambiguous project envelope")
         _validate_document(value.get("document"), "2")
         return ProjectFormat.CURRENT
-    _validate_document(value, "1")
+    _validate_document(value, LEGACY_PROJECT_SCHEMAS)
     return ProjectFormat.LEGACY
 
 
-def _validate_document(value: object, schema: str) -> None:
-    if not isinstance(value, dict) or value.get("schemaVersion") != schema:
+def _validate_document(value: object, schema: str | tuple[str, ...]) -> None:
+    accepted = (schema,) if isinstance(schema, str) else schema
+    if not isinstance(value, dict) or value.get("schemaVersion") not in accepted:
         raise ProjectFormatError("Unsupported project schema")
     if not isinstance(value.get("projectId"), str) or not value["projectId"]:
         raise ProjectFormatError("Missing project identity")

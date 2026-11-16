@@ -8,6 +8,7 @@ import time
 import uuid
 
 from cutvoke.storage.project_format import ProjectFormatError
+from cutvoke.domain.model import LEGACY_PROJECT_SCHEMAS
 from cutvoke.storage.v2_connection import TABLES
 
 ENTRY = 'project.cutvoke'
@@ -125,10 +126,10 @@ def inspect_database(database, pid):
         if row is None:
             raise ProjectFormatError('Project not found')
         expected = '2' if current else '1'
-        if row[0] != expected:
+        if row[0] not in (('2',) if current else LEGACY_PROJECT_SCHEMAS):
             raise ProjectFormatError('Unsupported project schema')
         return {'status': 'current' if current else 'legacy', 'sourceVersion': int(expected),
-                'targetVersion': 2, 'projectId': row[1], 'name': row[2] or row[1],
+                'sourceSchemaVersion': row[0], 'targetVersion': 2, 'projectId': row[1], 'name': row[2] or row[1],
                 'token': database_token(conn, pid, database)}
     finally:
         conn.close()
@@ -163,7 +164,7 @@ def _convert_json(value, old_id, new_id):
     if result.get('projectId') == old_id:
         result['projectId'] = new_id
     if result.get('projectId') == new_id and 'revision' in result and 'schemaVersion' in result and ('sequence' in result or 'sequences' in result):
-        if result['schemaVersion'] != '1':
+        if result['schemaVersion'] not in LEGACY_PROJECT_SCHEMAS:
             raise ProjectFormatError('Unsupported historical schema')
         result['schemaVersion'] = '2'
     return result

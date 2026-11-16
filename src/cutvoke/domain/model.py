@@ -804,6 +804,10 @@ class Sequence:
                    exposed_properties=d.get("exposedProperties", []))
 
 
+LEGACY_PROJECT_SCHEMAS = ("1", "1.0")
+CURRENT_PROJECT_SCHEMA = "2"
+
+
 class UnsupportedProjectSchema(Exception):
     """Format refusal must not be swallowed as corrupt legacy JSON fallback."""
 
@@ -831,7 +835,7 @@ class Project:
     presets: list[dict] = field(default_factory=list)
 
     def __post_init__(self):
-        if self.schema_version not in ("1", "2"):
+        if self.schema_version not in (*LEGACY_PROJECT_SCHEMAS, CURRENT_PROJECT_SCHEMA):
             raise UnsupportedProjectSchema("unsupported project schema")
         # 兼容旧构造（只传了 sequence）：填充 sequences 与 active_sequence_id
         if not self.sequences:
@@ -850,7 +854,7 @@ class Project:
                 for clip in track.clips:
                     if clip.keyframe_time_domain not in ("local", "signed-local"):
                         raise UnsupportedProjectSchema("unknown animation clock")
-                    if self.schema_version == "1":
+                    if self.schema_version in LEGACY_PROJECT_SCHEMAS:
                         if clip.keyframe_time_domain != "local" or any(
                                 key.time < Rational.of(0)
                                 for lane in clip.keyframes.values() for key in lane):
@@ -892,7 +896,7 @@ class Project:
 
     @classmethod
     def from_dict(cls, d: dict) -> "Project":
-        if d.get("schemaVersion") not in ("1", "2"):
+        if d.get("schemaVersion") not in (*LEGACY_PROJECT_SCHEMAS, CURRENT_PROJECT_SCHEMA):
             raise UnsupportedProjectSchema("unsupported project schema")
         seqs = [Sequence.from_dict(s) for s in d.get("sequences", [])]
         if not seqs:

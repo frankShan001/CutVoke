@@ -97,3 +97,25 @@ def test_http_choice_boundary_no_implicit_conversion(tmp_path):
         finally:
             api.close()
     assert hashlib.sha256(source.read_bytes()).hexdigest()==original
+
+
+def test_one_dot_zero_copy_migrates_current_and_history_without_touching_source(tmp_path):
+    source = tmp_path/'historical.sqlite'
+    with ProjectStore(str(source)) as store:
+        project = Project('1.0','p','0',Sequence('s',160,90,R.of(24)))
+        store.save(project)
+        store._conn.execute('INSERT INTO history(project_id,depth,snapshot_json,revision) VALUES(?,?,?,?)',
+                            ('p',0,json.dumps(project.to_dict()),'0'))
+    original = hashlib.sha256(source.read_bytes()).hexdigest()
+    probe = inspect_database(source,'p')
+    assert probe['status'] == 'legacy'
+    assert probe['sourceVersion'] == 1
+    assert probe['sourceSchemaVersion'] == '1.0'
+    result = convert_copy(source,'p',probe['token'],tmp_path/'converted')
+    assert hashlib.sha256(source.read_bytes()).hexdigest() == original
+    with DirectoryProjectStore(result['directory']) as store:
+        project = store.load(result['projectId'])
+        assert project.schema_version == '2'
+        history = json.loads(store.peek_history(result['projectId'],0))
+        assert history['schemaVersion'] == '2'
+        assert history['projectId'] == project.project_id

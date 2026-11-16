@@ -88,11 +88,12 @@ def test_trimmed_effect_range_and_nodes_restore_together():
     assert restored.to_dict()==before
 
 
-def test_direct_service_rejects_legacy_without_migration(tmp_path):
+@pytest.mark.parametrize("legacy_schema", ["1", "1.0"])
+def test_direct_service_rejects_legacy_without_migration(tmp_path, legacy_schema):
     from cutvoke.editing.service import EditError
     db=str(tmp_path/'legacy.sqlite')
     with ProjectStore(db) as store:
-        s=EditService(store);p=s.create_project('p');p.schema_version='1';store.save(p)
+        s=EditService(store);p=s.create_project('p');p.schema_version=legacy_schema;store.save(p)
         before=store.load('p').to_dict()
         with pytest.raises(EditError) as error:
             s.execute(Command('track.add',{'trackId':'v','kind':'video'},'edit','p',p.revision,Actor('human','test')))
