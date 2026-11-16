@@ -5822,22 +5822,32 @@ class RenderService:
         import os as _os
         if not _os.path.isfile(src):
             raise RenderError(f"thumbnail: source file not found: {src!r}")
-        cmd = [
-            self.ffmpeg, "-y", "-nostdin",
-            "-ss", f"{time:.4f}",
-            *self._video_input_arguments(src), "-i", src,
-            "-frames:v", "1",
-            "-vf", f"scale={width}:-2",
-            "-f", "image2", out_png,
-        ]
+        if isinstance(time, bool) or not isinstance(time, (int, float)) or not math.isfinite(time) or time < 0:
+            raise RenderError("thumbnail: time must be finite and nonnegative")
+        # Input-side -ss can discard reordered pictures around an HEVC GOP
+        # boundary. Decode before selecting the requested timestamp instead.
+        # This is O(time) for late thumbnails; the caller's timeout still bounds
+        # the operation. Scale only after selecting a frame, not every frame.
+        directory = os.path.dirname(os.path.abspath(out_png))
+        fd, temporary = tempfile.mkstemp(prefix=".thumbnail-", suffix=".png", dir=directory)
+        os.close(fd)
         try:
-            r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
-                               encoding="utf-8", errors="replace",
-                               timeout=timeout)
-        except subprocess.TimeoutExpired as e:
-            raise RenderError(f"thumbnail timed out on {src!r}") from e
-        if r.returncode != 0 or not os.path.isfile(out_png):
-            raise RenderError(f"thumbnail failed on {src!r}: {r.stderr[-400:]}")
+            cmd = [self.ffmpeg, "-y", "-nostdin",
+                   *self._video_input_arguments(src), "-i", src,
+                   "-vf", f"trim=start={time:.12f},scale={width}:-2",
+                   "-frames:v", "1", "-fps_mode", "vfr",
+                   "-f", "image2", temporary]
+            try:
+                r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
+                                   encoding="utf-8", errors="replace", timeout=timeout)
+            except subprocess.TimeoutExpired as e:
+                raise RenderError(f"thumbnail timed out on {src!r}") from e
+            if r.returncode != 0 or os.path.getsize(temporary) == 0:
+                raise RenderError(f"thumbnail failed or no frame at requested time: {r.stderr[-400:]}")
+            os.replace(temporary, out_png)
+        finally:
+            with contextlib.suppress(OSError):
+                os.unlink(temporary)
         return out_png
 
     def waveform_media(self, src: str, out_png: str, *, width: int = 320,
