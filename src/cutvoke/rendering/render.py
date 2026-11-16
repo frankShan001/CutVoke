@@ -142,14 +142,25 @@ def _filter_graph_arguments(ffmpeg: str, graph: str, directory: Optional[str] = 
         raise
     return [_filter_complex_file_option(ffmpeg), path], path
 
+@lru_cache(maxsize=32)
+def _alpha_decoder_available(ffmpeg: str, decoder: str) -> bool:
+    """Query supported decoders, not encoders; never silently drop source alpha."""
+    try:
+        result = subprocess.run([ffmpeg, "-hide_banner", "-decoders"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=10)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise RenderError(f"WEBM_ALPHA_DECODER_UNAVAILABLE: cannot inspect FFmpeg decoders: {error}") from error
+    return result.returncode == 0 and any(
+        len(fields := line.split()) >= 2 and fields[0].startswith("V") and fields[1] == decoder
+        for line in result.stdout.splitlines())
+
+
 # ---- V05 透明通道输出（alpha）----
 # 只认 ProRes 4444(.mov)：它是剪辑软件交接透明素材的通用口径，且 ffprobe
 # 会如实报告带 alpha 的 pix_fmt（yuva444p12le），**可验证**。
-# 为什么不收 .webm/VP9（2026-09-21 实测结论，别再踩）：
-#   本机 ffmpeg 9.0.1 用 libvpx-vp9 + -pix_fmt yuva420p + -auto-alt-ref 0
-#   导出的 webm，容器会打上 ALPHA_MODE=1 标签（看起来"成功"），但 stream
-#   pix_fmt 仍是 yuv420p，解码首帧 alpha 全 255 —— 是**假透明**。
-#   VP8 同样如此。与其交付一个"看起来透明其实不透明"的文件，不如明确拒绝。
+# VP8/VP9 alpha input needs libvpx decoding; output support remains deliberately
+# restricted to the established ProRes delivery contract. Metadata alone is not
+# proof of decoded output alpha.
 ALPHA_CONTAINERS = frozenset({".mov"})
 # 带 alpha 的像素格式前缀（ffprobe 的 pix_fmt 判定用，避免"导出成功但没透明"）
 _ALPHA_PIX_FMT_PREFIXES = ("yuva", "ya", "rgba", "bgra", "argb", "abgr", "gbrap")
@@ -2584,7 +2595,7 @@ class RenderService:
                     seek = getattr(self._render_ctx, 'input_seeks', {}).get(os.path.abspath(src))
                     if seek:
                         cmd += ['-ss', str(seek)]
-                    cmd += ["-i", src]
+                    cmd += [*self._video_input_arguments(src), "-i", src]
             if has_audio:
                 graph += ";[outa]anullsink"
             filter_args, filter_script_path = _filter_graph_arguments(self.ffmpeg, graph, caption_cwd)
@@ -2681,7 +2692,7 @@ class RenderService:
                             f"{fps_rat.numerator}/{fps_rat.denominator}",
                             "-i", src]
                 else:
-                    cmd += ["-i", src]
+                    cmd += [*self._video_input_arguments(src), "-i", src]
             if _has_audio:
                 graph += ";[outa]anullsink"
             filter_args, filter_script_path = _filter_graph_arguments(self.ffmpeg, graph, caption_cwd)
@@ -3575,7 +3586,7 @@ class RenderService:
         # Decoded alpha must meet the canvas before a working-space conversion
         # can discard it, including materialized composition intermediates.
         if (os.path.isfile(clip.asset_ref.source_path)
-                and _pix_fmt_has_alpha(self.probe_media(clip.asset_ref.source_path).get('pix_fmt'))):
+                and self._source_has_alpha(clip.asset_ref.source_path)):
             return True
         if _find_animations(clip):
             return True
@@ -4963,12 +4974,13 @@ class RenderService:
                 or transform["position"]["x"] != 0
                 or transform["position"]["y"] != 0):
             return None
-        pixel_format = self.probe_media(clip.asset_ref.source_path).get("pix_fmt")
+        source_info = self.probe_media(clip.asset_ref.source_path)
+        pixel_format = source_info.get("pix_fmt")
         # A paletted image may carry palette alpha even though its format name
         # contains no alpha marker. Keep unknown/transparent sources on the
         # compositing path so transparent pixels expose lower tracks correctly.
         if (not pixel_format or pixel_format == "pal8"
-                or _pix_fmt_has_alpha(pixel_format)):
+                or _pix_fmt_has_alpha(pixel_format) or source_info.get("webm_alpha")):
             return None
         params = animation.get("params", {}) or {}
         amplitude = float(params.get("amplitude", 0.03))
@@ -5682,6 +5694,23 @@ class RenderService:
         return self._clock_cache.get_or_compute(identity, lambda: regular_timestamps(
             self.ffprobe, source, start, duration, fps, exact_interval=True))
 
+    def _source_has_alpha(self, src: str) -> bool:
+        info = self.probe_media(src)
+        return _pix_fmt_has_alpha(info.get("pix_fmt")) or bool(info.get("webm_alpha"))
+
+    def _video_input_arguments(self, src: str) -> list[str]:
+        """Preserve WebM alpha without overriding ordinary VP8/VP9 decoders."""
+        info = self.probe_media(src)
+        decoder = {"vp8": "libvpx", "vp9": "libvpx-vp9"}.get(info.get("video_codec"))
+        if not decoder or not info.get("webm_alpha"):
+            return []
+        if not _alpha_decoder_available(self.ffmpeg, decoder):
+            raise RenderError(
+                f"WEBM_ALPHA_DECODER_UNAVAILABLE: transparent {info['video_codec']} input "
+                f"requires FFmpeg decoder {decoder}; install an FFmpeg build with libvpx "
+                "or convert the source to an alpha-capable intermediate")
+        return ["-c:v", decoder]
+
     def probe_media(self, src: str, timeout: float = 30.0) -> dict[str, Any]:
         """Probe current source metadata once, sharing concurrent reads safely."""
         if not os.path.isfile(src):
@@ -5711,7 +5740,7 @@ class RenderService:
         cmd = [
             executable, "-v", "error",
             "-show_entries", "format=duration,format_name",
-            "-show_entries", "stream=codec_type,width,height,pix_fmt,duration,start_time,avg_frame_rate,r_frame_rate",
+            "-show_entries", "stream=codec_type,codec_name,width,height,pix_fmt,duration,start_time,avg_frame_rate,r_frame_rate:stream_tags=alpha_mode",
             "-of", "json", src,
         ]
         try:
@@ -5772,6 +5801,10 @@ class RenderService:
             "format": str(fmt.get("format_name", "")),
             # V03：静帧/透明导出要判 alpha 是否真的在（PNG 常被判成 rgba/rgb24）
             "pix_fmt": v.get("pix_fmt") if v else None,
+            "video_codec": v.get("codec_name") if v else None,
+            "webm_alpha": bool(v and v.get("codec_name") in ("vp8", "vp9")
+                and any(key.lower() == "alpha_mode" and str(value) == "1"
+                        for key, value in (v.get("tags") if isinstance(v.get("tags"), dict) else {}).items())),
         }
         return result
 
@@ -5792,7 +5825,7 @@ class RenderService:
         cmd = [
             self.ffmpeg, "-y", "-nostdin",
             "-ss", f"{time:.4f}",
-            "-i", src,
+            *self._video_input_arguments(src), "-i", src,
             "-frames:v", "1",
             "-vf", f"scale={width}:-2",
             "-f", "image2", out_png,
@@ -5940,7 +5973,7 @@ class RenderService:
                 seek = getattr(self._render_ctx, 'input_seeks', {}).get(os.path.abspath(src))
                 if seek and not concat_input:
                     cmd += ['-ss', str(seek)]
-                cmd += ["-i", src]
+                cmd += [*self._video_input_arguments(src), "-i", src]
 
         filter_args, filter_script_path = _filter_graph_arguments(self.ffmpeg, graph, caption_cwd)
 
