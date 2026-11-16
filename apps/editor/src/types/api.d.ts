@@ -60,6 +60,7 @@ export interface SpeedCurve {
 export type FrameInterpolation = "none" | "motion";
 
 export interface Clip {
+  keyframeTimeDomain?: "local" | "signed-local";
   id: string;
   assetRef: AssetReference;
   role?: "sticker" | "adjustment";

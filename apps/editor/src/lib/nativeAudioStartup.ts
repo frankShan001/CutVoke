@@ -55,11 +55,21 @@ export class NativeAudioStartup {
           await element.play();
           // A stale play can start after cancellation. Do not stop a newer owner.
           if (!current()) { if (this.owners.get(element) === attempt) element.pause(); check(); }
+          // Prime every decoder, but do not let an early voice run while a
+          // slower peer prepares. The final seek barrier must run paused.
+          element.pause();
         })); check();
-        // A fast voice can advance while another play Promise is pending. It was
-        // muted; restore the requested start before making the complete mix audible.
+        // Restore the requested start with every decoder paused, so an early
+        // seeked event cannot consume the audition while another seek is pending.
         await Promise.all(request.voices.map(seek)); check();
         if (request.voices.some(({ element, time }) => element.seeking || Math.abs(element.currentTime - time) > .04)) throw new Error('native seek drifted before commit');
+        // All sources are now primed and positioned. Resume as one batch; retain
+        // the same drift protection if a device still delays a resumed voice.
+        await Promise.all(request.voices.map(async ({ element }) => {
+          await element.play();
+          if (!current()) { if (this.owners.get(element) === attempt) element.pause(); check(); }
+        })); check();
+        if (request.voices.some(({ element, time }) => element.seeking || Math.abs(element.currentTime - time) > .04)) throw new Error('native resume drifted before commit');
         if (request.context.state !== 'running' || !request.commit()) throw new Error('native commit cancelled');
         attempt.phase = 'running'; clearTimeout(attempt.timer);
         for (const { element } of request.voices) element.muted = false;

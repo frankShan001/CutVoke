@@ -241,3 +241,17 @@ def parameter_spec(clip, param):
                 if spec:
                     return spec[:2] + (float(effect.get("params",{}).get(fields[2],spec[2])),)
     raise ValueError(f"unsupported keyframe parameter or effect instance: {param}")
+
+
+def shift_manual_keyframes(clip, delta: Rational) -> None:
+    """Rebase persisted v2 manual nodes without deleting hidden animation.
+
+    Runtime expression lanes are not persisted manual data and must never be
+    shifted again. Rational timestamps and node IDs are preserved exactly.
+    """
+    if clip.keyframe_time_domain != "signed-local" or delta == Rational.of(0):
+        return
+    if any(hasattr(lane, "evaluator") for lane in clip.keyframes.values()):
+        raise ValueError("cannot edit runtime-derived animation lanes")
+    clip.keyframes = {name: [replace(key, time=key.time-delta) for key in lane]
+                      for name, lane in clip.keyframes.items()}

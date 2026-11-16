@@ -72,7 +72,7 @@ def test_nested_dedup_package_directory_move_and_lazy_restore(handoff, tmp_path)
     pack_project(project, str(package))
     with zipfile.ZipFile(package) as archive:
         package_manifest = json.loads(archive.read("manifest.json"))
-        assert package_manifest["packageFormat"] == 4
+        assert package_manifest["packageFormat"] == 5
         assert len(package_manifest["generatedSources"]) == 1
         assert len([n for n in archive.namelist() if n.startswith("sources/")]) == 1
     expected_source = source.read_bytes()
@@ -225,7 +225,7 @@ def test_explicit_restore_preserves_existing_and_rolls_back_io_failure(handoff, 
     assert not list(tmp_path.glob(".source-restore-*"))
 
 
-def test_unreferenced_source_excluded_and_legacy_package_unchanged(handoff, tmp_path):
+def test_unreferenced_source_excluded_from_v2_package(handoff, tmp_path):
     project, root, _, _ = handoff
     other = root / "ordinary.mp4"
     other.write_bytes(b"different ordinary media")
@@ -234,7 +234,7 @@ def test_unreferenced_source_excluded_and_legacy_package_unchanged(handoff, tmp_
     pack_project(project, str(package))
     with zipfile.ZipFile(package) as archive:
         manifest = json.loads(archive.read("manifest.json"))
-        assert manifest["packageFormat"] == 1
+        assert manifest["packageFormat"] == 5
         assert "generatedSources" not in manifest
     restored, _, warnings = unpack_project(str(package), str(tmp_path / "legacy"))
     assert not warnings
@@ -263,3 +263,39 @@ def test_source_package_rejects_linked_media_directory_before_writing(handoff, t
         unpack_project(str(package), str(destination), overwrite=True)
     assert sorted(p.name for p in outside.iterdir()) == ["user.txt"]
     assert (outside / "user.txt").read_bytes() == b"keep"
+
+
+def test_conversion_retains_inert_source_companion_and_rejects_stale_media(handoff,tmp_path):
+    from cutvoke.domain.model import Project
+    from cutvoke.storage.store import ProjectStore
+    from cutvoke.storage.project_format_migration import inspect_database,convert_copy
+    from cutvoke.storage.project_format import ProjectFormatError
+    project,root,source,_=handoff
+    data=json.loads(json.dumps(project.to_dict()).replace('signed-local','local'))
+    data['schemaVersion']='1'
+    database=tmp_path/'old.sqlite'
+    with ProjectStore(str(database)) as store:store.save(Project.from_dict(data))
+    token=inspect_database(database,'handoff')['token']
+    before=source.read_bytes()
+    result=convert_copy(database,'handoff',token,tmp_path/'converted')
+    archived=next((Path(result['directory'])/'media'/'.generated').glob('*.cvsource.zip'))
+    assert archived.read_bytes()==before
+    assert not list(Path(result['directory']).rglob('scene.py'))
+    media=root/'render.mp4';media.write_bytes(media.read_bytes()+b'changed')
+    with pytest.raises(ProjectFormatError,match='changed'):
+        convert_copy(database,'handoff',token,tmp_path/'stale')
+    assert not (tmp_path/'stale').exists()
+
+
+def test_actual_legacy_package_fixture_is_refused_without_output(handoff,tmp_path):
+    project,root,_,_=handoff
+    data=json.loads(json.dumps(project.to_dict()).replace('signed-local','local'))
+    data['schemaVersion']='1'
+    package=tmp_path/'v1-fixture.cvkpkg'
+    # The original flat v1 document and v1 package manifest, not a v2 pack
+    # whose marker was merely relabelled as old.
+    with zipfile.ZipFile(package,'w') as archive:
+        archive.writestr('manifest.json',json.dumps({'packageFormat':1,'schemaVersion':'1','assets':[]}))
+        archive.writestr('project.json',json.dumps(data))
+    with pytest.raises(ProjectPackError):unpack_project(str(package),str(tmp_path/'output'))
+    assert not (tmp_path/'output').exists()

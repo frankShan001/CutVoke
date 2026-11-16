@@ -55,24 +55,28 @@ def migrate_library(source_file: str, destination: str, *, cache_directory=None,
                 for pid, folder in guard.execute("SELECT project_id,root FROM project_directories"):
                     folder = Path(folder).resolve()
                     if folder.is_relative_to(root):
-                        database_file = folder / 'project.sqlite'
+                        from cutvoke.storage.project_format_migration import inspect_directory
+                        info = inspect_directory(folder)
+                        database_file = Path(info['database'])
+                        prefix = 'cv2_' if info['status'] == 'current' else ''
                         if not database_file.is_file():
                             raise ValueError(f"工程目录离线，请先重新打开：{folder}")
                         child = child_guards.enter_context(closing(sqlite3.connect(database_file, timeout=1)))
                         child.execute('BEGIN IMMEDIATE')
-                        if child.execute('SELECT 1 FROM edit_leases WHERE expires_at>?', (time.time(),)).fetchone():
+                        if child.execute(f'SELECT 1 FROM {prefix}edit_leases WHERE expires_at>?', (time.time(),)).fetchone():
                             raise ValueError('请等待独立工程的 Agent 编辑完成')
-                        for table in ('export_jobs', 'asr_jobs'):
+                        for base_table in ('export_jobs', 'asr_jobs'):
+                            table = prefix + base_table
                             if (child.execute('SELECT 1 FROM sqlite_master WHERE name=?', (table,)).fetchone() and
                                     child.execute(f"SELECT 1 FROM {table} WHERE status IN ('queued','running')").fetchone()):
                                 raise ValueError('请先完成独立工程的后台任务')
-                        directories.append((pid, folder))
+                        directories.append((pid, folder, database_file.name))
             caches = {".preview-cache", ".preview-cache-v2", ".cutvoke-preview-cache"}
             def ignore(folder, names):
                 skip = caches | ({source.name, source.name + "-wal", source.name + "-shm", "logs"}
                                  if Path(folder) == root else set())
-                if any(Path(folder) == directory for _pid, directory in directories):
-                    skip |= {"project.sqlite", "project.sqlite-wal", "project.sqlite-shm", "cache"}
+                if any(Path(folder) == directory for _pid, directory, _database in directories):
+                    skip |= {"project.sqlite", "project.sqlite-wal", "project.sqlite-shm", "project-v2.sqlite", "project-v2.sqlite-wal", "project-v2.sqlite-shm", "cache"}
                 return [name for name in names if name in skip]
             for item in root.rglob("*"):
                 if item.is_symlink() or getattr(item.lstat(), "st_file_attributes", 0) & stat.FILE_ATTRIBUTE_REPARSE_POINT:
@@ -80,11 +84,11 @@ def migrate_library(source_file: str, destination: str, *, cache_directory=None,
             shutil.copytree(root, stage, dirs_exist_ok=True, ignore=ignore)
             # Child databases have their own WAL. Back up each one consistently;
             # their manifests rebase owned paths when opened at the final location.
-            for _pid, folder in directories:
-                copied_db = stage / folder.relative_to(root) / 'project.sqlite'
+            for _pid, folder, filename in directories:
+                copied_db = stage / folder.relative_to(root) / filename
                 for suffix in ('-wal', '-shm'):
                     Path(str(copied_db) + suffix).unlink(missing_ok=True)
-                with closing(sqlite3.connect(folder / 'project.sqlite')) as reader, closing(sqlite3.connect(copied_db)) as output:
+                with closing(sqlite3.connect(folder / filename)) as reader, closing(sqlite3.connect(copied_db)) as output:
                     reader.backup(output)
             database = stage / source.name
             with closing(sqlite3.connect(source)) as reader, closing(sqlite3.connect(database)) as output:
@@ -118,7 +122,7 @@ def migrate_library(source_file: str, destination: str, *, cache_directory=None,
                                                (mapping[path_key(raw)], rowid))
                 from cutvoke.storage.asr_journal import relocate_asr_jobs
                 relocate_asr_jobs(output, root, stage, target)
-                for pid, folder in directories:
+                for pid, folder, _filename in directories:
                     output.execute('UPDATE project_directories SET root=? WHERE project_id=?',
                                    (str(target / folder.relative_to(root)), pid))
                 output.commit()

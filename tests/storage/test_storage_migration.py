@@ -116,3 +116,36 @@ def test_desktop_settings_preflight_waits_for_background_work(tmp_path, monkeypa
         assert result["error"]["code"] == "SETTINGS_BUSY"
     finally:
         api.close()
+
+
+def test_v2_child_wal_and_active_asr_are_respected(tmp_path):
+    from cutvoke.storage.project_directory import ProjectLibraryStore
+    from cutvoke.editing.service import EditService
+    from cutvoke.storage.asr_journal import AsrJournal
+    import sqlite3
+    base=tmp_path/'library';base.mkdir()
+    library=ProjectLibraryStore(str(base/'library.sqlite'))
+    service=EditService(library);service.create_project('v2')
+    folder=library.directory('v2')
+    service.close();library.close()
+    database=folder/'project-v2.sqlite'
+    writer=sqlite3.connect(database,isolation_level=None)
+    writer.execute('PRAGMA journal_mode=WAL');writer.execute('PRAGMA wal_autocheckpoint=0')
+    writer.execute("UPDATE cv2_projects SET name='uncheckpointed-name' WHERE project_id='v2'")
+    journal=AsrJournal(str(database))
+    journal.insert({'jobId':'job','projectId':'v2','status':'running','updatedAt':1},{'fixture':True})
+    try:
+        with pytest.raises(ValueError,match='后台任务'):
+            migrate_library(str(base/'library.sqlite'),str(tmp_path/'blocked'))
+        assert not (tmp_path/'blocked').exists()
+        journal.update('job',{'status':'completed'})
+        moved=migrate_library(str(base/'library.sqlite'),str(tmp_path/'moved'))
+        reopened=ProjectLibraryStore(moved)
+        try:
+            assert reopened.load('v2').name=='uncheckpointed-name'
+            copied=AsrJournal(str(reopened.directory('v2')/'project-v2.sqlite'))
+            try:assert copied.get('job')['status']=='completed'
+            finally:copied.close()
+        finally:reopened.close()
+    finally:
+        journal.close();writer.close()

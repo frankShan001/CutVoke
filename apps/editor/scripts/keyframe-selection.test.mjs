@@ -154,3 +154,26 @@ test('Bezier pointerUp blocks a stale form and commits only an explicitly select
     assert.deepEqual(Array.from(h.calls[0].bezier), [.35, .1, .8, .9]);
   } finally { await h.close(); }
 });
+
+test('signed hidden nodes remain listed but cannot be selected or included by select-all', async () => {
+  const h = await harness(clip([key('before', -2), key('visible', 1), key('after', 8)]));
+  try {
+    assert.equal(h.tree.root.findByProps({'aria-label':'选择关键帧 before'}).props.disabled,true);
+    await h.select('before'); assert.equal(h.checked('before'),false);
+    await act(async()=>h.button('全选节点').props.onClick());
+    assert.equal(h.checked('visible'),true);assert.equal(h.checked('after'),false);
+    await h.update(clip([key('before',-2),key('visible',-1),key('after',8)]));
+    assert.equal(h.checked('visible'),false);
+  } finally { await h.close(); }
+});
+
+test('real browser evaluator retains signed local interpolation and hold jumps',()=>{
+  const source=readFileSync(new URL('../src/lib/keyframes.ts',import.meta.url),'utf8');
+  const {outputText}=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}});
+  const exports={};runInNewContext(outputText,{exports,require:()=>({rationalToSecs})});
+  for(const mode of ['linear','ease-in','ease-out','hold','cubic-bezier']) {
+    const original=[{...key('a',0),value:20,interpolation:mode,bezier:[1/3,0,2/3,1]},{...key('b',10),value:100}];
+    const shifted=original.map(k=>({...k,time:r(rationalToSecs(k.time)-3)}));
+    for(let i=0;i<=70;i++)assert.ok(Math.abs(exports.evaluateKeyframes(shifted,i/10,0)-exports.evaluateKeyframes(original,i/10+3,0))<1e-9);
+  }
+});

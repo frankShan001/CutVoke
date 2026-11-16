@@ -2221,5 +2221,12 @@
   "仅包含版本化编辑，不含重命名、导出或其他无版本操作。": "Nur versionierte Bearbeitungen; Umbenennen, Exportieren und andere unversionierte Vorgänge sind ausgeschlossen.",
   "没有已提交的修改。": "Keine gespeicherten Änderungen.",
   "版本 {0} → {1} · 命令 {2} · {3} 个对象": "Version {0} → {1} · Befehl {2} · {3} Objekte",
-  "仅显示最近的修改。": "Nur die neuesten Änderungen werden angezeigt."
+  "仅显示最近的修改。": "Nur die neuesten Änderungen werden angezeigt.",
+  "不支持的工程格式": "Nicht unterstütztes Projektformat",
+  "旧工程需要转换": "Altes Projekt konvertieren",
+  "工程 {0} 使用格式 {1}，当前版本需要格式 {2}。": "Projekt {0} nutzt Format {1}; diese Version benötigt Format {2}.",
+  "转换将在新目录中创建副本，原工程保留不变。新副本不能用旧版本编辑器打开。关闭将不打开或转换工程。": "Die Konvertierung erstellt eine Kopie in einem neuen Ordner und lässt das Original unverändert. Alte Editoren können die neue Kopie nicht öffnen. Schließen öffnet oder konvertiert das Projekt nicht.",
+  "转换中…": "Konvertierung…",
+  "转换副本并打开": "Kopie konvertieren und öffnen",
+  "原资源包保留不变。": "Das Originalpaket bleibt unverändert."
 }

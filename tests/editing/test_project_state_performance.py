@@ -19,13 +19,13 @@ from cutvoke.interfaces.httpapi import HttpApi, build_handler
 from cutvoke.storage.store import ProjectStore
 
 
-def fixture(count=1):
+def fixture(count=1, *, schema="2"):
     sequence = Sequence(id="active", width=1920, height=1080, fps=R.of(30), tracks=[
         Track(id="video", kind="video", clips=[Clip(
             id=f"clip-{i}", asset_ref=AssetReference(asset_id="image", source_path="image.png"),
             timeline_start=R.of(i * 2), timeline_end=R.of(i * 2 + 1), source_start=R.of(0))
             for i in range(count)])])
-    return Project(schema_version="1", project_id="performance", revision="0", sequence=sequence,
+    return Project(schema_version=schema, project_id="performance", revision="0", sequence=sequence,
                    name="before", favorites=["keep"], presets=[{"name": "saved", "params": {"x": 1}}])
 
 
@@ -135,7 +135,7 @@ class ProjectStatePerformanceTests(unittest.TestCase):
     def test_old_dual_and_sequence_only_database_rows_remain_readable(self):
         for layout in ("dual", "legacy"):
             with self.subTest(layout=layout):
-                project = fixture()
+                project = fixture(schema="1")
                 self.store.save(project)
                 self.store._conn.execute("UPDATE projects SET project_json=? WHERE project_id=?", (
                     json.dumps(project.to_dict()) if layout == "dual" else "", project.project_id))
@@ -144,6 +144,24 @@ class ProjectStatePerformanceTests(unittest.TestCase):
                     project.favorites = []
                     project.presets = []
                 self.assertEqual(self.store.load(project.project_id).to_dict(), project.to_dict())
+
+    def test_legacy_sync_rejects_even_matching_token_without_loading(self):
+        import hashlib
+        project = fixture(schema="1")
+        self.store.save(project)
+        row = self.store._conn.execute(
+            "SELECT revision,name,updated_at,schema_version FROM projects WHERE project_id=?",
+            (project.project_id,)).fetchone()
+        token = hashlib.sha256(json.dumps([project.project_id, *row], ensure_ascii=False,
+                                         separators=(",", ":")).encode()).hexdigest()
+        before = self.store.load(project.project_id).to_dict()
+        with patch.object(self.store, "load", wraps=self.store.load) as load:
+            for known in (None, token):
+                with self.assertRaises(EditError) as caught:
+                    self.service.project_sync(project.project_id, known)
+                self.assertEqual(caught.exception.code, "PROJECT_CONVERSION_REQUIRED")
+            self.assertEqual(load.call_count, 0)
+        self.assertEqual(self.store.load(project.project_id).to_dict(), before)
 
     def test_sync_token_and_changed_content_share_one_read_snapshot(self):
         project = fixture()
