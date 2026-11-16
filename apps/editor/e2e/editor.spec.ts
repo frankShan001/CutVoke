@@ -4864,6 +4864,55 @@ for (const prepared of [true, false]) {
     for (const clipId of ["color-0", "color-1", "color-2"]) await apply(request, id, "clip.remove", { clipId });
     await apply(request, id, "clip.insert", { trackId: "v1", clipId: "color-0", sourcePath: asset.path,
       timelineStart: { num: 0, den: 1 }, timelineEnd: { num: 30, den: 1 } });
+    // Opt-in diagnostics only; no application events, readiness gates or assertions changed.
+    const frameDiagnostics = process.env.CUTVOKE_GAIN_FRAME_DIAGNOSTICS === "1";
+    if (frameDiagnostics) {
+      let retained = 0;
+      page.on("console", message => {
+        const text = message.text(), prefix = "cutvoke-gain-frame:";
+        if (!text.startsWith(prefix) || text.length > 16384 || retained >= 64) return;
+        void test.info().attach(`gain-frame-${++retained}`, {
+          body: text.slice(prefix.length), contentType: "application/json",
+        }).catch(() => {});
+      });
+      await page.addInitScript(() => {
+        let retained = 0;
+        const seen = new WeakSet<HTMLVideoElement>();
+        const sample = (video: HTMLVideoElement, phase: string, metadata?: VideoFrameCallbackMetadata) => {
+          if (retained >= 64) return;
+          const index = new URL(video.dataset.previewSource || "", location.href).searchParams.get("index");
+          if (index !== "0" && index !== "1") return;
+          retained++;
+          const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1;
+          let rgba: number[] | null = null, error: string | null = null;
+          try { const context = canvas.getContext("2d")!; context.drawImage(video, 0, 0, 1, 1, 0, 0, 1, 1); rgba = [...context.getImageData(0, 0, 1, 1).data]; }
+          catch (e) { error = e instanceof Error ? e.name : "unknown"; }
+          const hold = document.querySelector<HTMLCanvasElement>(".player__continuity-frame");
+          console.debug("cutvoke-gain-frame:" + JSON.stringify({ phase, index,
+            at: performance.now(), readyState: video.readyState, seeking: video.seeking,
+            paused: video.paused, currentTime: video.currentTime, width: video.videoWidth,
+            height: video.videoHeight, visible: getComputedStyle(video).visibility,
+            holdVisible: hold ? getComputedStyle(hold).visibility : null, rgba, error,
+            mediaTime: metadata?.mediaTime, presentedFrames: metadata?.presentedFrames }));
+        };
+        for (const eventName of ["loadedmetadata", "loadeddata", "canplay", "seeking", "seeked", "playing", "emptied"]) {
+          document.addEventListener(eventName, event => {
+            const video = event.target;
+            if (!(video instanceof HTMLVideoElement) || !video.matches(".player__video")) return;
+            sample(video, eventName + ":capture");
+            if (eventName !== "loadeddata" || seen.has(video)) return;
+            seen.add(video);
+            queueMicrotask(() => sample(video, "loadeddata:microtask"));
+            requestAnimationFrame(() => { sample(video, "loadeddata:raf1"); requestAnimationFrame(() => sample(video, "loadeddata:raf2")); });
+            if (typeof video.requestVideoFrameCallback === "function") {
+              let remaining = 3;
+              const next: VideoFrameRequestCallback = (_, metadata) => { sample(video, "video-frame", metadata); if (--remaining > 0) video.requestVideoFrameCallback(next); };
+              video.requestVideoFrameCallback(next);
+            }
+          }, true);
+        }
+      });
+    }
     const jobs: string[] = [], keepalives: string[] = [];
     page.on("response", async response => {
       if (response.request().method() === "POST" && response.url().endsWith(`/projects/${id}/preview-jobs`) && response.ok()) jobs.push((await response.json()).jobId);

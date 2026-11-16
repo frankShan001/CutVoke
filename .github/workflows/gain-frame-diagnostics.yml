@@ -1,0 +1,47 @@
+name: Gain boundary frame diagnostics
+on:
+  push:
+    branches: ['diagnostic/gain-boundary-77']
+permissions:
+  contents: read
+jobs:
+  frame-timing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install test requirements
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          python -m pip install -e ".[dev]"
+          python -m pip install fontTools==4.66.1
+          python tools/build/prepare_caption_fonts.py
+      - name: Install browser and build
+        working-directory: apps/editor
+        run: |
+          npm ci
+          npm run typecheck
+          npm run build
+          npx playwright install --with-deps chromium
+      - name: Repeat unchanged window-handoff assertions with bounded diagnostics
+        working-directory: apps/editor
+        env:
+          CUTVOKE_GAIN_FRAME_DIAGNOSTICS: '1'
+        run: npx playwright test e2e/editor.spec.ts --grep 'live audio gain.*window handoff' --repeat-each=10 --workers=1 --trace=on --output=../../.artifacts/gain-frame-diagnostics
+      - name: Preserve diagnostics and traces
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: gain-frame-diagnostics
+          path: .artifacts/gain-frame-diagnostics/
+          retention-days: 14
+          if-no-files-found: warn
