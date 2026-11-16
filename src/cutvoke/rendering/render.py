@@ -26,6 +26,7 @@ import ctypes
 import inspect
 import json
 import math
+import re
 import os
 import shutil
 import subprocess
@@ -5830,22 +5831,71 @@ class RenderService:
         import os as _os
         if not _os.path.isfile(src):
             raise RenderError(f"thumbnail: source file not found: {src!r}")
-        cmd = [
-            self.ffmpeg, "-y", "-nostdin",
-            "-ss", f"{time:.4f}",
-            *self._video_input_arguments(src), "-i", src,
-            "-frames:v", "1",
-            "-vf", f"scale={width}:-2",
-            "-f", "image2", out_png,
-        ]
+        if isinstance(time, bool) or not isinstance(time, (int, float)) or not math.isfinite(time) or time < 0:
+            raise RenderError("thumbnail: time must be finite and nonnegative")
+        # Preserve the decoded timeline when seeking, and accept a random-access
+        # decode only if its first picture is a keyframe at/before the target.
+        # Non-key initial pictures can have missing references (e.g. TS). Reordered
+        # GOPs can start AFTER the requested timestamp despite accurate seek.
+        # Back off on that observable failure; an unseeked decode is the final
+        # fallback. Every attempt shares the caller's deadline.
+        import time as clock
+        deadline = clock.monotonic() + timeout
+        input_arguments = self._video_input_arguments(src)
+        target_text = f"{time:.12f}"
+        target = Fraction(target_text)
+        seek = float(time)
+        backoff = 1.0
+        directory = os.path.dirname(os.path.abspath(out_png))
+        fd, temporary = tempfile.mkstemp(prefix=".thumbnail-", suffix=".png", dir=directory)
+        os.close(fd)
         try:
-            r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
-                               encoding="utf-8", errors="replace",
-                               timeout=timeout)
-        except subprocess.TimeoutExpired as e:
-            raise RenderError(f"thumbnail timed out on {src!r}") from e
-        if r.returncode != 0 or not os.path.isfile(out_png):
-            raise RenderError(f"thumbnail failed on {src!r}: {r.stderr[-400:]}")
+            while True:
+                remaining = deadline - clock.monotonic()
+                if remaining <= 0:
+                    raise RenderError(f"thumbnail timed out on {src!r}")
+                # Truncate even if a test double or failed decode leaves an image.
+                with open(temporary, "wb"):
+                    pass
+                cmd = [self.ffmpeg, "-hide_banner", "-loglevel", "info", "-y", "-nostdin"]
+                if seek > 0:
+                    cmd += ["-ss", f"{seek:.12f}", "-noaccurate_seek",
+                            "-copyts", "-start_at_zero"]
+                cmd += [*input_arguments, "-i", src]
+                if seek > 0:
+                    # Only the first decoded frame is logged, without pixel
+                    # checksums. Parse integer PTS/time_base, not rounded text.
+                    graph = ("split[check][frame];"
+                             r"[check]select=eq(n\,0),showinfo@coverage=checksum=0,nullsink;"
+                             f"[frame]trim=start={target_text},scale={width}:-2")
+                    cmd += ["-vf", graph]
+                else:
+                    cmd += ["-vf", f"trim=start={target_text},scale={width}:-2"]
+                cmd += ["-frames:v", "1", "-fps_mode", "vfr", "-f", "image2", temporary]
+                try:
+                    r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
+                                       encoding="utf-8", errors="replace", timeout=remaining)
+                except subprocess.TimeoutExpired as e:
+                    raise RenderError(f"thumbnail timed out on {src!r}") from e
+                if r.returncode != 0:
+                    raise RenderError(f"thumbnail failed: {r.stderr[-400:]}")
+                covered = seek == 0
+                if not covered:
+                    tb = re.search(r"\[showinfo@coverage[^\n]*config in time_base: (\d+)/(\d+)", r.stderr)
+                    pts = re.search(r"\[showinfo@coverage[^\n]*n:\s*0\s+pts:\s*(-?\d+)", r.stderr)
+                    keyframe = re.search(r"\[showinfo@coverage[^\n]*n:\s*0\s+pts:[^\n]*iskey:1", r.stderr)
+                    if tb and pts and keyframe and int(tb[2]) > 0:
+                        covered = int(pts[1]) * Fraction(int(tb[1]), int(tb[2])) <= target
+                if covered:
+                    if os.path.getsize(temporary) == 0:
+                        raise RenderError(f"thumbnail failed or no frame at requested time: {r.stderr[-400:]}")
+                    break
+                seek = max(0.0, float(time) - backoff)
+                backoff *= 2
+            os.replace(temporary, out_png)
+        finally:
+            with contextlib.suppress(OSError):
+                os.unlink(temporary)
         return out_png
 
     def waveform_media(self, src: str, out_png: str, *, width: int = 320,
