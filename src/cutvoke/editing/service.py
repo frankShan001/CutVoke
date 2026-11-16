@@ -25,7 +25,7 @@ from typing import Callable, Optional
 
 from cutvoke.domain.model import (Project, Sequence, Track, Clip, AssetReference, Caption, CaptionWord,
                    Marker, new_id, EFFECT_TRANSFORM)
-from cutvoke.domain.keyframes import Keyframe, parameter_spec, validate_bezier, effect_instance_id
+from cutvoke.domain.keyframes import Keyframe, parameter_spec, validate_bezier, effect_instance_id, shift_manual_keyframes
 from cutvoke.domain.protocol import Command, CommandResult, Event, Actor, ErrorCode, bump_revision
 from cutvoke.domain.rational import Rational
 from cutvoke.domain.speed_curve import SpeedCurve
@@ -572,6 +572,7 @@ class EditService:
         clip.speed_curve = curve.slice(left, right)
         clip.timeline_start, clip.timeline_end = start, end
         clip.speed = clip.speed_curve.source_duration / clip.duration
+        shift_manual_keyframes(clip, start-old_start)
         EditService._rebase_effect_ranges(clip, old_start, old_end, start, end)
 
     @staticmethod
@@ -594,8 +595,9 @@ class EditService:
                 # clip operations should not silently rewrite its meaning.
                 retained.append(effect)
                 continue
-            start = max(Rational.of(0), start)
-            end = min(duration, end)
+            if clip.keyframe_time_domain != "signed-local":
+                start = max(Rational.of(0), start)
+                end = min(duration, end)
             if start >= end:
                 continue
             effect["range"] = {"start": start.to_json(), "end": end.to_json()}
@@ -1479,7 +1481,7 @@ class EditService:
         if project_id in self._projects:
             raise EditError(ErrorCode.INVALID_ARGUMENT, f"project exists: {project_id}")
         seq = Sequence(id=f"{project_id}_seq", width=width, height=height, fps=fps)
-        proj = Project(schema_version="1", project_id=project_id,
+        proj = Project(schema_version="2", project_id=project_id,
                        revision="0", sequence=seq, name=name_hint)
         # 先持久（事务），成功才进内存（A02：创建失败不伪成功）
         if self._store is not None:
@@ -1580,6 +1582,7 @@ class EditService:
             if loaded is None:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 f"project not found: {project_id}")
+            self._require_current_format(loaded)
             self._projects[project_id] = loaded
             self._idempotency.setdefault(project_id, {})
             self._events.setdefault(project_id, [])
@@ -1588,10 +1591,18 @@ class EditService:
             return loaded
         if project_id not in self._projects:
             raise EditError(ErrorCode.INVALID_ARGUMENT, f"project not found: {project_id}")
+        self._require_current_format(self._projects[project_id])
         return self._projects[project_id]
+
+    @staticmethod
+    def _require_current_format(project):
+        if project.schema_version != "2":
+            raise EditError("PROJECT_CONVERSION_REQUIRED",
+                            "Legacy project must be converted to a separate new-format copy before opening.")
 
     def project_sync(self, project_id: str, known_token: Optional[str] = None) -> dict:
         """Return a compact full snapshot only when authoritative state changed."""
+        self.get_project(project_id)  # reject legacy before sync can bypass get_project
         if self._store is not None:
             state = self._store.load_for_sync(project_id, known_token)
             if state is None:
@@ -2102,7 +2113,9 @@ class EditService:
                             "use command_apply to run this operation explicitly")
         candidate = copy.deepcopy(proj)
         try:
+            self._enable_signed_clocks(candidate)
             changed = handler(candidate, command.payload)
+            self._enable_signed_clocks(candidate)
         except EditError:
             raise
         except Exception as e:
@@ -2398,7 +2411,9 @@ class EditService:
         # ---- 3) 候选副本执行（A03：异常/校验失败零污染）----
         candidate = copy.deepcopy(proj)
         try:
+            self._enable_signed_clocks(candidate)
             changed = handler(candidate, command.payload)
+            self._enable_signed_clocks(candidate)
         except EditError:
             raise
         except Exception as e:  # handler 内部畸形输入（如分母 0）→ 不污染状态
@@ -2554,7 +2569,9 @@ class EditService:
         for index, operation in enumerate(operations):
             command_type = operation["type"]
             try:
+                self._enable_signed_clocks(proj)
                 entries = self._handlers[command_type](proj, operation["payload"])
+                self._enable_signed_clocks(proj)
             except EditError as error:
                 raise EditError(error.code,
                                 f"edit.batch command {index} ({command_type}): {error.message}",
@@ -3064,6 +3081,7 @@ class EditService:
                     self._crop_curve_clip(c, end, ce)
                 else:
                     c.source_start = c.source_start + (end - c.timeline_start) * c.speed
+                    shift_manual_keyframes(c, end-c.timeline_start)
                     c.timeline_start = end
                 kept.append(c)
                 changed.append({"type": "clip", "id": c.id, "change": "trimmed",
@@ -3085,10 +3103,12 @@ class EditService:
                              effects=list(c.effects), linked=c.linked,
                              attached_to_clip_id=c.attached_to_clip_id,
                              hidden=c.hidden,
-                             keyframes={k: list(v) for k, v in c.keyframes.items()},
+                             keyframes=copy.deepcopy(c.keyframes),
+                             keyframe_time_domain=c.keyframe_time_domain,
                              volume=c.volume, fade_in=c.fade_in, fade_out=c.fade_out,
                              pitch=c.pitch, freeze_at=c.freeze_at, nested=c.nested,
                              role=c.role)
+                shift_manual_keyframes(right, end-c.timeline_start)
                 left.timeline_end = start
             kept.append(left)
             kept.append(right)
@@ -3135,10 +3155,12 @@ class EditService:
                                  effects=list(c.effects), linked=c.linked,
                                  attached_to_clip_id=c.attached_to_clip_id,
                                  hidden=c.hidden,
-                                 keyframes={k: list(v) for k, v in c.keyframes.items()},
+                                 keyframes=copy.deepcopy(c.keyframes),
+                             keyframe_time_domain=c.keyframe_time_domain,
                                  volume=c.volume, fade_in=c.fade_in, fade_out=c.fade_out,
                                  pitch=c.pitch, freeze_at=c.freeze_at, nested=c.nested,
                                  role=c.role)
+                    shift_manual_keyframes(right, at-c.timeline_start)
                     c.timeline_end = at
                 track.clips.append(right)
                 changed.append({"type": "clip", "id": c.id, "change": "split",
@@ -3149,6 +3171,19 @@ class EditService:
                                 "from": (at + dur).to_json()})
         track.clips = sorted(track.clips, key=lambda x: x.timeline_start)
         return changed
+
+    @staticmethod
+    def _enable_signed_clocks(project):
+        if project.schema_version != "2":
+            return
+        def enable(sequence):
+            for track in sequence.tracks:
+                for clip in track.clips:
+                    clip.keyframe_time_domain = "signed-local"
+                    if clip.nested is not None:
+                        enable(clip.nested)
+        for sequence in project.sequences:
+            enable(sequence)
 
     def _h_clip_trim(self, proj: Project, p: dict) -> list[dict]:
         clip_id = p["clipId"]
@@ -3184,6 +3219,7 @@ class EditService:
                     if "sourceStart" in p:
                         clip.source_start = Rational.from_json(**p["sourceStart"])
                     self._assert_clip_within_source(clip)
+                    shift_manual_keyframes(clip, clip.timeline_start-old_start)
                     self._rebase_effect_ranges(
                         clip, old_start, old_end, clip.timeline_start, clip.timeline_end)
                     changed = [{"type": "clip", "id": clip_id,
@@ -4509,7 +4545,7 @@ class EditService:
                             if key.id in selected:
                                 matched.add(key.id)
                                 key.time = anchor + (key.time-anchor)*scale + offset
-                            if key.time < Rational.of(0) or key.time > clip.duration:
+                            if key.id in selected and (key.time < Rational.of(0) or key.time > clip.duration):
                                 raise EditError(ErrorCode.INVALID_ARGUMENT, "retimed keyframe is outside the clip")
                             stamps.append(key.time.to_fraction())
                         if len(stamps) != len(set(stamps)):

@@ -16,6 +16,8 @@ zip 包（建议后缀 .cvkpkg），并支持在新目录 / 新机器上解包�
 
 from __future__ import annotations
 
+from cutvoke.storage.project_format import encode_current_snapshot
+
 import hashlib
 import json
 import os
@@ -30,7 +32,7 @@ from typing import Optional
 from cutvoke.domain.model import Project
 
 # 当前模块支持的包格式版本。包格式比此值新 → 明确拒绝（见 check_compatibility）。
-SUPPORTED_PACKAGE_FORMAT = 4
+SUPPORTED_PACKAGE_FORMAT = 5
 
 # 生成工具版本（与 pyproject.toml 的 version 保持一致；不引入 import 以避免
 # 在未安装环境下解析失败）。
@@ -289,7 +291,7 @@ def pack_project(project: Project, dest_pkg_path: str, *,
         pkg_to_src[name] = Path(item["path"])
 
     manifest = {
-        "packageFormat": 4 if source_entries else 3 if effect_entries else 2 if lut_entries else 1,
+        "packageFormat": 5,
         "projectId": project.project_id,
         "schemaVersion": project.schema_version,
         "generatedAt": datetime.now(timezone.utc).isoformat(),
@@ -311,7 +313,7 @@ def pack_project(project: Project, dest_pkg_path: str, *,
         with os.fdopen(fd, "w+b") as output:
             with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as zf:
                 zf.writestr("manifest.json", json.dumps(manifest, ensure_ascii=False, indent=2))
-                zf.writestr("project.json", json.dumps(project.to_dict(), ensure_ascii=False, indent=2))
+                zf.writestr("project.json", json.dumps(encode_current_snapshot(project.to_dict()), ensure_ascii=False, indent=2))
                 for pkg_path, src in pkg_to_src.items():
                     if _stream_copy_into_zip(zf, src, pkg_path) != expected[pkg_path]:
                         raise ProjectPackError(f"source changed while packing: {src}")
@@ -415,7 +417,7 @@ def inspect_package(pkg_path: str, *,
         manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
         project_obj = None
         if known_effect_ids is not None and "project.json" in zf.namelist():
-            project_obj = Project.from_dict(
+            project_obj = _project_from_wire(
                 json.loads(zf.read("project.json").decode("utf-8"))
             )
 
@@ -447,11 +449,11 @@ def _stage_package_sources(archive, stage):
             raise ValueError("duplicate project archive entry")
         manifest = json.loads(archive.read("manifest.json"), object_pairs_hook=_unique)
         check_compatibility(manifest)
-        Project.from_dict(json.loads(archive.read("project.json"), object_pairs_hook=_unique))
+        _project_from_wire(json.loads(archive.read("project.json"), object_pairs_hook=_unique))
         sources = manifest.get("generatedSources", [])
         if not isinstance(sources, list) or len(sources) > MAX_ARCHIVES:
             raise ValueError("invalid generatedSources list")
-        if sources and manifest.get("packageFormat") != 4:
+        if sources and manifest.get("packageFormat") not in (4, 5):
             raise ValueError("generatedSources requires project package format 4")
         if any(name.startswith("sources/") for name in names) and not sources:
             raise ValueError("undeclared generated source archive")
@@ -561,7 +563,7 @@ def unpack_project(pkg_path: str, dest_dir: str, *,
 
     with zipfile.ZipFile(pkg, "r") as zf:
         manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
-        project = Project.from_dict(
+        project = _project_from_wire(
             json.loads(zf.read("project.json").decode("utf-8"))
         )
 
@@ -640,3 +642,11 @@ def unpack_project(pkg_path: str, dest_dir: str, *,
                         if effect.get('params'):effect['params'],_=replace_paths(effect['params'],normalized)
 
     return project, mapping, warnings
+
+
+def _project_from_wire(value):
+    from cutvoke.storage.project_format import read_current_snapshot, ProjectFormatError
+    try:
+        return Project.from_dict(read_current_snapshot(value))
+    except ProjectFormatError as error:
+        raise ProjectPackError("PROJECT_CONVERSION_REQUIRED: open the original project, convert a copy, then export a new package") from error

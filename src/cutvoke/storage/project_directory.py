@@ -24,7 +24,7 @@ from cutvoke.storage.store import ProjectStore, RevisionConflict
 from cutvoke.storage.workspace_paths import is_path_field
 
 ENTRY = "project.cutvoke"
-DATABASE = "project.sqlite"
+DATABASE = "project-v2.sqlite"
 FORMAT = "cutvoke.project-directory"
 FOLDERS = ("media", "cache", "exports", "backups")
 
@@ -86,15 +86,15 @@ def _digest(path):
     return digest.hexdigest()
 
 
-def _entry(root):
+def _entry(root, *, allow_preparing=False):
     path = Path(root).expanduser().resolve()
     root = path.parent if path.name in (ENTRY, DATABASE) else path
     if (root / ENTRY).is_symlink():
         raise ValueError("工程入口不能是符号链接")
     data = json.loads((root / ENTRY).read_text("utf-8"))
-    if (data.get("format") != FORMAT or data.get("version") != 1 or
+    if (data.get("format") != FORMAT or data.get("version") != 2 or
             not isinstance(data.get("projectId"), str) or not data["projectId"] or
-            data.get("database") != DATABASE or data.get("state", "ready") != "ready"):
+            data.get("database") != DATABASE or data.get("state", "ready") not in (("ready", "preparing") if allow_preparing else ("ready",))):
         raise ValueError("不是受支持的 CutVoke 工程目录")
     database = root / DATABASE
     if not database.is_file() or database.is_symlink():
@@ -105,7 +105,7 @@ def _entry(root):
 class DirectoryProjectStore(ProjectStore):
     """An ordinary ProjectStore whose complete durable state lives in one folder."""
 
-    def __init__(self, root, *, shared=None, create_id=None, name=""):
+    def __init__(self, root, *, shared=None, create_id=None, name="", allow_preparing=False):
         self.root = Path(root).expanduser().resolve()
         self.shared = shared
         self._copy_lock = threading.RLock()
@@ -114,13 +114,13 @@ class DirectoryProjectStore(ProjectStore):
             self.root.mkdir(parents=True, exist_ok=False)
             for folder in FOLDERS:
                 (self.root / folder).mkdir()
-            self.manifest = {"format": FORMAT, "version": 1, "projectId": create_id,
+            self.manifest = {"format": FORMAT, "version": 2, "projectId": create_id,
                              "name": name, "database": DATABASE,
                              "rootPath": str(self.root), "createdAt": time.time()}
             _atomic_json(self.root / ENTRY, self.manifest)
         else:
-            self.root, self.manifest = _entry(self.root)
-        super().__init__(str(self.root / DATABASE))
+            self.root, self.manifest = _entry(self.root, allow_preparing=allow_preparing)
+        super().__init__(str(self.root / DATABASE), format_v2=True)
         self._rebase()
 
     def _rebase(self):
@@ -258,6 +258,9 @@ class DirectoryProjectStore(ProjectStore):
             return copied
 
     def commit(self, project, **kwargs):
+        if project.schema_version != "2":
+            from cutvoke.storage.project_format import ProjectFormatError
+            raise ProjectFormatError("PROJECT_CONVERSION_REQUIRED: convert a copy or close")
         if project.project_id != self.manifest["projectId"]:
             raise ValueError("一个工程目录只能包含一个工程")
         project._directory_root = str(self.root)
@@ -273,6 +276,9 @@ class DirectoryProjectStore(ProjectStore):
             return super().commit(project, **kwargs)
 
     def save(self, project):
+        if project.schema_version != "2":
+            from cutvoke.storage.project_format import ProjectFormatError
+            raise ProjectFormatError("PROJECT_CONVERSION_REQUIRED: convert a copy or close")
         if project.project_id != self.manifest["projectId"]:
             raise ValueError("一个工程目录只能包含一个工程")
         project._directory_root = str(self.root)
@@ -315,8 +321,42 @@ class ProjectLibraryStore(ProjectStore):
     """Route directory projects while keeping old libraries readable until migrated."""
 
     def __init__(self, database, *, projects_root=None):
+        # A legacy catalogue is never opened writable before the user's choice.
+        # Copy its app index to a separate v2 catalogue; projects stay schema 1
+        # and remain blocked until the explicit per-project conversion action.
+        import sqlite3
+        original = Path(database).resolve()
+        self.legacy_source = None
+        if original.is_file():
+            from cutvoke.storage.project_format_migration import readonly
+            probe = readonly(original)
+            try:
+                marked = probe.execute("SELECT 1 FROM sqlite_master WHERE name='cutvoke_catalog_v2'").fetchone()
+                has_projects = probe.execute("SELECT 1 FROM sqlite_master WHERE name='projects'").fetchone()
+                if has_projects and not marked:
+                    self.legacy_source = str(original)
+                    target = original.with_name(original.stem + ".v2" + original.suffix)
+                    if not target.exists():
+                        temporary = target.with_name(target.name + "." + uuid.uuid4().hex + ".part")
+                        copied = sqlite3.connect(temporary)
+                        try:
+                            probe.backup(copied)
+                            copied.execute("CREATE TABLE IF NOT EXISTS cutvoke_catalog_v2(version INTEGER)")
+                            copied.commit()
+                        finally:
+                            copied.close()
+                        try:
+                            os.link(temporary, target)  # exclusive publication, never overwrite
+                        except FileExistsError:
+                            pass
+                        finally:
+                            temporary.unlink(missing_ok=True)
+                    database = str(target)
+            finally:
+                probe.close()
         super().__init__(database)
-        self.projects_root = Path(projects_root or Path(database).resolve().parent / "projects").resolve()
+        self._conn.execute("CREATE TABLE IF NOT EXISTS cutvoke_catalog_v2(version INTEGER)")
+        self.projects_root = Path(projects_root or Path(database).resolve().parent / "projects-v2").resolve()
         self._directories = {}
         self._directory_lock = threading.RLock()
         self._conn.execute("CREATE TABLE IF NOT EXISTS project_directories ("
@@ -337,6 +377,10 @@ class ProjectLibraryStore(ProjectStore):
             existing = self._directories.get(project_id)
             if existing is not None:
                 return existing
+            from cutvoke.storage.project_format_migration import inspect_directory
+            from cutvoke.storage.project_format import ProjectFormatError
+            if inspect_directory(root)['status'] != 'current':
+                raise ProjectFormatError('PROJECT_CONVERSION_REQUIRED: convert a copy or close')
             store = DirectoryProjectStore(root, shared=self)
             if store.manifest["projectId"] != project_id:
                 store.close()
@@ -375,7 +419,7 @@ class ProjectLibraryStore(ProjectStore):
             if child:
                 return child.commit(project, **kwargs)
             if super().exists(project.project_id):
-                return super().commit(project, **kwargs)
+                raise ValueError('PROJECT_CONVERSION_REQUIRED: convert a copy or close')
             # Creation has no history/event arguments in EditService.
             if any(value for value in kwargs.values() if value not in ("-1", None, False)):
                 raise ValueError("工程必须先创建再提交编辑")
@@ -386,7 +430,7 @@ class ProjectLibraryStore(ProjectStore):
         if child:
             return child.save(project)
         if super().exists(project.project_id):
-            return super().save(project)
+            raise ValueError('PROJECT_CONVERSION_REQUIRED: convert a copy or close')
         self._create_directory(project)
 
     def list_all(self):
@@ -400,6 +444,13 @@ class ProjectLibraryStore(ProjectStore):
             directories = list(self._conn.execute("SELECT project_id,root FROM project_directories"))
         for pid, root in directories:
             try:
+                from cutvoke.storage.project_format_migration import inspect_directory
+                probe = inspect_directory(root)
+                if probe['status'] == 'legacy':
+                    rows[pid] = {'id':pid,'name':probe['name'],'revision':'', 'updatedAt':'',
+                                 'storageKind':'directory','directory':root,'available':True,
+                                 'conversionRequired':True}
+                    continue
                 child = self._target(pid)
                 item = next(p for p in child.list_projects() if p["id"] == pid)
                 rows[pid] = {**item, "storageKind": "directory", "directory": root, "available": True}
@@ -409,6 +460,10 @@ class ProjectLibraryStore(ProjectStore):
         return sorted(rows.values(), key=lambda p: p["updatedAt"], reverse=True)
 
     def open_directory(self, path):
+        from cutvoke.storage.project_format_migration import inspect_directory
+        from cutvoke.storage.project_format import ProjectFormatError
+        if inspect_directory(path)['status'] != 'current':
+            raise ProjectFormatError('PROJECT_CONVERSION_REQUIRED: convert a copy or close')
         root, manifest = _entry(path)
         pid = manifest["projectId"]
         with self._directory_lock:
@@ -489,6 +544,9 @@ def _project_method(name, *, keyword=False):
     def routed(self, *args, **kwargs):
         pid = kwargs.get("project_id") if keyword else (args[0] if args else kwargs.get("project_id"))
         child = self._target(pid) if pid else None
+        if child is None and pid and name not in ('exists','db_revision') and ProjectStore.exists(self, pid):
+            from cutvoke.storage.project_format import ProjectFormatError
+            raise ProjectFormatError('PROJECT_CONVERSION_REQUIRED: convert a copy or close')
         return getattr(child, name)(*args, **kwargs) if child else original(self, *args, **kwargs)
     return routed
 

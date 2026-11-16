@@ -74,10 +74,10 @@ class EffectTemporalRangeTests(unittest.TestCase):
         self._apply("clip.split", {"clipId": "clip", "at": json_time(3, 2)})
         clips = {clip.id: clip for clip in self.project.sequence.tracks[0].clips}
         self.assertEqual(clips["clip"].effects[0]["range"], {
-            "start": json_time(1, 2), "end": json_time(3, 2),
+            "start": json_time(1, 2), "end": json_time(5, 2),
         })
         self.assertEqual(clips["clip_r"].effects[0]["range"], {
-            "start": json_time(0), "end": json_time(1),
+            "start": json_time(-1), "end": json_time(1),
         })
 
     def test_left_trim_rebases_effect_interval(self) -> None:
@@ -88,7 +88,7 @@ class EffectTemporalRangeTests(unittest.TestCase):
         })
         clip = self.project.sequence.tracks[0].clips[0]
         self.assertEqual(clip.effects[0]["range"], {
-            "start": json_time(0), "end": json_time(3, 2),
+            "start": json_time(-1, 2), "end": json_time(3, 2),
         })
 
     def test_animation_policy_combines_or_replaces_manual_opacity_keyframes(self) -> None:

@@ -1200,9 +1200,12 @@ class HttpApi:
         parts = [unquote(p) for p in path.split("/") if p]
         # parts 形如 ['api','v1','projects',...]
         from cutvoke.interfaces.project_directories import directory_endpoint, route_project
+        from cutvoke.storage.project_format import ProjectFormatError
         try:
             directory_result = directory_endpoint(self, method, parts, body)
             target_api = route_project(self, method, parts, body) if directory_result is None else self
+        except ProjectFormatError as error:
+            return 409, {"error": {"code": "PROJECT_CONVERSION_REQUIRED", "message": str(error)}}
         except RevisionConflict as error:
             raise EditError(ErrorCode.REVISION_CONFLICT, str(error), retryable=True) from error
         except (ValueError, OSError) as error:
