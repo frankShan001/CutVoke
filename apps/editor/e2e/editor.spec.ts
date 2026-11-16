@@ -2840,6 +2840,20 @@ test("video transforms stay in sync between canvas and inspector while audio hid
   await expect(keyframeStatus).toContainText("X 1 个");
   await page.getByRole("button", { name: "删除水平位置 X关键帧 t=0.00s" }).click();
   await expect.poll(transformKeyframeCount).toBe(0);
+  // The server may persist a move before its response reaches the UI. Start
+  // the following resize from the optimistic geometry while that ack is late.
+  let delayedMoveAck = false;
+  let releaseMoveAck!: () => void;
+  const moveAckGate = new Promise<void>(resolve => { releaseMoveAck = resolve; });
+  await page.route(`**/api/v1/projects/${id}/commands`, async route => {
+    const command = route.request().postDataJSON();
+    if (!delayedMoveAck && command.type === "effect.update" && Number(command.payload?.params?.position?.x) > 12) {
+      delayedMoveAck = true;
+      const response = await route.fetch();
+      await moveAckGate;
+      await route.fulfill({ response });
+    } else await route.continue();
+  });
   const moveHandle = page.getByRole("button", { name: "拖动画面位置" });
   const outlineBox = await moveHandle.boundingBox();
   expect(outlineBox).toBeTruthy();
@@ -2857,6 +2871,16 @@ test("video transforms stay in sync between canvas and inspector while audio hid
   expect(handleBox).toBeTruthy();
   await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
   await page.mouse.down();
+  await page.mouse.move(handleBox!.x + handleBox!.width / 2 - 20, handleBox!.y + handleBox!.height / 2 - 15, { steps: 2 });
+  const moveResponse = page.waitForResponse(response => {
+    if (!response.url().endsWith(`/projects/${id}/commands`) || response.request().method() !== "POST") return false;
+    const command = response.request().postDataJSON();
+    return command.type === "effect.update" && Number(command.payload?.params?.position?.x) === movedX;
+  });
+  expect(delayedMoveAck).toBe(true);
+  releaseMoveAck();
+  await (await moveResponse).finished();
+  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   await page.mouse.move(handleBox!.x + handleBox!.width / 2 - 60, handleBox!.y + handleBox!.height / 2 - 45, { steps: 6 });
   await page.mouse.up();
   await expect.poll(async () => (await readTransform())?.scale || 1).toBeGreaterThan(1.1);
