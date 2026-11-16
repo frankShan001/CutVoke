@@ -162,5 +162,87 @@ class NativeResponseTests(unittest.TestCase):
         client.messages.get.assert_called_once_with(timeout=179)
 
 
+class CliPhaseEvidenceTests(unittest.TestCase):
+    def test_real_timeout_retains_bounded_safe_phase_and_original_exception(self):
+        import subprocess
+        import sys
+        real_run = subprocess.run
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            def shortened(command, **kwargs):
+                self.assertEqual(kwargs['timeout'], 180)
+                self.assertEqual(json.loads((root / 'unpack-1.json').read_text())['status'], 'started')
+                kwargs['timeout'] = 1.0  # Test only; production still passes 180.
+                return real_run(command, **kwargs)
+            code = "import sys,time;print('SECRET',flush=True);print('TOKEN',file=sys.stderr,flush=True);time.sleep(5)"
+            with mock.patch.object(module.subprocess, 'run', side_effect=shortened):
+                with self.assertRaises(subprocess.TimeoutExpired) as caught:
+                    module.run([sys.executable, '-c', code], evidence=root, phase='unpack-1')
+            self.assertEqual(caught.exception.timeout, 1.0)
+            text = (root / 'unpack-1.json').read_text()
+            record = json.loads(text)
+            self.assertEqual(record['exception'], 'TimeoutExpired')
+            self.assertEqual(record['status'], 'failed')
+            self.assertEqual(record['timeoutSeconds'], 180)
+            self.assertGreater(record['elapsedSeconds'], 0)
+            self.assertGreater(record['stdoutBytes'], 0)
+            self.assertGreater(record['stderrBytes'], 0)
+            self.assertLess(len(text), 512)
+            for secret in ('SECRET', 'TOKEN', sys.executable, code):
+                self.assertNotIn(secret, text)
+
+    def test_exit_and_launch_failures_reraise_same_object_without_raw_output(self):
+        import subprocess
+        errors = [subprocess.TimeoutExpired(['SECRET'], 180, output='PRIVATE', stderr='TOKEN'),
+                  subprocess.CalledProcessError(7, ['SECRET'], output=b'PRIVATE', stderr=b'TOKEN'),
+                  FileNotFoundError('PRIVATE/path')]
+        for error in errors:
+            with self.subTest(error=type(error).__name__), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                with mock.patch.object(module.subprocess, 'run', side_effect=error), mock.patch('builtins.print') as output:
+                    with self.assertRaises(type(error)) as caught:
+                        module.run(['SECRET'], evidence=root, phase='validate-2')
+                self.assertIs(caught.exception, error)
+                output.assert_not_called()
+                record = json.loads((root / 'validate-2.json').read_text())
+                self.assertEqual(record['exception'], type(error).__name__)
+                self.assertEqual(record['returncode'], getattr(error, 'returncode', None))
+                self.assertNotIn('PRIVATE', json.dumps(record))
+                self.assertNotIn('TOKEN', json.dumps(record))
+
+    def test_diagnostic_write_or_replace_failure_does_not_change_outcome(self):
+        import subprocess
+        for operation in ('write_text', 'replace'):
+            for fail in (False, True):
+                with self.subTest(operation=operation, fail=fail), tempfile.TemporaryDirectory() as temporary:
+                    root = Path(temporary)
+                    error = subprocess.TimeoutExpired(['SECRET'], 180)
+                    result = subprocess.CompletedProcess(['SECRET'], 0, b'OK', b'')
+                    with mock.patch.object(Path, operation, side_effect=PermissionError('private path')):
+                        with mock.patch.object(module.subprocess, 'run', side_effect=error if fail else None, return_value=result):
+                            if fail:
+                                with self.assertRaises(subprocess.TimeoutExpired) as caught:
+                                    module.run(['SECRET'], evidence=root, phase='unpack-2')
+                                self.assertIs(caught.exception, error)
+                            else:
+                                self.assertIs(module.run(['SECRET'], evidence=root, phase='unpack-2'), result)
+
+    def test_success_records_counts_and_rejects_arbitrary_phase(self):
+        import subprocess
+        result = subprocess.CompletedProcess(['SECRET'], 0, b'x' * 1000000, b'token')
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with mock.patch.object(module.subprocess, 'run', return_value=result) as run:
+                self.assertIs(module.run(['SECRET'], evidence=root, phase='validate-1'), result)
+                run.assert_called_once_with(['SECRET'], check=True, timeout=180, capture_output=True)
+                record = json.loads((root / 'validate-1.json').read_text())
+                self.assertEqual(record['status'], 'completed')
+                self.assertEqual(record['stdoutBytes'], 1000000)
+                self.assertEqual(record['stderrBytes'], 5)
+                with self.assertRaises(ValueError):
+                    module.run(['SECRET'], evidence=root, phase='../secret')
+                self.assertEqual(run.call_count, 1)
+
+
 if __name__ == '__main__':
     unittest.main()

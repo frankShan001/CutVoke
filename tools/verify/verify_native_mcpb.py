@@ -23,13 +23,49 @@ import time
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def run(command, **kwargs):
+def run(command, *, evidence=None, phase=None, **kwargs):
+    # Fixed phase names bound filenames and prevent arbitrary argv/output from
+    # becoming diagnostics. npx package acquisition and CLI work are one phase;
+    # these records do not distinguish their internal timeout causes.
+    if phase is not None and phase not in ('unpack-1', 'unpack-2', 'validate-1', 'validate-2'):
+        raise ValueError('Unknown MCPB evidence phase')
+    started = time.monotonic()
+    record = {'phase': phase, 'status': 'started', 'timeoutSeconds': 180}
+
+    def save():
+        if evidence is None or phase is None:
+            return
+        record['elapsedSeconds'] = round(time.monotonic() - started, 3)
+        destination = evidence / (phase + '.json')
+        temporary = evidence / (phase + '.json.tmp')
+        try:
+            temporary.write_text(json.dumps(record, sort_keys=True) + '\n', encoding='utf-8')
+            temporary.replace(destination)
+        except OSError:
+            # Diagnostics must not hide the subprocess outcome (especially its
+            # original timeout/exit exception) or change the acceptance gate.
+            pass
+
+    def output_size(value):
+        return len(value.encode('utf-8')) if isinstance(value, str) else len(value or b'')
+
+    save()
     try:
-        return subprocess.run(command, check=True, timeout=180, capture_output=True, **kwargs)
-    except subprocess.CalledProcessError as error:
-        diagnostic = error.stderr
-        print(diagnostic.decode('utf-8', errors='replace') if isinstance(diagnostic, bytes) else diagnostic)
+        result = subprocess.run(command, check=True, timeout=180, capture_output=True, **kwargs)
+    except (subprocess.TimeoutExpired, subprocess.CalledProcessError, OSError) as error:
+        record.update(status='failed', exception=type(error).__name__,
+                      returncode=getattr(error, 'returncode', None),
+                      stdoutBytes=output_size(getattr(error, 'stdout', None)),
+                      stderrBytes=output_size(getattr(error, 'stderr', None)))
+        save()
+        if phase is None and isinstance(error, subprocess.CalledProcessError):
+            diagnostic = error.stderr
+            print(diagnostic.decode('utf-8', errors='replace') if isinstance(diagnostic, bytes) else diagnostic)
         raise
+    record.update(status='completed', returncode=result.returncode,
+                  stdoutBytes=output_size(result.stdout), stderrBytes=output_size(result.stderr))
+    save()
+    return result
 
 
 class Client:
@@ -168,9 +204,9 @@ def main():
     expected = None
     for iteration in (1, 2):
         install = evidence / f'install-{iteration}'
-        result = run([*cli, 'unpack', str(bundle), str(install)])
+        result = run([*cli, 'unpack', str(bundle), str(install)], evidence=evidence, phase=f'unpack-{iteration}')
         (evidence / f'unpack-{iteration}.log').write_bytes(result.stdout + result.stderr)
-        run([*cli, 'validate', str(install / 'manifest.json')])
+        run([*cli, 'validate', str(install / 'manifest.json')], evidence=evidence, phase=f'validate-{iteration}')
         suffix = '.exe' if os.name == 'nt' else ''
         ffmpeg = install / 'engine/_internal/bin' / ('ffmpeg' + suffix)
         ffprobe = install / 'engine/_internal/bin' / ('ffprobe' + suffix)
