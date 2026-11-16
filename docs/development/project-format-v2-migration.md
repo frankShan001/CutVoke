@@ -103,3 +103,13 @@ The real browser conversion test covers Close (no catalogue/source change) and
 Convert (new schema-2 identity, original unchanged) for directories and packages.
 Local browser execution may be unavailable in restricted cloud environments;
 test discovery or fixture validation is not a substitute for CI browser passage.
+
+### Sidecar-free source inspection
+
+SQLite `mode=ro` is not a no-write guarantee for WAL bookkeeping: it can create
+`-wal`/`-shm` beside an otherwise unchanged source. Inspection and conversion now
+copy a stable observation of DB plus existing WAL into private temporary storage,
+verify source identity/bytes before use, and let SQLite rebuild bookkeeping only
+there. Committed WAL transactions remain visible; uncommitted frames do not.
+Continuously changing sources and nonempty rollback journals are refused rather
+than guessed. Never substitute `immutable=1`, which would ignore existing WAL.

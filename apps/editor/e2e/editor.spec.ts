@@ -2440,9 +2440,9 @@ test("prepared playback follows the ruler, stops at the end, and survives an Age
   await expect(ruler).toHaveAttribute("aria-valuenow", "15");
 
   await page.reload();
-  if (await page.getByRole("button", { name: `打开工程 ${name}` }).isVisible()) {
-    await page.getByRole("button", { name: `打开工程 ${name}` }).click();
-  }
+  // Reload starts on Home; await the async project list instead of making a
+  // one-shot isVisible decision before its response has arrived.
+  await page.getByRole("button", { name: `打开工程 ${name}`, exact: true }).click();
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "字幕" }).click();
   await expect(page.getByRole("button", { name: "选择字幕 caption-one" }))
     .toContainText("AI 已修正");

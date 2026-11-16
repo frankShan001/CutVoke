@@ -119,3 +119,89 @@ def test_one_dot_zero_copy_migrates_current_and_history_without_touching_source(
         history = json.loads(store.peek_history(result['projectId'],0))
         assert history['schemaVersion'] == '2'
         assert history['projectId'] == project.project_id
+
+
+def test_inspect_and_convert_leave_closed_wal_source_file_set_unchanged(tmp_path):
+    source = tmp_path / 'source'
+    source.mkdir()
+    database = source / 'old.sqlite'
+    make_legacy(database)
+    before = {p.name: p.read_bytes() for p in source.iterdir()}
+    probe = inspect_database(database, 'p')
+    assert {p.name: p.read_bytes() for p in source.iterdir()} == before
+    convert_copy(database, 'p', probe['token'], tmp_path / 'converted')
+    assert {p.name: p.read_bytes() for p in source.iterdir()} == before
+
+
+def test_wal_only_commit_is_read_without_touching_source_sidecars(tmp_path):
+    from cutvoke.storage.project_format_migration import readonly
+    source = tmp_path / 'source'
+    source.mkdir()
+    database = source / 'old.sqlite'
+    make_legacy(database)
+    writer = sqlite3.connect(database)
+    try:
+        writer.execute('PRAGMA journal_mode=WAL')
+        writer.execute('PRAGMA wal_autocheckpoint=0')
+        writer.execute("UPDATE projects SET name='WAL-only name' WHERE project_id='p'")
+        writer.commit()
+        before = {p.name: p.read_bytes() for p in source.iterdir()}
+        probe = inspect_database(database, 'p')
+        assert probe['name'] == 'WAL-only name'
+        assert {p.name: p.read_bytes() for p in source.iterdir()} == before
+        converted = convert_copy(database, 'p', probe['token'], tmp_path / 'converted')
+        assert {p.name: p.read_bytes() for p in source.iterdir()} == before
+        assert inspect_directory(converted['directory'])['name'] == 'WAL-only name'
+    finally:
+        writer.close()
+
+
+def test_snapshot_ignores_uncommitted_wal_frames(tmp_path):
+    from cutvoke.storage.project_format_migration import readonly
+    from contextlib import closing
+    database = tmp_path / 'wal.sqlite'
+    writer = sqlite3.connect(database)
+    try:
+        writer.execute('PRAGMA journal_mode=WAL')
+        writer.execute('PRAGMA wal_autocheckpoint=0')
+        writer.execute('PRAGMA cache_size=2')
+        writer.execute('CREATE TABLE values_test (value BLOB)')
+        writer.execute("INSERT INTO values_test VALUES ('committed')")
+        writer.commit()
+        writer.executemany('INSERT INTO values_test VALUES (?)', [(b'x' * 8192,)] * 100)
+        files = [database, Path(str(database) + '-wal'), Path(str(database) + '-shm')]
+        before = {p: p.read_bytes() for p in files}
+        with closing(readonly(database)) as reader:
+            assert reader.execute('SELECT value FROM values_test').fetchall() == [('committed',)]
+        assert {p: p.read_bytes() for p in files} == before
+    finally:
+        writer.rollback()
+        writer.close()
+
+
+def test_atomic_replacement_from_other_process_during_snapshot_is_rejected(tmp_path, monkeypatch):
+    import subprocess
+    import sys
+    from cutvoke.storage.project_format_migration import readonly
+    database = tmp_path / 'old.sqlite'
+    make_legacy(database)
+    original = database.read_bytes()
+    read = Path.read_bytes
+    calls = []
+    def racing_read(path):
+        data = read(path)
+        if path == database:
+            # A separate writer replaces an identical database: byte equality
+            # alone must not mask the concurrent source identity change.
+            subprocess.run([sys.executable, '-c',
+                'from pathlib import Path; import os,sys; p=Path(sys.argv[1]); '
+                'q=p.with_suffix(".replacement"); q.write_bytes(p.read_bytes()); os.replace(q,p)',
+                str(database)], check=True)
+            calls.append(1)
+        return data
+    monkeypatch.setattr(Path, 'read_bytes', racing_read)
+    with pytest.raises(ProjectFormatError, match='changed while reading'):
+        readonly(database)
+    assert len(calls) == 3
+    assert read(database) == original
+    assert sorted(p.name for p in tmp_path.iterdir()) == ['old.sqlite']

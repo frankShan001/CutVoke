@@ -129,3 +129,30 @@ def test_legacy_history_cannot_downgrade_current_project(tmp_path):
         assert store.load('p').to_dict()==before
         assert json.loads(store.peek_history('p',0))==old
         assert store.get_idempotent('p','undo') is None
+
+@pytest.mark.parametrize('mode', ['insert', 'overwrite', 'overwrite-head'])
+def test_insert_overwrite_rebase_effect_window_with_manual_clock(mode):
+    from cutvoke.domain.model import Clip, Track, AssetReference
+    s = EditService()
+    c = Clip(id='c', asset_ref=AssetReference('synthetic.png'),
+             timeline_start=R.of(0), timeline_end=R.of(10), source_start=R.of(0),
+             keyframe_time_domain='signed-local',
+             effects=[{'effectId': 'cutvoke.color', 'instanceId': 'e', 'params': {},
+                       'range': {'start': R.of(6).to_json(), 'end': R.of(8).to_json()}}],
+             keyframes={'effect:e:brightness': [Keyframe('a', R.of(6), 0), Keyframe('b', R.of(8), .5)]})
+    original = deepcopy(c.to_dict())
+    track = Track(id='v', kind='video', clips=[c])
+    if mode == 'insert':
+        s._insert_shift(track, R.of(5), R.of(2))
+    else:
+        s._overwrite_span(track, R.of(4 if mode == 'overwrite' else 0), R.of(5), 'new')
+    right = track.clips[-1]
+    assert [k.time for k in right.keyframes['effect:e:brightness']] == [R.of(1), R.of(3)]
+    assert right.effects[0]['range'] == {'start': R.of(1).to_json(), 'end': R.of(3).to_json()}
+    assert c.to_dict() == original
+    if len(track.clips) == 2:
+        left = track.clips[0]
+        assert left.effects[0]['range'] == original['effects'][0]['range']
+        assert left.effects[0] is not right.effects[0]
+        right.effects[0]['params']['brightness'] = .9
+        assert left.effects[0]['params'] == {}

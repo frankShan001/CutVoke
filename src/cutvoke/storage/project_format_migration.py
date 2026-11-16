@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import sqlite3
 import time
+import tempfile
 import uuid
 
 from cutvoke.storage.project_format import ProjectFormatError
@@ -15,11 +16,69 @@ ENTRY = 'project.cutvoke'
 V2_DATABASE = 'project-v2.sqlite'
 
 
+class _SnapshotConnection(sqlite3.Connection):
+    """SQLite may write WAL bookkeeping only inside this owned snapshot."""
+    def close(self):
+        try:
+            super().close()
+        finally:
+            self._snapshot_directory.cleanup()
+
+
 def readonly(database):
-    path = Path(database).expanduser()
-    if not path.is_file() or path.is_symlink():
-        raise ProjectFormatError('Project database is missing or unsafe')
-    return sqlite3.connect(path.resolve().as_uri() + '?mode=ro', uri=True, isolation_level=None)
+    # mode=ro still permits SQLite to create/update -wal/-shm beside the source.
+    # Copy DB + WAL as one stable observation instead. Never use immutable=1:
+    # it would silently discard transactions committed only in the WAL.
+    path = Path(database).expanduser().absolute()
+    temporary = tempfile.TemporaryDirectory(prefix='cutvoke-readonly-')
+    try:
+        paths = [path, Path(str(path) + '-wal'), Path(str(path) + '-journal')]
+        def signature():
+            result = []
+            for item in paths:
+                if item.is_symlink():
+                    raise ProjectFormatError('Project database is missing or unsafe')
+                if not item.exists():
+                    result.append(None)
+                    continue
+                if not item.is_file():
+                    raise ProjectFormatError('Project database is missing or unsafe')
+                stat = item.stat()
+                result.append((stat.st_dev, stat.st_ino, stat.st_size,
+                               stat.st_mtime_ns, stat.st_ctime_ns))
+            return result
+        for attempt in range(3):
+            before = signature()
+            if before[0] is None:
+                raise ProjectFormatError('Project database is missing or unsafe')
+            if before[2] is not None and before[2][2]:
+                raise ProjectFormatError('Project has a rollback journal; close its writer before inspection')
+            try:
+                contents = [item.read_bytes() if stamp is not None else None
+                            for item, stamp in zip(paths, before)]
+                if signature() != before:
+                    continue
+                if any(item.read_bytes() != content for item, content in zip(paths, contents)
+                       if content is not None):
+                    continue
+                if signature() != before:
+                    continue
+            except FileNotFoundError:
+                continue
+            break
+        else:
+            raise ProjectFormatError('Project changed while reading; close its writer and try again')
+        copy = Path(temporary.name) / 'snapshot.sqlite'
+        copy.write_bytes(contents[0])
+        if contents[1] is not None:
+            Path(str(copy) + '-wal').write_bytes(contents[1])
+        conn = sqlite3.connect(str(copy), isolation_level=None, factory=_SnapshotConnection)
+        conn._snapshot_directory = temporary
+        conn.execute('PRAGMA query_only=ON')
+        return conn
+    except BaseException:
+        temporary.cleanup()
+        raise
 
 
 def state_token(conn, pid):

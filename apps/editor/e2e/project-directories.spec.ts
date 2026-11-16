@@ -48,16 +48,36 @@ test("folder creation, scoped media and current-format reopening after a move", 
     "backup=sqlite3.connect(target/db)", "original.backup(backup)",
     "backup.close();original.close()",
   ].join("\n"), root, copied]);
-  const moved = `${copied}-moved`;
-  renameSync(copied, moved);
+  // A same-ID copy must not replace a still-registered original.
+  const duplicate = await request.post("/api/v1/project-directories/open", { data: { path: copied } });
+  expect(duplicate.status()).toBe(400);
+  expect((await duplicate.json()).error.message).toContain("另一个副本");
+  const originalDirectory = await (await request.get(`/api/v1/projects/${encodeURIComponent(name)}/directory`)).json();
+  expect(originalDirectory.directory).toBe(root);
+
+  // Create a genuinely unregistered current project, close its database, then
+  // move it. This exercises rebasing without bypassing duplicate-copy safety.
+  const offline = `${root}-unregistered`;
+  const independent = JSON.parse(execFileSync("python", ["-c", [
+    "import json,sys", "from cutvoke.storage.project_directory import DirectoryProjectStore",
+    "from cutvoke.editing.service import EditService", "from cutvoke.domain.protocol import Command,Actor",
+    "root,source,pid=sys.argv[1:]",
+    "with DirectoryProjectStore(root,create_id=pid) as store:",
+    " service=EditService(store);p=service.create_project(pid)",
+    " service.execute(Command('clip.insert',{'clipId':'still','trackId':'v','createTrackKind':'video','sourcePath':source,'timelineStart':{'num':'0','den':'1'},'timelineEnd':{'num':'1','den':'1'}},'insert',pid,p.revision,Actor('test','move')))",
+    " clip=service.get_project(pid).sequence.tracks[0].clips[0]",
+    " print(json.dumps({'projectId':pid,'assetId':clip.asset_ref.asset_id}))",
+  ].join("\n"), offline, imported.path, `${name}-unregistered`], { encoding: "utf8" }));
+  const moved = `${offline}-moved`;
+  renameSync(offline, moved);
   await page.getByRole("textbox", { name: "工程目录路径", exact: true }).fill(join(moved, "project.cutvoke"));
   await page.getByRole("button", { name: "打开工程目录", exact: true }).click();
   await expect(page.locator(".project-directory")).toContainText(moved);
-  const projectResponse = await request.get(`/api/v1/projects/${encodeURIComponent(name)}`);
+  const projectResponse = await request.get(`/api/v1/projects/${encodeURIComponent(independent.projectId)}`);
   expect(projectResponse.ok(), await projectResponse.text()).toBeTruthy();
   expect((await projectResponse.json()).schemaVersion).toBe("2");
-  const movedAssets = await (await request.get(`/api/v1/assets?projectId=${encodeURIComponent(name)}`)).json();
-  const movedImported = movedAssets.assets.find((asset: { assetId: string }) => asset.assetId === imported.assetId);
+  const movedAssets = await (await request.get(`/api/v1/assets?projectId=${encodeURIComponent(independent.projectId)}`)).json();
+  const movedImported = movedAssets.assets.find((asset: { assetId: string }) => asset.assetId === independent.assetId);
   expect(movedImported.path.startsWith(join(moved, "media"))).toBeTruthy();
   expect(readFileSync(movedImported.path)).toEqual(readFileSync(imported.path));
   await page.screenshot({ path: join(evidence, "moved-project-reopened.png") });

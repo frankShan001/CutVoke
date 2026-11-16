@@ -3068,52 +3068,22 @@ class EditService:
                 changed.append({"type": "clip", "id": c.id, "change": "deleted",
                                 "reason": "overwritten"})
                 continue
-            # 左端相交：裁掉尾部 → 保留 [cs, start)
+            from cutvoke.editing.timeline_ops import crop_clip
+            # Use the same copy-and-rebase contract as clip.split: manual lanes,
+            # effect windows and reverse/freeze source maps must move together.
             if cs < start and ce <= end:
-                if c.speed_curve is not None:
-                    self._crop_curve_clip(c, cs, start)
-                else:
-                    c.timeline_end = start
-                kept.append(c)
+                kept.append(crop_clip(self, c, cs, start))
                 changed.append({"type": "clip", "id": c.id, "change": "trimmed",
                                 "edge": "end", "to": start.to_json()})
                 continue
-            # 右端相交：裁掉头部 → 保留 [end, ce)
             if cs >= start and ce > end:
-                # 头部被吃掉，源内入点随之前移（保持画面内容与时间线对齐）
-                if c.speed_curve is not None:
-                    self._crop_curve_clip(c, end, ce)
-                else:
-                    c.source_start = c.source_start + (end - c.timeline_start) * c.speed
-                    shift_manual_keyframes(c, end-c.timeline_start)
-                    c.timeline_start = end
-                kept.append(c)
+                kept.append(crop_clip(self, c, end, ce))
                 changed.append({"type": "clip", "id": c.id, "change": "trimmed",
                                 "edge": "start", "to": end.to_json()})
                 continue
-            # 跨越：拆成左右两段
-            left = c
-            if c.speed_curve is not None:
-                right = copy.deepcopy(c)
-                right.id = new_id("clip")
-                self._crop_curve_clip(right, end, ce)
-                self._crop_curve_clip(left, cs, start)
-            else:
-                source_at = c.source_start + (end - c.timeline_start) * c.speed
-                right = Clip(id=new_id("clip"), asset_ref=c.asset_ref,
-                             timeline_start=end, timeline_end=ce,
-                             source_start=source_at, speed=c.speed,
-                             preserve_pitch=c.preserve_pitch,
-                             effects=list(c.effects), linked=c.linked,
-                             attached_to_clip_id=c.attached_to_clip_id,
-                             hidden=c.hidden,
-                             keyframes=copy.deepcopy(c.keyframes),
-                             keyframe_time_domain=c.keyframe_time_domain,
-                             volume=c.volume, fade_in=c.fade_in, fade_out=c.fade_out,
-                             pitch=c.pitch, freeze_at=c.freeze_at, nested=c.nested,
-                             role=c.role)
-                shift_manual_keyframes(right, end-c.timeline_start)
-                left.timeline_end = start
+            left = crop_clip(self, c, cs, start)
+            right = crop_clip(self, c, end, ce)
+            right.id = new_id("clip")
             kept.append(left)
             kept.append(right)
             changed.append({"type": "clip", "id": c.id, "change": "split",
@@ -3142,30 +3112,14 @@ class EditService:
                                 "to": c.timeline_start.to_json()})
             elif c.timeline_end > at:
                 # 插入点落在片段内部：切开，后半段右移 dur
-                if c.speed_curve is not None:
-                    old_start, old_end = c.timeline_start, c.timeline_end
-                    right = copy.deepcopy(c)
-                    right.id = new_id("clip")
-                    self._crop_curve_clip(right, at, old_end)
-                    right.timeline_start = right.timeline_start + dur
-                    right.timeline_end = right.timeline_end + dur
-                    self._crop_curve_clip(c, old_start, at)
-                else:
-                    source_at = c.source_start + (at - c.timeline_start) * c.speed
-                    right = Clip(id=new_id("clip"), asset_ref=c.asset_ref,
-                                 timeline_start=at + dur, timeline_end=c.timeline_end + dur,
-                                 source_start=source_at, speed=c.speed,
-                                 preserve_pitch=c.preserve_pitch,
-                                 effects=list(c.effects), linked=c.linked,
-                                 attached_to_clip_id=c.attached_to_clip_id,
-                                 hidden=c.hidden,
-                                 keyframes=copy.deepcopy(c.keyframes),
-                             keyframe_time_domain=c.keyframe_time_domain,
-                                 volume=c.volume, fade_in=c.fade_in, fade_out=c.fade_out,
-                                 pitch=c.pitch, freeze_at=c.freeze_at, nested=c.nested,
-                                 role=c.role)
-                    shift_manual_keyframes(right, at-c.timeline_start)
-                    c.timeline_end = at
+                from cutvoke.editing.timeline_ops import crop_clip
+                old_start, old_end = c.timeline_start, c.timeline_end
+                left = crop_clip(self, c, old_start, at)
+                right = crop_clip(self, c, at, old_end)
+                right.id = new_id("clip")
+                right.timeline_start += dur
+                right.timeline_end += dur
+                track.clips[track.clips.index(c)] = left
                 track.clips.append(right)
                 changed.append({"type": "clip", "id": c.id, "change": "split",
                                 "edge": "end", "to": at.to_json()})

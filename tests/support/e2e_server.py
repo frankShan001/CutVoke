@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from contextlib import ExitStack
 import subprocess
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -32,6 +33,18 @@ def seed_fixture(service: EditService, root: str, project_id: str = "e2e-fixture
         paths.append(path)
     project = service.create_project(project_id, width=160, height=90,
                                      fps=Rational.of(15))
+
+    # Keep semantic filenames in this fixture's already-owned media directory.
+    # Tests import these sources into another project via sourcePath (without
+    # their asset identity); feeding them hash basenames loses display names.
+    directory = getattr(service.store, "directory", lambda _pid: None)(project_id)
+    if directory:
+        owned = []
+        for path in paths:
+            target = Path(directory) / "media" / Path(path).name
+            shutil.copy2(path, target)
+            owned.append(str(target))
+        paths = owned
 
     def apply(kind: str, payload: dict, key: str) -> None:
         current = service.get_project(project.project_id)
