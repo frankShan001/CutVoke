@@ -72,6 +72,19 @@ for (const saveBeforeLate of [false, true]) {
     const images = await pngs(page), obsolete = gate(), obsoleteHandled = gate(), saveAck = gate();
     const seen: number[] = [], abortedZooms: number[] = [];
     let committedLatestFrames = 0;
+    const cancelledWindow = gate();
+    let windowRequests = 0;
+    if (!saveBeforeLate) {
+      // Keep the unrelated prepared source from replacing this window during
+      // the controlled stale-render response. Opening still uses real fixtures.
+      await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({ status: 404, json: {} }));
+      await page.route(`**/projects/${id}/preview-window?*`, async route => {
+        if (++windowRequests > 1) return route.continue();
+        await cancelledWindow.promise;
+        await route.fulfill({ status: 409, headers: { "x-cancelled-window": "1" },
+          json: { error: { code: "PREVIEW_CANCELLED", message: "superseded by a newer edit" } } });
+      });
+    }
     page.on("requestfailed", req => {
       if (req.url().endsWith("interactive-frame")) {
         const edits = req.postDataJSON().commands;
@@ -122,6 +135,21 @@ for (const saveBeforeLate of [false, true]) {
       await expect.poll(() => abortedZooms.includes(1.4)).toBe(true);
       await expect.poll(() => pixel(page)).toEqual([0, 255, 0, 255]);
       if (saveBeforeLate) await savedFrame();
+      else {
+        await expect.poll(() => windowRequests).toBeGreaterThan(0);
+        const originalCanvas = await page.locator(".player__interactive-scene").elementHandle();
+        expect(originalCanvas).toBeTruthy();
+        const cancelled = page.waitForResponse(response => response.headers()["x-cancelled-window"] === "1");
+        const recovered = page.waitForResponse(response => response.url().includes(`/projects/${id}/preview-window?`) && response.status() === 200);
+        cancelledWindow.release();
+        await (await cancelled).finished();
+        await (await recovered).finished();
+        expect(windowRequests).toBeGreaterThan(1);
+        await page.evaluate(async () => { for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame); });
+        expect(await page.locator(".player__interactive-scene").evaluate((canvas, original) => canvas === original, originalCanvas)).toBe(true);
+        expect(await pixel(page)).toEqual([0, 255, 0, 255]);
+        await expect(page.locator(".statusbar__msg")).not.toContainText("已切换到单帧预览");
+      }
       obsolete.release();
       await obsoleteHandled.promise;
       await page.evaluate(async () => { for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame); });
@@ -129,7 +157,7 @@ for (const saveBeforeLate of [false, true]) {
       if (!saveBeforeLate) await savedFrame();
       await expect.poll(async () => (await current(request, id)).sequence.tracks[0].clips[0].effects[0].params.zoom).toBe(1.6);
       await expect(page.locator(".player__interactive-status[role='alert']")).toHaveCount(0);
-    } finally { obsolete.release(); saveAck.release(); }
+    } finally { obsolete.release(); saveAck.release(); cancelledWindow.release(); }
   });
 }
 

@@ -720,7 +720,8 @@ class HttpApi:
             cancel_event if cancel_event is not None else threading.Event())
         export_queue = self.service._export_queue
         if priority > 0 and export_queue is not None and export_queue.reload_status()["busy"]:
-            raise RenderCancelled("background preview yields to export")
+            from cutvoke.rendering.preview_prepare import PreviewPreempted
+            raise PreviewPreempted("background preview yields to export")
         project_key = str(project.project_id)
         # Captions are drawn by the editor and already removed above. Metadata
         # such as project name/favorites/revision is not a visual dependency.
@@ -2824,7 +2825,7 @@ class HttpApi:
                 except (TypeError, ValueError):
                     raise EditError(ErrorCode.INVALID_ARGUMENT,
                                     "preview window index must be an integer") from None
-                from cutvoke.rendering.render import RenderError as _RE
+                from cutvoke.rendering.render import RenderError as _RE, RenderCancelled
                 try:
                     proj = self.service.get_project(pid)
                     if body.get("editorTitles") == "1":
@@ -2841,6 +2842,10 @@ class HttpApi:
                     return 200, result
                 except EditError:
                     raise
+                except RenderCancelled as e:
+                    # Cancellation is expected when an edit supersedes a render.
+                    # Let active browser requests retry before treating it as a failure.
+                    return 409, {"error": {"code": "PREVIEW_CANCELLED", "message": str(e)}}
                 except _RE as e:
                     return 422, {"error": {"code": "PREVIEW_FAILED", "message": str(e)}}
                 except Exception as e:  # noqa: BLE001
