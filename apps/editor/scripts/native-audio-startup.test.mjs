@@ -256,3 +256,27 @@ test('video remains the fallback clock without a ready native mix', () => {
   const result = playerTimeupdate({ native: false });
   assert.equal(result.actions[0].t, 3.217);
 });
+
+test('primed voices stay paused throughout a delayed final seek, then resume together',async()=>{
+  const h=harness();h.start.start(h.request);await h.unlock();
+  h.plays[0].resolve();await flush();assert.equal(h.elements[0].paused,true,'early decoder must wait paused');
+  h.elements.forEach(e=>e.seeking=true);
+  h.plays[1].resolve();await flush();
+  assert.ok(h.elements.every(e=>e.paused&&e.muted));assert.equal(h.commit(),0);
+  h.elements[0].seeking=false;h.elements[0].dispatchEvent(new Event('seeked'));await flush();
+  // Model 80ms of native playback advancement while the other seek is pending.
+  // A paused element must not consume this part of the selected sentence.
+  for(const e of h.elements)if(!e.paused)e.currentTime+=.08;
+  assert.ok(h.elements.every(e=>e.currentTime===3));assert.equal(h.commit(),0);
+  h.elements[1].seeking=false;h.elements[1].dispatchEvent(new Event('seeked'));await flush();
+  assert.equal(h.commit(),1);assert.equal(h.failures(),0);
+  assert.ok(h.elements.every(e=>!e.paused&&!e.muted&&e.currentTime===3));
+});
+test('cancellation during the final resume cannot revive primed voices',async()=>{
+  const h=harness(), resumed=[deferred(),deferred()];
+  h.elements.forEach((e,i)=>{let calls=0;e.play=()=> (++calls===1?h.plays[i].promise:resumed[i].promise).then(()=>{e.paused=false;});});
+  h.start.start(h.request);await h.unlock();h.plays.forEach(p=>p.resolve());await flush();
+  assert.equal(h.commit(),0);h.setCurrent(false);h.start.cancel();
+  resumed.forEach(p=>p.resolve());await flush();
+  assert.equal(h.commit(),0);assert.equal(h.failures(),0);assert.ok(h.elements.every(e=>e.paused&&e.muted));
+});

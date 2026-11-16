@@ -1200,9 +1200,12 @@ class HttpApi:
         parts = [unquote(p) for p in path.split("/") if p]
         # parts 形如 ['api','v1','projects',...]
         from cutvoke.interfaces.project_directories import directory_endpoint, route_project
+        from cutvoke.storage.project_format import ProjectFormatError
         try:
             directory_result = directory_endpoint(self, method, parts, body)
             target_api = route_project(self, method, parts, body) if directory_result is None else self
+        except ProjectFormatError as error:
+            return 409, {"error": {"code": "PROJECT_CONVERSION_REQUIRED", "message": str(error)}}
         except RevisionConflict as error:
             raise EditError(ErrorCode.REVISION_CONFLICT, str(error), retryable=True) from error
         except (ValueError, OSError) as error:
@@ -2852,18 +2855,41 @@ class HttpApi:
         # 解包打开（J10）：POST /api/v1/packages/open
         #   body {packagePath, targetDir?} → 解包出工程 + 素材 → 作为新工程导入服务。
         #   targetDir 受限在 media_dir 上级目录内（防路径穿越），缺省自动生成唯一目录。
-        if method == "POST" and parts == ["api", "v1", "packages", "open"]:
-            pkg = body.get("packagePath")
+        if method == "POST" and parts == ["api", "v1", "packages", "format", "inspect"]:
+            from cutvoke.storage.project_package_conversion import inspect_package_format
+            return 200, inspect_package_format(body.get("path", ""))
+        if method == "POST" and parts in (["api", "v1", "packages", "open"],
+                                          ["api", "v1", "packages", "format", "convert"]):
+            converting = parts[-1] == "convert"
+            pkg = body.get("path") if converting else body.get("packagePath")
             if not pkg:
                 return 400, {"error": {"code": "INVALID_ARGUMENT",
                                        "message": "open requires packagePath"}}
             try:
-                target_dir = self._resolve_unpack_target(body.get("targetDir"))
+                target_dir = self._resolve_unpack_target(body.get("targetDir"), create=not converting)
             except GovernanceError as e:
                 return 400, {"error": {"code": e.code, "message": str(e)}}
-            project, mapping, warnings = unpack_project(pkg, target_dir)
+            if converting:
+                from cutvoke.storage.project_package_conversion import convert_package_copy
+                project, mapping, warnings = convert_package_copy(pkg, body.get("token"), target_dir)
+            else:
+                project, mapping, warnings = unpack_project(pkg, target_dir)
             # 导入为服务内的新工程（生成新 id，避免与现有工程冲突）。
-            imported = self.service.import_project(project)
+            try:
+                imported = self.service.import_project(project)
+            except Exception:
+                if not converting:
+                    raise
+                # Publication and registration are separate transactions. An
+                # exception may arrive after a successful durable commit: keep
+                # the verified copy, never delete it or blindly retry import.
+                return 500, {"error": {
+                    "code": "PACKAGE_CONVERSION_IMPORT_UNCONFIRMED",
+                    "message": "副本已验证，但导入未确认。已保留转换副本，请核查工程列表和副本目录后再操作；不要直接重复转换。",
+                    "retryable": False,
+                    "details": {"verifiedCopyPath": str(target_dir),
+                                "importStatus": "unconfirmed"},
+                }}
             # 统计该工程引用的去重素材数。
             asset_ids: set[str] = set()
             for track in imported.sequence.tracks:
@@ -2920,7 +2946,7 @@ class HttpApi:
 
         return 404, {"error": {"code": "NOT_FOUND", "message": f"unknown: {method} {path}"}}
 
-    def _resolve_unpack_target(self, target_dir: Optional[str]) -> str:
+    def _resolve_unpack_target(self, target_dir: Optional[str], *, create: bool = True) -> str:
         """解析并约束解包目标目录，防路径穿越（J10 安全边界）。
 
         允许根 = media_dir 的上级目录（如 ~/.cutvoke）。规则：
@@ -2928,7 +2954,7 @@ class HttpApi:
           - 否则把 target_dir 当作「相对允许根」的路径解析（绝对路径会覆盖前
             缀，等同要求它落在允许根内）；解析后用 pathlib 判定是否仍在允许根
             之内。任何通过 ../ 或绝对路径逃逸出允许根的情形都抛 PathEscapeError。
-        返回最终绝对目标目录（确保已创建）。
+        返回最终绝对目标目录；转换使用 create=False，验证成功前不创建目标。
         """
         allowed = Path(os.path.dirname(self.media_dir)).resolve()
         try:
@@ -2936,8 +2962,11 @@ class HttpApi:
         except OSError:
             pass
         if not target_dir:
-            return str((allowed / "unpacked" / uuid.uuid4().hex).resolve())
-        candidate = (allowed / target_dir).resolve()
+            target_dir = str(Path("unpacked") / uuid.uuid4().hex)
+        lexical = allowed / target_dir
+        if not create and any(part.is_symlink() for part in (lexical, *lexical.parents)):
+            raise PathEscapeError("PATH_ESCAPE", "Conversion target must not contain symlinks")
+        candidate = lexical.resolve()
         if candidate != allowed and allowed not in candidate.parents:
             raise PathEscapeError(
                 "PATH_ESCAPE",
@@ -2945,7 +2974,8 @@ class HttpApi:
                 f"必须位于允许根目录 {allowed} 之内（禁止路径穿越）。",
             )
         try:
-            candidate.mkdir(parents=True, exist_ok=True)
+            if create:
+                candidate.mkdir(parents=True, exist_ok=True)
         except OSError as e:
             raise PathEscapeError(
                 "PATH_ESCAPE",

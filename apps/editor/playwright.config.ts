@@ -23,8 +23,8 @@ export default defineConfig({
     url: `${serverUrl}/api/v1/capabilities`,
     reuseExistingServer: !process.env.CI && (!process.env.CUTVOKE_E2E_PORT || process.env.CUTVOKE_E2E_REUSE === "1"),
     timeout: 120_000,
-    // Keep the seeded legacy project for migration coverage while all newly
-    // created projects use the same directory-backed library as shipped apps.
+    // Ordinary fixtures use the current directory-backed store, like shipped
+    // apps. Format-conversion tests create their own isolated legacy fixtures.
     env: { CUTVOKE_E2E_PORT: port, CUTVOKE_E2E_FOLDERS: "1" },
   },
 });

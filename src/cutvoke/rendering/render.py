@@ -5262,7 +5262,15 @@ class RenderService:
                 end = Rational.from_json(**effect_range["end"])
             except (KeyError, TypeError, ValueError, ZeroDivisionError) as exc:
                 raise RenderError(f"invalid temporal range for {e.get('effectId')}") from exc
-            if start < Rational.of(0) or end > original_duration or start >= end:
+            if start >= end:
+                raise RenderError(f"temporal range is outside clip {clip.id}")
+            if clip.keyframe_time_domain == "signed-local":
+                # Retain the full effect interval in storage; apply only its
+                # visible intersection, without resurrecting removed effects.
+                start, end = max(Rational.of(0), start), min(original_duration, end)
+                if start >= end:
+                    continue
+            elif start < Rational.of(0) or end > original_duration:
                 raise RenderError(f"temporal range is outside clip {clip.id}")
             if start == Rational.of(0) and end == original_duration:
                 cur = apply_one(cur)

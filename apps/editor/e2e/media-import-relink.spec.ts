@@ -89,9 +89,9 @@ test("folder scan previews ambiguity and legacy confirmation before restoring se
   const known = await upload("known.png"), legacy = await upload("legacy.png");
   const directory = await (await request.get(`/api/v1/projects/${project.id}/directory`)).json();
   expect(directory.storageKind).toBe("directory");
-  const database = join(directory.directory, "project.sqlite");
+  const database = join(directory.directory, "project-v2.sqlite");
   expect(existsSync(database)).toBe(true);
-  execFileSync("python", ["-c", "import sqlite3,sys; c=sqlite3.connect('file:'+sys.argv[1]+'?mode=rw',uri=True); c.execute('UPDATE assets SET sha256=NULL WHERE asset_id=?',(sys.argv[2],)); c.commit(); c.close()", database, legacy.assetId]);
+  execFileSync("python", ["-c", "import sqlite3,sys; c=sqlite3.connect('file:'+sys.argv[1]+'?mode=rw',uri=True); c.execute('UPDATE cv2_assets SET sha256=NULL WHERE asset_id=?',(sys.argv[2],)); c.commit(); c.close()", database, legacy.assetId]);
   unlinkSync(known.path); unlinkSync(legacy.path);
   const folder = join(evidence, "relink-folder");
   mkdirSync(join(folder, "a"), { recursive: true }); mkdirSync(join(folder, "b"), { recursive: true });

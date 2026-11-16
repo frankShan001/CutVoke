@@ -41,7 +41,7 @@ def decode(path):
 def project(sources, effects, *, fps=None, start=0):
     clips = [Clip(str(i), AssetReference(str(i), str(path)), rat(start+i), rat(start+i+1), rat(0),
                   effects=copy.deepcopy(effects[i])) for i, path in enumerate(sources)]
-    return Project("1", "Vlog verification", "0", Sequence("s", W, H, fps or rat(FPS),
+    return Project("2", "Vlog verification", "0", Sequence("s", W, H, fps or rat(FPS),
                    tracks=[Track("video", "video", clips=clips)]))
 
 

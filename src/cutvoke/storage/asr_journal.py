@@ -53,6 +53,11 @@ class AsrJournal:
                            if database and database != ":memory:" else None)
         self._db = sqlite3.connect(database or ":memory:", isolation_level=None,
                                    check_same_thread=False, timeout=5)
+        # Journals share a project database but use their own connection. Do not
+        # fall back to legacy ASR tables when the authoritative project is v2.
+        if self._db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='cv2_projects'").fetchone():
+            from cutvoke.storage.v2_connection import V2Connection
+            self._db = V2Connection(self._db)
         self._db.execute("PRAGMA busy_timeout=5000")
         with self.transaction():
             self._db.execute("CREATE TABLE IF NOT EXISTS asr_journal_meta ("

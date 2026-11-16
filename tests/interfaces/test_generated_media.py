@@ -121,7 +121,7 @@ def test_inspect_import_scoped_edit_swap_undo_and_package(fixture, tmp_path):
     package = call("project_package", projectId="one", expectedRevision="4", outPath="handoff.cvkpkg")
     restored, _, _ = unpack_project(package["path"], str(tmp_path / "restore"))
     with zipfile.ZipFile(package["path"]) as zipped:
-        assert json.loads(zipped.read("manifest.json"))["packageFormat"] == 4
+        assert json.loads(zipped.read("manifest.json"))["packageFormat"] == 5
         assert len([name for name in zipped.namelist() if name.startswith("sources/")]) == 2
     assert not list((tmp_path / "restore").rglob("scene.py"))
     assert Path(restored.sequence.tracks[0].clips[0].asset_ref.source_path).is_file()
