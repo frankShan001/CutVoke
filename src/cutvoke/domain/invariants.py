@@ -134,13 +134,17 @@ def validate_project(project: Project, *, _all_sequences: bool = True) -> Valida
                 if clip.source_start < Rational.of(0, 1):
                     errors.append(f"clip {clip.id}[{scope}]: negative source_start "
                                   f"{clip.source_start}")
+                if clip.keyframe_time_domain not in ("local", "signed-local"):
+                    errors.append(f"clip {clip.id}: unknown keyframe time domain")
+                if clip.keyframe_time_domain == "signed-local" and project.schema_version != "2":
+                    errors.append(f"clip {clip.id}: signed animation requires project format 2")
                 for param, lane in clip.keyframes.items():
                     try:
                         minimum, maximum, _ = parameter_spec(clip, param)
                         stamps = set()
                         for key in lane:
                             if (not math.isfinite(key.value) or not minimum <= key.value <= maximum
-                                    or key.time < Rational.of(0)
+                                    or (key.time < Rational.of(0) and not (project.schema_version == "2" and clip.keyframe_time_domain == "signed-local"))
                                     or key.interpolation not in Keyframe.VALID_INTERP
                                     or key.time.to_fraction() in stamps):
                                 raise ValueError("invalid time, value, interpolation or duplicate time")

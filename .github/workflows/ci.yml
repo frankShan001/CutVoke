@@ -90,8 +90,9 @@ jobs:
     env:
       CUTVOKE_E2E_PREVIEW_DIAGNOSTICS: "1"
     runs-on: ubuntu-24.04
-    # Successful complete jobs took 19-30min; bound stalled hosted installs.
-    timeout-minutes: 60
+    # Full scenarios alone took 37.4min on a loaded hosted runner. Reserve
+    # room for setup, the full 40min group, state 25min and recovery 15min.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
         with:
@@ -191,21 +192,30 @@ jobs:
         id: editor_scenarios
         timeout-minutes: 40
         working-directory: apps/editor
-        run: npm run test:e2e -- --output=../../.artifacts/test-results/full
+        env:
+          CUTVOKE_E2E_PORT: "8799"
+        # Signal the whole process group before the Actions hard deadline,
+        # allowing Playwright to close Chromium and its private fixture server.
+        run: timeout --signal=TERM --kill-after=30s 39m npm run test:e2e -- --output=../../.artifacts/test-results/full
       - name: Repeat deterministic state orderings
         # Complete independent regressions after a scenario failure. Keep each
         # output directory separate so a later run cannot erase earlier traces.
         if: ${{ !cancelled() && (steps.editor_scenarios.outcome == 'success' || steps.editor_scenarios.outcome == 'failure') }}
-        # Give each existing regression group its own step budget. Their
-        # combined hosted duration can exceed 15min even when all tests pass.
-        timeout-minutes: 15
+        # Three repetitions continued making progress at the old 15min cap.
+        # This is an aggregate budget, not a change to any test timeout/retry.
+        timeout-minutes: 25
         working-directory: apps/editor
-        run: npm run test:e2e:regressions:state -- --output=../../.artifacts/test-results/state
+        env:
+          CUTVOKE_E2E_PORT: "8800"
+        run: timeout --signal=TERM --kill-after=30s 24m npm run test:e2e:regressions:state -- --output=../../.artifacts/test-results/state
       - name: Repeat preview recovery and transcript orderings
         if: ${{ !cancelled() && (steps.editor_scenarios.outcome == 'success' || steps.editor_scenarios.outcome == 'failure') }}
         timeout-minutes: 15
         working-directory: apps/editor
-        run: npm run test:e2e:regressions:recovery -- --output=../../.artifacts/test-results/recovery
+        env:
+          # Never reuse a fixture server left by a cancelled earlier group.
+          CUTVOKE_E2E_PORT: "8801"
+        run: timeout --signal=TERM --kill-after=30s 14m npm run test:e2e:regressions:recovery -- --output=../../.artifacts/test-results/recovery
       - name: Preserve bounded preview stage diagnostics
         if: always()
         uses: actions/upload-artifact@v7

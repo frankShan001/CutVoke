@@ -25,7 +25,10 @@ test('opt-in Quick Whip lists, applies, previews, saves and survives undo/redo/r
     expect(result.ok(), await result.text()).toBeTruthy();
   };
   phase('read fixture');
-  const fixture = await (await request.get('/api/v1/projects/e2e-fixture')).json();
+  const fixtureResponse = await request.get('/api/v1/projects/e2e-fixture');
+  expect(fixtureResponse.ok(), await fixtureResponse.text()).toBeTruthy();
+  const fixture = await fixtureResponse.json();
+  expect(fixture.schemaVersion).toBe('2');
   phase('create project');
   const created = await request.post('/api/v1/projects', { data: {
     projectId: id, name: id, width: 160, height: 90, fps: 15,

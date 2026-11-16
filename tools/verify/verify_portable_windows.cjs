@@ -189,7 +189,10 @@ async function main() {
     assert.equal(directory.storageKind, "directory");
     assert.equal(directory.projectId, projectId);
     assert.ok(fs.existsSync(directory.entryPath));
-    assert.ok(fs.existsSync(path.join(directory.directory, "project.sqlite")));
+    const projectEntry = JSON.parse(fs.readFileSync(directory.entryPath, "utf8"));
+    assert.equal(projectEntry.version, 2);
+    assert.equal(projectEntry.database, "project-v2.sqlite");
+    assert.ok(fs.existsSync(path.join(directory.directory, projectEntry.database)));
     const relativeMedia = path.relative(fs.realpathSync(directory.mediaDirectory), fs.realpathSync(asset.path));
     assert.ok(relativeMedia && !relativeMedia.startsWith("..") && !path.isAbsolute(relativeMedia),
       `Imported media must belong to this project: ${asset.path}`);

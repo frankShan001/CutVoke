@@ -50,6 +50,9 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   });
   const spec = options.find(option=>option.name===param) || options[0];
   const lane = draft || [...(clip.keyframes?.[param] || [])].sort((a,b)=>rationalToSecs(a.time)-rationalToSecs(b.time));
+  // Hidden v2 nodes retain easing for outward extension. Evaluate with the
+  // complete lane, but do not offer off-clip navigation/dragging/retiming.
+  const visibleLane = lane.filter(frame => rationalToSecs(frame.time) >= 0 && rationalToSecs(frame.time) <= duration);
   const selected = selectedIds.filter(id => (clip.keyframes?.[param] || []).some(frame => frame.id === id));
   const formMatchesSelection = selected.length === 1 && formTarget?.clipId === clip.id
     && formTarget.param === param && formTarget.id === selected[0];
@@ -57,7 +60,7 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   useEffect(()=>{setSelected([]);setDraft(null);setParam(audio?"volume":"opacity");},[clip.id,audio]);
   useEffect(()=>{setDraft(null);},[clip.keyframes]);
   useEffect(()=>{
-    const valid = new Set((clip.keyframes?.[param] || []).map(frame => frame.id));
+    const valid = new Set((clip.keyframes?.[param] || []).filter(frame=>rationalToSecs(frame.time)>=0 && rationalToSecs(frame.time)<=duration).map(frame => frame.id));
     setSelected(current => {
       const retained = current.filter(id => valid.has(id));
       return retained.length === current.length ? current : retained;
@@ -83,7 +86,7 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
     return result;
   });
   const select = (frame: Keyframe, multiple=false) => {
-    if (savingRef.current || state.editLock) return;
+    if (savingRef.current || state.editLock || !visibleLane.some(item=>item.id===frame.id)) return;
     setSelected(current=>multiple ? current.includes(frame.id) ? current.filter(id=>id!==frame.id) : [...current,frame.id] : [frame.id]);
     setFormTarget({clipId:clip.id,param,id:frame.id});
     setKfTime(String(rationalToSecs(frame.time)));setKfValue(String(frame.value));
@@ -116,7 +119,7 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   };
   const navigate = (direction:number) => {
     const current=(getLatestState() || state).playhead-rationalToSecs(clip.timelineStart);
-    const ordered=lane.filter(frame=>direction<0?rationalToSecs(frame.time)<current-1e-6:rationalToSecs(frame.time)>current+1e-6);
+    const ordered=visibleLane.filter(frame=>direction<0?rationalToSecs(frame.time)<current-1e-6:rationalToSecs(frame.time)>current+1e-6);
     const frame=direction<0?ordered.at(-1):ordered[0];
     if(frame){select(frame);dispatch({type:'PLAYHEAD_SET',t:rationalToSecs(clip.timelineStart)+rationalToSecs(frame.time)});}
   };
@@ -143,7 +146,7 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
       }} onPointerCancel={()=>{drag.current=null;setDraft(null);}}>
       <path d={`M${pad},${pad} V${H-pad} H${W-pad}`} stroke="var(--border)" fill="none" />
       <path d={curve} fill="none" stroke="var(--accent)" strokeWidth="2" />
-      {graphMode==='value' ? lane.map(frame=><circle key={frame.id} cx={x(rationalToSecs(frame.time))} cy={y(Number(frame.value))} r={selected.includes(frame.id)?6:4}
+      {graphMode==='value' ? visibleLane.map(frame=><circle key={frame.id} cx={x(rationalToSecs(frame.time))} cy={y(Number(frame.value))} r={selected.includes(frame.id)?6:4}
         fill={selected.includes(frame.id)?"var(--accent)":"var(--text)"} tabIndex={0} role="button" aria-label={tr("曲线节点 {0}",frame.id)}
         onKeyDown={event=>{if(event.key==="Enter" || event.key===" ")select(frame,event.ctrlKey);}}
         onPointerDown={event=>{if(readOnly)return;select(frame,event.ctrlKey || event.metaKey);drag.current={id:frame.id,moved:false};svgRef.current!.setPointerCapture(event.pointerId);}} />) : null}
@@ -187,12 +190,12 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
     </>:null}
     <p className="cv-hint">{tr("拖动节点调整时间和值；多选后可整体移动或缩放时间。")}</p>
     {lane.length===0?<p className="cv-hint">{tr("暂无关键帧。")}</p>:lane.map(frame=><div key={frame.id} className="inspector__subrow" style={{gap:4}}>
-      <input type="checkbox" disabled={readOnly} checked={selected.includes(frame.id)} aria-label={tr("选择关键帧 {0}",frame.id)} onChange={()=>select(frame,true)} />
+      <input type="checkbox" disabled={readOnly || !visibleLane.some(item=>item.id===frame.id)} checked={selected.includes(frame.id)} aria-label={tr("选择关键帧 {0}",frame.id)} onChange={()=>select(frame,true)} />
       <span className="inspector__key">t={rationalToSecs(frame.time).toFixed(2)}s</span><span>{Number(frame.value).toFixed(2)} · {frame.interpolation}</span>
       <button className="cv-btn cv-btn--sm cv-btn--danger" disabled={readOnly} title={tr("删除关键帧")} onClick={()=>void save(()=>removeKeyframe(dispatch,getLatestState() || state,{clipId:clip.id,param,keyframeId:frame.id}))}><Trash2 size={10}/>{tr(" 删除")}</button>
     </div>)}
     {lane.length>0?<div className="inspector__subrow" style={{gap:4,flexWrap:"wrap",marginTop:6}}>
-      <button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={readOnly} onClick={()=>{if(!savingRef.current && !state.editLock)setSelected(lane.map(frame=>frame.id));}}>{tr("全选节点")}</button>
+      <button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={readOnly} onClick={()=>{if(!savingRef.current && !state.editLock)setSelected(visibleLane.map(frame=>frame.id));}}>{tr("全选节点")}</button>
       <label className="cv-hint">{tr("移动秒数")}<input className="cv-input" type="number" step="0.1" value={offset} aria-label={tr("关键帧移动秒数")} style={{width:70}} onChange={e=>setOffset(e.target.value)}/></label>
       <label className="cv-hint">{tr("时间倍率")}<input className="cv-input" type="number" min="0.01" step="0.1" value={timeScale} aria-label={tr("关键帧时间倍率")} style={{width:70}} onChange={e=>setTimeScale(e.target.value)}/></label>
       <button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={!selected.length || readOnly} onClick={()=>void commit({action:"retime",keyframeIds:selected,offset:Number(offset),timeScale:Number(timeScale),anchor:0})}>{tr("应用时间调整")}</button>

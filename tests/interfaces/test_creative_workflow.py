@@ -293,8 +293,12 @@ def test_shared_master_same_child_id_cannot_authorize_local_repair():
     project = service.create_project('p', width=320, height=180)
 
     def clip(identifier, start, end, shared=''):
+        # This fixture appends clips after the v2 Project constructor, bypassing
+        # normal command/import normalization. Build canonical v2 clips here so
+        # the preserve-clip assertion still compares the complete state.
         return Clip(identifier, AssetReference('a', source_path='synthetic.png'),
-                    R.of(start), R.of(end), R.of(0), sequence_ref=shared)
+                    R.of(start), R.of(end), R.of(0), sequence_ref=shared,
+                    keyframe_time_domain='signed-local')
 
     master = Sequence('master', 320, 180, R.of(30), tracks=[
         Track('child-v', 'video', [clip('main', 0, 4)])])

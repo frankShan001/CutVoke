@@ -120,9 +120,15 @@ def crop_clip(service, original: Clip, start: Rational, end: Rational) -> Clip:
         service._rebase_effect_ranges(clip, original.timeline_start,
                                      original.timeline_end, start, end)
     from cutvoke.domain.keyframes import crop_keyframes
-    clip.keyframes = {name: crop_keyframes(points, start - original.timeline_start,
-                                         end - original.timeline_start)
-                      for name, points in original.keyframes.items()}
+    if original.keyframe_time_domain == "signed-local":
+        # _crop_curve_clip already rebases the curved-speed branch.
+        if original.speed_curve is None:
+            from cutvoke.domain.keyframes import shift_manual_keyframes
+            shift_manual_keyframes(clip, start-original.timeline_start)
+    else:
+        clip.keyframes = {name: crop_keyframes(points, start - original.timeline_start,
+                                             end - original.timeline_start)
+                          for name, points in original.keyframes.items()}
     if clip.frame_interpolation == "motion" and not clip.has_slow_motion:
         clip.frame_interpolation = "none"
     if ((start != original.timeline_start or end != original.timeline_end)

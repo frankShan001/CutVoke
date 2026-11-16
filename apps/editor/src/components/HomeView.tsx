@@ -4,13 +4,13 @@ import { getLocale } from "../i18n/locale";
     职责：只做“选/建/改名工程”，进入编辑器后交给 Workspace。
     不用 history 路由（vite.config.ts:10），靠 store.view 状态切换视图。 */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Plus, FolderOpen, Pencil, Check, X, RefreshCw, PackageOpen, LayoutTemplate } from "lucide-react";
 import { useEditor, showError } from "../store/editor";
 import { createProject, loadProjects, renameProject, selectProject } from "../store/actions";
 import { openPackage } from "../lib/api";
 import { invalidateProject } from "../lib/api";
-import { openProjectDirectory } from "../lib/projectDirectories";
+import { openProjectDirectory, inspectProjectFormat, convertProjectCopy, type ProjectOpenSource, type ProjectFormatInspection } from "../lib/projectDirectories";
 import { CacheSettings } from "./CacheSettings";
 import { LanguageSelect } from "./LanguageSelect";
 
@@ -53,6 +53,16 @@ export function HomeView() {
   const [openDirectory, setOpenDirectory] = useState("");
   const [directoryBusy, setDirectoryBusy] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [conversion, setConversion] = useState<{ source: ProjectOpenSource; inspection: ProjectFormatInspection } | null>(null);
+  const [conversionBusy, setConversionBusy] = useState(false);
+  const opening = useRef(false);
+  const converting = useRef(false);
+  const alive = useRef(true);
+  const conversionDialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  useEffect(() => {
+    if (conversion && !conversionDialog.current?.open) conversionDialog.current?.showModal();
+  }, [conversion]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
 
@@ -97,32 +107,84 @@ export function HomeView() {
       showError(dispatch, { status: 400, code: "INVALID_ARGUMENT", message: tr("请填写资源包路径") });
       return;
     }
-    setPackBusy(true);
-    setPackWarnings([]);
+    return requestOpen({ kind: "package", path: trimmed });
+  };
+
+  const requestOpen = async (source: ProjectOpenSource) => {
+    if (opening.current || conversion) return;
+    opening.current = true;
+    setDirectoryBusy(true);
+    if (source.kind === "package") { setPackBusy(true); setPackWarnings([]); }
     try {
-      const res = await openPackage(trimmed);
-      setPackWarnings(res.warnings || []);
+      const inspection = await inspectProjectFormat(source);
+      if (!alive.current) return;
+      if (inspection.status === "legacy") {
+        setConversion({ source, inspection });
+        return;
+      }
+      if (inspection.status !== "current") throw new Error(tr("不支持的工程格式"));
+      if (source.kind === "package") {
+        const result = await openPackage(source.path);
+        if (!alive.current) return;
+        setPackWarnings(result.warnings || []);
+        await loadProjects(dispatch);
+        if (!alive.current) return;
+        dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已解包导入工程：{0}", result.name || result.projectId) });
+        setPackPath("");
+        return;
+      }
+      const result = source.kind === "directory"
+        ? await openProjectDirectory(source.path)
+        : { projectId: inspection.projectId, name: inspection.name };
+      if (!alive.current) return;
+      invalidateProject(result.projectId);
       await loadProjects(dispatch);
-      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已解包导入工程：{0}", res.name || res.projectId) });
-      setPackPath("");
-    } catch (err) {
-      showError(dispatch, err);
-    } finally {
-      setPackBusy(false);
+      if (!alive.current) return;
+      enterEditor(result.projectId, result.name || result.projectId);
+      setOpenDirectory("");
+    } catch (error) { if (alive.current) showError(dispatch, error); }
+    finally {
+      opening.current = false;
+      if (alive.current) { setDirectoryBusy(false); setPackBusy(false); }
     }
   };
 
-  const handleOpenDirectory = async () => {
-    if (!openDirectory.trim()) return;
-    setDirectoryBusy(true);
+  const closeConversion = () => {
+    if (converting.current) return;
+    conversionDialog.current?.close();
+    setConversion(null);
+  };
+  const confirmConversion = async () => {
+    if (!conversion || converting.current) return;
+    converting.current = true;
+    setConversionBusy(true);
     try {
-      const result = await openProjectDirectory(openDirectory.trim());
+      const result = await convertProjectCopy(conversion.source, conversion.inspection.token);
+      if (!alive.current) return;
+      if (conversion.source.kind === "package") {
+        setPackWarnings(result.warnings || []);
+        setPackPath("");
+      }
       invalidateProject(result.projectId);
       await loadProjects(dispatch);
+      if (!alive.current) return;
+      conversionDialog.current?.close();
+      setConversion(null);
       enterEditor(result.projectId, result.name || result.projectId);
-      setOpenDirectory("");
-    } catch (error) { showError(dispatch, error); }
-    finally { setDirectoryBusy(false); }
+    } catch (error) {
+      if (alive.current) {
+        showError(dispatch, error);
+        // A failed/stale plan must be inspected again, never silently retried.
+        conversionDialog.current?.close();
+        setConversion(null);
+      }
+    } finally {
+      converting.current = false;
+      if (alive.current) setConversionBusy(false);
+    }
+  };
+  const handleOpenDirectory = () => {
+    if (openDirectory.trim()) return requestOpen({ kind: "directory", path: openDirectory.trim() });
   };
 
   const startRename = (id: string, current: string) => {
@@ -138,6 +200,20 @@ export function HomeView() {
 
   return (
     <div className="home">
+      {conversion && <dialog ref={conversionDialog} aria-labelledby="project-conversion-title"
+        style={{ width: "min(560px, 90vw)", maxHeight: "90dvh", overflow: "auto", padding: 24, color: "var(--fg)", background: "var(--bg-2)", border: "1px solid var(--border)", borderRadius: 12 }}
+        onCancel={event => { event.preventDefault(); closeConversion(); }}>
+        <h2 id="project-conversion-title">{tr("旧工程需要转换")}</h2>
+        <p>{tr("工程 {0} 使用格式 {1}，当前版本需要格式 {2}。", conversion.inspection.name || conversion.inspection.projectId,
+          conversion.inspection.sourceVersion, conversion.inspection.targetVersion)}</p>
+        <p>{tr("转换将在新目录中创建副本，原工程保留不变。新副本不能用旧版本编辑器打开。关闭将不打开或转换工程。")}</p>
+        {conversion.source.kind === "package" && <p>{tr("原资源包保留不变。")}</p>}
+        <div style={{ display: "flex", gap: 12 }}>
+          <button className="cv-btn cv-btn--md" autoFocus disabled={conversionBusy} onClick={closeConversion}>{tr("关闭")}</button>
+          <button className="cv-btn cv-btn--primary cv-btn--md" disabled={conversionBusy} onClick={() => void confirmConversion()}>
+            {conversionBusy ? tr("转换中…") : tr("转换副本并打开")}</button>
+        </div>
+      </dialog>}
       <header className="home__hero">
         <div className="home__brand">
           <img src="/brand/icon-128.png" width="36" height="36" alt="" aria-hidden="true" draggable={false} />
@@ -212,7 +288,7 @@ export function HomeView() {
           <button
             className="cv-btn cv-btn--md"
             onClick={() => void handleOpenPackage()}
-            disabled={packBusy}
+            disabled={packBusy || directoryBusy}
             aria-label={tr("解包打开")}
           >
             <PackageOpen size={14} />
@@ -250,7 +326,8 @@ export function HomeView() {
                 <li key={p.id} className="home__item">
                   <button
                     className="home__item-main"
-                    onClick={() => enterEditor(p.id, label)}
+                    disabled={directoryBusy}
+                    onClick={() => void requestOpen({ kind: "recent", projectId: p.id })}
                     aria-label={tr("打开工程 {0}", label)}
                     title={tr("打开 {0}", label)}
                   >

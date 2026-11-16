@@ -98,7 +98,7 @@ class ProjectStore:
     所有写操作在单一事务内提交，WAL 模式提升并发与崩溃安全。
     """
 
-    def __init__(self, db_path: str, *, busy_timeout_ms: int = 5000):
+    def __init__(self, db_path: str, *, busy_timeout_ms: int = 5000, format_v2: bool = False):
         # db_path 可能是含中文/空格的任意路径，sqlite3 直接接受 str。
         self._db_path = db_path
         # 实例锁：HTTP 多线程请求下串行化同一个连接的访问（见 _synchronized）
@@ -107,6 +107,9 @@ class ProjectStore:
         # 并发安全由 _lock 保证，而不是靠 sqlite3 的线程检查。
         self._conn = sqlite3.connect(db_path, isolation_level=None,
                                      check_same_thread=False)
+        if format_v2:
+            from cutvoke.storage.v2_connection import V2Connection
+            self._conn = V2Connection(self._conn)
         # WAL：写不阻塞读，崩溃后可通过 -wal/-shm 恢复到最后一次提交。
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._conn.execute("PRAGMA synchronous=NORMAL")
@@ -1062,10 +1065,13 @@ class ProjectStore:
         """
         with self._transaction(immediate=False):
             row = self._conn.execute(
-                "SELECT revision, name, updated_at FROM projects WHERE project_id=?",
+                "SELECT revision, name, updated_at, schema_version FROM projects WHERE project_id=?",
                 (project_id,)).fetchone()
             if row is None:
                 return None
+            if row[3] != "2":
+                from cutvoke.storage.project_format import ProjectFormatError
+                raise ProjectFormatError("PROJECT_CONVERSION_REQUIRED: convert a copy or close")
             token = hashlib.sha256(json.dumps([project_id, *row], ensure_ascii=False,
                                              separators=(",", ":")).encode()).hexdigest()
             return token, row[0], None if token == known_token else self.load(project_id)
