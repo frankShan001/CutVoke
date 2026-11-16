@@ -3277,10 +3277,7 @@ class EditService:
         dest_track = src_track
         if "trackId" in p and p["trackId"] != src_track.id:
             tid = p["trackId"]
-            for track in proj.sequence.tracks:
-                if track.id == tid:
-                    dest_track = track
-                    break
+            dest_track = next((track for track in proj.sequence.tracks if track.id == tid), None)
             if dest_track is None:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 f"target track not found: {tid}")
