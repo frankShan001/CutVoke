@@ -4864,6 +4864,31 @@ for (const prepared of [true, false]) {
     for (const clipId of ["color-0", "color-1", "color-2"]) await apply(request, id, "clip.remove", { clipId });
     await apply(request, id, "clip.insert", { trackId: "v1", clipId: "color-0", sourcePath: asset.path,
       timelineStart: { num: 0, den: 1 }, timelineEnd: { num: 30, den: 1 } });
+    const jobs: string[] = [], keepalives: string[] = [];
+    page.on("response", async response => {
+      if (response.request().method() === "POST" && response.url().endsWith(`/projects/${id}/preview-jobs`) && response.ok()) jobs.push((await response.json()).jobId);
+      if (response.url().endsWith("/keepalive") && response.ok()) keepalives.push(response.url());
+    });
+    if (!prepared) await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({ status: 404, json: {} }));
+    await page.addInitScript(() => {
+      const voices: HTMLAudioElement[] = [];
+      const frames: Array<{ source: string; identity: string; rgba: number[] }> = [];
+      (window as typeof window & { gainVoices: typeof voices }).gainVoices = voices;
+      (window as typeof window & { gainFrames: typeof frames }).gainFrames = frames;
+      document.addEventListener("loadeddata", event => {
+        const video = event.target;
+        if (!(video instanceof HTMLVideoElement) || !video.matches(".player__video")) return;
+        const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1;
+        const context = canvas.getContext("2d")!; context.drawImage(video, 0, 0, 1, 1, 0, 0, 1, 1);
+        frames.push({ source: video.dataset.previewSource || "", identity: video.dataset.previewIdentity || "",
+          rgba: [...context.getImageData(0, 0, 1, 1).data] });
+      }, true);
+      const play = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function () {
+        if (this instanceof HTMLAudioElement && !voices.includes(this)) voices.push(this);
+        return play.call(this);
+      };
+    });
     // Opt-in diagnostics only; no application events, readiness gates or assertions changed.
     const frameDiagnostics = process.env.CUTVOKE_GAIN_FRAME_DIAGNOSTICS === "1";
     if (frameDiagnostics) {
@@ -4913,31 +4938,6 @@ for (const prepared of [true, false]) {
         }
       });
     }
-    const jobs: string[] = [], keepalives: string[] = [];
-    page.on("response", async response => {
-      if (response.request().method() === "POST" && response.url().endsWith(`/projects/${id}/preview-jobs`) && response.ok()) jobs.push((await response.json()).jobId);
-      if (response.url().endsWith("/keepalive") && response.ok()) keepalives.push(response.url());
-    });
-    if (!prepared) await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({ status: 404, json: {} }));
-    await page.addInitScript(() => {
-      const voices: HTMLAudioElement[] = [];
-      const frames: Array<{ source: string; identity: string; rgba: number[] }> = [];
-      (window as typeof window & { gainVoices: typeof voices }).gainVoices = voices;
-      (window as typeof window & { gainFrames: typeof frames }).gainFrames = frames;
-      document.addEventListener("loadeddata", event => {
-        const video = event.target;
-        if (!(video instanceof HTMLVideoElement) || !video.matches(".player__video")) return;
-        const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1;
-        const context = canvas.getContext("2d")!; context.drawImage(video, 0, 0, 1, 1, 0, 0, 1, 1);
-        frames.push({ source: video.dataset.previewSource || "", identity: video.dataset.previewIdentity || "",
-          rgba: [...context.getImageData(0, 0, 1, 1).data] });
-      }, true);
-      const play = HTMLMediaElement.prototype.play;
-      HTMLMediaElement.prototype.play = function () {
-        if (this instanceof HTMLAudioElement && !voices.includes(this)) voices.push(this);
-        return play.call(this);
-      };
-    });
     await openProject(page, name);
     const video = page.locator("video.player__video"), ruler = page.getByRole("slider", { name: "时间线播放头", exact: true });
     await expect(video).toHaveAttribute(prepared ? "src" : "data-preview-source", prepared ? /preview-jobs\/[^/]+\/media/ : /index=0/, { timeout: prepared ? 30_000 : 10_000 });
