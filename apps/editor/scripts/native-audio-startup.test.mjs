@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import ts from 'typescript';
 const deferred = () => { let resolve, reject; const promise = new Promise((a,b) => { resolve=a; reject=b; }); return { promise, resolve, reject }; };
 const flush = async () => { for(let i=0;i<20;i++) await Promise.resolve(); };
-function harness() {
+function harness(diagnostics = false) {
   const timers = new Map(); let timer=0;
   const exports = {};
   runInNewContext(ts.transpileModule(readFileSync(new URL('../src/lib/nativeAudioStartup.ts', import.meta.url),'utf8'),
@@ -18,7 +18,7 @@ function harness() {
   const elements=plays.map(play => Object.assign(new EventTarget(), { paused:true, muted:false, currentTime:3, seeking:false,
     pause(){this.paused=true;}, play(){return play.promise.then(()=>{this.paused=false;});} }));
   const voices=elements.map(element=>({element,time:3}));
-  const start=new exports.NativeAudioStartup();
+  const start=new exports.NativeAudioStartup(diagnostics);
   const request={key:'a',voices,context,current:()=>current,commit:()=>{commits++;return true;},failed:()=>failures++};
   return {start,request,context,resume,plays,elements,timers,commit:()=>commits,failures:()=>failures,setCurrent:v=>current=v,
     unlock:async()=>{context.state='running';resume.resolve();await flush();}};
@@ -279,4 +279,97 @@ test('cancellation during the final resume cannot revive primed voices',async()=
   assert.equal(h.commit(),0);h.setCurrent(false);h.start.cancel();
   resumed.forEach(p=>p.resolve());await flush();
   assert.equal(h.commit(),0);assert.equal(h.failures(),0);assert.ok(h.elements.every(e=>e.paused&&e.muted));
+});
+
+const lastDiagnostic = h => h.start.diagnostics().events.at(-1);
+test('startup diagnostics are opt-in, bounded, detached and contain only local enums/ids', async () => {
+  const off = harness(); off.start.start(off.request); off.start.cancel();
+  assert.equal(off.start.diagnostics().events.length, 0);
+  const h = harness(true);
+  h.request.key = '/private/media.mp4?secret=abc';
+  for (let i = 0; i < 100; i++) { h.start.start(h.request); h.start.cancel(); }
+  const snapshot = h.start.diagnostics();
+  assert.equal(snapshot.events.length, 64); assert.equal(snapshot.dropped, 136);
+  assert.equal(snapshot.events[0].attempt, 1); assert.equal(snapshot.events.at(-1).attempt, 100);
+  assert.deepEqual(Object.keys(snapshot.events[0]), ['attempt', 'phase', 'reason']);
+  assert.ok(!JSON.stringify(snapshot).includes('private'));
+  snapshot.events[0].reason = 'tampered'; snapshot.events.pop();
+  assert.equal(h.start.diagnostics().events.length, 64);
+  assert.equal(h.start.diagnostics().events[0].reason, 'started');
+});
+test('diagnostics distinguish context, seek and play failures without exception text', async () => {
+  const context = harness(true); context.start.start(context.request); context.resume.reject(new Error('/secret/url')); await flush();
+  assert.equal(lastDiagnostic(context).reason, 'context-failed'); assert.equal(lastDiagnostic(context).phase, 'context');
+  const seek = harness(true); Object.defineProperty(seek.elements[0], 'currentTime', { get: () => 3, set: () => { throw new Error('/secret/path'); } });
+  seek.start.start(seek.request); await seek.unlock();
+  assert.equal(lastDiagnostic(seek).reason, 'seek-failed'); assert.equal(lastDiagnostic(seek).phase, 'initial-seek');
+  const play = harness(true); play.start.start(play.request); await play.unlock(); play.plays[0].reject(new Error('/secret/play')); await flush();
+  assert.equal(lastDiagnostic(play).reason, 'play-failed'); assert.equal(lastDiagnostic(play).phase, 'prime-play');
+  for (const h of [context, seek, play]) { assert.equal(h.failures(), 1); assert.ok(!JSON.stringify(h.start.diagnostics()).includes('secret')); }
+});
+test('diagnostics distinguish timeout, stale, explicit cancellation and supersession', async () => {
+  const timeout = harness(true); timeout.start.start(timeout.request); [...timeout.timers.values()][0]();
+  assert.equal(lastDiagnostic(timeout).reason, 'timeout'); assert.equal(timeout.failures(), 1);
+  const stale = harness(true); stale.start.start(stale.request); stale.setCurrent(false); await stale.unlock();
+  assert.equal(lastDiagnostic(stale).reason, 'stale'); assert.equal(stale.failures(), 0);
+  for (const reason of ['cancelled', 'audition-stop', 'disabled', 'transport-stopped', 'scrubbing', 'disposed']) {
+    const h = harness(true); h.start.start(h.request); h.start.cancel(reason); await h.unlock();
+    assert.equal(lastDiagnostic(h).reason, reason); assert.equal(h.failures(), 0); assert.equal(h.commit(), 0);
+  }
+  const h = harness(true); h.start.start(h.request); h.start.start({...h.request, key:'replacement'});
+  assert.equal(h.start.diagnostics().events.at(-2).reason, 'superseded');
+  assert.equal(lastDiagnostic(h).attempt, 2);
+});
+test('diagnostics distinguish commit refusal, running context interruption and success', async () => {
+  for (const accepted of [true, false]) {
+    const h = harness(true); h.request.commit = () => accepted;
+    h.start.start(h.request); await h.unlock(); h.plays.forEach(p => p.resolve()); await flush();
+    assert.equal(lastDiagnostic(h).reason, accepted ? 'committed' : 'commit-refused');
+    assert.equal(lastDiagnostic(h).phase, accepted ? 'running' : 'commit');
+    if (accepted) { h.context.state = 'suspended'; h.start.start(h.request); assert.equal(lastDiagnostic(h).reason, 'context-interrupted'); assert.equal(h.failures(), 1); }
+    else assert.equal(h.failures(), 1);
+  }
+});
+test('diagnostic buffer failures cannot change commit, rollback or callback counts', async () => {
+  for (const fail of [false, true]) {
+    const h = harness(true); Object.freeze(h.start.evidence);
+    h.start.start(h.request); await h.unlock();
+    if (fail) h.plays[0].reject(); else h.plays.forEach(p => p.resolve());
+    await flush(); assert.equal(h.commit(), fail ? 0 : 1); assert.equal(h.failures(), fail ? 1 : 0);
+    h.start.cancel(); assert.ok(h.elements.every(e => e.paused && e.muted));
+  }
+});
+test('diagnostics classify final seek and resume drift separately', async () => {
+  const seek = harness(true); seek.start.start(seek.request); await seek.unlock();
+  seek.elements.forEach(e => e.seeking = true); seek.plays.forEach(p => p.resolve()); await flush();
+  seek.elements[0].seeking = false; seek.elements[0].dispatchEvent(new Event('seeked')); seek.elements[0].currentTime = 3.2;
+  seek.elements[1].seeking = false; seek.elements[1].dispatchEvent(new Event('seeked')); await flush();
+  assert.equal(lastDiagnostic(seek).reason, 'seek-drift'); assert.equal(lastDiagnostic(seek).phase, 'final-seek');
+  const resume = harness(true);
+  resume.elements.forEach(e => { let calls = 0; e.play = async () => { e.paused = false; if (++calls === 2) e.currentTime += .1; }; });
+  resume.start.start(resume.request); await resume.unlock(); await flush();
+  assert.equal(lastDiagnostic(resume).reason, 'resume-drift'); assert.equal(lastDiagnostic(resume).phase, 'resume-play');
+  for (const h of [seek, resume]) { assert.equal(h.failures(), 1); assert.equal(h.commit(), 0); }
+});
+test('keyboard evidence snapshot and logging failures do not escape the listener', () => {
+  const source = readFileSync(new URL('../e2e/transcript-flow.spec.ts', import.meta.url), 'utf8');
+  const file = ts.createSourceFile('transcript-flow.spec.ts', source, ts.ScriptTarget.Latest, true);
+  let snapshot, emit;
+  const visit = node => {
+    if (ts.isBinaryExpression(node) && node.left.getText(file) === '(window as any).__keyboardEvidence') snapshot = node.right.getText(file);
+    if (ts.isVariableDeclaration(node) && node.name.getText(file) === 'emitEvidence') emit = node.initializer.getText(file);
+    ts.forEachChild(node, visit);
+  };
+  visit(file); assert.ok(snapshot && emit);
+  for (const getter of [false, true]) {
+    const window = {}, samples = [{time: 1.2, playing: true}];
+    if (getter) Object.defineProperty(window, '__cutvokeNativeStartupEvidence', {get: () => {throw Error('private');}});
+    else window.__cutvokeNativeStartupEvidence = () => {throw Error('private');};
+    const exports = {};
+    runInNewContext(ts.transpileModule(`window.__keyboardEvidence = ${snapshot}; exports.emit = ${emit}`, {compilerOptions: {target: ts.ScriptTarget.ES2022}}).outputText,
+      {window, samples, dropped: 3, exports, console: {debug: () => {throw Error('logger');}}});
+    assert.equal(window.__keyboardEvidence().samples, samples); assert.equal(window.__keyboardEvidence().dropped, 3);
+    assert.equal(window.__keyboardEvidence().startup, undefined);
+    assert.doesNotThrow(() => exports.emit());
+  }
 });
