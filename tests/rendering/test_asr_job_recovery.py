@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+import inspect
 import json
 import os
 from pathlib import Path
@@ -77,12 +78,39 @@ def completed(manager, job_id):
     return wait_for(lambda: (job if (job := manager.get(job_id))["status"] == "completed" else None))
 
 
+def publish_ready(path, job_ids):
+    # The parent may observe existence immediately: publish only complete JSON.
+    staging = path.with_suffix(".pending")
+    staging.write_text(json.dumps(job_ids), encoding="utf-8")
+    staging.replace(path)
+
+
+def test_ready_signal_is_hidden_until_json_write_finishes(tmp_path, monkeypatch):
+    ready = tmp_path / "ready.json"
+    job_ids = ["running-job", "queued-job"]
+
+    def interrupted_write(path, text, encoding):
+        # Deterministically expose the empty and partial-write interleavings.
+        with path.open("w", encoding=encoding) as output:
+            assert not ready.exists()
+            output.write(text[:1])
+            output.flush()
+            assert not ready.exists()
+            output.write(text[1:])
+        return len(text)
+
+    monkeypatch.setattr(Path, "write_text", interrupted_write)
+    publish_ready(ready, job_ids)
+    assert json.loads(ready.read_text(encoding="utf-8")) == job_ids
+    assert not ready.with_suffix(".pending").exists()
+
+
 def test_killed_process_restores_running_and_queued_jobs_with_original_options(tmp_path):
     store, service, _ = library(tmp_path / "library")
     original = service.get_project("speech").to_dict()
     ready = tmp_path / "ready.json"
-    script = """
-import json, sys, time
+    script = "import json\n" + inspect.getsource(publish_ready) + """
+import sys, time
 from pathlib import Path
 from cutvoke.storage.store import ProjectStore
 from cutvoke.rendering import asr_jobs
@@ -96,7 +124,7 @@ manager = asr_jobs.AsrJobManager(sys.argv[1], project_loader=store.load)
 project = store.load("speech")
 first = manager.submit(project, "voice", model="tiny", language="en")
 second = manager.submit(project, "voice", model="small", language="zh")
-Path(sys.argv[2]).write_text(json.dumps([first["jobId"],second["jobId"]]))
+publish_ready(Path(sys.argv[2]), [first["jobId"], second["jobId"]])
 time.sleep(60)
 """
     process = subprocess.Popen([sys.executable, "-c", script, store.path, str(ready)],
