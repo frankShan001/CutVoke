@@ -448,6 +448,7 @@ test('a user keyboard seek within an audition cancels native audio before its bo
   page.on('console', retainEvidence);
   try {
   await page.addInitScript(() => {
+    (window as any).__cutvokeNativeStartupDiagnostics = true;
     const elements: HTMLAudioElement[] = []; (window as any).__transcriptAudio = elements;
     window.Audio = new Proxy(window.Audio, { construct(target, args) { const audio = Reflect.construct(target, args); elements.push(audio); return audio; } });
     (window as any).__transport = [];
@@ -457,10 +458,18 @@ test('a user keyboard seek within an audition cancels native audio before its bo
   await expect(page.getByTestId('live-audio-meter')).toHaveAttribute('data-ready', 'true', { timeout: 20_000 });
   await page.evaluate(() => {
     const samples: object[] = []; let dropped = 0;
-    (window as any).__keyboardEvidence = () => ({ samples, dropped });
+    (window as any).__keyboardEvidence = () => {
+      // Optional diagnostic reads must not interrupt transport listeners or the
+      // original predicate, including when a getter/snapshot itself throws.
+      let startup;
+      try { startup = (window as any).__cutvokeNativeStartupEvidence?.(); } catch { /* Best effort. */ }
+      return { samples, dropped, startup };
+    };
     // At most two emissions: the first observed playback stop, and one fallback.
     // This does not participate in the keyboard predicate, promise or timeout.
-    const emitEvidence = () => console.debug('cutvoke-test-keyboard-evidence:' + JSON.stringify({ samples, dropped }));
+    const emitEvidence = () => {
+      try { console.debug('cutvoke-test-keyboard-evidence:' + JSON.stringify((window as any).__keyboardEvidence())); } catch { /* Never interrupt playback/test predicates. */ }
+    };
     setTimeout(emitEvidence, 5000);
     let observedPlaying = false, emittedStop = false;
     (window as any).__keyboardSeek = new Promise<number>(resolve => {
