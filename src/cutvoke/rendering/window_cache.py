@@ -116,7 +116,11 @@ class WindowCache:
                     count, total = db.execute('SELECT count(*),coalesce(sum(length(data)),0) FROM windows').fetchone()
                     if count < self.MAX_ENTRIES and total + size <= self.MAX_BYTES:
                         break
-                    db.execute('DELETE FROM windows WHERE key=(SELECT key FROM windows ORDER BY used LIMIT 1)')
+                    # SQLite allows NULL in a TEXT PRIMARY KEY. Damaged cache
+                    # metadata must not make eviction loop forever on key=NULL.
+                    removed = db.execute('DELETE FROM windows WHERE rowid=(SELECT rowid FROM windows ORDER BY used LIMIT 1)')
+                    if removed.rowcount != 1:
+                        return False  # An unexpected schema/trigger must still make progress.
                 db.execute('INSERT INTO windows VALUES (?,?,?,?)',
                            (key, data, hashlib.sha256(data).hexdigest(), time.time()))
             return True
