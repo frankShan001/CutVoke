@@ -1,6 +1,7 @@
 """Exercise an external editor's real media, preview, export and handoff flow."""
 import base64
 import copy
+import hashlib
 import json
 import subprocess
 import tempfile
@@ -8,6 +9,7 @@ import threading
 import time
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from PIL import Image, ImageChops, ImageStat
 
@@ -170,6 +172,36 @@ class AgentWorkflowTests(unittest.TestCase):
             self.assertEqual(human.get_project("original").sequence.captions[0].text, "可继续编辑")
             self.assertIsNone(human.get_edit_lease("original"))
             human.close()
+
+    def test_preview_frame_digests_match_returned_bytes_on_cold_and_cache_hits(self):
+        tools = self.server._agent_tools()
+        cold = self.call("preview_frames", path=str(self.image), times=[0, 1], width=320)
+        with patch.object(tools.render, "extract_frame", side_effect=AssertionError("cache miss")):
+            warm = self.call("preview_frames", path=str(self.image), times=[0, 1], width=320)
+        for result in (cold, warm):
+            self.assertEqual(len(result["frames"]), 2)
+            self.assertEqual(len(result["_images"]), 2)
+            for frame, image in zip(result["frames"], result["_images"]):
+                data = base64.b64decode(image["data"])
+                self.assertEqual(frame["sha256"], hashlib.sha256(data).hexdigest())
+                self.assertEqual(frame["sizeBytes"], len(data))
+        self.assertEqual(cold["frames"], warm["frames"])
+        status, http = tools.api.handle("POST", "/api/v1/agent/preview_frames",
+            {"path": str(self.image), "times": [0], "width": 320})
+        self.assertEqual(status, 200)
+        self.assertEqual(http["frames"][0]["sha256"], cold["frames"][0]["sha256"])
+        self.assertEqual(http["frames"][0]["sizeBytes"], cold["frames"][0]["sizeBytes"])
+        self.assertEqual(len(http["images"]), 1)
+        data = base64.b64decode(http["images"][0]["data"])
+        self.assertEqual(http["frames"][0]["sha256"], hashlib.sha256(data).hexdigest())
+        self.assertEqual(http["frames"][0]["sizeBytes"], len(data))
+
+    def test_empty_preview_has_no_byte_evidence(self):
+        tools = self.server._agent_tools()
+        with patch.object(tools.render, "extract_frame", return_value=None):
+            result = self.call("preview_frames", path=str(self.image), times=[0], width=320)
+        self.assertEqual(result["frames"], [{"time": 0, "empty": True}])
+        self.assertEqual(result["_images"], [])
 
     def test_validation_and_http_parity(self):
         for values in ([0] * 7, [], [float("nan")], [-1]):
