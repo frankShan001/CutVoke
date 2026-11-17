@@ -89,7 +89,7 @@ AGENT_TOOLS = [
                      "items": {"type": "number", "minimum": 0}},
            "width": {"type": "integer", "minimum": 160, "maximum": 1920, "default": 960}},
           ("projectId", "expectedRevision", "type", "payload", "times")),
-    _tool("preview_frames", "查看工程或素材在指定秒数的实际画面，返回 PNG 图片供视觉检查。工程画面含文字轨和字幕，并标注渲染 revision；一次最多 6 帧。",
+    _tool("preview_frames", "查看工程或素材在指定秒数的实际画面，返回 PNG 图片供视觉检查。工程画面含文字轨和字幕，并标注渲染 revision；每个非空帧返回实际 PNG 字节的 sha256 与 sizeBytes（不是感知哈希或持久存档）；一次最多 6 帧。",
           {**REVISION, "assetId": STRING, "path": STRING,
            "times": {"type": "array", "minItems": 1, "maxItems": 6,
                      "items": {"type": "number", "minimum": 0}},
@@ -517,7 +517,8 @@ class AgentTools:
                             Path(temporary).unlink(missing_ok=True)
             with cache.pin(path):
                 data = Path(path).read_bytes()
-            frames.append({"time": at, "path": path, "mimeType": "image/png", "empty": False})
+            frames.append({"time": at, "path": path, "mimeType": "image/png", "empty": False,
+                           "sha256": hashlib.sha256(data).hexdigest(), "sizeBytes": len(data)})
             images.append({"type": "image", "mimeType": "image/png", "data": base64.b64encode(data).decode()})
         return {"projectId": a.get("projectId"), "revision": project.revision, "frames": frames, "_images": images}
 

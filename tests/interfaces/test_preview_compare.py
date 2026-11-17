@@ -1,5 +1,7 @@
 """Same-snapshot visual dry-runs over synthetic images and real PNG rendering."""
+import base64
 import copy
+import hashlib
 import json
 import tempfile
 import unittest
@@ -67,6 +69,9 @@ class PreviewCompareTests(unittest.TestCase):
         for index, pair in enumerate(data["pairs"]):
             for offset, label, channel in ((0, "before", 0), (1, "after", 2)):
                 self.assertEqual(pair[label]["imageIndex"], index * 2 + offset)
+                payload = base64.b64decode(response["content"][1 + index * 2 + offset]["data"])
+                self.assertEqual(pair[label]["sha256"], hashlib.sha256(payload).hexdigest())
+                self.assertEqual(pair[label]["sizeBytes"], len(payload))
                 with Image.open(pair[label]["path"]) as frame:
                     pixel = frame.convert("RGB").getpixel((160, 90))
                     self.assertGreater(pixel[channel], 240)
