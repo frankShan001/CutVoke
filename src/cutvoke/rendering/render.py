@@ -4265,6 +4265,19 @@ class RenderService:
                 f"[{cur}]format=rgba,colorchannelmixer=aa={opacity:.6f}[{nxt}]")
             cur = nxt
 
+        # Framesync needs a regular secondary clock. Container timestamps (for
+        # example 12 fps FFV1 in Matroska's 1 ms time base) survive trim/setpts
+        # with rounding jitter. Feeding them directly to a CFR color bed can
+        # duplicate/drop pictures differently in whole and bounded renders.
+        # Normalize the source, not the composed bed: resampling the latter
+        # can lose its final picture on FFmpeg 6.1. Pass the final source
+        # picture through EOF rounding too: a single high-rate source picture
+        # must remain available for the bed to hold, not round down to zero.
+        clocked = f"canvasclock{vseg[0]}"
+        vseg[0] += 1
+        parts.append(f"[{cur}]fps={fps_expr}:eof_action=pass[{clocked}]")
+        cur = clocked
+
         # 5) 叠加到黑色画布（位置 x,y；非变换片段 x=y=0 即满画布）
         out = self._composite_on_canvas(cur, clip, seq, parts, vseg,
                                           fps_expr, W, H, tr["position"],
