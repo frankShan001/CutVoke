@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import sqlite3
 import subprocess
+import sys
 import tempfile
 import threading
 import unittest
@@ -57,6 +58,36 @@ class CacheStorage(unittest.TestCase):
                     with sqlite3.connect(cache.database) as db:
                         db.execute('UPDATE windows SET data=?,digest=?', (data, digest))
                     self.assertFalse(cache.restore('key', Path(tmp) / 'private'))
+
+    def test_malformed_eviction_metadata_cannot_stall_publication(self):
+        # Isolate the regression: the old implementation loops forever rather
+        # than raising, so a bounded child process must catch that failure.
+        for ignore_delete in (False, True):
+            with self.subTest(ignore_delete=ignore_delete), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                cache = WindowCache(root / 'cache')
+                source = root / 'source'
+                source.write_bytes(b'encoded')
+                self.assertTrue(cache.publish('initial', source))
+                with sqlite3.connect(cache.database) as db:
+                    db.execute('DELETE FROM windows')
+                    db.executemany('INSERT INTO windows VALUES (NULL,?,?,?)',
+                                   [(b'x', 'invalid', 0)] * cache.MAX_ENTRIES)
+                    if ignore_delete:
+                        db.execute('CREATE TRIGGER prevent_eviction BEFORE DELETE ON windows '
+                                   'BEGIN SELECT RAISE(IGNORE); END')
+                code = ('from cutvoke.rendering.window_cache import WindowCache; import sys; '
+                        'print(WindowCache(sys.argv[1]).publish("new", sys.argv[2]))')
+                completed = subprocess.run([sys.executable, '-c', code,
+                                            str(cache.database.parent), str(source)],
+                                           capture_output=True, text=True, check=True, timeout=5)
+                self.assertEqual(completed.stdout.strip(), str(not ignore_delete))
+                with sqlite3.connect(cache.database) as db:
+                    self.assertLessEqual(db.execute('SELECT count(*) FROM windows').fetchone()[0],
+                                         cache.MAX_ENTRIES)
+                if not ignore_delete:
+                    self.assertTrue(cache.restore('new', root / 'restored'))
+                    self.assertEqual((root / 'restored').read_bytes(), b'encoded')
 
     def test_unavailable_or_invalid_database_is_disposable(self):
         with tempfile.TemporaryDirectory() as tmp:
