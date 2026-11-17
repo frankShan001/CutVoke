@@ -171,8 +171,9 @@ class RealRecovery(unittest.TestCase):
             self.assertEqual(changed['reusedWindowCount'], 0)
 
     def test_snapshot_edit_invalidates_then_warm_matches_independent_cold(self):
-        """A late keyframe edit invalidates all windows, not just its own window."""
-        with tempfile.TemporaryDirectory() as tmp, patch('os.cpu_count', return_value=1):
+        """Legacy full-snapshot fallback still invalidates all windows after an edit."""
+        with tempfile.TemporaryDirectory() as tmp, patch('os.cpu_count', return_value=1), \
+                patch('cutvoke.rendering.window_cache.compiled_tool_identity', return_value=None):
             root = Path(tmp)
             project = self.project(root)
             changed = copy.deepcopy(project)
@@ -319,6 +320,17 @@ class RealRecovery(unittest.TestCase):
                                        '-f', 'rawvideo', '-pix_fmt', 'rgb24', 'pipe:1'],
                                       check=True, capture_output=True).stdout
             self.assertEqual(rgb(root / 'cold.mp4'), rgb(root / 'warm.mp4'))
+            independent = root / 'independent'; independent.mkdir()
+            reference = independent / 'cold.mp4'
+            result = RenderService(gpu_effects=False).render(project, str(reference), **options)
+            self.assertEqual(result['reusedWindowCount'], 0)
+            self.assertEqual(rgb(root / 'warm.mp4'), rgb(reference))
+            def pcm(path):
+                return subprocess.run(['ffmpeg', '-v', 'error', '-i', str(path), '-vn',
+                                       '-f', 'f32le', '-acodec', 'pcm_f32le', 'pipe:1'],
+                                      check=True, capture_output=True).stdout
+            self.assertEqual(pcm(root / 'cold.mp4'), pcm(reference))
+            self.assertEqual(pcm(root / 'warm.mp4'), pcm(reference))
             cache = WindowCache(root / '.cutvoke-render-cache')
             with sqlite3.connect(cache.database) as db:
                 db.execute('UPDATE windows SET data=?', (b'truncated',))
