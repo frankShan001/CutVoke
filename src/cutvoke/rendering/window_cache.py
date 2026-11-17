@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import sqlite3
+import shutil
 import subprocess
 import time
 
@@ -116,7 +117,11 @@ class WindowCache:
                     count, total = db.execute('SELECT count(*),coalesce(sum(length(data)),0) FROM windows').fetchone()
                     if count < self.MAX_ENTRIES and total + size <= self.MAX_BYTES:
                         break
-                    db.execute('DELETE FROM windows WHERE key=(SELECT key FROM windows ORDER BY used LIMIT 1)')
+                    # SQLite allows NULL in a TEXT PRIMARY KEY. Damaged cache
+                    # metadata must not make eviction loop forever on key=NULL.
+                    removed = db.execute('DELETE FROM windows WHERE rowid=(SELECT rowid FROM windows ORDER BY used LIMIT 1)')
+                    if removed.rowcount != 1:
+                        return False  # An unexpected schema/trigger must still make progress.
                 db.execute('INSERT INTO windows VALUES (?,?,?,?)',
                            (key, data, hashlib.sha256(data).hexdigest(), time.time()))
             return True
@@ -125,22 +130,71 @@ class WindowCache:
 
 
 class RecoverySession:
-    def __init__(self, cache, identity, sources):
+    def __init__(self, cache, identity, sources, *, compiled_namespace=None, source_hashes=(), tool_sources=(), tool_commands=()):
         self.cache, self.sources = cache, sources
+        # Enabled only when tool/implementation identity was captured successfully.
+        self._compiled_namespace = compiled_namespace
+        self._source_hashes = dict(source_hashes)
+        self._tool_sources = tuple(tool_sources)
+        self._tool_commands = tuple(tool_commands)
         self.identity = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
 
     def unchanged(self):
         try:
-            return all(stamp(os.stat(path)) == identity for path, identity in self.sources)
+            return (all(os.path.abspath(shutil.which(command) or '') == path
+                        for command, path in self._tool_commands)
+                    and all(stamp(os.stat(path)) == identity
+                            for path, identity in (*self.sources, *self._tool_sources)))
         except OSError:
             return False
 
-    def key(self, cursor, duration):
+    @property
+    def compiled_enabled(self):
+        return type(self._compiled_namespace) is str and bool(self._compiled_namespace)
+
+    def source_digest(self, path):
+        return self._source_hashes.get(path)
+
+    def key(self, cursor, duration, *, compiled=None):
+        if compiled is not None and type(self._compiled_namespace) is str and self._compiled_namespace:
+            from cutvoke.rendering.compiled_window_identity import CompiledWindowIdentity
+            if (type(compiled) is CompiledWindowIdentity
+                    and compiled.window == (cursor, cursor + duration)
+                    and all(self._source_hashes.get(item.path) == item.digest for item in compiled.inputs)):
+                return compiled.key(self._compiled_namespace)
+        # Unknown plans/inputs and unavailable compiled identity use the exact
+        # existing full-snapshot namespace, not a partially known plan.
         return hashlib.sha256(json.dumps([self.identity, cursor, duration],
                                         sort_keys=True).encode()).hexdigest()
 
 
-def recovery_session(directory, snapshot, ffmpeg, options, cancel=None):
+def compiled_tool_identity(ffmpeg, ffprobe, cancel=None):
+    """Optional stronger identity; unavailable tools disable only selective reuse."""
+    if not ffprobe:
+        return None
+    try:
+        identities, sources = [], []
+        for command in (ffmpeg, ffprobe):
+            resolved = shutil.which(command)
+            if not resolved:
+                return None
+            path = os.path.abspath(resolved)  # Keep the invoked symlink path in the fence.
+            result = digest_file(path, cancel)
+            if result is None:
+                return None
+            digest, identity = result
+            version = subprocess.run([path, '-version'], capture_output=True, check=True,
+                                     timeout=10).stdout.decode('utf-8', errors='replace')
+            if stamp(os.stat(path)) != identity or not version:
+                return None
+            identities.append((path, digest, version))
+            sources.append((path, identity))
+        return identities, sources
+    except (OSError, ValueError, TypeError, subprocess.SubprocessError):
+        return None
+
+
+def recovery_session(directory, snapshot, ffmpeg, options, cancel=None, *, ffprobe=None):
     if snapshot is None:
         return None
     try:
@@ -170,6 +224,14 @@ def recovery_session(directory, snapshot, ffmpeg, options, cancel=None):
         if files != sorted(package.rglob('*.py')):
             return None
         identity = [ABI, implementation, document, hashes, version, options]
-        return RecoverySession(WindowCache(directory), identity, sources)
+        compiled_namespace, tool_sources, tool_commands = None, (), ()
+        tool_identity = compiled_tool_identity(ffmpeg, ffprobe, cancel)
+        if tool_identity is not None:
+            tools, tool_sources = tool_identity
+            tool_commands = tuple(zip((ffmpeg, ffprobe), (item[0] for item in tools)))
+            compiled_namespace = hashlib.sha256(json.dumps(
+                ['compiled-window-tools-v1', ABI, implementation, tools, options], sort_keys=True).encode()).hexdigest()
+        return RecoverySession(WindowCache(directory), identity, sources,
+            compiled_namespace=compiled_namespace, source_hashes=hashes, tool_sources=tool_sources, tool_commands=tool_commands)
     except (OSError, ValueError, TypeError, subprocess.SubprocessError):
         return None

@@ -26,6 +26,7 @@ import ctypes
 import inspect
 import json
 import math
+import re
 import os
 import shutil
 import subprocess
@@ -2035,7 +2036,7 @@ class RenderService:
             Path(out_dir) / ".cutvoke-render-cache",
             getattr(self._render_ctx, "recovery_snapshot", None), self.ffmpeg,
             [overlay_position, alpha, getattr(self._render_ctx, "working_color", "bt709"),
-             start, duration], cancel_event) if getattr(self._render_ctx, "gpu", None) is None else None
+             start, duration], cancel_event, ffprobe=self.ffprobe) if getattr(self._render_ctx, "gpu", None) is None else None
         reused_windows = []
         completed_seconds = 0.0
         if progress_callback:
@@ -2087,6 +2088,15 @@ class RenderService:
                 origin = self._render_ctx.compile_origin
                 compile_seconds = time.monotonic() - compile_started
                 try:
+                    if recovery:
+                        from cutvoke.rendering.compiled_window_identity import admit_window
+                        plan = admit_window(self, recovery, video_seq, graph, inputs,
+                            cursor=cursor, duration=chunk_duration, origin=origin,
+                            overlay_position=overlay_position, alpha=alpha, quality=quality,
+                            chunk_audio=chunk_audio, caption_cwd=caption_cwd)
+                        # One local immutable key for this invocation, including
+                        # recursive halves. No thread-local pending key survives.
+                        cache_key = recovery.key(cursor, chunk_duration, compiled=plan)
                     if recovery and recovery.unchanged() and recovery.cache.restore(cache_key, path):
                         try:
                             self._verify(str(path), chunk_duration, seq.width, seq.height,
@@ -4264,6 +4274,19 @@ class RenderService:
                 f"[{cur}]format=rgba,colorchannelmixer=aa={opacity:.6f}[{nxt}]")
             cur = nxt
 
+        # Framesync needs a regular secondary clock. Container timestamps (for
+        # example 12 fps FFV1 in Matroska's 1 ms time base) survive trim/setpts
+        # with rounding jitter. Feeding them directly to a CFR color bed can
+        # duplicate/drop pictures differently in whole and bounded renders.
+        # Normalize the source, not the composed bed: resampling the latter
+        # can lose its final picture on FFmpeg 6.1. Pass the final source
+        # picture through EOF rounding too: a single high-rate source picture
+        # must remain available for the bed to hold, not round down to zero.
+        clocked = f"canvasclock{vseg[0]}"
+        vseg[0] += 1
+        parts.append(f"[{cur}]fps={fps_expr}:eof_action=pass[{clocked}]")
+        cur = clocked
+
         # 5) 叠加到黑色画布（位置 x,y；非变换片段 x=y=0 即满画布）
         out = self._composite_on_canvas(cur, clip, seq, parts, vseg,
                                           fps_expr, W, H, tr["position"],
@@ -5830,22 +5853,71 @@ class RenderService:
         import os as _os
         if not _os.path.isfile(src):
             raise RenderError(f"thumbnail: source file not found: {src!r}")
-        cmd = [
-            self.ffmpeg, "-y", "-nostdin",
-            "-ss", f"{time:.4f}",
-            *self._video_input_arguments(src), "-i", src,
-            "-frames:v", "1",
-            "-vf", f"scale={width}:-2",
-            "-f", "image2", out_png,
-        ]
+        if isinstance(time, bool) or not isinstance(time, (int, float)) or not math.isfinite(time) or time < 0:
+            raise RenderError("thumbnail: time must be finite and nonnegative")
+        # Preserve the decoded timeline when seeking, and accept a random-access
+        # decode only if its first picture is a keyframe at/before the target.
+        # Non-key initial pictures can have missing references (e.g. TS). Reordered
+        # GOPs can start AFTER the requested timestamp despite accurate seek.
+        # Back off on that observable failure; an unseeked decode is the final
+        # fallback. Every attempt shares the caller's deadline.
+        import time as clock
+        deadline = clock.monotonic() + timeout
+        input_arguments = self._video_input_arguments(src)
+        target_text = f"{time:.12f}"
+        target = Fraction(target_text)
+        seek = float(time)
+        backoff = 1.0
+        directory = os.path.dirname(os.path.abspath(out_png))
+        fd, temporary = tempfile.mkstemp(prefix=".thumbnail-", suffix=".png", dir=directory)
+        os.close(fd)
         try:
-            r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
-                               encoding="utf-8", errors="replace",
-                               timeout=timeout)
-        except subprocess.TimeoutExpired as e:
-            raise RenderError(f"thumbnail timed out on {src!r}") from e
-        if r.returncode != 0 or not os.path.isfile(out_png):
-            raise RenderError(f"thumbnail failed on {src!r}: {r.stderr[-400:]}")
+            while True:
+                remaining = deadline - clock.monotonic()
+                if remaining <= 0:
+                    raise RenderError(f"thumbnail timed out on {src!r}")
+                # Truncate even if a test double or failed decode leaves an image.
+                with open(temporary, "wb"):
+                    pass
+                cmd = [self.ffmpeg, "-hide_banner", "-loglevel", "info", "-y", "-nostdin"]
+                if seek > 0:
+                    cmd += ["-ss", f"{seek:.12f}", "-noaccurate_seek",
+                            "-copyts", "-start_at_zero"]
+                cmd += [*input_arguments, "-i", src]
+                if seek > 0:
+                    # Only the first decoded frame is logged, without pixel
+                    # checksums. Parse integer PTS/time_base, not rounded text.
+                    graph = ("split[check][frame];"
+                             r"[check]select=eq(n\,0),showinfo@coverage=checksum=0,nullsink;"
+                             f"[frame]trim=start={target_text},scale={width}:-2")
+                    cmd += ["-vf", graph]
+                else:
+                    cmd += ["-vf", f"trim=start={target_text},scale={width}:-2"]
+                cmd += ["-frames:v", "1", "-fps_mode", "vfr", "-f", "image2", temporary]
+                try:
+                    r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
+                                       encoding="utf-8", errors="replace", timeout=remaining)
+                except subprocess.TimeoutExpired as e:
+                    raise RenderError(f"thumbnail timed out on {src!r}") from e
+                if r.returncode != 0:
+                    raise RenderError(f"thumbnail failed: {r.stderr[-400:]}")
+                covered = seek == 0
+                if not covered:
+                    tb = re.search(r"\[showinfo@coverage[^\n]*config in time_base: (\d+)/(\d+)", r.stderr)
+                    pts = re.search(r"\[showinfo@coverage[^\n]*n:\s*0\s+pts:\s*(-?\d+)", r.stderr)
+                    keyframe = re.search(r"\[showinfo@coverage[^\n]*n:\s*0\s+pts:[^\n]*iskey:1", r.stderr)
+                    if tb and pts and keyframe and int(tb[2]) > 0:
+                        covered = int(pts[1]) * Fraction(int(tb[1]), int(tb[2])) <= target
+                if covered:
+                    if os.path.getsize(temporary) == 0:
+                        raise RenderError(f"thumbnail failed or no frame at requested time: {r.stderr[-400:]}")
+                    break
+                seek = max(0.0, float(time) - backoff)
+                backoff *= 2
+            os.replace(temporary, out_png)
+        finally:
+            with contextlib.suppress(OSError):
+                os.unlink(temporary)
         return out_png
 
     def waveform_media(self, src: str, out_png: str, *, width: int = 320,

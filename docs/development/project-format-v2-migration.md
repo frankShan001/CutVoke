@@ -1,4 +1,4 @@
-# Issue 55: incompatible format migration work in progress
+# Issue 55: merged incompatible format migration
 
 The owner chose an incompatible new project format. New versions must identify
 old projects and offer a visible **Convert copy and open** or **Close** choice.
@@ -6,7 +6,8 @@ Reading or closing must never silently convert the original.
 
 ## Current implementation boundary
 
-Draft implementation now includes read-only discovery, explicit copy conversion,
+The implementation merged in [#78](https://github.com/frankShan001/CutVoke/pull/78)
+includes read-only discovery, explicit copy conversion,
 v2 manifest/database with isolated authoritative tables, catalogue copy before
 writable initialization, recent/directory UI choice, and signed-local complete
 manual curves for reversible trims. The old source remains separate. Generic
@@ -19,9 +20,8 @@ leases/jobs; completed old job receipts and idempotency records are not replayed
 in the new identity. Source token changes abort publication. Failed destinations
 remain `preparing` and cannot be opened. Original project media is not deleted.
 
-This is work in progress, not merge-ready. Legacy package opening now has the
-same explicit Convert copy / Close choice: a token-bound immutable archive copy
-is preflighted and must pass complete-media validation before registration.
+Legacy package opening has the same explicit Convert copy / Close choice:
+a token-bound immutable archive copy is preflighted and must pass complete-media validation before registration.
 The original directory copy-switch and rollback functions refuse in-place
 operation. Global library relocation understands v2 child databases/WAL and
 active ASR/export/lease guards. Declared file resources, asset-ID-only references,
@@ -29,11 +29,22 @@ history and generated source ZIP companions are copied without executing source.
 Global fonts/plugins referenced by installation names remain runtime dependencies,
 as before; this does not claim a fully standalone bundle of all installed tools.
 
-Actual old source acceptance was run against both 879841a and released v0.3.5:
+Historical old-source acceptance was run against both 879841a and released v0.3.5:
 directory/package readers refuse v2, and raw old-store writes cannot alter the
-v2 authoritative snapshot. Focused integrated migration/package/source/history
-checks passed 97 tests and 5 subtests after the follow-up fixes. Full CI/platform
-and actual new conversion browser end-to-end acceptance are not yet complete.
+v2 authoritative snapshot. At that stage, focused integrated
+migration/package/source/history checks passed 97 tests and 5 subtests after the follow-up fixes.
+
+[#83](https://github.com/frankShan001/CutVoke/pull/83) subsequently integrated the
+analytic trim oracle into normal test discovery. Its integrated head `33c3e0a`
+passed [CI, including browser acceptance](https://github.com/frankShan001/CutVoke/actions/runs/43880998342),
+[Windows](https://github.com/frankShan001/CutVoke/actions/runs/43880998245), and
+[Unix platform checks](https://github.com/frankShan001/CutVoke/actions/runs/43880998549)
+(the Intel macOS job passed on retry). After merge at
+[`bcedce5`](https://github.com/frankShan001/CutVoke/commit/bcedce526b16b3a0a3a152309ebbc5e2b629e1c3),
+[main CI](https://github.com/frankShan001/CutVoke/actions/runs/43898575658)
+also passed: 214 full browser scenarios, 111 state-ordering cases and 51 recovery cases.
+These are merged-main validation results, not a claim that released v0.3.6
+contains the new format.
 
 The project-format envelope codec is currently used for package boundaries;
 the SQLite boundary uses namespaced tables rather than the envelope.
@@ -65,7 +76,12 @@ the SQLite boundary uses namespaced tables rather than the envelope.
    New trim/extend commands update clock exactly; move/slip do not. Derived
    controller lanes must not shift twice. All render/UI/cache consumers must agree.
 
-## Acceptance still required
+## Acceptance contract
+
+The following requirements remain the regression contract for this migration.
+They are not a list of pending merge gates, nor a claim that every scenario
+below received a new dedicated test in #83. The linked runs above record the
+validated revisions; later changes require their own relevant verification.
 
 - Real released reader fixtures: directory, raw database and package must refuse
   new-format data; verify hashes unchanged after failed open/write attempts.
