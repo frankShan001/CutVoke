@@ -53,14 +53,20 @@ export function InteractiveAudio({ playing, transportMode, onReady, playbackCloc
   const context = useRef<AudioContext | null>(null);
   const client = useRef(crypto.randomUUID()), serial = useRef(0);
   const voices = useRef(new Map<string, Voice>());
-  const startup = useRef(new NativeAudioStartup());
+  const startup = useRef(new NativeAudioStartup((window as any).__cutvokeNativeStartupDiagnostics === true));
+  useEffect(() => {
+    if ((window as any).__cutvokeNativeStartupDiagnostics !== true) return;
+    const snapshot = () => startup.current.diagnostics();
+    (window as any).__cutvokeNativeStartupEvidence = snapshot;
+    return () => { if ((window as any).__cutvokeNativeStartupEvidence === snapshot) delete (window as any).__cutvokeNativeStartupEvidence; };
+  }, []);
   const meter = useRef<HTMLOutputElement>(null);
   const positionGeneration = useRef<string | null>(null);
   const latest = useRef({ project, scope: state.currentId, time: state.playhead, seek: state.playheadSeekVersion, scrubbing: state.scrubbing, playing, transportMode, onReady, playbackClock, onClockSource, onPositionSource });
   latest.current = { project, scope: state.currentId, time: state.playhead, seek: state.playheadSeekVersion, scrubbing: state.scrubbing, playing, transportMode, onReady, playbackClock, onClockSource, onPositionSource };
   useEffect(() => {
     const pause = (event: Event) => {
-      startup.current.cancel();
+      startup.current.cancel('audition-stop');
       const time = (event as CustomEvent<{ time?: number }>).detail?.time;
       for (const [id, voice] of voices.current) {
         voice.element.pause();
@@ -193,7 +199,7 @@ export function InteractiveAudio({ playing, transportMode, onReady, playbackCloc
       // Never play a partial native mix together with the server mix.
       const key = JSON.stringify([latest.current.scope, latest.current.transportMode, nativeAudioGeneration(snapshot), latest.current.seek]);
       if (!enabled || !latest.current.playing || latest.current.scrubbing) {
-        startup.current.cancel();
+        startup.current.cancel(!enabled ? 'disabled' : !latest.current.playing ? 'transport-stopped' : 'scrubbing');
         // At the sequence end the last voice is removed before Player's RAF
         // can publish the endpoint. Preserve the running clock for that finalizer.
         const reachedEnd = running && snapshot && time >= playbackEndSecs(snapshot.sequence.tracks);
@@ -227,7 +233,7 @@ export function InteractiveAudio({ playing, transportMode, onReady, playbackCloc
     };
     frame = requestAnimationFrame(update);
     return () => {
-      disposed = true; startup.current.cancel(); cancelAnimationFrame(frame);
+      disposed = true; startup.current.cancel('disposed'); cancelAnimationFrame(frame);
       for (const voice of voices.current.values()) { voice.disposed = true; voice.controller.abort(); voice.element.pause(); voice.gain?.disconnect(); if (voice.url) URL.revokeObjectURL(voice.url); }
       voices.current.clear(); latest.current.onClockSource(null); latest.current.onPositionSource(null);
       void context.current?.close(); context.current = null;
