@@ -2036,7 +2036,7 @@ class RenderService:
             Path(out_dir) / ".cutvoke-render-cache",
             getattr(self._render_ctx, "recovery_snapshot", None), self.ffmpeg,
             [overlay_position, alpha, getattr(self._render_ctx, "working_color", "bt709"),
-             start, duration], cancel_event) if getattr(self._render_ctx, "gpu", None) is None else None
+             start, duration], cancel_event, ffprobe=self.ffprobe) if getattr(self._render_ctx, "gpu", None) is None else None
         reused_windows = []
         completed_seconds = 0.0
         if progress_callback:
@@ -2088,6 +2088,15 @@ class RenderService:
                 origin = self._render_ctx.compile_origin
                 compile_seconds = time.monotonic() - compile_started
                 try:
+                    if recovery:
+                        from cutvoke.rendering.compiled_window_identity import admit_window
+                        plan = admit_window(self, recovery, video_seq, graph, inputs,
+                            cursor=cursor, duration=chunk_duration, origin=origin,
+                            overlay_position=overlay_position, alpha=alpha, quality=quality,
+                            chunk_audio=chunk_audio, caption_cwd=caption_cwd)
+                        # One local immutable key for this invocation, including
+                        # recursive halves. No thread-local pending key survives.
+                        cache_key = recovery.key(cursor, chunk_duration, compiled=plan)
                     if recovery and recovery.unchanged() and recovery.cache.restore(cache_key, path):
                         try:
                             self._verify(str(path), chunk_duration, seq.width, seq.height,
