@@ -41,8 +41,8 @@ jobs:
           cache-dependency-path: apps/editor/package-lock.json
 
       - name: Inspect runner-provided Ubuntu mirrors
-        # Preserve the hosted image's official mirror ordering and fallback.
-        # Rewriting Azure to archive duplicated a host and prolonged DNS failures.
+        # Record existing candidates; the bounded installer selects only from
+        # these official mirrors without changing global sources or keyrings.
         run: |
           if [ -f /etc/apt/apt-mirrors.txt ]; then
             cat /etc/apt/apt-mirrors.txt
@@ -50,14 +50,14 @@ jobs:
 
       - name: Refresh Ubuntu package indexes
         timeout-minutes: 5
-        run: sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+        run: sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o APT::Update::Error-Mode=any update
       - name: Install and verify FFmpeg 6.1
         # Provisioning budget only: 105 MB of signed Ubuntu dependencies can
         # exceed five minutes on the runner mirror. Test deadlines are unchanged.
         timeout-minutes: 10
         run: |
           apt-cache policy ffmpeg
-          sudo timeout --signal=TERM --kill-after=30s 9m apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y ffmpeg
+          sudo timeout --signal=TERM --kill-after=30s 9m python3 tools/verify/install_ci_ffmpeg.py
           python tools/verify/check_ffmpeg61.py
 
       - name: Check Python sources
@@ -121,8 +121,8 @@ jobs:
           npm ci --ignore-scripts
           npm run test:build-deps
       - name: Inspect runner-provided Ubuntu mirrors
-        # Preserve the hosted image's official mirror ordering and fallback.
-        # Rewriting Azure to archive duplicated a host and prolonged DNS failures.
+        # Record existing candidates; the bounded installer selects only from
+        # these official mirrors without changing global sources or keyrings.
         run: |
           if [ -f /etc/apt/apt-mirrors.txt ]; then
             cat /etc/apt/apt-mirrors.txt
@@ -132,12 +132,12 @@ jobs:
       # stalled apt index, FFmpeg package, pip resolver, or browser download.
       - name: Refresh Ubuntu package indexes
         timeout-minutes: 5
-        run: sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+        run: sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o APT::Update::Error-Mode=any update
       - name: Install and verify FFmpeg 6.1
         timeout-minutes: 10
         run: |
           apt-cache policy ffmpeg
-          sudo timeout --signal=TERM --kill-after=30s 9m apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y ffmpeg
+          sudo timeout --signal=TERM --kill-after=30s 9m python3 tools/verify/install_ci_ffmpeg.py
           python tools/verify/check_ffmpeg61.py
       - name: Install Python project and development dependencies
         timeout-minutes: 10
