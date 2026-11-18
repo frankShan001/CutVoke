@@ -41,20 +41,24 @@ jobs:
           cache-dependency-path: apps/editor/package-lock.json
 
       - name: Inspect runner-provided Ubuntu mirrors
-        # Preserve the hosted image's official mirror ordering and fallback.
-        # Rewriting Azure to archive duplicated a host and prolonged DNS failures.
+        # Record existing candidates; the bounded installer selects only from
+        # these official mirrors without changing global sources or keyrings.
         run: |
           if [ -f /etc/apt/apt-mirrors.txt ]; then
             cat /etc/apt/apt-mirrors.txt
           fi
 
-      - name: Install FFmpeg
+      - name: Refresh Ubuntu package indexes
         timeout-minutes: 5
+        run: sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o APT::Update::Error-Mode=any update
+      - name: Install and verify FFmpeg 6.1
+        # Provisioning budget only: 105 MB of signed Ubuntu dependencies can
+        # exceed five minutes on the runner mirror. Test deadlines are unchanged.
+        timeout-minutes: 10
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
-          ffmpeg -version
-          ffprobe -version
+          apt-cache policy ffmpeg
+          sudo timeout --signal=TERM --kill-after=30s 9m python3 tools/verify/install_ci_ffmpeg.py
+          python tools/verify/check_ffmpeg61.py
 
       - name: Check Python sources
         env:
@@ -86,12 +90,16 @@ jobs:
           python -c "from pathlib import Path; import cutvoke; assert (Path(cutvoke.__file__).parent / 'web' / 'index.html').is_file()"
 
   browser:
-    name: Browser editing workflow
+    name: Browser editing workflow (${{ matrix.group }})
     env:
       CUTVOKE_E2E_PREVIEW_DIAGNOSTICS: "1"
     runs-on: ubuntu-24.04
-    # Full scenarios alone took 37.4min on a loaded hosted runner. Reserve
-    # room for setup, the full 40min group, state 25min and recovery 15min.
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [full-1, full-2, state, recovery]
+    # Independent runners/fixture servers split the full suite without changing
+    # test deadlines. Repeated regressions run in their own isolated jobs.
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
@@ -113,8 +121,8 @@ jobs:
           npm ci --ignore-scripts
           npm run test:build-deps
       - name: Inspect runner-provided Ubuntu mirrors
-        # Preserve the hosted image's official mirror ordering and fallback.
-        # Rewriting Azure to archive duplicated a host and prolonged DNS failures.
+        # Record existing candidates; the bounded installer selects only from
+        # these official mirrors without changing global sources or keyrings.
         run: |
           if [ -f /etc/apt/apt-mirrors.txt ]; then
             cat /etc/apt/apt-mirrors.txt
@@ -124,12 +132,13 @@ jobs:
       # stalled apt index, FFmpeg package, pip resolver, or browser download.
       - name: Refresh Ubuntu package indexes
         timeout-minutes: 5
-        run: sudo apt-get update
-      - name: Install FFmpeg
-        timeout-minutes: 5
+        run: sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o APT::Update::Error-Mode=any update
+      - name: Install and verify FFmpeg 6.1
+        timeout-minutes: 10
         run: |
-          sudo apt-get install -y ffmpeg
-          ffmpeg -version
+          apt-cache policy ffmpeg
+          sudo timeout --signal=TERM --kill-after=30s 9m python3 tools/verify/install_ci_ffmpeg.py
+          python tools/verify/check_ffmpeg61.py
       - name: Install Python project and development dependencies
         timeout-minutes: 10
         run: |
@@ -153,13 +162,14 @@ jobs:
           npm run test:basic
           npx playwright install --with-deps chromium
       - name: Verify audio-first tutorial in the editor
+        if: ${{ matrix.group == 'full-1' }}
         timeout-minutes: 8
         working-directory: apps/editor
         run: |
           npm run build
           npx playwright test --config=playwright.audio-tutorial.config.ts
       - name: Verify opt-in Quick Whip in the editor
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.group == 'full-1' }}
         timeout-minutes: 5
         working-directory: apps/editor
         env:
@@ -169,12 +179,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: quick-whip-ui-evidence
+          name: quick-whip-ui-evidence-${{ matrix.group }}
           path: .artifacts/quick-whip-ui/
           if-no-files-found: ignore
           retention-days: 7
       - name: Repeat unchanged title flow with independent cold servers and font caches
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && matrix.group == 'full-1' }}
         timeout-minutes: 10
         run: |
           python tools/verify/test_cold_title_flow.py
@@ -183,12 +193,16 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: cold-title-evidence
+          name: cold-title-evidence-${{ matrix.group }}
           path: .artifacts/cold-title/
           retention-days: 7
           if-no-files-found: ignore
+      - name: Verify full-suite shard coverage
+        if: ${{ startsWith(matrix.group, 'full-') }}
+        working-directory: apps/editor
+        run: python ../../tools/verify/check_browser_shards.py
       - name: Run full editor scenarios
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && startsWith(matrix.group, 'full-') }}
         id: editor_scenarios
         timeout-minutes: 40
         working-directory: apps/editor
@@ -196,11 +210,15 @@ jobs:
           CUTVOKE_E2E_PORT: "8799"
         # Signal the whole process group before the Actions hard deadline,
         # allowing Playwright to close Chromium and its private fixture server.
-        run: timeout --signal=TERM --kill-after=30s 39m npm run test:e2e -- --output=../../.artifacts/test-results/full
+        run: timeout --signal=TERM --kill-after=30s 39m npm run test:e2e -- --shard=${{ matrix.group == 'full-1' && '1/2' || '2/2' }} --output=../../.artifacts/test-results/full
+      - name: Build editor for independent regressions
+        if: ${{ !cancelled() && (matrix.group == 'state' || matrix.group == 'recovery') }}
+        timeout-minutes: 5
+        working-directory: apps/editor
+        run: npm run build
       - name: Repeat deterministic state orderings
-        # Complete independent regressions after a scenario failure. Keep each
-        # output directory separate so a later run cannot erase earlier traces.
-        if: ${{ !cancelled() && (steps.editor_scenarios.outcome == 'success' || steps.editor_scenarios.outcome == 'failure') }}
+        # Independent matrix jobs preserve regressions even if a full shard fails.
+        if: ${{ !cancelled() && matrix.group == 'state' }}
         # Three repetitions continued making progress at the old 15min cap.
         # This is an aggregate budget, not a change to any test timeout/retry.
         timeout-minutes: 25
@@ -209,7 +227,7 @@ jobs:
           CUTVOKE_E2E_PORT: "8800"
         run: timeout --signal=TERM --kill-after=30s 24m npm run test:e2e:regressions:state -- --output=../../.artifacts/test-results/state
       - name: Repeat preview recovery and transcript orderings
-        if: ${{ !cancelled() && (steps.editor_scenarios.outcome == 'success' || steps.editor_scenarios.outcome == 'failure') }}
+        if: ${{ !cancelled() && matrix.group == 'recovery' }}
         timeout-minutes: 15
         working-directory: apps/editor
         env:
@@ -220,7 +238,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: preview-stage-diagnostics
+          name: preview-stage-diagnostics-${{ matrix.group }}
           path: .artifacts/preview-diagnostics/*.jsonl
           retention-days: 7
           if-no-files-found: ignore
@@ -228,6 +246,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: browser-failure-diagnostics
+          name: browser-failure-diagnostics-${{ matrix.group }}
           path: .artifacts/test-results/
           retention-days: 7
