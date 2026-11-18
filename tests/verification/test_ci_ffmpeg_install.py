@@ -49,17 +49,28 @@ class MirrorInstall(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 guard.package_metadata(bad)
 
-    def test_select_one_and_fail_closed(self):
+    def test_select_canonical_only_without_ranking_or_fallback(self):
         with tempfile.TemporaryDirectory() as d:
-            self.assertEqual(guard.select([EC2, ARCHIVE], 'file', 1, Path(d),
-                lambda url, *_: 3 if url == EC2 else 1), ARCHIVE)
             calls = []
+            def qualified(url, *_):
+                calls.append(url)
+                return 3
+            self.assertEqual(guard.select([EC2, ARCHIVE], 'file', 1, Path(d), qualified), ARCHIVE)
+            self.assertEqual(calls, [ARCHIVE])
+            calls.clear()
             def failed(url, *_):
                 calls.append(url)
                 raise ValueError('failed')
             with self.assertRaises(RuntimeError):
                 guard.select([EC2, ARCHIVE], 'file', 1, Path(d), failed)
-            self.assertEqual(calls, [EC2, ARCHIVE])
+            self.assertEqual(calls, [ARCHIVE])
+
+    def test_missing_exact_configured_canonical_stops_before_probe(self):
+        for urls in ([EC2], ['http://archive.ubuntu.com/ubuntu/'], []):
+            with self.subTest(urls=urls), patch.object(guard, 'probe') as unused:
+                with self.assertRaises(RuntimeError):
+                    guard.select(urls, 'file', 1, Path('/unused'), unused)
+                unused.assert_not_called()
 
     def test_range_probe_limits_and_failures(self):
         with tempfile.TemporaryDirectory() as d:

@@ -1,4 +1,4 @@
-"""Bounded mirror selection for CI; probe bytes are NOT installation evidence.
+"""Bounded canonical-source installation; probe bytes are NOT installation evidence.
 
 Run after an authenticated, fail-on-any-error apt update, inside the workflow's
 9-minute process-group deadline. Only task-local source/index copies are changed.
@@ -30,8 +30,8 @@ def candidates(text):
                 or parsed.query or parsed.fragment or parsed.hostname in seen):
             raise ValueError('unsupported or duplicate runner mirror')
         seen.add(parsed.hostname)
-        # The runner also appends its security fallback. Probe only the two
-        # archive candidates; preserve all suites including noble-security below.
+        # Recognize the configured archive candidates; select() probes canonical
+        # only. Preserve all suites including noble-security below.
         if parsed.hostname != 'security.ubuntu.com':
             urls.append(url)
     if not 1 <= len(urls) <= 2:
@@ -74,18 +74,19 @@ def probe(url, filename, size, directory, run=subprocess.run):
 
 
 def select(urls, filename, size, directory, probe_fn=probe):
-    valid = []
-    for url in urls:
-        try:
-            elapsed = probe_fn(url, filename, size, directory)
-        except (ValueError, OSError, subprocess.TimeoutExpired) as exc:
-            print(json.dumps({'mirror': url, 'probe': 'failed', 'reason': str(exc)}), flush=True)
-        else:
-            valid.append((elapsed, url))
-            print(json.dumps({'mirror': url, 'bytes': PROBE_BYTES, 'seconds': elapsed}), flush=True)
-    if not valid:
-        raise RuntimeError('No valid official mirror probe; installation not attempted')
-    return min(valid)[1]
+    # Fixed policy, not a speed contest: small ranges did not predict full
+    # dependency throughput. Only use this source if the runner configured it.
+    canonical = 'https://archive.ubuntu.com/ubuntu/'
+    if canonical not in urls:
+        raise RuntimeError('Configured HTTPS canonical archive missing; installation not attempted')
+    try:
+        elapsed = probe_fn(canonical, filename, size, directory)
+    except (ValueError, OSError, subprocess.TimeoutExpired) as exc:
+        print(json.dumps({'mirror': canonical, 'probe': 'failed', 'reason': str(exc)}), flush=True)
+        raise RuntimeError('Canonical transfer qualification failed; no fallback or installation') from exc
+    print(json.dumps({'mirror': canonical, 'bytes': PROBE_BYTES, 'seconds': elapsed,
+                      'qualification': 'partial transfer only, not complete installation evidence'}), flush=True)
+    return canonical
 
 
 def source_copy(etc, target, selected):
