@@ -1,3 +1,4 @@
+import { recordPreviewStop, type PreviewStopReason, type PreviewStopSnapshot } from "../lib/previewStopEvidence";
 import { InteractionStatus } from "./InteractionStatus";
 import { InteractiveScene } from "./InteractiveScene";
 import { InteractiveAudio } from "./InteractiveAudio";
@@ -345,6 +346,25 @@ export function Player() {
     dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: msg("播放结束") });
   }, []);
 
+  // Read refs only when explicitly enabled by the acceptance observer. Never
+  // invoke audioPlaybackClock here: reading it can initialize/stop transport.
+  const stopEvidenceScope = useRef({ end: mediaEndSecs, prepared: usePrepared });
+  stopEvidenceScope.current = { end: mediaEndSecs, prepared: usePrepared };
+  const endPlayWithEvidence = useCallback((reason: PreviewStopReason,
+    decision: () => Pick<PreviewStopSnapshot, "observedTime" | "decisionEnd" | "decisionWindowStart" | "decisionWindowEnd">) => {
+    recordPreviewStop(reason, () => ({
+      ...decision(), ...stopEvidenceScope.current, playhead: playheadRef.current,
+      reportedVideoTime: reportedVideoTimeRef.current,
+      windowStart: windowBoundsRef.current.start, windowEnd: windowBoundsRef.current.end,
+      audioActive: audioTransportRef.current.active, audioAnchorTime: audioTransportRef.current.time,
+      nativeAudioReady: nativeAudioRef.current, playing: playingRef.current,
+    }));
+    endPlay();
+  }, [endPlay]);
+  const onImageEnded = useCallback(() => endPlayWithEvidence("image-end", () => ({
+    observedTime: null, decisionEnd: null, decisionWindowStart: null, decisionWindowEnd: null,
+  })), [endPlayWithEvidence]);
+
   const { frameUrl, frameState, frameError, scheduleFrame, reset: resetFrames } = usePreviewFrame({
     aspect: (project?.sequence.width || 1920) / (project?.sequence.height || 1080),
     projectId: currentId,
@@ -353,7 +373,7 @@ export function Player() {
     totalSecs: mediaEndSecs,
     playheadRef,
     dispatchRef,
-    onEnded: endPlay,
+    onEnded: onImageEnded,
   });
   useEffect(() => {
     if (mode === "image" && currentId) scheduleFrame(decodePlayhead);
@@ -475,8 +495,9 @@ export function Player() {
     }
     setVideoTime(mediaEndSecs);
     dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: mediaEndSecs });
-    endPlay();
-  }, [endPlay, mediaEndSecs, windowEnd]);
+    endPlayWithEvidence("video-ended", () => ({ observedTime: windowStart + event.currentTarget.currentTime,
+      decisionEnd: mediaEndSecs, decisionWindowStart: windowStart, decisionWindowEnd: windowEnd }));
+  }, [endPlayWithEvidence, mediaEndSecs, windowStart, windowEnd]);
 
   const onTimeUpdate = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     const v = event.currentTarget;
@@ -512,7 +533,8 @@ export function Player() {
       dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: mediaEndSecs });
       pauseStatusRef.current = tr("播放结束");
       v.pause();
-      endPlay();
+      endPlayWithEvidence("video-time-end", () => ({ observedTime: absoluteTime,
+        decisionEnd: mediaEndSecs, decisionWindowStart: windowStart, decisionWindowEnd: windowEnd }));
       return;
     }
     const boundedTime = Math.min(mediaEndSecs, Math.max(0, absoluteTime));
@@ -524,7 +546,7 @@ export function Player() {
       dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: boundedTime });
       suppressSeek.current = false;
     }
-  }, [endPlay, mediaEndSecs, mode, windowStart, windowEnd, usePrepared]);
+  }, [endPlayWithEvidence, mediaEndSecs, mode, windowStart, windowEnd, usePrepared]);
   const onPlay = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current) return;
     setShowColorBefore(false);
@@ -659,13 +681,18 @@ export function Player() {
             video.currentTime = time - bounds.start;
           if (video.paused) requestVideoPlay(video);
         }
-        if (time >= mediaEndSecs) { video?.pause(); endPlay(); return; }
+        if (time >= mediaEndSecs) {
+          video?.pause();
+          endPlayWithEvidence("audio-clock-end", () => ({ observedTime: time,
+            decisionEnd: mediaEndSecs, decisionWindowStart: bounds.start, decisionWindowEnd: bounds.end }));
+          return;
+        }
       }
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [playing, nativeAudioReady, state.scrubbing, mode, audioPlaybackClock, mediaEndSecs, requestVideoPlay, endPlay]);
+  }, [playing, nativeAudioReady, state.scrubbing, mode, audioPlaybackClock, mediaEndSecs, requestVideoPlay, endPlayWithEvidence]);
 
   useEffect(() => {
     const video = videoRef.current;

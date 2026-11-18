@@ -1,17 +1,28 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import vm from "node:vm";
+import { readFileSync } from "node:fs";
+import ts from "typescript";
 import { createRequire } from "node:module";
 const { verifyNativePreview } = createRequire(import.meta.url)("../../../tools/verify/verify_native_preview.cjs");
 
 // Deterministically model compositor submission while Play's automation RPC is
 // still pending. The helper under test (not a duplicate observer) runs in a DOM
 // sandbox. Real browser/native tests separately cover decoding and rendering.
-function fixture({ black = false, failClick = false, submit = true, handoff = false, snapshotThrows = false, recordThrows = false, beforeEmit = () => {}, metadata = { mediaTime: .5, presentedFrames: 2 } } = {}) {
+function fixture({ black = false, failClick = false, submit = true, handoff = false, snapshotThrows = false, recordThrows = false, beforeEmit = () => {}, metadata = { mediaTime: .5, presentedFrames: 2 }, priorEvidence } = {}) {
   const polls = new Set(), timers = new Set(), events = [];
   let id = 0, drawn = null, pixelReads = 0;
+  const listeners = new Map();
+  const listen = (type, fn) => { if (!listeners.has(type)) listeners.set(type, new Set()); listeners.get(type).add(fn); };
+  const unlisten = (type, fn) => listeners.get(type)?.delete(fn);
+  const dispatch = (type, value = {}) => { for (const fn of listeners.get(type) || []) fn(Object.defineProperties({ type }, Object.getOwnPropertyDescriptors(value))); };
+  const window = Object.defineProperties({}, {
+    addEventListener: { value: listen }, removeEventListener: { value: unlisten },
+  });
+  if (priorEvidence) Object.defineProperty(window, "__cutvokePreviewStopEvidence", priorEvidence);
   const makeVideo = source => ({
-    paused: true, seeking: false, readyState: 4, currentTime: 0,
+    paused: true, seeking: false, readyState: 4, currentTime: 0, duration: 3,
+    matches: () => true,
     videoWidth: 1, videoHeight: 1, currentSrc: source, callbacks: new Map(),
     requestVideoFrameCallback(callback) { this.callbacks.set(++id, callback); return id; },
     cancelVideoFrameCallback(handle) { this.callbacks.delete(handle); },
@@ -19,8 +30,9 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
   const first = makeVideo("https://private.example/secret-media?token=SECRET"), second = makeVideo("/Users/private/media-secret.mp4");
   let active = first;
   const context = vm.createContext({
-    window: {},
+    window,
     document: {
+      addEventListener: listen, removeEventListener: unlisten,
       querySelector: () => active,
       createElement: () => ({ getContext: () => ({
         drawImage: video => { drawn = video; },
@@ -51,6 +63,7 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
       if (name === "暂停") { active.paused = true; events.push("pause"); return; }
       if (recordThrows) {
         for (const state of Object.values(context.window)) {
+          if (!state?.diagnostic) continue;
           state.diagnostic.events.push = () => { throw new Error("diagnostic write failure"); };
         }
       }
@@ -63,7 +76,7 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
         assert.equal(pixelReads, 0);
         for (const poll of polls) poll();
       }
-      beforeEmit({ active, polls, emit });
+      beforeEmit({ active, polls, emit, dispatch, window, first, second, setActive: v => { active = v; } });
       if (submit) emit(active);
       events.push("click-return");
     } },
@@ -77,7 +90,8 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
     toBeGreaterThan: async minimum => { assert.ok(await read() > minimum); events.push("clock-checked"); },
   });
   return { page, expect, events, first, second, get drawn() { return drawn; }, get pixelReads() { return pixelReads; },
-    assertClean() { assert.equal(polls.size, 0); assert.equal(timers.size, 0); assert.deepEqual(Object.keys(context.window), []); assert.equal(first.callbacks.size + second.callbacks.size, 0); } };
+    assertClean() { assert.equal(polls.size, 0); assert.equal(timers.size, 0); assert.deepEqual(Object.keys(context.window), []); assert.equal([...listeners.values()].reduce((n, s) => n + s.size, 0), 0);
+      assert.deepEqual(Object.getOwnPropertyDescriptor(window, "__cutvokePreviewStopEvidence"), priorEvidence); assert.equal(first.callbacks.size + second.callbacks.size, 0); } };
 }
 
 test("native acceptance captures submitted pixels before slow Play RPC returns", async () => {
@@ -190,4 +204,99 @@ test("failed diagnostic writes cannot interrupt the original deadline rejection"
   const f = fixture({ recordThrows: true, submit: false });
   await assert.rejects(verifyNativePreview(f.page, f.expect, { cycles: 1, timeout: 20 }), /No submitted playing preview frame/);
   f.assertClean();
+});
+
+// Replay evidence orderings, not the product's unknown Intel root cause. Both
+// runs must still fail the original compositor criterion; only diagnosis differs.
+test("diagnostics distinguish audio reaching end with lagging video from an early end", async () => {
+  for (const observedTime of [3, .696598]) {
+    const d = await failureDiagnostic({ submit: false, beforeEmit: ({ active, polls, dispatch }) => {
+      active.currentTime = .696598; active.seeking = true;
+      if (observedTime < 3) active.duration = .696598;
+      dispatch("seeking", { target: active });
+      dispatch("cutvoke:transport-clock", { detail: { time: observedTime, end: 3, playing: true, url: "SECRET" } });
+      dispatch("cutvoke:preview-stop", { detail: { reason: observedTime === 3 ? "audio-clock-end" : "video-ended", observedTime, decisionEnd: 3, end: 3,
+        windowStart: 0, windowEnd: 3, audioActive: true, nativeAudioReady: true, playing: true, prepared: true,
+        private: "SECRET" } });
+      active.paused = true; dispatch("pause", { target: active });
+      active.seeking = false; dispatch("seeked", { target: active });
+      for (const poll of polls) poll();
+    } });
+    assert.equal(d.stops.length, 1); assert.equal(d.stops[0].observedTime, observedTime);
+    assert.equal(d.clocks[0].time, observedTime); assert.equal(d.stops[0].end, 3);
+    assert.equal(d.media.find(e => e.event === "stop-snapshot").time, .696598);
+    assert.equal(d.media.find(e => e.event === "media-seeked").paused, true);
+    assert.equal(d.media[0].duration, observedTime === 3 ? 3 : .696598);
+  }
+});
+test("media handoff diagnostics identify inactive node and retain clocks independently", async () => {
+  const d = await failureDiagnostic({ submit: false, beforeEmit: ({ first, second, setActive, dispatch, polls }) => {
+    first.currentTime = .29; setActive(second); second.currentTime = .696598;
+    dispatch("pause", { target: first });
+    dispatch("loadedmetadata", { target: second });
+    for (let i = 0; i < 200; i++) dispatch("cutvoke:transport-clock", { detail: { time: i / 4, end: 3, playing: true } });
+    for (const poll of polls) poll();
+  } });
+  assert.equal(d.media.find(e => e.event === "media-pause").active, false);
+  assert.equal(d.media.find(e => e.event === "media-loadedmetadata").active, true);
+  assert.equal(d.clocks.length, 64); assert.equal(d.clocksDropped, 136);
+  assert.equal(d.clocks[0].time, 0); assert.equal(d.clocks.at(-1).time, 49.75);
+  assert.equal(d.media.length, 2); assert.equal(d.mediaDropped, 0);
+});
+test("diagnostics ignore unknown reasons and hostile event getters, restore prior setting", async () => {
+  const priorEvidence = { configurable: true, enumerable: false, writable: true, value: false };
+  const f = fixture({ priorEvidence, beforeEmit: ({ dispatch, window }) => {
+    assert.equal(window.__cutvokePreviewStopEvidence, true);
+    dispatch("cutvoke:preview-stop", { detail: { reason: "SECRET" } });
+    dispatch("cutvoke:preview-stop", { get detail() { throw new Error("SECRET"); } });
+    dispatch("cutvoke:transport-clock", { detail: { get time() { throw new Error("SECRET"); } } });
+  } });
+  await verifyNativePreview(f.page, f.expect, { cycles: 1 }); f.assertClean();
+});
+
+function stopHook(window) {
+  const exports = {};
+  vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../src/lib/previewStopEvidence.ts", import.meta.url), "utf8"),
+    { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText,
+    { exports, window, CustomEvent: class { constructor(type, { detail }) { this.type = type; this.detail = detail; } } });
+  return exports.recordPreviewStop;
+}
+test("product stop hook is disabled by default and never evaluates snapshot or clocks", () => {
+  let reads = 0; const record = stopHook({ dispatchEvent: () => { throw new Error("must not dispatch"); } });
+  record("audio-clock-end", () => { reads++; throw new Error("clock"); }); assert.equal(reads, 0);
+});
+test("product stop hook has a finite scalar allowlist and cannot throw into playback", () => {
+  const events = [], window = { __cutvokePreviewStopEvidence: true, dispatchEvent: e => events.push(e) };
+  const record = stopHook(window);
+  record("audio-clock-end", () => ({ observedTime: 3, end: 3, playhead: .69, reportedVideoTime: .69,
+    windowStart: 0, windowEnd: 3, audioActive: true, nativeAudioReady: true, audioAnchorTime: Infinity,
+    playing: true, prepared: true, path: "SECRET", projectId: "SECRET", raw: {} }));
+  assert.equal(events.length, 1); assert.equal(events[0].detail.audioAnchorTime, null);
+  assert.doesNotMatch(JSON.stringify(events), /SECRET|path|projectId|raw/);
+  record("SECRET", () => { throw new Error("must not snapshot"); });
+  record("video-ended", () => ({ get end() { throw new Error("hostile"); } }));
+  window.dispatchEvent = () => { throw new Error("listener"); };
+  assert.doesNotThrow(() => record("image-end", () => ({})));
+  Object.defineProperty(window, "__cutvokePreviewStopEvidence", { get() { throw new Error("hostile opt-in"); } });
+  assert.doesNotThrow(() => record("image-end", () => ({})));
+});
+
+test("observer does not invoke or replace an occupied opt-in accessor", async () => {
+  const priorEvidence = { configurable: false, enumerable: false, set: undefined, get() { throw new Error("foreign getter"); } };
+  const f = fixture({ priorEvidence });
+  await verifyNativePreview(f.page, f.expect, { cycles: 1 }); f.assertClean();
+});
+test("bounded media and stop channels retain first and final records without raw objects", async () => {
+  const d = await failureDiagnostic({ submit: false, beforeEmit: ({ active, dispatch }) => {
+    for (let i = 0; i < 100; i++) {
+      active.currentTime = i; dispatch("seeked", { target: active });
+      dispatch("cutvoke:preview-stop", { detail: { reason: "audio-clock-end", observedTime: i,
+        decisionEnd: 3, end: 4, decisionWindowStart: 0, decisionWindowEnd: 3, windowStart: 2, windowEnd: 4,
+        path: "SECRET", raw: active } });
+    }
+  } });
+  assert.equal(d.stops.length, 64); assert.equal(d.stopsDropped, 36);
+  assert.equal(d.stops[0].observedTime, 0); assert.equal(d.stops.at(-1).observedTime, 99);
+  assert.equal(d.stops.at(-1).decisionEnd, 3); assert.equal(d.stops.at(-1).end, 4);
+  assert.equal(d.media.length, 64); assert.equal(d.mediaDropped, 136);
 });
