@@ -48,13 +48,17 @@ jobs:
             cat /etc/apt/apt-mirrors.txt
           fi
 
-      - name: Install FFmpeg
+      - name: Refresh Ubuntu package indexes
         timeout-minutes: 5
+        run: sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+      - name: Install and verify FFmpeg 6.1
+        # Provisioning budget only: 105 MB of signed Ubuntu dependencies can
+        # exceed five minutes on the runner mirror. Test deadlines are unchanged.
+        timeout-minutes: 10
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
-          ffmpeg -version
-          ffprobe -version
+          apt-cache policy ffmpeg
+          sudo timeout --signal=TERM --kill-after=30s 9m apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y ffmpeg
+          python tools/verify/check_ffmpeg61.py
 
       - name: Check Python sources
         env:
@@ -128,12 +132,13 @@ jobs:
       # stalled apt index, FFmpeg package, pip resolver, or browser download.
       - name: Refresh Ubuntu package indexes
         timeout-minutes: 5
-        run: sudo apt-get update
-      - name: Install FFmpeg
-        timeout-minutes: 5
+        run: sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+      - name: Install and verify FFmpeg 6.1
+        timeout-minutes: 10
         run: |
-          sudo apt-get install -y ffmpeg
-          ffmpeg -version
+          apt-cache policy ffmpeg
+          sudo timeout --signal=TERM --kill-after=30s 9m apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install -y ffmpeg
+          python tools/verify/check_ffmpeg61.py
       - name: Install Python project and development dependencies
         timeout-minutes: 10
         run: |
