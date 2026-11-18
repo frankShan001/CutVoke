@@ -194,3 +194,51 @@ test("continuous preparation stops at the selected budget while window playback 
   expect(pixel[0]).toBeGreaterThan(220); expect(pixel[1]).toBeLessThan(25); expect(pixel[2]).toBeLessThan(25);
   await page.getByRole("button", { name: "暂停", exact: true }).click();
 });
+
+test("native acceptance stop evidence reports the actual end decision without driving the clock", async ({ page, request }) => {
+  const { id, name } = await fixture(request);
+  const project = await (await request.get(`/api/v1/projects/${id}`)).json();
+  const edited = await request.post(`/api/v1/projects/${id}/commands`, { data: {
+    type: "edit.batch", expectedRevision: project.revision, commandId: crypto.randomUUID(),
+    payload: { commands: [
+      { type: "clip.remove", payload: { clipId: "v1" } },
+      { type: "clip.remove", payload: { clipId: "v2" } },
+      { type: "clip.trim", payload: { clipId: "v0", timelineEnd: { num: 3, den: 1 } } },
+    ] },
+  } });
+  expect(edited.ok(), await edited.text()).toBeTruthy();
+  await page.goto("/");
+  await page.getByRole("button", { name: `打开工程 ${name}` }).click();
+  const video = page.locator("video.player__video");
+  await expect(video).toBeVisible();
+  await expect.poll(() => video.evaluate(v => v.readyState)).toBeGreaterThanOrEqual(2);
+  await page.evaluate(() => {
+    const w = window as any;
+    if (w.__cutvokePreviewStopEvidence !== undefined) throw new Error("diagnostics must be opt-in");
+    const evidence = { events: [] as unknown[], handler: (event: Event) => {
+      evidence.events.push((event as CustomEvent).detail);
+    } };
+    w.__stopEvidence = evidence;
+    window.addEventListener("cutvoke:preview-stop", evidence.handler);
+    w.__cutvokePreviewStopEvidence = true;
+  });
+  try {
+    await page.getByRole("button", { name: "播放", exact: true }).click();
+    await expect.poll(() => page.evaluate(() => (window as any).__stopEvidence.events.length)).toBeGreaterThan(0);
+    const events = await page.evaluate(() => (window as any).__stopEvidence.events);
+    // This checks the wired diagnostic path, not the unresolved Intel cause.
+    const stop = events.at(-1);
+    expect(["audio-clock-end", "video-ended", "video-time-end"]).toContain(stop.reason);
+    expect(stop.decisionEnd).toBe(3);
+    expect(stop.end).toBe(3);
+    expect(Number.isFinite(stop.observedTime)).toBe(true);
+    expect(JSON.stringify(events)).not.toMatch(/https?:|blob:|sourcePath|projectId|clipId/);
+    await expect(page.getByRole("button", { name: "播放", exact: true })).toBeVisible();
+  } finally {
+    await page.evaluate(() => {
+      const w = window as any;
+      if (w.__stopEvidence) window.removeEventListener("cutvoke:preview-stop", w.__stopEvidence.handler);
+      delete w.__cutvokePreviewStopEvidence; delete w.__stopEvidence;
+    }).catch(() => {});
+  }
+});
