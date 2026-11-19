@@ -1,6 +1,6 @@
 # Community tasks / 可认领的社区任务
 
-These are maintainer-scoped contribution invitations, not completed features or release commitments. Comment on the relevant Issue before starting; the maintainer confirms scope and reviews the PR. The MCP path, FFmpeg frame-clock and test-isolation fixes are maintained in the current code and are not deferred to newcomers.
+Open tasks below are maintainer-scoped contribution invitations, not release commitments; completed entries are marked explicitly. Comment on the relevant Issue before starting; the maintainer confirms scope and reviews the PR. The MCP path, FFmpeg frame-clock and test-isolation fixes are maintained in the current code and are not deferred to newcomers.
 
 ## 1. Review one interface language with a native speaker
 
@@ -22,15 +22,15 @@ Acceptance: OS/architecture, Python/Node/browser and FFmpeg versions; passing do
 
 中文：需要真实 macOS 环境；只验收源码安装路径，不把云 Linux 或未测试的安装包写成 macOS 支持证明。
 
-## 3. Add an original audio-first editing tutorial
+## 3. Completed: original audio-first editing tutorial / 已完成：音频优先教程
 
-[Claim / 认领：Issue #4](https://github.com/frankShan001/CutVoke/issues/4)
+[Completed Issue #4 / 已完成任务](https://github.com/frankShan001/CutVoke/issues/4) · [Merged PR #43 / 已合并实现](https://github.com/frankShan001/CutVoke/pull/43)
 
-Scope: a small offline example using original generated tones or explicitly licensed audio. Show audio-role classification, waveform/audition, volume/fades and editable captions through supported commands; provide an English and Chinese walkthrough.
+Use the existing [English tutorial](../../examples/audio-first/README.md) or [中文教程](../../examples/audio-first/README.zh-CN.md); this is no longer an unclaimed implementation task.
 
-Acceptance: a runnable example under `examples/` with a new output directory, no user-library access or downloads; correct duration, non-silent unclipped audio and lower endpoint RMS after fades; a saved editable project/package; inspected GUI preview and full MP4 decode. State sources/licenses and avoid claiming subjective listening when it was not performed.
+The offline example uses original generated media and supported commands for audio roles, waveform/audition, volume/fades and editable captions. Recorded acceptance covers real export/full decode, objective audio checks, editable package relocation, and automated editor checks on original/restored projects. Follow the tutorial's source-build prerequisites; these checks do not establish desktop-package compatibility or subjective listening quality.
 
-中文：提供可复现的音频优先教程和双语步骤；使用原创/明确许可素材，验证声音、淡入淡出、可编辑工程和实际导出。
+中文：教程已在 #43 合入并完成 #4 的限定验收，请勿重复认领实现。按双语教程的源码构建前提运行；客观音频检查与自动化编辑器验收不等于主观听评，也不代表桌面发行包兼容性已验证。
 
 ## 4. Add variable-frame-rate footage regression coverage
 
