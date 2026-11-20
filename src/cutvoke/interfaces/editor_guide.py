@@ -148,7 +148,9 @@ GUIDES = {
             "effect.setAnimation replaces only its entry/exit/loop/combined slot; an empty effectId clears the selected slot or all animation slots. Preserve or explicitly replace opacity keyframes using keyframePolicy.",
             "edit.batch supports only its returned allowedCommands and cannot nest. Query edit.batch schema and each child command first. Previews must use the same expectedRevision and payload as the eventual commit.",
             "Acquire edit_lock before grouped agent edits. Use lease.leaseId as command_apply.editLeaseId; renew before expiry, release even on failure. Avoid holding a lease throughout a long export.",
-            "For a precise correction, project_lookup returns matchCount and ambiguous before limit. Use requireUnique=true; zero matches still returns an empty list. Multiple hits require a time filter or an explicitly chosen entityId; never pick the first match. Change only requested fields. history.undo/redo changes revision too; reread after undo."]},
+            "For a precise correction, project_lookup returns matchCount and ambiguous before limit. Use requireUnique=true; zero matches still returns an empty list. Multiple hits require a time filter or an explicitly chosen entityId; never pick the first match. Change only requested fields. history.undo/redo changes revision too; reread after undo.",
+            "When several captions match at the same time, query with requireUnique=false and request fields such as id, text, x, y and fontSize. "
+            "If hasMore is true, increase the limit or ask the user for context to narrow the lookup. Show each match's position and style and ask which caption to edit. Use the chosen entityId."]},
     "errors": {
         "title": "Recovering from errors",
         "rules": [
