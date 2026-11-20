@@ -2212,5 +2212,21 @@
   "确认接管": "Confirmar retomada",
   "确认接管编辑": "Confirmar retomada da edição",
   "租约剩余 {0} 秒": "A permissão expira em {0} s",
-  "租约已变化，请确认当前 Agent 后重试。": "A permissão mudou. Verifique o agente atual antes de tentar novamente."
+  "租约已变化，请确认当前 Agent 后重试。": "A permissão mudou. Verifique o agente atual antes de tentar novamente.",
+  "正在读取…": "Lendo…",
+  "查看本次租约的修改": "Revisar alterações durante esta concessão",
+  "无法读取修改，请刷新工程后重试。": "Não foi possível ler as alterações. Atualize o projeto e tente novamente.",
+  "未记录此租约的起始版本。": "Nenhuma revisão inicial foi registrada para esta concessão.",
+  "租约版本 {0} → {1}": "Revisões da concessão {0} → {1}",
+  "仅包含版本化编辑，不含重命名、导出或其他无版本操作。": "Apenas edições versionadas; exclui renomeações, exportações e outras operações sem versão.",
+  "没有已提交的修改。": "Nenhuma alteração confirmada.",
+  "版本 {0} → {1} · 命令 {2} · {3} 个对象": "Revisão {0} → {1} · Comando {2} · {3} entidades",
+  "仅显示最近的修改。": "Apenas as alterações mais recentes são exibidas.",
+  "不支持的工程格式": "Formato de projeto não compatível",
+  "旧工程需要转换": "Converter projeto antigo",
+  "工程 {0} 使用格式 {1}，当前版本需要格式 {2}。": "O projeto {0} usa o formato {1}; esta versão exige o formato {2}.",
+  "转换将在新目录中创建副本，原工程保留不变。新副本不能用旧版本编辑器打开。关闭将不打开或转换工程。": "A conversão cria uma cópia em uma nova pasta e mantém o original inalterado. Editores antigos não podem abrir a nova cópia. Fechar não abre nem converte o projeto.",
+  "转换中…": "Convertendo…",
+  "转换副本并打开": "Converter cópia e abrir",
+  "原资源包保留不变。": "O pacote original permanece inalterado."
 }

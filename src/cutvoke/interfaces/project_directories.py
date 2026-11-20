@@ -9,6 +9,32 @@ from cutvoke.storage.project_directory_migration import plan_migration, migrate_
 
 def directory_endpoint(api, method, parts, body):
     store = api.service.store
+    from cutvoke.storage.project_format_migration import inspect_directory, inspect_database, convert_copy
+    import uuid
+    if method == "POST" and parts in (["api", "v1", "project-directories", "inspect"],
+                                      ["api", "v1", "project-directories", "convert"]):
+        if not isinstance(store, ProjectLibraryStore):
+            raise ValueError("Open conversion from the project library")
+        probe = inspect_directory(body.get("path", ""))
+        if parts[-1] == "inspect":
+            return 200, probe
+        target = store.projects_root / ("converted-" + uuid.uuid4().hex)
+        result = convert_copy(probe['database'], probe['projectId'], body.get('token'), target, shared=store)
+        store.open_directory(result['directory'])
+        return 200, result
+    if method == "POST" and len(parts) == 6 and parts[:3] == ["api", "v1", "projects"] and parts[4] == "format":
+        if not isinstance(store, ProjectLibraryStore):
+            raise ValueError("Open conversion from the project library")
+        pid = parts[3]
+        root = store.directory(pid)
+        probe = inspect_directory(root) if root else inspect_database(store.legacy_source or store.path, pid)
+        if parts[5] == "inspect":
+            return 200, probe
+        if parts[5] == "convert":
+            target = store.projects_root / ("converted-" + uuid.uuid4().hex)
+            result = convert_copy(probe.get('database', store.legacy_source or store.path), pid, body.get('token'), target, shared=store)
+            store.open_directory(result['directory'])
+            return 200, result
     if method == "POST" and parts == ["api", "v1", "project-directories", "open"]:
         if not isinstance(store, ProjectLibraryStore):
             raise ValueError("请从工程列表打开独立工程目录")
@@ -33,6 +59,9 @@ def directory_endpoint(api, method, parts, body):
     if not isinstance(store, ProjectLibraryStore):
         raise ValueError("请从工程库管理旧工程迁移")
     if len(parts) == 6 and method == "POST":
+        if parts[5] in ("plan", "migrate", "rollback"):
+            from cutvoke.storage.project_format import ProjectFormatError
+            raise ProjectFormatError("Use explicit format conversion; in-place legacy migration is disabled")
         if parts[5] == "plan":
             return 200, plan_migration(store, pid)
         if parts[5] in ("migrate", "rollback"):

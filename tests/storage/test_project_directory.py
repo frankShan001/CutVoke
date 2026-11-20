@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
 import shutil
+from contextlib import closing
 
 import pytest
 
@@ -11,10 +12,12 @@ from cutvoke.storage.project_directory import ProjectLibraryStore, DirectoryProj
 from cutvoke.storage.store import ProjectStore
 from cutvoke.storage.project_directory_migration import plan_migration, migrate_project, rollback_migration
 from cutvoke.storage.store import RevisionConflict
+from cutvoke.storage.project_format import ProjectFormatError
+from cutvoke.storage.project_format_migration import inspect_database, convert_copy
 
 
 def project_with_media(pid, source):
-    return Project.from_dict({"schemaVersion": "1", "projectId": pid, "revision": "0",
+    return Project.from_dict({"schemaVersion": "2", "projectId": pid, "revision": "0",
         "sequence": {"id": "s", "width": 128, "height": 72, "fps": {"num": "24", "den": "1"},
             "tracks": [{"id": "v", "kind": "video", "clips": [{"id": "c",
                 "assetRef": {"assetId": "test-source", "sourcePath": str(source)},
@@ -63,7 +66,7 @@ def test_new_projects_are_independent_and_survive_a_move(tmp_path):
     reopened.close()
 
 
-def test_legacy_stays_readable_and_new_directory_is_indexed(tmp_path):
+def test_legacy_catalogue_requires_conversion_and_new_directory_is_indexed(tmp_path):
     db = tmp_path / "library.sqlite"
     legacy = ProjectStore(str(db))
     service = EditService(store=legacy)
@@ -71,7 +74,8 @@ def test_legacy_stays_readable_and_new_directory_is_indexed(tmp_path):
     service.close()
     legacy.close()
     library = ProjectLibraryStore(str(db))
-    assert library.load("old").project_id == "old"
+    with pytest.raises(ProjectFormatError, match="CONVERSION_REQUIRED"):
+        library.load("old")
     service = EditService(store=library)
     service.create_project("new")
     assert library.directory("old") is None
@@ -102,26 +106,41 @@ def legacy_library(tmp_path):
     service = EditService(store=store)
     service.execute(Command(type="track.add", project_id="old", expected_revision="0", payload={"kind": "audio"}))
     service.close(); store.close()
+    # A frozen legacy snapshot fixture, not implicit conversion by a new API.
+    import sqlite3
+    with closing(sqlite3.connect(database)) as conn:
+        conn.execute("UPDATE projects SET schema_version='1'")
+        for table,column in [('projects','project_json'),('history','snapshot_json')]:
+            for rowid,raw in conn.execute(f'SELECT rowid,{column} FROM {table}').fetchall():
+                data=json.loads(raw.replace('signed-local','local'));data['schemaVersion']='1'
+                conn.execute(f'UPDATE {table} SET {column}=? WHERE rowid=?',(json.dumps(data),rowid))
+        conn.commit()
     return ProjectLibraryStore(str(database)), source
 
 
-def test_migration_keeps_history_references_and_rolls_back_without_deleting_files(tmp_path):
+def convert(library, destination=None, token=None):
+    source=library.legacy_source or library.path
+    plan=inspect_database(source,'old')
+    result=convert_copy(source,'old',token or plan['token'],destination or library.projects_root/'copy',shared=library)
+    library.open_directory(result['directory'])
+    return result
+
+
+
+def test_conversion_keeps_history_and_refuses_destructive_rollback(tmp_path):
     library, source = legacy_library(tmp_path)
-    before = library.load_for_sync("old")
-    plan = plan_migration(library, "old")
-    assert plan["canMigrate"] and plan["fileCount"] == 1 and plan["historySnapshots"] == 1
-    result = migrate_project(library, "old", token=plan["token"], directory=str(tmp_path / "我的工程"))
-    root = Path(result["directory"])
-    child = library._target("old")
-    assert source.is_file() and Path(result["backupPath"]).is_file()
-    assert library.load_for_sync("old") != before
-    assert library.load("old").revision == "1"
-    assert child.get_asset("test-source")["path"].startswith(str(root / "media"))
-    history = library.peek_history("old", 0)
-    assert str(source) not in json.dumps(history)
-    rollback_migration(library, "old")
-    assert library.directory("old") is None and source.is_file() and (root / ENTRY).is_file()
-    assert library.load("old").sequence.tracks[0].clips[0].asset_ref.source_path == str(source)
+    original=Path(library.legacy_source).read_bytes()
+    result=convert(library,tmp_path/'我的工程');pid=result['projectId']
+    root=Path(result['directory']);child=library._target(pid)
+    assert source.is_file() and Path(library.legacy_source).read_bytes()==original
+    assert library.directory('old') is None and pid!='old'
+    assert child.load(pid).revision=='1'
+    assert child.get_asset('test-source')['path'].startswith(str(root/'media'))
+    assert str(source) not in str(library.peek_history(pid,0))
+    with pytest.raises(ProjectFormatError): rollback_migration(library,pid)
+    assert (root/ENTRY).is_file() and source.is_file()
+    with ProjectStore(library.legacy_source) as old:
+        assert old.load('old').sequence.tracks[0].clips[0].asset_ref.source_path==str(source)
     library.close()
 
 
@@ -129,16 +148,16 @@ def test_migrated_folder_moves_without_original_library_and_can_undo_and_render(
     from cutvoke.rendering.render import RenderService
     import subprocess
     library, source = legacy_library(tmp_path)
-    plan = plan_migration(library, "old")
-    result = migrate_project(library, "old", token=plan["token"])
+    result = convert(library)
+    pid=result["projectId"]
     original_root = Path(result["directory"])
     library.close(); source.unlink()
     moved = tmp_path / "moved-project"
     shutil.move(str(original_root), moved)
     independent = DirectoryProjectStore(moved)
     service = EditService(store=independent)
-    service.execute(Command(type="history.undo", project_id="old", expected_revision="1", payload={}))
-    project = independent.load("old")
+    service.execute(Command(type="history.undo", project_id=pid, expected_revision="1", payload={}))
+    project = independent.load(pid)
     assert len(project.sequence.tracks) == 1
     output = independent.export_path("portable.mp4")
     RenderService().render(project, output)
@@ -148,50 +167,46 @@ def test_migrated_folder_moves_without_original_library_and_can_undo_and_render(
 
 
 def test_stale_migration_and_edited_rollback_are_rejected(tmp_path):
-    library, source = legacy_library(tmp_path)
-    plan = plan_migration(library, "old")
-    source.write_bytes(source.read_bytes() + b"change")
-    with pytest.raises(RevisionConflict):
-        migrate_project(library, "old", token=plan["token"])
-    plan = plan_migration(library, "old")
-    migrate_project(library, "old", token=plan["token"])
-    service = EditService(store=library)
-    service.execute(Command(type="track.add", project_id="old", expected_revision="1", payload={"kind": "audio"}))
-    with pytest.raises(ValueError, match="已修改"):
-        rollback_migration(library, "old")
-    assert library.directory("old") and library.load("old").revision == "2"
-    service.close(); library.close()
+    library, source=legacy_library(tmp_path)
+    plan=inspect_database(library.legacy_source,'old')
+    source.write_bytes(source.read_bytes()+b'change')
+    with pytest.raises(ProjectFormatError,match='changed'):
+        convert(library,token=plan['token'])
+    result=convert(library);pid=result['projectId']
+    service=EditService(store=library)
+    service.execute(Command(type='track.add',project_id=pid,expected_revision='1',payload={'kind':'audio'}))
+    with pytest.raises(ProjectFormatError):rollback_migration(library,pid)
+    assert library.load(pid).revision=='2' and library.directory('old') is None
+    service.close();library.close()
 
 
 def test_offline_directory_never_falls_back_to_old_snapshot(tmp_path):
     library, _ = legacy_library(tmp_path)
-    plan = plan_migration(library, "old")
-    result = migrate_project(library, "old", token=plan["token"])
+    result = convert(library)
+    pid=result["projectId"]
     database = library.path
     library.close()
     moved = tmp_path / "relocated"
     shutil.move(result["directory"], moved)
     library = ProjectLibraryStore(database)
-    assert library.list_projects()[0]["available"] is False
+    assert next(p for p in library.list_projects() if p["id"]==pid)["available"] is False
     with pytest.raises(ValueError, match="离线或已移动"):
-        library.load("old")
+        library.load(pid)
     library.open_directory(moved / ENTRY)
-    assert library.load("old").revision == "1" and library.list_projects()[0]["available"]
+    assert library.load(pid).revision == "1" and next(p for p in library.list_projects() if p["id"]==pid)["available"]
     library.close()
 
 
-def test_failed_copy_never_switches_and_blocks_opening_partial_folder(tmp_path, monkeypatch):
-    library, _ = legacy_library(tmp_path)
-    plan = plan_migration(library, "old")
-    def fail(*args, **kwargs):
-        raise OSError("disk full")
-    monkeypatch.setattr(DirectoryProjectStore, "collect_file", fail)
-    with pytest.raises(OSError, match="disk full"):
-        migrate_project(library, "old", token=plan["token"])
-    assert library.directory("old") is None
-    with pytest.raises(ValueError):
-        library.open_directory(plan["suggestedDirectory"])
-    assert library.load("old").revision == "1"
+def test_failed_copy_never_switches_and_blocks_opening_partial_folder(tmp_path,monkeypatch):
+    library,_=legacy_library(tmp_path)
+    original=Path(library.legacy_source).read_bytes()
+    def fail(*args,**kwargs):raise OSError('disk full')
+    monkeypatch.setattr(DirectoryProjectStore,'collect_file',fail)
+    with pytest.raises(OSError,match='disk full'):convert(library)
+    assert library.directory('old') is None
+    with pytest.raises(ProjectFormatError):library.open_directory(library.projects_root/'copy')
+    assert Path(library.legacy_source).read_bytes()==original
+    with pytest.raises(ProjectFormatError):library.load('old')
     library.close()
 
 
@@ -276,17 +291,24 @@ def test_path_only_migration_retains_original_media_names_in_current_and_undo_re
     service = EditService(store=legacy)
     service.execute(Command(type='track.add', project_id='old', expected_revision='0', payload={'kind':'audio'}))
     service.close(); legacy.close()
+    import sqlite3
+    with closing(sqlite3.connect(database)) as conn:
+        conn.execute("UPDATE projects SET schema_version='1'")
+        for table,column in [('projects','project_json'),('history','snapshot_json')]:
+            for rowid,raw in conn.execute(f'SELECT rowid,{column} FROM {table}').fetchall():
+                data=json.loads(raw.replace('signed-local','local'));data['schemaVersion']='1'
+                conn.execute(f'UPDATE {table} SET {column}=? WHERE rowid=?',(json.dumps(data),rowid))
+        conn.commit()
     library = ProjectLibraryStore(str(database))
     try:
-        plan = plan_migration(library, 'old')
-        migrate_project(library, 'old', token=plan['token'])
-        child = library._target('old')
+        result=convert(library);pid=result['projectId']
+        child = library._target(pid)
         assets = child.list_assets()
         assert len(assets) == 1 and assets[0]['name'] == source.name
         assert Path(assets[0]['path']).read_bytes() == source.read_bytes()
         assert Path(assets[0]['path']).is_relative_to(child.root / 'media')
         service = EditService(store=library)
-        service.execute(Command(type='history.undo', project_id='old', expected_revision='1', payload={}))
+        service.execute(Command(type='history.undo', project_id=pid, expected_revision='1', payload={}))
         assert child.list_assets()[0]['name'] == source.name
         service.close()
     finally:
@@ -326,3 +348,12 @@ def test_effect_geometry_path_is_not_a_file_and_declared_dependencies_remain_own
         service.close()
     finally:
         store.close()
+
+
+def test_retired_migration_functions_cannot_bypass_explicit_conversion(tmp_path):
+    library,_=legacy_library(tmp_path)
+    original=Path(library.legacy_source).read_bytes()
+    for call in (lambda:plan_migration(library,'old'),lambda:migrate_project(library,'old',token='x'),lambda:rollback_migration(library,'old')):
+        with pytest.raises(ProjectFormatError):call()
+    assert Path(library.legacy_source).read_bytes()==original
+    library.close()

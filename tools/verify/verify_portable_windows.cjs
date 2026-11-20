@@ -1,3 +1,4 @@
+const { verifyNativeCaptionFonts } = require("./verify_native_caption_fonts.cjs");
 const { verifyNativePreview } = require("./verify_native_preview.cjs");
 const { verifyNativeTransition } = require("./verify_native_transition.cjs");
 const { verifyWindowsResourceInstall } = require("./verify_windows_resource_install.cjs");
@@ -188,7 +189,10 @@ async function main() {
     assert.equal(directory.storageKind, "directory");
     assert.equal(directory.projectId, projectId);
     assert.ok(fs.existsSync(directory.entryPath));
-    assert.ok(fs.existsSync(path.join(directory.directory, "project.sqlite")));
+    const projectEntry = JSON.parse(fs.readFileSync(directory.entryPath, "utf8"));
+    assert.equal(projectEntry.version, 2);
+    assert.equal(projectEntry.database, "project-v2.sqlite");
+    assert.ok(fs.existsSync(path.join(directory.directory, projectEntry.database)));
     const relativeMedia = path.relative(fs.realpathSync(directory.mediaDirectory), fs.realpathSync(asset.path));
     assert.ok(relativeMedia && !relativeMedia.startsWith("..") && !path.isAbsolute(relativeMedia),
       `Imported media must belong to this project: ${asset.path}`);
@@ -237,7 +241,10 @@ async function main() {
     await page.getByRole("button", { name: `打开工程 ${projectId}`, exact: true }).click();
     await page.getByRole("heading", { name: "时间线", exact: true }).waitFor();
     try {
-      report.previewPlayback = await verifyNativePreview(page, expect);
+      report.previewObserverDiagnostics = [];
+      report.previewPlayback = await verifyNativePreview(page, expect, {
+        onDiagnostic: diagnostic => report.previewObserverDiagnostics.push(diagnostic),
+      });
     } catch (error) {
       report.previewVideos = await page.locator("video").evaluateAll(videos => videos.map(v => ({
         className: v.className, hidden: v.hidden, visibility: getComputedStyle(v).visibility,
@@ -267,6 +274,8 @@ async function main() {
     report.exportProbe = probe;
     report.checks.guiExportAndFullVideoAudioDecode = true;
     report.transitionClock = await verifyNativeTransition({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath });
+    report.captionFonts = await verifyNativeCaptionFonts({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath, assets: path.join(folder, "resources/engine/_internal/cutvoke/assets") });
+    report.checks.packagedCaptionColdExport = true;
     report.checks.threeShotTransitionClockAndPixels = true;
     const before = await api(`projects/${projectId}`);
     const pid = runtime.processId;

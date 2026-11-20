@@ -19,6 +19,7 @@ on:
       - src/**
       - apps/editor/**
       - tools/build/**
+      - tools/verify/verify_native_mcpb.py
       - tools/verify/verify_native_preview.cjs
       - tools/verify/verify_native_transition.cjs
       - tests/rendering/test_canvas_eof_clock.py
@@ -65,13 +66,15 @@ jobs:
           cache-dependency-path: |
             apps/desktop/package-lock.json
             apps/editor/package-lock.json
-      - name: Select official Ubuntu archive mirror
+      - name: Inspect runner-provided Ubuntu mirrors
         if: runner.os == 'Linux'
+        # Preserve the hosted image's official mirror ordering and fallback.
+        # Rewriting Azure to archive duplicated a host and prolonged DNS failures.
         run: |
           if [ -f /etc/apt/apt-mirrors.txt ]; then
-            sudo sed -i 's|https\?://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
             cat /etc/apt/apt-mirrors.txt
           fi
+
       - name: Refresh Ubuntu package indexes
         if: runner.os == 'Linux'
         timeout-minutes: 5
@@ -173,6 +176,21 @@ jobs:
             openbox > /tmp/cutvoke-openbox.log 2>&1 &
             node tools/verify/verify_portable_unix.cjs
           '
+      - name: Verify official MCPB extraction and native stdio with external data
+        timeout-minutes: 15
+        run: python tools/verify/verify_native_mcpb.py
+      - name: Preserve native MCPB evidence (not a distributable candidate)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.target }}-mcpb-evidence
+          path: |
+            .artifacts/acceptance/mcpb/*.json
+            .artifacts/acceptance/mcpb/*.jsonl
+            .artifacts/acceptance/mcpb/*.log
+            .artifacts/acceptance/mcpb/*.png
+          retention-days: 14
+          if-no-files-found: warn
       - name: Upload verified download
         uses: actions/upload-artifact@v7
         with:

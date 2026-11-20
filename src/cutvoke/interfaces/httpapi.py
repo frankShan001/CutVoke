@@ -79,7 +79,7 @@ from cutvoke.storage.media_uploads import (receive_upload, relative_path as medi
 
 # Bump when preview rendering changes so neither disk cache nor browser ETag can
 # treat media produced by an older renderer as current for the same project data.
-PREVIEW_RENDER_CACHE_VERSION = 38
+PREVIEW_RENDER_CACHE_VERSION = 39
 # Keep first playback and local edits bounded even on dense effect timelines.
 PREVIEW_WINDOW_SECONDS = 2
 ASSET_MEDIA_TYPES = {
@@ -720,7 +720,8 @@ class HttpApi:
             cancel_event if cancel_event is not None else threading.Event())
         export_queue = self.service._export_queue
         if priority > 0 and export_queue is not None and export_queue.reload_status()["busy"]:
-            raise RenderCancelled("background preview yields to export")
+            from cutvoke.rendering.preview_prepare import PreviewPreempted
+            raise PreviewPreempted("background preview yields to export")
         project_key = str(project.project_id)
         # Captions are drawn by the editor and already removed above. Metadata
         # such as project name/favorites/revision is not a visual dependency.
@@ -1200,9 +1201,12 @@ class HttpApi:
         parts = [unquote(p) for p in path.split("/") if p]
         # parts 形如 ['api','v1','projects',...]
         from cutvoke.interfaces.project_directories import directory_endpoint, route_project
+        from cutvoke.storage.project_format import ProjectFormatError
         try:
             directory_result = directory_endpoint(self, method, parts, body)
             target_api = route_project(self, method, parts, body) if directory_result is None else self
+        except ProjectFormatError as error:
+            return 409, {"error": {"code": "PROJECT_CONVERSION_REQUIRED", "message": str(error)}}
         except RevisionConflict as error:
             raise EditError(ErrorCode.REVISION_CONFLICT, str(error), retryable=True) from error
         except (ValueError, OSError) as error:
@@ -2288,6 +2292,11 @@ class HttpApi:
                 return 200, {"locked": True, "lease": lease}
 
             if method == "POST" and len(parts) == 6 \
+                    and parts[4] == "edit-lock" and parts[5] == "review":
+                return 200, self.service.review_edit_lease(
+                    pid, body.get("leaseId", ""), body.get("limit", 20))
+
+            if method == "POST" and len(parts) == 6 \
                     and parts[4] == "edit-lock" and parts[5] == "renew":
                 lease = self.service.renew_edit_lease(
                     pid, body.get("leaseId", ""), body.get("ttlSeconds", 30))
@@ -2334,6 +2343,12 @@ class HttpApi:
                 except (TypeError, ValueError):
                     raise EditError(ErrorCode.INVALID_ARGUMENT,
                                     "limit must be 1..50") from None
+                require_unique = body.get("requireUnique", False)
+                if isinstance(require_unique, str):
+                    if require_unique.lower() not in ("true", "false"):
+                        raise EditError(ErrorCode.INVALID_ARGUMENT,
+                                        "requireUnique must be true or false")
+                    require_unique = require_unique.lower() == "true"
                 raw_fields = body.get("fields")
                 fields = raw_fields.split(",") if isinstance(raw_fields, str) else None
                 return 200, self.service.project_lookup(
@@ -2343,7 +2358,7 @@ class HttpApi:
                     at_seconds=body.get("atSeconds"),
                     from_seconds=body.get("fromSeconds"),
                     to_seconds=body.get("toSeconds"),
-                    fields=fields, limit=limit,
+                    fields=fields, limit=limit, require_unique=require_unique,
                 )
 
             if method == "POST" and len(parts) == 5 and parts[4] == "commands":
@@ -2810,7 +2825,7 @@ class HttpApi:
                 except (TypeError, ValueError):
                     raise EditError(ErrorCode.INVALID_ARGUMENT,
                                     "preview window index must be an integer") from None
-                from cutvoke.rendering.render import RenderError as _RE
+                from cutvoke.rendering.render import RenderError as _RE, RenderCancelled
                 try:
                     proj = self.service.get_project(pid)
                     if body.get("editorTitles") == "1":
@@ -2827,6 +2842,10 @@ class HttpApi:
                     return 200, result
                 except EditError:
                     raise
+                except RenderCancelled as e:
+                    # Cancellation is expected when an edit supersedes a render.
+                    # Let active browser requests retry before treating it as a failure.
+                    return 409, {"error": {"code": "PREVIEW_CANCELLED", "message": str(e)}}
                 except _RE as e:
                     return 422, {"error": {"code": "PREVIEW_FAILED", "message": str(e)}}
                 except Exception as e:  # noqa: BLE001
@@ -2841,18 +2860,41 @@ class HttpApi:
         # 解包打开（J10）：POST /api/v1/packages/open
         #   body {packagePath, targetDir?} → 解包出工程 + 素材 → 作为新工程导入服务。
         #   targetDir 受限在 media_dir 上级目录内（防路径穿越），缺省自动生成唯一目录。
-        if method == "POST" and parts == ["api", "v1", "packages", "open"]:
-            pkg = body.get("packagePath")
+        if method == "POST" and parts == ["api", "v1", "packages", "format", "inspect"]:
+            from cutvoke.storage.project_package_conversion import inspect_package_format
+            return 200, inspect_package_format(body.get("path", ""))
+        if method == "POST" and parts in (["api", "v1", "packages", "open"],
+                                          ["api", "v1", "packages", "format", "convert"]):
+            converting = parts[-1] == "convert"
+            pkg = body.get("path") if converting else body.get("packagePath")
             if not pkg:
                 return 400, {"error": {"code": "INVALID_ARGUMENT",
                                        "message": "open requires packagePath"}}
             try:
-                target_dir = self._resolve_unpack_target(body.get("targetDir"))
+                target_dir = self._resolve_unpack_target(body.get("targetDir"), create=not converting)
             except GovernanceError as e:
                 return 400, {"error": {"code": e.code, "message": str(e)}}
-            project, mapping, warnings = unpack_project(pkg, target_dir)
+            if converting:
+                from cutvoke.storage.project_package_conversion import convert_package_copy
+                project, mapping, warnings = convert_package_copy(pkg, body.get("token"), target_dir)
+            else:
+                project, mapping, warnings = unpack_project(pkg, target_dir)
             # 导入为服务内的新工程（生成新 id，避免与现有工程冲突）。
-            imported = self.service.import_project(project)
+            try:
+                imported = self.service.import_project(project)
+            except Exception:
+                if not converting:
+                    raise
+                # Publication and registration are separate transactions. An
+                # exception may arrive after a successful durable commit: keep
+                # the verified copy, never delete it or blindly retry import.
+                return 500, {"error": {
+                    "code": "PACKAGE_CONVERSION_IMPORT_UNCONFIRMED",
+                    "message": "副本已验证，但导入未确认。已保留转换副本，请核查工程列表和副本目录后再操作；不要直接重复转换。",
+                    "retryable": False,
+                    "details": {"verifiedCopyPath": str(target_dir),
+                                "importStatus": "unconfirmed"},
+                }}
             # 统计该工程引用的去重素材数。
             asset_ids: set[str] = set()
             for track in imported.sequence.tracks:
@@ -2909,7 +2951,7 @@ class HttpApi:
 
         return 404, {"error": {"code": "NOT_FOUND", "message": f"unknown: {method} {path}"}}
 
-    def _resolve_unpack_target(self, target_dir: Optional[str]) -> str:
+    def _resolve_unpack_target(self, target_dir: Optional[str], *, create: bool = True) -> str:
         """解析并约束解包目标目录，防路径穿越（J10 安全边界）。
 
         允许根 = media_dir 的上级目录（如 ~/.cutvoke）。规则：
@@ -2917,7 +2959,7 @@ class HttpApi:
           - 否则把 target_dir 当作「相对允许根」的路径解析（绝对路径会覆盖前
             缀，等同要求它落在允许根内）；解析后用 pathlib 判定是否仍在允许根
             之内。任何通过 ../ 或绝对路径逃逸出允许根的情形都抛 PathEscapeError。
-        返回最终绝对目标目录（确保已创建）。
+        返回最终绝对目标目录；转换使用 create=False，验证成功前不创建目标。
         """
         allowed = Path(os.path.dirname(self.media_dir)).resolve()
         try:
@@ -2925,8 +2967,11 @@ class HttpApi:
         except OSError:
             pass
         if not target_dir:
-            return str((allowed / "unpacked" / uuid.uuid4().hex).resolve())
-        candidate = (allowed / target_dir).resolve()
+            target_dir = str(Path("unpacked") / uuid.uuid4().hex)
+        lexical = allowed / target_dir
+        if not create and any(part.is_symlink() for part in (lexical, *lexical.parents)):
+            raise PathEscapeError("PATH_ESCAPE", "Conversion target must not contain symlinks")
+        candidate = lexical.resolve()
         if candidate != allowed and allowed not in candidate.parents:
             raise PathEscapeError(
                 "PATH_ESCAPE",
@@ -2934,7 +2979,8 @@ class HttpApi:
                 f"必须位于允许根目录 {allowed} 之内（禁止路径穿越）。",
             )
         try:
-            candidate.mkdir(parents=True, exist_ok=True)
+            if create:
+                candidate.mkdir(parents=True, exist_ok=True)
         except OSError as e:
             raise PathEscapeError(
                 "PATH_ESCAPE",
@@ -3221,7 +3267,7 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             for key in ("category", "subcategory", "family", "qualifiedOnly", "effectId", "clipId", "duration", "lang", "path", "w",
                         "q", "appliesTo", "favoritesOnly", "recentOnly", "rev",
                         "entityType", "entityId", "textContains", "atSeconds", "compareClipId",
-                        "fromSeconds", "toSeconds", "fields", "limit", "index", "editorTitles",
+                        "fromSeconds", "toSeconds", "fields", "limit", "requireUnique", "index", "editorTitles",
                         "token", "kind", "from", "to", "trackId", "time", "projectId"):
                 if key in qs:
                     body[key] = qs[key][0]

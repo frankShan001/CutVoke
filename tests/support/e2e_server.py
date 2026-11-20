@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import os
+from contextlib import ExitStack
 import subprocess
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -31,6 +33,18 @@ def seed_fixture(service: EditService, root: str, project_id: str = "e2e-fixture
         paths.append(path)
     project = service.create_project(project_id, width=160, height=90,
                                      fps=Rational.of(15))
+
+    # Keep semantic filenames in this fixture's already-owned media directory.
+    # Tests import these sources into another project via sourcePath (without
+    # their asset identity); feeding them hash basenames loses display names.
+    directory = getattr(service.store, "directory", lambda _pid: None)(project_id)
+    if directory:
+        owned = []
+        for path in paths:
+            target = Path(directory) / "media" / Path(path).name
+            shutil.copy2(path, target)
+            owned.append(str(target))
+        paths = owned
 
     def apply(kind: str, payload: dict, key: str) -> None:
         current = service.get_project(project.project_id)
@@ -62,18 +76,27 @@ def main() -> None:
         # The optional extension journal belongs to this disposable runtime.
         # Status reads must never create files in the user's actual profile.
         os.environ["CUTVOKE_EXTENSION_HOME"] = os.path.join(root, "extensions")
-        service = EditService(store=ProjectStore(os.path.join(root, "projects.sqlite")))
+        # Ordinary browser/QA fixtures must use the shipped current-format
+        # store. Seeding plain projects.sqlite first creates a legacy catalogue
+        # that the conversion gate correctly refuses before editor tests run.
+        from cutvoke.storage.project_directory import ProjectLibraryStore
+        service = EditService(store=ProjectLibraryStore(os.path.join(root, "projects.sqlite")))
         seed_fixture(service, root)
-        # Migration acceptance owns a separate legacy project. Reopening its
-        # moved copy must never replace the source fixture used by other files.
-        seed_fixture(service, root, "e2e-migration-fixture")
-        if os.environ.get("CUTVOKE_E2E_FOLDERS") == "1":
-            from cutvoke.storage.project_directory import ProjectLibraryStore
-            service.close(); service.store.close()
-            service = EditService(store=ProjectLibraryStore(os.path.join(root, "projects.sqlite")))
+        # Old-format conversion tests create independent disposable fixtures.
+        # Never make the shared e2e-fixture require a conversion choice.
         api = HttpApi(service, RenderService(), media_dir=os.path.join(root, "media"))
         try:
-            serve(api, host="127.0.0.1", port=port, web_dir=str(web_dir))
+            with ExitStack() as diagnostics:
+                # Test-only, opt-in timing; never record paths, project content or errors.
+                if os.environ.get("CUTVOKE_E2E_PREVIEW_DIAGNOSTICS") == "1":
+                    from preview_diagnostics import install_preview_diagnostics
+                    logs = Path(__file__).resolve().parents[2] / ".artifacts" / "preview-diagnostics"
+                    logs.mkdir(parents=True, exist_ok=True)
+                    stream = diagnostics.enter_context(tempfile.NamedTemporaryFile(
+                        mode="w", encoding="utf-8", prefix="preview-", suffix=".jsonl",
+                        dir=logs, delete=False))
+                    diagnostics.enter_context(install_preview_diagnostics(api, stream, enabled=True, compile_stages=True))
+                serve(api, host="127.0.0.1", port=port, web_dir=str(web_dir))
         finally:
             api.close()
 

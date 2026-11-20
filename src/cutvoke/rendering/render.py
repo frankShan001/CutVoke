@@ -26,6 +26,7 @@ import ctypes
 import inspect
 import json
 import math
+import re
 import os
 import shutil
 import subprocess
@@ -142,14 +143,25 @@ def _filter_graph_arguments(ffmpeg: str, graph: str, directory: Optional[str] = 
         raise
     return [_filter_complex_file_option(ffmpeg), path], path
 
+@lru_cache(maxsize=32)
+def _alpha_decoder_available(ffmpeg: str, decoder: str) -> bool:
+    """Query supported decoders, not encoders; never silently drop source alpha."""
+    try:
+        result = subprocess.run([ffmpeg, "-hide_banner", "-decoders"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=10)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise RenderError(f"WEBM_ALPHA_DECODER_UNAVAILABLE: cannot inspect FFmpeg decoders: {error}") from error
+    return result.returncode == 0 and any(
+        len(fields := line.split()) >= 2 and fields[0].startswith("V") and fields[1] == decoder
+        for line in result.stdout.splitlines())
+
+
 # ---- V05 透明通道输出（alpha）----
 # 只认 ProRes 4444(.mov)：它是剪辑软件交接透明素材的通用口径，且 ffprobe
 # 会如实报告带 alpha 的 pix_fmt（yuva444p12le），**可验证**。
-# 为什么不收 .webm/VP9（2026-09-21 实测结论，别再踩）：
-#   本机 ffmpeg 9.0.1 用 libvpx-vp9 + -pix_fmt yuva420p + -auto-alt-ref 0
-#   导出的 webm，容器会打上 ALPHA_MODE=1 标签（看起来"成功"），但 stream
-#   pix_fmt 仍是 yuv420p，解码首帧 alpha 全 255 —— 是**假透明**。
-#   VP8 同样如此。与其交付一个"看起来透明其实不透明"的文件，不如明确拒绝。
+# VP8/VP9 alpha input needs libvpx decoding; output support remains deliberately
+# restricted to the established ProRes delivery contract. Metadata alone is not
+# proof of decoded output alpha.
 ALPHA_CONTAINERS = frozenset({".mov"})
 # 带 alpha 的像素格式前缀（ffprobe 的 pix_fmt 判定用，避免"导出成功但没透明"）
 _ALPHA_PIX_FMT_PREFIXES = ("yuva", "ya", "rgba", "bgra", "argb", "abgr", "gbrap")
@@ -1219,11 +1231,15 @@ def _prepare_static_masks(method):
         render_started=time.monotonic()
         arguments = signature.bind(self, project, *args, **kwargs)
         cancel = arguments.arguments.get("cancel_event")
+        if cancel is not None and cancel.is_set():
+            raise RenderCancelled("render cancelled before preparation")
         values = arguments.arguments
         callback = values.get('progress_callback')
         if callback:
             callback({'phase':'preparing'})
         original_project=project
+        from cutvoke.rendering.window_cache import simple_snapshot
+        recovery_snapshot = simple_snapshot(project) if method.__name__ == "render" else None
         from cutvoke.domain.essential_properties import resolve as resolve_compositions
         project = resolve_compositions(project)
         from cutvoke.domain.spatial_path import resolve as resolve_spatial_paths
@@ -1281,6 +1297,8 @@ def _prepare_static_masks(method):
             self._render_ctx.bounded_origin=origin
             self._render_ctx.verified_input_paths={os.path.normcase(os.path.abspath(c.asset_ref.source_path))
                 for t in project.sequence.tracks for c in t.clips if c.id in clocks}
+        previous_recovery = getattr(self._render_ctx, "recovery_snapshot", None)
+        self._render_ctx.recovery_snapshot = recovery_snapshot
         previous = getattr(self._render_ctx, 'gpu', None)
         previous_pixel=getattr(self._render_ctx,'pixel_gpu',None)
         previous_clips=getattr(self._render_ctx,'gpu_clips',{})
@@ -1339,6 +1357,7 @@ def _prepare_static_masks(method):
                                 self._gpu_failed = True
                                 return prepared(self, original_project, *args, **kwargs)
         finally:
+            self._render_ctx.recovery_snapshot = previous_recovery
             self._render_ctx.gpu = previous
             self._render_ctx.pixel_gpu=previous_pixel
             self._render_ctx.gpu_clips=previous_clips
@@ -2003,7 +2022,8 @@ class RenderService:
         FFV1/PCM intermediates avoid repeated lossy video/AAC encoding and AAC
         priming gaps at window boundaries. The final concat has one media input,
         applies export color management once, and publishes only after verify.
-        All intermediates belong to this request's unique temporary directory.
+        Live inputs belong to this request's unique temporary directory.
+        Eligible completed video windows also enter a bounded disposable cache.
         """
         out_dir = os.path.dirname(os.path.abspath(out_path))
         warnings = list(preflight_warnings)
@@ -2011,6 +2031,13 @@ class RenderService:
         chunks = []
         stage_started = time.monotonic()
         window_metrics = []
+        from cutvoke.rendering.window_cache import recovery_session
+        recovery = recovery_session(
+            Path(out_dir) / ".cutvoke-render-cache",
+            getattr(self._render_ctx, "recovery_snapshot", None), self.ffmpeg,
+            [overlay_position, alpha, getattr(self._render_ctx, "working_color", "bt709"),
+             start, duration], cancel_event, ffprobe=self.ffprobe) if getattr(self._render_ctx, "gpu", None) is None else None
+        reused_windows = []
         completed_seconds = 0.0
         if progress_callback:
             progress_callback({"phase": "rendering", "fraction": 0.0,
@@ -2052,20 +2079,46 @@ class RenderService:
                 self._render_ctx.gpu_clips={}
                 self._render_ctx.pixel_gpu=None
                 check_cancel()
+                path = temporary / f"window-{round(cursor*float(frame_rate)):09d}.mkv"
+                cache_key = recovery.key(cursor, chunk_duration) if recovery else None
                 compile_started = time.monotonic()
                 graph, inputs, _expected, chunk_audio, messages, caption_cwd = self._compile(
                     video_seq, overlay_position, alpha=alpha,
                     render_window=(cursor, cursor + chunk_duration), frame_aligned_origin=True)
                 origin = self._render_ctx.compile_origin
                 compile_seconds = time.monotonic() - compile_started
-                path = temporary / f"window-{round(cursor*float(frame_rate)):09d}.mkv"
                 try:
+                    if recovery:
+                        from cutvoke.rendering.compiled_window_identity import admit_window
+                        plan = admit_window(self, recovery, video_seq, graph, inputs,
+                            cursor=cursor, duration=chunk_duration, origin=origin,
+                            overlay_position=overlay_position, alpha=alpha, quality=quality,
+                            chunk_audio=chunk_audio, caption_cwd=caption_cwd)
+                        # One local immutable key for this invocation, including
+                        # recursive halves. No thread-local pending key survives.
+                        cache_key = recovery.key(cursor, chunk_duration, compiled=plan)
+                    if recovery and recovery.unchanged() and recovery.cache.restore(cache_key, path):
+                        try:
+                            self._verify(str(path), chunk_duration, seq.width, seq.height,
+                                         expect_alpha=alpha)
+                            if recovery.unchanged():
+                                check_cancel()
+                                reused_windows.append(cache_key)
+                                window_metrics.append({"compile": compile_seconds, "composite": 0.0})
+                                return [(path, chunk_duration, messages)]
+                        except RenderCancelled:
+                            raise
+                        except RenderError:
+                            pass  # Invalid cache entries are disposable, never final output.
                     self._run_ffmpeg(seq, graph, inputs, str(path), quality,
                         cancel_event, False, caption_cwd=caption_cwd,
                         alpha=alpha, output_start=cursor - origin,
                         output_duration=chunk_duration, lossless=True)
                     self._verify(str(path), chunk_duration, seq.width, seq.height,
                                  expect_alpha=alpha)
+                    check_cancel()
+                    if recovery and recovery.unchanged():
+                        recovery.cache.publish(cache_key, path)
                     window_metrics.append({'compile':compile_seconds,
                                            'composite':time.monotonic()-compile_started-compile_seconds})
                 except RenderError as exc:
@@ -2161,6 +2214,7 @@ class RenderService:
                 "color_range":probe.get("color_range"),
                 "audio_start_time":probe.get("audio_start_time"), "video_start_time":probe.get("video_start_time"),
                 "warnings":warnings, "renderStrategy":"lossless-windows", "windowCount":len(chunks),
+                "reusedWindowCount":len(reused_windows),
                 "audioStrategy":"continuous-pcm" if has_audio else "none",
                 "audioVerification":audio_verification,
                 "videoVerification":video_verification,
@@ -2551,7 +2605,7 @@ class RenderService:
                     seek = getattr(self._render_ctx, 'input_seeks', {}).get(os.path.abspath(src))
                     if seek:
                         cmd += ['-ss', str(seek)]
-                    cmd += ["-i", src]
+                    cmd += [*self._video_input_arguments(src), "-i", src]
             if has_audio:
                 graph += ";[outa]anullsink"
             filter_args, filter_script_path = _filter_graph_arguments(self.ffmpeg, graph, caption_cwd)
@@ -2648,7 +2702,7 @@ class RenderService:
                             f"{fps_rat.numerator}/{fps_rat.denominator}",
                             "-i", src]
                 else:
-                    cmd += ["-i", src]
+                    cmd += [*self._video_input_arguments(src), "-i", src]
             if _has_audio:
                 graph += ";[outa]anullsink"
             filter_args, filter_script_path = _filter_graph_arguments(self.ffmpeg, graph, caption_cwd)
@@ -3462,6 +3516,12 @@ class RenderService:
                 parts.append(f"[outa]apad=whole_dur={audio_end:.9f},"
                              f"atrim=end={audio_end:.9f},asetpts=PTS-STARTPTS[outa]")
 
+        elif has_audio:
+            # A short sound effect must not leave the delivery audio stream
+            # shorter than the picture timeline checked by audio integrity.
+            audio_end = max(audio_expected, video_expected + origin - audio_origin)
+            parts.append(f"[outa]apad=whole_dur={audio_end:.9f}[outa]")
+
         graph = ";".join(parts)
         graph = self._preview_seek_inputs(graph, input_paths, seq.fps.to_fraction())
         # 期望总时长取视频主轴与音频最长轨的较大者；amix duration=longest 与之对齐
@@ -3536,7 +3596,7 @@ class RenderService:
         # Decoded alpha must meet the canvas before a working-space conversion
         # can discard it, including materialized composition intermediates.
         if (os.path.isfile(clip.asset_ref.source_path)
-                and _pix_fmt_has_alpha(self.probe_media(clip.asset_ref.source_path).get('pix_fmt'))):
+                and self._source_has_alpha(clip.asset_ref.source_path)):
             return True
         if _find_animations(clip):
             return True
@@ -4213,6 +4273,19 @@ class RenderService:
             parts.append(
                 f"[{cur}]format=rgba,colorchannelmixer=aa={opacity:.6f}[{nxt}]")
             cur = nxt
+
+        # Framesync needs a regular secondary clock. Container timestamps (for
+        # example 12 fps FFV1 in Matroska's 1 ms time base) survive trim/setpts
+        # with rounding jitter. Feeding them directly to a CFR color bed can
+        # duplicate/drop pictures differently in whole and bounded renders.
+        # Normalize the source, not the composed bed: resampling the latter
+        # can lose its final picture on FFmpeg 6.1. Pass the final source
+        # picture through EOF rounding too: a single high-rate source picture
+        # must remain available for the bed to hold, not round down to zero.
+        clocked = f"canvasclock{vseg[0]}"
+        vseg[0] += 1
+        parts.append(f"[{cur}]fps={fps_expr}:eof_action=pass[{clocked}]")
+        cur = clocked
 
         # 5) 叠加到黑色画布（位置 x,y；非变换片段 x=y=0 即满画布）
         out = self._composite_on_canvas(cur, clip, seq, parts, vseg,
@@ -4924,12 +4997,13 @@ class RenderService:
                 or transform["position"]["x"] != 0
                 or transform["position"]["y"] != 0):
             return None
-        pixel_format = self.probe_media(clip.asset_ref.source_path).get("pix_fmt")
+        source_info = self.probe_media(clip.asset_ref.source_path)
+        pixel_format = source_info.get("pix_fmt")
         # A paletted image may carry palette alpha even though its format name
         # contains no alpha marker. Keep unknown/transparent sources on the
         # compositing path so transparent pixels expose lower tracks correctly.
         if (not pixel_format or pixel_format == "pal8"
-                or _pix_fmt_has_alpha(pixel_format)):
+                or _pix_fmt_has_alpha(pixel_format) or source_info.get("webm_alpha")):
             return None
         params = animation.get("params", {}) or {}
         amplitude = float(params.get("amplitude", 0.03))
@@ -5211,7 +5285,15 @@ class RenderService:
                 end = Rational.from_json(**effect_range["end"])
             except (KeyError, TypeError, ValueError, ZeroDivisionError) as exc:
                 raise RenderError(f"invalid temporal range for {e.get('effectId')}") from exc
-            if start < Rational.of(0) or end > original_duration or start >= end:
+            if start >= end:
+                raise RenderError(f"temporal range is outside clip {clip.id}")
+            if clip.keyframe_time_domain == "signed-local":
+                # Retain the full effect interval in storage; apply only its
+                # visible intersection, without resurrecting removed effects.
+                start, end = max(Rational.of(0), start), min(original_duration, end)
+                if start >= end:
+                    continue
+            elif start < Rational.of(0) or end > original_duration:
                 raise RenderError(f"temporal range is outside clip {clip.id}")
             if start == Rational.of(0) and end == original_duration:
                 cur = apply_one(cur)
@@ -5643,6 +5725,23 @@ class RenderService:
         return self._clock_cache.get_or_compute(identity, lambda: regular_timestamps(
             self.ffprobe, source, start, duration, fps, exact_interval=True))
 
+    def _source_has_alpha(self, src: str) -> bool:
+        info = self.probe_media(src)
+        return _pix_fmt_has_alpha(info.get("pix_fmt")) or bool(info.get("webm_alpha"))
+
+    def _video_input_arguments(self, src: str) -> list[str]:
+        """Preserve WebM alpha without overriding ordinary VP8/VP9 decoders."""
+        info = self.probe_media(src)
+        decoder = {"vp8": "libvpx", "vp9": "libvpx-vp9"}.get(info.get("video_codec"))
+        if not decoder or not info.get("webm_alpha"):
+            return []
+        if not _alpha_decoder_available(self.ffmpeg, decoder):
+            raise RenderError(
+                f"WEBM_ALPHA_DECODER_UNAVAILABLE: transparent {info['video_codec']} input "
+                f"requires FFmpeg decoder {decoder}; install an FFmpeg build with libvpx "
+                "or convert the source to an alpha-capable intermediate")
+        return ["-c:v", decoder]
+
     def probe_media(self, src: str, timeout: float = 30.0) -> dict[str, Any]:
         """Probe current source metadata once, sharing concurrent reads safely."""
         if not os.path.isfile(src):
@@ -5672,7 +5771,7 @@ class RenderService:
         cmd = [
             executable, "-v", "error",
             "-show_entries", "format=duration,format_name",
-            "-show_entries", "stream=codec_type,width,height,pix_fmt,duration,start_time,avg_frame_rate,r_frame_rate",
+            "-show_entries", "stream=codec_type,codec_name,width,height,pix_fmt,duration,start_time,avg_frame_rate,r_frame_rate:stream_tags=alpha_mode",
             "-of", "json", src,
         ]
         try:
@@ -5733,6 +5832,10 @@ class RenderService:
             "format": str(fmt.get("format_name", "")),
             # V03：静帧/透明导出要判 alpha 是否真的在（PNG 常被判成 rgba/rgb24）
             "pix_fmt": v.get("pix_fmt") if v else None,
+            "video_codec": v.get("codec_name") if v else None,
+            "webm_alpha": bool(v and v.get("codec_name") in ("vp8", "vp9")
+                and any(key.lower() == "alpha_mode" and str(value) == "1"
+                        for key, value in (v.get("tags") if isinstance(v.get("tags"), dict) else {}).items())),
         }
         return result
 
@@ -5750,22 +5853,71 @@ class RenderService:
         import os as _os
         if not _os.path.isfile(src):
             raise RenderError(f"thumbnail: source file not found: {src!r}")
-        cmd = [
-            self.ffmpeg, "-y", "-nostdin",
-            "-ss", f"{time:.4f}",
-            "-i", src,
-            "-frames:v", "1",
-            "-vf", f"scale={width}:-2",
-            "-f", "image2", out_png,
-        ]
+        if isinstance(time, bool) or not isinstance(time, (int, float)) or not math.isfinite(time) or time < 0:
+            raise RenderError("thumbnail: time must be finite and nonnegative")
+        # Preserve the decoded timeline when seeking, and accept a random-access
+        # decode only if its first picture is a keyframe at/before the target.
+        # Non-key initial pictures can have missing references (e.g. TS). Reordered
+        # GOPs can start AFTER the requested timestamp despite accurate seek.
+        # Back off on that observable failure; an unseeked decode is the final
+        # fallback. Every attempt shares the caller's deadline.
+        import time as clock
+        deadline = clock.monotonic() + timeout
+        input_arguments = self._video_input_arguments(src)
+        target_text = f"{time:.12f}"
+        target = Fraction(target_text)
+        seek = float(time)
+        backoff = 1.0
+        directory = os.path.dirname(os.path.abspath(out_png))
+        fd, temporary = tempfile.mkstemp(prefix=".thumbnail-", suffix=".png", dir=directory)
+        os.close(fd)
         try:
-            r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
-                               encoding="utf-8", errors="replace",
-                               timeout=timeout)
-        except subprocess.TimeoutExpired as e:
-            raise RenderError(f"thumbnail timed out on {src!r}") from e
-        if r.returncode != 0 or not os.path.isfile(out_png):
-            raise RenderError(f"thumbnail failed on {src!r}: {r.stderr[-400:]}")
+            while True:
+                remaining = deadline - clock.monotonic()
+                if remaining <= 0:
+                    raise RenderError(f"thumbnail timed out on {src!r}")
+                # Truncate even if a test double or failed decode leaves an image.
+                with open(temporary, "wb"):
+                    pass
+                cmd = [self.ffmpeg, "-hide_banner", "-loglevel", "info", "-y", "-nostdin"]
+                if seek > 0:
+                    cmd += ["-ss", f"{seek:.12f}", "-noaccurate_seek",
+                            "-copyts", "-start_at_zero"]
+                cmd += [*input_arguments, "-i", src]
+                if seek > 0:
+                    # Only the first decoded frame is logged, without pixel
+                    # checksums. Parse integer PTS/time_base, not rounded text.
+                    graph = ("split[check][frame];"
+                             r"[check]select=eq(n\,0),showinfo@coverage=checksum=0,nullsink;"
+                             f"[frame]trim=start={target_text},scale={width}:-2")
+                    cmd += ["-vf", graph]
+                else:
+                    cmd += ["-vf", f"trim=start={target_text},scale={width}:-2"]
+                cmd += ["-frames:v", "1", "-fps_mode", "vfr", "-f", "image2", temporary]
+                try:
+                    r = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True,
+                                       encoding="utf-8", errors="replace", timeout=remaining)
+                except subprocess.TimeoutExpired as e:
+                    raise RenderError(f"thumbnail timed out on {src!r}") from e
+                if r.returncode != 0:
+                    raise RenderError(f"thumbnail failed: {r.stderr[-400:]}")
+                covered = seek == 0
+                if not covered:
+                    tb = re.search(r"\[showinfo@coverage[^\n]*config in time_base: (\d+)/(\d+)", r.stderr)
+                    pts = re.search(r"\[showinfo@coverage[^\n]*n:\s*0\s+pts:\s*(-?\d+)", r.stderr)
+                    keyframe = re.search(r"\[showinfo@coverage[^\n]*n:\s*0\s+pts:[^\n]*iskey:1", r.stderr)
+                    if tb and pts and keyframe and int(tb[2]) > 0:
+                        covered = int(pts[1]) * Fraction(int(tb[1]), int(tb[2])) <= target
+                if covered:
+                    if os.path.getsize(temporary) == 0:
+                        raise RenderError(f"thumbnail failed or no frame at requested time: {r.stderr[-400:]}")
+                    break
+                seek = max(0.0, float(time) - backoff)
+                backoff *= 2
+            os.replace(temporary, out_png)
+        finally:
+            with contextlib.suppress(OSError):
+                os.unlink(temporary)
         return out_png
 
     def waveform_media(self, src: str, out_png: str, *, width: int = 320,
@@ -5901,7 +6053,7 @@ class RenderService:
                 seek = getattr(self._render_ctx, 'input_seeks', {}).get(os.path.abspath(src))
                 if seek and not concat_input:
                     cmd += ['-ss', str(seek)]
-                cmd += ["-i", src]
+                cmd += [*self._video_input_arguments(src), "-i", src]
 
         filter_args, filter_script_path = _filter_graph_arguments(self.ffmpeg, graph, caption_cwd)
 

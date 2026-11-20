@@ -8,7 +8,7 @@
 
 *一款本地优先（Local-First）的开源视频剪辑软件。人类创作者与 AI Agent 共享同一条非破坏性时间线——既能用可视化界面精细打磨每一帧，也能接入 MCP 让 AI 自动完成粗剪、字幕与特效，并支持社区共建可复用的特效生态。*
 
-[![Release](https://img.shields.io/github/v/release/frankShan001/CutVoke?include_prereleases&label=Release&color=blue)](https://github.com/frankShan001/CutVoke/releases)
+[![Release](https://img.shields.io/github/v/release/frankShan001/CutVoke?include_prereleases&label=Release&color=blue)](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![MCP Ready](https://img.shields.io/badge/MCP-Agent--Native-8A2BE2)](docs/user/LOCAL_DELIVERY_MCP.md)
@@ -16,7 +16,7 @@
 
 [**English**](README.md) | [**简体中文**](README.zh-CN.md)
 
-[下载桌面版](https://github.com/frankShan001/CutVoke/releases) · [v0.3.5 最新动态](docs/development/release-notes-v0.3.5.md) · [观看剪辑案例](examples/showcases/) · [接入 AI Agent](docs/user/agent-skill.zh-CN.md) · [贡献社区特效](CONTRIBUTING.zh-CN.md)
+[下载桌面版](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [v0.3.6 最新动态](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [观看剪辑案例](examples/showcases/) · [接入 AI Agent](docs/user/agent-skill.zh-CN.md) · [贡献社区特效](CONTRIBUTING.zh-CN.md)
 
 </div>
 
@@ -25,24 +25,33 @@
 </p>
 
 > **CutVoke 是一款开源、本地运行的视频剪辑软件：你的 AI Agent 通过 MCP 直接剪时间线，你也能打开同一条时间线随时手动修改。**
-> Instagram 新推出的 Edits for Mac 也提供了 MCP，但只支持 macOS（Apple 芯片），而且要登录 Instagram 账号。CutVoke 支持 **Windows · macOS · Linux**，本地剪辑无需账号，源码采用 MIT 协议。
+> CutVoke 支持 **Windows · macOS · Linux**，本地剪辑无需账号，源码采用 MIT 协议。你可以选择自己的 AI Agent；外部 AI 服务可能有独立的账号、费用与数据政策。
 > 适用于 Claude Code、Codex、Cursor、Claude Desktop 以及任何 MCP 客户端。
 
 **30 秒接入你的 Agent**
 
-1. [下载 CutVoke v0.3.5](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.5) 并启动一次。
+1. [下载 CutVoke v0.3.6](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) 并启动一次。
 2. 打开数据目录下的 `profile/mcp-config.json`（Windows 便携版：exe 旁的 `CutVoke Data`；macOS：`~/Library/Application Support/CutVoke/`；Linux：`${XDG_DATA_HOME:-~/.local/share}/CutVoke/`）。里面已经写好了内置引擎的命令，不需要另装 Python。
 3. 把其中的 `cutvoke` 配置加到你的 Agent：[Claude Code](docs/integrations/claude-code.md) · [Codex](docs/integrations/codex.md) · [Cursor](docs/integrations/cursor.md)。然后直接说："剪掉停顿、加字幕、出一个 9:16 竖版，导出前先给我看几帧。"
 
 ⭐ **觉得有用的话，点个 Star 能让更多创作者找到它。**
 
-## v0.3.5 最新更新速览
+## v0.3.6 预览版更新速览
 
-- **按文剪辑视频**：支持按句/词定位试听、预览删减影响，并支持一键同步撤销音画与字幕修改。
-- **AI 方案审阅与修补**：新增结构化 AI 创作提案、渲染帧证据审阅与局部修补（Patch）MCP 工作流。
-- **代码视频与缓存渲染**：支持外部代码视频（Code Video）清单静态校验导入，以及帧窗口缓存复用渲染。
-- **极速启动与精准切镜**：优化内置音频/背景冷启动读取，统一工程帧时钟消除各帧率下透明轨道单帧残留。
-- **3D 引擎与合成升级 (v0.3.3–v0.3.4)**：新增 OpenGL 3D 图层、轨道遮罩、调整图层、五大 AI 题材规范与 GPU 加速预览（[发布说明](docs/development/release-notes-v0.3.5.md) · [更新日志](CHANGELOG.md)）。
+- **更可靠的素材处理**：修复透明 VP8/VP9 WebM 合成、损坏缩略图/波形缓存重建、短音频导出尾部及导出路径编辑问题。
+- **更安全的人机协作**：显式人工接管、租约修改记录审阅、本地音频检查，以及可编辑的生成源码交接。
+- **剪辑可靠性改进**：改善原生试听启动、过期关键帧选择和取消处理；部分间歇性播放问题仍在排查。
+- **四种下载包**：Windows x64、Linux x64、macOS Apple Silicon 与 Intel。见[发布说明与已验证下载](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6)。
+
+> **下载版与源码的区别：** v0.3.6 是冻结的预览版，不等于当前 `main`。后续工程格式迁移和缩略图寻帧变更**不包含在本版中**。源码 `main` 已能识别旧工程，让用户选择**转换副本并打开**或**关闭**，保留原工程。需要与下载版一致的文档时，请查看 [v0.3.6 源码树](https://github.com/frankShan001/CutVoke/tree/v0.3.6)；仓库中未特别标注的文档跟随 `main`。
+
+### 更新前请留意
+
+先关闭 CutVoke，备份工程与素材。在自己的工程验证完成前，保留旧版应用。
+
+- **四平台 v0.3.6 下载包均未启用导出窗口缓存复用。** 普通导出可用，但失败重试不能从已完成的窗口继续。这与代码视频生成缓存是不同机制。
+- 间歇性试听/键盘超时，以及拆分后左裁剪导致的手动关键帧错位尚未完全解决。Linux 导出测试中出现竖屏长字幕左右裁切；其他平台及预览一致性尚未验证。交付成片前请重点检查这些情况。
+- 实际打包应用与离线 MCPB 检查通过，不代表真实客户端安装、跨版本迁移、实体设备或隔离下载后的首次启动均已验证。macOS 包采用临时完整性签名，**未进行 Developer ID 签名或公证**。见[完整发布限制](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6)。
 
 ## 观看产品介绍
 
@@ -128,7 +137,7 @@ CutVoke 采用非破坏性、声明式的共享时间线架构，打通了桌面
         └─────────────────────────────────────────────────┘
 ```
 
-Agent 持有编辑租约时，编辑器显示持有者和剩余时间。点击**接管编辑**可结束指定租约，并在刷新工程后继续手工编辑；已完成的修改会保留，携带旧租约的请求会被拒绝。
+Agent 持有编辑租约时，编辑器显示持有者和剩余时间。点击**接管编辑**可结束指定租约，并在刷新工程后继续手工编辑；已完成的修改会保留，携带旧租约的请求会被拒绝。 **查看本次租约的修改**会显示当前租约的最近 20 次已提交版本摘要，可在接管前检查。只包含版本化编辑，不含重命名、导出等操作；旧租约未记录起始边界时会明确提示，结束租约后不提供此视图。
 
 ### 你可以直接对 AI Agent 说的话（Prompt 示例）
 
@@ -137,6 +146,8 @@ Agent 持有编辑租约时，编辑器显示持有者和剩余时间。点击**
 > *“检查我当前的 CutVoke 时间线，自动剪掉超过 0.6 秒的静音停顿，在镜头切换处加上柔和的叠化转场，并用本地 ASR 生成中文字幕轨。”*
 
 > *“按照 `cutvoke-editor` 的纪录片剪辑规范，把 `./raw_clips` 里的素材配合 `bgm.mp3` 剪成一段 60 秒的高燃混剪，审阅关键渲染帧确认切镜自然，完成后我会在编辑器界面里微调标题动画。”*
+
+单条字幕修改先用 `project_lookup(requireUnique=true)`：即使 `limit=1`，多匹配也会被拒绝。请用时间或明确选择的 ID 消歧，只有 `matchCount=1` 且目标符合意图时才修改。详见 [Agent 编辑指南](docs/user/external-agent-editing.md)。
 
 ## 核心功能亮点
 
@@ -158,14 +169,16 @@ Agent 持有编辑租约时，编辑器显示持有者和剩余时间。点击**
 
 ### 方式一：下载桌面免安装版（推荐普通创作者）
 
-无需配置复杂的开发环境，直接前往 [**GitHub Releases (v0.3.5)**](https://github.com/frankShan001/CutVoke/releases) 下载对应系统的免安装包，解压后即可运行：
+无需配置复杂的开发环境，直接前往 [**GitHub Releases (v0.3.6)**](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) 下载对应系统的预览版免安装包，解压后即可运行：
 
-| 操作系统 | 芯片架构 | 下载链接 (v0.3.5) |
+| 操作系统 | 芯片架构 | 下载链接 (v0.3.6) |
 | :--- | :--- | :--- |
-| **Windows** | 64位 免安装便携版 (x64) | [`CutVoke-0.3.5-windows-x64-portable.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.5/CutVoke-0.3.5-windows-x64-portable.zip) |
-| **macOS** | Apple Silicon (M1–M4, arm64) | [`CutVoke-0.3.5-macos-arm64.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.5/CutVoke-0.3.5-macos-arm64.zip) |
-| **macOS** | Intel 芯片 (x64) | [`CutVoke-0.3.5-macos-x64.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.5/CutVoke-0.3.5-macos-x64.zip) |
-| **Linux** | 64位 (x64) | [`CutVoke-0.3.5-linux-x64.tar.gz`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.5/CutVoke-0.3.5-linux-x64.tar.gz) |
+| **Windows** | 64位 免安装便携版 (x64) | [`CutVoke-0.3.6-windows-x64-portable.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.6/CutVoke-0.3.6-windows-x64-portable.zip) |
+| **macOS** | Apple Silicon (arm64) | [`CutVoke-0.3.6-macos-arm64.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.6/CutVoke-0.3.6-macos-arm64.zip) |
+| **macOS** | Intel 芯片 (x64) | [`CutVoke-0.3.6-macos-x64.zip`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.6/CutVoke-0.3.6-macos-x64.zip) |
+| **Linux** | 64位 (x64) | [`CutVoke-0.3.6-linux-x64.tar.gz`](https://github.com/frankShan001/CutVoke/releases/download/v0.3.6/CutVoke-0.3.6-linux-x64.tar.gz) |
+
+[SHA-256 校验清单](https://github.com/frankShan001/CutVoke/releases/download/v0.3.6/SHA256SUMS) · [构建与验收记录](https://github.com/frankShan001/CutVoke/releases/download/v0.3.6/BUILD-INFO.json) · [所有版本 / 旧版下载](https://github.com/frankShan001/CutVoke/releases)
 
 > **提示**：桌面版已内置 FFmpeg 和 ffprobe，无需另行配置系统 FFmpeg。仅源码安装（方式三）需要将 [`ffmpeg` 与 `ffprobe`](https://ffmpeg.org/download.html) 配置到 `PATH`。各系统首次启动说明可参考 [预发布说明](docs/development/prerelease.md)。
 
@@ -194,6 +207,8 @@ Agent 持有编辑租约时，编辑器显示持有者和剩余时间。点击**
 2. 将仓库内置的 [**`cutvoke-editor` 技能包**](skills/cutvoke-editor/) 挂载给你的 Agent，让它立即掌握时间线操作规范、分题材节奏指南与特效目录。详细配置步骤请查阅 [中文 Agent 技能接入指南](docs/user/agent-skill.zh-CN.md)。
 
 ### 方式三：从源码启动（面向开发者与进阶玩家）
+
+默认克隆开发中的 `main`。若要运行已发布预览版的源码，请在克隆后、安装依赖前运行 `git checkout v0.3.6`。不要假定由更新源码转换的工程仍可被 v0.3.6 读取。
 
 **前置环境**：Python `3.10+`、Node.js `20+`（CI 使用 Node.js `24`），且系统 `PATH` 中已配置好 `ffmpeg` 与 `ffprobe`。所需编解码器及各平台说明见 [安装与已验证环境](docs/user/installation.md)。
 
@@ -282,7 +297,7 @@ CutVoke/
 | **特效、动画与 3D** | [电影级特效 (Cinematic VFX)](docs/cinematic-vfx.md) · [动态遮罩 (Moving Masks)](docs/moving-masks.md) · [标题动画 (Title Motion)](docs/title-motion.md) · [动画工作流](docs/user/ANIMATION_WORKFLOW.md) · [合成工作流](docs/user/COMPOSITING_WORKFLOW.md) · [本地 3D 与人像模型](docs/user/LOCAL_3D_AND_MODELS.md) |
 | **音频与离线字幕** | [音频工作台](docs/user/AUDIO_WORKBENCH.md) · [本地离线语音识别 (Local ASR)](docs/user/LOCAL_ASR.md) |
 | **AI Agent 与 MCP** | [中文 Agent 技能接入指南](docs/user/agent-skill.zh-CN.md) · [MCP 本地交付说明](docs/user/LOCAL_DELIVERY_MCP.md) · [CutVoke Editor 技能目录](skills/cutvoke-editor/) |
-| **版本记录与二次开发** | [v0.3.5 发布说明](docs/development/release-notes-v0.3.5.md) · [v0.3.4 发布说明](docs/development/release-notes-v0.3.4.md) · [工程目录结构](docs/development/project-layout.md) · [渲染性能优化](docs/development/render-performance.md) |
+| **版本记录与二次开发** | [v0.3.6 发布说明](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [v0.3.5 发布说明](docs/development/release-notes-v0.3.5.md) · [工程目录结构](docs/development/project-layout.md) · [渲染性能优化](docs/development/render-performance.md) |
 
 ## 开源协议与安全说明
 

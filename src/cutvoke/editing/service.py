@@ -25,7 +25,7 @@ from typing import Callable, Optional
 
 from cutvoke.domain.model import (Project, Sequence, Track, Clip, AssetReference, Caption, CaptionWord,
                    Marker, new_id, EFFECT_TRANSFORM)
-from cutvoke.domain.keyframes import Keyframe, parameter_spec, validate_bezier, effect_instance_id
+from cutvoke.domain.keyframes import Keyframe, parameter_spec, validate_bezier, effect_instance_id, shift_manual_keyframes
 from cutvoke.domain.protocol import Command, CommandResult, Event, Actor, ErrorCode, bump_revision
 from cutvoke.domain.rational import Rational
 from cutvoke.domain.speed_curve import SpeedCurve
@@ -348,6 +348,7 @@ class EditService:
         # project_id -> [snapshot, ...]  重做栈（undo 时弹出的快照）
         self._redo_stack: dict[str, list[Project]] = {}
         self._edit_leases: dict[str, dict] = {}
+        self._lease_review_boundaries: dict[str, tuple[int, str]] = {}
         self._issued_edit_leases: set[tuple[str, str]] = set()
         self._memory_lease_guard = threading.RLock()
         # 可选持久化存储（T08）：传入则每次提交后持久化到 SQLite
@@ -571,6 +572,7 @@ class EditService:
         clip.speed_curve = curve.slice(left, right)
         clip.timeline_start, clip.timeline_end = start, end
         clip.speed = clip.speed_curve.source_duration / clip.duration
+        shift_manual_keyframes(clip, start-old_start)
         EditService._rebase_effect_ranges(clip, old_start, old_end, start, end)
 
     @staticmethod
@@ -593,8 +595,9 @@ class EditService:
                 # clip operations should not silently rewrite its meaning.
                 retained.append(effect)
                 continue
-            start = max(Rational.of(0), start)
-            end = min(duration, end)
+            if clip.keyframe_time_domain != "signed-local":
+                start = max(Rational.of(0), start)
+                end = min(duration, end)
             if start >= end:
                 continue
             effect["range"] = {"start": start.to_json(), "end": end.to_json()}
@@ -1478,7 +1481,7 @@ class EditService:
         if project_id in self._projects:
             raise EditError(ErrorCode.INVALID_ARGUMENT, f"project exists: {project_id}")
         seq = Sequence(id=f"{project_id}_seq", width=width, height=height, fps=fps)
-        proj = Project(schema_version="1", project_id=project_id,
+        proj = Project(schema_version="2", project_id=project_id,
                        revision="0", sequence=seq, name=name_hint)
         # 先持久（事务），成功才进内存（A02：创建失败不伪成功）
         if self._store is not None:
@@ -1579,6 +1582,7 @@ class EditService:
             if loaded is None:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 f"project not found: {project_id}")
+            self._require_current_format(loaded)
             self._projects[project_id] = loaded
             self._idempotency.setdefault(project_id, {})
             self._events.setdefault(project_id, [])
@@ -1587,12 +1591,23 @@ class EditService:
             return loaded
         if project_id not in self._projects:
             raise EditError(ErrorCode.INVALID_ARGUMENT, f"project not found: {project_id}")
+        self._require_current_format(self._projects[project_id])
         return self._projects[project_id]
+
+    @staticmethod
+    def _require_current_format(project):
+        if project.schema_version != "2":
+            raise EditError("PROJECT_CONVERSION_REQUIRED",
+                            "Legacy project must be converted to a separate new-format copy before opening.")
 
     def project_sync(self, project_id: str, known_token: Optional[str] = None) -> dict:
         """Return a compact full snapshot only when authoritative state changed."""
         if self._store is not None:
-            state = self._store.load_for_sync(project_id, known_token)
+            from cutvoke.storage.project_format import ProjectFormatError
+            try:
+                state = self._store.load_for_sync(project_id, known_token)
+            except ProjectFormatError as error:
+                raise EditError("PROJECT_CONVERSION_REQUIRED", str(error)) from error
             if state is None:
                 raise EditError(ErrorCode.INVALID_ARGUMENT, f"project not found: {project_id}")
             token, revision, project = state
@@ -1607,6 +1622,7 @@ class EditService:
         result = {"projectId": project_id, "revision": revision, "token": token,
                   "unchanged": project is None}
         if project is not None:
+            self._require_current_format(project)
             result["project"] = project.to_dict(compact=True)
         return result
 
@@ -1671,8 +1687,8 @@ class EditService:
                        from_seconds: Optional[float] = None,
                        to_seconds: Optional[float] = None,
                        fields: Optional[list[str]] = None,
-                       limit: int = 10) -> dict:
-        """Read only the captions or clips an Agent needs for a local edit."""
+                       limit: int = 10, require_unique: bool = False) -> dict:
+        """Read a bounded projection; count all matches before applying the limit."""
         if entity_type not in ("caption", "clip"):
             raise EditError(ErrorCode.INVALID_ARGUMENT,
                             "entityType must be 'caption' or 'clip'")
@@ -1681,6 +1697,8 @@ class EditService:
                             "entityId and textContains must be strings")
         if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= 50:
             raise EditError(ErrorCode.INVALID_ARGUMENT, "limit must be 1..50")
+        if not isinstance(require_unique, bool):
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "requireUnique must be a boolean")
         defaults = ({"id", "text", "start", "end"} if entity_type == "caption"
                     else {"id", "trackId", "sourceName", "timelineStart", "timelineEnd"})
         available = ({"id", "text", "start", "end", "fontFamily", "fontSize", "color",
@@ -1713,19 +1731,18 @@ class EditService:
 
         project = self.get_project(project_id)
         found: list[dict] = []
+        match_count = 0
         needle = text_contains.casefold()
         if entity_type == "caption":
-            candidates = ((c, c.to_dict()) for c in project.sequence.captions)
+            candidates = ((c, None) for c in project.sequence.captions)
         else:
-            candidates = (
-                (c, {**c.to_dict(), "trackId": track.id,
-                     "sourceName": c.asset_ref.source_path.replace("\\", "/").rsplit("/", 1)[-1]})
-                for track in project.sequence.tracks for c in track.clips
-            )
-        for entity, record in candidates:
+            candidates = ((c, track.id)
+                          for track in project.sequence.tracks for c in track.clips)
+        for entity, track_id in candidates:
             if entity_id and entity.id != entity_id:
                 continue
-            searchable = entity.text if entity_type == "caption" else record["sourceName"]
+            searchable = (entity.text if entity_type == "caption" else
+                          entity.asset_ref.source_path.replace("\\", "/").rsplit("/", 1)[-1])
             if needle and needle not in searchable.casefold():
                 continue
             start = entity.start if entity_type == "caption" else entity.timeline_start
@@ -1736,12 +1753,25 @@ class EditService:
                 continue
             if upper is not None and start >= upper:
                 continue
-            found.append({key: record[key] for key in selected})
-            if len(found) > limit:
-                break
+            match_count += 1
+            # Count even matches beyond the response limit, but do not serialize
+            # their full records (which may include large effect/keyframe data).
+            if len(found) < limit:
+                record = entity.to_dict()
+                if entity_type == "clip":
+                    record.update(trackId=track_id, sourceName=searchable)
+                found.append({key: record[key] for key in selected})
+        if require_unique and match_count > 1:
+            raise EditError(
+                ErrorCode.AMBIGUOUS_MATCH,
+                f"project_lookup matched {match_count} {entity_type} entities. "
+                "Narrow by time or an explicitly chosen entityId before editing; "
+                "limit does not disambiguate matches.",
+            )
         return {"projectId": project.project_id, "revision": project.revision,
-                "entityType": entity_type, "items": found[:limit],
-                "hasMore": len(found) > limit}
+                "entityType": entity_type, "items": found,
+                "hasMore": match_count > limit,
+                "matchCount": match_count, "ambiguous": match_count > 1}
 
     # ------------------------------------------------------------------
     # Agent 编辑租约：协调“可见但只读”，智能决策仍在外部 Agent。
@@ -1797,10 +1827,54 @@ class EditService:
                 "expiresAt": now + ttl,
                 "acquiredAt": current["acquiredAt"] if current else now,
             }
+            if current is None:
+                self._lease_review_boundaries[project_id] = (
+                    len(self._events.get(project_id, [])), self.get_project(project_id).revision)
             self._edit_leases[project_id] = lease
             return dict(lease)
         except EditLeaseConflict as e:
             raise self._lease_failure(e) from e
+
+    @_serialize_memory_lease
+    def review_edit_lease(self, project_id: str, lease_id: str, limit: int = 20) -> dict:
+        """Bounded revision summaries, not payloads or a complete audit of side effects."""
+        if not isinstance(lease_id, str) or not lease_id.strip():
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "leaseId is required")
+        if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 50:
+            raise EditError(ErrorCode.INVALID_ARGUMENT, "limit must be an integer from 1 to 50")
+        if self._store is not None:
+            try:
+                result = self._store.review_edit_lease(project_id, lease_id, limit)
+            except EditLeaseConflict as exc:
+                raise self._lease_failure(exc) from exc
+        else:
+            current = self.get_edit_lease(project_id)
+            if current is None or current["leaseId"] != lease_id:
+                raise EditError(ErrorCode.EDIT_LEASE_INVALID, "Edit lease changed or expired. Refresh the project.")
+            boundary = self._lease_review_boundaries.get(project_id)
+            events = self._events.get(project_id, [])[boundary[0]:] if boundary else []
+            result = dict(available=boundary is not None, acquiredRevision=boundary[1] if boundary else None,
+                          revision=self.get_project(project_id).revision,
+                          events=[e.to_dict() for e in events[-limit:]], hasMore=len(events) > limit)
+        # Whitelist metadata: changedEntities can contain caption text, paths, or
+        # nested snapshots. Never return those payloads from this review view.
+        def summary(event):
+            counts: dict[tuple[str, str], int] = {}
+            entities = event.get("changedEntities", [])
+            for entity in entities:
+                def label(key):
+                    value = str(entity.get(key, "other"))
+                    return value if len(value) <= 64 and value.replace("_", "").replace(".", "").isalnum() else "other"
+                key = (label("type"), label("change"))
+                if key not in counts and len(counts) >= 12:
+                    key = ("other", "other")
+                counts[key] = counts.get(key, 0) + 1
+            return dict(previousRevision=event.get("previousRevision", ""),
+                        revision=event.get("revision", ""), commandId=str(event.get("commandId", ""))[:256],
+                        entityCount=len(entities),
+                        entityKinds=[dict(type=k[0], change=k[1], count=v) for k, v in counts.items()])
+        result["changes"] = [summary(e) for e in result.pop("events")]
+        return dict(projectId=project_id, leaseId=lease_id, **result)
 
     @_serialize_memory_lease
     def renew_edit_lease(self, project_id: str, lease_id: str,
@@ -2043,7 +2117,9 @@ class EditService:
                             "use command_apply to run this operation explicitly")
         candidate = copy.deepcopy(proj)
         try:
+            self._enable_signed_clocks(candidate)
             changed = handler(candidate, command.payload)
+            self._enable_signed_clocks(candidate)
         except EditError:
             raise
         except Exception as e:
@@ -2339,7 +2415,9 @@ class EditService:
         # ---- 3) 候选副本执行（A03：异常/校验失败零污染）----
         candidate = copy.deepcopy(proj)
         try:
+            self._enable_signed_clocks(candidate)
             changed = handler(candidate, command.payload)
+            self._enable_signed_clocks(candidate)
         except EditError:
             raise
         except Exception as e:  # handler 内部畸形输入（如分母 0）→ 不污染状态
@@ -2495,7 +2573,9 @@ class EditService:
         for index, operation in enumerate(operations):
             command_type = operation["type"]
             try:
+                self._enable_signed_clocks(proj)
                 entries = self._handlers[command_type](proj, operation["payload"])
+                self._enable_signed_clocks(proj)
             except EditError as error:
                 raise EditError(error.code,
                                 f"edit.batch command {index} ({command_type}): {error.message}",
@@ -2988,49 +3068,22 @@ class EditService:
                 changed.append({"type": "clip", "id": c.id, "change": "deleted",
                                 "reason": "overwritten"})
                 continue
-            # 左端相交：裁掉尾部 → 保留 [cs, start)
+            from cutvoke.editing.timeline_ops import crop_clip
+            # Use the same copy-and-rebase contract as clip.split: manual lanes,
+            # effect windows and reverse/freeze source maps must move together.
             if cs < start and ce <= end:
-                if c.speed_curve is not None:
-                    self._crop_curve_clip(c, cs, start)
-                else:
-                    c.timeline_end = start
-                kept.append(c)
+                kept.append(crop_clip(self, c, cs, start))
                 changed.append({"type": "clip", "id": c.id, "change": "trimmed",
                                 "edge": "end", "to": start.to_json()})
                 continue
-            # 右端相交：裁掉头部 → 保留 [end, ce)
             if cs >= start and ce > end:
-                # 头部被吃掉，源内入点随之前移（保持画面内容与时间线对齐）
-                if c.speed_curve is not None:
-                    self._crop_curve_clip(c, end, ce)
-                else:
-                    c.source_start = c.source_start + (end - c.timeline_start) * c.speed
-                    c.timeline_start = end
-                kept.append(c)
+                kept.append(crop_clip(self, c, end, ce))
                 changed.append({"type": "clip", "id": c.id, "change": "trimmed",
                                 "edge": "start", "to": end.to_json()})
                 continue
-            # 跨越：拆成左右两段
-            left = c
-            if c.speed_curve is not None:
-                right = copy.deepcopy(c)
-                right.id = new_id("clip")
-                self._crop_curve_clip(right, end, ce)
-                self._crop_curve_clip(left, cs, start)
-            else:
-                source_at = c.source_start + (end - c.timeline_start) * c.speed
-                right = Clip(id=new_id("clip"), asset_ref=c.asset_ref,
-                             timeline_start=end, timeline_end=ce,
-                             source_start=source_at, speed=c.speed,
-                             preserve_pitch=c.preserve_pitch,
-                             effects=list(c.effects), linked=c.linked,
-                             attached_to_clip_id=c.attached_to_clip_id,
-                             hidden=c.hidden,
-                             keyframes={k: list(v) for k, v in c.keyframes.items()},
-                             volume=c.volume, fade_in=c.fade_in, fade_out=c.fade_out,
-                             pitch=c.pitch, freeze_at=c.freeze_at, nested=c.nested,
-                             role=c.role)
-                left.timeline_end = start
+            left = crop_clip(self, c, cs, start)
+            right = crop_clip(self, c, end, ce)
+            right.id = new_id("clip")
             kept.append(left)
             kept.append(right)
             changed.append({"type": "clip", "id": c.id, "change": "split",
@@ -3059,28 +3112,14 @@ class EditService:
                                 "to": c.timeline_start.to_json()})
             elif c.timeline_end > at:
                 # 插入点落在片段内部：切开，后半段右移 dur
-                if c.speed_curve is not None:
-                    old_start, old_end = c.timeline_start, c.timeline_end
-                    right = copy.deepcopy(c)
-                    right.id = new_id("clip")
-                    self._crop_curve_clip(right, at, old_end)
-                    right.timeline_start = right.timeline_start + dur
-                    right.timeline_end = right.timeline_end + dur
-                    self._crop_curve_clip(c, old_start, at)
-                else:
-                    source_at = c.source_start + (at - c.timeline_start) * c.speed
-                    right = Clip(id=new_id("clip"), asset_ref=c.asset_ref,
-                                 timeline_start=at + dur, timeline_end=c.timeline_end + dur,
-                                 source_start=source_at, speed=c.speed,
-                                 preserve_pitch=c.preserve_pitch,
-                                 effects=list(c.effects), linked=c.linked,
-                                 attached_to_clip_id=c.attached_to_clip_id,
-                                 hidden=c.hidden,
-                                 keyframes={k: list(v) for k, v in c.keyframes.items()},
-                                 volume=c.volume, fade_in=c.fade_in, fade_out=c.fade_out,
-                                 pitch=c.pitch, freeze_at=c.freeze_at, nested=c.nested,
-                                 role=c.role)
-                    c.timeline_end = at
+                from cutvoke.editing.timeline_ops import crop_clip
+                old_start, old_end = c.timeline_start, c.timeline_end
+                left = crop_clip(self, c, old_start, at)
+                right = crop_clip(self, c, at, old_end)
+                right.id = new_id("clip")
+                right.timeline_start += dur
+                right.timeline_end += dur
+                track.clips[track.clips.index(c)] = left
                 track.clips.append(right)
                 changed.append({"type": "clip", "id": c.id, "change": "split",
                                 "edge": "end", "to": at.to_json()})
@@ -3090,6 +3129,18 @@ class EditService:
                                 "from": (at + dur).to_json()})
         track.clips = sorted(track.clips, key=lambda x: x.timeline_start)
         return changed
+
+    @staticmethod
+    def _enable_signed_clocks(project):
+        EditService._require_current_format(project)
+        def enable(sequence):
+            for track in sequence.tracks:
+                for clip in track.clips:
+                    clip.keyframe_time_domain = "signed-local"
+                    if clip.nested is not None:
+                        enable(clip.nested)
+        for sequence in project.sequences:
+            enable(sequence)
 
     def _h_clip_trim(self, proj: Project, p: dict) -> list[dict]:
         clip_id = p["clipId"]
@@ -3125,6 +3176,7 @@ class EditService:
                     if "sourceStart" in p:
                         clip.source_start = Rational.from_json(**p["sourceStart"])
                     self._assert_clip_within_source(clip)
+                    shift_manual_keyframes(clip, clip.timeline_start-old_start)
                     self._rebase_effect_ranges(
                         clip, old_start, old_end, clip.timeline_start, clip.timeline_end)
                     changed = [{"type": "clip", "id": clip_id,
@@ -3225,10 +3277,7 @@ class EditService:
         dest_track = src_track
         if "trackId" in p and p["trackId"] != src_track.id:
             tid = p["trackId"]
-            for track in proj.sequence.tracks:
-                if track.id == tid:
-                    dest_track = track
-                    break
+            dest_track = next((track for track in proj.sequence.tracks if track.id == tid), None)
             if dest_track is None:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 f"target track not found: {tid}")
@@ -3945,10 +3994,15 @@ class EditService:
                    "-ss", f"{s:.6f}", "-to", f"{e:.6f}",
                    "-acodec", "pcm_s16le", "-ar", "44100", out_path]
             try:
-                subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+                completed = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
             except subprocess.TimeoutExpired as ex:
                 raise EditError(ErrorCode.INVALID_ARGUMENT,
                                 f"audio.splitSentences ffmpeg timeout: {ex}") from ex
+            if completed.returncode != 0:
+                raise EditError(
+                    ErrorCode.INVALID_ARGUMENT,
+                    f"audio.splitSentences failed at segment {cap['index']} "
+                    f"(ffmpeg exit code {completed.returncode})")
             segments_out.append({
                 "index": cap["index"],
                 "path": out_path,
@@ -4445,7 +4499,7 @@ class EditService:
                             if key.id in selected:
                                 matched.add(key.id)
                                 key.time = anchor + (key.time-anchor)*scale + offset
-                            if key.time < Rational.of(0) or key.time > clip.duration:
+                            if key.id in selected and (key.time < Rational.of(0) or key.time > clip.duration):
                                 raise EditError(ErrorCode.INVALID_ARGUMENT, "retimed keyframe is outside the clip")
                             stamps.append(key.time.to_fraction())
                         if len(stamps) != len(set(stamps)):

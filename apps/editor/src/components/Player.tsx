@@ -1,3 +1,4 @@
+import { recordPreviewStop, type PreviewStopReason, type PreviewStopSnapshot } from "../lib/previewStopEvidence";
 import { InteractionStatus } from "./InteractionStatus";
 import { InteractiveScene } from "./InteractiveScene";
 import { InteractiveAudio } from "./InteractiveAudio";
@@ -103,6 +104,8 @@ export function Player() {
   const playingRef = useRef(playing);
   playingRef.current = playing;
   const nativeAudioClockRef = useRef<(() => number) | null>(null);
+  const nativeAudioPositionRef = useRef<(() => number | null) | null>(null);
+  const onNativeAudioPosition = useCallback((position: (() => number | null) | null) => { nativeAudioPositionRef.current = position; }, []);
   const onNativeAudioClock = useCallback((clock: (() => number) | null) => { nativeAudioClockRef.current = clock; }, []);
   const audioTransportRef = useRef({ active: false, time: 0, started: 0, clock: null as (() => number) | null });
   const scrubbingRef = useRef(state.scrubbing);
@@ -215,18 +218,26 @@ export function Player() {
   const windowBoundsRef = useRef({ start: windowStart, end: windowEnd, source: videoUrl });
   windowBoundsRef.current = { start: windowStart, end: windowEnd, source: videoUrl };
   const auditionBoundary = useRef<(time: number) => number | null>(() => null);
-  const audioPlaybackClock = useCallback((initialize = true) => {
+  const audioPlaybackClock = useCallback((initialize = false, reset = false) => {
+    if (reset) { audioTransportRef.current.active = false; return { time: playheadRef.current, playing: false }; }
     const bounded = (time: number, running: boolean) => {
       const end = auditionBoundary.current(time);
       return end === null ? { time, playing: running } : { time: end, playing: false };
     };
+    // Deadline observation must consider eligible native media cursors as well as the
+    // graph clock. They can differ across native media elements under load.
+    const audibleTime = playingRef.current ? nativeAudioPositionRef.current?.() : null;
+    if (audibleTime != null) {
+      const end = auditionBoundary.current(audibleTime);
+      if (end !== null) return { time: end, playing: false };
+    }
     // With a ready native mix, audio owns the transport. Video decoding and
     // segment handoffs must not pause or rewind a healthy sound stream.
-    if (mode === "video" && (nativeAudioRef.current || audioTransportRef.current.active) && playingRef.current && !scrubbingRef.current) {
+    if (mode === "video" && (nativeAudioRef.current || audioTransportRef.current.active || (initialize && nativeAudioClockRef.current)) && playingRef.current && !scrubbingRef.current) {
       const transport = audioTransportRef.current;
       const source = nativeAudioClockRef.current;
       const now = source?.() ?? performance.now() / 1000;
-      // A deadline observes progress; it must not start this clock before the
+      // Observers (publication, video and audition) must not start this clock before the
       // native-audio update gets its first frame and actually starts voices.
       if (!transport.active && !initialize) return { time: playheadRef.current, playing: false };
       if (!transport.active || transport.clock !== source) {
@@ -335,6 +346,25 @@ export function Player() {
     dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: msg("播放结束") });
   }, []);
 
+  // Read refs only when explicitly enabled by the acceptance observer. Never
+  // invoke audioPlaybackClock here: reading it can initialize/stop transport.
+  const stopEvidenceScope = useRef({ end: mediaEndSecs, prepared: usePrepared });
+  stopEvidenceScope.current = { end: mediaEndSecs, prepared: usePrepared };
+  const endPlayWithEvidence = useCallback((reason: PreviewStopReason,
+    decision: () => Pick<PreviewStopSnapshot, "observedTime" | "decisionEnd" | "decisionWindowStart" | "decisionWindowEnd">) => {
+    recordPreviewStop(reason, () => ({
+      ...decision(), ...stopEvidenceScope.current, playhead: playheadRef.current,
+      reportedVideoTime: reportedVideoTimeRef.current,
+      windowStart: windowBoundsRef.current.start, windowEnd: windowBoundsRef.current.end,
+      audioActive: audioTransportRef.current.active, audioAnchorTime: audioTransportRef.current.time,
+      nativeAudioReady: nativeAudioRef.current, playing: playingRef.current,
+    }));
+    endPlay();
+  }, [endPlay]);
+  const onImageEnded = useCallback(() => endPlayWithEvidence("image-end", () => ({
+    observedTime: null, decisionEnd: null, decisionWindowStart: null, decisionWindowEnd: null,
+  })), [endPlayWithEvidence]);
+
   const { frameUrl, frameState, frameError, scheduleFrame, reset: resetFrames } = usePreviewFrame({
     aspect: (project?.sequence.width || 1920) / (project?.sequence.height || 1080),
     projectId: currentId,
@@ -343,7 +373,7 @@ export function Player() {
     totalSecs: mediaEndSecs,
     playheadRef,
     dispatchRef,
-    onEnded: endPlay,
+    onEnded: onImageEnded,
   });
   useEffect(() => {
     if (mode === "image" && currentId) scheduleFrame(decodePlayhead);
@@ -465,14 +495,17 @@ export function Player() {
     }
     setVideoTime(mediaEndSecs);
     dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: mediaEndSecs });
-    endPlay();
-  }, [endPlay, mediaEndSecs, windowEnd]);
+    endPlayWithEvidence("video-ended", () => ({ observedTime: windowStart + event.currentTarget.currentTime,
+      decisionEnd: mediaEndSecs, decisionWindowStart: windowStart, decisionWindowEnd: windowEnd }));
+  }, [endPlayWithEvidence, mediaEndSecs, windowStart, windowEnd]);
 
   const onTimeUpdate = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     const v = event.currentTarget;
     if (v !== videoRef.current) return;
     if (scrubbingRef.current) return;
-    if (audioTransportRef.current.active && playingRef.current) return;
+    // A ready native mix owns the start even before its asynchronous startup
+    // commits. Preview video can already advance while the audio RAF is delayed.
+    if ((nativeAudioRef.current || audioTransportRef.current.active) && playingRef.current) return;
     const absoluteTime = windowStart + v.currentTime;
     // A native preview can be stale or longer than the current editable sequence.
     // The editor's content boundary is authoritative for both playback and scrubbing.
@@ -500,7 +533,8 @@ export function Player() {
       dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: mediaEndSecs });
       pauseStatusRef.current = tr("播放结束");
       v.pause();
-      endPlay();
+      endPlayWithEvidence("video-time-end", () => ({ observedTime: absoluteTime,
+        decisionEnd: mediaEndSecs, decisionWindowStart: windowStart, decisionWindowEnd: windowEnd }));
       return;
     }
     const boundedTime = Math.min(mediaEndSecs, Math.max(0, absoluteTime));
@@ -512,7 +546,7 @@ export function Player() {
       dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: boundedTime });
       suppressSeek.current = false;
     }
-  }, [endPlay, mediaEndSecs, mode, windowStart, windowEnd, usePrepared]);
+  }, [endPlayWithEvidence, mediaEndSecs, mode, windowStart, windowEnd, usePrepared]);
   const onPlay = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current) return;
     setShowColorBefore(false);
@@ -647,13 +681,18 @@ export function Player() {
             video.currentTime = time - bounds.start;
           if (video.paused) requestVideoPlay(video);
         }
-        if (time >= mediaEndSecs) { video?.pause(); endPlay(); return; }
+        if (time >= mediaEndSecs) {
+          video?.pause();
+          endPlayWithEvidence("audio-clock-end", () => ({ observedTime: time,
+            decisionEnd: mediaEndSecs, decisionWindowStart: bounds.start, decisionWindowEnd: bounds.end }));
+          return;
+        }
       }
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [playing, nativeAudioReady, state.scrubbing, mode, audioPlaybackClock, mediaEndSecs, requestVideoPlay, endPlay]);
+  }, [playing, nativeAudioReady, state.scrubbing, mode, audioPlaybackClock, mediaEndSecs, requestVideoPlay, endPlayWithEvidence]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -740,7 +779,9 @@ export function Player() {
     if (mode === "video" && v) {
       if (v.paused) {
         if (mediaEndSecs <= 0) return;
-        if (playhead >= mediaEndSecs - 0.01 || windowStart + v.currentTime >= mediaEndSecs - 0.01) {
+        // Explicit seeks update the timeline before the decoder catches up.
+        // A stale video cursor at its old endpoint must not restart from zero.
+        if (playhead >= mediaEndSecs - 0.01) {
           if (windowStart === 0) v.currentTime = 0;
           reportedVideoTimeRef.current = 0;
           setVideoTime(0);
@@ -784,7 +825,7 @@ export function Player() {
   auditionBoundary.current = useTranscriptAudition({
     projectId: currentId, sequenceId: project?.sequence.id, revision: state.revision,
     end: mediaEndSecs, playhead, scrubbing: state.scrubbing, video: videoRef,
-    windowStart, clock: audioPlaybackClock, seekVersion: state.playheadSeekVersion,
+    windowStart, clock: audioPlaybackClock, deadlinePosition: () => playingRef.current ? nativeAudioPositionRef.current?.() ?? null : null, seekVersion: state.playheadSeekVersion,
     play: () => {
       // An audition is one bounded pass, including when a shorter transport
       // loop was already enabled. Update the ref before the next clock tick.
@@ -992,7 +1033,7 @@ export function Player() {
             <span className="player__compare-label">{tr("正在生成调色前画面…")}</span>
           ) : null}
           {!state.opening && currentId && !showColorBefore && mode === "video" ? <InteractiveScene playing={playing} onReady={setNativeReady} /> : null}
-          {!state.opening && currentId ? <InteractiveAudio playing={playing} onReady={setNativeAudioReady} playbackClock={audioPlaybackClock} onClockSource={onNativeAudioClock} /> : null}
+          {!state.opening && currentId ? <InteractiveAudio playing={playing} transportMode={mode} onReady={setNativeAudioReady} playbackClock={audioPlaybackClock} onClockSource={onNativeAudioClock} onPositionSource={onNativeAudioPosition} /> : null}
           <InteractionStatus />
           <TransformCanvasOverlay />
           <MaskCanvasOverlay />

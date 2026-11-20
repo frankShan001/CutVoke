@@ -2430,15 +2430,19 @@ test("prepared playback follows the ruler, stops at the end, and survives an Age
   await ruler.press("End");
   await expect(ruler).toHaveAttribute("aria-valuenow", "15");
   await page.getByRole("button", { name: "停止" }).click();
-  await page.mouse.click(bounds!.x + 14.8 * 40, bounds!.y + bounds!.height / 2);
+  // Use the ruler's frame-aware navigation rather than cached pixel bounds:
+  // layout/scroll changes after Stop must not turn the near-end seek into a no-op.
+  await ruler.press("End");
+  for (let frame = 0; frame < 3; frame++) await ruler.press("ArrowLeft");
+  await expect.poll(async () => Number(await ruler.getAttribute("aria-valuenow"))).toBeCloseTo(14.8, 4);
   await page.getByRole("button", { name: "播放", exact: true }).click();
   await expect(page.getByRole("button", { name: "播放", exact: true })).toBeVisible({ timeout: 8_000 });
   await expect(ruler).toHaveAttribute("aria-valuenow", "15");
 
   await page.reload();
-  if (await page.getByRole("button", { name: `打开工程 ${name}` }).isVisible()) {
-    await page.getByRole("button", { name: `打开工程 ${name}` }).click();
-  }
+  // Reload starts on Home; await the async project list instead of making a
+  // one-shot isVisible decision before its response has arrived.
+  await page.getByRole("button", { name: `打开工程 ${name}`, exact: true }).click();
   await page.getByRole("tablist", { name: "创作域" }).getByRole("tab", { name: "字幕" }).click();
   await expect(page.getByRole("button", { name: "选择字幕 caption-one" }))
     .toContainText("AI 已修正");
@@ -2836,6 +2840,20 @@ test("video transforms stay in sync between canvas and inspector while audio hid
   await expect(keyframeStatus).toContainText("X 1 个");
   await page.getByRole("button", { name: "删除水平位置 X关键帧 t=0.00s" }).click();
   await expect.poll(transformKeyframeCount).toBe(0);
+  // The server may persist a move before its response reaches the UI. Start
+  // the following resize from the optimistic geometry while that ack is late.
+  let delayedMoveAck = false;
+  let releaseMoveAck!: () => void;
+  const moveAckGate = new Promise<void>(resolve => { releaseMoveAck = resolve; });
+  await page.route(`**/api/v1/projects/${id}/commands`, async route => {
+    const command = route.request().postDataJSON();
+    if (!delayedMoveAck && command.type === "effect.update" && Number(command.payload?.params?.position?.x) > 12) {
+      delayedMoveAck = true;
+      const response = await route.fetch();
+      await moveAckGate;
+      await route.fulfill({ response });
+    } else await route.continue();
+  });
   const moveHandle = page.getByRole("button", { name: "拖动画面位置" });
   const outlineBox = await moveHandle.boundingBox();
   expect(outlineBox).toBeTruthy();
@@ -2853,6 +2871,16 @@ test("video transforms stay in sync between canvas and inspector while audio hid
   expect(handleBox).toBeTruthy();
   await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
   await page.mouse.down();
+  await page.mouse.move(handleBox!.x + handleBox!.width / 2 - 20, handleBox!.y + handleBox!.height / 2 - 15, { steps: 2 });
+  const moveResponse = page.waitForResponse(response => {
+    if (!response.url().endsWith(`/projects/${id}/commands`) || response.request().method() !== "POST") return false;
+    const command = response.request().postDataJSON();
+    return command.type === "effect.update" && Number(command.payload?.params?.position?.x) === movedX;
+  });
+  expect(delayedMoveAck).toBe(true);
+  releaseMoveAck();
+  await (await moveResponse).finished();
+  await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   await page.mouse.move(handleBox!.x + handleBox!.width / 2 - 60, handleBox!.y + handleBox!.height / 2 - 45, { steps: 6 });
   await page.mouse.up();
   await expect.poll(async () => (await readTransform())?.scale || 1).toBeGreaterThan(1.1);
@@ -3338,7 +3366,7 @@ test("speed curve can be edited, undone, reopened, and exported from the Web edi
   unlinkSync(outputPath);
 });
 
-test("attached overlays follow video moves, Alt keeps them in place, and unlinking persists", async ({ page, request }) => {
+test("attached overlays follow video moves, Alt keeps them in place, and unlinking persists", async ({ page, request }, testInfo) => {
   const fixture = await readProject(request, "e2e-fixture");
   const sourcePath = fixture.sequence.tracks[0].clips[0].assetRef.sourcePath;
   const id = `attached-move-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -3392,10 +3420,44 @@ test("attached overlays follow video moves, Alt keeps them in place, and unlinki
     if (holdAlt) await page.keyboard.up("Alt");
   };
 
+  // Observe only this synthetic scenario's status categories; never collect
+  // arbitrary status text (which can contain paths) or change product timing.
+  await page.evaluate(() => {
+    const node = document.querySelector(".statusbar__msg");
+    if (!node) throw new Error("Status bar missing before attachment move");
+    const events: { at: number; status: string }[] = [];
+    const started = performance.now();
+    const capture = () => {
+      const text = node.textContent || "";
+      const status = text === "已移动片段，1 个关联片段同步移动" ? "attached-move-success"
+        : text === "就绪" ? "ready"
+        : text === "连续预览失败，已切换到单帧预览" ? "preview-fallback"
+        : "other";
+      if (events.length < 80) events.push({ at: performance.now() - started, status });
+    };
+    const observer = new MutationObserver(capture);
+    observer.observe(node, { childList: true, characterData: true, subtree: true });
+    capture();
+    (window as any).__attachmentStatusDiagnostics = { events, observer };
+  });
   // A two-second clip shifted by half its width moves exactly one second.
-  await moveBy(0.5);
-  await expect.poll(readPositions).toEqual({ video: 1, sticker: 1.5, attachedTo: "parent-video" });
-  await expect(page.getByText("已移动片段，1 个关联片段同步移动")).toBeVisible();
+  try {
+    await moveBy(0.5);
+    await expect.poll(readPositions).toEqual({ video: 1, sticker: 1.5, attachedTo: "parent-video" });
+    await expect(page.getByText("已移动片段，1 个关联片段同步移动")).toBeVisible();
+  } finally {
+    const events = await page.evaluate(() => {
+      const record = (window as any).__attachmentStatusDiagnostics;
+      record?.observer.disconnect();
+      delete (window as any).__attachmentStatusDiagnostics;
+      return record?.events || [];
+    }).catch(() => []);
+    try {
+      await testInfo.attach("attachment-status-ordering", {
+        body: JSON.stringify(events), contentType: "application/json",
+      });
+    } catch { /* Diagnostic attachment must not replace the original assertion. */ }
+  }
   await page.getByRole("button", { name: "撤销" }).click();
   await expect.poll(readPositions).toEqual({ video: 0, sticker: 0.5, attachedTo: "parent-video" });
   await page.getByRole("button", { name: "重做" }).click();
@@ -3413,13 +3475,22 @@ test("attached overlays follow video moves, Alt keeps them in place, and unlinki
 });
 
 test("stale background preparation reconciles without replacing successful edit feedback", async ({ page, request }) => {
-  for (const transport of ["submission", "poll"] as const) {
+  for (const transport of ["submission", "poll", "poll-before-ack"] as const) {
     const { id, name } = await createProject(request);
     let release!: () => void;
     const gate = new Promise<void>(resolve => { release = resolve; });
     const submitted: string[] = [];
     let conflict = 0;
     let renderFailure: "failed" | "cancelled" | null = null;
+    let releaseCommand!: () => void, committed!: () => void;
+    const commandGate = new Promise<void>(resolve => { releaseCommand = resolve; });
+    const stored = new Promise<void>(resolve => { committed = resolve; });
+    if (transport === "poll-before-ack") await page.route(`**/projects/${id}/commands`, async route => {
+      if (route.request().postDataJSON().type !== "caption.remove") return route.continue();
+      const response = await route.fetch();
+      expect(response.ok()).toBeTruthy();
+      committed(); await commandGate; await route.fulfill({ response });
+    });
     const jobId = `reconciled-${id}`;
     const running = { jobId, state: "running", phase: "rendering", completedWindows: 0,
       totalWindows: 1, progress: 0, cached: false };
@@ -3433,7 +3504,7 @@ test("stale background preparation reconciles without replacing successful edit 
       } else await route.fulfill({ status: 202, json: running });
     });
     await page.route(`**/preview-jobs/${jobId}`, async route => {
-      if (transport === "poll" && submitted.length === 1) {
+      if (transport !== "submission" && submitted.length === 1) {
         await gate;
         return route.fulfill({ json: { ...running, state: "cancelled",
           error: "preview superseded by a newer edit" } });
@@ -3451,7 +3522,8 @@ test("stale background preparation reconciles without replacing successful edit 
       await page.locator("#creative-domain-caption").click();
       await page.getByRole("button", { name: "删除字幕 caption-one", exact: true }).click();
       const feedback = page.locator(".statusbar__msg");
-      await expect(feedback).toHaveText("已删除字幕");
+      if (transport === "poll-before-ack") await stored;
+      else await expect(feedback).toHaveText("已删除字幕");
       const latest = await readProject(request, id);
       expect(latest.revision).not.toBe(submitted[0]);
       expect(latest.sequence.captions).toHaveLength(0);
@@ -3461,13 +3533,16 @@ test("stale background preparation reconciles without replacing successful edit 
       release();
       if (transport === "submission") await expect.poll(() => conflict).toBe(409);
       await expect.poll(() => submitted).toEqual([submitted[0], latest.revision]);
+      // The old job must reconcile while the command ACK is still withheld.
+      // No client snapshot/revision has been delivered by that command yet.
+      releaseCommand();
       await expect(feedback).toHaveText("已删除字幕");
       await expect(page.getByText("工程已更新，请重新加载", { exact: true })).toHaveCount(0);
       expect(await readProject(request, id)).toEqual(latest);
       renderFailure = transport === "submission" ? "failed" : "cancelled";
       await expect(feedback).toHaveText(transport === "submission"
         ? "current preview decoder failure" : "current preview cancellation");
-    } finally { release(); }
+    } finally { release(); releaseCommand(); }
   }
 });
 
@@ -3898,8 +3973,48 @@ test("text and freehand masks edit on canvas and persist through undo and reopen
   await page.getByRole("button", { name: "撤销" }).click();
   await expect.poll(async () => Number(((await maskParams()).points as Array<{ x: number }>)[0].x))
     .toBeCloseTo(firstPointX, 3);
-  await page.getByRole("button", { name: "重做" }).click();
-  await expect.poll(async () => (await maskParams()).points).toEqual(pointsAfterAnchorEdit);
+  // The API can commit redo before the editor receives its refreshed snapshot.
+  // Hold that snapshot to prove the distinction, then drag only the displayed revision.
+  const beforeAnchorRedo = await readProject(request, id);
+  await expect(overlay).toHaveAttribute("data-source-revision", beforeAnchorRedo.revision);
+  await expect.poll(() => firstAnchor.evaluate(node => {
+    const circle = node as SVGCircleElement;
+    return circle.cx.baseVal.value / circle.ownerSVGElement!.viewBox.baseVal.width;
+  })).toBeCloseTo(firstPointX, 6);
+  const redoneRevision = String(BigInt(beforeAnchorRedo.revision) + 1n);
+  let releaseAnchorRedo!: () => void;
+  const anchorRedoGate = new Promise<void>(resolve => { releaseAnchorRedo = resolve; });
+  let heldAnchorRedo = 0;
+  const anchorSyncPattern = `**/projects/${id}/sync?*`;
+  await page.route(anchorSyncPattern, async route => {
+    const response = await route.fetch();
+    const snapshot = await response.json();
+    if (!snapshot.unchanged && snapshot.revision === redoneRevision) {
+      heldAnchorRedo++;
+      await anchorRedoGate;
+    }
+    await route.fulfill({ response });
+  });
+  try {
+    await page.getByRole("button", { name: "重做" }).click();
+    await expect.poll(async () => (await maskParams()).points).toEqual(pointsAfterAnchorEdit);
+    await expect.poll(() => heldAnchorRedo).toBeGreaterThan(0);
+    await expect(overlay).toHaveAttribute("data-source-revision", beforeAnchorRedo.revision);
+    releaseAnchorRedo();
+    await expect(overlay).toHaveAttribute("data-source-revision", redoneRevision);
+    const restoredAnchor = (pointsAfterAnchorEdit as Array<{ x: number; y: number }>)[0];
+    for (const axis of ["x", "y"] as const) {
+      await expect.poll(() => firstAnchor.evaluate((node, coordinate) => {
+        const circle = node as SVGCircleElement;
+        const viewBox = circle.ownerSVGElement!.viewBox.baseVal;
+        return coordinate === "x" ? circle.cx.baseVal.value / viewBox.width
+          : circle.cy.baseVal.value / viewBox.height;
+      }, axis)).toBeCloseTo(restoredAnchor[axis], 6);
+    }
+  } finally {
+    releaseAnchorRedo();
+    await page.unrouteAll({ behavior: "wait" });
+  }
 
   const anchorBox = await firstAnchor.boundingBox();
   expect(anchorBox).toBeTruthy();
