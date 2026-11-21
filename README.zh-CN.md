@@ -16,7 +16,7 @@
 
 [**English**](README.md) | [**简体中文**](README.zh-CN.md)
 
-[下载桌面版](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [v0.3.6 最新动态](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [观看剪辑案例](examples/showcases/) · [接入 AI Agent](docs/user/agent-skill.zh-CN.md) · [贡献社区特效](CONTRIBUTING.zh-CN.md)
+[下载桌面版](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [v0.3.6 最新动态](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [观看剪辑案例](examples/showcases/) · [接入 AI Agent](docs/user/agent-skill.zh-CN.md) · [贡献社区特效](CONTRIBUTING.zh-CN.md) · [保存自己的特效预设](docs/user/effect-contributing.zh-CN.md#边剪辑边创作无需开发环境)
 
 </div>
 
@@ -249,6 +249,10 @@ cutvoke serve
 ## 社区特效共建与开源贡献指南
 
 CutVoke 的核心愿景之一，是打造一个**开放、透明、人人可复用的视频特效与创意素材生态**。在 CutVoke 中，转场、滤镜、动态标题和贴纸不再是加密封闭的二进制插件，而是存放在 [`effects/`](effects/) 与 [`resources/`](resources/) 下**可读、可参数化调节、可版本化管理的声明式配方（Recipes）**。
+
+### 边剪辑边保存特效预设
+
+接入 AI 编辑器后，可以把受支持的画面处理或动效保存为可复用的特效模块，无需搭建开发环境。[创作者指南](docs/user/effect-contributing.zh-CN.md#边剪辑边创作无需开发环境)介绍如何在其他片段中复用，或导出只含设置的 ZIP。ZIP 只保存在本地，不含工程素材和正文；是否公开投稿由你另行决定。新增特效算法请走下方的开发者流程。
 
 ### 特别征集：欢迎贡献可复用的视觉特效！
 
