@@ -16,7 +16,7 @@
 
 [**English**](README.md) | [**简体中文**](README.zh-CN.md)
 
-[Download Desktop App](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [What's New in v0.3.6](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [Watch Showcases](examples/showcases/) · [Connect AI Agents](docs/user/LOCAL_DELIVERY_MCP.md) · [Contribute Effects](CONTRIBUTING.md)
+[Download Desktop App](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [What's New in v0.3.6](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [Watch Showcases](examples/showcases/) · [Connect AI Agents](docs/user/LOCAL_DELIVERY_MCP.md) · [Contribute Effects](CONTRIBUTING.md) · [Save your own effect preset](effects/README.md#create-while-editing-no-development-setup)
 
 </div>
 
@@ -249,6 +249,10 @@ Open `http://127.0.0.1:8787` in your browser. Windows users can alternatively ru
 ## Community Effects & Open-Source Contributions
 
 One of CutVoke's core design goals is building an **open, reusable ecosystem of video effects, transitions, motion titles, and creative assets**. Instead of locking effects inside compiled binary plugins, CutVoke defines effects as inspectable, parameterized recipes inside [`effects/`](effects/) and [`resources/`](resources/).
+
+### Save an effect preset while editing
+
+With a connected AI editor, ask it to save a supported look or motion treatment as a reusable effect module. You don't need a development environment. The [creator walkthrough](effects/README.md#create-while-editing-no-development-setup) shows how to reuse it on another clip or export a settings-only ZIP. The ZIP stays local and excludes project media and text; submitting it publicly is a separate choice. For new effect algorithms, use the developer route below.
 
 ### Especially Wanted: Contribute Reusable Effects!
 
