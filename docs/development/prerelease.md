@@ -30,6 +30,8 @@ On Windows, use `Get-FileHash -Algorithm SHA256 <file>` and compare every delive
 
 ## Installed-package smoke check
 
+The filenames below match main's current 0.3.5 source metadata, not the frozen v0.3.6 desktop release. Substitute the actual filenames produced by your candidate build; these examples do not claim a published wheel asset.
+
 Create a separate clean virtual environment, install the candidate wheel with its dependencies and run outside the source checkout:
 
 ```bash
@@ -60,7 +62,7 @@ FFmpeg source, extracts the shipped ZIP and actually starts `CutVoke.exe` on
 Windows. It validates GUI/health, offline resource integrity, stdio MCP,
 import/preview/export/full decode, persistence, cleanup and read-only data
 protection. It does not run an installer or modify global PATH/registry.
-The current unsigned Windows archive is a v0.3.5 prerelease asset; use its matching release metadata above. The linked originating verification JSON retains its historical 0.3.1 baseline. Human device,
+The current unsigned Windows archive is a v0.3.6 prerelease asset; use its matching release metadata above. The linked originating verification JSON retains its historical 0.3.1 baseline. Human device,
 native picker, GPU/audio and SmartScreen checks remain separate.
 
 ## Legacy Windows installer boundary
@@ -79,4 +81,4 @@ Return the exact filenames and hashes, originating SHA/CI, tested platforms, out
 
 先生成候选源码包/wheel、校验清单与版本说明草案，在干净环境安装并从源码包重建。候选包不是正式发行；`dirty:true` 的产物只供本地审查，公开前需从获准的干净提交重新构建。
 
-Windows 便携 ZIP 的当前下载为上方 v0.3.5 预发布；准确哈希、源提交和验收运行以同版本的 SHA256SUMS、BUILD-INFO.json 为准。基础使用无需安装或配置 Python/Node/系统 FFmpeg。该候选带完整许可与对应 FFmpeg 源码，未签名；0.3.1 原包与历史候选记录继续保留，不能用于校验 0.3.5。传统安装包和用户设备的人工体验仍需各自验收；正式 Release 需在核对具体成品后另行确认。
+Windows 便携 ZIP 的当前下载为上方 v0.3.6 预发布；准确哈希、源提交和验收运行以同版本的 SHA256SUMS、BUILD-INFO.json 为准。基础使用无需安装或配置 Python/Node/系统 FFmpeg。该候选带完整许可与对应 FFmpeg 源码，未签名；0.3.1 原包与历史候选记录继续保留，不能用于校验 0.3.6。传统安装包和用户设备的人工体验仍需各自验收；正式 Release 需在核对具体成品后另行确认。
