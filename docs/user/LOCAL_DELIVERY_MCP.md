@@ -4,9 +4,9 @@
 
 ## 已构建桌面发行包（Windows / macOS / Linux）
 
-下载与校验值见[安装说明](installation.md)，选择与系统架构一致的包。完整解压后，Windows 打开 `CutVoke.exe`，Mac 将 `CutVoke.app` 移到应用程序目录再打开，Linux x64 在目录运行 `./cutvoke`。这些包内置编辑器、冻结后端和 FFmpeg，基础剪辑无需另装 Python、Node 或 FFmpeg。
+当前桌面下载是 2026-11-16 发布的 [v0.3.6 冻结预览版](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6)，不是当前 main 的构建；该版本不包含主线后续加入的工程格式转换和缩略图跳转改动；工程格式转换与上文的旧工程库迁移到独立目录是两项不同的功能。下载与同版本校验文件见[安装说明](installation.md)，选择与系统架构一致的包。完整解压后，Windows 打开 `CutVoke.exe`，Mac 将 `CutVoke.app` 移到应用程序目录再打开，Linux x64 在目录运行 `./cutvoke`。这些包内置编辑器、冻结后端和 FFmpeg，基础剪辑无需另装 Python、Node 或 FFmpeg。
 
-Mac 需 macOS 13+，候选包没有 Developer ID 与公证，可能被 Gatekeeper 阻止；受阻时等待签名/公证版，不关闭安全控制。Linux 基线为 Ubuntu 22.04 x64 / glibc 2.35+，需要桌面系统库和可用沙箱，不使用 `--no-sandbox`。
+Mac 需 macOS 13+；v0.3.6 仅有 ad-hoc 完整性签名，没有 Developer ID 与公证，可能被 Gatekeeper 阻止。受阻时停止并保留具体警告，参阅[安装说明的签名与首次启动边界](installation.md#launch-the-current-macos-package)，不关闭安全控制。Linux 基线为 Ubuntu 22.04 x64 / glibc 2.35+，需要桌面系统库和可用沙箱，不使用 `--no-sandbox`。
 
 Windows 默认数据根目录是 exe 旁的 `CutVoke Data`；Mac 为 `~/Library/Application Support/CutVoke/`；Linux 为 `${XDG_DATA_HOME:-~/.local/share}/CutVoke/`。首次启动后，使用该根目录下 `profile/mcp-config.json` 中的绝对内置引擎命令配置 MCP。它与桌面使用同一工程库，无需系统 Python；移动程序后再次启动即可刷新命令路径。更新应用时保留数据与备份。自动 runner 验收不代表人工设备音频/GPU 或 Mac 隔离下载的验收。
 

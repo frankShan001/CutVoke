@@ -241,7 +241,10 @@ async function main() {
     await page.getByRole("button", { name: `打开工程 ${projectId}`, exact: true }).click();
     await page.getByRole("heading", { name: "时间线", exact: true }).waitFor();
     try {
-      report.previewPlayback = await verifyNativePreview(page, expect);
+      report.previewObserverDiagnostics = [];
+      report.previewPlayback = await verifyNativePreview(page, expect, {
+        onDiagnostic: diagnostic => report.previewObserverDiagnostics.push(diagnostic),
+      });
     } catch (error) {
       report.previewVideos = await page.locator("video").evaluateAll(videos => videos.map(v => ({
         className: v.className, hidden: v.hidden, visibility: getComputedStyle(v).visibility,
