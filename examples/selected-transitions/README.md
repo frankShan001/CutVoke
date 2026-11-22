@@ -11,8 +11,10 @@ Load `recipe.py` with `importlib.util.spec_from_file_location`, then call
 
 1. Select both sides of each wanted boundary. Only touching neighbors on the same
    video track qualify. Gaps, cross-track pairs and unselected cuts are untouched.
-2. Existing transitions are skipped, not replaced. Locked eligible boundaries and
-   stale selections fail before any command is sent.
+2. If any selected touching pair is on a locked video track, reject the entire
+   request before preview or execution, even if the right clip already has a
+   transition. On unlocked tracks, skip existing transitions without replacing
+   them. Stale selections also fail before any command is sent.
 3. Build a `Command(type='edit.batch', payload=payload, project_id=..., actor=...,
    expected_revision=snapshot.revision, command_id=...)`. Use the normal actor,
    lease and authorization flow; this helper grants no permissions.
@@ -45,8 +47,10 @@ idempotent delivery, single undo, whole-batch rollback on a late invalid boundar
 gaps, existing transitions, locks, stale selection, cross-track exclusion and the
 32-boundary limit. Synthetic path names are not opened; no personal media needed.
 
-中文：仅在同一视频轨道上、左右两片都被选中且首尾相接时添加转场；跳过
-已有转场，不覆盖。先 dry-run 展示目标及数量，再依照正常授权执行。
+中文：仅在同一视频轨道上、左右两片都被选中且首尾相接时添加转场。只要有
+一对这样的片段位于锁定轨道，整个请求就会在预览或执行前被拒绝，即使右侧
+片段已带转场。未锁定轨道上的已有转场会跳过，不覆盖。先 dry-run 展示目标
+及数量，再依照正常授权执行。
 最多 32 个边界为一个原子批次；超过时拒绝，不自动拆分。人工选择分批后，
 每批独立提交/撤销，后批失败不会撤销前批。此示例不调整音量/淡入淡出，
 也不保证渲染听感不变；测试仅验证命令行为，不替代实际预览与音视频验收。

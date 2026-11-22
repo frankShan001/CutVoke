@@ -69,6 +69,27 @@ class SelectedTransitionRecipeTests(unittest.TestCase):
         with self.assertRaises(ValueError): recipe.selected_transition_batch(self.project, ['0', '0'])
         with self.assertRaises(ValueError): recipe.selected_transition_batch(self.project, ['0', '4'])
 
+    def test_locked_selected_pair_with_existing_transition_rejects_whole_request(self):
+        locked_track = Track('other', 'video', [
+            Clip('other-left', AssetReference('image', 'synthetic.png'),
+                 Rational.of(0), Rational.of(1), Rational.of(0), keyframe_time_domain="signed-local"),
+            Clip('other-right', AssetReference('image', 'synthetic.png'),
+                 Rational.of(1), Rational.of(2), Rational.of(0), keyframe_time_domain="signed-local"),
+        ])
+        locked_track.clips[1].effects = [
+            {'effectId': 'cutvoke.transition.crossfade', 'params': {'duration': .4}}]
+        # The original unlocked track contributes an eligible command first.
+        self.project.sequence.tracks.append(locked_track)
+        selected = ['0', '1', 'other-left', 'other-right']
+        payload = recipe.selected_transition_batch(self.project, selected)
+        self.assertEqual([c['payload']['clipId'] for c in payload['commands']], ['1'])
+
+        locked_track.locked = True
+        before = copy.deepcopy(self.project.to_dict())
+        with self.assertRaisesRegex(ValueError, 'Selected boundary is on a locked track'):
+            recipe.selected_transition_batch(self.project, selected)
+        self.assertEqual(self.project.to_dict(), before)
+
     def test_no_cross_track_boundary_or_invalid_parameters(self):
         self.project.sequence.tracks.append(Track('other', 'video', [
             Clip('other-clip', AssetReference('image', 'synthetic.png'), Rational.of(1), Rational.of(2), Rational.of(0), keyframe_time_domain="signed-local")]))
