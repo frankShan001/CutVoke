@@ -21,6 +21,16 @@ SOURCE = ('Types: deb\nURIs: ' + guard.MIRROR_URI + '\n'
           'Components: main universe restricted multiverse\nSigned-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg\n')
 
 
+def probe_paths(args):
+    return tuple(Path(args[args.index(flag) + 1]) for flag in ('--output', '--dump-header'))
+
+
+def write_probe_files(args, length=guard.PROBE_BYTES, total=1900000):
+    body, headers = probe_paths(args)
+    body.write_bytes(b'x' * length)
+    headers.write_text(f'Content-Range: bytes 0-{guard.PROBE_BYTES-1}/{total}\n')
+
+
 class MirrorInstall(unittest.TestCase):
     def test_configured_candidates_only(self):
         self.assertEqual(guard.candidates(EC2 + '\tpriority:1\n' + ARCHIVE + '\tpriority:2'), [EC2, ARCHIVE])
@@ -80,8 +90,7 @@ class MirrorInstall(unittest.TestCase):
                 self.assertEqual(args[args.index('--max-time') + 1], '15')
                 self.assertNotIn('--location', args)
                 self.assertEqual(kwargs['timeout'], 17)
-                (root/'probe.deb.part').write_bytes(b'x' * guard.PROBE_BYTES)
-                (root/'probe.headers').write_text(f'HTTP/1.1 206 Partial Content\nContent-Range: bytes 0-{guard.PROBE_BYTES-1}/1900000\n')
+                write_probe_files(args)
                 return SimpleNamespace(returncode=0, stdout='206 1.5')
             self.assertEqual(guard.probe(ARCHIVE, 'file', 1900000, root, fake), 1.5)
             for output in ('302 1.0', '200 1.0', '206 14.0'):
@@ -93,6 +102,77 @@ class MirrorInstall(unittest.TestCase):
             with self.assertRaises(ValueError):
                 guard.probe(ARCHIVE, 'file', 1900000, root,
                     lambda *a, **k: SimpleNamespace(returncode=28, stdout=''))
+
+    def test_canonical_timeout_retries_once_with_fresh_response(self):
+        for fresh_response in (True, False):
+            with self.subTest(fresh_response=fresh_response), tempfile.TemporaryDirectory() as d:
+                root = Path(d)
+                calls = []
+                paths = []
+
+                def curl(args, **kwargs):
+                    body, headers = probe_paths(args)
+                    self.assertFalse(body.exists())
+                    self.assertFalse(headers.exists())
+                    paths.append((body, headers))
+                    calls.append(([arg for arg in args if arg not in (str(body), str(headers))],
+                                  kwargs))
+                    if len(calls) == 1:
+                        # Even fully populated files from a timeout cannot
+                        # supply the fresh 206 response for the retry.
+                        write_probe_files(args)
+                        return SimpleNamespace(returncode=28, stdout='')
+                    if fresh_response:
+                        write_probe_files(args)
+                    return SimpleNamespace(returncode=0, stdout='206 1.5')
+
+                def probe(*args):
+                    return guard.probe(*args, run=curl)
+
+                if fresh_response:
+                    self.assertEqual(guard.select([EC2, ARCHIVE], 'file', 1900000, root, probe),
+                                     ARCHIVE)
+                else:
+                    with self.assertRaisesRegex(RuntimeError, 'no fallback or installation') as error:
+                        guard.select([EC2, ARCHIVE], 'file', 1900000, root, probe)
+                    self.assertRegex(str(error.exception.__cause__), 'range/size mismatch')
+                self.assertEqual(len(calls), 2)
+                self.assertEqual(calls[0], calls[1])
+                self.assertEqual(calls[0][0][-1], ARCHIVE + 'file')
+                for first, second in zip(*paths):
+                    self.assertNotEqual(first, second)
+
+    def test_second_curl_timeout_is_terminal(self):
+        with tempfile.TemporaryDirectory() as d:
+            calls = []
+
+            def curl(args, **kwargs):
+                calls.append(args[-1])
+                return SimpleNamespace(returncode=28, stdout='')
+
+            with self.assertRaisesRegex(RuntimeError, 'no fallback or installation') as error:
+                guard.select([EC2, ARCHIVE], 'file', 1900000, Path(d),
+                             lambda *args: guard.probe(*args, run=curl))
+            self.assertRegex(str(error.exception.__cause__), r'failed \(28\)')
+            self.assertEqual(calls, [ARCHIVE + 'file'] * 2)
+
+    def test_non_curl_timeout_failures_are_not_retried(self):
+        for status, stdout in ((22, ''), (60, ''), (0, '302 1.0'), (0, '206 4.1'),
+                               (0, 'malformed'), (None, '')):
+            with self.subTest(status=status, stdout=stdout), tempfile.TemporaryDirectory() as d:
+                calls = []
+
+                def curl(args, **kwargs):
+                    calls.append(args[-1])
+                    if status is None:
+                        raise subprocess.TimeoutExpired(args, kwargs['timeout'])
+                    write_probe_files(args)
+                    return SimpleNamespace(returncode=status, stdout=stdout)
+
+                with self.assertRaisesRegex(RuntimeError, 'no fallback or installation'):
+                    guard.select([EC2, ARCHIVE], 'file', 1900000, Path(d),
+                                 lambda *args: guard.probe(*args, run=curl))
+                self.assertEqual(calls, [ARCHIVE + 'file'])
 
     def test_task_local_sources_preserve_authentication(self):
         with tempfile.TemporaryDirectory() as d:
@@ -161,9 +241,8 @@ class MirrorInstall(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d)
             for length, total in ((123, 1900000), (guard.PROBE_BYTES, 1900001)):
-                def fake(*args, **kwargs):
-                    (root/'probe.deb.part').write_bytes(b'x' * length)
-                    (root/'probe.headers').write_text(f'Content-Range: bytes 0-{guard.PROBE_BYTES-1}/{total}\n')
+                def fake(args, **kwargs):
+                    write_probe_files(args, length, total)
                     return SimpleNamespace(returncode=0, stdout='206 1.0')
                 with self.subTest(length=length, total=total), self.assertRaises(ValueError):
                     guard.probe(ARCHIVE, 'file', 1900000, root, fake)
