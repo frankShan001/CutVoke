@@ -4870,9 +4870,10 @@ for (const prepared of [true, false]) {
       if (response.url().endsWith("/keepalive") && response.ok()) keepalives.push(response.url());
     });
     if (!prepared) await page.route(`**/projects/${id}/preview-jobs`, route => route.fulfill({ status: 404, json: {} }));
-    await page.addInitScript(() => {
+    await page.addInitScript(observeBoundary => {
       const voices: HTMLAudioElement[] = [];
       const frames: Array<{ source: string; identity: string; rgba: number[] }> = [];
+      let observeLoaded: ((event: Event, sample: (typeof frames)[number]) => void) | undefined;
       (window as typeof window & { gainVoices: typeof voices }).gainVoices = voices;
       (window as typeof window & { gainFrames: typeof frames }).gainFrames = frames;
       document.addEventListener("loadeddata", event => {
@@ -4880,15 +4881,140 @@ for (const prepared of [true, false]) {
         if (!(video instanceof HTMLVideoElement) || !video.matches(".player__video")) return;
         const canvas = document.createElement("canvas"); canvas.width = canvas.height = 1;
         const context = canvas.getContext("2d")!; context.drawImage(video, 0, 0, 1, 1, 0, 0, 1, 1);
-        frames.push({ source: video.dataset.previewSource || "", identity: video.dataset.previewIdentity || "",
-          rgba: [...context.getImageData(0, 0, 1, 1).data] });
+        const sample = { source: video.dataset.previewSource || "", identity: video.dataset.previewIdentity || "",
+          rgba: [...context.getImageData(0, 0, 1, 1).data] };
+        frames.push(sample);
+        observeLoaded?.(event, sample);
       }, true);
       const play = HTMLMediaElement.prototype.play;
       HTMLMediaElement.prototype.play = function () {
         if (this instanceof HTMLAudioElement && !voices.includes(this)) voices.push(this);
         return play.call(this);
       };
-    });
+      if (observeBoundary) {
+        // Console records are retained only by the existing failure trace.
+        // This probe is best-effort and never participates in acceptance.
+        type Activation = {
+          node: HTMLVideoElement; source: string; identity: string; currentSrc: string;
+          generation: number; loaded: boolean; submitted: boolean;
+        };
+        let generation = 0, active: Activation | undefined;
+        let pending: number | undefined, deadline: number | undefined;
+        let observer: MutationObserver | undefined, observed: Element | null = null;
+        let stopped = false;
+        let animationSupported = false;
+        const events = ["loadstart", "emptied", "loadedmetadata"];
+        const emit = (record: object) => console.debug("[gain-boundary] " + JSON.stringify(record));
+        const safe = (fn: () => void) => {
+          try { fn(); } catch { finish("probe-unavailable"); }
+        };
+        const cancel = () => {
+          const id = pending;
+          pending = undefined;
+          if (id !== undefined) active?.node.cancelVideoFrameCallback(id);
+        };
+        const finish = (outcome: string) => {
+          if (stopped) return;
+          stopped = true;
+          observeLoaded = undefined;
+          events.forEach(event => document.removeEventListener(event, onMedia, true));
+          window.removeEventListener("pagehide", onPageHide);
+          observer?.disconnect();
+          if (deadline !== undefined) window.clearTimeout(deadline);
+          try { cancel(); } catch { /* A detached decoder needs no further observation. */ }
+          try { emit({ stage: "terminal", outcome, generations: generation, animationSupported }); }
+          catch { /* Trace output must never affect the test. */ }
+        };
+        const pixel = (image: HTMLVideoElement | HTMLCanvasElement, width: number, height: number) => {
+          if (!(width && height)) return null;
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = canvas.height = 1;
+            const context = canvas.getContext("2d");
+            if (!context) return null;
+            context.drawImage(image, 0, 0, 1, 1, 0, 0, 1, 1);
+            return [...context.getImageData(0, 0, 1, 1).data];
+          } catch { return null; }
+        };
+        const record = (stage: string, a: Activation, rgba: number[] | null, metadata?: VideoFrameCallbackMetadata) => {
+          const hold = a.node.closest(".player__canvas-frame")?.querySelector<HTMLCanvasElement>(".player__continuity-frame");
+          emit({
+            stage, generation: a.generation, at: performance.now(), window: 1,
+            readyState: a.node.readyState, seeking: a.node.seeking, paused: a.node.paused,
+            currentTime: a.node.currentTime, mediaTime: metadata?.mediaTime ?? null,
+            presentedFrames: metadata?.presentedFrames ?? null, rgba,
+            sameDecoderSource: a.node.currentSrc === a.currentSrc && a.node.src === a.currentSrc,
+            videoShown: a.node.style.visibility === "visible",
+            hold: hold ? { visible: hold.style.visibility === "visible",
+              sameIdentity: hold.dataset.previewIdentity === a.identity,
+              rgba: pixel(hold, hold.width, hold.height) } : null,
+          });
+          if (a.loaded && a.submitted) finish("paired");
+        };
+        const matches = (a: Activation) =>
+          observed?.querySelector("video.player__video") === a.node &&
+          !a.node.hidden && a.node.dataset.previewSource === a.source &&
+          a.node.dataset.previewIdentity === a.identity && a.node.currentSrc === a.currentSrc &&
+          a.node.src === a.currentSrc;
+        const follow = (invalidate = false) => {
+          if (stopped || (!invalidate && active && matches(active))) return;
+          cancel();
+          active = undefined;
+          const node = observed?.querySelector<HTMLVideoElement>("video.player__video");
+          const source = node?.dataset.previewSource, identity = node?.dataset.previewIdentity;
+          if (!node || node.hidden || !source || !identity || !node.currentSrc || node.src !== node.currentSrc ||
+              new URL(source, location.href).searchParams.get("index") !== "1") return;
+          if (generation >= 4) { finish("generation-limit"); return; }
+          const a: Activation = { node, source, identity, currentSrc: node.currentSrc,
+            generation: ++generation, loaded: false, submitted: false };
+          active = a;
+          if (typeof node.requestVideoFrameCallback !== "function") return;
+          animationSupported = true;
+          pending = node.requestVideoFrameCallback((_, metadata) => safe(() => {
+            if (stopped || active !== a) return;
+            pending = undefined;
+            if (!matches(a)) { follow(); return; }
+            a.submitted = true;
+            record("first-matching-callback-after-registration", a, pixel(node, node.videoWidth, node.videoHeight), metadata);
+          }));
+        };
+        function onMedia(event: Event, sample?: (typeof frames)[number]) {
+          safe(() => {
+            const node = event.target;
+            if (stopped || !(node instanceof HTMLVideoElement) || !node.matches("video.player__video")) return;
+            const surface = node.closest(".player__canvas-frame");
+            if (!surface) return;
+            const moved = observed !== surface;
+            if (moved) {
+              observer?.disconnect();
+              observed = surface;
+              observer?.observe(surface, { subtree: true, childList: true, attributes: true,
+                attributeOldValue: true, attributeFilter: ["class", "hidden", "src", "data-preview-source", "data-preview-identity"] });
+            }
+            follow(moved || (node === active?.node && (event.type === "loadstart" || event.type === "emptied")));
+            const a = active;
+            if (event.type !== "loadeddata" || !a || a.node !== node || !matches(a) ||
+                a.loaded || sample?.source !== a.source || sample.identity !== a.identity) return;
+            a.loaded = true;
+            record("loadeddata", a, sample.rgba);
+            if (!animationSupported) finish("frame-callback-unavailable");
+          });
+        }
+        function onPageHide() { finish("pagehide"); }
+        safe(() => {
+          observer = new MutationObserver(records => safe(() => {
+            const tracked = active?.node;
+            follow(records.some(r => r.target === tracked && r.attributeName !== null &&
+              r.oldValue !== tracked?.getAttribute(r.attributeName)));
+          }));
+          events.forEach(event => document.addEventListener(event, onMedia, true));
+          observeLoaded = onMedia;
+          window.addEventListener("pagehide", onPageHide);
+          // A diagnostic lifetime only: never awaited and no effect on the test limit.
+          deadline = window.setTimeout(() => finish("probe-deadline"), 30_000);
+        });
+      }
+    }, !prepared);
     await openProject(page, name);
     const video = page.locator("video.player__video"), ruler = page.getByRole("slider", { name: "时间线播放头", exact: true });
     await expect(video).toHaveAttribute(prepared ? "src" : "data-preview-source", prepared ? /preview-jobs\/[^/]+\/media/ : /index=0/, { timeout: prepared ? 30_000 : 10_000 });
