@@ -92,3 +92,58 @@ def test_lost_gpu_retries_same_color_managed_range_on_cpu(tmp_path):
     assert not list(tmp_path.glob('*.tmp.mp4'))
     subprocess.run(['ffmpeg', '-v', 'error', '-i', str(output), '-f', 'null', '-'],
                    check=True, capture_output=True)
+
+
+@pytest.mark.skipif(not shutil.which("ffmpeg"), reason="FFmpeg required")
+def test_encoder_fallback_does_not_leak_between_exports(tmp_path, monkeypatch):
+    monkeypatch.setenv("CUTVOKE_GPU_ACCELERATION", "1")
+    renderer = RenderService()
+    edits = EditService()
+
+    def new_project(name):
+        source = tmp_path / f"{name}.png"
+        Image.new("RGB", (320, 180), (190, 60, 30)).save(source)
+        project = edits.create_project(name, width=320, height=180, fps=R.of(24))
+        project.sequence.tracks = [Track("v", "video", [
+            Clip("c", AssetReference("a", str(source)), R.of(0), R.of(1), R.of(0))])]
+        return project
+
+    real_popen = subprocess.Popen
+    encoders = []
+
+    def simulate_nvenc(command, *args, **kwargs):
+        if "-c:v" not in command:
+            return real_popen(command, *args, **kwargs)
+        encoder = command[command.index("-c:v") + 1]
+        encoders.append(encoder)
+        if encoder != "h264_nvenc":
+            return real_popen(command, *args, **kwargs)
+        if encoders.count("h264_nvenc") == 1:
+            return real_popen([command[0], "-cutvoke-missing-gpu"], *args, **kwargs)
+        # Emulate a recovered NVENC process with a valid software bitstream.
+        # Assert the renderer's selected encoder, not the stub's implementation.
+        rewritten = list(command)
+        rewritten[rewritten.index("-c:v") + 1] = "libx264"
+        rewritten[rewritten.index("-preset") + 1] = "veryfast"
+        rewritten[rewritten.index("-cq")] = "-crf"
+        for flag in ("-tune", "-rc", "-spatial-aq", "-b:v"):
+            index = rewritten.index(flag)
+            del rewritten[index:index + 2]
+        return real_popen(rewritten, *args, **kwargs)
+
+    with patch("cutvoke.rendering.render._nvenc_available", return_value=True) as probe, \
+         patch("cutvoke.rendering.render.subprocess.Popen", side_effect=simulate_nvenc):
+        first = renderer.render(new_project("fallback"), str(tmp_path / "fallback.mp4"))
+        second = renderer.render(new_project("new-project"), str(tmp_path / "new-project.mp4"))
+        assert probe.call_count == 2
+        renderer.gpu_acceleration = False
+        cpu = renderer.render(new_project("cpu-only"), str(tmp_path / "cpu-only.mp4"))
+        assert probe.call_count == 2
+
+    assert encoders == ["h264_nvenc", "libx264", "h264_nvenc", "libx264"]
+    assert (first["videoEncoder"], first["encoderFallback"]) == ("libx264", True)
+    assert (second["videoEncoder"], second["encoderFallback"]) == ("h264_nvenc", False)
+    assert (cpu["videoEncoder"], cpu["encoderFallback"]) == ("libx264", False)
+    for name in ("fallback", "new-project", "cpu-only"):
+        subprocess.run([renderer.ffmpeg, "-v", "error", "-i", str(tmp_path / f"{name}.mp4"),
+                        "-f", "null", "-"], check=True, capture_output=True)

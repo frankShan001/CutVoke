@@ -1224,6 +1224,31 @@ class RenderCancelled(RenderError):
     """渲染被取消（cancel_event 触发），不留下误导性的成功成片。"""
 
 
+def _scope_export_encoder_outcome(method):
+    @wraps(method)
+    def scoped(self, *args, **kwargs):
+        # Each export owns its encoder outcome and retry guard. The service can
+        # outlive a job, including on a single persistent export worker thread.
+        ctx = self._render_ctx
+        fields = ("video_encoder", "encoder_fallback", "hardware_disabled")
+        missing = object()
+        previous = {field: getattr(ctx, field, missing) for field in fields}
+        try:
+            for field in fields:
+                if previous[field] is not missing:
+                    delattr(ctx, field)
+            return method(self, *args, **kwargs)
+        finally:
+            # Save and restore rather than just clear, so a nested export cannot
+            # overwrite the outcome of an enclosing render.
+            for field, value in previous.items():
+                if value is not missing:
+                    setattr(ctx, field, value)
+                elif hasattr(ctx, field):
+                    delattr(ctx, field)
+    return scoped
+
+
 def _prepare_static_masks(method):
     signature = inspect.signature(method)
     @wraps(method)
@@ -1804,6 +1829,7 @@ class RenderService:
     # ------------------------------------------------------------------
     # 公共入口
     # ------------------------------------------------------------------
+    @_scope_export_encoder_outcome
     @_prepare_static_masks
     def render(self, project: Project, out_path: str, quality: str = "high",
                overlay_position: tuple[int, int] = (0, 0),
