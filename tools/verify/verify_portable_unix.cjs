@@ -76,9 +76,16 @@ async function main() {
   const zip = path.join(root, "dist/portable", download.filename);
   assert.equal(crypto.createHash("sha256").update(fs.readFileSync(zip)).digest("hex"), download.sha256);
   const extracted = path.join(out, "中文 空格路径");
-  fs.mkdirSync(extracted, { recursive: true });
-  if (process.platform === "darwin") run("/usr/bin/ditto", ["-x", "-k", zip, extracted]);
-  else run("/usr/bin/tar", ["-xzf", zip, "-C", extracted]);
+  if (process.platform === "darwin") {
+    fs.mkdirSync(extracted, { recursive: true });
+    run("/usr/bin/ditto", ["-x", "-k", zip, extracted]);
+  } else {
+    // Never let an earlier extraction supply members missing from this tarball.
+    // Exclusive mkdir rejects any existing path, including a symlink.
+    assert.ok(fs.lstatSync(out).isDirectory(), "Acceptance output must be a real directory");
+    fs.mkdirSync(extracted);
+    run("/usr/bin/tar", ["-xzf", zip, "-C", extracted]);
+  }
   const folder = path.join(extracted, download.filename.replace(/\.(zip|tar\.gz)$/, ""));
   const resources = process.platform === "darwin" ? path.join(folder, "CutVoke.app/Contents/Resources") : path.join(folder, "resources");
   const executable = process.platform === "darwin" ? path.join(folder, "CutVoke.app/Contents/MacOS/CutVoke") : path.join(folder, "cutvoke");
