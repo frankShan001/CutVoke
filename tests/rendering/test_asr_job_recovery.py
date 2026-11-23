@@ -445,6 +445,73 @@ def test_busy_commit_rolls_back_asr_journal_before_resuming(tmp_path):
         journal.close()
 
 
+def test_worker_started_then_interrupted_cannot_claim_resumed_job(tmp_path, monkeypatch):
+    store, service, _ = library(tmp_path / "library")
+    manager = AsrJobManager(store.path, project_loader=store.load)
+    old_ready, new_ready = threading.Event(), threading.Event()
+    release_old, release_new = threading.Event(), threading.Event()
+    workers, recognized = [], []
+    run, start = manager._run, threading.Thread.start
+
+    def held_run(job_id, project):
+        worker = threading.current_thread()
+        if worker is workers[0]:
+            old_ready.set()
+            assert release_old.wait(5), "test did not release the original worker"
+        else:
+            workers.append(worker)
+            new_ready.set()
+            assert release_new.wait(5), "test did not release the resumed worker"
+        run(job_id, project)
+
+    def interrupt_after_native_start(worker):
+        workers.append(worker)
+        start(worker)
+        assert old_ready.wait(5)
+        raise KeyboardInterrupt
+
+    def recognize(*args, **kwargs):
+        recognized.append(threading.current_thread())
+        return proposal(*args, **kwargs)
+
+    try:
+        with recognition(recognize):
+            monkeypatch.setattr(manager, "_run", held_run)
+            with monkeypatch.context() as fault:
+                fault.setattr(threading.Thread, "start", interrupt_after_native_start)
+                with pytest.raises(KeyboardInterrupt):
+                    manager.submit(store.load("speech"), "voice", model="tiny")
+            old_worker = workers[0]
+            interrupted, = manager.jobs("speech")
+            job_id = interrupted["jobId"]
+            assert interrupted["status"] == "interrupted"
+            assert old_worker.is_alive()
+            assert manager._active_job is None and not manager._threads and not manager._leases
+            assert manager.resume(job_id)["status"] == "queued"
+            assert new_ready.wait(5)
+            new_worker = manager._threads[job_id]
+            resumed_lease = manager._leases[job_id]
+            release_old.set()
+            old_worker.join(5)
+            assert not old_worker.is_alive()
+            assert not recognized, "superseded worker reached the recognizer"
+            assert manager.get(job_id)["status"] == "queued"
+            assert manager._active_job == job_id
+            assert manager._threads[job_id] is new_worker
+            assert manager._leases[job_id] is resumed_lease
+            release_new.set()
+            assert completed(manager, job_id)["result"]["model"] == "tiny"
+            assert recognized == [new_worker]
+    finally:
+        release_old.set()
+        release_new.set()
+        for worker in workers:
+            worker.join(5)
+        manager.close()
+        service.close()
+        store.close()
+
+
 def test_restart_retains_result_and_reviewed_draft_but_rejects_changed_source(tmp_path):
     store, service, source = library(tmp_path / "library")
     manager = AsrJobManager(store.path, project_loader=store.load)

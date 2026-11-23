@@ -230,10 +230,12 @@ class AsrJobManager:
                                     statuses=("completed",), version_field="draftsUpdatedAt")
 
     def _run(self, job_id: str, project: Project) -> None:
+        worker = threading.current_thread()
         claim_failed = False
         try:
             with self._lock:
-                if self._closed.is_set() or self._active_job != job_id:
+                if (self._closed.is_set() or self._active_job != job_id
+                        or self._threads.get(job_id) is not worker):
                     return
                 try:
                     job = self._journal.update(job_id, {"status": "running", "phase": "准备识别"},
@@ -271,7 +273,7 @@ class AsrJobManager:
                     self._journal.prune()
         finally:
             with self._lock:
-                if self._active_job == job_id:
+                if self._active_job == job_id and self._threads.get(job_id) is worker:
                     self._active_job = None
                     if claim_failed:
                         self._threads.pop(job_id, None)
