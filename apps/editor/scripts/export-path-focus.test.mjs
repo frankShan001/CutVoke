@@ -8,7 +8,7 @@ import { create, act } from 'react-test-renderer';
 import ts from 'typescript';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-async function harness(draft = null, deferJobs = false) {
+async function harness(draft = null, deferJobs = false, selectedRange = null) {
   let resolveJobs;
   const jobs = new Promise(resolve => { resolveJobs = resolve; });
   if (!deferJobs) resolveJobs([]);
@@ -29,6 +29,7 @@ async function harness(draft = null, deferJobs = false) {
     '../lib/assetStore': { useSessionAssets() {} }, '../lib/preflight': {},
     '../lib/rational': { rationalToSecs: () => 0 },
     '../lib/projectDirectories': { getProjectDirectory: () => directory },
+    '../store/selectedExportRange': { selectedExportRange: () => selectedRange },
   };
   const source = readFileSync(new URL('../src/components/ExportVideoSection.tsx', import.meta.url), 'utf8');
   const { outputText } = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } });
@@ -38,7 +39,14 @@ async function harness(draft = null, deferJobs = false) {
   let tree;
   await act(async () => { tree = create(React.createElement(exports.ExportVideoSection, { onClose() {} })); });
   const input = () => tree.root.findAllByType('input').find(n => n.props['aria-label'] === '输出文件路径');
-  return { input,
+  const find = (label) => tree.root.findAllByType('input').find(n => n.props['aria-label'] === label);
+  const prefill = () => tree.root.findAllByType('button').find(n => n.props.children === '使用所选片段的时间范围');
+  const submit = () => tree.root.findAllByType('button').find(n => n.props['aria-label'] === '开始导出');
+  const revise = next => act(async () => {
+    selectedRange = next;
+    tree.update(React.createElement(exports.ExportVideoSection, { onClose() {} }));
+  });
+  return { input, find, prefill, submit, revise,
     restore: job => act(async () => resolveJobs([job])),
     focus: () => act(async () => input().props.onFocus?.()),
     change: value => act(async () => input().props.onChange({ target: { value } })),
@@ -140,5 +148,49 @@ for (const status of ['queued', 'running']) test(`late ${status} job remains aut
     await h.focus(); await h.change('/new-draft.mp4'); await h.restore(exportJob(status)); await h.resolve();
     assert.equal(h.input().props.value, '/project/exports/history.mp4');
     assert.equal(h.input().props.disabled, true);
+  } finally { await h.close(); }
+});
+
+test('selected range stays disabled while restoring and during an active export', async () => {
+  const preset = { projectId: 'p', revision: '7', clipId: 'a', start: 2.25, end: 3.5 };
+  const h = await harness({ outPath: '/draft.mp4', useRange: true, rangeStart: '1', rangeEnd: '2' }, true, preset);
+  try {
+    assert.equal(h.prefill().props.disabled, true);
+    await h.restore({ ...exportJob('running'), request: { range: { start: 4, end: 5 } } });
+    assert.equal(h.prefill().props.disabled, true);
+    assert.equal(h.find('导出开始时间').props.value, '4');
+    assert.equal(h.find('导出结束时间').props.value, '5');
+  } finally { await h.close(); }
+});
+
+test('using a selected range updates only the range form, without submitting', async () => {
+  const preset = { projectId: 'p', revision: '7', clipId: 'a', start: 2.25, end: 3.5 };
+  const h = await harness({ outPath: '/draft.mp4' }, false, preset);
+  try {
+    assert.equal(h.prefill().props.disabled, false);
+    await act(async () => h.prefill().props.onClick());
+    assert.equal(h.find('导出开始时间').props.value, '2.25');
+    assert.equal(h.find('导出结束时间').props.value, '3.5');
+    assert.equal(h.input().props.value, '/draft.mp4');
+    await act(async () => h.find('导出结束时间').props.onChange({ target: { value: '3.75' } }));
+    assert.equal(h.find('导出开始时间').props.value, '2.25');
+    assert.equal(h.find('导出结束时间').props.value, '3.75');
+    await h.revise(null);
+    assert.equal(h.prefill().props.disabled, true);
+    assert.equal(h.submit().props.disabled, false); // explicit manual range no longer follows selection
+  } finally { await h.close(); }
+});
+
+test('changed selection or revision cannot submit a previously selected range', async () => {
+  const original = { projectId: 'p', revision: '7', clipId: 'a', start: 2.25, end: 3.5 };
+  const h = await harness(null, false, original);
+  try {
+    await act(async () => h.prefill().props.onClick());
+    await h.revise({ ...original, revision: '8', end: 4 });
+    assert.equal(h.submit().props.disabled, true);
+    assert.equal(h.find('导出结束时间').props.disabled, true);
+    await act(async () => h.prefill().props.onClick());
+    assert.equal(h.find('导出结束时间').props.value, '4');
+    assert.equal(h.submit().props.disabled, false);
   } finally { await h.close(); }
 });
