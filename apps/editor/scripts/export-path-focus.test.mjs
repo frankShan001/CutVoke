@@ -8,16 +8,32 @@ import { create, act } from 'react-test-renderer';
 import ts from 'typescript';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-async function harness(draft = null, deferJobs = false, selectedRange = null) {
+function loadModule(relative, dependencies, globals = {}) {
+  const source = readFileSync(new URL(relative, import.meta.url), 'utf8');
+  const { outputText } = ts.transpileModule(source, { compilerOptions: {
+    target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX,
+  } });
+  const exports = {};
+  runInNewContext(outputText, { exports, require: name => {
+    assert.ok(dependencies[name], name);
+    return dependencies[name];
+  }, ...globals });
+  return exports;
+}
+
+async function harness(draft = null, deferJobs = false, selectedRange = null, { withDialog = false, flush } = {}) {
   let resolveJobs;
   const jobs = new Promise(resolve => { resolveJobs = resolve; });
   if (!deferJobs) resolveJobs([]);
+  let resolveOtherJobs;
+  const otherJobs = new Promise(resolve => { resolveOtherJobs = resolve; });
   let resolveDirectory;
   const directory = new Promise(resolve => { resolveDirectory = resolve; });
-  const state = { currentId: 'p', project: { sequence: { tracks: [] } } };
+  let state = { currentId: 'p', revision: '7', project: { sequence: { tracks: [{ clips: [{ timelineEnd: 8 }] }] } } };
   const dispatch = () => {};
   const text = s => s;
   const node = tag => props => React.createElement(tag, props);
+  const queued = [];
   const dependencies = {
     react: React, 'react/jsx-runtime': jsx,
     '../i18n': { useLocale() {}, tr: text, msg: text },
@@ -25,29 +41,46 @@ async function harness(draft = null, deferJobs = false, selectedRange = null) {
     './ui': { Button: node('button'), Field: node('div'), Select: node('select'), TextInput: node('input'), Badge: node('span') },
     '../store/editor': { useEditor: () => ({ state, dispatch }), showError() {} },
     '../store/actions': { getLatestState: () => state },
-    '../lib/api': { listExportJobs: () => jobs },
+    '../lib/api': {
+      listExportJobs: id => id === 'p' ? jobs : otherJobs,
+      preflightProject: async () => ({ readyToRender: true, warnings: [], errors: [] }),
+      sendCommand: async (id, type) => { queued.push([id, type]); return { changedEntities: [{ type: 'export_enqueued', jobId: 'fixture' }] }; },
+      newCommandId: () => 'fixture-command',
+    },
     '../lib/assetStore': { useSessionAssets() {} }, '../lib/preflight': {},
-    '../lib/rational': { rationalToSecs: () => 0 },
+    '../lib/rational': { rationalToSecs: n => Number(n) },
     '../lib/projectDirectories': { getProjectDirectory: () => directory },
     '../store/selectedExportRange': { selectedExportRange: () => selectedRange },
   };
-  const source = readFileSync(new URL('../src/components/ExportVideoSection.tsx', import.meta.url), 'utf8');
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } });
-  const exports = {};
-  runInNewContext(outputText, { exports, require: name => { assert.ok(dependencies[name], name); return dependencies[name]; },
-    window: {}, localStorage: { getItem: () => JSON.stringify(draft), setItem() {} }, setTimeout, clearTimeout, setInterval, clearInterval });
+  if (flush) {
+    const actions = loadModule('../src/store/actions.ts', {
+      ...dependencies, './editor': dependencies['../store/editor'],
+      '../lib/pendingEdits': { flushPendingEdits: flush },
+      '../lib/projectScope': {}, '../lib/projectSync': {},
+    });
+    dependencies['../store/actions'].doExport = actions.doExport;
+  }
+  const globals = { window: { addEventListener() {}, removeEventListener() {} },
+    localStorage: { getItem: () => JSON.stringify(draft), setItem() {} }, setTimeout, clearTimeout, setInterval, clearInterval };
+  const { ExportVideoSection } = loadModule('../src/components/ExportVideoSection.tsx', dependencies, globals);
+  const View = withDialog ? loadModule('../src/components/ExportDialog.tsx', {
+    ...dependencies, './ExportVideoSection': { ExportVideoSection },
+  }, globals).ExportDialog : ExportVideoSection;
+  const view = () => React.createElement(View, { onClose() {} });
   let tree;
-  await act(async () => { tree = create(React.createElement(exports.ExportVideoSection, { onClose() {} })); });
+  await act(async () => { tree = create(view()); });
   const input = () => tree.root.findAllByType('input').find(n => n.props['aria-label'] === '输出文件路径');
-  const find = (label) => tree.root.findAllByType('input').find(n => n.props['aria-label'] === label);
+  const find = label => tree.root.findAllByType('input').find(n => n.props['aria-label'] === label);
   const prefill = () => tree.root.findAllByType('button').find(n => n.props.children === '使用所选片段的时间范围');
   const submit = () => tree.root.findAllByType('button').find(n => n.props['aria-label'] === '开始导出');
-  const revise = next => act(async () => {
+  const revise = (next, id = state.currentId) => act(async () => {
     selectedRange = next;
-    tree.update(React.createElement(exports.ExportVideoSection, { onClose() {} }));
+    state = { ...state, currentId: id };
+    tree.update(view());
   });
-  return { input, find, prefill, submit, revise,
+  return { input, find, prefill, submit, revise, queued,
     restore: job => act(async () => resolveJobs([job])),
+    restoreOther: job => act(async () => resolveOtherJobs([job])),
     focus: () => act(async () => input().props.onFocus?.()),
     change: value => act(async () => input().props.onChange({ target: { value } })),
     resolve: () => act(async () => resolveDirectory({ exportDirectory: '/project/exports' })),
@@ -192,5 +225,40 @@ test('changed selection or revision cannot submit a previously selected range', 
     await act(async () => h.prefill().props.onClick());
     assert.equal(h.find('导出结束时间').props.value, '4');
     assert.equal(h.submit().props.disabled, false);
+  } finally { await h.close(); }
+});
+
+for (const change of ['selection', 'project']) test(`derived range fails closed after deferred edit flush: ${change}`, async () => {
+  const original = { projectId: 'p', revision: '7', clipId: 'a', start: 2.25, end: 3.5 };
+  let release;
+  const pending = new Promise(resolve => { release = resolve; });
+  let entered;
+  const flushStarted = new Promise(resolve => { entered = resolve; });
+  const h = await harness({ outPath: '/draft.mp4' }, false, original, {
+    withDialog: true, flush: () => { entered(); return pending; },
+  });
+  let exporting;
+  try {
+    await act(async () => h.prefill().props.onClick());
+    await act(async () => { exporting = h.submit().props.onClick(); await flushStarted; });
+    await h.revise(null, change === 'project' ? 'next' : 'p');
+    await act(async () => { release(true); await exporting; });
+    assert.deepEqual(h.queued, []);
+  } finally { release(true); await h.close(); }
+});
+
+test('switching projects in an open dialog cannot mask an active job range', async () => {
+  const original = { projectId: 'p', revision: '7', clipId: 'a', start: 2.25, end: 3.5 };
+  const h = await harness(null, false, original, { withDialog: true });
+  try {
+    await act(async () => h.prefill().props.onClick());
+    assert.equal(h.find('导出开始时间').props.value, '2.25');
+    await h.revise({ ...original, projectId: 'next' }, 'next');
+    assert.equal(h.prefill().props.disabled, true);
+    assert.equal(h.find('导出开始时间'), undefined);
+    await h.restoreOther({ ...exportJob('running'), request: { range: { start: 4, end: 5 } } });
+    assert.equal(h.prefill().props.disabled, true);
+    assert.equal(h.find('导出开始时间').props.value, '4');
+    assert.equal(h.find('导出结束时间').props.value, '5');
   } finally { await h.close(); }
 });

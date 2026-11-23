@@ -1,7 +1,7 @@
 import { msg, tr, useLocale } from "../i18n";
 /** Export requests and measured stage progress are restored from persisted jobs. */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Upload, Copy, FolderOpen, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Button, Field, Select, TextInput, Badge } from "./ui";
 import { useEditor, showError } from "../store/editor";
@@ -69,6 +69,13 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
   const [reconnecting, setReconnecting] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const startedRef = useRef(Date.now());
+  // After an async save, read the last committed dialog scope, not the
+  // render that started the export or the bridge's passive-effect snapshot.
+  const committedState = useRef<typeof state | null>(null);
+  useLayoutEffect(() => {
+    committedState.current = state;
+    return () => { committedState.current = null; };
+  }, [state]);
   const selectableRange = selectedExportRange(state);
   const isCurrentRange = (current: typeof state) => {
     const choice = selectedExportRange(current);
@@ -157,6 +164,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
           const created = Number(job.createdAt);
           startedRef.current = Number.isFinite(created) && created > 0 ? created * 1000 : Date.parse(String(job.createdAt)) || Date.now();
           if (["queued", "running"].includes(job.status)) {
+            setSelectedRange(null);
             setBusy(true);
             setPhase("running");
             setElapsed(Math.max(0, Math.floor((Date.now() - startedRef.current) / 1000)));
@@ -288,7 +296,14 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
         transparent,
         ...(!transparent && videoBitrate.trim() ? { videoBitrateKbps: Number(videoBitrate) } : {}),
         ...(!transparent && audioBitrate.trim() ? { audioBitrateKbps: Number(audioBitrate) } : {}),
-      }, selectedRange?.revision);
+      }, selectedRange ? {
+        revision: selectedRange.revision,
+        isCurrent: () => {
+          const committed = committedState.current;
+          return !!committed && isCurrentRange(committed);
+        },
+      } : undefined);
+      if (!aliveRef.current) return;
       if (out.inFlight && out.jobId) {
         queued = true;
         startedRef.current = Date.now();
@@ -300,6 +315,8 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       } else if (out.error) {
         setJobError(out.error);
         setPhase("error");
+      } else {
+        setPhase("idle"); // The current selection changed while edits were being flushed.
       }
     } catch (error) {
       if (!aliveRef.current) return;

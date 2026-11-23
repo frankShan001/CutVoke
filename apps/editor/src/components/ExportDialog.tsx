@@ -97,7 +97,7 @@ export function ExportDialog() {
           </button>
         </header>
 
-        <ExportVideoSection onClose={close} />
+        <ExportVideoSection key={state.currentId} onClose={close} />
 
         <div className="export-dialog__divider" role="separator" />
 

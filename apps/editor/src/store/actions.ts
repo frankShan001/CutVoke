@@ -426,7 +426,7 @@ export async function doExport(
   quality: ExportQuality = "high",
   range?: ExportRange,
   options: import("../lib/api").ExportOptions = {},
-  expectedRevision?: string,
+  selectedRangeGuard?: { revision: string; isCurrent: () => boolean },
 ): Promise<ExportOutcome> {
   if (!state.currentId) {
     const err = new ApiFailure({ status: 400, code: "NO_PROJECT", message: tr("请先选择工程") });
@@ -438,10 +438,11 @@ export async function doExport(
     // A range copied from a clip must be queued against the exact reviewed
     // revision. The command uses the same queue and rejects revision conflicts.
     let jobId: string;
-    if (expectedRevision !== undefined) {
+    if (selectedRangeGuard) {
+      if (!selectedRangeGuard.isCurrent()) return { ok: false };
       const result = await sendCommand(state.currentId, "export.enqueue",
         { outPath, quality, overwrite: true, ...options, ...(range ? { range } : {}) },
-        expectedRevision, newCommandId());
+        selectedRangeGuard.revision, newCommandId());
       const receipt = (result.changedEntities as Array<{ type: string; jobId?: string }>)
         .find(entity => entity.type === "export_enqueued");
       if (!receipt?.jobId) throw new ApiFailure({ status: 502, code: "INVALID_RESPONSE", message: tr("导出失败") });
