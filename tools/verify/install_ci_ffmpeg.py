@@ -65,19 +65,31 @@ def probe(url, filename, size, directory, run=subprocess.run):
                       '--proto', '=http,https', '--max-redirs', '0', '--connect-timeout', '5',
                       '--max-time', '15', '--range', f'0-{PROBE_BYTES - 1}',
                       '--max-filesize', str(PROBE_BYTES), '--output', str(body),
-                      '--dump-header', str(headers), '--write-out', '%{http_code} %{time_total}',
+                      '--dump-header', str(headers), '--write-out', '%{http_code} %{time_total} %{time_starttransfer}',
                       url + filename], capture_output=True, text=True, timeout=17)
         if result.returncode == 28:
             raise _ProbeTimeout('bounded probe failed (28)')
         if result.returncode:
             raise ValueError(f'bounded probe failed ({result.returncode})')
-        status, elapsed = result.stdout.split()
+        status, elapsed, *timing = result.stdout.split(maxsplit=2)
         if (status != '206' or not body.is_file() or body.stat().st_size != PROBE_BYTES
                 or not re.search(rf'^content-range:\s*bytes 0-{PROBE_BYTES - 1}/{size}\s*$',
                                  headers.read_text(), re.I | re.M)):
             raise ValueError('probe range/size mismatch or redirect')
         seconds = float(elapsed)
-        if not 0 < seconds <= 4:
+        qualified = 0 < seconds <= 4
+        elapsed_ms = ttfb_ms = None
+        if 0 < seconds <= 15:
+            elapsed_ms = round(seconds * 1000)
+            # Only curl's decimal timing is informational. Never print the token
+            # or use it to qualify the transfer or decide a retry.
+            if timing and re.fullmatch(r'[0-9]{1,2}(?:\.[0-9]{1,6})?', timing[0]):
+                first_byte = float(timing[0])
+                if first_byte <= seconds:
+                    ttfb_ms = round(first_byte * 1000)
+        print(json.dumps({'probe': 'qualified-range', 'outcome': 'pass' if qualified else 'below-floor',
+                          'elapsed_ms': elapsed_ms, 'ttfb_ms': ttfb_ms}), flush=True)
+        if not qualified:
             raise ValueError('probe below 256 KiB/s qualification floor')
         return seconds
 

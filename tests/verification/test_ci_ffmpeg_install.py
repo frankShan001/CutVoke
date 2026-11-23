@@ -1,4 +1,7 @@
+from contextlib import redirect_stdout
 import importlib.util
+import io
+import json
 from pathlib import Path
 import subprocess
 import tempfile
@@ -102,6 +105,50 @@ class MirrorInstall(unittest.TestCase):
             with self.assertRaises(ValueError):
                 guard.probe(ARCHIVE, 'file', 1900000, root,
                     lambda *a, **k: SimpleNamespace(returncode=28, stdout=''))
+
+    def test_qualified_range_timing_does_not_change_floor(self):
+        for total, ttfb, expected_ttfb in (
+                ('4.0', '3.9', 3900), ('4.2', '3.9', 3900), ('4.2', '0.2', 200),
+                ('4.2', '', None), ('4.0', '', None), ('4.0', '4.1', None),
+                ('4.0', 'NaN', None), ('4.0', '-1', None), ('4.0', '0.1 EXTRA', None),
+                ('4.0', 'https://private.example/a?token=canary', None)):
+            with self.subTest(total=total, ttfb=ttfb), tempfile.TemporaryDirectory() as d:
+                calls = []
+                def curl(args, **kwargs):
+                    calls.append(args[-1])
+                    self.assertEqual(args[args.index('--write-out') + 1],
+                                     '%{http_code} %{time_total} %{time_starttransfer}')
+                    write_probe_files(args)
+                    return SimpleNamespace(returncode=0, stdout=f'206 {total} {ttfb}')
+                def probe(*args):
+                    return guard.probe(*args, run=curl)
+                output = io.StringIO()
+                with redirect_stdout(output):
+                    if float(total) > 4:
+                        with self.assertRaisesRegex(RuntimeError, 'no fallback or installation'):
+                            guard.select([EC2, ARCHIVE], 'file', 1900000, Path(d), probe)
+                    else:
+                        self.assertEqual(guard.select([EC2, ARCHIVE], 'file', 1900000, Path(d), probe),
+                                         ARCHIVE)
+                self.assertEqual(calls, [ARCHIVE + 'file'])
+                records = [json.loads(line) for line in output.getvalue().splitlines()]
+                timings = [record for record in records if record.get('probe') == 'qualified-range']
+                self.assertEqual(timings, [{'probe': 'qualified-range',
+                    'outcome': 'pass' if float(total) <= 4 else 'below-floor',
+                    'elapsed_ms': round(float(total) * 1000), 'ttfb_ms': expected_ttfb}])
+                self.assertNotIn('canary', output.getvalue())
+
+    def test_unqualified_response_does_not_emit_range_timing(self):
+        for status, length, total in (('200', guard.PROBE_BYTES, 1900000),
+                                      ('206', 123, 1900000), ('206', guard.PROBE_BYTES, 1900001)):
+            with self.subTest(status=status, length=length, total=total), tempfile.TemporaryDirectory() as d:
+                def curl(args, **kwargs):
+                    write_probe_files(args, length, total)
+                    return SimpleNamespace(returncode=0, stdout=f'{status} 1.5 0.2')
+                output = io.StringIO()
+                with redirect_stdout(output), self.assertRaisesRegex(ValueError, 'range/size mismatch'):
+                    guard.probe(ARCHIVE, 'file', 1900000, Path(d), curl)
+                self.assertEqual(output.getvalue(), '')
 
     def test_canonical_timeout_retries_once_with_fresh_response(self):
         for fresh_response in (True, False):
