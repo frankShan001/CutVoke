@@ -1,7 +1,7 @@
 import { msg, tr, useLocale } from "../i18n";
 /** Export requests and measured stage progress are restored from persisted jobs. */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Upload, Copy, FolderOpen, Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Button, Field, Select, TextInput, Badge } from "./ui";
 import { useEditor, showError } from "../store/editor";
@@ -12,6 +12,7 @@ import { LOCATE_PREFLIGHT_ISSUE, preflightSummary } from "../lib/preflight";
 import { rationalToSecs } from "../lib/rational";
 import type { ExportResult } from "../types/api";
 import { getProjectDirectory } from "../lib/projectDirectories";
+import { selectedExportRange, type SelectedExportRange } from "../store/selectedExportRange";
 
 function savedExportSettings(projectId: string | null) {
   try { return JSON.parse(localStorage.getItem(`cutvoke.export.${projectId}`) || "null") as {
@@ -51,6 +52,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
   const [useRange, setUseRange] = useState(draft?.useRange || false);
   const [rangeStart, setRangeStart] = useState(draft?.rangeStart || "0");
   const [rangeEnd, setRangeEnd] = useState(draft?.rangeEnd || "");
+  const [selectedRange, setSelectedRange] = useState<SelectedExportRange | null>(null);
   const [videoBitrate, setVideoBitrate] = useState(draft?.videoBitrate || "");
   const [audioBitrate, setAudioBitrate] = useState(draft?.audioBitrate || "");
   const [transparent, setTransparent] = useState(draft?.transparent || false);
@@ -67,6 +69,40 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
   const [reconnecting, setReconnecting] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const startedRef = useRef(Date.now());
+  // After an async save, read the last committed dialog scope, not the
+  // render that started the export or the bridge's passive-effect snapshot.
+  const committedState = useRef<typeof state | null>(null);
+  useLayoutEffect(() => {
+    committedState.current = state;
+    return () => { committedState.current = null; };
+  }, [state]);
+  const selectableRange = selectedExportRange(state);
+  const isCurrentRange = (current: typeof state) => {
+    const choice = selectedExportRange(current);
+    return !selectedRange || (choice?.projectId === selectedRange.projectId &&
+      choice.clipId === selectedRange.clipId && choice.revision === selectedRange.revision &&
+      choice.start === selectedRange.start && choice.end === selectedRange.end);
+  };
+  const staleRange = !isCurrentRange(state);
+  const showingRange = useRange || !!selectedRange;
+  const startText = selectedRange ? String(selectedRange.start) : rangeStart;
+  const endText = selectedRange ? String(selectedRange.end) : rangeEnd;
+
+  const useSelectedRange = () => {
+    if (busy || restoring) return;
+    const current = getLatestState() || state;
+    if (current.currentId !== state.currentId) return;
+    const range = selectedExportRange(current);
+    if (range) setSelectedRange(range);
+  };
+
+  const makeRangeManual = () => {
+    if (!selectedRange) return;
+    setRangeStart(startText);
+    setRangeEnd(endText);
+    setUseRange(true);
+    setSelectedRange(null);
+  };
   const projectDuration = (state.project?.sequence.tracks || []).reduce(
     (duration, track) => Math.max(
       duration,
@@ -128,6 +164,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
           const created = Number(job.createdAt);
           startedRef.current = Number.isFinite(created) && created > 0 ? created * 1000 : Date.parse(String(job.createdAt)) || Date.now();
           if (["queued", "running"].includes(job.status)) {
+            setSelectedRange(null);
             setBusy(true);
             setPhase("running");
             setElapsed(Math.max(0, Math.floor((Date.now() - startedRef.current) / 1000)));
@@ -215,9 +252,10 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       }
     }
     let range: { start: number; end: number } | undefined;
-    if (useRange) {
-      const start = Number(rangeStart);
-      const end = rangeEnd.trim() ? Number(rangeEnd) : projectDuration;
+    if (!isCurrentRange(getLatestState() || state)) return;
+    if (showingRange) {
+      const start = Number(startText);
+      const end = endText.trim() ? Number(endText) : projectDuration;
       if (!Number.isFinite(start) || !Number.isFinite(end) ||
           start < 0 || end <= start || end > projectDuration) {
         showError(dispatch, {
@@ -248,12 +286,24 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
         dispatch({ type: "STATUS_SET", severity: "warn", text: msg("导出前检查发现问题，请先修复素材或工程") });
         return;
       }
+      const latest = getLatestState() || state;
+      if (!isCurrentRange(latest)) {
+        setPhase("idle");
+        return;
+      }
       setPhase("running");
-      const out = await doExport(dispatch, getLatestState() || state, outPath.trim(), quality, range, {
+      const out = await doExport(dispatch, latest, outPath.trim(), quality, range, {
         transparent,
         ...(!transparent && videoBitrate.trim() ? { videoBitrateKbps: Number(videoBitrate) } : {}),
         ...(!transparent && audioBitrate.trim() ? { audioBitrateKbps: Number(audioBitrate) } : {}),
-      });
+      }, selectedRange ? {
+        revision: selectedRange.revision,
+        isCurrent: () => {
+          const committed = committedState.current;
+          return !!committed && isCurrentRange(committed);
+        },
+      } : undefined);
+      if (!aliveRef.current) return;
       if (out.inFlight && out.jobId) {
         queued = true;
         startedRef.current = Date.now();
@@ -265,6 +315,8 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       } else if (out.error) {
         setJobError(out.error);
         setPhase("error");
+      } else {
+        setPhase("idle"); // The current selection changed while edits were being flushed.
       }
     } catch (error) {
       if (!aliveRef.current) return;
@@ -363,15 +415,21 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
         <Field label={tr("音频码率（kbps）")}><TextInput type="number" min="1" max="1536" step="1" value={audioBitrate} disabled={busy}
           placeholder="192" aria-label={tr("音频码率（kbps）")} onChange={event => setAudioBitrate(event.target.value)} /></Field>
       </div>}
+      <Button variant="secondary" onClick={useSelectedRange} disabled={busy || restoring || !selectableRange}>
+        {tr("使用所选片段的时间范围")}
+      </Button>
+      {selectedRange ? <p className="cv-hint" role="status">{staleRange
+        ? tr("工程或选择已变更，请重新选取范围或手动输入。")
+        : tr("仅使用片段的时间范围，保留该时段的全部可见图层和可听音轨。")}</p> : null}
       <label className="export-dialog__range-toggle">
         <input
           type="checkbox"
-          checked={useRange}
+          checked={showingRange}
           disabled={busy}
-          onChange={(event) => setUseRange(event.target.checked)}
+          onChange={(event) => { setSelectedRange(null); setUseRange(event.target.checked); }}
           aria-label={tr("仅导出时间范围")}
         />{tr("仅导出时间范围")}</label>
-      {useRange ? (
+      {showingRange ? (
         <div className="export-dialog__range-fields">
           <Field label={tr("开始时间（秒）")}>
             <TextInput
@@ -379,10 +437,10 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
               min="0"
               max={projectDuration}
               step={frameDuration}
-              value={rangeStart}
-              disabled={busy}
-              onChange={(event) => setRangeStart(event.target.value)}
-              onBlur={() => setRangeStart((value) => snapToFrame(value))}
+              value={startText}
+              disabled={busy || staleRange}
+              onChange={(event) => { makeRangeManual(); setRangeStart(event.target.value); }}
+              onBlur={() => { if (!selectedRange) setRangeStart((value) => snapToFrame(value)); }}
               aria-label={tr("导出开始时间")}
             />
           </Field>
@@ -392,17 +450,17 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
               min="0"
               max={projectDuration}
               step={frameDuration}
-              value={rangeEnd}
-              disabled={busy}
+              value={endText}
+              disabled={busy || staleRange}
               placeholder={projectDuration.toFixed(2)}
-              onChange={(event) => setRangeEnd(event.target.value)}
-              onBlur={() => setRangeEnd((value) => snapToFrame(value))}
+              onChange={(event) => { makeRangeManual(); setRangeEnd(event.target.value); }}
+              onBlur={() => { if (!selectedRange) setRangeEnd((value) => snapToFrame(value)); }}
               aria-label={tr("导出结束时间")}
             />
           </Field>
         </div>
       ) : null}
-      {useRange ? (
+      {showingRange ? (
         <p className="cv-hint" style={{ marginTop: 6 }}>{tr("时间会对齐到工程帧率，完成面板显示编码后的实际时长。")}</p>
       ) : null}
 
@@ -410,7 +468,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
         <Button variant="secondary" onClick={onClose}>{phase === "running" ? tr("后台导出") : tr("取消")}</Button>
         {phase === "running" && jobId ? <Button variant="secondary" onClick={() => void handleCancel()} disabled={cancelling || reconnecting}>
           {cancelling ? tr("正在取消…") : tr("取消导出")}</Button> : null}
-        <Button variant="primary" onClick={handleExport} disabled={busy || restoring} aria-label={tr("开始导出")}>
+        <Button variant="primary" onClick={handleExport} disabled={busy || restoring || staleRange} aria-label={tr("开始导出")}>
           <Upload size={14} />
           {phase === "checking" ? tr("检查素材中…") : busy ? tr("导出中…") : phase === "blocked" ? tr("重新检查并导出") : tr("开始导出")}
         </Button>
