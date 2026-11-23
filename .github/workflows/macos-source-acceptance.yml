@@ -180,6 +180,7 @@ jobs:
           import runpy
           import stat
           import subprocess
+          import sys
           import urllib.error
 
           fixture = Path("examples/audio-first/demo.py").resolve()
@@ -199,6 +200,82 @@ jobs:
               urllib.error.HTTPError: "HTTPError", urllib.error.URLError: "URLError",
           }
 
+          child_bootstrap = r"""import os, runpy, socket, stat, sys, threading
+          from http.server import HTTPServer
+          from pathlib import Path
+
+          _, verb, hflag, host, pflag, port, dflag, db, lflag, log = sys.argv
+          if ((verb, hflag, host, pflag, dflag, lflag) !=
+                  ("serve", "--host", "127.0.0.1", "--port", "--data", "--log")
+                  or Path(db).name != "projects.sqlite"
+                  or Path(log) != Path(db).parent.parent / "upload-service.jsonl"):
+              raise RuntimeError("unexpected synthetic HTTP command")
+          address = (host, int(port))
+          owner = threading.get_ident()
+          bind = HTTPServer.server_bind
+
+          def note(event):
+              try:
+                  fd = os.open(log, os.O_WRONLY | os.O_APPEND | os.O_CREAT
+                               | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600)
+                  try:
+                      if stat.S_ISREG(os.fstat(fd).st_mode):
+                          os.write(fd, ('{"event":"%s"}\n' % event).encode("ascii"))
+                  finally:
+                      os.close(fd)
+              except OSError:
+                  pass
+
+          def observed_bind(server):
+              if threading.get_ident() != owner or server.server_address != address:
+                  return bind(server)
+              note("qa-bind-enter")
+              lookup = socket.gethostbyaddr
+              def observed_lookup(name):
+                  if threading.get_ident() != owner or name != host:
+                      return lookup(name)
+                  note("qa-reverse-enter")
+                  try:
+                      return lookup(name)
+                  finally:
+                      note("qa-reverse-return")
+              socket.gethostbyaddr = observed_lookup
+              try:
+                  bind(server)
+              finally:
+                  socket.gethostbyaddr = lookup
+              note("qa-bind-return")
+              activate = server.server_activate
+              def observed_activate():
+                  del server.server_activate
+                  note("qa-listen-enter")
+                  activate()
+                  note("qa-listen-return")
+              server.server_activate = observed_activate
+
+          HTTPServer.server_bind = observed_bind
+          try:
+              runpy.run_module("cutvoke", run_name="__main__", alter_sys=True)
+          finally:
+              HTTPServer.server_bind = bind
+          """
+
+          def audio_run():
+              run = runpy.run_path(str(fixture))["run"]
+              audio = (Path(os.environ["QA_DIR"]) / "audio").resolve()
+              module = run.__globals__["transport"]
+              web_uploads = module.WebUploads
+              def observed_web(command, database, output, effects):
+                  if (command != [sys.executable, "-m", "cutvoke"] or output != audio
+                          or database != audio / "data" / "projects.sqlite" or effects is not None):
+                      raise RuntimeError("unexpected synthetic audio fixture")
+                  return web_uploads([command[0], "-c", child_bootstrap], database, output, effects)
+              module.WebUploads = observed_web
+              try:
+                  run(audio)
+              finally:
+                  module.WebUploads = web_uploads
+
           def final_url_reason(error):
               context = error.__context__
               if type(context) is not urllib.error.URLError:
@@ -216,7 +293,14 @@ jobs:
               flags = os.O_RDONLY | os.O_NOFOLLOW
               folder_flags = flags | os.O_DIRECTORY
               limit = 64 * 1024
-              checkpoints = {"serve.boot": 1, "serve.builtin_audio": 2, "http.serve_start": 3}
+              checkpoints = (
+                  ("", "not-observed"), ("serve.boot", "serve-boot"), ("serve.builtin_audio", "builtin-audio"),
+                  ("qa-bind-enter", "bind-enter"), ("qa-reverse-enter", "reverse-enter"),
+                  ("qa-reverse-return", "reverse-return"), ("qa-bind-return", "bind-return"),
+                  ("qa-listen-enter", "listen-enter"), ("qa-listen-return", "listen-return"),
+                  ("http.serve_start", "listener-created"),
+              )
+              ranks = {event: index for index, (event, _) in enumerate(checkpoints)}
               try:
                   root = os.open(os.environ["QA_DIR"], folder_flags)
                   try:
@@ -244,10 +328,10 @@ jobs:
                       row = json.loads(line)
                       if not isinstance(row, dict) or not isinstance(row.get("event"), str):
                           return "marker-unavailable"
-                      latest = max(latest, checkpoints.get(row["event"], 0))
+                      latest = max(latest, ranks.get(row["event"], 0))
               except (KeyError, OSError, ValueError, RecursionError):
                   return "marker-unavailable"
-              return ("not-observed", "serve-boot", "builtin-audio", "listener-created")[latest]
+              return checkpoints[latest][1]
 
           def provenance(error):
               chain = []
@@ -281,7 +365,7 @@ jobs:
               return "unknown (no fixture traceback)"
 
           try:
-              runpy.run_path(str(fixture))["run"](Path(os.environ["QA_DIR"]) / "audio")
+              audio_run()
           except Exception as error:
               try:
                   with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
