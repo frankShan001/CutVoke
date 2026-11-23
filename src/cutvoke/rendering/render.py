@@ -3539,8 +3539,12 @@ class RenderService:
             parts.append(f"[outv]trim=end={local_end:.9f}{clock}[outv]")
             if has_audio:
                 audio_end=render_window[1]-audio_origin
-                parts.append(f"[outa]apad=whole_dur={audio_end:.9f},"
-                             f"atrim=end={audio_end:.9f},asetpts=PTS-STARTPTS[outa]")
+                # Mix output is continuous PCM; preserve its sample clock even
+                # when a delay or mixed input supplies uneven packet timestamps.
+                rate = seq.audio_sample_rate
+                end_sample = round(audio_end * rate)
+                parts.append(f"[outa]aresample={rate},apad=whole_len={end_sample},"
+                             f"atrim=end_sample={end_sample},asetpts=N/SR/TB[outa]")
 
         elif has_audio:
             # A short sound effect must not leave the delivery audio stream
@@ -6044,8 +6048,14 @@ class RenderService:
                     f"setpts=PTS-STARTPTS,fps={fps.numerator}/{fps.denominator}[boundedv]")
             if has_audio:
                 audio_offset=getattr(self._render_ctx,'audio_origin_delta',0.)
-                graph += (f";[outa]atrim=start={start+audio_offset:.9f}:end={end+audio_offset:.9f},"
-                          "asetpts=PTS-STARTPTS[boundeda]")
+                # Clip effects and mixing are already applied at the sequence rate.
+                # Cut the same sample interval as the independent reference;
+                # timestamp-based atrim can drop whole packets after adelay.
+                rate = seq.audio_sample_rate
+                first = max(0, round((start + audio_offset) * rate))
+                last = round((end + audio_offset) * rate)
+                graph += (f";[outa]aresample={rate},atrim=start_sample={first}:end_sample={last},"
+                          "asetpts=N/SR/TB[boundeda]")
                 audio_label = "[boundeda]"
 
         # This is a background worker, not an interactive terminal command.
