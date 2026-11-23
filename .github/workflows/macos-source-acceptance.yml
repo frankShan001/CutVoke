@@ -171,8 +171,66 @@ jobs:
           PY
           record '- Default stdio MCP: Web media availability, six readable PNGs, 1280×720 at 30 fps, 12 s H.264/AAC and full decode.'
 
-          stage audio-roundtrip python examples/audio-first/demo.py --output "$QA_DIR/audio"
-          stage audio-evidence python - <<'PY'
+          audio_failed=0
+          if stage audio-roundtrip python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import runpy
+          import subprocess
+          import urllib.error
+
+          fixture = Path("examples/audio-first/demo.py").resolve()
+          names = {"run", "export", "audio_metrics", "tone", "http", "semantic_project",
+                   "rms", "tone_amplitude", "normalize", "pcm"}
+          classes = {
+              AssertionError: "AssertionError", EOFError: "EOFError",
+              FileNotFoundError: "FileNotFoundError", KeyError: "KeyError",
+              OSError: "OSError", RuntimeError: "RuntimeError",
+              StopIteration: "StopIteration", TypeError: "TypeError",
+              ValueError: "ValueError", json.JSONDecodeError: "JSONDecodeError",
+              subprocess.CalledProcessError: "CalledProcessError",
+              subprocess.TimeoutExpired: "TimeoutExpired",
+              urllib.error.HTTPError: "HTTPError", urllib.error.URLError: "URLError",
+          }
+
+          def provenance(error):
+              chain = []
+              seen = set()
+              while error is not None and len(chain) < 8 and id(error) not in seen:
+                  seen.add(id(error))
+                  chain.append(error)
+                  error = error.__cause__ or (
+                      None if error.__suppress_context__ else error.__context__)
+              for cause in reversed(chain):
+                  frames = []
+                  trace = cause.__traceback__
+                  for _ in range(64):
+                      if trace is None:
+                          break
+                      code = trace.tb_frame.f_code
+                      line = trace.tb_lineno
+                      if (code.co_name in names and 1 <= line <= 10000
+                              and Path(code.co_filename).resolve() == fixture):
+                          frames.append((code.co_name, line))
+                      trace = trace.tb_next
+                  if frames:
+                      locations = " → ".join(f"{name}:{line}" for name, line in frames[-4:])
+                      return f"{classes.get(type(cause), 'unknown')} ({locations})"
+              return "unknown (no fixture traceback)"
+
+          try:
+              runpy.run_path(str(fixture))["run"](Path(os.environ["QA_DIR"]) / "audio")
+          except Exception as error:
+              try:
+                  with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+                      summary.write(f"- Audio roundtrip failed: {provenance(error)}.\n")
+              except Exception:
+                  pass  # Diagnostics cannot replace the original failure.
+              raise
+          PY
+          then
+            if stage audio-evidence python - <<'PY'
           import json
           import os
           from pathlib import Path
@@ -181,7 +239,15 @@ jobs:
           assert all(audio[key] is True for key in ("fullDecode", "editablePackageRoundTrip",
                                                     "roundTripAudioMatches", "auditionStreamMatchesSource"))
           PY
-          record '- Separate audio fixture: editable package reopen and exact decoded PCM parity.'
+            then
+              record '- Separate audio fixture: editable package reopen and exact decoded PCM parity.'
+            else
+              audio_failed=1
+              record '- Audio roundtrip evidence validation failed.'
+            fi
+          else
+            audio_failed=1
+          fi
 
           unset CUTVOKE_E2E_BROWSER
           (
@@ -198,3 +264,4 @@ jobs:
             stage browser-handoff ./node_modules/.bin/playwright test e2e/mcp-handoff.spec.ts --workers=1 --trace off --output "$QA_DIR/browser"
           )
           record '- Separate Chrome Headless Shell handoff: caption save, playback and GUI export/full decode.'
+          test "$audio_failed" -eq 0
