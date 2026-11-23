@@ -92,11 +92,27 @@ async function main() {
     assert.equal(crypto.createHash("sha256").update(fs.readFileSync(path.join(folder, name))).digest("hex"), hash, name);
   }
   report.checks.extractedZipIntegrity = true;
+  if (target === "linux-x64") {
+    for (const directory of [folder, resources]) {
+      assert.ok(fs.lstatSync(directory).isDirectory(), "Extracted engine must be inside the real archive directories");
+    }
+    report.checks.linuxFrozenEngineInventory = JSON.parse(run(process.env.CUTVOKE_VERIFY_PYTHON, [
+      path.join(root, "tools/verify/verify_unix_frozen_engine_inventory.py"),
+      path.join(root, ".artifacts/build/desktop-engine/cutvoke-engine"),
+      path.join(resources, "engine"),
+    ], env));
+  }
   const doctor = JSON.parse(run(engine, ["doctor", "--json"], env));
   assert.equal(doctor.ok, true, JSON.stringify(doctor));
   assert.equal(doctor.optionalDependencies.asr, false);
   assert.equal(doctor.optionalDependencies.person, false);
-  assert.ok(doctor.ffmpeg.startsWith(bin));
+  if (target === "linux-x64") {
+    assert.equal(doctor.runtime.pythonExecutable, fs.realpathSync(engine));
+    assert.equal(doctor.ffmpeg, fs.realpathSync(ffmpeg));
+    assert.equal(doctor.ffprobe, fs.realpathSync(ffprobe));
+  } else {
+    assert.ok(doctor.ffmpeg.startsWith(bin));
+  }
   report.doctor = doctor;
   fs.writeFileSync(path.join(out, "ffmpeg-version.txt"), run(ffmpeg, ["-version"], env));
   run(process.env.CUTVOKE_VERIFY_PYTHON, [path.join(root, "tools/verify/verify_unix_runtime.py"), folder, path.join(root, "dist/portable/native-runtime.json")]);
