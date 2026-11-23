@@ -1,0 +1,200 @@
+name: macOS arm64 source acceptance
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ['.github/workflows/macos-source-acceptance.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: macos-15
+    timeout-minutes: 35
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: '3.13.16'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '24.15.0'
+
+      - name: Install source dependencies and official FFmpeg bottle
+        timeout-minutes: 18
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+          HOMEBREW_NO_INSTALL_CLEANUP: '1'
+        run: |
+          test "$(uname -m)" = arm64
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          qa=$(mktemp -d "$RUNNER_TEMP/cutvoke-macos-source.XXXXXX")
+          printf 'QA_DIR=%s\n' "$qa" >> "$GITHUB_ENV"
+          stage() {
+            local phase=$1
+            shift
+            if "$@" > "$qa/$phase.log" 2>&1; then
+              printf '%s: ok\n' "$phase"
+            else
+              printf '::error::%s failed; raw runner-local logs are not published\n' "$phase"
+              return 1
+            fi
+          }
+          brew=/opt/homebrew/bin/brew
+          stage ffmpeg-bottle "$brew" install --force-bottle homebrew/core/ffmpeg-full
+          ffmpeg_bin="$("$brew" --prefix homebrew/core/ffmpeg-full)/bin"
+          test -x "$ffmpeg_bin/ffmpeg"
+          test -x "$ffmpeg_bin/ffprobe"
+          export PATH="$ffmpeg_bin:$PATH"
+          stage virtual-environment python -m venv "$qa/venv"
+          export PATH="$qa/venv/bin:$PATH"
+          stage source-install python -m pip install -e .
+          (
+            cd apps/editor
+            stage editor-dependencies npm ci
+            stage editor-build npm run build
+          )
+          printf '%s\n' "$ffmpeg_bin" "$qa/venv/bin" >> "$GITHUB_PATH"
+          printf 'QA_FFMPEG_BIN=%s\n' "$ffmpeg_bin" >> "$GITHUB_ENV"
+
+      - name: Exercise and report isolated synthetic source fixtures
+        timeout-minutes: 15
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+          CUTVOKE_E2E_PORT: '8809'
+        run: |
+          stage() {
+            local phase=$1
+            shift
+            if "$@" > "$QA_DIR/$phase.log" 2>&1; then
+              printf '%s: ok\n' "$phase"
+            else
+              printf '::error::%s failed; raw runner-local logs are not published\n' "$phase"
+              return 1
+            fi
+          }
+          record() { printf '%s\n' "$1" >> "$GITHUB_STEP_SUMMARY"; }
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(command -v ffmpeg)" = "$QA_FFMPEG_BIN/ffmpeg"
+          test "$(command -v ffprobe)" = "$QA_FFMPEG_BIN/ffprobe"
+          record '### macOS arm64 source acceptance'
+          record 'Hosted Mac VM only. Separate synthetic fixtures. No physical-device, subjective, Intel, signed/notarized or packaged-download acceptance.'
+          stage doctor python -m cutvoke doctor --json
+          stage source-evidence python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import platform
+          import re
+          import subprocess
+
+          import cutvoke
+
+          root = Path(os.environ["QA_DIR"])
+          ffmpeg_bin = Path(os.environ["QA_FFMPEG_BIN"])
+          doctor = json.loads((root / "doctor.log").read_text())
+          assert Path(cutvoke.__file__).resolve() == (Path.cwd() / "src/cutvoke/__init__.py").resolve()
+          assert doctor["ok"] is True
+          required = {"ffmpeg", "ffprobe", "ffmpeg:libx264", "ffmpeg:aac", "ffmpeg:overlay",
+                      "ffmpeg:drawtext", "ffmpeg:subtitles", "web-editor"}
+          assert required <= {check["name"] for check in doctor["checks"] if check["ok"] is True}
+          assert all(Path(doctor[tool]).resolve() == (ffmpeg_bin / tool).resolve()
+                     for tool in ("ffmpeg", "ffprobe"))
+
+          def command(*args):
+              return subprocess.check_output(args, text=True, timeout=15).strip()
+
+          def version(value, pattern):
+              assert re.fullmatch(pattern, value)
+              return value
+
+          versions = {
+              "macOS": version(command("sw_vers", "-productVersion"), r"\d+(?:\.\d+){1,2}"),
+              "Python": version(platform.python_version(), r"\d+\.\d+\.\d+"),
+              "Node": version(command("node", "--version"), r"v\d+\.\d+\.\d+"),
+          }
+          for tool in ("ffmpeg", "ffprobe"):
+              value = command(str(ffmpeg_bin / tool), "-version").splitlines()[0].split()[2]
+              versions[tool] = version(value, r"\d+\.\d+(?:\.\d+)?(?:[-+._][A-Za-z0-9]+)*")
+          sha = version(os.environ["EXPECTED_SHA"], r"[0-9a-f]{40}")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              summary.write(f"\nSource commit: \x60{sha}\x60\n\n")
+              for tool, value in versions.items():
+                  summary.write(f"- {tool}: {value}\n")
+              summary.write("- Source doctor required checks passed; official Homebrew formula.\n")
+          PY
+
+          (
+            cd "$QA_DIR"
+            cat > subtitle-probe.srt <<'SRT'
+          1
+          00:00:00,000 --> 00:00:01,000
+          CutVoke synthetic subtitle
+          SRT
+            stage subtitle-render "$QA_FFMPEG_BIN/ffmpeg" -nostdin -v error \
+              -f lavfi -i color=c=black:s=320x180:r=1:d=1 \
+              -vf subtitles=subtitle-probe.srt -frames:v 1 -pix_fmt rgb24 \
+              -c:v rawvideo -threads 1 -f rawvideo subtitle-probe.rgb
+            stage subtitle-pixels python -c 'from pathlib import Path; p = Path("subtitle-probe.rgb").read_bytes(); assert len(p) == 320*180*3 and max(p) > 200'
+          )
+          record '- Selected FFmpeg rendered one synthetic SRT frame with visible subtitle pixels.'
+
+          stage stdio-mcp python skills/cutvoke-editor/scripts/demo.py --output "$QA_DIR/default"
+          stage stdio-evidence python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from PIL import Image
+
+          root = Path(os.environ["QA_DIR"]) / "default"
+          demo = json.loads((root / "result.json").read_text())
+          assert demo["importMode"] == "mcp"
+          assert (demo["size"], demo["duration"], demo["fps"], demo["codecs"]) == (
+              [1280, 720], 12, "30/1", ["h264", "aac"])
+          assert all(demo[key] is True for key in ("browserAssetsAvailable", "fullDecode",
+                                                   "preflightReady", "idempotentReplay"))
+          frames = sorted((root / "frames").glob("frame-*.png"))
+          assert len(frames) == 6
+          for frame in frames:
+              with Image.open(frame) as image:
+                  assert image.format == "PNG"
+                  image.verify()
+          PY
+          record '- Default stdio MCP: Web media availability, six readable PNGs, 1280×720 at 30 fps, 12 s H.264/AAC and full decode.'
+
+          stage audio-roundtrip python examples/audio-first/demo.py --output "$QA_DIR/audio"
+          stage audio-evidence python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          audio = json.loads((Path(os.environ["QA_DIR"]) / "audio/result.json").read_text())
+          assert all(audio[key] is True for key in ("fullDecode", "editablePackageRoundTrip",
+                                                    "roundTripAudioMatches", "auditionStreamMatchesSource"))
+          PY
+          record '- Separate audio fixture: editable package reopen and exact decoded PCM parity.'
+
+          unset CUTVOKE_E2E_BROWSER
+          (
+            cd apps/editor
+            stage browser-install ./node_modules/.bin/playwright install chromium
+            stage browser-version node --input-type=module -e 'import { chromium } from "@playwright/test"; const browser = await chromium.launch(); try { console.log(browser.version()); } finally { await browser.close(); }'
+            browser=$(cat "$QA_DIR/browser-version.log")
+            if [[ $browser =~ ^[0-9]+([.][0-9]+){2,3}$ ]]; then
+              record "- Playwright default Chrome Headless Shell: $browser"
+            else
+              printf '::error::browser-version format was not recognized\n'
+              exit 1
+            fi
+            stage browser-handoff ./node_modules/.bin/playwright test e2e/mcp-handoff.spec.ts --workers=1 --trace off --output "$QA_DIR/browser"
+          )
+          record '- Separate Chrome Headless Shell handoff: caption save, playback and GUI export/full decode.'
