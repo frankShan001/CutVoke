@@ -173,10 +173,12 @@ jobs:
 
           audio_failed=0
           if stage audio-roundtrip python - <<'PY'
+          import errno
           import json
           import os
           from pathlib import Path
           import runpy
+          import stat
           import subprocess
           import urllib.error
 
@@ -196,6 +198,56 @@ jobs:
               subprocess.TimeoutExpired: "TimeoutExpired",
               urllib.error.HTTPError: "HTTPError", urllib.error.URLError: "URLError",
           }
+
+          def final_url_reason(error):
+              context = error.__context__
+              if type(context) is not urllib.error.URLError:
+                  return "url-reason-unknown"
+              reason = context.reason
+              if isinstance(reason, OSError) and reason.errno == errno.ECONNREFUSED:
+                  return "connection-refused"
+              if isinstance(reason, TimeoutError):
+                  return "transport-timeout"
+              return "other-urlerror"
+
+          def startup_marker():
+              # Only the fresh synthetic fixture's owned service log; never emit fields
+              # other than fixed milestone buckets or read stdout/stderr.
+              flags = os.O_RDONLY | os.O_NOFOLLOW
+              folder_flags = flags | os.O_DIRECTORY
+              limit = 64 * 1024
+              checkpoints = {"serve.boot": 1, "serve.builtin_audio": 2, "http.serve_start": 3}
+              try:
+                  root = os.open(os.environ["QA_DIR"], folder_flags)
+                  try:
+                      audio = os.open("audio", folder_flags, dir_fd=root)
+                      try:
+                          log = os.open("upload-service.jsonl", flags | os.O_NONBLOCK, dir_fd=audio)
+                          try:
+                              info = os.fstat(log)
+                              if not stat.S_ISREG(info.st_mode) or info.st_size > limit:
+                                  return "marker-unavailable"
+                              with os.fdopen(log, "rb", buffering=0, closefd=False) as stream:
+                                  raw = stream.read(limit + 1)
+                              if len(raw) != info.st_size:
+                                  return "marker-unavailable"
+                          finally:
+                              os.close(log)
+                      finally:
+                          os.close(audio)
+                  finally:
+                      os.close(root)
+                  if len(raw) > limit or (raw and not raw.endswith(b"\n")):
+                      return "marker-unavailable"
+                  latest = 0
+                  for line in raw.split(b"\n")[:-1]:
+                      row = json.loads(line)
+                      if not isinstance(row, dict) or not isinstance(row.get("event"), str):
+                          return "marker-unavailable"
+                      latest = max(latest, checkpoints.get(row["event"], 0))
+              except (KeyError, OSError, ValueError, RecursionError):
+                  return "marker-unavailable"
+              return ("not-observed", "serve-boot", "builtin-audio", "listener-created")[latest]
 
           def provenance(error):
               chain = []
@@ -222,7 +274,10 @@ jobs:
                       trace = trace.tb_next
                   if frames:
                       locations = " → ".join(f"{name}:{line}" for name, line in frames[-4:])
-                      return f"{classes.get(type(cause), 'unknown')} ({locations})"
+                      result = f"{classes.get(type(cause), 'unknown')} ({locations})"
+                      if type(cause) is RuntimeError and frames[-1] == ("web-readiness-timeout", 237):
+                          result += f"; final URL error: {final_url_reason(cause)}; startup marker: {startup_marker()}"
+                      return result
               return "unknown (no fixture traceback)"
 
           try:
