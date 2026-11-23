@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
+import math
 import os
 import shutil
 import subprocess
+import struct
 import tempfile
 import threading
 import time
 import unittest
+import wave
+
+from PIL import Image
 
 from cutvoke.interfaces.httpapi import HttpApi
 from cutvoke.domain.model import AssetReference, Clip, Track
@@ -103,6 +108,62 @@ class ExportRangeTests(unittest.TestCase):
             self.assertEqual(renderer.options["output_duration"], 1.5)
             self.assertTrue(renderer.options["overwrite"])
             self.assertEqual(matching["status"], "succeeded")
+
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"),
+                         "FFmpeg required")
+    def test_bounded_audio_checks_alignment_on_the_continuous_sample_clock(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            rate = 48000
+            audio = os.path.join(directory, "chirp.wav")
+            # Distinct sweeps make correlation discriminate small real shifts.
+            samples = []
+            for i in range(rate * 4):
+                t = i / rate
+                sample = 0.0 if 2.0 <= t < 2.1 else (
+                    0.2 * math.sin(2 * math.pi * (137 * t + 18 * t * t))
+                    + 0.12 * math.sin(2 * math.pi * (941 * t + 31 * t * t)))
+                samples.append(round(sample * 32767))
+            with wave.open(audio, "wb") as output:
+                output.setparams((1, 2, rate, 0, "NONE", "not compressed"))
+                output.writeframes(struct.pack(f"<{len(samples)}h", *samples))
+
+            image = os.path.join(directory, "picture.png")
+            Image.new("RGB", (160, 90), (55, 105, 192)).save(image)
+            service = EditService()
+            try:
+                for label, fps, start, source, overlap in (
+                    ("leading-silence", r(30), 0.5, r(2), False),
+                    ("overlap", r(30), 0.75, r(2), True),
+                    ("fractional-rate", Rational.of(30000, 1001), 0.517,
+                     Rational.of(1001, 500), False),
+                ):
+                    with self.subTest(label=label):
+                        project = service.create_project(label, width=160, height=90, fps=fps)
+                        project.sequence.tracks = [
+                            Track("v", "video", [Clip("pic", AssetReference("pic", image), r(0), r(3), r(0))]),
+                            Track("a", "audio", [Clip("sound", AssetReference("sound", audio),
+                                Rational.of(1, 2), Rational.of(3, 2), source)]),
+                        ]
+                        if overlap:
+                            project.sequence.tracks.append(Track("b", "audio", [
+                                Clip("overlap", AssetReference("sound", audio),
+                                     Rational.of(7, 10), Rational.of(9, 5), Rational.of(2, 5))
+                            ]))
+                        renderer = RenderService()
+                        renderer.gpu_acceleration = False
+                        path = os.path.join(directory, label + ".mp4")
+                        result = renderer.render(project, path, quality="low",
+                                                 output_start=start, output_duration=1.0)
+                        self.assertTrue(os.path.isfile(path))
+                        verification = result["audioVerification"]
+                        self.assertEqual(verification["status"], "passed")
+                        self.assertTrue(verification["windows"])
+                        self.assertLess(abs(verification["lengthDifferenceSeconds"]), 0.03)
+                        for window in verification["windows"]:
+                            self.assertEqual(window["estimatedOffsetSeconds"], 0)
+                            self.assertGreater(window["zeroOffsetCorrelation"], 0.99)
+            finally:
+                service.close()
 
     @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"),
                          "FFmpeg required")
