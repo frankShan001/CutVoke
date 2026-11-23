@@ -44,6 +44,7 @@ import threading
 import zipfile
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from socketserver import TCPServer
 from typing import Any, Optional
 from urllib.parse import urlparse, parse_qs, unquote
 import uuid
@@ -3478,6 +3479,14 @@ def serve(api: HttpApi, host: str = "127.0.0.1", port: int = 8787,
     # retries delay unrelated API requests behind that burst.
     class LocalHTTPServer(ThreadingHTTPServer):
         request_queue_size = 128
+
+        def server_bind(self):
+            if self.server_address[0] != "127.0.0.1":
+                return super().server_bind()
+            # HTTPServer does a reverse lookup between bind and listen. A
+            # literal loopback endpoint does not need a DNS-derived name.
+            TCPServer.server_bind(self)
+            self.server_name, self.server_port = self.server_address[:2]
 
     server = LocalHTTPServer((bound, port), handler)
     api.shutdown_callback = server.shutdown
