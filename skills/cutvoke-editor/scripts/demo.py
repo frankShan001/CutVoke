@@ -231,7 +231,9 @@ class WebUploads:
                 except urllib.error.HTTPError as error:
                     raise RuntimeError(f"Local upload API returned HTTP {error.code}; inspect the service configuration, do not bypass authentication") from error
                 except urllib.error.URLError:
-                    if self.process.poll() is not None or time.monotonic() >= deadline:
+                    if self.process.poll() is not None:
+                        raise RuntimeError("Local upload service did not start; inspect upload-service.log")
+                    if time.monotonic() >= deadline:
                         raise RuntimeError("Local upload service did not start; inspect upload-service.log")
                     time.sleep(0.2)
         except BaseException:

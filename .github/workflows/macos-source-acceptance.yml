@@ -181,6 +181,9 @@ jobs:
           import urllib.error
 
           fixture = Path("examples/audio-first/demo.py").resolve()
+          transport = Path("skills/cutvoke-editor/scripts/demo.py").resolve()
+          startup = {229: "web-wrong-data-path", 232: "web-http-error",
+                     235: "web-child-exited", 237: "web-readiness-timeout"}
           names = {"run", "export", "audio_metrics", "tone", "http", "semantic_project",
                    "rms", "tone_amplitude", "normalize", "pcm"}
           classes = {
@@ -213,6 +216,9 @@ jobs:
                       if (code.co_name in names and 1 <= line <= 10000
                               and Path(code.co_filename).resolve() == fixture):
                           frames.append((code.co_name, line))
+                      elif (code.co_qualname == "WebUploads.__init__" and line in startup
+                            and Path(code.co_filename).resolve() == transport):
+                          frames.append((startup[line], line))
                       trace = trace.tb_next
                   if frames:
                       locations = " → ".join(f"{name}:{line}" for name, line in frames[-4:])
