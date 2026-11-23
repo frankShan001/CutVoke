@@ -191,8 +191,24 @@ test("selected export passes its range to preflight and keeps out-of-range missi
 test("selected clip prefills the mixed timeline range without queuing", async ({ page, request }) => {
   test.setTimeout(90_000);
   const { id, name } = await projectWithImages(request);
+  const sampleRate = 48_000;
+  const samples = sampleRate * 4;
+  const tone = Buffer.alloc(44 + samples * 2); // mono PCM16 WAV, including the nonzero source offset
+  tone.write("RIFF", 0);
+  tone.writeUInt32LE(tone.length - 8, 4);
+  tone.write("WAVEfmt ", 8);
+  tone.writeUInt32LE(16, 16);
+  tone.writeUInt16LE(1, 20);
+  tone.writeUInt16LE(1, 22);
+  tone.writeUInt32LE(sampleRate, 24);
+  tone.writeUInt32LE(sampleRate * 2, 28);
+  tone.writeUInt16LE(2, 32);
+  tone.writeUInt16LE(16, 34);
+  tone.write("data", 36);
+  tone.writeUInt32LE(samples * 2, 40);
+  for (let i = 0; i < samples; i++) tone.writeInt16LE(Math.round(4096 * Math.sin(2 * Math.PI * 440 * i / sampleRate)), 44 + i * 2);
   const audioAsset = await request.post(`/api/v1/assets?name=range-tone.wav&projectId=${encodeURIComponent(id)}`, {
-    headers: { "Content-Type": "application/octet-stream" }, data: readFileSync(audio),
+    headers: { "Content-Type": "application/octet-stream" }, data: tone,
   });
   expect(audioAsset.ok()).toBeTruthy();
   const { path: sourcePath, assetId } = await audioAsset.json();
@@ -240,7 +256,7 @@ test("selected clip prefills the mixed timeline range without queuing", async ({
   await expect(dialog.locator(".inspector__row").filter({ hasText: "时长" })).toContainText("1.00 秒");
   const ffmpeg = (options: string[]) => execFileSync("ffmpeg", ["-v", "error", "-i", path, ...options, "-"],
     { timeout: 10_000, maxBuffer: 2 * 1024 * 1024 });
-  const picture = ffmpeg(["-frames:v", "1", "-pix_fmt", "rgb24", "-f", "rawvideo"]);
+  const picture = ffmpeg(["-frames:v", "1", "-threads", "1", "-pix_fmt", "rgb24", "-f", "rawvideo"]);
   expect(picture.some(level => level > 32)).toBe(true); // retains the other track's picture
   const waveform = ffmpeg(["-vn", "-t", "1", "-f", "s16le"]);
   let peak = 0;

@@ -445,7 +445,7 @@ export async function doExport(
         selectedRangeGuard.revision, newCommandId());
       const receipt = (result.changedEntities as Array<{ type: string; jobId?: string }>)
         .find(entity => entity.type === "export_enqueued");
-      if (!receipt?.jobId) throw new ApiFailure({ status: 502, code: "INVALID_RESPONSE", message: tr("导出失败") });
+      if (!receipt?.jobId) throw new ApiFailure({ status: 502, code: "INVALID_RESPONSE", message: tr(" 导出失败").trim() });
       jobId = receipt.jobId;
     } else {
       jobId = (await apiEnqueueExport(state.currentId, outPath, quality, range, true, options)).jobId;
