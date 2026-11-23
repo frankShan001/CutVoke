@@ -2,6 +2,10 @@
 
 ## 导出音轨
 
+**按单个片段的时间范围导出（当前源码版）**：在时间线上只选中一个片段，点击 **导出** → **使用所选片段的时间范围**。检查自动填入的时间线起止点，再点击 **开始导出**。这一步只填入区间，不会自动提交；导出的是该区间内整条时间线的可见画面和可听混音，不会隔离所选片段。
+
+**Export a selected clip’s time range (current source build):** Select exactly one clip on the timeline, then choose **Export** → **Use selected clip's time range**. Check the prefilled timeline start and end, then click **Start export**. The shortcut only fills the range; it does not start an export. The result includes the visible layers and audible mix of the whole timeline within that range, not just the selected clip.
+
 正常速度的音轨不再经过 `atempo=1`。该滤镜仍会执行时间伸缩算法，可能改变完整母带的波形位置。
 片段位置改用采样数对齐；密集时间线的分窗口导出只分割画面，音频连续混合一次，最后统一编码。
 输入音频先转换到工程采样率，再应用以样本数表示的位置、变速与变调，避免 44.1 kHz 素材在 48 kHz 工程内发生延迟误差。
