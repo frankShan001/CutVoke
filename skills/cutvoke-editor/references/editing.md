@@ -36,6 +36,8 @@ Use runtime help for exact fields and supported commands:
 
 `createTrackKind` in `clip.insert` creates a **new** track; omit it when adding later clips to that track. Applying a transition targets the incoming clip and requires an adjacent previous clip on the same track. Verify sufficient source duration/transition handles and inspect the overlap; do not assume an effect can repair an unsuitable cut.
 
+Picture transitions do not crossfade sound. For an audio crossfade, overlap clips on separate audio tracks, use `clip.audio` to set the outgoing clip’s `fadeOut` and the incoming clip’s `fadeIn` in seconds to match the actual audio overlap, then listen to that range in preview and export.
+
 ### Resolve repeated caption text before editing
 
 `project_lookup` reports `matchCount` and `ambiguous` for all entities matching the ID/text/time filters, before `limit` truncates `items`. `hasMore` still indicates truncation; `limit=1` does not establish uniqueness. Use `requireUnique=true` for a single-target correction: multiple matches return `AMBIGUOUS_MATCH` without an edit, while zero matches still returns an empty list.

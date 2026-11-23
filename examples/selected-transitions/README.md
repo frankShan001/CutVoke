@@ -34,6 +34,29 @@ prove rendered sound is unchanged: inspect the actual transition with existing
 preview/export tools. Timing, media handles and audible/visual quality need their
 own media acceptance; the tests below are command-level, not a full render test.
 
+## Audio crossfade / 音频交叉淡化
+
+A picture transition does not automatically crossfade sound. Put the outgoing
+and incoming audio on separate tracks and overlap them on the timeline. For
+example, place A at 0–3 s and B at 2–5 s. In each clip’s Audio inspector, set a
+1 s fade-out on A and a 1 s fade-in on B. With `clip.audio`, set A’s
+`fadeOut: 1` and B’s `fadeIn: 1`. Match the fades to the actual audio overlap,
+not the picture transition duration. Listen across the overlap in both timeline
+preview and an export.
+
+For embedded sound, detaching the audio preserves its timing; it does not
+create an overlap. Before extending either end, check that there is enough
+source audio and that the edit preserves sync.
+
+画面转场不会自动交叉淡化声音。把前后两段音频放到不同音轨，让它们在时间线上
+重叠。例如 A 放在 0–3 秒，B 放在 2–5 秒。在片段的“音频”面板为 A 设置
+1 秒淡出、为 B 设置 1 秒淡入；也可以用 `clip.audio` 分别设置 A 的
+`fadeOut: 1` 和 B 的 `fadeIn: 1`。以两段音频的实际重叠时长为准，不照搬
+画面转场时长。在时间线预览和导出成片中都试听这段过渡。
+
+如果声音内嵌在视频里，“分离原声”会保留原有时序，不会自动产生重叠。延长
+片段前，先确认原素材有足够的音频余量，并检查声画是否仍然同步。
+
 ## Verify
 
 From the repository root with runtime dependencies and pytest installed:
