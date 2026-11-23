@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import copy
 import json
+import logging
+import sqlite3
 import threading
 import time
 import uuid
@@ -13,6 +15,9 @@ from cutvoke.rendering.speech_recognition import (LANGUAGE_CHOICES, MODEL_CHOICE
                                  SpeechRecognitionError, availability,
                                  find_source_clip, source_signature,
                                  transcribe_clip)
+
+
+_LOG = logging.getLogger(__name__)
 
 
 class AsrJobManager:
@@ -88,7 +93,19 @@ class AsrJobManager:
     def _release_lease(self, job_id):
         lease = self._leases.pop(job_id, None)
         if lease:
-            lease.close()
+            try:
+                lease.close()
+            except OSError:
+                _LOG.warning("Could not close an ASR job lease")
+
+    def _mark_interrupted(self, job_id):
+        try:
+            self._journal.update(job_id, {"status": "interrupted", "phase": "等待恢复", "error": ""},
+                                 statuses=ACTIVE)
+        except sqlite3.OperationalError:
+            # Release the lease even if this write fails. Normal journal
+            # recovery can retry the transition when storage is available.
+            _LOG.warning("Could not record ASR interruption; journal recovery is pending")
 
     def _drop_inactive_pending(self):
         # Another manager can cancel our queued row through the shared journal.
@@ -116,8 +133,8 @@ class AsrJobManager:
             self._active_job = None
             self._threads.pop(job_id, None)
             try:
-                self._journal.update(job_id, {"status": "interrupted", "phase": "等待恢复", "error": ""},
-                                     statuses=("queued",))
+                _LOG.warning("Could not start an ASR worker")
+                self._mark_interrupted(job_id)
             finally:
                 self._release_lease(job_id)
             if not isinstance(exc, RuntimeError):
@@ -213,12 +230,19 @@ class AsrJobManager:
                                     statuses=("completed",), version_field="draftsUpdatedAt")
 
     def _run(self, job_id: str, project: Project) -> None:
+        claim_failed = False
         try:
             with self._lock:
                 if self._closed.is_set() or self._active_job != job_id:
                     return
-                job = self._journal.update(job_id, {"status": "running", "phase": "准备识别"},
-                                           statuses=("queued",))
+                try:
+                    job = self._journal.update(job_id, {"status": "running", "phase": "准备识别"},
+                                               statuses=("queued",))
+                except sqlite3.OperationalError:
+                    claim_failed = True
+                    _LOG.warning("Could not claim an ASR job; recognition did not start")
+                    self._mark_interrupted(job_id)
+                    return
                 if not job or job["status"] != "running":
                     return
             try:
@@ -249,10 +273,14 @@ class AsrJobManager:
             with self._lock:
                 if self._active_job == job_id:
                     self._active_job = None
-                    self._release_lease(job_id)
-                    if not self._closed.is_set():
-                        self._drop_inactive_pending()
-                        if self._pending is not None:
+                    if claim_failed:
+                        self._threads.pop(job_id, None)
+                    try:
+                        self._release_lease(job_id)
+                    finally:
+                        if not self._closed.is_set() and self._pending is not None:
+                            # The next worker's conditional claim decides whether
+                            # this row was cancelled; don't read SQLite here.
                             pending, self._pending = self._pending, None
                             self._start(*pending)
 
@@ -261,10 +289,13 @@ class AsrJobManager:
             if self._closed.is_set():
                 return
             self._closed.set()
-            for job_id, lease in self._leases.items():
-                self._journal.update(job_id, {"status": "interrupted", "phase": "等待恢复", "error": ""},
-                                     statuses=ACTIVE)
-                lease.close()
-            self._leases.clear()
             self._pending = None
-            self._journal.close()
+            try:
+                for job_id in self._leases:
+                    self._mark_interrupted(job_id)
+            finally:
+                try:
+                    for job_id in tuple(self._leases):
+                        self._release_lease(job_id)
+                finally:
+                    self._journal.close()

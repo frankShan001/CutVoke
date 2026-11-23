@@ -6,6 +6,7 @@ import inspect
 import json
 import os
 from pathlib import Path
+import sqlite3
 import subprocess
 import sys
 import threading
@@ -315,6 +316,133 @@ def test_pending_recovery_or_cancellation_during_promotion(tmp_path, monkeypatch
             other.close()
         service.close()
         store.close()
+
+
+@pytest.mark.parametrize("lease_close_fails", [False, True])
+def test_handoff_never_reads_pending_from_finishing_worker(tmp_path, monkeypatch, caplog, lease_close_fails):
+    store, service, _ = library(tmp_path / "library")
+    entered, release, calls, run = held_recognition()
+    manager = AsrJobManager(store.path, project_loader=store.load)
+    try:
+        with recognition(run):
+            project = store.load("speech")
+            active = manager.submit(project, "voice", model="tiny")["jobId"]
+            assert entered.wait(5)
+            pending = manager.submit(project, "voice", model="base")["jobId"]
+            worker = manager._threads[active]
+            read, close_lease = manager._journal.get, manager._leases[active].close
+            bad_reads = []
+
+            def fault_on_stale_handoff_read(job_id):
+                if threading.current_thread() is worker and job_id == pending:
+                    bad_reads.append(job_id)
+                    raise sqlite3.OperationalError("synthetic read failure")
+                return read(job_id)
+
+            def fault_after_lease_close():
+                close_lease()
+                raise OSError("synthetic lease close error")
+
+            monkeypatch.setattr(manager._journal, "get", fault_on_stale_handoff_read)
+            if lease_close_fails:
+                monkeypatch.setattr(manager._leases[active], "close", fault_after_lease_close)
+            release.set()
+            worker.join(5)
+            assert not worker.is_alive()
+            completed(manager, pending)
+            assert not bad_reads
+            assert calls == ["tiny", "base"]
+            assert ("Could not close an ASR job lease" in caplog.text) == lease_close_fails
+    finally:
+        release.set()
+        manager.close()
+        service.close()
+        store.close()
+
+
+@pytest.mark.parametrize("repair_fails", [False, True])
+def test_failed_sqlite_claim_leaves_no_worker_or_lease_and_recovers(
+    tmp_path, monkeypatch, caplog, repair_fails
+):
+    store, service, _ = library(tmp_path / "library")
+    entered, release, calls, run = held_recognition()
+    manager = AsrJobManager(store.path, project_loader=store.load)
+    try:
+        with recognition(run):
+            project = store.load("speech")
+            active = manager.submit(project, "voice", model="tiny")["jobId"]
+            assert entered.wait(5)
+            pending = manager.submit(project, "voice", model="base")["jobId"]
+            worker = manager._threads[active]
+            db = manager._journal._db
+            fault_statuses = {"running", "interrupted"} if repair_fails else {"running"}
+            claim_workers = []
+
+            class ClaimFault:
+                def __getattr__(self, name):
+                    return getattr(db, name)
+
+                def execute(self, sql, params=()):
+                    if (sql.startswith("UPDATE asr_jobs SET status=") and params[-1] == pending
+                            and params[0] in fault_statuses):
+                        # Statement fails inside the real journal transaction.
+                        if params[0] == "running":
+                            claim_workers.append(threading.current_thread())
+                        return db.execute("SELECT * FROM nonexistent_asr_claim_table")
+                    return db.execute(sql, params)
+
+            with monkeypatch.context() as fault:
+                fault.setattr(manager._journal, "_db", ClaimFault())
+                release.set()
+                worker.join(5)
+                assert not worker.is_alive()
+                successor = wait_for(lambda: claim_workers and claim_workers[0])
+                successor.join(5)
+                assert not successor.is_alive()
+            assert calls == ["tiny"]
+            assert manager._active_job is None and manager._pending is None and not manager._leases
+            assert pending not in manager._threads
+            assert not db.in_transaction
+            abandoned = manager.get(pending)
+            assert abandoned["status"] == ("queued" if repair_fails else "interrupted")
+            assert abandoned["result"] is None
+            assert "Could not claim an ASR job" in caplog.text
+            assert ("Could not record ASR interruption" in caplog.text) == repair_fails
+            assert "nonexistent_asr_claim_table" not in caplog.text
+            manager.jobs("speech")
+            assert manager.get(pending)["status"] == "interrupted"
+            assert manager.resume(pending)["status"] == "queued"
+            assert completed(manager, pending)["result"]["model"] == "base"
+            assert calls == ["tiny", "base"]
+    finally:
+        release.set()
+        manager.close()
+        service.close()
+        store.close()
+
+
+def test_busy_commit_rolls_back_asr_journal_before_resuming(tmp_path):
+    database = str(tmp_path / "commit-busy.sqlite")
+    journal = AsrJournal(database)
+    reader = sqlite3.connect(database, isolation_level=None)
+    job_id = "commit-busy"
+    try:
+        assert journal._db.execute("PRAGMA journal_mode=DELETE").fetchone() == ("delete",)
+        journal._db.execute("PRAGMA busy_timeout=0")
+        journal.insert({"jobId": job_id, "projectId": "speech", "status": "queued",
+                        "updatedAt": time.time()}, {})
+        reader.execute("BEGIN")
+        assert reader.execute("SELECT status FROM asr_jobs WHERE job_id=?", (job_id,)).fetchone() == ("queued",)
+        with pytest.raises(sqlite3.OperationalError, match="database is locked"):
+            journal.update(job_id, {"status": "running"}, statuses=("queued",))
+        assert not journal._db.in_transaction
+        assert journal.get(job_id)["status"] == "queued"
+        reader.execute("COMMIT")
+        assert journal.update(job_id, {"status": "interrupted"}, statuses=("queued",))["status"] == "interrupted"
+        assert journal.update(job_id, {"status": "queued"}, statuses=("interrupted",))["status"] == "queued"
+    finally:
+        reader.close()
+        journal.close()
 
 
 def test_restart_retains_result_and_reviewed_draft_but_rejects_changed_source(tmp_path):
