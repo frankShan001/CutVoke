@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import math
 import os
 import shutil
 import subprocess
+import struct
 import tempfile
 import time
 import unittest
+import wave
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -16,12 +20,14 @@ from unittest.mock import patch
 from PIL import Image
 
 from cutvoke.interfaces.httpapi import HttpApi
+from cutvoke.domain.model import AssetReference, Clip, Rational
 from cutvoke.domain.protocol import Actor, Command, ErrorCode
 from cutvoke.rendering.render import RenderService
 from cutvoke.editing.service import EditError, EditService
 from cutvoke.rendering.speech_recognition import (
     SpeechRecognitionError,
     availability,
+    _extract_audio,
     _load_whisper_model,
     _resolve_asr_runtime,
     transcribe_clip,
@@ -99,6 +105,71 @@ class _CudaInferenceFailsModel:
 
 @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "FFmpeg required")
 class SpeechRecognitionTests(unittest.TestCase):
+    def test_extract_audio_uses_first_source_stream_not_default_disposition(self) -> None:
+        for default in (0, 1):
+            with self.subTest(default=default), tempfile.TemporaryDirectory() as temporary:
+                master, extracted = Path(temporary) / "master.mp4", Path(temporary) / "source.wav"
+                self._audio_source(master, (440, 880), default)
+                probed = subprocess.run([
+                    "ffprobe", "-v", "error", "-select_streams", "a",
+                    "-show_entries", "stream=channels:stream_disposition=default:stream_tags=language",
+                    "-of", "json", str(master),
+                ], check=True, capture_output=True, timeout=15)
+                audio = json.loads(probed.stdout)["streams"]
+                self.assertEqual([(s["channels"], s["tags"]["language"], s["disposition"]["default"]) for s in audio],
+                                 [(1, "eng", int(default == 0)), (1, "jpn", int(default == 1))])
+                duration = _extract_audio(self._source_clip(master), str(extracted), "ffmpeg")
+                self.assertAlmostEqual(duration, 1.25, delta=0.06)
+                self._assert_extracted_tone(extracted, 440, 880)
+
+    def test_extract_audio_single_and_missing_stream(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            single, silent = root / "single.mp4", root / "silent.mp4"
+            self._audio_source(single, (880,), 0)
+            extracted = root / "source.wav"
+            duration = _extract_audio(self._source_clip(single), str(extracted), "ffmpeg")
+            self.assertAlmostEqual(duration, 1.25, delta=0.06)
+            self._assert_extracted_tone(extracted, 880, 440)
+            self._audio_source(silent, (), 0)
+            with self.assertRaisesRegex(SpeechRecognitionError, "没有可识别的音频流"):
+                _extract_audio(self._source_clip(silent), str(root / "missing.wav"), "ffmpeg")
+
+    @staticmethod
+    def _audio_source(path: Path, tones: tuple[int, ...], default: int) -> None:
+        command = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin", "-y",
+                   "-f", "lavfi", "-i", "color=blue:size=160x90:rate=12:duration=1.25"]
+        for frequency in tones:
+            command += ["-f", "lavfi", "-i", f"sine=frequency={frequency}:sample_rate=48000:duration=1.25"]
+        command += ["-map", "0:v:0", "-c:v", "libx264", "-threads:v", "1", "-pix_fmt", "yuv420p"]
+        for index, language in enumerate(("eng", "jpn")[:len(tones)]):
+            command += ["-map", f"{index + 1}:a:0", f"-metadata:s:a:{index}", f"language={language}",
+                        f"-disposition:a:{index}", "default" if index == default else "0"]
+        if tones:
+            command += ["-c:a", "aac"]
+        subprocess.run([*command, str(path)], check=True, capture_output=True, timeout=30)
+
+    @staticmethod
+    def _source_clip(path: Path) -> Clip:
+        return Clip("voice", AssetReference("asset", str(path)),
+                    Rational.of(0), Rational.of(5, 4), Rational.of(0))
+
+    def _assert_extracted_tone(self, path: Path, expected: int, other: int) -> None:
+        with wave.open(str(path), "rb") as wav:
+            self.assertEqual((wav.getnchannels(), wav.getsampwidth(), wav.getframerate()), (1, 2, 16000))
+            wav.setpos(4_000)
+            raw = wav.readframes(8_000)
+        self.assertEqual(len(raw), 16_000)
+        samples = struct.unpack("<8000h", raw)
+
+        def tone_strength(frequency: int) -> float:
+            step = 2 * math.pi * frequency / 16000
+            real = sum(value * math.cos(step * i) for i, value in enumerate(samples))
+            imag = sum(value * math.sin(step * i) for i, value in enumerate(samples))
+            return math.hypot(real, imag) / len(samples)
+
+        self.assertGreater(tone_strength(expected), max(100, 8 * tone_strength(other)))
+
     def test_asr_runtime_selection_and_auto_fallback(self) -> None:
         self.assertEqual(_resolve_asr_runtime("auto", cuda_device_count=1),
                          ("cuda", "float16"))
