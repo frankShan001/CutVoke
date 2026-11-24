@@ -12,6 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![MCP Ready](https://img.shields.io/badge/MCP-Agent--Native-8A2BE2)](docs/user/LOCAL_DELIVERY_MCP.md)
+[![frankShan001/CutVoke MCP server](https://glama.ai/mcp/servers/frankShan001/CutVoke/badges/score.svg)](https://glama.ai/mcp/servers/frankShan001/CutVoke)
 [![FFmpeg](https://img.shields.io/badge/Engine-FFmpeg-007808?logo=ffmpeg&logoColor=white)](https://ffmpeg.org/)
 
 [**English**](README.md) | [**简体中文**](README.zh-CN.md)
