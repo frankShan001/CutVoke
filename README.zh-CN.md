@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/images/readme/banner.svg" alt="CutVoke Banner" width="100%" />
+<img src="docs/images/readme/banner.svg" alt="CutVoke 开源 AI 视频剪辑软件" width="100%" />
 
-# CutVoke
+# CutVoke — 开源 AI 视频剪辑软件，人和 AI Agent 共用一条时间线
 
 **你的素材，你的 AI，同一条可编辑时间线。**
 
@@ -17,7 +17,7 @@
 
 [**English**](README.md) | [**简体中文**](README.zh-CN.md)
 
-[下载桌面版](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [v0.3.6 最新动态](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [观看剪辑案例](examples/showcases/) · [接入 AI Agent](docs/user/agent-skill.zh-CN.md) · [贡献社区特效](CONTRIBUTING.zh-CN.md) · [保存自己的特效预设](docs/user/effect-contributing.zh-CN.md#边剪辑边创作无需开发环境)
+[下载桌面版](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [v0.3.6 最新动态](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [观看剪辑案例](examples/showcases/) · [接入 AI Agent](docs/user/agent-skill.zh-CN.md) · [贡献社区特效](CONTRIBUTING.zh-CN.md) · [保存自己的特效预设](docs/user/effect-contributing.zh-CN.md#边剪辑边创作无需开发环境) · [常见问题](#常见问题)
 
 </div>
 
@@ -28,6 +28,7 @@
 > **CutVoke 是一款开源、本地运行的视频剪辑软件：你的 AI Agent 通过 MCP 直接剪时间线，你也能打开同一条时间线随时手动修改。**
 > CutVoke 支持 **Windows · macOS · Linux**，本地剪辑无需账号，源码采用 MIT 协议。你可以选择自己的 AI Agent；外部 AI 服务可能有独立的账号、费用与数据政策。
 > 适用于 Claude Code、Codex、Cursor、Claude Desktop 以及任何 MCP 客户端。
+> 如果你在找可以让 AI 来剪的开源剪辑软件（类似剪映 / CapCut 的开源替代），或者一个用于视频剪辑的 MCP 服务器，CutVoke 就是为这个场景做的。
 
 **30 秒接入你的 Agent**
 
@@ -293,6 +294,38 @@ CutVoke/
 ├── examples/                  # 展映级案例工程、创意工作流与生成式媒体 Demo
 └── docs/                      # 用户手册、特效指南、版本发布说明与架构文档
 ```
+
+## 常见问题
+
+### 能用 Claude Code 剪视频吗？
+可以。CutVoke 自带本地 stdio MCP 服务器。先启动一次桌面版，把 `profile/mcp-config.json` 里的 `cutvoke` 配置加到 Claude Code（[接入说明](docs/integrations/claude-code.md)），然后直接用自然语言提需求，比如"加字幕、把停顿收紧、再出一个 9:16 竖版"。Agent 改的是真实的工程时间线，你可以在 CutVoke 剪辑界面里打开继续调整。
+
+### 有没有开源的视频剪辑 MCP 服务器？
+CutVoke 就是一个：MIT 协议的视频剪辑软件，MCP 服务器向任何 MCP 客户端（Claude Code、Codex、Cursor、Claude Desktop 等）提供工程、时间线、字幕、预览和导出等工具，另外还有命令行和本地 HTTP API。详见 [Local Delivery MCP](docs/user/LOCAL_DELIVERY_MCP.md)。
+
+### Codex 或 Cursor 能剪视频吗？
+可以，走同一个 MCP 服务器。接入步骤：[Codex](docs/integrations/codex.md) · [Cursor](docs/integrations/cursor.md)。再加载内置的 [`cutvoke-editor` Skill](skills/cutvoke-editor/)，Agent 就能理解时间线结构，并参考音乐视频、纪录片/Vlog、剧情短片、讲解教程、产品展示等剪辑流程。
+
+### AI 剪得不好怎么办？
+直接手动改。Agent 的修改和你的手动修改在同一条非破坏性时间线上，不用重新写提示词，在可视化界面里拖片段、调字幕时间、改关键帧就行。Agent 持有编辑租约时界面会显示，点"接管编辑"即可收回控制权。Agent 也可以先用 `preview_compare` 对比修改前后的画面，确认后再提交。
+
+### CutVoke 能离线用吗？
+剪辑、预览和 FFmpeg 导出都在本机完成，本地剪辑不需要账号，桌面版已内置 FFmpeg。你接入的 AI Agent（Claude Code、Codex 等）可能是云服务，有各自的账号、费用和数据政策。可选的本地语音识别字幕基于 faster-whisper，模型下载一次后可离线使用（[本地自动字幕](docs/user/LOCAL_ASR.md)）。
+
+### CutVoke 免费吗？
+源码采用 MIT 协议，桌面版不需要账号或订阅。桌面安装包里还包含遵循各自协议的第三方组件（例如 GPLv3 的 FFmpeg）。你接入的 AI 服务由该服务自己计费，与 CutVoke 无关。
+
+### 和剪映 / CapCut、达芬奇（DaVinci Resolve）有什么区别？
+剪映和达芬奇是成熟的手动剪辑软件，模板和特效库都很丰富。CutVoke 是一个更年轻的开源预览版，核心是让 AI Agent 和人在同一条可编辑时间线上协作：适合让 Agent 先做粗剪、字幕或多版本，你再逐个片段把关。简单的单层时间线可以导出/导入 FCPXML 1.10、OpenTimelineIO 和 CMX 3600 EDL（特效、关键帧和字幕不会带过去）。
+
+### 和 AI 视频生成工具、FFmpeg 类 MCP 工具有什么不同？
+AI 视频生成工具给你的是成品 MP4；FFmpeg 类 MCP 工具对文件执行一次性命令。CutVoke 保留完整的多轨工程（片段、字幕、特效、关键帧），Agent 和你都能接着改，最后在本地用 FFmpeg 渲染。
+
+### 能自动生成字幕吗？
+可以，需要安装可选的本地语音识别组件（faster-whisper）。识别结果先作为草稿供你校对，确认后成为可编辑的字幕轨：可以改样式、按字词或句子剪辑、导出 SRT，或在导出 MP4 时烧录进画面。详见[本地自动字幕](docs/user/LOCAL_ASR.md)。
+
+### 支持哪些系统？
+Windows x64（免安装版）、macOS（Apple 芯片和 Intel）、Linux x64。目前是预览版；macOS 安装包为临时签名，未经苹果公证。限制说明见[最新发布](https://github.com/frankShan001/CutVoke/releases)。
 
 ## 文档导航中心
 

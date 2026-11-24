@@ -6,7 +6,7 @@ import subprocess
 
 import pytest
 
-from cutvoke.domain.model import AssetReference, Clip, Project, Sequence, Track
+from cutvoke.domain.model import CURRENT_PROJECT_SCHEMA, AssetReference, Clip, Project, Sequence, Track
 from cutvoke.domain.rational import Rational
 from cutvoke.rendering.render import RenderService
 
@@ -60,8 +60,11 @@ def test_mixed_rate_range_starts_on_same_picture_as_full_export(tmp_path, monkey
 
     clip = Clip("camera", AssetReference("asset", str(source)),
                 Rational.of(0), Rational.of(3), Rational.of(0))
-    project = Project("mixed-rate", "Mixed rate", "0", Sequence(
-        "sequence", width, height, Rational.of(30), tracks=[Track("v", "video", clips=[clip])]))
+    project = Project(
+        schema_version=CURRENT_PROJECT_SCHEMA, project_id="mixed-rate", revision="0", name="Mixed rate",
+        sequence=Sequence("sequence", width, height, Rational.of(30),
+                          tracks=[Track("v", "video", clips=[clip])]),
+    )
     full = tmp_path / "full.mp4"
     RenderService(gpu_effects=False).render(project, str(full), quality="low")
     whole = frame_ids(full)
