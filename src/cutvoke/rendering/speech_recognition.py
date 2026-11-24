@@ -222,7 +222,9 @@ def _extract_audio(clip: Clip, output: str, ffmpeg: str) -> float:
     command = [
         ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
         "-ss", f"{source_start:.6f}", "-i", clip.asset_ref.source_path,
-        "-t", f"{source_duration:.6f}", "-vn", "-ac", "1", "-ar", "16000",
+        # Match the first source audio stream used by the timeline renderer.
+        # FFmpeg automatic selection may pick a different default disposition.
+        "-t", f"{source_duration:.6f}", "-vn", "-map", "0:a:0", "-ac", "1", "-ar", "16000",
         "-c:a", "pcm_s16le", output,
     ]
     try:
