@@ -2,6 +2,7 @@ const { verifyNativeCaptionFonts } = require("./verify_native_caption_fonts.cjs"
 const { scheduleStackCapture } = require("../../apps/desktop/qa-diagnostics.cjs");
 const { verifyNativePreview } = require("./verify_native_preview.cjs");
 const { verifyNativeTransition } = require("./verify_native_transition.cjs");
+const { verifyUnixFrozenRecovery } = require("./verify_unix_frozen_recovery.cjs");
 // Extract and run the exact Unix download, with a sandboxed visible renderer.
 // Shares the established Windows GUI/MCP/import/preview/export acceptance flow.
 const assert = require("node:assert/strict");
@@ -344,6 +345,12 @@ async function main() {
     }
     report.checks.guiExportAndFullVideoAudioDecode = true;
     report.transitionClock = await verifyNativeTransition({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath });
+    if (target === "linux-x64") {
+      report.checks.linuxFrozenRecoveryFailsClosed = await verifyUnixFrozenRecovery({
+        origin, engine, ffmpeg, ffprobe, env, dataPath: runtime.dataPath,
+        sourcePython: process.env.CUTVOKE_VERIFY_PYTHON, sourceRoot: path.join(root, "src"),
+      });
+    }
     report.captionFonts = await verifyNativeCaptionFonts({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath, assets: path.join(resources, "engine/_internal/cutvoke/assets") });
     report.checks.packagedCaptionColdExport = true;
     report.checks.threeShotTransitionClockAndPixels = true;
