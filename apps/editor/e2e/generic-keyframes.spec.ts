@@ -72,6 +72,85 @@ test('generic curve editor persists Bezier volume and retimes selected nodes as 
   await expect(page.getByRole('img',{name:'参数时间曲线'})).toBeVisible();
 });
 
+test('history refresh follows a pristine keyframe form without overwriting a newer selection',async({page,request})=>{
+  const {id,name}=await fixture(request);
+  await apply(request,id,'clip.keyframe',{clipId:'c',action:'batch',keyframes:[
+    {param:'opacity',time:{num:'1',den:'1'},value:.4,interpolation:'linear'},
+    {param:'opacity',time:{num:'3',den:'1'},value:.8,interpolation:'linear'},
+  ]});
+  await open(page,name);
+  const lane=async()=>(await read(request,id)).sequence.tracks[0].clips[0].keyframes.opacity;
+  const keyTime=(frame:{time:{num:string;den:string}})=>Number(frame.time.num)/Number(frame.time.den);
+  const keys=await lane();
+  const a=keys.find((key:{time:{num:string;den:string}})=>keyTime(key)===1);
+  const b=keys.find((key:{time:{num:string;den:string}})=>keyTime(key)===3);
+  const checkbox=(key:string)=>page.getByRole('checkbox',{name:`选择关键帧 ${key}`,exact:true});
+  const time=page.getByLabel('关键帧时间（秒）',{exact:true});
+  const undo=page.getByRole('button',{name:'撤销',exact:true});
+  const update=page.getByRole('button',{name:'更新节点',exact:true});
+  const aTime=async()=>{
+    const frame=(await lane()).find((node:{id:string})=>node.id===a.id);
+    return keyTime(frame);
+  };
+  await checkbox(a.id).check();
+  await page.getByLabel('关键帧移动秒数').fill('.5');
+  await page.getByRole('button',{name:'应用时间调整',exact:true}).click();
+  await expect.poll(aTime).toBe(1.5);
+  await expect(time).toHaveValue('1.5');
+  await undo.click();
+  await expect.poll(aTime).toBe(1);
+  await expect(checkbox(a.id)).toBeChecked();
+  await expect(time).toHaveValue('1');
+  await page.getByRole('button',{name:'重做',exact:true}).click();
+  await expect.poll(aTime).toBe(1.5);
+  await expect(time).toHaveValue('1.5');
+
+  // A deliberate draft survives, but must not overwrite a changed version of
+  // the same selected keyframe until that keyframe is explicitly reselected.
+  await time.fill('1.75');
+  await undo.click();
+  await expect.poll(aTime).toBe(1);
+  await expect(time).toHaveValue('1.75');
+  await expect(update).toBeDisabled();
+  await expect(page.locator('.inspector').getByRole('button',{name:'添加',exact:true}).first()).toBeDisabled();
+  await page.locator('.keyframe-editor').getByRole('button',{name:'重置参数',exact:true}).click();
+  await expect(checkbox(a.id)).toBeChecked();
+  await expect(time).toHaveValue('1');
+  await expect(update).toBeEnabled();
+
+  await page.getByRole('button',{name:'重做',exact:true}).click();
+  await expect.poll(aTime).toBe(1.5);
+  await expect(time).toHaveValue('1.5');
+  let release!:()=>void;
+  const gate=new Promise<void>(resolve=>{release=resolve;});
+  let waiting=false;
+  const match=(url:URL)=>url.pathname===`${projectPath(id)}/commands`;
+  await page.route(match,async route=>{
+    if(route.request().method()==='POST' && route.request().postDataJSON().type==='history.undo'){
+      waiting=true;await gate;
+    }
+    await route.continue().catch(()=>{});
+  });
+  try {
+    await undo.click();
+    await expect.poll(()=>waiting).toBe(true);
+    const newer=page.getByRole('button',{name:`曲线节点 ${b.id}`,exact:true});
+    await newer.press('Enter');
+    await expect(checkbox(b.id)).toBeChecked();
+    await expect(checkbox(a.id)).not.toBeChecked();
+    await time.fill('3.25');
+  } finally {
+    release();
+  }
+  await expect.poll(aTime).toBe(1);
+  await expect(checkbox(a.id).locator('..')).toContainText('t=1.00s');
+  await expect(checkbox(b.id)).toBeChecked();
+  await expect(checkbox(a.id)).not.toBeChecked();
+  await expect(time).toHaveValue('3.25');
+  await expect(update).toBeEnabled();
+  await page.unroute(match);
+});
+
 test('graph node and Bezier handle gestures commit and undo without losing node identity',async({page,request})=>{
   const {id,name}=await fixture(request);
   await apply(request,id,'clip.keyframe',{clipId:'c',action:'batch',keyframes:[

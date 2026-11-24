@@ -9,6 +9,15 @@ import { evaluateKeyframes, keyframeVelocity } from "../../lib/keyframes";
 import type { Clip, Keyframe, KeyframeInterpolation } from "../../types/api";
 
 type Bezier = [number,number,number,number];
+type FormFields = { kfTime:string; kfValue:string; kfInterp:KeyframeInterpolation; bezier:Bezier };
+const defaultBezier:Bezier = [.25,.1,.25,1];
+const frameForm = (frame:Keyframe):FormFields => ({
+  kfTime:String(rationalToSecs(frame.time)), kfValue:String(frame.value), kfInterp:frame.interpolation,
+  bezier:frame.bezier || defaultBezier,
+});
+const frameBase = (frame:Keyframe | null | undefined) => frame
+  ? JSON.stringify([frame.time.num,frame.time.den,frame.value,frame.interpolation,frame.bezier || defaultBezier])
+  : null;
 const effectSpecs: Record<string,Record<string,[number,number,number]>> = {
   "cutvoke.color": { brightness: [-1,1,0], contrast: [0,2,1], saturation: [0,3,1] },
   "cutvoke.fx.blur": { sigma: [1,20,5] },
@@ -19,12 +28,12 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   useLocale();
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const [param, setParam] = useState("opacity");
-  const [kfTime, setKfTime] = useState("0");
-  const [kfValue, setKfValue] = useState("1");
-  const [kfInterp, setKfInterp] = useState<KeyframeInterpolation>("linear");
-  const [bezier,setBezier] = useState<Bezier>([.25,.1,.25,1]);
+  const [formFallback,setFormFallback] = useState<FormFields>({
+    kfTime:"0",kfValue:"1",kfInterp:"linear",bezier:defaultBezier,
+  });
+  const [manualForm,setManualForm] = useState<{ fields:FormFields; base:string | null } | null>(null);
   const [selectedIds,setSelected] = useState<string[]>([]);
-  const [formTarget,setFormTarget] = useState<{clipId:string;param:string;id:string} | null>(null);
+  const [formTarget,setFormTarget] = useState<{projectId:string|null;sequenceId:string|undefined;clipId:string;param:string;id:string} | null>(null);
   const [offset,setOffset] = useState("0");
   const [timeScale,setTimeScale] = useState("1");
   const [draft,setDraft] = useState<Keyframe[] | null>(null);
@@ -33,6 +42,7 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   const savingRef = useRef(false);
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ id: string; moved: boolean } | null>(null);
+  const bezierDrag = useRef<{projectId:string|null; target:typeof formTarget; base:string|null} | null>(null);
   const duration = Math.max(.001,rationalToSecs(clip.timelineEnd)-rationalToSecs(clip.timelineStart));
   const audio = state.project?.sequence.tracks.some(track=>track.kind==="audio" && track.clips.some(item=>item.id===clip.id));
   const options: {name: string; min: number; max: number; value: number}[] = [
@@ -54,10 +64,36 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   // complete lane, but do not offer off-clip navigation/dragging/retiming.
   const visibleLane = lane.filter(frame => rationalToSecs(frame.time) >= 0 && rationalToSecs(frame.time) <= duration);
   const selected = selectedIds.filter(id => (clip.keyframes?.[param] || []).some(frame => frame.id === id));
-  const formMatchesSelection = selected.length === 1 && formTarget?.clipId === clip.id
-    && formTarget.param === param && formTarget.id === selected[0];
+  const sequenceId=state.project?.sequence.id;
+  const targetHere = formTarget?.clipId === clip.id && formTarget.param === param
+    && formTarget.projectId === state.currentId && formTarget.sequenceId === sequenceId ? formTarget : null;
+  const authoritativeFrame = targetHere && (clip.keyframes?.[param] || []).find(frame => frame.id === targetHere.id);
+  const authoritativeForm = authoritativeFrame ? frameForm(authoritativeFrame) : null;
+  const formBase = frameBase(authoritativeFrame);
+  const draggingFrame = authoritativeFrame && draft?.find(frame => frame.id === authoritativeFrame.id);
+  const formFields = manualForm?.fields || (draggingFrame ? frameForm(draggingFrame) : authoritativeForm) || formFallback;
+  const {kfTime,kfValue,kfInterp,bezier} = formFields;
+  // A pristine form follows history/sync. Preserve a deliberate draft, but
+  // don't let it overwrite a changed version of the same key without reselection.
+  const formConflict = manualForm !== null && manualForm.base !== formBase;
+  const formMatchesSelection = !formConflict && selected.length === 1 && authoritativeFrame?.id === selected[0];
+  const editForm = (update:(fields:FormFields)=>FormFields) => setManualForm(current => ({
+    fields:update(current?.fields || formFields), base:current ? current.base : formBase,
+  }));
   const readOnly = Boolean(state.editLock) || saving;
-  useEffect(()=>{setSelected([]);setDraft(null);setParam(audio?"volume":"opacity");},[clip.id,audio]);
+  const ownedBezierDrag = () => bezierDrag.current !== null && bezierDrag.current.projectId === state.currentId
+    && bezierDrag.current.target === targetHere && bezierDrag.current.base === formBase;
+  const formCommandState = () => {
+    const latest = getLatestState() || state;
+    const project = latest.project;
+    // The command revision must describe the same hydrated snapshot that we
+    // checked. A command ACK can advance revision before the project refresh.
+    if (!project || latest.currentId !== state.currentId || project.revision !== latest.revision || project.sequence.id !== sequenceId) return null;
+    const currentClip = project.sequence.tracks.flatMap(track=>track.clips).find(item=>item.id===clip.id);
+    if (!currentClip || (targetHere && frameBase(currentClip.keyframes?.[param]?.find(frame=>frame.id===targetHere.id))!==formBase)) return null;
+    return latest;
+  };
+  useEffect(()=>{setSelected([]);setDraft(null);setManualForm(null);setParam(audio?"volume":"opacity");},[state.currentId,sequenceId,clip.id,audio]);
   useEffect(()=>{setDraft(null);},[clip.keyframes]);
   useEffect(()=>{
     const valid = new Set((clip.keyframes?.[param] || []).filter(frame=>rationalToSecs(frame.time)>=0 && rationalToSecs(frame.time)<=duration).map(frame => frame.id));
@@ -74,23 +110,40 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
     window.addEventListener('cutvoke:keyframe-channel',selectChannel);
     return()=>window.removeEventListener('cutvoke:keyframe-channel',selectChannel);
   },[clip.id,clip.effects,audio]);
-  const save = async (action: () => Promise<unknown>) => {
+  const save = async <T,>(action: () => Promise<T>) => {
     if (savingRef.current) return;
     savingRef.current = true; setSaving(true);
     try { return await action(); }
     finally { savingRef.current = false; setSaving(false); }
   };
-  const commit = (payload: Record<string,unknown>) => save(async () => {
-    const result = await runCommand(dispatch,getLatestState() || state,"clip.keyframe",{clipId:clip.id,...payload});
+  const commit = (payload: Record<string,unknown>, formBound=false) => save(async () => {
+    const current = formBound ? formCommandState() : getLatestState() || state;
+    if(!current) return;
+    const result = await runCommand(dispatch,current,"clip.keyframe",{clipId:clip.id,...payload},formBound?{retryConflict:false}:undefined);
     if (result.ok) dispatch({type:"UNDO_SET",blocked:false});
     return result;
   });
+  const submitForm = (bezierOnly=false) => {
+    if(!formMatchesSelection || readOnly || !authoritativeFrame || !authoritativeForm) return;
+    const submitted=manualForm;
+    const payload=bezierOnly ? {interpolation:"cubic-bezier",bezier} : {
+      time:secsToRational(Number(kfTime)),value:Number(kfValue),interpolation:kfInterp,
+      ...(kfInterp==="cubic-bezier"?{bezier}:{}),
+    };
+    // A Bezier gesture submits easing only. Keep any existing time/value draft.
+    const remaining=bezierOnly && submitted
+      && (kfTime!==authoritativeForm.kfTime || kfValue!==authoritativeForm.kfValue)
+      ? {fields:submitted.fields,base:frameBase({...authoritativeFrame,interpolation:"cubic-bezier",bezier})}
+      : null;
+    void commit({action:"update",param,keyframeId:selected[0],...payload},true).then(result=>{
+      if(result?.ok) setManualForm(current=>current===submitted ? remaining : current);
+    });
+  };
   const select = (frame: Keyframe, multiple=false) => {
     if (savingRef.current || state.editLock || !visibleLane.some(item=>item.id===frame.id)) return;
     setSelected(current=>multiple ? current.includes(frame.id) ? current.filter(id=>id!==frame.id) : [...current,frame.id] : [frame.id]);
-    setFormTarget({clipId:clip.id,param,id:frame.id});
-    setKfTime(String(rationalToSecs(frame.time)));setKfValue(String(frame.value));
-    setKfInterp(frame.interpolation);setBezier(frame.bezier || [.25,.1,.25,1]);
+    setFormTarget({projectId:state.currentId,sequenceId,clipId:clip.id,param,id:frame.id});
+    setFormFallback(frameForm(frame));setManualForm(null);
   };
   const W=320,H=144,pad=16;
   const x=(time:number)=>pad+time/duration*(W-2*pad);
@@ -109,7 +162,6 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
     const value=Math.max(spec.min,Math.min(spec.max,spec.max-((event.clientY-rect.top)/rect.height*H-pad)/(H-2*pad)*(spec.max-spec.min)));
     drag.current.moved=true;
     setDraft(lane.map(frame=>frame.id===drag.current!.id ? {...frame,time:secsToRational(time),value} : frame));
-    setKfTime(time.toFixed(3));setKfValue(value.toFixed(3));
   };
   const easeSelected = (interpolation:KeyframeInterpolation, controls?:Bezier) => {
     if(readOnly || !selected.length) return;
@@ -129,7 +181,7 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
     <div className="inspector__sep" />
     <div id="clip-opacity-keyframes" tabIndex={-1} className="inspector__subrow"><span className="inspector__key">{param==="opacity"?tr("不透明度关键帧"):tr("参数关键帧")}</span></div>
     <label className="cv-hint">{tr("关键帧参数")}<select className="cv-input" value={param} aria-label={tr("关键帧参数")} disabled={readOnly}
-      onChange={event=>{const next=options.find(option=>option.name===event.target.value)!;setParam(next.name);setKfValue(String(next.value));setSelected([]);setDraft(null);}}>
+      onChange={event=>{const next=options.find(option=>option.name===event.target.value)!;setParam(next.name);setFormFallback({...formFields,kfValue:String(next.value)});setManualForm(null);setSelected([]);setDraft(null);}}>
       {options.map(option=><option key={option.name} value={option.name}>{option.name}</option>)}</select></label>
     <div className="inspector__subrow" style={{gap:6,flexWrap:'wrap',marginTop:6}}>
       <select className="cv-input" aria-label={tr('曲线类型')} value={graphMode} onChange={event=>setGraphMode(event.target.value as 'value'|'speed')}>
@@ -153,15 +205,21 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
       <text x={pad} y={12} fill="var(--text-dim)" fontSize="9">{Number(graphMax.toFixed(3))}{graphMode==='speed'?' /s':''}</text><text x={W-pad} y={H-2} textAnchor="end" fill="var(--text-dim)" fontSize="9">{duration.toFixed(2)}s</text>
     </svg>
     <div className="inspector__subrow" style={{marginTop:6,gap:4,flexWrap:"wrap"}}>
-      <input type="number" step="0.01" min="0" max={duration} value={kfTime} aria-label={tr("关键帧时间（秒）")} className="cv-input" style={{width:72}} onChange={e=>setKfTime(e.target.value)} />
-      <input type="number" step="0.01" min={spec.min} max={spec.max} value={kfValue} aria-label={param==="opacity"?tr("关键帧 opacity 值（0-1）"):tr("关键帧值")} className="cv-input" style={{width:72}} onChange={e=>setKfValue(e.target.value)} />
-      <select className="cv-input" value={kfInterp} aria-label={tr("关键帧插值")} onChange={e=>setKfInterp(e.target.value as KeyframeInterpolation)}>
+      <input type="number" step="0.01" min="0" max={duration} value={kfTime} aria-label={tr("关键帧时间（秒）")} className="cv-input" style={{width:72}} onChange={e=>{const kfTime=e.target.value;editForm(fields=>({...fields,kfTime}));}} />
+      <input type="number" step="0.01" min={spec.min} max={spec.max} value={kfValue} aria-label={param==="opacity"?tr("关键帧 opacity 值（0-1）"):tr("关键帧值")} className="cv-input" style={{width:72}} onChange={e=>{const kfValue=e.target.value;editForm(fields=>({...fields,kfValue}));}} />
+      <select className="cv-input" value={kfInterp} aria-label={tr("关键帧插值")} onChange={e=>{const kfInterp=e.target.value as KeyframeInterpolation;editForm(fields=>({...fields,kfInterp}));}}>
         {["linear","ease-in","ease-out","cubic-bezier","hold"].map(value=><option key={value} value={value}>{value==='hold'?tr('保持（阶梯）'):value}</option>)}</select>
-      <button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={readOnly} onClick={()=>{
-        const time=Number(kfTime),value=Number(kfValue);if(!Number.isFinite(time)||!Number.isFinite(value))return;
-        void save(()=>addKeyframe(dispatch,getLatestState() || state,{clipId:clip.id,param,time,value,interpolation:kfInterp,...(kfInterp==="cubic-bezier"?{bezier}:{})}));
+      <button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={readOnly || formConflict} onClick={()=>{
+        if(readOnly || formConflict) return;
+        const current=formCommandState(),time=Number(kfTime),value=Number(kfValue);
+        if(!current || !Number.isFinite(time) || !Number.isFinite(value))return;
+        void save(()=>addKeyframe(dispatch,current,{clipId:clip.id,param,time,value,interpolation:kfInterp,...(kfInterp==="cubic-bezier"?{bezier}:{})},{retryConflict:false}));
       }}><Plus size={10}/>{tr(" 添加")}</button>
-      {selected.length===1?<button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={readOnly || !formMatchesSelection} onClick={()=>{if(formMatchesSelection)void commit({action:"update",param,keyframeId:selected[0],time:secsToRational(Number(kfTime)),value:Number(kfValue),interpolation:kfInterp,...(kfInterp==="cubic-bezier"?{bezier}:{})});}}>{tr("更新节点")}</button>:null}
+      {selected.length===1?<button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={readOnly || !formMatchesSelection} title={formConflict?tr("工程已变化，请重新发起"):undefined} onClick={()=>submitForm()}>{tr("更新节点")}</button>:null}
+      {formConflict?<button className="cv-btn cv-btn--sm cv-btn--secondary" disabled={readOnly} onClick={()=>{
+        if(!authoritativeForm) setFormFallback({kfTime:"0",kfValue:String(spec.value),kfInterp:"linear",bezier:defaultBezier});
+        setManualForm(null);
+      }}>{tr("重置参数")}</button>:null}
     </div>
     <div className="inspector__subrow" style={{gap:5,flexWrap:'wrap',marginTop:6}}>
       <button className="cv-chip" disabled={!selected.length || readOnly} onClick={()=>easeSelected('cubic-bezier',[.333333,0,.666667,1])}>{tr('缓入缓出')} <kbd>F9</kbd></button>
@@ -171,22 +229,27 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
     {kfInterp==="cubic-bezier"?<>
       <svg viewBox="0 0 160 120" role="img" aria-label={tr("缓动控制曲线")} style={{width:"100%",height:120,touchAction:"none"}}
         onPointerMove={event=>{
-          const handle=event.currentTarget.dataset.handle;if(!handle || readOnly)return;
+          const handle=event.currentTarget.dataset.handle;if(!handle || readOnly || !ownedBezierDrag())return;
           const rect=event.currentTarget.getBoundingClientRect();
           const px=Math.max(0,Math.min(1,((event.clientX-rect.left)/rect.width*160-20)/120));
           const py=Math.max(0,Math.min(1,1-((event.clientY-rect.top)/rect.height*120-10)/100));
-          const index=Number(handle);setBezier(current=>current.map((value,i)=>i===index?px:i===index+1?py:value) as Bezier);
+          const index=Number(handle);editForm(fields=>({...fields,bezier:fields.bezier.map((value,i)=>i===index?px:i===index+1?py:value) as Bezier}));
         }} onPointerUp={event=>{
           if(event.currentTarget.dataset.handle===undefined)return;
           delete event.currentTarget.dataset.handle;event.currentTarget.releasePointerCapture(event.pointerId);
-          if(formMatchesSelection && !readOnly)void commit({action:"update",param,keyframeId:selected[0],interpolation:"cubic-bezier",bezier});
-        }} onPointerCancel={event=>{delete event.currentTarget.dataset.handle;}}>
+          const owns=ownedBezierDrag();bezierDrag.current=null;
+          if(owns)submitForm(true);
+        }} onPointerCancel={event=>{delete event.currentTarget.dataset.handle;bezierDrag.current=null;}}>
         <path d={`M20,110 L${20+bezier[0]*120},${110-bezier[1]*100} M140,10 L${20+bezier[2]*120},${110-bezier[3]*100}`} fill="none" stroke="var(--text-dim)" />
         <path d={`M20,110 C${20+bezier[0]*120},${110-bezier[1]*100} ${20+bezier[2]*120},${110-bezier[3]*100} 140,10`} fill="none" stroke="var(--accent)" strokeWidth="2" />
         {[0,2].map(index=><circle key={index} cx={20+bezier[index]*120} cy={110-bezier[index+1]*100} r="6" fill="var(--accent)" aria-label={tr("贝塞尔控制点 {0}",index/2+1)}
-          onPointerDown={event=>{if(readOnly)return;const svg=event.currentTarget.ownerSVGElement!;svg.dataset.handle=String(index);svg.setPointerCapture(event.pointerId);}} />)}
+          onPointerDown={event=>{
+             if(readOnly || !formMatchesSelection)return;
+             bezierDrag.current={projectId:state.currentId,target:targetHere,base:formBase};
+             const svg=event.currentTarget.ownerSVGElement!;svg.dataset.handle=String(index);svg.setPointerCapture(event.pointerId);
+           }} />)}
       </svg>
-      <div style={{display:"flex",gap:4,marginTop:6}}>{bezier.map((value,index)=><label className="cv-hint" key={index}>{["x1","y1","x2","y2"][index]}<input type="number" className="cv-input" min="0" max="1" step="0.05" value={value} aria-label={`Bezier ${["x1","y1","x2","y2"][index]}`} onChange={event=>setBezier(current=>current.map((v,i)=>i===index?Number(event.target.value):v) as Bezier)} /></label>)}</div>
+      <div style={{display:"flex",gap:4,marginTop:6}}>{bezier.map((value,index)=><label className="cv-hint" key={index}>{["x1","y1","x2","y2"][index]}<input type="number" className="cv-input" min="0" max="1" step="0.05" value={value} aria-label={`Bezier ${["x1","y1","x2","y2"][index]}`} onChange={event=>{const value=Number(event.target.value);editForm(fields=>({...fields,bezier:fields.bezier.map((v,i)=>i===index?value:v) as Bezier}));}} /></label>)}</div>
     </>:null}
     <p className="cv-hint">{tr("拖动节点调整时间和值；多选后可整体移动或缩放时间。")}</p>
     {lane.length===0?<p className="cv-hint">{tr("暂无关键帧。")}</p>:lane.map(frame=><div key={frame.id} className="inspector__subrow" style={{gap:4}}>

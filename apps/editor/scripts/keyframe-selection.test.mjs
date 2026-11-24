@@ -17,7 +17,7 @@ const clip = (keys, id = 'clip-one') => ({ id, timelineStart: r(0), timelineEnd:
 // and numerical graph dependencies. This does not replace browser acceptance.
 async function harness(initial) {
   const calls = [], listeners = new Map();
-  const state = { project: { sequence: { width: 160, height: 90, tracks: [] } }, editLock: null, playhead: 0 };
+  const state = { currentId: 'project', revision: '1', project: { revision: '1', sequence: { width: 160, height: 90, tracks: [{ kind: 'video', clips: [initial] }] } }, editLock: null, playhead: 0 };
   const dependencies = {
     react: React, 'react/jsx-runtime': jsx,
     '../../i18n': { useLocale() {}, tr: (s, ...args) => s.replace(/\{(\d+)\}/g, (_, i) => args[i]) },
@@ -37,7 +37,10 @@ async function harness(initial) {
   await act(async () => { tree = create(React.createElement(exports.KeyframeSection, { clip: initial })); });
   return {
     calls, tree,
-    update: async value => act(async () => tree.update(React.createElement(exports.KeyframeSection, { clip: value }))),
+    update: async value => act(async () => {
+      state.project.sequence.tracks[0].clips = [value];
+      tree.update(React.createElement(exports.KeyframeSection, { clip: value }));
+    }),
     select: async id => act(async () => tree.root.findByProps({ 'aria-label': `选择关键帧 ${id}` }).props.onChange()),
     button: label => tree.root.findAllByType('button').find(node => node.children.includes(label)),
     checked: id => tree.root.findByProps({ 'aria-label': `选择关键帧 ${id}` }).props.checked,
@@ -131,21 +134,27 @@ test('Bezier pointerUp blocks a stale form and commits only an explicitly select
   const a = { ...key('a', 1), interpolation: 'cubic-bezier', bezier: [.2, .1, .8, .9] };
   const b = { ...key('b', 2), interpolation: 'cubic-bezier', bezier: [.7, .2, .9, .4] };
   const h = await harness(clip([a, b]));
-  const release = () => ({ pointerId: 1, currentTarget: { dataset: { handle: '0' }, releasePointerCapture() {} } });
+  const release = () => ({ pointerId: 1, currentTarget: { dataset: {}, setPointerCapture() {}, releasePointerCapture() {} } });
+  const press = gesture => h.tree.root.findByProps({ 'aria-label': '贝塞尔控制点 1' }).props.onPointerDown({pointerId: 1, currentTarget: { ownerSVGElement: gesture.currentTarget }});
   try {
-    await h.select('a'); await h.select('b'); await h.update(clip([a]));
-    // Also invoke the disabled button's handler directly: the guard must live
-    // in the handler, not only in the DOM's disabled attribute.
-    await act(async () => h.button('更新节点').props.onClick());
-    const staleRelease = release();
+    await h.select('b');
+    const staleRelease = release(); await act(async () => press(staleRelease));
+    await act(async () => h.tree.root.findByProps({ 'aria-label': '曲线节点 a' }).props.onKeyDown({key:'Enter'}));
+    assert.equal(h.button('更新节点').props.disabled, false);
     await act(async () => h.tree.root.findByProps({ 'aria-label': '缓动控制曲线' }).props.onPointerUp(staleRelease));
     assert.equal(staleRelease.currentTarget.dataset.handle, undefined);
+    assert.equal(h.calls.length, 0);
+    await h.select('b'); await h.update(clip([a]));
+    // Also invoke the disabled button's handler directly: the guard must live
+    // in the handler, not only in the DOM's disabled attribute.
+    assert.equal(h.button('更新节点').props.disabled, true);
+    await act(async () => h.button('更新节点').props.onClick());
     assert.equal(h.calls.length, 0);
 
     await h.select('a'); await h.select('a');
     await act(async () => h.tree.root.findByProps({ 'aria-label': 'Bezier x1' }).props.onChange({ target: { value: '.35' } }));
     await h.update(clip([a])); // An unrelated refresh must preserve the draft.
-    const validRelease = release();
+    const validRelease = release(); await act(async () => press(validRelease));
     await act(async () => h.tree.root.findByProps({ 'aria-label': '缓动控制曲线' }).props.onPointerUp(validRelease));
     assert.equal(validRelease.currentTarget.dataset.handle, undefined);
     assert.equal(h.calls.length, 1);
