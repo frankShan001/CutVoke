@@ -473,6 +473,7 @@ export async function addKeyframe(
     interpolation?: KeyframeInterpolation;
     bezier?: [number,number,number,number];
   },
+  options?: { retryConflict?: boolean },
 ): Promise<ActionResult> {
   const payload: Record<string, unknown> = {
     clipId: input.clipId,
@@ -483,7 +484,7 @@ export async function addKeyframe(
   };
   if (input.interpolation) payload.interpolation = input.interpolation;
   if (input.bezier) payload.bezier = input.bezier;
-  const res = await runCommand(dispatch, state, "clip.keyframe", payload);
+  const res = await runCommand(dispatch, state, "clip.keyframe", payload, options);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
     dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已添加关键帧 {0}", input.param) });
