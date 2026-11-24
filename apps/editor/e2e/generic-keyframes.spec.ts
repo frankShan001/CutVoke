@@ -149,6 +149,22 @@ test('history refresh follows a pristine keyframe form without overwriting a new
   await expect(time).toHaveValue('3.25');
   await expect(update).toBeEnabled();
   await page.unroute(match);
+
+  // Put the deliberate draft at B's original time so stale Add would upsert B.
+  await time.fill('3');
+  const value=page.getByLabel('关键帧 opacity 值（0-1）',{exact:true});
+  await value.fill('0.6');
+  const add=page.locator('.keyframe-editor').getByRole('button',{name:'添加',exact:true});
+  await checkbox(b.id).locator('..').getByTitle('删除关键帧',{exact:true}).click();
+  const bFrame=async()=>(await lane()).find((node:{id:string})=>node.id===b.id);
+  await expect.poll(bFrame).toBeUndefined();
+  await expect(checkbox(b.id)).toHaveCount(0);
+  await expect(add).toBeDisabled();
+  await undo.click();
+  await expect.poll(async()=>(await bFrame())?.value).toBe(.8);
+  await expect(checkbox(b.id)).not.toBeChecked();
+  await expect(value).toHaveValue('0.6');
+  await expect(add).toBeDisabled();
 });
 
 test('graph node and Bezier handle gestures commit and undo without losing node identity',async({page,request})=>{

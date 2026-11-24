@@ -31,7 +31,7 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   const [formFallback,setFormFallback] = useState<FormFields>({
     kfTime:"0",kfValue:"1",kfInterp:"linear",bezier:defaultBezier,
   });
-  const [manualForm,setManualForm] = useState<{ fields:FormFields; base:string | null } | null>(null);
+  const [manualForm,setManualForm] = useState<{ fields:FormFields; base:string | null; conflicted:boolean } | null>(null);
   const [selectedIds,setSelected] = useState<string[]>([]);
   const [formTarget,setFormTarget] = useState<{projectId:string|null;sequenceId:string|undefined;clipId:string;param:string;id:string} | null>(null);
   const [offset,setOffset] = useState("0");
@@ -42,7 +42,11 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   const savingRef = useRef(false);
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ id: string; moved: boolean } | null>(null);
-  const bezierDrag = useRef<{projectId:string|null; target:typeof formTarget; base:string|null} | null>(null);
+  const bezierDrag = useRef<{
+    projectId:string|null; sequenceId:string|undefined; clipId:string; param:string;
+    selection:typeof selectedIds; target:typeof formTarget; base:string|null; pointerId:number;
+    commitOnRelease:boolean;
+  } | null>(null);
   const duration = Math.max(.001,rationalToSecs(clip.timelineEnd)-rationalToSecs(clip.timelineStart));
   const audio = state.project?.sequence.tracks.some(track=>track.kind==="audio" && track.clips.some(item=>item.id===clip.id));
   const options: {name: string; min: number; max: number; value: number}[] = [
@@ -75,14 +79,26 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
   const {kfTime,kfValue,kfInterp,bezier} = formFields;
   // A pristine form follows history/sync. Preserve a deliberate draft, but
   // don't let it overwrite a changed version of the same key without reselection.
-  const formConflict = manualForm !== null && manualForm.base !== formBase;
+  const baseMismatch = manualForm !== null && manualForm.base !== formBase;
+  // Once an authoritative change is observed, Undo restoring identical fields
+  // must not silently make an old draft writable again.
+  if (manualForm && baseMismatch && !manualForm.conflicted) setManualForm({...manualForm,conflicted:true});
+  const formConflict = baseMismatch || Boolean(manualForm?.conflicted);
   const formMatchesSelection = !formConflict && selected.length === 1 && authoritativeFrame?.id === selected[0];
   const editForm = (update:(fields:FormFields)=>FormFields) => setManualForm(current => ({
-    fields:update(current?.fields || formFields), base:current ? current.base : formBase,
+    fields:update(current?.fields || formFields), base:current ? current.base : formBase, conflicted:current?.conflicted ?? false,
   }));
   const readOnly = Boolean(state.editLock) || saving;
-  const ownedBezierDrag = () => bezierDrag.current !== null && bezierDrag.current.projectId === state.currentId
-    && bezierDrag.current.target === targetHere && bezierDrag.current.base === formBase;
+  const ownedBezierDrag = (pointerId:number) => {
+    const gesture=bezierDrag.current;
+    return gesture && !formConflict && gesture.pointerId===pointerId && gesture.projectId===state.currentId
+      && gesture.sequenceId===sequenceId && gesture.clipId===clip.id && gesture.param===param
+      && gesture.selection===selectedIds && gesture.target===targetHere && gesture.base===formBase ? gesture : null;
+  };
+  const abandonBezierDrag = (event:PointerEvent<SVGSVGElement>) => {
+    if(bezierDrag.current?.pointerId!==event.pointerId)return;
+    delete event.currentTarget.dataset.handle;bezierDrag.current=null;
+  };
   const formCommandState = () => {
     const latest = getLatestState() || state;
     const project = latest.project;
@@ -133,10 +149,10 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
     // A Bezier gesture submits easing only. Keep any existing time/value draft.
     const remaining=bezierOnly && submitted
       && (kfTime!==authoritativeForm.kfTime || kfValue!==authoritativeForm.kfValue)
-      ? {fields:submitted.fields,base:frameBase({...authoritativeFrame,interpolation:"cubic-bezier",bezier})}
+      ? {fields:submitted.fields,base:frameBase({...authoritativeFrame,interpolation:"cubic-bezier",bezier}),conflicted:false}
       : null;
     void commit({action:"update",param,keyframeId:selected[0],...payload},true).then(result=>{
-      if(result?.ok) setManualForm(current=>current===submitted ? remaining : current);
+      if(result?.ok && submitted) setManualForm(current=>current?.fields===submitted.fields ? remaining : current);
     });
   };
   const select = (frame: Keyframe, multiple=false) => {
@@ -229,23 +245,26 @@ export function KeyframeSection({ clip }: { clip: Clip }) {
     {kfInterp==="cubic-bezier"?<>
       <svg viewBox="0 0 160 120" role="img" aria-label={tr("缓动控制曲线")} style={{width:"100%",height:120,touchAction:"none"}}
         onPointerMove={event=>{
-          const handle=event.currentTarget.dataset.handle;if(!handle || readOnly || !ownedBezierDrag())return;
+          const handle=event.currentTarget.dataset.handle;if(!handle || readOnly || !ownedBezierDrag(event.pointerId))return;
           const rect=event.currentTarget.getBoundingClientRect();
           const px=Math.max(0,Math.min(1,((event.clientX-rect.left)/rect.width*160-20)/120));
           const py=Math.max(0,Math.min(1,1-((event.clientY-rect.top)/rect.height*120-10)/100));
           const index=Number(handle);editForm(fields=>({...fields,bezier:fields.bezier.map((value,i)=>i===index?px:i===index+1?py:value) as Bezier}));
         }} onPointerUp={event=>{
-          if(event.currentTarget.dataset.handle===undefined)return;
+          if(event.currentTarget.dataset.handle===undefined || bezierDrag.current?.pointerId!==event.pointerId)return;
+          const gesture=ownedBezierDrag(event.pointerId);bezierDrag.current=null;
           delete event.currentTarget.dataset.handle;event.currentTarget.releasePointerCapture(event.pointerId);
-          const owns=ownedBezierDrag();bezierDrag.current=null;
-          if(owns)submitForm(true);
-        }} onPointerCancel={event=>{delete event.currentTarget.dataset.handle;bezierDrag.current=null;}}>
+          if(gesture?.commitOnRelease)submitForm(true);
+        }} onPointerCancel={abandonBezierDrag} onLostPointerCapture={abandonBezierDrag}>
         <path d={`M20,110 L${20+bezier[0]*120},${110-bezier[1]*100} M140,10 L${20+bezier[2]*120},${110-bezier[3]*100}`} fill="none" stroke="var(--text-dim)" />
         <path d={`M20,110 C${20+bezier[0]*120},${110-bezier[1]*100} ${20+bezier[2]*120},${110-bezier[3]*100} 140,10`} fill="none" stroke="var(--accent)" strokeWidth="2" />
         {[0,2].map(index=><circle key={index} cx={20+bezier[index]*120} cy={110-bezier[index+1]*100} r="6" fill="var(--accent)" aria-label={tr("贝塞尔控制点 {0}",index/2+1)}
           onPointerDown={event=>{
-             if(readOnly || !formMatchesSelection)return;
-             bezierDrag.current={projectId:state.currentId,target:targetHere,base:formBase};
+             if(readOnly || formConflict || (bezierDrag.current && ownedBezierDrag(bezierDrag.current.pointerId)))return;
+             // An Add draft can edit easing locally; only a gesture started
+             // with a matching selected key can commit on release.
+             bezierDrag.current={projectId:state.currentId,sequenceId,clipId:clip.id,param,
+               selection:selectedIds,target:targetHere,base:formBase,pointerId:event.pointerId,commitOnRelease:formMatchesSelection};
              const svg=event.currentTarget.ownerSVGElement!;svg.dataset.handle=String(index);svg.setPointerCapture(event.pointerId);
            }} />)}
       </svg>
