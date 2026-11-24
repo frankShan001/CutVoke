@@ -279,6 +279,7 @@ async function main() {
     try {
       report.previewObserverDiagnostics = [];
       report.previewPlayback = await verifyNativePreview(page, expect, {
+        traceSeekWrites: target === "macos-x64",
         onDiagnostic: diagnostic => report.previewObserverDiagnostics.push(diagnostic),
       });
     } catch (error) {
