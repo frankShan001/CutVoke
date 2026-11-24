@@ -11,6 +11,7 @@ const load = name => readFileSync(new URL(`../src/lib/${name}.ts`, import.meta.u
 const rational = moduleUrl(load("rational").replace('import { tr } from "../i18n";', 'const tr = text => text;'));
 const curve = moduleUrl(load("speedCurve").replace('"./rational"', JSON.stringify(rational)));
 const timing = load("clipTiming").replace('"./rational"', JSON.stringify(rational)).replace('"./speedCurve"', JSON.stringify(curve));
+const { forwardLeftTrim } = await import(moduleUrl(readFileSync(new URL("../src/components/timeline/util.ts", import.meta.url), "utf8").replace('"../../lib/rational"', JSON.stringify(rational))));
 const { clipSourceRange, parseTimingInput, timingPayload } = await import(moduleUrl(timing));
 const r = (num, den=1) => ({num: String(num), den: String(den)});
 const base = {id: "clip", sourceStart:r(2),timelineStart:r(5),timelineEnd:r(7),speed:r(2)};
@@ -35,4 +36,21 @@ test("numeric left trim preserves source mapping in both playback directions", (
   assert.deepEqual(timingPayload(reverse,"sourceOut",3,r(30)).timelineEnd,r(195,30));
   assert.deepEqual(timingPayload(reverse,"sourceOut",3,r(30)).sourceStart,r(3000000,1000000));
   assert.throws(()=>timingPayload(base,"duration",0,r(30)));
+});
+
+test("forward left trim conserves source out at normal and fast speeds", () => {
+  for (const speed of [1, 2]) {
+    const clip = { ...base, speed: r(speed) };
+    const next = forwardLeftTrim(clip, 5.5, r(30));
+    assert.deepEqual(next, { timelineStart: r(11, 2), sourceStart: speed === 1 ? r(5, 2) : r(3) });
+    assert.equal(Number(next.sourceStart.num) / Number(next.sourceStart.den) + 1.5 * speed, 2 + 2 * speed);
+  }
+});
+
+test("forward left trim clamps on-grid inward from source zero and an off-grid right edge", () => {
+  const clip = { ...base, timelineStart: r(1001, 1000), timelineEnd: r(2), sourceStart: r(1, 10), speed: r(3, 2) };
+  const fps = r(30000, 1001);
+  assert.deepEqual(forwardLeftTrim(clip, -100, fps), { timelineStart: r(29029, 30000), sourceStart: r(999, 20000) });
+  assert.deepEqual(forwardLeftTrim(clip, 100, fps), { timelineStart: r(29029, 15000), sourceStart: r(7507, 5000) });
+  assert.deepEqual(clip.timelineEnd, r(2));
 });

@@ -87,6 +87,38 @@ export function snapSecsToFrame(secs: number, frameRate?: Rational): number {
   return (frame * fpsDen) / fpsNum;
 }
 
+// The untouched source out is fixed when dragging the left edge at positive
+// constant speed. Clamp on the frame grid, not by rounding a source bound.
+export function forwardLeftTrim(clip: Clip, requested: number, fps?: Rational):
+  { timelineStart: Rational; sourceStart: Rational } | null {
+  if (!fps || !Number.isFinite(requested)) return null;
+  const start = clip.timelineStart, end = clip.timelineEnd, source = clip.sourceStart;
+  const speed = clip.speed ?? { num: "1", den: "1" };
+  const [sn, sd, en, ed, an, ad, vn, vd, fn, fd] =
+    [start, end, source, speed, fps].flatMap(({ num, den }) => [BigInt(num), BigInt(den)]);
+  if (sn < 0n || en < 0n || an < 0n || vn <= 0n || fn <= 0n ||
+      [sd, ed, ad, vd, fd].some((d) => d <= 0n)) return null;
+  const lower = (sn * ad * vn - an * vd * sd) * fn;
+  const lowerDen = sd * ad * vn * fd;
+  const firstFrame = lower > 0n ? (lower + lowerDen - 1n) / lowerDen : 0n;
+  const lastFrame = en * fn / (ed * fd) - 1n;
+  const rounded = Math.round(requested * Number(fn) / Number(fd));
+  if (lastFrame < firstFrame || !Number.isSafeInteger(rounded)) return null;
+  const desired = BigInt(rounded);
+  const frame = desired < firstFrame ? firstFrame : desired > lastFrame ? lastFrame : desired;
+  const edge = frame * fd;
+  const delta = edge * sd - sn * fn;
+  const reduced = (n: bigint, d: bigint): Rational => {
+    let x = n < 0n ? -n : n, y = d;
+    while (y !== 0n) [x, y] = [y, x % y];
+    return { num: String(n / x), den: String(d / x) };
+  };
+  return {
+    timelineStart: reduced(edge, fn),
+    sourceStart: reduced(an * fn * sd * vd + delta * vn * ad, ad * fn * sd * vd),
+  };
+}
+
 /** 最近一帧的时长（秒）；旧/不完整工程回退到 0.1s。 */
 export function frameDurationSecs(frameRate?: Rational): number {
   const fpsNum = Number(frameRate?.num);

@@ -6,7 +6,7 @@ import { msg, tr, useLocale } from "../../i18n";
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRightLeft, Film, Music, Type, Lock, Unlock, Volume2, VolumeX, Eye, EyeOff, Trash2, Link2 } from "lucide-react";
-import type { Clip, Track } from "../../types/api";
+import type { Clip, Rational, Track } from "../../types/api";
 import { useEditor } from "../../store/editor";
 import { selectedClipIds, selectTimelineClip } from "../../store/timelineSelection";
 import { getLatestState, runCommand } from "../../store/actions";
@@ -16,6 +16,7 @@ import {
   clipStartSecs,
   clipEndSecs,
   frameDurationSecs,
+  forwardLeftTrim,
   fmtTimePrecise,
   pxToSecSnapped,
   secsToFrameRatString,
@@ -44,6 +45,16 @@ interface TrimState {
   speedAbs: number;
   sourceDuration: number | null;
   curved: boolean;
+  forward?: { clip: Clip; fps: Rational; sequenceId: string; signature: string };
+}
+
+function trimSourceSignature(clip: Clip): string {
+  const time = (value?: Rational) => value ? [value.num, value.den] : null;
+  return JSON.stringify([
+    clip.assetRef.assetId, clip.assetRef.sourcePath, clip.assetRef.fingerprint,
+    time(clip.sourceStart), time(clip.speed), time(clip.timelineStart), time(clip.timelineEnd),
+    clip.speedCurve ?? null, clip.freezeAt ?? null, !!clip.nested, clip.sequenceRef, clip.role,
+  ]);
 }
 
 interface TrimShape {
@@ -462,6 +473,16 @@ export const TrackRow = memo(function TrackRow({
     e.stopPropagation();
     trimGesture.current += 1;
     const gesture = trimGesture.current;
+    const sequence = state.project?.sequence;
+    const assetKind = mode === "trim-l" && (track.kind === "video" || track.kind === "audio")
+      ? getSessionAssets().find((asset) => asset.path === clip.assetRef.sourcePath)?.kind ??
+        inferKind(clip.assetRef.sourcePath, false, false)
+      : null;
+    const forward = (assetKind === "video" || assetKind === "audio") &&
+      sequence && clip.assetRef.sourcePath && !clip.role && !clip.nested && !clip.sequenceRef &&
+      !clip.speedCurve && !clip.freezeAt && rationalToSecs(clip.speed ?? { num: "1", den: "1" }) > 0
+      ? { clip, fps: sequence.fps, sequenceId: sequence.id, signature: trimSourceSignature(clip) }
+      : undefined;
     setTrim({
       clipId: clip.id,
       mode,
@@ -472,9 +493,10 @@ export const TrackRow = memo(function TrackRow({
       speedAbs: Math.max(0.000001, Math.abs(rationalToSecs(clip.speed || { num: "1", den: "1" }))),
       sourceDuration: knownSourceDuration(clip.assetRef.sourcePath) ?? sourceDurations[clip.assetRef.sourcePath] ?? null,
       curved: Boolean(clip.speedCurve),
+      forward,
     });
     trimPointerId.current = e.pointerId;
-    void sourceDurationFor(clip.assetRef.sourcePath).then((duration) => {
+    if (!forward) void sourceDurationFor(clip.assetRef.sourcePath).then((duration) => {
       if (trimGesture.current === gesture && trimPointerId.current != null) {
         setTrim((current) => current?.clipId === clip.id ? { ...current, sourceDuration: duration } : current);
       }
@@ -514,7 +536,10 @@ export const TrackRow = memo(function TrackRow({
     if (Math.abs(deltaPx) < 4) return;
     const snap = pxToSecSnapped(deltaPx, pxPerSec, frameRate);
     if (trim.mode === "trim-l") {
-      const ns = boundedTrimStart(snapSecsToFrame(trim.originStart + snap, frameRate), trim, frameDuration);
+      const forward = trim.forward && forwardLeftTrim(trim.forward.clip, trim.originStart + snap, trim.forward.fps);
+      if (trim.forward && !forward) return;
+      const ns = forward ? rationalToSecs(forward.timelineStart) :
+        boundedTrimStart(snapSecsToFrame(trim.originStart + snap, frameRate), trim, frameDuration);
       setTrimShape({ clipId: trim.clipId, shape: {
         left: toPx(ns, pxPerSec), width: toPx(trim.originEnd - ns, pxPerSec),
         edgePx: toPx(ns, pxPerSec), edgeSecs: ns,
@@ -547,6 +572,24 @@ export const TrackRow = memo(function TrackRow({
       return;
     }
     const snap = pxToSecSnapped(deltaPx, pxPerSec, frameRate);
+    if (t.forward) {
+      const ctx = getLatestState() ?? state;
+      const sequence = ctx.project?.sequence;
+      const liveTrack = sequence?.tracks.find((item) => item.id === track.id);
+      const live = liveTrack?.clips.find((item) => item.id === t.clipId);
+      const { clip, fps, sequenceId, signature } = t.forward;
+      const next = forwardLeftTrim(clip, t.originStart + snap, fps);
+      if (next && Math.abs(rationalToSecs(next.timelineStart) - t.originStart) >= frameDurationSecs(fps) / 2 &&
+          trimGesture.current === gesture && ctx.currentId === state.currentId && !ctx.editLock &&
+          ctx.project?.revision === ctx.revision && sequence?.id === sequenceId &&
+          sequence.fps.num === fps.num && sequence.fps.den === fps.den &&
+          liveTrack && !liveTrack.locked && live && trimSourceSignature(live) === signature) {
+        void trimClip(dispatch, ctx, { clipId: t.clipId, newStart: next.timelineStart, sourceStart: next.sourceStart });
+      }
+      setTrim(null);
+      setTrimShape(null);
+      return;
+    }
     const source = track.clips.find((clip) => clip.id === t.clipId)?.assetRef.sourcePath;
     if (t.sourceDuration == null && source) t.sourceDuration = await sourceDurationFor(source);
     if (trimGesture.current !== gesture) return;
