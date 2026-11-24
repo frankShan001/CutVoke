@@ -17,7 +17,7 @@
 
 [**English**](README.md) | [**简体中文**](README.zh-CN.md)
 
-[下载桌面版](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [v0.3.6 最新动态](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [观看剪辑案例](examples/showcases/) · [接入 AI Agent](docs/user/agent-skill.zh-CN.md) · [贡献社区特效](CONTRIBUTING.zh-CN.md) · [保存自己的特效预设](docs/user/effect-contributing.zh-CN.md#边剪辑边创作无需开发环境) · [常见问题](#常见问题)
+[下载桌面版](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [v0.3.6 最新动态](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [观看剪辑案例](examples/showcases/) · [接入 AI Agent](docs/user/agent-skill.zh-CN.md) · [贡献社区特效](CONTRIBUTING.zh-CN.md) · [保存自己的特效预设](docs/user/effect-contributing.zh-CN.md#边剪辑边创作无需开发环境) · [文档](https://frankshan001.github.io/CutVoke/) · [常见问题](#常见问题)
 
 </div>
 
