@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="docs/images/readme/banner.svg" alt="CutVoke Banner" width="100%" />
+<img src="docs/images/readme/banner.svg" alt="CutVoke — open-source AI video editor with an MCP server" width="100%" />
 
-# CutVoke
+# CutVoke — Open-Source AI Video Editor for Humans and AI Agents
 
 **Your Footage. Your AI. One Shared, Editable Timeline.**
 
-*An open-source, local-first video editor where human creators and AI agents collaborate on the same non-destructive timeline—complete with visual editing, MCP integration, and reusable community effects.*
+*An open-source, local-first AI video editor with a built-in MCP server: Claude Code, Codex, Cursor or any MCP client can cut, caption and add effects, and you finish the edit by hand on the same non-destructive, multi-track timeline. Desktop app for Windows, macOS and Linux.*
 
 [![Release](https://img.shields.io/github/v/release/frankShan001/CutVoke?include_prereleases&label=Release&color=blue)](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -17,7 +17,7 @@
 
 [**English**](README.md) | [**简体中文**](README.zh-CN.md)
 
-[Download Desktop App](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [What's New in v0.3.6](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [Watch Showcases](examples/showcases/) · [Connect AI Agents](docs/user/LOCAL_DELIVERY_MCP.md) · [Contribute Effects](CONTRIBUTING.md) · [Save your own effect preset](effects/README.md#create-while-editing-no-development-setup)
+[Download Desktop App](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [What's New in v0.3.6](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [Watch Showcases](examples/showcases/) · [Connect AI Agents](docs/user/LOCAL_DELIVERY_MCP.md) · [Contribute Effects](CONTRIBUTING.md) · [Save your own effect preset](effects/README.md#create-while-editing-no-development-setup) · [FAQ](#faq)
 
 </div>
 
@@ -28,6 +28,7 @@
 > **CutVoke is an open-source, local video editor your AI agent can drive over MCP — and you can open the same timeline and fix anything by hand.**
 > CutVoke runs on **Windows · macOS · Linux**, needs no account for local editing, and its source is MIT-licensed. Choose your own AI agent; external AI services may have separate accounts, costs and data policies.
 > Works with Claude Code, Codex, Cursor, Claude Desktop, or any MCP client.
+> Looking for an open-source CapCut alternative that an AI agent can also drive, or an MCP server for video editing? That is what CutVoke is built for.
 
 **Connect your agent in 30 seconds**
 
@@ -293,6 +294,38 @@ CutVoke/
 ├── examples/                  # Showcase projects, creative workflows & generated media demos
 └── docs/                      # User manuals, VFX guides, release notes & architecture docs
 ```
+
+## FAQ
+
+### Can I edit video with Claude Code?
+Yes. CutVoke ships a local stdio MCP server. Launch the desktop app once, copy the `cutvoke` entry from `profile/mcp-config.json` into Claude Code ([setup guide](docs/integrations/claude-code.md)), and ask for edits in plain language, e.g. *"add captions, tighten the pauses and make a 9:16 version."* The agent edits a real project timeline, which you can open and adjust in the CutVoke editor.
+
+### Is there an open-source MCP server for video editing?
+CutVoke is one: an MIT-licensed video editor whose MCP server exposes project, timeline, caption, preview and export tools to any MCP client (Claude Code, Codex, Cursor, Claude Desktop and others). It also has a CLI and a local HTTP API. See [Local Delivery MCP](docs/user/LOCAL_DELIVERY_MCP.md).
+
+### Can Codex or Cursor edit videos?
+Yes, through the same MCP server. Per-client steps: [Codex](docs/integrations/codex.md) · [Cursor](docs/integrations/cursor.md). Loading the bundled [`cutvoke-editor` skill](skills/cutvoke-editor/) gives the agent the timeline schema plus workflow guides for music videos, documentaries/vlogs, narrative shorts, explainers and product showcases.
+
+### What happens if the AI makes a bad cut?
+You fix it by hand. Agent edits land on the same non-destructive timeline as manual edits, so you can drag clips, retime captions or change keyframes in the visual editor instead of re-prompting. While an agent holds an editing lease, the editor shows it, and **Take over editing** hands control back to you. Agents can also call `preview_compare` to check before/after frames without committing a change.
+
+### Does CutVoke work offline?
+Editing, previewing and FFmpeg export run on your computer, and local editing needs no account; FFmpeg is bundled in the desktop packages. The AI agent you connect (Claude Code, Codex, etc.) may be a cloud service with its own account, cost and data policy. Optional local speech-to-text captions use faster-whisper; models download once and can then run offline ([Local ASR](docs/user/LOCAL_ASR.md)).
+
+### Is CutVoke free?
+The source code is MIT-licensed and the desktop app needs no account or subscription. The desktop packages also include third-party components under their own licenses (for example, FFmpeg under GPLv3). Any AI service you connect is billed by that service, not by CutVoke.
+
+### How is CutVoke different from CapCut or DaVinci Resolve?
+CapCut and DaVinci Resolve are mature editors built for hands-on editing, with large template and effect libraries. CutVoke is a younger, open-source preview built around one idea: an AI agent and a person working on the same editable timeline. Use it when you want an agent to do the rough cut, captions or versions and still control every clip yourself. Simple flat timelines can be exchanged as FCPXML 1.10, OpenTimelineIO or CMX 3600 EDL (effects, keyframes and captions are not carried over).
+
+### How is it different from AI video generators or FFmpeg MCP tools?
+AI video generators return a finished MP4; FFmpeg-style MCP tools run one-off commands on files. CutVoke keeps a multi-track project — clips, captions, effects, keyframes — that both the agent and you can keep editing, then renders it locally with FFmpeg.
+
+### Can it generate subtitles automatically?
+Yes, with the optional local ASR add-on (faster-whisper). Results arrive as a draft you can correct, then become an editable subtitle track you can restyle, cut by word or sentence, export as SRT, or burn into the MP4 export. See [Local ASR](docs/user/LOCAL_ASR.md) (in Chinese).
+
+### Which platforms are supported?
+Windows x64 (portable), macOS on Apple Silicon and Intel, and Linux x64. Current builds are previews; macOS packages are ad-hoc signed, not notarized. See the [latest release](https://github.com/frankShan001/CutVoke/releases) for limitations.
 
 ## Documentation Hub
 
