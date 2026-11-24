@@ -38,18 +38,54 @@ test("microphone take can be auditioned, retaken, inserted and mixed with persis
   const track = project.sequence.tracks.find((entry: { kind: string }) => entry.kind === "audio");
   expect(track.clips).toHaveLength(1); expect(track.clips[0].assetRef.sourcePath).toMatch(/\.wav$/);
   const mixer = page.locator("section").filter({ has: page.getByRole("heading", { name: "混音台", exact: true }) });
-  await mixer.getByLabel("混音通道").selectOption(`track:${track.id}`);
-  await mixer.getByLabel("增益（dB）", { exact: true }).first().fill("-9");
+  const channel = mixer.getByRole("combobox", { name: "混音通道", exact: true });
+  const numberGain = mixer.getByRole("spinbutton", { name: "增益（dB）", exact: true });
+  const fader = mixer.getByRole("slider", { name: "混音通道 · 增益（dB）", exact: true });
+  const readProject = async () => (await request.get(`/api/v1/projects/${id}`)).json();
+  const trackGain = (data: typeof project) =>
+    data.sequence.tracks.find((entry: { id: string }) => entry.id === track.id).audioMix?.gainDb ?? 0;
+
+  await expect(fader).toHaveCount(0); // The master channel keeps its existing input.
+  await channel.selectOption(`track:${track.id}`);
+  await expect(fader).toHaveValue("0");
+  const selectedBefore = await readProject();
+  await fader.press("Home");
+  await expect(numberGain).toHaveValue("-96");
+  await fader.press("ArrowUp");
+  const keyboardGain = await fader.inputValue();
+  expect(Number(keyboardGain)).toBeGreaterThan(-96);
+  await expect.poll(async () => Number(await numberGain.inputValue())).toBe(Number(keyboardGain));
+
+  await numberGain.fill("-97");
+  await expect(fader).toBeDisabled();
+  await expect(numberGain).toHaveValue("-97");
+  await numberGain.fill("-9.25");
+  await expect(fader).toBeEnabled();
+  await expect(fader).toHaveValue("-9.25");
+  const beforeApply = await readProject();
+  expect(beforeApply.revision).toBe(selectedBefore.revision);
+  expect(trackGain(beforeApply)).toBe(0);
+
   await mixer.getByRole("button", { name: "应用混音", exact: true }).click();
-  await expect.poll(async () => {
-    const data = await (await request.get(`/api/v1/projects/${id}`)).json();
-    return data.sequence.tracks.find((entry: { id: string }) => entry.id === track.id).audioMix?.gainDb;
-  }).toBe(-9);
+  await expect.poll(async () => trackGain(await readProject())).toBe(-9.25);
+  const afterApply = await readProject();
+  expect(Number(afterApply.revision)).toBe(Number(beforeApply.revision) + 1);
+  expect(afterApply.sequence.masterAudio).toEqual(beforeApply.sequence.masterAudio);
+  expect(afterApply.sequence.tracks.filter((entry: { id: string }) => entry.id !== track.id))
+    .toEqual(beforeApply.sequence.tracks.filter((entry: { id: string }) => entry.id !== track.id));
+  await channel.selectOption("master");
+  await channel.selectOption(`track:${track.id}`);
+  await expect(numberGain).toHaveValue("-9.25");
+  await expect(fader).toHaveValue("-9.25");
+
   await page.getByRole("button", { name: /^撤销/ }).first().click();
-  await expect.poll(async () => {
-    const data = await (await request.get(`/api/v1/projects/${id}`)).json();
-    return data.sequence.tracks.find((entry: { id: string }) => entry.id === track.id).audioMix?.gainDb ?? 0;
-  }).toBe(0);
+  await expect.poll(async () => trackGain(await readProject())).toBe(0);
+  await expect(fader).toHaveValue("0");
+  await page.getByRole("button", { name: `锁定轨道 ${track.id}`, exact: true }).click();
+  await expect(fader).toBeDisabled();
+  await expect(numberGain).toBeDisabled();
+  await page.getByRole("button", { name: `解锁轨道 ${track.id}`, exact: true }).click();
+  await expect(fader).toBeEnabled();
 
   // A deterministic 1.860-second model-output fixture must stay inside its
   // real source range. The actual Demucs engine is separately integration-tested.
