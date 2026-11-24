@@ -74,8 +74,8 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
   const page = {
     locator: () => video,
     evaluate: async (callback, arg) => { context.arg = arg;
-      if (snapshotThrows && callback.toString().includes("state.snapshot()")) {
-        context.window[arg].snapshot = () => { throw new Error("diagnostic failure"); };
+      if (snapshotThrows && callback.toString().includes("state.snapshot(")) {
+        context.window[typeof arg === "string" ? arg : arg.key].snapshot = () => { throw new Error("diagnostic failure"); };
       }
       return vm.runInContext(`(${callback.toString()})(arg)`, context); },
     getByRole: (role, { name }) => role === "slider" ? ruler : { click: async () => {
@@ -95,7 +95,7 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
         assert.equal(pixelReads, 0);
         for (const poll of polls) poll();
       }
-      beforeEmit({ active, polls, emit, dispatch, window, first, second, nativeSeekError, mediaDescriptor, setActive: v => { active = v; } });
+      beforeEmit({ active, polls, timers, emit, dispatch, window, first, second, nativeSeekError, mediaDescriptor, setActive: v => { active = v; } });
       if (submit) emit(active);
       events.push("click-return");
     } },
@@ -374,6 +374,8 @@ test("capped seek trace cannot imply absence and still uses the original frame d
   const d=diagnostics[0];
   assert.equal(d.seekWrites.length,64); assert.equal(d.seekWritesDropped,6); assert.equal(d.seekWrites[0].requestedTime,.5);
   assert.equal(d.seekCoverage.status,"incomplete"); assert.equal(d.seekCoverage.absenceEvidence,false);
+  assert.equal(d.seekCoverage.acceptedOrdinal,null);
+  assert.ok(d.seekCoverage.endOrdinal < d.seekCoverage.snapshotOrdinal);
   assert.equal(f.mediaWrites.length,70); assert.equal(f.pixelReads,0); f.assertClean();
 });
 test("seek observer restores its descriptor after black pixels, failed Play, and zero-write success", async () => {
@@ -384,6 +386,8 @@ test("seek observer restores its descriptor after black pixels, failed Play, and
     assert.equal(diagnostics[0].seekWrites.length,0);
     assert.equal(diagnostics[0].seekCoverage.status,"observed");
     assert.equal(diagnostics[0].seekCoverage.absenceEvidence,true);
+    const {endOrdinal,snapshotOrdinal}=diagnostics[0].seekCoverage;
+    assert.ok(reason ? endOrdinal < snapshotOrdinal : snapshotOrdinal < endOrdinal);
     f.assertClean();
   }
 });
@@ -420,4 +424,50 @@ test("foreign descriptor changes and non-numeric active attempts invalidate abse
       f.assertClean();
     }
   }
+});
+
+test("opt-in successful frame stops the oracle while observing the existing late snapshot", async () => {
+  const diagnostics=[];
+  const f=fixture({mediaAccessor:true, submit:false, beforeEmit:({first, second, setActive, emit, dispatch, polls, timers})=>{
+    emit(first);
+    // Model the existing Play RPC still in flight after the valid visual frame.
+    assert.equal(polls.size,0);
+    assert.equal(timers.size,0);
+    second.currentSrc="";
+    setActive(second);
+    second.paused=false; second.seeking=true; second.readyState=1;
+    dispatch("loadedmetadata",{target:second});
+    second.currentSrc="/Users/private/prepared-secret.mp4";
+    second.currentTime=.7;
+    dispatch("seeking",{target:second});
+    assert.equal(second.callbacks.size,0);
+  }});
+  const samples=await verifyNativePreview(f.page,f.expect,{cycles:1, traceSeekWrites:true, onDiagnostic:d=>diagnostics.push(d)});
+  assert.equal(samples[0].energy,255);
+  assert.equal(f.drawn,f.first);assert.equal(f.pixelReads,1);
+  const d=diagnostics[0], c=d.seekCoverage;
+  const accepted=d.events.find(e=>e.event==="accepted");
+  const snapshot=d.events.find(e=>e.event==="snapshot");
+  const seeking=d.media.find(e=>e.event==="media-seeking");
+  assert.equal(d.seekWrites.length,1);
+  const write=d.seekWrites[0];
+  assert.deepEqual([accepted.node,write.node,write.sourceGeneration,snapshot.node],[1,2,2,2]);
+  assert.equal(write.requestedTime,.7);assert.equal(write.seeking,true);
+  assert.equal(accepted.ordinal,c.acceptedOrdinal);assert.equal(snapshot.ordinal,c.snapshotOrdinal);
+  assert.ok(c.startOrdinal < c.acceptedOrdinal && c.acceptedOrdinal < write.ordinal
+    && write.ordinal < seeking.ordinal && seeking.ordinal < c.snapshotOrdinal && c.snapshotOrdinal < c.endOrdinal);
+  assert.equal(c.status,"observed");assert.equal(c.absenceEvidence,true);
+  assert.doesNotMatch(JSON.stringify(d),/private|SECRET|\.mp4|https:/);
+  f.assertClean();
+});
+test("a late Play RPC error after the first accepted frame still restores observation", async () => {
+  const diagnostics=[];
+  const f=fixture({mediaAccessor:true,submit:false,beforeEmit:({first,emit})=>{
+    emit(first);throw new Error("late Play RPC failed");
+  }});
+  await assert.rejects(verifyNativePreview(f.page,f.expect,{cycles:1,traceSeekWrites:true,onDiagnostic:d=>diagnostics.push(d)}),/late Play RPC failed/);
+  assert.equal(f.pixelReads,1);assert.equal(diagnostics[0].seekCoverage.status,"observed");
+  const {endOrdinal,snapshotOrdinal}=diagnostics[0].seekCoverage;
+  assert.ok(endOrdinal < snapshotOrdinal);
+  f.assertClean();
 });

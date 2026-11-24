@@ -17,7 +17,8 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
       // Strict allowlist: no URLs, DOM text, media paths or exception messages.
       const state = { promise: null, cancel: null, diagnostic: { events: [], counts: {}, dropped: 0, media: [], mediaDropped: 0, clocks: [], clocksDropped: 0, stops: [], stopsDropped: 0 } };
       const seekCoverage = traceSeekWrites ? {
-        status: "unavailable", startOrdinal: null, endOrdinal: null, absenceEvidence: false,
+        status: "unavailable", startOrdinal: null, acceptedOrdinal: null, snapshotOrdinal: null,
+        endOrdinal: null, absenceEvidence: false,
       } : null;
       if (seekCoverage) Object.assign(state.diagnostic, { seekCoverage, seekWrites: [], seekWritesDropped: 0 });
       const started = Date.now(), nodes = new WeakMap();
@@ -156,15 +157,18 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
         try { restoreEvidence(); } catch {}
         restoreEvidence = () => {};
       };
-      state.snapshot = () => {
-        stopSeekWrites();
-        record("snapshot", document.querySelector("video.player__video"));
+      state.snapshot = (completed) => {
+        if (!completed) stopSeekWrites();
+        try {
+          if (record("snapshot", document.querySelector("video.player__video")) && seekCoverage) seekCoverage.snapshotOrdinal = ordinal;
+        } finally { stopSeekWrites(); }
         if (seekCoverage) {
           const d = state.diagnostic;
           // Absence applies only between the marker ordinals to attempted JS
           // calls through this prototype on the active video. It is not proof
           // of no seek; a capped/unavailable trace cannot rule out even writes.
-          if (d.seekWritesDropped || d.dropped || d.mediaDropped || d.clocksDropped || d.stopsDropped) {
+          if (seekCoverage.snapshotOrdinal === null || d.seekWritesDropped || d.dropped
+            || d.mediaDropped || d.clocksDropped || d.stopsDropped) {
             if (seekCoverage.status === "observed") seekCoverage.status = "incomplete";
           }
           seekCoverage.absenceEvidence = seekCoverage.status === "observed";
@@ -174,9 +178,11 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
       window[key] = state;
       state.promise = new Promise((resolve, reject) => {
         let target = null, source = "", callback = null, generation = 0, done = false;
-        const cleanup = () => {
-          done = true; generation++;
-          cleanEvidence();
+        const cleanup = (retainEvidence = false) => {
+          const stopFrameObserver = !done;
+          if (stopFrameObserver) { done = true; generation++; }
+          if (!retainEvidence) cleanEvidence();
+          if (!stopFrameObserver) return;
           clearInterval(watch); clearTimeout(deadline);
           if (target && callback !== null) target.cancelVideoFrameCallback(callback);
         };
@@ -201,7 +207,9 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
             const reason = current !== document.querySelector("video.player__video") ? "inactive-node"
               : current.currentSrc !== source ? "changed-source" : current.paused ? "paused"
               : current.seeking ? "seeking" : metadata.mediaTime <= .25 ? "early-frame" : null;
-            record(reason || "accepted", current, metadata);
+            if (record(reason || "accepted", current, metadata) && !reason && seekCoverage) {
+              seekCoverage.acceptedOrdinal = ordinal;
+            }
             if (reason) { arm(); return; }
             try {
               const canvas = document.createElement("canvas");
@@ -210,7 +218,9 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
               const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
               let energy = 0;
               for (let i = 0; i < pixels.length; i += 4) energy += pixels[i] + pixels[i + 1] + pixels[i + 2];
-              cleanup();
+              // Stop the strict frame observer now. On a normal opt-in success,
+              // keep only passive evidence through the existing final snapshot.
+              cleanup(Boolean(seekCoverage && canvas.width > 0 && canvas.height > 0 && energy > 0));
               resolve({ width: canvas.width, height: canvas.height, energy, time: current.currentTime,
                 mediaTime: metadata.mediaTime, presentedFrames: metadata.presentedFrames });
             } catch (error) { cleanup(); reject(error); }
@@ -236,12 +246,12 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
       // pool/source handoff while waiting, rejecting callbacks from old sources.
       frame = await page.evaluate(key => window[key].promise, observerKey);
     } finally {
-      const diagnostic = await page.evaluate(key => {
+      const diagnostic = await page.evaluate(({ key, completed }) => {
         const state = window[key];
         if (!state) return null;
-        try { return state.snapshot(); } catch { return null; }
+        try { return state.snapshot(completed); } catch { return null; }
         finally { state.cancel(); delete window[key]; }
-      }, observerKey).catch(() => null);
+      }, { key: observerKey, completed: frame !== undefined }).catch(() => null);
       // Diagnostics never change acceptance or hide the original failure.
       try { if (diagnostic) onDiagnostic({ cycle, ...diagnostic }); } catch {}
     }
