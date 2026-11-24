@@ -5092,16 +5092,21 @@ test("forward audio left-handle trim after a split preserves source out at 1x an
   expect(uploaded.ok(), await uploaded.text()).toBeTruthy();
   const asset = await uploaded.json();
   for (const speed of [1, 2]) {
+    const trackId = `audio-lane-${speed}`;
     const clipId = `audio-${speed}`;
-    await apply(request, id, "track.add", { trackId: clipId, kind: "audio" });
-    await apply(request, id, "clip.insert", { trackId: clipId, clipId, sourcePath: asset.path,
-      timelineStart: 0, timelineEnd: 6 });
+    await apply(request, id, "track.add", { trackId, kind: "audio" });
+    await apply(request, id, "clip.insert", { trackId, clipId, sourcePath: asset.path,
+      timelineStart: { num: 0, den: 1 }, timelineEnd: { num: 6, den: 1 } });
     if (speed === 2) await apply(request, id, "clip.speed", { clipId, speed });
     await apply(request, id, "clip.split", { clipId, at: { num: 6, den: 5 * speed } });
   }
   await openProject(page, name);
-  const zoomIn = page.locator(".timeline__zoom button[aria-label='放大']");
-  for (let level = 0; level < 7 && await zoomIn.isEnabled(); level += 1) await zoomIn.click();
+  const zoom = page.locator(".timeline__zoom-val");
+  for (let level = 0; level < 7 && await zoom.textContent() !== "80px/s"; level += 1) {
+    const scale = Number((await zoom.textContent())!.split("px")[0]);
+    await page.locator(`.timeline__zoom button[aria-label='${scale < 80 ? "放大" : "缩小"}']`).click();
+  }
+  await expect(zoom).toHaveText("80px/s");
   for (const speed of [1, 2]) {
     const selector = page.locator(`[data-clip-id="audio-${speed}_r"]`);
     const handle = selector.locator(".clip-block__drag--l");
@@ -5111,28 +5116,38 @@ test("forward audio left-handle trim after a split preserves source out at 1x an
     expect(clipBox).toBeTruthy();
     expect(handleBox).toBeTruthy();
     const read = async () => {
-      const clip = (await readProject(request, id)).sequence.tracks.find(t => t.id === `audio-${speed}`)!
+      const clip = (await readProject(request, id)).sequence.tracks.find(t => t.id === `audio-lane-${speed}`)!
         .clips.find(c => c.id === `audio-${speed}_r`)!;
       const sourceStart = (clip as typeof clip & { sourceStart: typeof clip.timelineStart }).sourceStart;
       return [seconds(clip.timelineStart), seconds(clip.timelineEnd), seconds(sourceStart)];
     };
     const before = [1.2 / speed, 6 / speed, 1.2];
     const after = [2.4 / speed, 6 / speed, 2.4];
+    const showsStart = (start: number) => expect(selector).toHaveAttribute("aria-label", new RegExp(`开始于 ${start.toFixed(3)} 秒`));
     expect(await read()).toEqual(before);
+    await showsStart(before[0]);
+    const gestureRevision = (await readProject(request, id)).revision;
     const x = handleBox.x + handleBox.width / 2, y = handleBox.y + handleBox.height / 2;
+    const destination = x + clipBox.width / 4;
+    const scroller = (await page.locator(".timeline__scroller").boundingBox())!;
+    expect(destination).toBeLessThan(scroller.x + scroller.width);
     await page.mouse.move(x, y);
     await page.mouse.down();
     try {
-      await page.mouse.move(x + clipBox.width / 4, y, { steps: 8 });
+      await page.mouse.move(destination, y, { steps: 8 });
       await expect(page.getByTestId("clip-trim-readout")).toHaveAttribute("data-edge-frame", String(36 / speed));
       expect(await read()).toEqual(before);
+      expect((await readProject(request, id)).revision).toBe(gestureRevision);
     } finally {
       await page.mouse.up();
     }
     await expect.poll(read).toEqual(after);
+    await showsStart(after[0]);
     await page.getByRole("button", { name: "撤销", exact: true }).click();
     await expect.poll(read).toEqual(before);
+    await showsStart(before[0]);
     await page.getByRole("button", { name: "重做", exact: true }).click();
     await expect.poll(read).toEqual(after);
+    await showsStart(after[0]);
   }
 });
