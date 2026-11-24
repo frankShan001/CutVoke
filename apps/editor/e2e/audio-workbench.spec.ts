@@ -38,7 +38,7 @@ test("microphone take can be auditioned, retaken, inserted and mixed with persis
   const track = project.sequence.tracks.find((entry: { kind: string }) => entry.kind === "audio");
   expect(track.clips).toHaveLength(1); expect(track.clips[0].assetRef.sourcePath).toMatch(/\.wav$/);
   const mixer = page.locator("section").filter({ has: page.getByRole("heading", { name: "混音台", exact: true }) });
-  const channel = mixer.getByLabel("混音通道");
+  const channel = mixer.getByRole("combobox", { name: "混音通道", exact: true });
   const numberGain = mixer.getByRole("spinbutton", { name: "增益（dB）", exact: true });
   const fader = mixer.getByRole("slider", { name: "混音通道 · 增益（dB）", exact: true });
   const readProject = async () => (await request.get(`/api/v1/projects/${id}`)).json();
