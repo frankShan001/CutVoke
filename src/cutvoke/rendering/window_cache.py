@@ -15,6 +15,7 @@ from pathlib import Path
 import sqlite3
 import shutil
 import subprocess
+import sys
 import time
 
 ABI = 'dense-ffv1-v1'
@@ -195,7 +196,9 @@ def compiled_tool_identity(ffmpeg, ffprobe, cancel=None):
 
 
 def recovery_session(directory, snapshot, ffmpeg, options, cancel=None, *, ffprobe=None):
-    if snapshot is None:
+    # Frozen loaders execute bundled bytecode, even if readable source files
+    # happen to be present. A source hash cannot identify that runtime.
+    if snapshot is None or getattr(sys, 'frozen', False):
         return None
     try:
         document, paths = snapshot
@@ -210,7 +213,7 @@ def recovery_session(directory, snapshot, ffmpeg, options, cancel=None, *, ffpro
         version = subprocess.run([ffmpeg, '-version'], capture_output=True, check=True,
                                  timeout=10).stdout.decode('utf-8', errors='replace')
         # Include domain timing/keyframes and every preprocessing dependency,
-        # not just the renderer entry point. Missing frozen sources fail closed.
+        # not just the renderer entry point. Missing sources fail closed.
         package = Path(__file__).resolve().parents[1]
         if not (package / 'rendering' / 'render.py').is_file():
             return None

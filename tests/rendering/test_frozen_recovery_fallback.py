@@ -1,7 +1,8 @@
-"""Source-runtime simulation of missing frozen sources, not packaged-app QA."""
+"""Source-runtime tests for frozen recovery fallback, not packaged-app QA."""
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -9,6 +10,33 @@ from unittest.mock import patch
 from cutvoke.rendering import window_cache
 from cutvoke.rendering.render import RenderService
 from tests.rendering import test_window_cache as fixtures
+
+
+class FrozenRecoveryEligibility(unittest.TestCase):
+    def test_frozen_runtime_declines_even_with_readable_renderer_sources(self):
+        # Use the real source layout as a stronger control than a lone render.py:
+        # even all readable sources cannot identify the frozen runtime's bytecode.
+        renderer_source = Path(window_cache.__file__).with_name('render.py')
+        self.assertTrue(renderer_source.is_file())
+        snapshot = ({'projectId': 'frozen-source-looking'}, [str(renderer_source)])
+        version = subprocess.CompletedProcess(['ffmpeg', '-version'], 0, stdout=b'ffmpeg fixture\n')
+
+        for frozen in (True, False):
+            with self.subTest(frozen=frozen), patch.object(sys, 'frozen', frozen, create=True), \
+                    patch.object(window_cache, 'digest_file', return_value=('digest', (1,))) as digest, \
+                    patch.object(window_cache.subprocess, 'run', return_value=version) as run, \
+                    patch.object(window_cache, 'WindowCache') as cache:
+                result = window_cache.recovery_session('unused-cache', snapshot, 'ffmpeg', {})
+                if frozen:
+                    self.assertIsNone(result)
+                    digest.assert_not_called()
+                    run.assert_not_called()
+                    cache.assert_not_called()
+                else:
+                    self.assertIsInstance(result, window_cache.RecoverySession)
+                    digest.assert_any_call(renderer_source, None)
+                    run.assert_called_once()
+                    cache.assert_called_once_with('unused-cache')
 
 
 @unittest.skipUnless(shutil.which('ffmpeg') and shutil.which('ffprobe'), 'FFmpeg required')
