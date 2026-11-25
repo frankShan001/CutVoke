@@ -61,6 +61,24 @@ class MirrorInstall(unittest.TestCase):
             guard.select(guard.candidates(west), 'file', 1, Path('/unused'), unused)
         unused.assert_not_called()
 
+    def test_hosted_us_east_1_is_inventory_not_a_download_fallback(self):
+        east = 'http://us-east-1.ec2.archive.ubuntu.com/ubuntu/'
+        regional = (east + '\tpriority:1\n' + ARCHIVE
+                    + '\tpriority:2\nhttps://security.ubuntu.com/ubuntu/\tpriority:3\n')
+        urls = guard.candidates(regional)
+        self.assertEqual(urls, [east, ARCHIVE])
+        with redirect_stdout(io.StringIO()), patch.object(guard, 'probe', return_value=2) as probe:
+            path = Path('/unused')
+            self.assertEqual(guard.select(urls, 'file', 1, path, probe), ARCHIVE)
+            probe.assert_called_once_with(ARCHIVE, 'file', 1, path)
+        with patch.object(guard, 'probe') as unused, self.assertRaises(RuntimeError):
+            guard.select(guard.candidates(east), 'file', 1, Path('/unused'), unused)
+        unused.assert_not_called()
+        for bad in (regional.replace('.ubuntu.com/ubuntu/', '.ubuntu.com.evil/ubuntu/', 1),
+                    regional + east, regional + EC2):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                guard.candidates(bad)
+
     def test_reject_urls(self):
         for bad in ('https://archive.ubuntu.com.evil/ubuntu/', 'https://evil@archive.ubuntu.com/ubuntu/',
                     'https://archive.ubuntu.com:443/ubuntu/', 'https://archive.ubuntu.com/ubuntu/?x=1',
