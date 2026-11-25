@@ -88,7 +88,7 @@ class WindowCache:
 
     def restore(self, key, target):
         try:
-            with closing(self._connect()) as db, db:
+            with closing(self._connect()) as db:
                 row = db.execute('SELECT data,digest FROM windows WHERE key=? AND length(data)<=?',
                                  (key, self.MAX_ITEM)).fetchone()
                 if (row is None or not isinstance(row[0], bytes)
@@ -96,8 +96,15 @@ class WindowCache:
                         or hashlib.sha256(row[0]).hexdigest() != row[1]):
                     return False
                 # Holding the bytes, not a shared cache path, makes eviction safe.
-                Path(target).write_bytes(row[0])
-                db.execute('UPDATE windows SET used=? WHERE key=?', (time.time(), key))
+                if Path(target).write_bytes(row[0]) != len(row[0]):
+                    return False
+                # Eviction recency is advisory after the verified copy. A
+                # competing writer must not discard the request's good bytes.
+                try:
+                    with db:
+                        db.execute('UPDATE windows SET used=? WHERE key=?', (time.time(), key))
+                except sqlite3.Error:
+                    pass
                 return True
         except (OSError, sqlite3.Error):
             return False
