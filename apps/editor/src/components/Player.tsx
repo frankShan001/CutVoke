@@ -10,7 +10,7 @@ import { msg, tr, useLocale } from "../i18n";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type SyntheticEvent } from "react";
 import { Play, Pause, Square, SkipBack, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Scissors, Repeat, Flag, LoaderCircle } from "lucide-react";
-import { useEditor } from "../store/editor";
+import { useEditor, type AudioPlayheadPublication } from "../store/editor";
 import { getLatestState, runCommand } from "../store/actions";
 import { splitClip } from "../store/clipEdit";
 import { TitleCanvasOverlay } from "./TitleCanvasOverlay";
@@ -108,7 +108,12 @@ export function Player() {
   const nativeAudioPositionRef = useRef<(() => number | null) | null>(null);
   const onNativeAudioPosition = useCallback((position: (() => number | null) | null) => { nativeAudioPositionRef.current = position; }, []);
   const onNativeAudioClock = useCallback((clock: (() => number) | null) => { nativeAudioClockRef.current = clock; }, []);
-  const audioTransportRef = useRef({ active: false, time: 0, started: 0, clock: null as (() => number) | null });
+  const audioTransportRef = useRef({ active: false, time: 0, started: 0, clock: null as (() => number) | null, epoch: {} });
+  const lastAudioPublication = useRef<{
+    stamp: AudioPlayheadPublication; clockEpoch: object; scope: object; video: HTMLVideoElement; mediaSource: string; time: number;
+  } | null>(null);
+  const playheadSeekVersionRef = useRef(state.playheadSeekVersion);
+  playheadSeekVersionRef.current = state.playheadSeekVersion;
   const scrubbingRef = useRef(state.scrubbing);
   scrubbingRef.current = state.scrubbing;
   const scrubPausedVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -219,6 +224,18 @@ export function Player() {
   });
   const windowBoundsRef = useRef({ start: windowStart, end: windowEnd, source: videoUrl });
   windowBoundsRef.current = { start: windowStart, end: windowEnd, source: videoUrl };
+  const publicationScope = useRef({
+    projectId: currentId, source: videoUrl, mediaUrl, start: windowStart, end: windowEnd, mode, playing, scrubbing: state.scrubbing,
+  });
+  const previousPublicationScope = publicationScope.current;
+  if (previousPublicationScope.projectId !== currentId || previousPublicationScope.source !== videoUrl ||
+      previousPublicationScope.mediaUrl !== mediaUrl || previousPublicationScope.start !== windowStart ||
+      previousPublicationScope.end !== windowEnd || previousPublicationScope.mode !== mode ||
+      previousPublicationScope.playing !== playing || previousPublicationScope.scrubbing !== state.scrubbing) {
+    publicationScope.current = {
+      projectId: currentId, source: videoUrl, mediaUrl, start: windowStart, end: windowEnd, mode, playing, scrubbing: state.scrubbing,
+    };
+  }
   const preparedEvidence = useRef(usePrepared);
   preparedEvidence.current = usePrepared;
   const readSeekEvidence = useCallback((video: HTMLVideoElement | null) => ({
@@ -263,7 +280,7 @@ export function Player() {
       if (!transport.active || transport.clock !== source) {
         const prior = transport.clock?.() ?? performance.now() / 1000;
         transport.time = transport.active ? transport.time + Math.max(0, prior - transport.started) : playheadRef.current;
-        transport.active = true; transport.clock = source; transport.started = now;
+        transport.active = true; transport.clock = source; transport.started = now; transport.epoch = {};
       }
       // Wall time can outrun the actual audio device under load. Use the
       // graph's clock so healthy voices are never repeatedly seeked forward.
@@ -292,7 +309,19 @@ export function Player() {
     frame = requestAnimationFrame(publish);
     return () => cancelAnimationFrame(frame);
   }, [audioPlaybackClock, mediaEndSecs]);
+  // React can commit an older audio publication after the RAF has already
+  // advanced the same clock. Provenance distinguishes that from seek intent.
+  const isSupersededAudioPublication = useCallback((shown: AudioPlayheadPublication | undefined) => {
+    const latest = lastAudioPublication.current, transport = audioTransportRef.current;
+    return !!shown && !!latest && playingRef.current && !scrubbingRef.current && transport.active &&
+      transport.clock === nativeAudioClockRef.current && transport.epoch === latest.clockEpoch &&
+      latest.scope === publicationScope.current && latest.video === videoRef.current &&
+      latest.video.dataset.previewSource === windowBoundsRef.current.source && latest.mediaSource === latest.video.currentSrc && latest.time === reportedVideoTimeRef.current &&
+      shown.seekVersion === playheadSeekVersionRef.current && shown.seekVersion === latest.stamp.seekVersion &&
+      shown.epoch === latest.stamp.epoch && shown.ordinal < latest.stamp.ordinal;
+  }, []);
   useLayoutEffect(() => {
+    if (mode === "video" && isSupersededAudioPublication(state.audioPlayheadPublication)) return;
     if (audioTransportRef.current.active && Math.abs(playhead - reportedVideoTimeRef.current) > .25)
       audioTransportRef.current.active = false;
   }, [playhead]);
@@ -632,6 +661,7 @@ export function Player() {
   useEffect(() => {
     const v = videoRef.current;
     if (mode !== "video" || !v || suppressSeek.current) return;
+    if (isSupersededAudioPublication(state.audioPlayheadPublication)) return;
     const boundedPlayhead = Math.min(mediaEndSecs, Math.max(0, decodePlayhead));
     if (state.scrubbing && !usePrepared && decodePlayhead !== playhead) return;
     setVideoTime(boundedPlayhead);
@@ -699,12 +729,24 @@ export function Player() {
         if (loop.enabled && loop.in != null && loop.out != null && loop.out > loop.in && time >= Math.min(loop.out, mediaEndSecs)) {
           time = loop.in;
           const source = nativeAudioClockRef.current;
-          audioTransportRef.current = { active: true, time, started: source?.() ?? performance.now() / 1000, clock: source };
+          audioTransportRef.current = { active: true, time, started: source?.() ?? performance.now() / 1000, clock: source, epoch: {} };
+        }
+        const video = videoRef.current, bounds = windowBoundsRef.current;
+        let audioPublication: AudioPlayheadPublication | undefined;
+        const transport = audioTransportRef.current;
+        if (clock.playing && transport.active && video && video.dataset.previewSource === bounds.source && video.currentSrc) {
+          const prior = lastAudioPublication.current, scope = publicationScope.current, mediaSource = video.currentSrc;
+          const previous = prior && prior.clockEpoch === transport.epoch && prior.scope === scope &&
+            prior.video === video && prior.mediaSource === mediaSource ? prior.stamp : null;
+          audioPublication = {
+            epoch: previous?.epoch ?? {}, seekVersion: playheadSeekVersionRef.current,
+            ordinal: (previous?.ordinal ?? 0) + 1,
+          };
+          lastAudioPublication.current = { stamp: audioPublication, clockEpoch: transport.epoch, scope, video, mediaSource, time };
         }
         reportedVideoTimeRef.current = time;
         setVideoTime(time);
-        dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: time });
-        const video = videoRef.current, bounds = windowBoundsRef.current;
+        dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: time, audioPublication });
         if (video && video.dataset.previewSource === bounds.source && video.readyState >= 2 && time >= bounds.start && time < bounds.end) {
           if (!video.seeking && Math.abs(video.currentTime - (time - bounds.start)) > .15)
             seekPreviewVideo(video, time - bounds.start, "audio-tick", () => readSeekEvidence(video));
