@@ -27,6 +27,7 @@ import { RatioIcon } from "./playerIcons";
 import { usePreviewFrame } from "./usePreviewFrame";
 import { usePreviewPoster } from "./usePreviewPoster";
 import { useVideoHandoff } from "./useVideoHandoff";
+import { previewLoadSeekSite, recordPreviewPhase, seekPreviewVideo } from "../lib/previewSeekEvidence";
 import { usePreviewSegments } from "./usePreviewSegments";
 import { usePreviewPreload } from "./usePreviewPreload";
 import { useTranscriptAudition } from "./useTranscriptAudition";
@@ -209,6 +210,7 @@ export function Player() {
     source: videoUrl, active: mode === "video", playing,
     onPresented: (source) => {
       setReadyVideoUrl(source);
+      recordPreviewPhase("presented", videoRef.current, () => readSeekEvidence(videoRef.current));
       if (state.opening && usePrepared && source === prepared?.url && currentId &&
           (videoRef.current?.readyState || 0) >= 3) {
         dispatch({ type: "PROJECT_OPEN_READY", projectId: currentId });
@@ -217,6 +219,24 @@ export function Player() {
   });
   const windowBoundsRef = useRef({ start: windowStart, end: windowEnd, source: videoUrl });
   windowBoundsRef.current = { start: windowStart, end: windowEnd, source: videoUrl };
+  const preparedEvidence = useRef(usePrepared);
+  preparedEvidence.current = usePrepared;
+  const readSeekEvidence = useCallback((video: HTMLVideoElement | null) => ({
+    prepared: preparedEvidence.current, nativeAudioReady: nativeAudioRef.current,
+    audioActive: audioTransportRef.current.active, playing: playingRef.current,
+    audioAnchor: audioTransportRef.current.time, playhead: playheadRef.current,
+    decodeTime: decodePlayheadRef.current, reportedTime: reportedVideoTimeRef.current,
+    windowStart: windowBoundsRef.current.start, windowEnd: windowBoundsRef.current.end,
+    sourceMatches: !!video && video.dataset.previewSource === windowBoundsRef.current.source,
+  }), []);
+  const hasOffer = !!offered;
+  const warmedOffer = !!offeredMatches && readyVideoUrl === offered?.url;
+  useEffect(() => {
+    recordPreviewPhase("selection", videoRef.current, () => ({
+      ...readSeekEvidence(videoRef.current), offered: hasOffer, matching: !!offeredMatches,
+      retained: !!retainPrepared, warmedOffer, ready: videoReady, holding,
+    }));
+  }, [readSeekEvidence, hasOffer, offeredMatches, retainPrepared, warmedOffer, usePrepared, videoReady, holding, nativeAudioReady, playing, videoUrl]);
   const auditionBoundary = useRef<(time: number) => number | null>(() => null);
   const audioPlaybackClock = useCallback((initialize = false, reset = false) => {
     if (reset) { audioTransportRef.current.active = false; return { time: playheadRef.current, playing: false }; }
@@ -281,11 +301,13 @@ export function Player() {
     if (video && video.readyState >= 1) {
       const { start, end } = windowBoundsRef.current;
       const target = Math.min(end, Math.max(start, decodePlayheadRef.current));
-      if (Math.abs(video.currentTime - (target - start)) > 0.03) video.currentTime = target - start;
+      if (Math.abs(video.currentTime - (target - start)) > 0.03)
+        seekPreviewVideo(video, target - start, "bind", () => readSeekEvidence(video));
       reportedVideoTimeRef.current = target;
     }
     bindVideo(video);
-  }, [bindVideo]);
+    if (video) recordPreviewPhase("bound", video, () => readSeekEvidence(video));
+  }, [bindVideo, readSeekEvidence]);
   useEffect(() => { if (videoRef.current) videoRef.current.muted = nativeAudioReady; }, [nativeAudioReady]);
   useEffect(() => {
     const pause = () => { playingRef.current = false; setPlaying(false); videoRef.current?.pause(); };
@@ -380,10 +402,11 @@ export function Player() {
   }, [mode, currentId, decodePlayhead, scheduleFrame]);
   useEffect(() => {
     if (!segments.error || mode !== "video") return;
+    recordPreviewPhase("fallback-segment", videoRef.current, () => readSeekEvidence(videoRef.current));
     setMode("image");
     dispatchRef.current({ type: "STATUS_SET", severity: "warn",
       text: msg("连续预览失败，已切换到单帧预览") });
-  }, [segments.error, mode]);
+  }, [segments.error, mode, readSeekEvidence]);
 
   useEffect(() => {
     const onAssetRestored = (event: Event) => {
@@ -461,7 +484,7 @@ export function Player() {
     const localTarget = Math.max(0, target - windowStart);
     if (Math.abs(v.currentTime - localTarget) > 0.03) {
       try {
-        v.currentTime = localTarget;
+        seekPreviewVideo(v, localTarget, previewLoadSeekSite(event.type), () => readSeekEvidence(v));
       } catch {
         /* keep the decoded position if the browser rejects an early metadata seek */
       }
@@ -470,21 +493,23 @@ export function Player() {
     reportedVideoTimeRef.current = target;
     if (v.readyState >= 2 && !v.seeking) confirmFrame(v);
     if (playingRef.current && !scrubbingRef.current && v.paused && target < mediaEndSecs - 0.01) requestVideoPlay(v);
-  }, [mediaEndSecs, windowStart, windowEnd, requestVideoPlay, confirmFrame]);
+  }, [mediaEndSecs, windowStart, windowEnd, requestVideoPlay, confirmFrame, readSeekEvidence]);
   const onVideoError = useCallback((video: HTMLVideoElement) => {
     if (video !== videoRef.current || video.dataset.previewSource !== videoUrl ||
         !video.error || video.error.code === 1) return;
     decodedPrepared.current = null;
     setReadyVideoUrl(null);
     if (state.opening && usePrepared) {
+      recordPreviewPhase("fallback-open", video, () => readSeekEvidence(video));
       window.dispatchEvent(new CustomEvent("cutvoke:prepared-preview-error", { detail: { projectId: currentId } }));
       return;
     }
+    recordPreviewPhase("fallback-video", video, () => readSeekEvidence(video));
     setMode("image");
     dispatchRef.current({ type: "STATUS_SET", severity: "warn",
       text: msg("连续预览失败，已切换到单帧预览") });
     scheduleFrame(playheadRef.current);
-  }, [scheduleFrame, state.opening, usePrepared, currentId, videoUrl]);
+  }, [scheduleFrame, state.opening, usePrepared, currentId, videoUrl, readSeekEvidence]);
   const onVideoEnded = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current || scrubbingRef.current) return;
     if (audioTransportRef.current.active && playingRef.current) return;
@@ -516,7 +541,7 @@ export function Player() {
       : null;
     if (mode === "video" && !v.paused && lp.enabled && lp.in != null && loopEnd != null && loopEnd > lp.in) {
       if (absoluteTime >= loopEnd) {
-        if (lp.in >= windowStart && lp.in < windowEnd) v.currentTime = lp.in - windowStart;
+        if (lp.in >= windowStart && lp.in < windowEnd) seekPreviewVideo(v, lp.in - windowStart, "video-loop", () => readSeekEvidence(v));
         reportedVideoTimeRef.current = lp.in;
         setVideoTime(lp.in);
         dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: lp.in });
@@ -525,7 +550,7 @@ export function Player() {
     }
     if (!usePrepared && !v.paused && mediaEndSecs > 0 && absoluteTime >= mediaEndSecs - 0.01) {
       try {
-        v.currentTime = mediaEndSecs - windowStart;
+        seekPreviewVideo(v, mediaEndSecs - windowStart, "video-end", () => readSeekEvidence(v));
       } catch {
         /* keep the current decoded frame if the media element rejects the exact end */
       }
@@ -546,7 +571,7 @@ export function Player() {
       dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: boundedTime });
       suppressSeek.current = false;
     }
-  }, [endPlayWithEvidence, mediaEndSecs, mode, windowStart, windowEnd, usePrepared]);
+  }, [endPlayWithEvidence, mediaEndSecs, mode, windowStart, windowEnd, usePrepared, readSeekEvidence]);
   const onPlay = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current) return;
     setShowColorBefore(false);
@@ -611,7 +636,7 @@ export function Player() {
         boundedPlayhead >= windowStart && boundedPlayhead <= windowEnd) {
       try {
         if (Math.abs(v.currentTime - (boundedPlayhead - windowStart)) > 0.03) {
-          v.currentTime = Math.max(0, boundedPlayhead - windowStart);
+          seekPreviewVideo(v, Math.max(0, boundedPlayhead - windowStart), "external-sync", () => readSeekEvidence(v));
         }
         // An action may already have positioned the native video. Accept that
         // seek too, otherwise the playback guard rejects every subsequent tick.
@@ -620,7 +645,7 @@ export function Player() {
         /* ignore */
       }
     }
-  }, [decodePlayhead, playhead, state.scrubbing, usePrepared, mediaEndSecs, mode, windowStart, windowEnd]);
+  }, [decodePlayhead, playhead, state.scrubbing, usePrepared, mediaEndSecs, mode, windowStart, windowEnd, readSeekEvidence]);
 
   // Publish once per decoded frame, rather than repainting the editor at the
   // display's 60/144Hz rate while a 30fps video is still showing the same frame.
@@ -678,7 +703,7 @@ export function Player() {
         const video = videoRef.current, bounds = windowBoundsRef.current;
         if (video && video.dataset.previewSource === bounds.source && video.readyState >= 2 && time >= bounds.start && time < bounds.end) {
           if (!video.seeking && Math.abs(video.currentTime - (time - bounds.start)) > .15)
-            video.currentTime = time - bounds.start;
+            seekPreviewVideo(video, time - bounds.start, "audio-tick", () => readSeekEvidence(video));
           if (video.paused) requestVideoPlay(video);
         }
         if (time >= mediaEndSecs) {
@@ -692,7 +717,7 @@ export function Player() {
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [playing, nativeAudioReady, state.scrubbing, mode, audioPlaybackClock, mediaEndSecs, requestVideoPlay, endPlayWithEvidence]);
+  }, [playing, nativeAudioReady, state.scrubbing, mode, audioPlaybackClock, mediaEndSecs, requestVideoPlay, endPlayWithEvidence, readSeekEvidence]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -737,9 +762,9 @@ export function Player() {
     const v = videoRef.current;
     if (v) {
       v.pause();
-      v.currentTime = 0;
+      seekPreviewVideo(v, 0, "project-reset", () => readSeekEvidence(v));
     }
-  }, [currentId, resetFrames]);
+  }, [currentId, resetFrames, readSeekEvidence]);
 
   // 基础画面变化后重新尝试 video 模式；字幕更新不应让已降级的预览反复重试。
   useEffect(() => {
@@ -782,7 +807,7 @@ export function Player() {
         // Explicit seeks update the timeline before the decoder catches up.
         // A stale video cursor at its old endpoint must not restart from zero.
         if (playhead >= mediaEndSecs - 0.01) {
-          if (windowStart === 0) v.currentTime = 0;
+          if (windowStart === 0) seekPreviewVideo(v, 0, "play-restart", () => readSeekEvidence(v));
           reportedVideoTimeRef.current = 0;
           setVideoTime(0);
           dispatch({ type: "PLAYHEAD_SET", t: 0 });
@@ -844,7 +869,8 @@ export function Player() {
       reportedVideoTimeRef.current = time;
       setVideoTime(time);
       const video = videoRef.current;
-      if (video && time >= windowStart && time <= windowEnd) video.currentTime = time - windowStart;
+      if (video && time >= windowStart && time <= windowEnd)
+        seekPreviewVideo(video, time - windowStart, "audition", () => readSeekEvidence(video));
       dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: time });
     },
     onEnd: () => dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: msg("已暂停") }),
@@ -859,7 +885,7 @@ export function Player() {
     if (mode === "video" && v) {
       if (!v.paused) pauseStatusRef.current = tr("已回到开头");
       v.pause();
-      v.currentTime = 0;
+      seekPreviewVideo(v, 0, "stop", () => readSeekEvidence(v));
     }
     dispatch({ type: "PLAYHEAD_SET", t: 0 });
     dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已回到开头") });
@@ -880,7 +906,7 @@ export function Player() {
       setVideoTime(next);
       if (next >= windowStart && next < windowEnd) {
         try {
-          v.currentTime = next - windowStart;
+          seekPreviewVideo(v, next - windowStart, "frame-step", () => readSeekEvidence(v));
         } catch {
           /* ignore */
         }

@@ -9,7 +9,7 @@ const { verifyNativePreview } = createRequire(import.meta.url)("../../../tools/v
 // Deterministically model compositor submission while Play's automation RPC is
 // still pending. The helper under test (not a duplicate observer) runs in a DOM
 // sandbox. Real browser/native tests separately cover decoding and rendering.
-function fixture({ black = false, failClick = false, submit = true, handoff = false, snapshotThrows = false, recordThrows = false, beforeEmit = () => {}, metadata = { mediaTime: .5, presentedFrames: 2 }, priorEvidence, mediaAccessor = false, mediaConfigurable = true } = {}) {
+function fixture({ black = false, failClick = false, submit = true, handoff = false, snapshotThrows = false, recordThrows = false, beforeEmit = () => {}, metadata = { mediaTime: .5, presentedFrames: 2 }, priorEvidence, priorCaller, mediaAccessor = false, mediaConfigurable = true } = {}) {
   const polls = new Set(), timers = new Set(), events = [];
   let id = 0, drawn = null, pixelReads = 0;
   const listeners = new Map();
@@ -20,6 +20,7 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
     addEventListener: { value: listen }, removeEventListener: { value: unlisten },
   });
   if (priorEvidence) Object.defineProperty(window, "__cutvokePreviewStopEvidence", priorEvidence);
+  if (priorCaller) Object.defineProperty(window, "__cutvokeNativeSeekEvidence", priorCaller);
   const makeVideo = source => ({
     paused: true, seeking: false, readyState: 4, currentTime: 0, duration: 3,
     matches: () => true,
@@ -111,6 +112,7 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
   return { page, expect, events, first, second, mediaWrites, get drawn() { return drawn; }, get pixelReads() { return pixelReads; },
     assertClean(expectedDescriptor = mediaDescriptor) { assert.equal(polls.size, 0); assert.equal(timers.size, 0); assert.deepEqual(Object.keys(context.window), []); assert.equal([...listeners.values()].reduce((n, s) => n + s.size, 0), 0);
       assert.deepEqual(Object.getOwnPropertyDescriptor(window, "__cutvokePreviewStopEvidence"), priorEvidence);
+      assert.deepEqual(Object.getOwnPropertyDescriptor(window, "__cutvokeNativeSeekEvidence"), priorCaller);
       assert.deepEqual(Object.getOwnPropertyDescriptor(Media.prototype, "currentTime"), expectedDescriptor);
       assert.equal(first.callbacks.size + second.callbacks.size, 0); } };
 }
@@ -470,4 +472,73 @@ test("a late Play RPC error after the first accepted frame still restores observ
   const {endOrdinal,snapshotOrdinal}=diagnostics[0].seekCoverage;
   assert.ok(endOrdinal < snapshotOrdinal);
   f.assertClean();
+});
+
+function seekHook(window) {
+  const exports = {};
+  vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../src/lib/previewSeekEvidence.ts", import.meta.url), "utf8"),
+    { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText,
+    { exports, window });
+  return exports;
+}
+
+test("existing native seek observer attributes only the exact node and synchronous setter", async () => {
+  const diagnostics = [];
+  const f = fixture({ mediaAccessor: true, handoff: true, beforeEmit: ({ first, second, window, nativeSeekError }) => {
+    const hook = seekHook(window);
+    const detail = () => ({ prepared: true, audioActive: true, sourceMatches: true, playhead: .6,
+      reportedTime: .4, clock: "SECRET", path: "/Users/SECRET", extra: { token: "SECRET" }, decodeTime: Infinity });
+    hook.recordPreviewPhase("selection", second, () => ({ ...detail(), offered: true, ready: false }));
+    const leaveInactive = window.__cutvokeNativeSeekEvidence.beginSeek("external-sync", first, detail());
+    second.currentTime = .54; // no label may leak to a different decoder
+    leaveInactive();
+    hook.seekPreviewVideo(second, .61, hook.previewLoadSeekSite("loadeddata"), detail);
+    assert.throws(() => hook.seekPreviewVideo(second, 999, "bind", detail), error => error === nativeSeekError);
+    second.currentTime = .65; // no label may leak after the setter throws
+    hook.recordPreviewPhase("presented", second, detail);
+    hook.recordPreviewPhase("/Users/SECRET", second, detail);
+  } });
+  await verifyNativePreview(f.page, f.expect, { cycles: 1, traceSeekWrites: true, onDiagnostic: d => diagnostics.push(d) });
+  const [d] = diagnostics;
+  assert.equal(d.callerProbeInstalled, true);
+  assert.equal(d.unknownSeekCallers, 2);
+  assert.deepEqual(Array.from(d.seekWrites, x => [x.caller, x.requestedTime]),
+    [["unknown", .54], ["loadeddata", .61], ["bind", 999], ["unknown", .65]]);
+  assert.equal(d.seekWrites[1].evidence.audioActive, true);
+  assert.equal(d.seekWrites[1].evidence.reportedTime, .4);
+  assert.equal(d.seekWrites[1].node, d.phases[0].node);
+  assert.deepEqual(Array.from(d.phases, x => x.event), ["selection", "presented"]);
+  assert.equal(d.phases[0].evidence.offered, true);
+  assert.equal(d.phases[0].evidence.ready, false);
+  assert.doesNotMatch(JSON.stringify(d), /Users|SECRET|private\.example|token|extra|decodeTime/);
+  f.assertClean();
+});
+
+test("caller evidence remains opt-in, bounded, and cannot change native setter outcomes", async () => {
+  let reads = 0;
+  const priorCaller = { configurable: false, enumerable: false, set: undefined,
+    get() { throw new Error("foreign accessor must not run"); } };
+  const f = fixture({ mediaAccessor: true, priorCaller, beforeEmit: ({ active, window, nativeSeekError }) => {
+    const hook = seekHook(window);
+    hook.seekPreviewVideo(active, .63, "audio-tick", () => { reads++; throw new Error("must not sample"); });
+    assert.throws(() => hook.seekPreviewVideo(active, 999, "external-sync", () => { reads++; }), error => error === nativeSeekError);
+    assert.equal(active.currentTime, .63);
+  } });
+  const diagnostics = [];
+  await verifyNativePreview(f.page, f.expect, { cycles: 1, traceSeekWrites: true, onDiagnostic: d => diagnostics.push(d) });
+  assert.equal(reads, 0);
+  assert.equal(diagnostics[0].callerProbeInstalled, false);
+  assert.equal(diagnostics[0].unknownSeekCallers, 2);
+  f.assertClean();
+
+  const bounded = fixture({ mediaAccessor: true, beforeEmit: ({ active, window }) => {
+    const hook = seekHook(window);
+    for (let i = 0; i < 100; i++) hook.recordPreviewPhase("selection", active, () => ({ playhead: i }));
+  } });
+  await verifyNativePreview(bounded.page, bounded.expect, { cycles: 1, traceSeekWrites: true, onDiagnostic: d => diagnostics.push(d) });
+  assert.equal(diagnostics[1].phases.length, 64);
+  assert.equal(diagnostics[1].phasesDropped, 36);
+  assert.equal(diagnostics[1].phases.at(-1).evidence.playhead, 99);
+  assert.equal(diagnostics[1].seekCoverage.absenceEvidence, false);
+  bounded.assertClean();
 });

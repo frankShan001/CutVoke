@@ -5,6 +5,18 @@ import assert from 'node:assert/strict';
 import ts from 'typescript';
 const deferred = () => { let resolve, reject; const promise = new Promise((a,b) => { resolve=a; reject=b; }); return { promise, resolve, reject }; };
 const flush = async () => { for(let i=0;i<20;i++) await Promise.resolve(); };
+function bindPlayerSeek(context) {
+  // Extracted Player callbacks do not execute Player's imports. Run the same
+  // setter helper with QA off, rather than replacing a native seek in the test.
+  const exports = {};
+  runInNewContext(ts.transpileModule(readFileSync(new URL('../src/lib/previewSeekEvidence.ts', import.meta.url), 'utf8'),
+    { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText,
+    { exports, window: {} });
+  context.seekPreviewVideo = exports.seekPreviewVideo;
+  context.qaSeekReads = 0;
+  context.readSeekEvidence = () => { context.qaSeekReads++; return {}; };
+  return context;
+}
 function harness(diagnostics = false) {
   const timers = new Map(); let timer=0;
   const exports = {};
@@ -221,8 +233,10 @@ test('real play handler honors the timeline seek while decoder still reports its
     const globals={exports:{},currentId:'p',project:{},hasRenderable:true,playingRef:{current:false},audioTransportRef:{current:{}},
       videoRef:{current:{paused:true,currentTime:15}},mode:'video',mediaEndSecs:15,playhead,windowStart:0,
       reportedVideoTimeRef:{current:14.8},setVideoTime:()=>{},setPlaying:()=>{},requestVideoPlay:()=>plays++,dispatch:a=>actions.push(a)};
-    runInNewContext(ts.transpileModule(`exports.toggle=${callback}`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,globals);
+    runInNewContext(ts.transpileModule(`exports.toggle=${callback}`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,bindPlayerSeek(globals));
     globals.exports.toggle();assert.equal(plays,1);
+    assert.equal(globals.videoRef.current.currentTime, playhead === 15 ? 0 : 15);
+    assert.equal(globals.qaSeekReads, 0);
     assert.equal(actions.some(a=>a.type==='PLAYHEAD_SET'&&a.t===0),playhead===15);
   }
 });
@@ -243,8 +257,9 @@ function playerTimeupdate({ native = true, active = false, playing = true } = {}
     windowStart: 0, loopRef: { current: { enabled: false, in: null, out: null } }, mode: 'video',
     usePrepared: true, mediaEndSecs: 6, setVideoTime: t => times.push(t), playheadRef: { current: 3 },
     reportedVideoTimeRef: { current: 3 }, suppressSeek: { current: false }, dispatchRef: { current: action => actions.push(action) } };
-  runInNewContext(ts.transpileModule(`exports.callback = ${callback}`, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText, context);
+  runInNewContext(ts.transpileModule(`exports.callback = ${callback}`, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText, bindPlayerSeek(context));
   context.exports.callback({ currentTarget: video });
+  assert.equal(context.qaSeekReads, 0);
   return { actions, times };
 }
 test('ready native mix owns start position before asynchronous startup commits', () => {
