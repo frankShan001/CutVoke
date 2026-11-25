@@ -1955,7 +1955,7 @@ class RenderService:
         #    _compile 在含字幕时会生成 ASS 临时目录（caption_cwd），需调用方清理。
         graph, input_paths, expected_duration, has_audio, warnings, caption_cwd = (
             self._compile(seq, overlay_position, alpha=alpha, render_window=render_window,
-                          frame_aligned_origin=True))
+                          frame_aligned_origin=True, exact_video_bounds=requested_range))
         warnings = preflight_warnings + warnings
         verify_duration = expected_duration
         if output_start is not None or output_duration is not None:
@@ -2117,7 +2117,8 @@ class RenderService:
                 compile_started = time.monotonic()
                 graph, inputs, _expected, chunk_audio, messages, caption_cwd = self._compile(
                     video_seq, overlay_position, alpha=alpha,
-                    render_window=(cursor, cursor + chunk_duration), frame_aligned_origin=True)
+                    render_window=(cursor, cursor + chunk_duration), frame_aligned_origin=True,
+                    exact_video_bounds=True)
                 origin = self._render_ctx.compile_origin
                 compile_seconds = time.monotonic() - compile_started
                 try:
@@ -2291,7 +2292,8 @@ class RenderService:
                 at=(frame-1)/rate;duration=2/rate
                 self._render_ctx.gpu_clips={};self._render_ctx.pixel_gpu=None
                 graph,inputs,_expected,_audio,_messages,cwd=self._compile(
-                    seq,overlay_position,alpha=alpha,render_window=(at,at+duration),frame_aligned_origin=True)
+                    seq,overlay_position,alpha=alpha,render_window=(at,at+duration),
+                    frame_aligned_origin=True,exact_video_bounds=True)
                 reference=Path(directory)/f'seam-{index:05d}.mkv'
                 try:
                     self._run_ffmpeg(seq,graph,inputs,str(reference),quality,cancel_event,False,
@@ -2965,7 +2967,8 @@ class RenderService:
                  alpha: bool = False,
                  render_modes: Optional[list[dict[str, Any]]] = None,
                  render_window: Optional[tuple[float, float]] = None,
-                 frame_aligned_origin: bool = False
+                 frame_aligned_origin: bool = False,
+                 exact_video_bounds: bool = False
                  ) -> tuple[str, list[str], float, bool, list[str], Optional[str]]:
         warnings: list[str] = []
         # 渲染期标志（见 __init__ 注释）：供深层画布构建读取，避免层层传参漏传
@@ -3172,7 +3175,7 @@ class RenderService:
                         (render_window is not None and original_canvas[track.id])),
                     preserve_alpha=transparent_layer or any(c.compositing.get("matte")
                         for c in track.clips if not c.hidden),
-                    frame_aligned_end=render_window is not None and frame_aligned_origin)
+                    frame_aligned_end=exact_video_bounds)
             finally:
                 self._render_ctx.alpha = alpha
             track_streams.append((label, dur))
@@ -3557,7 +3560,7 @@ class RenderService:
             # filter time base. For a grid-aligned composition that can drop
             # the last picture whose timestamp is still inside the window.
             video_end = (f"end_frame={_video_frame_at_or_after(local_end, fps)}"
-                         if frame_aligned_origin else f"end={local_end:.9f}")
+                         if exact_video_bounds else f"end={local_end:.9f}")
             parts.append(f"[outv]trim={video_end}{clock}[outv]")
             if has_audio:
                 audio_end=render_window[1]-audio_origin
