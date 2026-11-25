@@ -2234,5 +2234,10 @@
   "原资源包保留不变。": "Le paquet d’origine reste inchangé.",
   "添加审片标记": "Ajouter un marqueur de révision",
   "标记备注": "Note du marqueur",
-  "工程已变化或暂不可编辑，请关闭后重新添加标记。": "Le projet a changé ou n’est temporairement pas modifiable. Fermez cette boîte de dialogue, puis ajoutez de nouveau le marqueur."
+  "工程已变化或暂不可编辑，请关闭后重新添加标记。": "Le projet a changé ou n’est temporairement pas modifiable. Fermez cette boîte de dialogue, puis ajoutez de nouveau le marqueur.",
+  "下载与成片对齐的 SRT": "Télécharger le SRT synchronisé",
+  "本次导出范围内没有字幕。": "Cette plage d’exportation ne contient aucun sous-titre.",
+  "视频已导出，但无法验证 SRT 与画面时间对齐。": "La vidéo a été exportée, mais la synchronisation du SRT avec l’image n’a pas pu être vérifiée.",
+  "附带与成片对齐的 SRT": "Inclure un SRT synchronisé",
+  "同步 SRT 仅适用于带时间范围的 MP4。": "Le SRT synchronisé est disponible uniquement pour les exports MP4 avec une plage temporelle."
 }
