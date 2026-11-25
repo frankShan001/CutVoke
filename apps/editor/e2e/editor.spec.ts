@@ -5193,13 +5193,10 @@ test("a human can save one review marker at the captured playhead and undo it", 
   expect(acquired.ok(), await acquired.text()).toBeTruthy();
   const leaseId = (await acquired.json()).lease.leaseId;
   try {
-    await expect(dialog.getByRole("status")).toBeVisible();
-    await expect(save).toBeDisabled();
-    await input.press("Enter");
+    await expect(dialog).toBeHidden();
+    await expect(trigger).toBeDisabled();
     expect(markerRequests).toHaveLength(0);
     expect((await readProject(request, id)).revision).toBe(before.revision);
-    await cancel.click();
-    await expect(trigger).toBeDisabled();
   } finally {
     const released = await request.post(`${apiPath(id)}/edit-lock/release`, { data: { leaseId } });
     expect(released.ok()).toBeTruthy();

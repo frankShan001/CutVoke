@@ -1,5 +1,5 @@
 import { BookmarkPlus } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { tr, useLocale } from "../../i18n";
 import { getLatestState, runCommand } from "../../store/actions";
 import { type EditorState, useEditor } from "../../store/editor";
@@ -44,8 +44,19 @@ export function TimelineMarkerTool({ end }: { end: number }) {
     if (!element) return;
     element.showModal();
     field.current?.focus();
-    return () => { element.close(); trigger.current?.focus(); };
+    return () => {
+      element.close();
+      const button = trigger.current;
+      if (button?.disabled) button.closest(".timeline")?.querySelector<HTMLElement>(".timeline-ruler")?.focus();
+      else button?.focus();
+    };
   }, [draft]);
+
+  useLayoutEffect(() => {
+    // The existing editor lease intercepts all keyboard events. Do not leave
+    // its newly read-only workspace covered by a native modal.
+    if (draft && (state.editLock || (!busy && !matchesDraft(state, draft)))) setDraft(null);
+  }, [busy, draft, state]);
 
   const open = () => {
     const latest = getLatestState() ?? state;
@@ -74,7 +85,7 @@ export function TimelineMarkerTool({ end }: { end: number }) {
     submitting.current = true;
     setBusy(true);
     try {
-      const result = await runCommand(dispatch, latest, "marker.add", { name, time: draft.time }, { retryConflict: false });
+      const result = await runCommand(dispatch, latest, "marker.add", { name, time: draft.time }, { autoShow: false, retryConflict: false });
       if (result.ok) setDraft(null);
       else setRejected(true);
     } finally {
