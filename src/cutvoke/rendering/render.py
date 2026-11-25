@@ -245,6 +245,11 @@ _IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp", ".bmp", ".gif", ".apng",
                ".avif", ".tif", ".tiff")
 
 
+def _video_frame_at_or_after(seconds: float, fps: Fraction) -> int:
+    # Avoid losing a frame to float error at an already aligned boundary.
+    return math.ceil(seconds * float(fps) - 1e-7)
+
+
 def _is_image_src(src: str) -> bool:
     """按扩展名判断是否为静态图片源（1.5-A）。图片渲染需 -loop 1 续帧。"""
     return src.lower().endswith(_IMAGE_EXTS)
@@ -1950,7 +1955,7 @@ class RenderService:
         #    _compile 在含字幕时会生成 ASS 临时目录（caption_cwd），需调用方清理。
         graph, input_paths, expected_duration, has_audio, warnings, caption_cwd = (
             self._compile(seq, overlay_position, alpha=alpha, render_window=render_window,
-                          frame_aligned_origin=True))
+                          frame_aligned_origin=True, exact_video_bounds=requested_range))
         warnings = preflight_warnings + warnings
         verify_duration = expected_duration
         if output_start is not None or output_duration is not None:
@@ -2087,6 +2092,8 @@ class RenderService:
                 track.muted = True
             end = start + duration
             frame_rate = seq.fps.to_fraction()
+            first_picture = _video_frame_at_or_after(start, frame_rate)
+            past_last_picture = _video_frame_at_or_after(end, frame_rate)
             # Fragment graphs contain many independently timed alpha branches.
             # Keep fewer simultaneous shot/effect clocks alive in FFmpeg.
             fragment_graph = any(
@@ -2110,7 +2117,8 @@ class RenderService:
                 compile_started = time.monotonic()
                 graph, inputs, _expected, chunk_audio, messages, caption_cwd = self._compile(
                     video_seq, overlay_position, alpha=alpha,
-                    render_window=(cursor, cursor + chunk_duration), frame_aligned_origin=True)
+                    render_window=(cursor, cursor + chunk_duration), frame_aligned_origin=True,
+                    exact_video_bounds=True)
                 origin = self._render_ctx.compile_origin
                 compile_seconds = time.monotonic() - compile_started
                 try:
@@ -2164,10 +2172,18 @@ class RenderService:
                 return [(path,chunk_duration,messages)]
             intervals=[]
             cursor=start
-            while cursor<end-1e-7:
-                step=min(window_duration,end-cursor)
-                intervals.append((cursor,step))
-                cursor+=step
+            while cursor < end:
+                boundary = min(cursor + window_duration, end)
+                if boundary <= cursor:
+                    raise RenderError("window step does not advance the video clock")
+                # A fractional final window shorter than a frame can contain
+                # no video sample. Its requested time still belongs to audio.
+                if (_video_frame_at_or_after(boundary, frame_rate) >
+                        _video_frame_at_or_after(cursor, frame_rate)):
+                    intervals.append((cursor, boundary - cursor))
+                cursor = boundary
+            if not intervals:
+                raise RenderError("output range contains no video frame")
             # Two bounded workers keep a many-core workstation busy without
             # opening the full timeline or an encoder per clip at once.
             workers=min(2,max(1,(os.cpu_count() or 2)//8),
@@ -2215,6 +2231,7 @@ class RenderService:
                 cancel_event, has_audio, video_bitrate_kbps=video_bitrate_kbps,
                 audio_bitrate_kbps=audio_bitrate_kbps, alpha=alpha,
                 color_chain=color_chain, output_duration=duration, concat_input=True,
+                output_frame_count=past_last_picture - first_picture,
                 progress_callback=progress_callback, progress_duration=duration,
                 progress_phase="encoding")
             if progress_callback:
@@ -2275,7 +2292,8 @@ class RenderService:
                 at=(frame-1)/rate;duration=2/rate
                 self._render_ctx.gpu_clips={};self._render_ctx.pixel_gpu=None
                 graph,inputs,_expected,_audio,_messages,cwd=self._compile(
-                    seq,overlay_position,alpha=alpha,render_window=(at,at+duration),frame_aligned_origin=True)
+                    seq,overlay_position,alpha=alpha,render_window=(at,at+duration),
+                    frame_aligned_origin=True,exact_video_bounds=True)
                 reference=Path(directory)/f'seam-{index:05d}.mkv'
                 try:
                     self._run_ffmpeg(seq,graph,inputs,str(reference),quality,cancel_event,False,
@@ -2949,7 +2967,8 @@ class RenderService:
                  alpha: bool = False,
                  render_modes: Optional[list[dict[str, Any]]] = None,
                  render_window: Optional[tuple[float, float]] = None,
-                 frame_aligned_origin: bool = False
+                 frame_aligned_origin: bool = False,
+                 exact_video_bounds: bool = False
                  ) -> tuple[str, list[str], float, bool, list[str], Optional[str]]:
         warnings: list[str] = []
         # 渲染期标志（见 __init__ 注释）：供深层画布构建读取，避免层层传参漏传
@@ -3155,7 +3174,8 @@ class RenderService:
                     force_canvas=bool(mode.get("canvas", False) or
                         (render_window is not None and original_canvas[track.id])),
                     preserve_alpha=transparent_layer or any(c.compositing.get("matte")
-                        for c in track.clips if not c.hidden))
+                        for c in track.clips if not c.hidden),
+                    frame_aligned_end=exact_video_bounds)
             finally:
                 self._render_ctx.alpha = alpha
             track_streams.append((label, dur))
@@ -3536,7 +3556,12 @@ class RenderService:
             # would clear CFR metadata/frame duration on FFmpeg 7 and lose the
             # last picture of a bounded preview or window intermediate.
             clock = "" if _setpts_clears_frame_rate(self.ffmpeg) else ",setpts=PTS-STARTPTS"
-            parts.append(f"[outv]trim=end={local_end:.9f}{clock}[outv]")
+            # Duration-based trims round fractional bounds onto the incoming
+            # filter time base. For a grid-aligned composition that can drop
+            # the last picture whose timestamp is still inside the window.
+            video_end = (f"end_frame={_video_frame_at_or_after(local_end, fps)}"
+                         if exact_video_bounds else f"end={local_end:.9f}")
+            parts.append(f"[outv]trim={video_end}{clock}[outv]")
             if has_audio:
                 audio_end=render_window[1]-audio_origin
                 # Mix output is continuous PCM; preserve its sample clock even
@@ -3647,6 +3672,7 @@ class RenderService:
                             video_duration=None,
                             force_canvas: bool = False,
                             preserve_alpha: bool = False,
+                            frame_aligned_end: bool = False,
                             ) -> tuple[str, float]:
         """编译一条视频轨为单条视频流 [vtk{n}]，返回 (label, 时长秒)。
 
@@ -4050,8 +4076,13 @@ class RenderService:
         # Supply one lookahead frame, then bound the lane to its actual duration.
         clock = ("" if _setpts_clears_frame_rate(self.ffmpeg) else
                  f",settb=expr={fps.denominator}/{fps.numerator},setpts=N")
+        # Bound the resampled lane on the same grid as the composition.
+        # Otherwise a bounded lane can drop its last real picture before
+        # framesync and expose the canvas underneath it.
+        lane_end = (f"end_frame={_video_frame_at_or_after(film, fps)}"
+                    if frame_aligned_end else f"duration={film:.9f}")
         parts.append(f"[{current}]tpad=stop_mode=clone:stop=1,fps={fps_expr},"
-                     f"trim=duration={film:.9f}{clock}[{out_label}]")
+                     f"trim={lane_end}{clock}[{out_label}]")
         return out_label, film
 
     def _pad_last_frame(self, label: str, pad_secs: float, parts: list[str],
@@ -6013,6 +6044,7 @@ class RenderService:
                     output_duration: Optional[float] = None,
                     preview_source_duration: Optional[float] = None,
                     lossless: bool = False, concat_input: bool = False,
+                    output_frame_count: Optional[int] = None,
                     progress_callback=None, progress_duration: Optional[float] = None,
                     progress_phase: str = "encoding") -> None:
         preset = QUALITY_PRESETS.get(quality)
@@ -6044,7 +6076,11 @@ class RenderService:
             # Trim after effects/subtitles so their original clocks are intact.
             start = output_start or 0.0
             end = start + output_duration
-            graph += (f";{out_label}trim=start_frame={math.ceil(start*float(seq.fps.to_fraction())-1e-7)}:end_frame={math.ceil(end*float(seq.fps.to_fraction())-1e-7)},"
+            rate = seq.fps.to_fraction()
+            first_frame = _video_frame_at_or_after(start, rate)
+            past_last_frame = (_video_frame_at_or_after(end, rate) if output_frame_count is None
+                               else first_frame + output_frame_count)
+            graph += (f";{out_label}trim=start_frame={first_frame}:end_frame={past_last_frame},"
                       "setpts=PTS-STARTPTS[boundedv]")
             out_label = "[boundedv]"
             if _setpts_clears_frame_rate(self.ffmpeg):

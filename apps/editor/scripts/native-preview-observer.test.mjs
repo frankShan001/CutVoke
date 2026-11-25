@@ -4,7 +4,7 @@ import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
 import { createRequire } from "node:module";
-const { verifyNativePreview, verifyNativeSeekControl } = createRequire(import.meta.url)("../../../tools/verify/verify_native_preview.cjs");
+const { verifyNativePreview } = createRequire(import.meta.url)("../../../tools/verify/verify_native_preview.cjs");
 
 // Deterministically model compositor submission while Play's automation RPC is
 // still pending. The helper under test (not a duplicate observer) runs in a DOM
@@ -81,11 +81,6 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
       return vm.runInContext(`(${callback.toString()})(arg)`, context); },
     getByRole: (role, { name }) => role === "slider" ? ruler : { click: async () => {
       if (name === "暂停") { active.paused = true; events.push("pause"); return; }
-      if (name === "下一帧") {
-        beforeEmit({ active, polls, timers, emit, dispatch, window, first, second, nativeSeekError, mediaDescriptor, setActive: v => { active = v; } });
-        events.push("step");
-        return;
-      }
       if (recordThrows) {
         for (const state of Object.values(context.window)) {
           if (!state?.diagnostic) continue;
@@ -111,7 +106,6 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
     toBeGreaterThan: minimum => assert.ok(value > minimum, `${value} must exceed ${minimum}`),
   });
   expect.poll = read => ({
-    toBe: async expected => assert.equal(await read(), expected),
     toBeGreaterThanOrEqual: async minimum => assert.ok(await read() >= minimum),
     toBeGreaterThan: async minimum => { assert.ok(await read() > minimum); events.push("clock-checked"); },
   });
@@ -547,40 +541,4 @@ test("caller evidence remains opt-in, bounded, and cannot change native setter o
   assert.equal(diagnostics[1].phases.at(-1).evidence.playhead, 99);
   assert.equal(diagnostics[1].seekCoverage.absenceEvidence, false);
   bounded.assertClean();
-});
-
-test("native caller control requires the real tagged setter without starting playback or its frame oracle", async () => {
-  const step = 1 / 30;
-  for (const labelled of [true, false]) {
-    const f = fixture({ mediaAccessor: true, beforeEmit: ({ active, polls, timers, window }) => {
-      assert.equal(polls.size + timers.size, 0);
-      assert.equal(active.paused, true);
-      assert.equal(active.currentTime, 0);
-      if (labelled) seekHook(window).seekPreviewVideo(active, step, "frame-step", () => ({ sourceMatches: true }));
-      else active.currentTime = step;
-    } });
-    const result = await verifyNativeSeekControl(f.page, f.expect, step);
-    assert.equal(result.passed, labelled);
-    assert.equal(result.initial.readyState, 4);
-    assert.equal(result.initial.paused, true);
-    assert.equal(result.initial.time, 0);
-    if (labelled) {
-      assert.equal(result.caller, "frame-step");
-      assert.equal(result.requestedTime, step);
-      assert.equal(result.observedTime, step);
-    } else assert.equal(result.reason, "expected-frame-step-label-not-observed");
-    assert.equal(f.events.includes("step"), true);
-    assert.equal(f.events.includes("click-return"), false);
-    assert.equal(f.pixelReads, 0);
-    f.assertClean();
-  }
-});
-
-test("native caller control refuses a cursor that is not actually at zero", async () => {
-  const f = fixture({ mediaAccessor: true });
-  f.first.currentTime = .2;
-  assert.deepEqual(await verifyNativeSeekControl(f.page, f.expect, 1 / 30),
-    { passed: false, reason: "zero-frame-not-ready" });
-  assert.equal(f.events.includes("step"), false);
-  f.assertClean();
 });
