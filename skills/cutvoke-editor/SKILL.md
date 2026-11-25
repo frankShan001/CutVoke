@@ -50,13 +50,16 @@ on a miss, and use returned `mediaSourceStart` on a covering cache hit. Source
 execution is disabled. Keep native titles/audio editable; preview an atomic
 split/trim/swap batch for a local repair. Referenced source archives travel inside `.cvkpkg`; the cache index
 remains outside it. Use `generated_source` to inspect or explicitly restore
-inputs into a new directory without executing them. See [request/cache details](../../docs/user/generated-render.md).
+inputs into a new directory without executing them. For more request/cache details,
+see the [optional source-checkout guide](https://github.com/frankShan001/CutVoke/blob/main/docs/user/generated-render.md).
 `generated_media` statically inspects/imports a hashed source/output manifest;
 it never executes code or edits the timeline. Use the returned ordinary asset
 with `clip.insert` or explicit `asset.swap` targets. Preserve native text/audio
 where useful. `project_package` includes verified source ZIPs for media referenced
 by the edit; unused imports and undeclared dependencies are excluded. See the
-[bridge example](../../examples/generated-media/README.md).
+[optional source-checkout bridge example](https://github.com/frankShan001/CutVoke/blob/main/examples/generated-media/README.md).
+These repository references are optional; use the `editor_help` topics above when
+working from a copied Skill without the CutVoke source checkout.
 
 For visual changes, use `preview_compare` with the same preview-supported command and current revision before committing. Request 1–3 timestamps that exist in both timelines; inspect each before/after pair and its zero-based imageIndex (image blocks only). This writes preview cache files, not project/history. Same timestamps do not mean the same source moment after ripple cuts; it does not audition audio. Re-read and reconcile if the revision changes before applying.
 
