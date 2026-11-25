@@ -1,5 +1,6 @@
 """Recovery must skip work, not verification, audio mixing or source identity."""
 import copy
+from contextlib import closing
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import sqlite3
@@ -47,6 +48,60 @@ class CacheStorage(unittest.TestCase):
             self.assertFalse(cache.restore('other', target))
             source.write_bytes(b'x' * 65)
             self.assertFalse(cache.publish('oversize', source))
+
+    def test_verified_copy_is_a_hit_when_another_writer_blocks_the_recency_touch(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cache = WindowCache(root / 'cache')
+            source, target = root / 'seed', root / 'request-owned'
+            payload = b'cached video blob'
+            source.write_bytes(payload)
+            self.assertTrue(cache.publish('key', source))
+            write_bytes = Path.write_bytes
+            with closing(sqlite3.connect(cache.database)) as writer:
+                with writer:
+                    writer.execute("UPDATE windows SET used=1 WHERE key='key'")
+
+                def copy_then_lock(path, data):
+                    self.assertEqual((path, data), (target, payload))
+                    copied = write_bytes(path, data)
+                    writer.execute('BEGIN IMMEDIATE')
+                    return copied
+
+                with patch.object(Path, 'write_bytes', copy_then_lock):
+                    try:
+                        hit = cache.restore('key', target)
+                        self.assertTrue(writer.in_transaction)
+                    finally:
+                        writer.rollback()
+                self.assertTrue(hit)
+                self.assertEqual(target.read_bytes(), payload)
+                # The lock must really have blocked the touch.
+                self.assertEqual(writer.execute(
+                    "SELECT used FROM windows WHERE key='key'").fetchone(), (1.,))
+
+    def test_restore_requires_successful_lookup_and_complete_destination_write(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cache = WindowCache(root / 'cache')
+            source, target = root / 'seed', root / 'request-owned'
+            source.write_bytes(b'cached video blob')
+            self.assertTrue(cache.publish('key', source))
+            with closing(sqlite3.connect(cache.database)) as writer:
+                writer.execute('BEGIN EXCLUSIVE')
+                try:
+                    self.assertFalse(cache.restore('key', target))
+                    self.assertFalse(target.exists())
+                finally:
+                    writer.rollback()
+
+            write_bytes = Path.write_bytes
+            with patch.object(Path, 'write_bytes', lambda path, data: write_bytes(path, data[:4])):
+                self.assertFalse(cache.restore('key', target))
+            self.assertEqual(target.read_bytes(), b'cach')
+            target.unlink()
+            target.mkdir()
+            self.assertFalse(cache.restore('key', target))
 
     def test_malformed_sqlite_payload_types_are_misses(self):
         with tempfile.TemporaryDirectory() as tmp:
