@@ -5224,6 +5224,13 @@ test("a human can save one review marker at the captured playhead and undo it", 
   await expect(page.locator(".timeline-ruler__marker")).toHaveCount(0);
 });
 
+function reviewMarkerRoutes(id: string) {
+  const project = apiPath(id);
+  const commands = `${project}/commands`;
+  const isProjectRead = (path: string) => path === project || path === `${project}/sync`;
+  return { commands, isProjectRead, matches: (url: URL) => isProjectRead(url.pathname) || url.pathname === commands };
+}
+
 for (const blocked of ["post", "refresh"] as const) {
   test(`closing a review marker while its ${blocked} is pending does not resubmit`, async ({ page, request }) => {
     const { id, name } = await createProject(request);
@@ -5233,20 +5240,17 @@ for (const blocked of ["post", "refresh"] as const) {
     const note = `Pending ${blocked}`;
     let markerPosts = 0;
     let withheld = false;
-    let signalHeld!: () => void, release!: () => void;
-    const reached = new Promise<void>(resolve => { signalHeld = resolve; });
+    let release!: () => void;
     const gate = new Promise<void>(resolve => { release = resolve; });
-    await page.route(url => url.pathname === apiPath(id) || url.pathname === `${apiPath(id)}/commands`, async route => {
+    const paths = reviewMarkerRoutes(id);
+    await page.route(paths.matches, async route => {
       const req = route.request();
-      const markerPost = req.method() === "POST" && new URL(req.url()).pathname.endsWith("/commands") &&
+      const markerPost = req.method() === "POST" && new URL(req.url()).pathname === paths.commands &&
         req.postDataJSON()?.type === "marker.add";
       if (markerPost) markerPosts++;
       if ((blocked === "post" && markerPost) ||
-          (blocked === "refresh" && markerPosts > 0 && req.method() === "GET")) {
-        if (!withheld) {
-          withheld = true;
-          signalHeld();
-        }
+          (blocked === "refresh" && markerPosts > 0 && req.method() === "GET" && paths.isProjectRead(new URL(req.url()).pathname))) {
+        withheld = true;
         await gate;
       }
       await route.continue();
@@ -5255,7 +5259,7 @@ for (const blocked of ["post", "refresh"] as const) {
       await trigger.click();
       await dialog.getByLabel("标记备注").fill(note);
       await dialog.getByRole("button", { name: "保存", exact: true }).click();
-      await reached;
+      await expect.poll(() => withheld, { timeout: 10_000, message: `Expected to intercept marker ${blocked}` }).toBe(true);
       await expect(dialog.getByRole("status")).toHaveText("保存中…");
       const readNames = async () => {
         const current = await readProject(request, id);
@@ -5292,24 +5296,25 @@ test("a late review marker response does not roll a newer project revision backw
   await openProject(page, name);
   const trigger = page.getByRole("button", { name: "添加审片标记" });
   const dialog = page.getByRole("dialog", { name: "添加审片标记" });
-  let receiptCommitted!: () => void, releaseReceipt!: () => void, releaseReads!: () => void;
-  const committed = new Promise<void>(resolve => { receiptCommitted = resolve; });
+  let committed = false;
+  let releaseReceipt!: () => void, releaseReads!: () => void;
   const holdReceipt = new Promise<void>(resolve => { releaseReceipt = resolve; });
   const holdReads = new Promise<void>(resolve => { releaseReads = resolve; });
   let blockReads = false;
   let markerPosts = 0;
 
-  await page.route(url => url.pathname === apiPath(id) || url.pathname === `${apiPath(id)}/commands`, async route => {
+  const paths = reviewMarkerRoutes(id);
+  await page.route(paths.matches, async route => {
     const req = route.request();
-    if (req.method() === "POST" && new URL(req.url()).pathname.endsWith("/commands") &&
+    if (req.method() === "POST" && new URL(req.url()).pathname === paths.commands &&
         req.postDataJSON()?.type === "marker.add") {
       markerPosts++;
       const response = await route.fetch();
-      receiptCommitted();
+      committed = response.ok();
       await holdReceipt;
       await route.fulfill({ response });
     } else {
-      if (blockReads && req.method() === "GET") await holdReads;
+      if (blockReads && req.method() === "GET" && paths.isProjectRead(new URL(req.url()).pathname)) await holdReads;
       await route.continue();
     }
   });
@@ -5318,7 +5323,7 @@ test("a late review marker response does not roll a newer project revision backw
     await trigger.click();
     await dialog.getByLabel("标记备注").fill("First pending");
     await dialog.getByRole("button", { name: "保存", exact: true }).click();
-    await committed;
+    await expect.poll(() => committed, { timeout: 10_000, message: "Expected a held, successful marker POST receipt" }).toBe(true);
     const first = await readProject(request, id);
     expect(first.revision).not.toBe(before.revision);
     await dialog.getByRole("button", { name: "关闭", exact: true }).click();
