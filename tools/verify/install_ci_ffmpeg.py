@@ -26,9 +26,12 @@ def candidates(text):
             continue
         url = line.split()[0]
         parsed = urlsplit(url)
-        # Exact hosts from actions/runner-images configure-apt-sources.sh.
+        # Exact hosts from GitHub-hosted Ubuntu runner mirror lists. The
+        # west-2 image provisions its regional archive instead of east-2.
+        # select() still requires and probes only the configured HTTPS canonical archive.
         official = parsed.hostname in ('archive.ubuntu.com', 'azure.archive.ubuntu.com',
-                                       'us-east-2.ec2.archive.ubuntu.com', 'security.ubuntu.com')
+                                       'us-east-2.ec2.archive.ubuntu.com',
+                                       'us-west-2.ec2.archive.ubuntu.com', 'security.ubuntu.com')
         if (not official or parsed.scheme not in ('http', 'https') or parsed.port is not None
                 or parsed.username or parsed.password or parsed.path != '/ubuntu/'
                 or parsed.query or parsed.fragment or parsed.hostname in seen):
