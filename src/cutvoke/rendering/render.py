@@ -4136,11 +4136,13 @@ class RenderService:
             if total_duration is None:
                 raise RenderError("leading canvas padding requires its stream duration")
             rate = Fraction(fps_expr)
-            # Concat's microsecond timestamps can land just after a frame tick.
-            # Rebuild the lattice before framesync, rather than resampling those
-            # rounded timestamps (which can repeat an animated picture).
+            # Snap concat's microsecond timestamps to the sequence time base
+            # before framesync. Rescale the actual PTS, not the frame ordinal:
+            # the first clip may already be retimed or have a different source
+            # frame rate. Renumbering makes its effective speed 1x by frame count
+            # and can move the following cut into the clip's intended interval.
             parts.append(f"[{prefix}][{label}]concat=n=2:v=1:a=0{lookahead},"
-                         f"settb=expr={rate.denominator}/{rate.numerator},setpts=N,"
+                         f"settb=expr={rate.denominator}/{rate.numerator},"
                          f"fps={fps_expr},trim=duration={total_duration:.9f}[{out}]")
         elif at_start:
             parts.append(
