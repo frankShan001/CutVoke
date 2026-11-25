@@ -42,6 +42,25 @@ class MirrorInstall(unittest.TestCase):
             self.assertEqual(guard.candidates(primary + '\tpriority:1\n' + ARCHIVE +
                 '\tpriority:2\nhttps://security.ubuntu.com/ubuntu/\tpriority:3'), [primary, ARCHIVE])
 
+    def test_hosted_us_west_2_mirror_list_still_selects_only_canonical_https(self):
+        west = 'http://us-west-2.ec2.archive.ubuntu.com/ubuntu/'
+        regional = (west + '\tpriority:1\n' + ARCHIVE
+                    + '\tpriority:2\nhttps://security.ubuntu.com/ubuntu/\tpriority:3\n')
+        urls = guard.candidates(regional)
+        self.assertEqual(urls, [west, ARCHIVE])
+        with redirect_stdout(io.StringIO()), patch.object(guard, 'probe', return_value=2) as probe:
+            path = Path('/unused')
+            self.assertEqual(guard.select(urls, 'file', 1, path, probe), ARCHIVE)
+            probe.assert_called_once_with(ARCHIVE, 'file', 1, path)
+        for bad in (regional.replace('.ubuntu.com/ubuntu/', '.ubuntu.com.evil/ubuntu/', 1),
+                    regional + west,
+                    regional + EC2):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                guard.candidates(bad)
+        with patch.object(guard, 'probe') as unused, self.assertRaises(RuntimeError):
+            guard.select(guard.candidates(west), 'file', 1, Path('/unused'), unused)
+        unused.assert_not_called()
+
     def test_reject_urls(self):
         for bad in ('https://archive.ubuntu.com.evil/ubuntu/', 'https://evil@archive.ubuntu.com/ubuntu/',
                     'https://archive.ubuntu.com:443/ubuntu/', 'https://archive.ubuntu.com/ubuntu/?x=1',
