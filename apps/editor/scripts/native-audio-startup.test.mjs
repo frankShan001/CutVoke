@@ -13,6 +13,7 @@ function bindPlayerSeek(context) {
     { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText,
     { exports, window: {} });
   context.seekPreviewVideo = exports.seekPreviewVideo;
+  context.previewLoadSeekSite = exports.previewLoadSeekSite;
   context.qaSeekReads = 0;
   context.readSeekEvidence = () => { context.qaSeekReads++; return {}; };
   return context;
@@ -387,4 +388,74 @@ test('keyboard evidence snapshot and logging failures do not escape the listener
     assert.equal(window.__keyboardEvidence().startup, undefined);
     assert.doesNotThrow(() => exports.emit());
   }
+});
+
+function playerVideoLoaded({ seeking = true, active = true, playing = true, scrubbing = false, paused = true,
+  windowStart = 0, requested = 1.2422675736961448, decode = 1.1842176870748298 } = {}) {
+  const source = readFileSync(new URL('../src/components/Player.tsx', import.meta.url), 'utf8');
+  const file = ts.createSourceFile('Player.tsx', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let callback;
+  const visit = node => {
+    if (ts.isVariableDeclaration(node) && node.name.getText(file) === 'onVideoLoaded')
+      callback = node.initializer.arguments[0].getText(file);
+    ts.forEachChild(node, visit);
+  }; visit(file);
+  let cursor = requested;
+  const writes = [], modes = [], times = [], frames = [], plays = [];
+  const video = {
+    duration: 2, seeking, paused, readyState: seeking ? 1 : 4,
+    get currentTime() { return cursor; },
+    set currentTime(t) { writes.push(t); cursor = t; },
+  };
+  const context = bindPlayerSeek({
+    exports: {}, videoRef: { current: video }, audioTransportRef: { current: { active } },
+    playingRef: { current: playing }, scrubbingRef: { current: scrubbing },
+    decodePlayheadRef: { current: windowStart + decode },
+    reportedVideoTimeRef: { current: windowStart + requested },
+    windowStart, windowEnd: windowStart + 2, mediaEndSecs: windowStart + 3,
+    setMode: m => modes.push(m), setVideoTime: t => times.push(t),
+    confirmFrame: v => frames.push(v), requestVideoPlay: v => plays.push(v),
+  });
+  runInNewContext(ts.transpileModule(`exports.loaded = ${callback}`, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  }).outputText, context);
+  return { video, writes, modes, times, frames, plays, reported: context.reportedVideoTimeRef,
+    load: (type, currentTarget = video) => context.exports.loaded({ type, currentTarget }) };
+}
+
+test('queued seeked cannot rewind a newer in-flight seek during native audio playback', () => {
+  // First pair observed in native Intel CI; second models a newer explicit
+  // target already submitted to the decoder before the old notification.
+  for (const [requested, decode] of [[1.2422675736961448, 1.1842176870748298], [.1, 1.2]]) {
+    const h = playerVideoLoaded({ requested, decode, paused: false });
+    h.load('seeked');
+    assert.equal(h.video.currentTime, requested);
+    assert.equal(h.reported.current, requested);
+    assert.deepEqual([h.writes, h.times, h.modes, h.frames, h.plays], [[], [], [], [], []]);
+  }
+});
+
+test('metadata/data, settled seeks, and non-audio-owned editing still use Player load behavior', () => {
+  for (const type of ['loadedmetadata', 'loadeddata']) {
+    const h = playerVideoLoaded({ windowStart: 2, requested: 0, decode: .5 });
+    h.load(type);
+    assert.deepEqual(h.writes, [.5]);
+    assert.deepEqual(h.times, [2.5]);
+    assert.equal(h.plays.length, 1);
+  }
+  for (const options of [{ active: false }, { playing: false }, { scrubbing: true }]) {
+    const h = playerVideoLoaded({ ...options, requested: 1.25, decode: 1 });
+    h.load('seeked');
+    assert.deepEqual(h.writes, [1]);
+    assert.deepEqual(h.times, [1]);
+    assert.deepEqual(h.modes, ['video']);
+  }
+  const h = playerVideoLoaded({ seeking: false, requested: 1.25, decode: 1.25 });
+  h.load('seeked', { ...h.video }); // obsolete pool node
+  assert.deepEqual(h.modes, []);
+  h.load('seeked');
+  assert.deepEqual(h.writes, []);
+  assert.deepEqual(h.times, [1.25]);
+  assert.equal(h.frames.length, 1);
+  assert.equal(h.plays.length, 1);
 });

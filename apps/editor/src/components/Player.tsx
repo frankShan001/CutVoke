@@ -477,6 +477,10 @@ export function Player() {
   // video 就绪 / 失败 → 切换主/降级模式
   const onVideoLoaded = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current) return;
+    // A queued seeked event can arrive after a newer seek has started.
+    // While audio owns playback, don't rewind the pending seek to a stale render playhead.
+    if (event.type === "seeked" && event.currentTarget.seeking && audioTransportRef.current.active &&
+        playingRef.current && !scrubbingRef.current) return;
     setMode("video");
     const v = videoRef.current;
     if (!v || Number.isNaN(v.duration) || v.duration <= 0) return;
