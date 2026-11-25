@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import contextlib
+from fractions import Fraction
+import http.client
+from http.server import ThreadingHTTPServer
+import json
 import math
 import os
 import shutil
@@ -15,8 +20,9 @@ import wave
 
 from PIL import Image
 
-from cutvoke.interfaces.httpapi import HttpApi
-from cutvoke.domain.model import AssetReference, Clip, Track
+from cutvoke.interfaces.httpapi import HttpApi, build_handler
+from cutvoke.domain.model import (CURRENT_PROJECT_SCHEMA, AssetReference, Caption, Clip,
+                                  Project, Sequence, Track)
 from cutvoke.domain.rational import Rational
 from cutvoke.rendering.render import RenderService
 from cutvoke.editing.service import EditError, EditService
@@ -208,6 +214,163 @@ class ExportRangeTests(unittest.TestCase):
                 ranged_frame, preview_frame)) / len(ranged_frame)
             self.assertLess(difference, 5.0)
 
+
+    @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"),
+                         "FFmpeg required")
+    def test_off_grid_http_exports_keep_every_real_picture_and_exact_audio_clock(self) -> None:
+        fps = Fraction(30000, 1001)
+        width, height = 160, 96
+
+        def ffmpeg(*args, stdin=None):
+            return subprocess.run(["ffmpeg", "-nostdin", "-v", "error", *map(str, args)],
+                                  input=stdin, capture_output=True, timeout=30, check=True).stdout
+
+        def encoded_id(index):
+            row = b"".join(bytes([224 if index & (1 << bit) else 32]) * 16
+                           for bit in range(9)) + bytes([128]) * 16
+            return row * height
+
+        def pictures(path, fmt="gray"):
+            bytes_per_frame = width * height * (3 if fmt == "rgb24" else 1)
+            raw = ffmpeg("-i", path, "-map", "0:v:0", "-fps_mode", "passthrough",
+                         "-threads", "1", "-f", "rawvideo", "-pix_fmt", fmt, "pipe:1")
+            self.assertTrue(raw and len(raw) % bytes_per_frame == 0)
+            return [raw[i:i + bytes_per_frame] for i in range(0, len(raw), bytes_per_frame)]
+
+        def picture_id(raw):
+            levels = [raw[14 * width + bit * 16 + 8] for bit in range(9)]
+            self.assertTrue(all(level < 64 or level > 192 for level in levels), levels)
+            return sum((level > 128) << bit for bit, level in enumerate(levels))
+
+        def frame_time(index):
+            seconds = Fraction(index) / fps
+            return Rational.of(seconds.numerator, seconds.denominator)
+
+        with tempfile.TemporaryDirectory() as directory:
+            source = os.path.join(directory, "numbered.mp4")
+            ffmpeg("-f", "rawvideo", "-pixel_format", "gray", "-video_size", f"{width}x{height}",
+                   "-framerate", "30000/1001", "-i", "pipe:0", "-an", "-c:v", "libx264",
+                   "-pix_fmt", "yuv420p", "-threads", "1", "-g", "30", "-bf", "2",
+                   "-sc_threshold", "0", source, stdin=b"".join(map(encoded_id, range(374))))
+            self.assertEqual(list(map(picture_id, pictures(source))), list(range(374)))
+            audio = os.path.join(directory, "chirp.wav")
+            ffmpeg("-f", "lavfi", "-i",
+                   "aevalsrc=0.25*sin(2*PI*(211*t+18*t*t)):s=48000:d=12.012",
+                   "-c:a", "pcm_s16le", audio)
+
+            service = EditService()
+            renderer = RenderService(gpu_effects=False)
+            renderer.gpu_acceleration = False
+            api = HttpApi(service, render=renderer, media_dir=os.path.join(directory, "media"))
+            server = ThreadingHTTPServer(("127.0.0.1", 0), build_handler(api))
+            worker = threading.Thread(target=server.serve_forever, daemon=True)
+            worker.start()
+
+            def request(method, route, body=None):
+                with contextlib.closing(http.client.HTTPConnection(
+                        "127.0.0.1", server.server_port, timeout=10)) as conn:
+                    conn.request(method, route, json.dumps(body) if body is not None else None,
+                                 headers={"Content-Type": "application/json"} if body is not None else {})
+                    response = conn.getresponse()
+                    return response.status, json.loads(response.read())
+
+            def export(pid, tag, start_tick, end_tick, strategy=None):
+                start, end = (float(Fraction(tick) / fps) for tick in (start_tick, end_tick))
+                route = f"/api/v1/projects/{pid}/exports"
+                path = os.path.join(directory, tag + ".mp4")
+                status, reply = request("POST", route, {"outPath": path, "quality": "low",
+                                                       "range": {"start": start, "end": end}})
+                self.assertEqual(status, 202, reply)
+                deadline = time.monotonic() + 40
+                job = {}
+                while time.monotonic() < deadline:
+                    _, listing = request("GET", route)
+                    job = next((item for item in listing["jobs"] if item["jobId"] == reply["jobId"]), {})
+                    if job.get("status") in {"succeeded", "failed", "cancelled", "interrupted"}:
+                        break
+                    time.sleep(.05)
+                self.assertEqual(job.get("status"), "succeeded", job.get("error"))
+                self.assertEqual(job["request"]["range"], {"start": start, "end": end})
+                self.assertEqual(job["result"].get("renderStrategy"), strategy)
+                return path, job["result"], start, end
+
+            try:
+                for kind, cuts in (("direct", 1), ("source-eof", 1), ("dense", 30),
+                                   ("dense-audio", 30), ("decorated", 1)):
+                    project = Project(schema_version=CURRENT_PROJECT_SCHEMA, name=kind,
+                        project_id=kind, revision="0",
+                        sequence=Sequence(kind + "-seq", width, height,
+                                          Rational.of(fps.numerator, fps.denominator)))
+                    step = 360 // cuts
+                    clips = [
+                        Clip(f"shot-{i}", AssetReference("numbered", source),
+                             frame_time(i), frame_time(i + step),
+                             frame_time(i + (14 if kind == "source-eof" else 0)))
+                        for i in range(0, 360, step)
+                    ]
+                    project.sequence.tracks = [Track("picture", "video", clips)]
+                    if kind in {"dense-audio", "decorated"}:
+                        project.sequence.tracks.append(Track("audio", "audio", [
+                            Clip("chirp", AssetReference("chirp", audio),
+                                 r(0), frame_time(360), r(0))]))
+                    if kind == "decorated":
+                        clips[0].effects = [{"effectId": "cutvoke.fx.invert", "params": {},
+                                             "range": {"start": frame_time(86).to_json(),
+                                                       "end": frame_time(89).to_json()}}]
+                        project.sequence.captions = [
+                            Caption("caption", "END", frame_time("89.5"), frame_time(95),
+                                    color="#ffff00", fontSize=21, y=.75)]
+                    service.import_project(project, project_id=kind)
+
+                for pid, first, last in (("direct", "3.75", "90.25"),
+                                         ("dense", "3.25", "274.75"),
+                                         ("dense", "3.75", "274.25"),
+                                         ("source-eof", "358.85", "359.25"),
+                                         ("dense-audio", "3.65", "243.75"),
+                                         ("dense", "3.65", "244.1")):
+                    with self.subTest(pid=pid, first=first, last=last):
+                        dense = pid.startswith("dense")
+                        source_offset = 14 if pid == "source-eof" else 0
+                        path, result, start, end = export(pid, f"{pid}-{first}-{last}", first, last,
+                                                         "lossless-windows" if dense else None)
+                        self.assertEqual(list(map(picture_id, pictures(path))),
+                                         list(range(math.ceil(Fraction(first)) + source_offset,
+                                                    math.ceil(Fraction(last)) + source_offset)))
+                        if pid == "dense-audio":
+                            audit = result["audioVerification"]
+                            self.assertEqual(audit["status"], "passed")
+                            self.assertTrue(audit["windows"])
+                            self.assertAlmostEqual(audit["checkedSeconds"],
+                                (round(end * 48000) - round(start * 48000)) / 48000, delta=2 / 8000)
+                            self.assertTrue(all(window["estimatedOffsetSeconds"] == 0 and
+                                                window["zeroOffsetCorrelation"] > .99
+                                                for window in audit["windows"]))
+                        if dense:
+                            if last == "243.75":
+                                self.assertEqual(result["windowCount"], 1)
+                            else:
+                                self.assertEqual(result["windowCount"], 2)
+                                self.assertEqual(result["videoVerification"]["status"], "passed")
+
+                decorated, result, start, end = export("decorated", "decorated-trim", "3.75", "90.25")
+                ids = list(map(picture_id, pictures(decorated)))
+                self.assertEqual(len(ids), 87)
+                self.assertEqual((ids[0], ids[87 - 4], ids[-1]), (4, 511 ^ 87, 90))
+                rgb = pictures(decorated, "rgb24")
+                def yellow(frame):
+                    pixels = rgb[frame - 4]
+                    return sum(red > blue + 35 and green > blue + 35
+                               for red, green, blue in zip(pixels[::3], pixels[1::3], pixels[2::3]))
+                self.assertLess(yellow(88), 4)
+                self.assertGreater(yellow(90), 15)
+                self.assertAlmostEqual(result["audioVerification"]["checkedSeconds"],
+                    (round(end * 48000) - round(start * 48000)) / 48000, delta=2 / 8000)
+            finally:
+                server.shutdown()
+                server.server_close()
+                worker.join(timeout=3)
+                api.close()
+                service.close()
 
 if __name__ == "__main__":
     unittest.main()
