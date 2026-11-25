@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import re
 from fractions import Fraction
+from math import floor
 from typing import List
 
 from cutvoke.domain.model import Caption, new_id
@@ -109,6 +110,29 @@ def export_srt(captions: List[Caption]) -> str:
         end_ts = rational_to_srt_time(cap.end)
         blocks.append(f"{i}\n{start_ts} --> {end_ts}\n{cap.text}")
     return "\n\n".join(blocks) + "\n"
+
+
+def export_picture_srt(captions: List[Caption], origin: Fraction,
+                       duration: Fraction) -> str:
+    """Project-clock text intersected with a verified picture interval."""
+    last_ms = floor(duration * 1000)
+    projected = []
+    for cue in captions:
+        start = max(Fraction(0), cue.start.to_fraction() - origin)
+        end = min(duration, cue.end.to_fraction() - origin)
+        if end <= start:
+            continue
+        start_ms = round(start * 1000)
+        end_ms = min(last_ms, round(end * 1000))
+        if start_ms >= end_ms:
+            continue
+        # An empty payload line would end a SubRip block prematurely.
+        text = "\n".join(line for line in cue.text.splitlines() if line.strip())
+        if not text:
+            continue
+        projected.append(Caption(cue.id, text, Rational.of(start_ms, 1000),
+                                 Rational.of(end_ms, 1000)))
+    return export_srt(projected) if projected else ""
 
 
 # ---------------------------------------------------------------------------

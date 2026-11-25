@@ -3592,6 +3592,41 @@ test("timeline range export is queued and reports the selected duration", async 
   unlinkSync(outputPath);
 });
 
+test("ranged MP4 downloads its own synchronized SRT from a successful export", async ({ page, request }) => {
+  test.setTimeout(90_000);
+  const { id, name } = await createProject(request);
+  await apply(request, id, "caption.update", { captionId: "caption-one", text: "中文 · café" });
+  await openProject(page, name);
+  await page.getByRole("button", { name: "导出", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "导出成片" });
+  const include = dialog.getByRole("checkbox", { name: "附带与成片对齐的 SRT" });
+  const download = dialog.getByRole("button", { name: "下载与成片对齐的 SRT" });
+  const outputPath = await projectOutputPath(request, id, `${id}-synchronized.mp4`);
+  await dialog.getByLabel("输出文件路径").fill(outputPath);
+  await expect(include).toBeDisabled();
+  await expect(download).toHaveCount(0);
+  await dialog.getByLabel("仅导出时间范围").check();
+  await dialog.getByLabel("导出开始时间").fill("0.8");
+  await dialog.getByLabel("导出结束时间").fill("2.2");
+  await expect(include).toBeEnabled();
+  await expect(include).not.toBeChecked();
+  await include.check();
+  try {
+    await dialog.getByRole("button", { name: "开始导出" }).click();
+    await expect(download).toBeVisible({ timeout: 75_000 });
+    expect(statSync(outputPath).size).toBeGreaterThan(0);
+    const [file] = await Promise.all([page.waitForEvent("download"), download.click()]);
+    expect(file.suggestedFilename()).toMatch(/^captions-export_[a-f0-9]+\.srt$/);
+    expect(readFileSync((await file.path())!, "utf8")).toBe("1\n00:00:00,200 --> 00:00:01,400\n中文 · café\n");
+    const unchangedGlobal = await request.get(`${apiPath(id)}/captions.srt`);
+    expect(await unchangedGlobal.text()).toContain("00:00:01,000 --> 00:00:03,000");
+  } finally {
+    try { unlinkSync(outputPath); } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
+  }
+});
+
 test("transparent export UI writes a real ProRes MOV and restores its options", async ({ page, request }) => {
   const { id, name } = await createProject(request);
   await openProject(page, name);

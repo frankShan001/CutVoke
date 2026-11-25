@@ -2546,6 +2546,14 @@ class HttpApi:
                 evs = self.service.events_since(pid, since)
                 return 200, {"events": [e.to_dict() for e in evs]}
 
+            if method == "GET" and len(parts) == 7 and parts[4] == "exports" and parts[6] == "captions.srt":
+                self.service.get_project(pid)
+                srt = self._export_queue().caption_srt(pid, parts[5])
+                if srt is None:
+                    return 404, {"error": {"code": "NOT_FOUND",
+                                           "message": "No synchronized captions for this export"}}
+                return 200, {"__srt_attachment__": srt}
+
             # 该工程的导出任务列表（导出任务 UI 用）
             if method == "GET" and len(parts) == 5 and parts[4] == "exports":
                 store = self.service.store
@@ -3065,10 +3073,14 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             self._write_body(payload)
 
         def _respond_bytes(self, status: int, data: bytes,
-                           ctype: str = "application/octet-stream") -> None:
+                           ctype: str = "application/octet-stream", *,
+                           attachment_srt: bool = False) -> None:
             self.send_response(status)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(data)))
+            if attachment_srt:
+                self.send_header("Content-Disposition", 'attachment; filename="captions.srt"')
+                self.send_header("Cache-Control", "no-store")
             for k, v in self._cors_headers().items():
                 self.send_header(k, v)
             self.end_headers()
@@ -3300,6 +3312,10 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                 self._respond_video_file(data["__media_path__"],
                                          data.get("__media_etag__", ""),
                                          data.get("__media_type__", "application/octet-stream"))
+                return
+            if isinstance(data, dict) and "__srt_attachment__" in data:
+                self._respond_bytes(200, data["__srt_attachment__"].encode("utf-8"),
+                                    "text/plain; charset=utf-8", attachment_srt=True)
                 return
             # SRT 导出：纯文本（UTF-8）
             if isinstance(data, dict) and "__text__" in data:

@@ -6,7 +6,7 @@ import { Upload, Copy, FolderOpen, Loader2, AlertTriangle, CheckCircle2 } from "
 import { Button, Field, Select, TextInput, Badge } from "./ui";
 import { useEditor, showError } from "../store/editor";
 import { doExport, getLatestState } from "../store/actions";
-import { cancelExportJob, listExportJobs, preflightProject, ApiFailure, type ExportQuality, type ExportJob, type ProjectPreflightIssue, type ProjectPreflightReport } from "../lib/api";
+import { cancelExportJob, downloadExportSrt, listExportJobs, preflightProject, ApiFailure, type ExportQuality, type ExportJob, type ProjectPreflightIssue, type ProjectPreflightReport } from "../lib/api";
 import { assetDisplayName, useSessionAssets } from "../lib/assetStore";
 import { LOCATE_PREFLIGHT_ISSUE, preflightSummary } from "../lib/preflight";
 import { rationalToSecs } from "../lib/rational";
@@ -56,6 +56,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
   const [videoBitrate, setVideoBitrate] = useState(draft?.videoBitrate || "");
   const [audioBitrate, setAudioBitrate] = useState(draft?.audioBitrate || "");
   const [transparent, setTransparent] = useState(draft?.transparent || false);
+  const [captionSidecar, setCaptionSidecar] = useState(false);
   const [job, setJob] = useState<ExportJob | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [result, setResult] = useState<ExportResult | null>(null);
@@ -85,6 +86,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
   };
   const staleRange = !isCurrentRange(state);
   const showingRange = useRange || !!selectedRange;
+  const supportsSidecar = showingRange && !transparent && /\.mp4$/i.test(outPath.trim());
   const startText = selectedRange ? String(selectedRange.start) : rangeStart;
   const endText = selectedRange ? String(selectedRange.end) : rangeEnd;
 
@@ -294,6 +296,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
       setPhase("running");
       const out = await doExport(dispatch, latest, outPath.trim(), quality, range, {
         transparent,
+        ...(supportsSidecar && captionSidecar ? { captionSidecar: true } : {}),
         ...(!transparent && videoBitrate.trim() ? { videoBitrateKbps: Number(videoBitrate) } : {}),
         ...(!transparent && audioBitrate.trim() ? { audioBitrateKbps: Number(audioBitrate) } : {}),
       }, selectedRange ? {
@@ -464,6 +467,13 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
         <p className="cv-hint" style={{ marginTop: 6 }}>{tr("时间会对齐到工程帧率，完成面板显示编码后的实际时长。")}</p>
       ) : null}
 
+      <label className="export-dialog__range-toggle">
+        <input type="checkbox" checked={supportsSidecar && captionSidecar} disabled={busy || !supportsSidecar}
+          onChange={event => setCaptionSidecar(event.target.checked)} />
+        {tr("附带与成片对齐的 SRT")}
+      </label>
+      {!supportsSidecar ? <p className="cv-hint">{tr("同步 SRT 仅适用于带时间范围的 MP4。")}</p> : null}
+
       <div className="export-dialog__actions">
         <Button variant="secondary" onClick={onClose}>{phase === "running" ? tr("后台导出") : tr("取消")}</Button>
         {phase === "running" && jobId ? <Button variant="secondary" onClick={() => void handleCancel()} disabled={cancelling || reconnecting}>
@@ -566,6 +576,27 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
             <Button variant="secondary" size="sm" onClick={() => copyPath(result.output_path)} aria-label={tr("复制输出路径")}>
               <Copy size={13} />{tr(" 复制路径")}</Button>
           </div>
+          {job?.projectId === state.currentId && job?.status === "succeeded" && result.captionSidecarStatus === "available" ? (
+            <Button variant="secondary" size="sm" onClick={() => {
+              void downloadExportSrt(job.projectId, job.jobId).then(blob => {
+                if (!aliveRef.current || committedState.current?.currentId !== job.projectId) return;
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `captions-${job.jobId}.srt`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+              }).catch(error => {
+                if (aliveRef.current && committedState.current?.currentId === job.projectId) showError(dispatch, error);
+              });
+            }}>{tr("下载与成片对齐的 SRT")}</Button>
+          ) : null}
+          {result.captionSidecarStatus === "empty"
+            ? <p className="cv-hint">{tr("本次导出范围内没有字幕。")}</p> : null}
+          {result.captionSidecarStatus === "unavailable"
+            ? <p className="cv-hint">{tr("视频已导出，但无法验证 SRT 与画面时间对齐。")}</p> : null}
           <div className="inspector__row" style={{ marginTop: 6 }}>
             <span className="inspector__key">{tr("时长")}</span>
             <span className="inspector__val">{durStr}</span>
