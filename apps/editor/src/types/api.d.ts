@@ -259,6 +259,7 @@ export interface ExportResult {
   jobId?: string;
   /** 命中缓存（同一请求此前已成功）。 */
   cached?: boolean;
+  captionSidecarStatus?: "available" | "empty" | "unavailable";
 }
 
 /** 工程摘要（GET /projects/{id}/summary）。 */

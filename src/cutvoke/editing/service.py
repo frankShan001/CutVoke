@@ -1278,6 +1278,7 @@ class EditService:
                 {"name": "quality", "description": "画质 high/medium/low（默认 high）", "required": False},
                 {"name": "versioned", "description": "多版本：true 时永不覆盖已有成片，依次 name.mp4→name_v2.mp4（默认 False）", "required": False},
                 {"name": "transparent", "description": "透明通道：true 时导出带 alpha 的 ProRes 4444（outPath 须 .mov）", "required": False},
+                {"name": "captionSidecar", "description": "仅限指定范围的 MP4：true 时在导出成功后提供与该成片画面网格对齐的独立 SRT（默认 False，不改烧录）", "required": False},
                 {"name": "videoBitrateKbps", "description": "目标视频码率 kbps", "required": False},
                 {"name": "audioBitrateKbps", "description": "目标音频码率 kbps", "required": False},
                 {"name": "overwrite", "description": "覆盖已存在文件（默认 False）", "required": False},

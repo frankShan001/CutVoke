@@ -26,6 +26,7 @@ import queue
 import threading
 import time
 import uuid
+from fractions import Fraction
 from typing import Any, Callable, Optional
 
 from cutvoke.domain.model import Project
@@ -207,6 +208,13 @@ class ExportQueue:
         out_path = payload.get("outPath")
         if not out_path:
             raise ValueError("export queue requires 'outPath'")
+        include = payload.get("captionSidecar", False)
+        if not isinstance(include, bool):
+            raise ValueError("captionSidecar must be boolean")
+        if include and (payload.get("transparent") or os.path.splitext(str(out_path))[1].lower() != ".mp4"):
+            raise ValueError("captionSidecar supports ranged MP4 video exports only")
+        if include and payload.get("range") is None:
+            raise ValueError("captionSidecar requires an explicit export range")
         if payload.get("quality", "high") not in {"high", "medium", "low"}:
             raise ValueError("quality must be high, medium or low")
         for field, maximum in (("videoBitrateKbps", 1_000_000), ("audioBitrateKbps", 1536)):
@@ -323,6 +331,35 @@ class ExportQueue:
             return row
         return None
 
+    @staticmethod
+    def _picture_srt(project: Project, clock: dict, requested: dict) -> str:
+        from cutvoke.domain.captions import export_picture_srt
+        rate = Fraction(clock["rateNum"], clock["rateDen"])
+        origin = clock["startFrame"] / rate
+        duration = min(clock["frameCount"] / rate, Fraction(str(requested["end"])) - origin)
+        return export_picture_srt(project.sequence.captions, origin, duration)
+
+    def caption_srt(self, project_id: str, job_id: str) -> Optional[str]:
+        """Read the immutable job snapshot only after terminal success."""
+        with self._lock:
+            job = self._store.get_export_job(job_id) if self._store is not None else self._jobs.get(job_id)
+            if (not job or job["projectId"] != project_id or job["status"] != STATUS_SUCCEEDED
+                    or (job.get("request") or {}).get("captionSidecar") is not True):
+                return None
+            result = job.get("result") or {}
+            clock = result.get("captionSidecar")
+            requested = job["request"].get("range")
+            if result.get("captionSidecarStatus") != "available" or not clock or not requested:
+                return None
+            snapshot = (self._store.get_export_project_snapshot(job_id) if self._store is not None
+                        else self._snapshots.get(job_id))
+        if snapshot is None:
+            return None
+        project = self._load_project(project_id, job["revision"], snapshot)
+        if project.project_id != project_id:
+            return None
+        return self._picture_srt(project, clock, requested) or None
+
     def list(self, project_id: Optional[str] = None,
              status: Optional[str] = None) -> list[dict]:
         """队列视图：内存态优先，账本兜底（重启后仍可查历史）。"""
@@ -424,6 +461,8 @@ class ExportQueue:
                                     if payload.get("audioBitrateKbps") else None),
                 alpha=bool(payload.get("transparent", False)))
             render_options["progress_callback"] = report_progress
+            if payload.get("captionSidecar") is True and project.sequence.captions:
+                render_options["caption_sidecar"] = True
             export_range = payload.get("range")
             if export_range is not None:
                 start = float(export_range["start"])
@@ -431,6 +470,12 @@ class ExportQueue:
                 render_options.update(output_start=start,
                                       output_duration=end - start)
             result = svc.render(project, job["outPath"], **render_options)
+            if payload.get("captionSidecar") is True:
+                clock = result.get("captionSidecar")
+                result["captionSidecarStatus"] = (
+                    "empty" if not project.sequence.captions else
+                    "unavailable" if not clock else
+                    "available" if self._picture_srt(project, clock, export_range) else "empty")
         except RenderCancelled:
             self._finish(job, STATUS_CANCELLED,
                          error={"code": "CANCELLED", "message": "render cancelled"},

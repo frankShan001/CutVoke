@@ -1850,7 +1850,8 @@ class RenderService:
                source_transfer: Optional[str] = None,
                output_start: Optional[float] = None,
                output_duration: Optional[float] = None,
-               progress_callback=None) -> dict[str, Any]:
+               progress_callback=None,
+               caption_sidecar: bool = False) -> dict[str, Any]:
         """把工程渲染为 MP4(H.264 + AAC) 视频。
 
         返回 dict：output_path, duration, width, height, has_audio, warnings。
@@ -1866,6 +1867,8 @@ class RenderService:
             progress_callback({"phase": "preparing"})
         requested_range = output_start is not None or output_duration is not None
         preflight_range = None
+        if caption_sidecar and not requested_range:
+            raise RenderError("caption sidecar requires an explicit video export range")
         if requested_range:
             if (output_start is None or output_duration is None
                     or not math.isfinite(output_start) or not math.isfinite(output_duration)
@@ -1949,6 +1952,7 @@ class RenderService:
                     alpha, color_chain, (color_space or ('bt709' if not alpha else None)) if tm == "none" else None,
                     video_bitrate_kbps, audio_bitrate_kbps, start, duration,
                     preflight_warnings,
+                    **({"caption_sidecar": True} if caption_sidecar else {}),
                     **({"progress_callback": progress_callback} if progress_callback else {}))
 
         # 2. 编译 filter_complex 图 + 输入列表（有理数→float 仅在此层）
@@ -1957,6 +1961,14 @@ class RenderService:
             self._compile(seq, overlay_position, alpha=alpha, render_window=render_window,
                           frame_aligned_origin=True, exact_video_bounds=requested_range))
         warnings = preflight_warnings + warnings
+        picture_clock = None
+        if caption_sidecar:
+            rate = seq.fps.to_fraction()
+            origin = self._render_ctx.compile_origin
+            start = output_start - origin
+            first = _video_frame_at_or_after(start, rate)
+            end = _video_frame_at_or_after(start + output_duration, rate)
+            picture_clock = (rate, round(origin * float(rate)) + first, end - first, cancel_event)
         verify_duration = expected_duration
         if output_start is not None or output_duration is not None:
             verify_duration = output_duration
@@ -1988,7 +2000,8 @@ class RenderService:
                 progress_callback({"phase": "verifying"})
             probe = self._verify(tmp_path, verify_duration, seq.width,
                                  seq.height, expect_alpha=alpha,
-                                 expect_primaries=probed_space)
+                                 expect_primaries=probed_space,
+                                 **({"picture_clock": picture_clock} if picture_clock else {}))
             audio_verification = None
             if has_audio and quality != 'preview':
                 with tempfile.TemporaryDirectory(prefix='cutvoke-audio-check-', dir=out_dir) as check_directory:
@@ -2037,6 +2050,7 @@ class RenderService:
             "audio_start_time": probe.get("audio_start_time"),
             "video_start_time": probe.get("video_start_time"),
             "warnings": warnings,
+            **({"captionSidecar": probe.get("captionSidecar")} if caption_sidecar else {}),
             "videoEncoder": getattr(self._render_ctx, "video_encoder", "libx264"),
             "encoderFallback": getattr(self._render_ctx, "encoder_fallback", False),
         }
@@ -2047,7 +2061,7 @@ class RenderService:
             alpha: bool, color_chain: str, expected_primaries: Optional[str],
             video_bitrate_kbps: Optional[int], audio_bitrate_kbps: Optional[int],
             start: float, duration: float, preflight_warnings: list[str],
-            progress_callback=None) -> dict[str, Any]:
+            progress_callback=None, caption_sidecar: bool = False) -> dict[str, Any]:
         """Render dense long timelines with at most one window's inputs alive.
 
         FFV1/PCM intermediates avoid repeated lossy video/AAC encoding and AAC
@@ -2237,7 +2251,9 @@ class RenderService:
             if progress_callback:
                 progress_callback({"phase": "verifying"})
             probe = self._verify(str(final), duration, seq.width, seq.height,
-                                 expect_alpha=alpha, expect_primaries=expected_primaries)
+                                 expect_alpha=alpha, expect_primaries=expected_primaries,
+                                 **({"picture_clock": (frame_rate, first_picture, past_last_picture - first_picture, cancel_event)}
+                                    if caption_sidecar else {}))
             audio_verification = None
             if has_audio:
                 from cutvoke.rendering.audio_integrity import verify_audio, AudioIntegrityError
@@ -2256,6 +2272,7 @@ class RenderService:
                 "color_transfer":probe.get("color_transfer"), "color_space":probe.get("color_space"),
                 "color_range":probe.get("color_range"),
                 "audio_start_time":probe.get("audio_start_time"), "video_start_time":probe.get("video_start_time"),
+                **({"captionSidecar": probe.get("captionSidecar")} if caption_sidecar else {}),
                 "warnings":warnings, "renderStrategy":"lossless-windows", "windowCount":len(chunks),
                 "reusedWindowCount":len(reused_windows),
                 "audioStrategy":"continuous-pcm" if has_audio else "none",
@@ -6374,15 +6391,61 @@ class RenderService:
     # ------------------------------------------------------------------
     # ffprobe 验证真实可解码 + 时长/尺寸正确
     # ------------------------------------------------------------------
+    def _verify_picture_packet_grid(self, path, rate, count, timebase, cancel_event) -> bool:
+        """Verify each presentation tick of the opted-in MP4; no video re-decode."""
+        ticks_per_frame = 1 / (timebase * rate)
+        if ticks_per_frame.denominator != 1 or not 0 < count <= 4_000_000:
+            return False
+        ticks_per_frame = ticks_per_frame.numerator
+        try:
+            with tempfile.TemporaryFile() as values:
+                cmd = [self.ffprobe, "-v", "error", "-select_streams", "v:0",
+                       "-show_entries", "packet=pts", "-of", "csv=p=0", path]
+                with subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=values,
+                                      stderr=subprocess.DEVNULL) as probe:
+                    deadline = time.monotonic() + 30
+                    while probe.poll() is None:
+                        if ((cancel_event is not None and cancel_event.is_set())
+                                or time.monotonic() >= deadline
+                                or os.fstat(values.fileno()).st_size > count * 24 + 1024):
+                            probe.kill()
+                            return False
+                        try:
+                            probe.wait(timeout=.2)
+                        except subprocess.TimeoutExpired:
+                            pass
+                    if probe.returncode or values.tell() > count * 24 + 1024:
+                        return False
+                values.seek(0)
+                seen = bytearray((count + 7) // 8)
+                matched = 0
+                for line in values:
+                    if matched % 4096 == 0 and (time.monotonic() >= deadline
+                            or (cancel_event is not None and cancel_event.is_set())):
+                        return False
+                    frame, off_grid = divmod(int(line), ticks_per_frame)
+                    if off_grid or not 0 <= frame < count:
+                        return False
+                    byte, bit = divmod(frame, 8)
+                    if seen[byte] & (1 << bit):
+                        return False
+                    seen[byte] |= 1 << bit
+                    matched += 1
+                return matched == count
+        except (OSError, ValueError, OverflowError):
+            return False
+
     def _verify(self, path: str, expected_duration: float,
                 width: int, height: int,
                 expect_alpha: bool = False,
-                expect_primaries: Optional[str] = None) -> dict[str, Any]:
+                expect_primaries: Optional[str] = None,
+                picture_clock: Optional[tuple[Fraction, int, int, Optional[threading.Event]]] = None) -> dict[str, Any]:
+        clock_fields = ",start_pts,time_base,duration_ts,nb_frames,avg_frame_rate,r_frame_rate" if picture_clock else ""
         cmd = [
             self.ffprobe, "-v", "error",
             "-show_entries",
             "format=duration:stream=codec_type,codec_name,width,height,pix_fmt,"
-            "color_primaries,color_transfer,color_space,color_range,start_time",
+            "color_primaries,color_transfer,color_space,color_range,start_time" + clock_fields,
             "-of", "json", path,
         ]
         try:
@@ -6444,7 +6507,27 @@ class RenderService:
                     f"color_primaries={want!r} ({expect_primaries}), "
                     f"got {got or 'unknown'!r}")
 
-        return {"duration": dur, "width": got_w, "height": got_h,
+        clock = None
+        if picture_clock:
+            # MP4 stream ticks, not its container duration (which can be audio-led).
+            rate, first, expected_count, cancel_event = picture_clock
+            try:
+                count = int(video["nb_frames"])
+                timebase = Fraction(video["time_base"])
+                duration = int(video["duration_ts"]) * timebase
+                if (count > 0 and count == expected_count
+                        and int(video["start_pts"]) == 0
+                        and Fraction(video["avg_frame_rate"]) == rate
+                        and Fraction(video["r_frame_rate"]) == rate
+                        and duration == count / rate
+                        and self._verify_picture_packet_grid(path, rate, count, timebase, cancel_event)):
+                    clock = {"startFrame": first, "frameCount": count,
+                             "rateNum": rate.numerator, "rateDen": rate.denominator}
+            except (KeyError, TypeError, ValueError, ZeroDivisionError):
+                pass
+
+        return {**({"captionSidecar": clock} if picture_clock else {}),
+                "duration": dur, "width": got_w, "height": got_h,
                 "codec": video.get("codec_name"), "pix_fmt": pix_fmt,
                 "color_primaries": video.get("color_primaries"),
                 "color_transfer": video.get("color_transfer"),
