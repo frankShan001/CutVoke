@@ -108,7 +108,7 @@ export function TimelineMarkerTool({ end }: { end: number }) {
     setMarkerPending(draft.projectId, true);
     try {
       const result = await runCommand(dispatch, latest, "marker.add", { name, time: draft.time },
-        { autoShow: false, retryConflict: false, isCurrent });
+        { autoShow: false, retryConflict: false, ignoreOlderRevision: true, isCurrent });
       if (!isCurrent()) return;
       if (result.ok) setDraft(null);
       else setRejected(true);

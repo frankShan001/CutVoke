@@ -5286,3 +5286,55 @@ for (const blocked of ["post", "refresh"] as const) {
     await expect(page.getByRole("button", { name: "撤销", exact: true })).toBeEnabled();
   });
 }
+
+test("a late review marker response does not roll a newer project revision backwards", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await openProject(page, name);
+  const trigger = page.getByRole("button", { name: "添加审片标记" });
+  const dialog = page.getByRole("dialog", { name: "添加审片标记" });
+  let receiptCommitted!: () => void, releaseReceipt!: () => void, releaseReads!: () => void;
+  const committed = new Promise<void>(resolve => { receiptCommitted = resolve; });
+  const holdReceipt = new Promise<void>(resolve => { releaseReceipt = resolve; });
+  const holdReads = new Promise<void>(resolve => { releaseReads = resolve; });
+  let blockReads = false;
+  let markerPosts = 0;
+
+  await page.route(url => url.pathname === apiPath(id) || url.pathname === `${apiPath(id)}/commands`, async route => {
+    const req = route.request();
+    if (req.method() === "POST" && new URL(req.url()).pathname.endsWith("/commands") &&
+        req.postDataJSON()?.type === "marker.add") {
+      markerPosts++;
+      const response = await route.fetch();
+      receiptCommitted();
+      await holdReceipt;
+      await route.fulfill({ response });
+    } else {
+      if (blockReads && req.method() === "GET") await holdReads;
+      await route.continue();
+    }
+  });
+  try {
+    const before = await readProject(request, id);
+    await trigger.click();
+    await dialog.getByLabel("标记备注").fill("First pending");
+    await dialog.getByRole("button", { name: "保存", exact: true }).click();
+    await committed;
+    const first = await readProject(request, id);
+    expect(first.revision).not.toBe(before.revision);
+    await dialog.getByRole("button", { name: "关闭", exact: true }).click();
+    const newer = await apply(request, id, "marker.add", { name: "From another editor", time: { num: 1, den: 1 } });
+    expect(newer.revision).not.toBe(first.revision);
+    await expect(page.locator(".timeline-ruler__marker[title*='From another editor']")).toHaveCount(1);
+
+    // Keep any receipt-driven refresh from repairing a stale revision and
+    // masking the regression. The newer snapshot is already visible.
+    blockReads = true;
+    releaseReceipt();
+    await expect(trigger).toBeEnabled();
+    expect(markerPosts).toBe(1);
+    await expect(page.locator(".timeline-ruler__marker")).toHaveCount(2);
+  } finally {
+    releaseReceipt();
+    releaseReads();
+  }
+});

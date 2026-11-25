@@ -243,7 +243,7 @@ export async function runCommand(
   state: EditorState,
   type: string,
   payload: Record<string, unknown>,
-  opts: { autoShow?: boolean; retryConflict?: boolean; isCurrent?: () => boolean } = {},
+  opts: { autoShow?: boolean; retryConflict?: boolean; ignoreOlderRevision?: boolean; isCurrent?: () => boolean } = {},
 ): Promise<ActionResult> {
   const autoShow = opts.autoShow ?? true;
   if (!state.currentId) {
@@ -271,6 +271,8 @@ export async function runCommand(
   }
   const projectId = state.currentId;
   const ownsFeedback = () => opts.isCurrent?.() !== false;
+  const acceptsSuccess = (revision: string) => ownsFeedback() && !(opts.ignoreOlderRevision &&
+    latestState?.currentId === projectId && isOlderRevision(revision, latestState.revision));
   const doPost = async (expected: string) => {
     const commandId = newCommandId();
     rememberLocalCommand(projectId, commandId);
@@ -285,7 +287,7 @@ export async function runCommand(
   dispatch({ type: "SYNC_STATE_SET", syncState: "saving" });
   try {
     const result = await doPost(state.revision);
-    if (!ownsFeedback()) return { ok: true, command: result };
+    if (!acceptsSuccess(result.revision)) return { ok: true, command: result };
     dispatch({ type: "REVISION_SET", revision: result.revision });
     if (!type.startsWith("history.") && result.revision !== state.revision) {
       dispatch({ type: "UNDO_SET", blocked: false });
@@ -305,7 +307,7 @@ export async function runCommand(
         const currentRev2 = latestState ? latestState.revision : currentRev;
         try {
           const result = await doPost(currentRev2);
-          if (!ownsFeedback()) return { ok: true, command: result };
+          if (!acceptsSuccess(result.revision)) return { ok: true, command: result };
           dispatch({ type: "REVISION_SET", revision: result.revision });
           if (!type.startsWith("history.") && result.revision !== currentRev2) {
             dispatch({ type: "UNDO_SET", blocked: false });
