@@ -5223,3 +5223,66 @@ test("a human can save one review marker at the captured playhead and undo it", 
   await expect.poll(markers).toEqual([]);
   await expect(page.locator(".timeline-ruler__marker")).toHaveCount(0);
 });
+
+for (const blocked of ["post", "refresh"] as const) {
+  test(`closing a review marker while its ${blocked} is pending does not resubmit`, async ({ page, request }) => {
+    const { id, name } = await createProject(request);
+    await openProject(page, name);
+    const trigger = page.getByRole("button", { name: "添加审片标记" });
+    const dialog = page.getByRole("dialog", { name: "添加审片标记" });
+    const note = `Pending ${blocked}`;
+    let markerPosts = 0;
+    let withheld = false;
+    let signalHeld!: () => void, release!: () => void;
+    const reached = new Promise<void>(resolve => { signalHeld = resolve; });
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    await page.route(url => url.pathname === apiPath(id) || url.pathname === `${apiPath(id)}/commands`, async route => {
+      const req = route.request();
+      const markerPost = req.method() === "POST" && new URL(req.url()).pathname.endsWith("/commands") &&
+        req.postDataJSON()?.type === "marker.add";
+      if (markerPost) markerPosts++;
+      if ((blocked === "post" && markerPost) ||
+          (blocked === "refresh" && markerPosts > 0 && req.method() === "GET")) {
+        if (!withheld) {
+          withheld = true;
+          signalHeld();
+        }
+        await gate;
+      }
+      await route.continue();
+    });
+    try {
+      await trigger.click();
+      await dialog.getByLabel("标记备注").fill(note);
+      await dialog.getByRole("button", { name: "保存", exact: true }).click();
+      await reached;
+      await expect(dialog.getByRole("status")).toHaveText("保存中…");
+      const readNames = async () => {
+        const current = await readProject(request, id);
+        const markers = (current.sequence as Project["sequence"] & { markers: Array<{ name: string }> }).markers;
+        return markers.map(item => item.name);
+      };
+      if (blocked === "post") expect(await readNames()).toEqual([]);
+      else await expect.poll(readNames).toEqual([note]);
+      if (blocked === "post") {
+        await page.keyboard.press("Escape");
+      } else {
+        await dialog.getByRole("button", { name: "关闭", exact: true }).click();
+      }
+      await expect(dialog).toBeHidden();
+      await expect(trigger).toBeDisabled();
+      await expect(page.getByRole("slider", { name: "时间线播放头" })).toBeFocused();
+      expect(markerPosts).toBe(1);
+    } finally {
+      release();
+    }
+
+    await expect(trigger).toBeEnabled();
+    const sequence = (await readProject(request, id)).sequence as Project["sequence"] & {
+      markers: Array<{ name: string }>;
+    };
+    expect(sequence.markers.map(item => item.name)).toEqual([note]);
+    expect(markerPosts).toBe(1);
+    await expect(page.getByRole("button", { name: "撤销", exact: true })).toBeEnabled();
+  });
+}

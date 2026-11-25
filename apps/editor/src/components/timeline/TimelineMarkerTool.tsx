@@ -1,10 +1,23 @@
 import { BookmarkPlus } from "lucide-react";
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { tr, useLocale } from "../../i18n";
 import { getLatestState, runCommand } from "../../store/actions";
 import { type EditorState, useEditor } from "../../store/editor";
 import { rationalToSecs } from "../../lib/rational";
 import { fmtTimePrecise, secsToFrameRatString } from "./util";
+
+// Keep one pending command per project even if its dialog or workspace closes.
+const pendingMarkerSaves = new Set<string>();
+const markerSaveListeners = new Set<() => void>();
+function subscribeMarkerSaves(listener: () => void) {
+  markerSaveListeners.add(listener);
+  return () => { markerSaveListeners.delete(listener); };
+}
+function setMarkerPending(projectId: string, pending: boolean) {
+  if (pending) pendingMarkerSaves.add(projectId);
+  else pendingMarkerSaves.delete(projectId);
+  markerSaveListeners.forEach(listener => listener());
+}
 
 type MarkerDraft = {
   projectId: string;
@@ -29,14 +42,19 @@ export function TimelineMarkerTool({ end }: { end: number }) {
   const { state, dispatch } = useEditor({ subscribeToClock: false });
   const [draft, setDraft] = useState<MarkerDraft | null>(null);
   const [note, setNote] = useState("");
-  const [busy, setBusy] = useState(false);
+  const busy = useSyncExternalStore(subscribeMarkerSaves, () => !!state.currentId && pendingMarkerSaves.has(state.currentId));
   const [rejected, setRejected] = useState(false);
-  const submitting = useRef(false);
+  const mounted = useRef(true);
   const trigger = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const field = useRef<HTMLInputElement>(null);
   const titleId = useId();
   const label = tr("添加审片标记");
+
+  useLayoutEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
 
   useEffect(() => {
     if (!draft) return;
@@ -61,7 +79,7 @@ export function TimelineMarkerTool({ end }: { end: number }) {
   const open = () => {
     const latest = getLatestState() ?? state;
     const project = latest.project;
-    if (!project || !canWriteMarker(latest) || latest.currentId !== state.currentId ||
+    if (!project || pendingMarkerSaves.has(project.projectId) || !canWriteMarker(latest) || latest.currentId !== state.currentId ||
         latest.revision !== state.revision || !Number.isFinite(end) || end <= 0 ||
         !Number.isFinite(latest.playhead) || latest.playhead < 0 || latest.playhead > end) return;
     const rate = rationalToSecs(project.sequence.fps);
@@ -76,30 +94,35 @@ export function TimelineMarkerTool({ end }: { end: number }) {
 
   const submit = async () => {
     const name = note.trim();
-    if (!draft || !name || name.length > 120 || /[\r\n]/.test(name) || submitting.current || rejected) return;
+    if (!draft || !name || name.length > 120 || /[\r\n]/.test(name) || pendingMarkerSaves.has(draft.projectId) || rejected) return;
     const latest = getLatestState() ?? state;
     if (!matchesDraft(latest, draft)) {
       setRejected(true);
       return;
     }
-    submitting.current = true;
-    setBusy(true);
+    const isCurrent = () => {
+      const current = getLatestState() ?? state;
+      return mounted.current && current.currentId === draft.projectId &&
+        current.project?.sequence.id === draft.sequenceId && current.view === "editor";
+    };
+    setMarkerPending(draft.projectId, true);
     try {
-      const result = await runCommand(dispatch, latest, "marker.add", { name, time: draft.time }, { autoShow: false, retryConflict: false });
+      const result = await runCommand(dispatch, latest, "marker.add", { name, time: draft.time },
+        { autoShow: false, retryConflict: false, isCurrent });
+      if (!isCurrent()) return;
       if (result.ok) setDraft(null);
       else setRejected(true);
     } finally {
-      submitting.current = false;
-      setBusy(false);
+      setMarkerPending(draft.projectId, false);
     }
   };
 
   const stale = draft && (rejected || (!busy && !matchesDraft(state, draft)));
   return <>
-    <button ref={trigger} type="button" className="timeline__zoom-btn timeline-marker-tool" disabled={!canWriteMarker(state) || !(end > 0)}
+    <button ref={trigger} type="button" className="timeline__zoom-btn timeline-marker-tool" disabled={busy || !canWriteMarker(state) || !(end > 0)}
       aria-label={label} title={label} aria-haspopup="dialog" onClick={open}><BookmarkPlus size={14} aria-hidden="true" /></button>
     {draft && <dialog ref={dialog} className="timeline-marker-dialog" aria-labelledby={titleId}
-      onCancel={event => { event.preventDefault(); if (!submitting.current) setDraft(null); }}>
+      onCancel={event => { event.preventDefault(); setDraft(null); }}>
       <form onSubmit={event => { event.preventDefault(); void submit(); }}>
         <strong id={titleId}>{label}</strong>
         <time>{fmtTimePrecise(rationalToSecs(draft.time))}</time>
@@ -107,9 +130,10 @@ export function TimelineMarkerTool({ end }: { end: number }) {
           <input ref={field} className="cv-input" type="text" value={note} maxLength={120} disabled={busy}
             onChange={event => setNote(event.currentTarget.value)} />
         </label>
-        {stale ? <p role="status">{tr("工程已变化或暂不可编辑，请关闭后重新添加标记。")}</p> : null}
+        {busy && <p role="status">{tr("保存中…")}</p>}
+        {stale && !busy ? <p role="status">{tr("工程已变化或暂不可编辑，请关闭后重新添加标记。")}</p> : null}
         <div className="timeline-marker-dialog__actions">
-          <button className="cv-btn cv-btn--sm" type="button" disabled={busy} onClick={() => setDraft(null)}>{tr("取消")}</button>
+          <button className="cv-btn cv-btn--sm" type="button" onClick={() => setDraft(null)}>{busy ? tr("关闭") : tr("取消")}</button>
           <button className="cv-btn cv-btn--sm cv-btn--primary" type="submit" disabled={busy || !!stale || !note.trim()}>{tr("保存")}</button>
         </div>
       </form>
