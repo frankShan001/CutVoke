@@ -5772,7 +5772,8 @@ class RenderService:
                 "or convert the source to an alpha-capable intermediate")
         return ["-c:v", decoder]
 
-    def probe_media(self, src: str, timeout: float = 30.0) -> dict[str, Any]:
+    def probe_media(self, src: str, timeout: float = 30.0, *,
+                    include_audio_channels: bool = False) -> dict[str, Any]:
         """Probe current source metadata once, sharing concurrent reads safely."""
         if not os.path.isfile(src):
             raise RenderError(f"media file not found: {src!r}")
@@ -5780,8 +5781,11 @@ class RenderService:
             identity = (self.ffprobe, file_identity(src))
         except OSError as error:
             raise RenderError(f'ffprobe unavailable: {error}') from error
-        return dict(self._probe_cache.get_or_compute(
+        result = dict(self._probe_cache.get_or_compute(
             identity, lambda: self._probe_media_uncached(src, timeout)))
+        if not include_audio_channels:
+            result.pop("audio_channels", None)
+        return result
 
     def _probe_media_uncached(self, src: str,
                     timeout: float = 30.0) -> dict[str, Any]:
@@ -5801,7 +5805,7 @@ class RenderService:
         cmd = [
             executable, "-v", "error",
             "-show_entries", "format=duration,format_name",
-            "-show_entries", "stream=codec_type,codec_name,width,height,pix_fmt,duration,start_time,avg_frame_rate,r_frame_rate:stream_tags=alpha_mode",
+            "-show_entries", "stream=codec_type,codec_name,width,height,pix_fmt,duration,start_time,avg_frame_rate,r_frame_rate,channels:stream_tags=alpha_mode",
             "-of", "json", src,
         ]
         try:
@@ -5853,6 +5857,7 @@ class RenderService:
             "video_duration": video_duration,
             "video_start_time": stream_start(v),
             "audio_start_time": stream_start(a),
+            "audio_channels": a.get("channels") if a else None,
             "avg_frame_rate": str(Fraction(v.get("avg_frame_rate", "0/1"))) if v and v.get("avg_frame_rate") not in (None, "0/0") else "0",
             "r_frame_rate": str(Fraction(v.get("r_frame_rate", "0/1"))) if v and v.get("r_frame_rate") not in (None, "0/0") else "0",
             "width": int(v.get("width", 0)) if v else 0,

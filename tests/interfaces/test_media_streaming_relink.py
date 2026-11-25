@@ -194,6 +194,36 @@ def test_timeline_media_only_resolves_referenced_active_clip_and_valid_ranges(ap
     assert observed[-1]['start']==.1 and observed[-1]['end']==pytest.approx(2/3)
 
 
+
+def test_timeline_waveform_http_keeps_antiphase_audio_visible(api_server):
+    api, port, root = api_server
+    source = root / "phase-waveform.wav"
+    tone = r"0.7*sin(2*PI*431*t)*lt(t\,1)"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i",
+                    f"aevalsrc={tone}|-{tone}:s=16000:d=2:c=stereo", str(source)],
+                   check=True, capture_output=True, timeout=15)
+    project = api.service.create_project("phase-waveform-api")
+    for kind, payload in (("track.add", {"trackId": "lane-a", "kind": "audio"}),
+                          ("clip.insert", {"trackId": "lane-a", "clipId": "phase",
+                           "sourcePath": str(source), "timelineStart": {"num": 0, "den": 1},
+                           "timelineEnd": {"num": 2, "den": 1}})):
+        snapshot = api.service.get_project(project.project_id)
+        api.service.execute(Command(type=kind, payload=payload, command_id=kind,
+            project_id=project.project_id, expected_revision=snapshot.revision, actor=Actor("human", "test")))
+    conn = http.client.HTTPConnection("127.0.0.1", port, timeout=20)
+    try:
+        conn.request("GET", "/api/v1/projects/phase-waveform-api/clips/phase/timeline-media?kind=waveform&w=128")
+        response = conn.getresponse()
+        assert response.status == 200
+        assert response.getheader("Content-Type") == "image/png"
+        with Image.open(io.BytesIO(response.read())) as image:
+            assert image.size == (128, 36)
+            assert image.getchannel("A").crop((24, 0, 25, 36)).getbbox()[3] - 18 >= 8
+            assert sum(a > 0 for a in image.getchannel("A").crop((104, 0, 105, 36)).getdata()) <= 2
+    finally:
+        conn.close()
+
+
 def test_sync_route_passes_actual_http_query_token(api_server):
     api,port,_root=api_server
     api.service.create_project('sync-query')
