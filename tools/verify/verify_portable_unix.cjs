@@ -1,6 +1,6 @@
 const { verifyNativeCaptionFonts } = require("./verify_native_caption_fonts.cjs");
 const { scheduleStackCapture } = require("../../apps/desktop/qa-diagnostics.cjs");
-const { verifyNativePreview } = require("./verify_native_preview.cjs");
+const { verifyNativePreview, verifyNativeSeekControl } = require("./verify_native_preview.cjs");
 const { verifyNativeTransition } = require("./verify_native_transition.cjs");
 const { verifyUnixFrozenRecovery } = require("./verify_unix_frozen_recovery.cjs");
 // Extract and run the exact Unix download, with a sandboxed visible renderer.
@@ -373,6 +373,14 @@ async function main() {
     assert.ok(cache.directory.startsWith(path.join(data, "data")));
     report.previewCache = cache;
     report.checks.restartPreservesProjectAndLanguage = true;
+    if (target === "macos-x64") {
+      // Run after the original preview/export and restart checks on a fresh
+      // window. Only in-memory playhead changes; later lifecycle checks remain.
+      const fps = before.sequence.fps;
+      report.previewSeekControl = await verifyNativeSeekControl(page, expect, Number(fps.den) / Number(fps.num));
+      assert.ok(report.previewSeekControl.passed, `Native seek caller control failed: ${report.previewSeekControl.reason}`);
+      report.checks.intelSeekCallerControl = true;
+    }
     await close();
     report.checks.windowCloseStopsOwnedBackend = true;
     report.storage = { database: path.join(data, "data/projects.sqlite"), profile, cache: cache.directory };

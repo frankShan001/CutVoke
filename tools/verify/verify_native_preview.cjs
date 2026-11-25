@@ -1,5 +1,6 @@
 // Shared by browser regression coverage and all four packaged-app acceptances.
-async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3, traceSeekWrites = false, onDiagnostic = () => {} } = {}) {
+async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3, traceSeekWrites = false,
+  onDiagnostic = () => {}, seekControlStep = null } = {}) {
   const video = page.locator("video.player__video");
   const ruler = page.getByRole("slider", { name: "时间线播放头", exact: true });
   const samples = [];
@@ -13,7 +14,7 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
     // Install the compositor observer before Play. Slow automation round trips
     // must not consume a short clip before its first playing frame is observed.
     const observerKey = `__cutvokeNativePreview_${Date.now()}_${cycle}`;
-    await page.evaluate(({ timeout, key, traceSeekWrites }) => {
+    await page.evaluate(({ timeout, key, traceSeekWrites, seekControlStep }) => {
       // Strict allowlist: no URLs, DOM text, media paths or exception messages.
       const state = { promise: null, cancel: null, diagnostic: { events: [], counts: {}, dropped: 0, media: [], mediaDropped: 0, clocks: [], clocksDropped: 0, stops: [], stopsDropped: 0 } };
       const seekCoverage = traceSeekWrites ? {
@@ -233,6 +234,13 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
         return state.diagnostic;
       };
       window[key] = state;
+      if (seekControlStep !== null) {
+        // Isolated positive control: no frame oracle, RAF/polling or deadlines
+        // from the cold/warm playback acceptance are started here.
+        state.cancel = cleanEvidence;
+        record("control-zero", document.querySelector("video.player__video"));
+        return;
+      }
       state.promise = new Promise((resolve, reject) => {
         let target = null, source = "", callback = null, generation = 0, done = false;
         const cleanup = (retainEvidence = false) => {
@@ -290,7 +298,23 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
       // A failed Play/locator assertion can outlive the observer's deadline.
       // Retain its rejection for the later await without an unhandled event.
       void state.promise.catch(() => {});
-    }, { timeout, key: observerKey, traceSeekWrites });
+    }, { timeout, key: observerKey, traceSeekWrites, seekControlStep });
+    const snapshot = completed => page.evaluate(({ key, completed }) => {
+      const state = window[key];
+      if (!state) return null;
+      try { return state.snapshot(completed); } catch { return null; }
+      finally { state.cancel(); delete window[key]; }
+    }, { key: observerKey, completed }).catch(() => null);
+    if (seekControlStep !== null) {
+      let completed = false, diagnostic;
+      try {
+        await page.getByRole("button", { name: "下一帧", exact: true }).click({ timeout });
+        await expect.poll(() => video.evaluate(v => v.paused &&
+          Math.abs(v.currentTime - seekControlStep) < .002, undefined, { timeout }), { timeout }).toBe(true);
+        completed = true;
+      } finally { diagnostic = await snapshot(completed); }
+      return diagnostic;
+    }
     let frame;
     try {
       await page.getByRole("button", { name: "播放", exact: true }).click();
@@ -303,12 +327,7 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
       // pool/source handoff while waiting, rejecting callbacks from old sources.
       frame = await page.evaluate(key => window[key].promise, observerKey);
     } finally {
-      const diagnostic = await page.evaluate(({ key, completed }) => {
-        const state = window[key];
-        if (!state) return null;
-        try { return state.snapshot(completed); } catch { return null; }
-        finally { state.cancel(); delete window[key]; }
-      }, { key: observerKey, completed: frame !== undefined }).catch(() => null);
+      const diagnostic = await snapshot(frame !== undefined);
       // Diagnostics never change acceptance or hide the original failure.
       try { if (diagnostic) onDiagnostic({ cycle, ...diagnostic }); } catch {}
     }
@@ -319,4 +338,53 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
   }
   return samples;
 }
-module.exports = { verifyNativePreview };
+// Run only after existing acceptance has finished. This qualifies a known
+// setter label in the real packaged UI, not the timing of a naturally cold seek.
+async function verifyNativeSeekControl(page, expect, step, timeout = 5_000) {
+  if (!Number.isFinite(step) || step <= 0) return { passed: false, reason: "invalid-frame-duration" };
+  const video = page.locator("video.player__video");
+  const ruler = page.getByRole("slider", { name: "时间线播放头", exact: true });
+  let initial;
+  try {
+    await ruler.focus({ timeout });
+    await ruler.press("Home", { timeout });
+    await expect.poll(async () => Number(await ruler.getAttribute("aria-valuenow", { timeout })), { timeout }).toBe(0);
+    const measure = () => video.evaluate(v => ({
+      readyState: v.readyState, paused: v.paused, seeking: v.seeking, time: v.currentTime,
+    }), undefined, { timeout });
+    await expect.poll(async () => {
+      const v = await measure();
+      return v.readyState >= 2 && v.paused && !v.seeking && Math.abs(v.time) < .002;
+    }, { timeout }).toBe(true);
+    initial = await measure();
+    if (initial.readyState < 2 || !initial.paused || initial.seeking || !Number.isFinite(initial.time) || Math.abs(initial.time) >= .002)
+      return { passed: false, reason: "zero-frame-not-ready" };
+  } catch {
+    return { passed: false, reason: "zero-frame-not-ready" };
+  }
+  let diagnostic;
+  try {
+    diagnostic = await verifyNativePreview(page, expect, { timeout, cycles: 1, traceSeekWrites: true, seekControlStep: step });
+  } catch {
+    return { passed: false, reason: "step-or-native-cursor-unavailable", initial };
+  }
+  if (!diagnostic?.callerProbeInstalled || diagnostic.seekCoverage?.status !== "observed")
+    return { passed: false, reason: "caller-probe-unavailable-or-incomplete", initial };
+  const zero = diagnostic.events.find(event => event.event === "control-zero");
+  const end = diagnostic.events.find(event => event.event === "snapshot");
+  if (!zero?.paused || zero.seeking || zero.readyState < 2 || !Number.isFinite(zero.time) || Math.abs(zero.time) >= .002)
+    return { passed: false, reason: "zero-frame-not-ready-at-observer-start", initial };
+  if (zero.node !== end?.node || zero.sourceGeneration !== end?.sourceGeneration)
+    return { passed: false, reason: "active-source-changed-during-frame-step", initial };
+  const label = diagnostic.seekWrites.find(write => write.caller === "frame-step" &&
+    write.active && write.paused && write.node === end?.node && write.sourceGeneration === end?.sourceGeneration &&
+    write.ordinal > diagnostic.seekCoverage.startOrdinal && write.ordinal < diagnostic.seekCoverage.snapshotOrdinal &&
+    Math.abs(write.requestedTime - step) < 1e-6);
+  if (!label) return { passed: false, reason: "expected-frame-step-label-not-observed", initial };
+  if (!end.paused || !Number.isFinite(end.time) || Math.abs(end.time - step) >= .002)
+    return { passed: false, reason: "stepped-native-cursor-not-held", initial };
+  return { passed: true, initial: { readyState: zero.readyState, paused: zero.paused, time: zero.time },
+    caller: "frame-step", requestedTime: label.requestedTime,
+    observedTime: end.time, node: label.node, sourceGeneration: label.sourceGeneration };
+}
+module.exports = { verifyNativePreview, verifyNativeSeekControl };
