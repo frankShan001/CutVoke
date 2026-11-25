@@ -2231,5 +2231,8 @@
   "转换将在新目录中创建副本，原工程保留不变。新副本不能用旧版本编辑器打开。关闭将不打开或转换工程。": "Die Konvertierung erstellt eine Kopie in einem neuen Ordner und lässt das Original unverändert. Alte Editoren können die neue Kopie nicht öffnen. Schließen öffnet oder konvertiert das Projekt nicht.",
   "转换中…": "Konvertierung…",
   "转换副本并打开": "Kopie konvertieren und öffnen",
-  "原资源包保留不变。": "Das Originalpaket bleibt unverändert."
+  "原资源包保留不变。": "Das Originalpaket bleibt unverändert.",
+  "添加审片标记": "Prüfmarkierung hinzufügen",
+  "标记备注": "Notiz zur Markierung",
+  "工程已变化或暂不可编辑，请关闭后重新添加标记。": "Das Projekt wurde geändert oder kann vorübergehend nicht bearbeitet werden. Schließen Sie den Dialog und fügen Sie die Markierung erneut hinzu."
 }

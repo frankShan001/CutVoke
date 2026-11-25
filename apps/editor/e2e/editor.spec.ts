@@ -5151,3 +5151,78 @@ test("forward audio left-handle trim after a split preserves source out at 1x an
     await showsStart(after[0]);
   }
 });
+
+test("a human can save one review marker at the captured playhead and undo it", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await openProject(page, name);
+  const ruler = page.getByRole("slider", { name: "时间线播放头" });
+  await ruler.press("Home");
+  await ruler.press("ArrowRight");
+  await expect.poll(async () => Number(await ruler.getAttribute("aria-valuenow"))).toBeCloseTo(1 / 15, 6);
+  const trigger = page.getByRole("button", { name: "添加审片标记" });
+  const dialog = page.getByRole("dialog", { name: "添加审片标记" });
+  const input = dialog.getByLabel("标记备注");
+  const save = dialog.getByRole("button", { name: "保存", exact: true });
+  const cancel = dialog.getByRole("button", { name: "取消", exact: true });
+  const before = await readProject(request, id);
+  const markerRequests: unknown[] = [];
+  page.on("request", req => {
+    if (req.method() === "POST" && new URL(req.url()).pathname === `${apiPath(id)}/commands`) {
+      const body = req.postDataJSON();
+      if (body.type === "marker.add") markerRequests.push(body);
+    }
+  });
+  await trigger.click();
+  await expect(input).toBeFocused();
+  await input.fill("   ");
+  await expect(save).toBeDisabled();
+  await input.fill("Discard this note");
+  await cancel.click();
+  await expect(dialog).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await expect(input).toHaveValue("");
+  await input.press("Escape");
+  await expect(dialog).toBeHidden();
+  expect((await readProject(request, id)).revision).toBe(before.revision);
+  expect(markerRequests).toHaveLength(0);
+
+  await trigger.click();
+  await input.fill("Leave a little more time");
+  const acquired = await request.post(`${apiPath(id)}/edit-lock`, { data: { owner: "marker-review-agent", ttlSeconds: 30 } });
+  expect(acquired.ok(), await acquired.text()).toBeTruthy();
+  const leaseId = (await acquired.json()).lease.leaseId;
+  try {
+    await expect(dialog.getByRole("status")).toBeVisible();
+    await expect(save).toBeDisabled();
+    await input.press("Enter");
+    expect(markerRequests).toHaveLength(0);
+    expect((await readProject(request, id)).revision).toBe(before.revision);
+    await cancel.click();
+    await expect(trigger).toBeDisabled();
+  } finally {
+    const released = await request.post(`${apiPath(id)}/edit-lock/release`, { data: { leaseId } });
+    expect(released.ok()).toBeTruthy();
+  }
+
+  await trigger.click();
+  await input.fill("  Hold the next shot  ");
+  await save.click();
+  await expect(dialog).toBeHidden();
+  expect(markerRequests).toHaveLength(1);
+  expect(markerRequests[0]).toMatchObject({
+    type: "marker.add", expectedRevision: before.revision,
+    payload: { name: "Hold the next shot", time: { num: "1", den: "15" } },
+  });
+  const markers = async () => {
+    const sequence = (await readProject(request, id)).sequence as Project["sequence"] & {
+      markers: Array<{ name: string; time: Parameters<typeof seconds>[0] }>;
+    };
+    return sequence.markers.map(item => [item.name, seconds(item.time)]);
+  };
+  await expect.poll(markers).toEqual([["Hold the next shot", 1 / 15]]);
+  await expect(page.locator(".timeline-ruler__marker")).toHaveCount(1);
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect.poll(markers).toEqual([]);
+  await expect(page.locator(".timeline-ruler__marker")).toHaveCount(0);
+});
