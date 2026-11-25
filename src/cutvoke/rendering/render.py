@@ -3913,10 +3913,20 @@ class RenderService:
         film = first_start - origin
         # 开头空白：第一片段不在 t=0 → 补在流**前面**
         if first_start > origin:
+            # Keep the proven source clock in the direct whole-export path.
+            # Ranged/windowed and canvas-effect graphs have other clock and
+            # EOF constraints; do not change their leading-gap normalizer.
+            use_source_pts = (getattr(self._render_ctx, "window", None) is None
+                              and not needs_canvas
+                              and not _is_image_src(clips[0].asset_ref.source_path)
+                              and clips[0].freeze_at is None
+                              and not self._has_fx(clips[0])
+                              and not clips[0].compositing.get("matte"))
             current = self._pad_black(current, first_start - origin, parts, fps_expr,
                                       at_start=True, transparent=transparent_layer,
                                       canvas_size=(seq.width, seq.height),
-                                      total_duration=first_start - origin + clip_durs[0])
+                                      total_duration=first_start - origin + clip_durs[0],
+                                      preserve_source_pts=use_source_pts)
         tl += clip_durs[0]
         film += clip_durs[0]
         for i in range(1, len(clip_labels)):
@@ -4124,7 +4134,8 @@ class RenderService:
                    fps_expr: str, at_start: bool = False,
                    transparent: bool = False,
                    canvas_size: Optional[tuple[int, int]] = None,
-                   total_duration: Optional[float] = None) -> str:
+                   total_duration: Optional[float] = None,
+                   preserve_source_pts: bool = False) -> str:
         """补 pad_secs 秒黑帧（A04：绝对时间空白）。
 
         `at_start=True` → 补在该流**前面**（仅用于"首片段不在 t=0"的开头空白）；
@@ -4153,11 +4164,13 @@ class RenderService:
             if total_duration is None:
                 raise RenderError("leading canvas padding requires its stream duration")
             rate = Fraction(fps_expr)
-            # Concat's microsecond timestamps can land just after a frame tick.
-            # Rebuild the lattice before framesync, rather than resampling those
-            # rounded timestamps (which can repeat an animated picture).
+            # Snap concat's microsecond timestamps to the sequence time base
+            # before framesync. In a direct plain shot, rescale the actual PTS
+            # instead of numbering frames: retimed and mixed-FPS inputs may
+            # have a genuinely different cadence from the generated prefix.
+            renumber = "" if preserve_source_pts else "setpts=N,"
             parts.append(f"[{prefix}][{label}]concat=n=2:v=1:a=0{lookahead},"
-                         f"settb=expr={rate.denominator}/{rate.numerator},setpts=N,"
+                         f"settb=expr={rate.denominator}/{rate.numerator},{renumber}"
                          f"fps={fps_expr},trim=duration={total_duration:.9f}[{out}]")
         elif at_start:
             parts.append(
