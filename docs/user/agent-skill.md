@@ -16,7 +16,7 @@ For substantial expressive work, design observable changes and compare a short d
 
 ## Copy or install
 
-The self-contained folder is `skills/cutvoke-editor/`: `SKILL.md`, progressively loaded references, and a runnable `scripts/demo.py`. Copy the **whole folder**, so its relative references remain available.
+The self-contained folder is `skills/cutvoke-editor/`: `SKILL.md`, progressively loaded references, and a runnable `scripts/demo.py`. Copy the **whole folder**, so its local references remain available. For optional code-video work, use `editor_help({"topic":"generated-media"})` and `editor_help({"topic":"generated-render"})` from the installed Skill. The linked repository guides are supplemental; running the repository bridge example requires a source checkout.
 
 For Codex's [personal skill directory](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills), run these commands from the CutVoke checkout:
 
