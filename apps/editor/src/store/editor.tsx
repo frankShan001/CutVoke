@@ -59,6 +59,10 @@ export type View = "home" | "editor";
 /** 与后端的保存态镜像：saving=正在提交，saved=已落库，error=提交失败。 */
 export type SyncState = "idle" | "saving" | "saved" | "error";
 
+// Local provenance for a playhead published by Player's activated audio clock.
+// Not a project revision or persisted edit.
+export type AudioPlayheadPublication = Readonly<{ epoch: object; seekVersion: number; ordinal: number }>;
+
 export interface EditorState {
   projects: ProjectListItem[];
   currentId: string | null;
@@ -84,6 +88,7 @@ export interface EditorState {
   playhead: number;
   /** Explicit seek intent; transport ticks never increment this UI-only counter. */
   playheadSeekVersion: number;
+  audioPlayheadPublication?: AudioPlayheadPublication;
   /** 标尺或播放头正在拖动；只影响预览调度，不写入工程。 */
   scrubbing: boolean;
   /** 剪映式工具模式：select 选择 / cut 切割。 */
@@ -129,7 +134,7 @@ export type EditorAction =
   | { type: "CLIP_SELECTION_SET"; clipIds: string[]; primaryId?: string; anchorId?: string | null }
   | { type: "SYNC" }
   | { type: "RESET_SELECTION_FOR"; trackId: string | null }
-  | { type: "PLAYHEAD_SET"; t: number; source?: "transport" }
+  | { type: "PLAYHEAD_SET"; t: number; source?: "transport"; audioPublication?: AudioPlayheadPublication }
   | { type: "SCRUBBING_SET"; active: boolean }
   | { type: "TOOL_MODE_SET"; mode: ToolMode }
   | { type: "SNAP_TOGGLE" }
@@ -223,6 +228,7 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
         revision: "",
         playhead: 0,
         playheadSeekVersion: 0,
+        audioPlayheadPublication: undefined,
         scrubbing: false,
         error: null,
         opening: true,
@@ -257,7 +263,7 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
     case "PROJECT_OPEN_READY":
       return action.projectId === state.currentId ? { ...state, opening: false } : state;
     case "PROJECT_CLOSED":
-      return { ...state, currentId: null, project: null, revision: "", playhead: 0,
+      return { ...state, currentId: null, project: null, revision: "", playhead: 0, audioPlayheadPublication: undefined,
         selectionVersion: state.selectionVersion + 1,
         scrubbing: false, preparedPreview: null, opening: false, error: null, editLock: null, view: "home" };
     case "REVISION_SET":
@@ -293,7 +299,9 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
       return { ...state, lastSync: Date.now() };
     case "PLAYHEAD_SET":
       return { ...state, playhead: action.t,
-        playheadSeekVersion: state.playheadSeekVersion + (action.source === "transport" ? 0 : 1) };
+        playheadSeekVersion: state.playheadSeekVersion + (action.source === "transport" ? 0 : 1),
+        audioPlayheadPublication: action.source === "transport" &&
+          action.audioPublication?.seekVersion === state.playheadSeekVersion ? action.audioPublication : undefined };
     case "SCRUBBING_SET":
       return state.scrubbing === action.active ? state : { ...state, scrubbing: action.active };
     case "TOOL_MODE_SET":
@@ -373,7 +381,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   // This snapshot updates for every editing change; event handlers read the live
   // playhead through getLatestState() when they need a clock value.
   if ((Object.keys(state) as (keyof EditorState)[]).some((key) =>
-    key !== "playhead" && key !== "playheadSeekVersion" && key !== "lastSync" && state[key] !== editingState.current[key])) {
+    key !== "playhead" && key !== "playheadSeekVersion" && key !== "audioPlayheadPublication" && key !== "lastSync" && state[key] !== editingState.current[key])) {
     editingState.current = state;
   }
   const editingValue = useMemo(() => ({ state: editingState.current, dispatch }), [editingState.current, dispatch, locale]);
