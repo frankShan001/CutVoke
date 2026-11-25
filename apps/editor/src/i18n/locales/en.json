@@ -263,6 +263,9 @@
   "人物特效": "Person effects",
   "人物范围": "People to keep",
   "仅可删除空轨；非空轨道需先删除其上片段。": "Only empty tracks can be deleted. Remove the clips first.",
+  "使用所选片段的时间范围": "Use selected clip's time range",
+  "工程或选择已变更，请重新选取范围或手动输入。": "The project or selection changed. Select the range again or enter it manually.",
+  "仅使用片段的时间范围，保留该时段的全部可见图层和可听音轨。": "The clip only sets the time range. Export includes all visible layers and audible tracks in that range.",
   "仅导出时间范围": "Export time range only",
   "仅已选": "Selected only",
   "仅支持已声明的剪切子集；不支持 AAF，未映射项目会返回诊断。": "Only the documented cut subsets are supported. AAF is unsupported; unmapped items return diagnostics.",
@@ -2228,5 +2231,13 @@
   "转换将在新目录中创建副本，原工程保留不变。新副本不能用旧版本编辑器打开。关闭将不打开或转换工程。": "Conversion creates a copy in a new directory and leaves the original unchanged. Older editors cannot open the new copy. Close leaves the project unopened and unconverted.",
   "转换中…": "Converting…",
   "转换副本并打开": "Convert copy and open",
-  "原资源包保留不变。": "The original package remains unchanged."
+  "原资源包保留不变。": "The original package remains unchanged.",
+  "添加审片标记": "Add review marker",
+  "标记备注": "Marker note",
+  "工程已变化或暂不可编辑，请关闭后重新添加标记。": "The project changed or is temporarily read-only. Close this dialog and add the marker again.",
+  "下载与成片对齐的 SRT": "Download synchronized SRT",
+  "本次导出范围内没有字幕。": "There are no subtitles in this export range.",
+  "视频已导出，但无法验证 SRT 与画面时间对齐。": "The video was exported, but SRT timing could not be verified against the picture.",
+  "附带与成片对齐的 SRT": "Include a synchronized SRT",
+  "同步 SRT 仅适用于带时间范围的 MP4。": "Synchronized SRT is available only for ranged MP4 exports."
 }

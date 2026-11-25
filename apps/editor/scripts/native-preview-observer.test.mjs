@@ -9,7 +9,7 @@ const { verifyNativePreview } = createRequire(import.meta.url)("../../../tools/v
 // Deterministically model compositor submission while Play's automation RPC is
 // still pending. The helper under test (not a duplicate observer) runs in a DOM
 // sandbox. Real browser/native tests separately cover decoding and rendering.
-function fixture({ black = false, failClick = false, submit = true, handoff = false, snapshotThrows = false, recordThrows = false, beforeEmit = () => {}, metadata = { mediaTime: .5, presentedFrames: 2 }, priorEvidence } = {}) {
+function fixture({ black = false, failClick = false, submit = true, handoff = false, snapshotThrows = false, recordThrows = false, beforeEmit = () => {}, metadata = { mediaTime: .5, presentedFrames: 2 }, priorEvidence, priorCaller, mediaAccessor = false, mediaConfigurable = true } = {}) {
   const polls = new Set(), timers = new Set(), events = [];
   let id = 0, drawn = null, pixelReads = 0;
   const listeners = new Map();
@@ -20,6 +20,7 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
     addEventListener: { value: listen }, removeEventListener: { value: unlisten },
   });
   if (priorEvidence) Object.defineProperty(window, "__cutvokePreviewStopEvidence", priorEvidence);
+  if (priorCaller) Object.defineProperty(window, "__cutvokeNativeSeekEvidence", priorCaller);
   const makeVideo = source => ({
     paused: true, seeking: false, readyState: 4, currentTime: 0, duration: 3,
     matches: () => true,
@@ -28,6 +29,25 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
     cancelVideoFrameCallback(handle) { this.callbacks.delete(handle); },
   });
   const first = makeVideo("https://private.example/secret-media?token=SECRET"), second = makeVideo("/Users/private/media-secret.mp4");
+  const mediaValues = new WeakMap(), mediaWrites = [], nativeSeekError = new Error("native test setter refused");
+  const Media = class {};
+  let mediaDescriptor;
+  if (mediaAccessor) {
+    Object.defineProperty(window, "HTMLMediaElement", { value: Media });
+    Object.defineProperty(Media.prototype, "currentTime", {
+      configurable: mediaConfigurable, enumerable: true,
+      get() { return mediaValues.get(this); },
+      set(value) { mediaWrites.push([this, value]); if (value === 999) throw nativeSeekError; mediaValues.set(this, value); },
+    });
+    mediaDescriptor = Object.getOwnPropertyDescriptor(Media.prototype, "currentTime");
+    for (const v of [first, second]) {
+      delete v.currentTime; Object.setPrototypeOf(v, Media.prototype); mediaValues.set(v, 0);
+    }
+  }
+  const advanceDecoder = (video, value) => {
+    if (mediaAccessor) mediaValues.set(video, value);
+    else video.currentTime = value;
+  };
   let active = first;
   const context = vm.createContext({
     window,
@@ -55,8 +75,8 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
   const page = {
     locator: () => video,
     evaluate: async (callback, arg) => { context.arg = arg;
-      if (snapshotThrows && callback.toString().includes("state.snapshot()")) {
-        context.window[arg].snapshot = () => { throw new Error("diagnostic failure"); };
+      if (snapshotThrows && callback.toString().includes("state.snapshot(")) {
+        context.window[typeof arg === "string" ? arg : arg.key].snapshot = () => { throw new Error("diagnostic failure"); };
       }
       return vm.runInContext(`(${callback.toString()})(arg)`, context); },
     getByRole: (role, { name }) => role === "slider" ? ruler : { click: async () => {
@@ -68,15 +88,15 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
         }
       }
       if (failClick) throw new Error("Play action failed");
-      active.paused = false; active.currentTime = .5;
+      active.paused = false; advanceDecoder(active, .5);
       for (const poll of polls) poll();
       if (handoff) {
-        active = second; active.paused = false; active.currentTime = .5;
+        active = second; active.paused = false; advanceDecoder(active, .5);
         emit(first); // A queued callback from the former pool source is invalid.
         assert.equal(pixelReads, 0);
         for (const poll of polls) poll();
       }
-      beforeEmit({ active, polls, emit, dispatch, window, first, second, setActive: v => { active = v; } });
+      beforeEmit({ active, polls, timers, emit, dispatch, window, first, second, nativeSeekError, mediaDescriptor, setActive: v => { active = v; } });
       if (submit) emit(active);
       events.push("click-return");
     } },
@@ -89,9 +109,12 @@ function fixture({ black = false, failClick = false, submit = true, handoff = fa
     toBeGreaterThanOrEqual: async minimum => assert.ok(await read() >= minimum),
     toBeGreaterThan: async minimum => { assert.ok(await read() > minimum); events.push("clock-checked"); },
   });
-  return { page, expect, events, first, second, get drawn() { return drawn; }, get pixelReads() { return pixelReads; },
-    assertClean() { assert.equal(polls.size, 0); assert.equal(timers.size, 0); assert.deepEqual(Object.keys(context.window), []); assert.equal([...listeners.values()].reduce((n, s) => n + s.size, 0), 0);
-      assert.deepEqual(Object.getOwnPropertyDescriptor(window, "__cutvokePreviewStopEvidence"), priorEvidence); assert.equal(first.callbacks.size + second.callbacks.size, 0); } };
+  return { page, expect, events, first, second, mediaWrites, get drawn() { return drawn; }, get pixelReads() { return pixelReads; },
+    assertClean(expectedDescriptor = mediaDescriptor) { assert.equal(polls.size, 0); assert.equal(timers.size, 0); assert.deepEqual(Object.keys(context.window), []); assert.equal([...listeners.values()].reduce((n, s) => n + s.size, 0), 0);
+      assert.deepEqual(Object.getOwnPropertyDescriptor(window, "__cutvokePreviewStopEvidence"), priorEvidence);
+      assert.deepEqual(Object.getOwnPropertyDescriptor(window, "__cutvokeNativeSeekEvidence"), priorCaller);
+      assert.deepEqual(Object.getOwnPropertyDescriptor(Media.prototype, "currentTime"), expectedDescriptor);
+      assert.equal(first.callbacks.size + second.callbacks.size, 0); } };
 }
 
 test("native acceptance captures submitted pixels before slow Play RPC returns", async () => {
@@ -299,4 +322,223 @@ test("bounded media and stop channels retain first and final records without raw
   assert.equal(d.stops[0].observedTime, 0); assert.equal(d.stops.at(-1).observedTime, 99);
   assert.equal(d.stops.at(-1).decisionEnd, 3); assert.equal(d.stops.at(-1).end, 4);
   assert.equal(d.media.length, 64); assert.equal(d.mediaDropped, 136);
+});
+
+test("opt-in seek observation preserves the native setter and correlates only active video writes", async () => {
+  const diagnostics = [];
+  const f = fixture({ mediaAccessor: true, handoff: true, beforeEmit: ({ first, second, dispatch, window, mediaDescriptor, nativeSeekError }) => {
+    const installed = Object.getOwnPropertyDescriptor(window.HTMLMediaElement.prototype, "currentTime");
+    assert.equal(installed.get, mediaDescriptor.get); assert.notEqual(installed.set, mediaDescriptor.set);
+    const audio = new window.HTMLMediaElement(); audio.currentTime = .7;
+    first.currentTime = .8;
+    second.seeking = true;
+    second.currentTime = .65;
+    assert.throws(() => { second.currentTime = 999; }, error => error === nativeSeekError);
+    dispatch("seeked", { target: second });
+    second.seeking = false;
+  } });
+  const samples = await verifyNativePreview(f.page, f.expect, { cycles: 1, traceSeekWrites: true, onDiagnostic: d => diagnostics.push(d) });
+  assert.equal(samples[0].energy, 255);
+  assert.deepEqual(f.mediaWrites.map(([,value]) => value), [.7,.8,.65,999]);
+  const d = diagnostics[0], seeked = d.media.find(entry => entry.event === "media-seeked"), accepted = d.events.find(entry => entry.event === "accepted");
+  assert.equal(d.seekCoverage.status, "observed"); assert.equal(d.seekCoverage.absenceEvidence,true);
+  assert.equal(d.seekWrites.length, 2);
+  assert.equal(d.seekWrites[0].node,accepted.node); assert.equal(d.seekWrites[0].sourceGeneration,accepted.sourceGeneration);
+  assert.equal(d.seekWrites[0].requestedTime,.65); assert.equal(d.seekWrites[0].time,.5);
+  assert.equal(d.seekWrites[0].seeking,true); assert.equal(d.seekWrites[1].time,.65);
+  assert.ok(d.seekCoverage.startOrdinal < d.seekWrites[0].ordinal);
+  assert.ok(d.seekWrites[1].ordinal < seeked.ordinal && seeked.ordinal < accepted.ordinal && accepted.ordinal < d.seekCoverage.endOrdinal);
+  assert.doesNotMatch(JSON.stringify(d), /private|SECRET|\.mp4|https:/);
+  f.assertClean();
+});
+test("seek observation is opt-in and unavailable instrumentation cannot imply zero writes", async () => {
+  for (const traceSeekWrites of [false, true]) {
+    const diagnostics = [];
+    const f = fixture({ mediaAccessor:true, mediaConfigurable:false, beforeEmit: ({active}) => {active.currentTime=.7;} });
+    await verifyNativePreview(f.page, f.expect, {cycles:1, traceSeekWrites, onDiagnostic:d=>diagnostics.push(d)});
+    assert.equal(f.mediaWrites.length,1);
+    const d=diagnostics[0];
+    if (traceSeekWrites) {
+      assert.equal(d.seekCoverage.status,"unavailable"); assert.equal(d.seekCoverage.absenceEvidence,false);
+      assert.equal(d.seekWrites.length,0); assert.equal(d.seekCoverage.startOrdinal,null);
+    } else {
+      assert.equal(d.seekCoverage,undefined); assert.equal(d.events[0].ordinal,undefined);
+    }
+    f.assertClean();
+  }
+});
+test("capped seek trace cannot imply absence and still uses the original frame deadline", async () => {
+  const diagnostics = [];
+  const f=fixture({mediaAccessor:true, submit:false, beforeEmit:({active})=>{
+    for(let i=0;i<70;i++)active.currentTime=.5+i/100;
+  }});
+  await assert.rejects(verifyNativePreview(f.page,f.expect,{cycles:1,timeout:20,traceSeekWrites:true,onDiagnostic:d=>diagnostics.push(d)}),/No submitted playing preview frame/);
+  const d=diagnostics[0];
+  assert.equal(d.seekWrites.length,64); assert.equal(d.seekWritesDropped,6); assert.equal(d.seekWrites[0].requestedTime,.5);
+  assert.equal(d.seekCoverage.status,"incomplete"); assert.equal(d.seekCoverage.absenceEvidence,false);
+  assert.equal(d.seekCoverage.acceptedOrdinal,null);
+  assert.ok(d.seekCoverage.endOrdinal < d.seekCoverage.snapshotOrdinal);
+  assert.equal(f.mediaWrites.length,70); assert.equal(f.pixelReads,0); f.assertClean();
+});
+test("seek observer restores its descriptor after black pixels, failed Play, and zero-write success", async () => {
+  for (const [options, reason] of [[{black:true},/0 must exceed 0/],[{failClick:true},/Play action failed/],[{},null]]) {
+    const diagnostics=[], f=fixture({mediaAccessor:true,...options});
+    const run=verifyNativePreview(f.page,f.expect,{cycles:1,traceSeekWrites:true,onDiagnostic:d=>diagnostics.push(d)});
+    if(reason) await assert.rejects(run,reason); else await run;
+    assert.equal(diagnostics[0].seekWrites.length,0);
+    assert.equal(diagnostics[0].seekCoverage.status,"observed");
+    assert.equal(diagnostics[0].seekCoverage.absenceEvidence,true);
+    const {endOrdinal,snapshotOrdinal}=diagnostics[0].seekCoverage;
+    assert.ok(reason ? endOrdinal < snapshotOrdinal : snapshotOrdinal < endOrdinal);
+    f.assertClean();
+  }
+});
+
+test("foreign descriptor changes and non-numeric active attempts invalidate absence evidence", async () => {
+  for (const takeover of [false,true]) {
+    const diagnostics=[];
+    let foreign;
+    const f=fixture({mediaAccessor:true, beforeEmit:({active,window})=>{
+      const proto=window.HTMLMediaElement.prototype;
+      if(takeover) {
+        const installed=Object.getOwnPropertyDescriptor(proto,"currentTime");
+        foreign={...installed,enumerable:false};
+        Object.defineProperty(proto,"currentTime",foreign);
+        active.currentTime=.6;
+      } else {
+        const unknown={valueOf(){throw new Error("observer must not coerce");}};
+        // The fake native setter stores its original argument; restore a valid
+        // media clock afterward, exactly as a real decoder would do.
+        active.currentTime=unknown;
+        active.currentTime=.6;
+      }
+    }});
+    await verifyNativePreview(f.page,f.expect,{cycles:1,traceSeekWrites:true,onDiagnostic:d=>diagnostics.push(d)});
+    const d=diagnostics[0];
+    assert.equal(d.seekCoverage.status,"incomplete"); assert.equal(d.seekCoverage.absenceEvidence,false);
+    assert.equal(d.seekWrites.length,1);
+    if(takeover) {
+      f.first.currentTime=.7; // surviving wrapper is inert after cleanup
+      assert.equal(d.seekWrites.length,1);
+      f.assertClean(foreign);
+    } else {
+      assert.equal(typeof f.mediaWrites[0][1],"object");
+      f.assertClean();
+    }
+  }
+});
+
+test("opt-in successful frame stops the oracle while observing the existing late snapshot", async () => {
+  const diagnostics=[];
+  const f=fixture({mediaAccessor:true, submit:false, beforeEmit:({first, second, setActive, emit, dispatch, polls, timers})=>{
+    emit(first);
+    // Model the existing Play RPC still in flight after the valid visual frame.
+    assert.equal(polls.size,0);
+    assert.equal(timers.size,0);
+    second.currentSrc="";
+    setActive(second);
+    second.paused=false; second.seeking=true; second.readyState=1;
+    dispatch("loadedmetadata",{target:second});
+    second.currentSrc="/Users/private/prepared-secret.mp4";
+    second.currentTime=.7;
+    dispatch("seeking",{target:second});
+    assert.equal(second.callbacks.size,0);
+  }});
+  const samples=await verifyNativePreview(f.page,f.expect,{cycles:1, traceSeekWrites:true, onDiagnostic:d=>diagnostics.push(d)});
+  assert.equal(samples[0].energy,255);
+  assert.equal(f.drawn,f.first);assert.equal(f.pixelReads,1);
+  const d=diagnostics[0], c=d.seekCoverage;
+  const accepted=d.events.find(e=>e.event==="accepted");
+  const snapshot=d.events.find(e=>e.event==="snapshot");
+  const seeking=d.media.find(e=>e.event==="media-seeking");
+  assert.equal(d.seekWrites.length,1);
+  const write=d.seekWrites[0];
+  assert.deepEqual([accepted.node,write.node,write.sourceGeneration,snapshot.node],[1,2,2,2]);
+  assert.equal(write.requestedTime,.7);assert.equal(write.seeking,true);
+  assert.equal(accepted.ordinal,c.acceptedOrdinal);assert.equal(snapshot.ordinal,c.snapshotOrdinal);
+  assert.ok(c.startOrdinal < c.acceptedOrdinal && c.acceptedOrdinal < write.ordinal
+    && write.ordinal < seeking.ordinal && seeking.ordinal < c.snapshotOrdinal && c.snapshotOrdinal < c.endOrdinal);
+  assert.equal(c.status,"observed");assert.equal(c.absenceEvidence,true);
+  assert.doesNotMatch(JSON.stringify(d),/private|SECRET|\.mp4|https:/);
+  f.assertClean();
+});
+test("a late Play RPC error after the first accepted frame still restores observation", async () => {
+  const diagnostics=[];
+  const f=fixture({mediaAccessor:true,submit:false,beforeEmit:({first,emit})=>{
+    emit(first);throw new Error("late Play RPC failed");
+  }});
+  await assert.rejects(verifyNativePreview(f.page,f.expect,{cycles:1,traceSeekWrites:true,onDiagnostic:d=>diagnostics.push(d)}),/late Play RPC failed/);
+  assert.equal(f.pixelReads,1);assert.equal(diagnostics[0].seekCoverage.status,"observed");
+  const {endOrdinal,snapshotOrdinal}=diagnostics[0].seekCoverage;
+  assert.ok(endOrdinal < snapshotOrdinal);
+  f.assertClean();
+});
+
+function seekHook(window) {
+  const exports = {};
+  vm.runInNewContext(ts.transpileModule(readFileSync(new URL("../src/lib/previewSeekEvidence.ts", import.meta.url), "utf8"),
+    { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText,
+    { exports, window });
+  return exports;
+}
+
+test("existing native seek observer attributes only the exact node and synchronous setter", async () => {
+  const diagnostics = [];
+  const f = fixture({ mediaAccessor: true, handoff: true, beforeEmit: ({ first, second, window, nativeSeekError }) => {
+    const hook = seekHook(window);
+    const detail = () => ({ prepared: true, audioActive: true, sourceMatches: true, playhead: .6,
+      reportedTime: .4, clock: "SECRET", path: "/Users/SECRET", extra: { token: "SECRET" }, decodeTime: Infinity });
+    hook.recordPreviewPhase("selection", second, () => ({ ...detail(), offered: true, ready: false }));
+    const leaveInactive = window.__cutvokeNativeSeekEvidence.beginSeek("external-sync", first, detail());
+    second.currentTime = .54; // no label may leak to a different decoder
+    leaveInactive();
+    hook.seekPreviewVideo(second, .61, hook.previewLoadSeekSite("loadeddata"), detail);
+    assert.throws(() => hook.seekPreviewVideo(second, 999, "bind", detail), error => error === nativeSeekError);
+    second.currentTime = .65; // no label may leak after the setter throws
+    hook.recordPreviewPhase("presented", second, detail);
+    hook.recordPreviewPhase("/Users/SECRET", second, detail);
+  } });
+  await verifyNativePreview(f.page, f.expect, { cycles: 1, traceSeekWrites: true, onDiagnostic: d => diagnostics.push(d) });
+  const [d] = diagnostics;
+  assert.equal(d.callerProbeInstalled, true);
+  assert.equal(d.unknownSeekCallers, 2);
+  assert.deepEqual(Array.from(d.seekWrites, x => [x.caller, x.requestedTime]),
+    [["unknown", .54], ["loadeddata", .61], ["bind", 999], ["unknown", .65]]);
+  assert.equal(d.seekWrites[1].evidence.audioActive, true);
+  assert.equal(d.seekWrites[1].evidence.reportedTime, .4);
+  assert.equal(d.seekWrites[1].node, d.phases[0].node);
+  assert.deepEqual(Array.from(d.phases, x => x.event), ["selection", "presented"]);
+  assert.equal(d.phases[0].evidence.offered, true);
+  assert.equal(d.phases[0].evidence.ready, false);
+  assert.doesNotMatch(JSON.stringify(d), /Users|SECRET|private\.example|token|extra|decodeTime/);
+  f.assertClean();
+});
+
+test("caller evidence remains opt-in, bounded, and cannot change native setter outcomes", async () => {
+  let reads = 0;
+  const priorCaller = { configurable: false, enumerable: false, set: undefined,
+    get() { throw new Error("foreign accessor must not run"); } };
+  const f = fixture({ mediaAccessor: true, priorCaller, beforeEmit: ({ active, window, nativeSeekError }) => {
+    const hook = seekHook(window);
+    hook.seekPreviewVideo(active, .63, "audio-tick", () => { reads++; throw new Error("must not sample"); });
+    assert.throws(() => hook.seekPreviewVideo(active, 999, "external-sync", () => { reads++; }), error => error === nativeSeekError);
+    assert.equal(active.currentTime, .63);
+  } });
+  const diagnostics = [];
+  await verifyNativePreview(f.page, f.expect, { cycles: 1, traceSeekWrites: true, onDiagnostic: d => diagnostics.push(d) });
+  assert.equal(reads, 0);
+  assert.equal(diagnostics[0].callerProbeInstalled, false);
+  assert.equal(diagnostics[0].unknownSeekCallers, 2);
+  f.assertClean();
+
+  const bounded = fixture({ mediaAccessor: true, beforeEmit: ({ active, window }) => {
+    const hook = seekHook(window);
+    for (let i = 0; i < 100; i++) hook.recordPreviewPhase("selection", active, () => ({ playhead: i }));
+  } });
+  await verifyNativePreview(bounded.page, bounded.expect, { cycles: 1, traceSeekWrites: true, onDiagnostic: d => diagnostics.push(d) });
+  assert.equal(diagnostics[1].phases.length, 64);
+  assert.equal(diagnostics[1].phasesDropped, 36);
+  assert.equal(diagnostics[1].phases.at(-1).evidence.playhead, 99);
+  assert.equal(diagnostics[1].seekCoverage.absenceEvidence, false);
+  bounded.assertClean();
 });

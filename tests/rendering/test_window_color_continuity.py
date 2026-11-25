@@ -1,5 +1,7 @@
 """Real pixels across window seams: mixed RGB effects, YUV clips and clocks."""
 import copy
+from fractions import Fraction
+import math
 import shutil
 import subprocess
 import threading
@@ -24,8 +26,11 @@ class Continuous(RenderService):
     def _render_in_windows(self,seq,out_path,quality,overlay_position,cancel_event,alpha,color_chain,
                            expected_primaries,video_bitrate_kbps,audio_bitrate_kbps,start,duration,
                            preflight_warnings,**kwargs):
+        # Use the actual direct ranged-export bound, not the preview compiler's
+        # legacy timestamp trim, or the reference can drop an in-range picture.
         graph,inputs,_expected,audio,_warnings,cwd=self._compile(
-            seq,overlay_position,alpha=alpha,render_window=(start,start+duration),frame_aligned_origin=True)
+            seq,overlay_position,alpha=alpha,render_window=(start,start+duration),
+            frame_aligned_origin=True,exact_video_bounds=True)
         try:
             self._run_ffmpeg(seq,graph,inputs,out_path,quality,cancel_event,audio,caption_cwd=cwd,
                 alpha=alpha,color_chain=color_chain,output_start=start-self._render_ctx.compile_origin,
@@ -78,7 +83,12 @@ def test_mixed_rgb_yuv_transitions_and_keyframes_match_continuous_render(tmp_pat
         path=tmp_path/(name+'.mp4')
         report=renderer.render(copy.deepcopy(project),str(path),quality='high',output_start=start,output_duration=17)
         outputs.append(frames(path))
-    assert outputs[0].shape==outputs[1].shape
+    # Independent half-open timeline oracle: the two paths must not agree
+    # merely by dropping the same fractional-terminal frame.
+    rate=fps.to_fraction()
+    first=Fraction(str(start))
+    expected=math.ceil((first+17)*rate)-math.ceil(first*rate)
+    assert outputs[0].shape==outputs[1].shape==(expected,96,160,4)
     delta=outputs[1].astype(float)-outputs[0].astype(float)
     assert np.abs(delta).mean()<.08
     assert np.abs(delta.mean(axis=(1,2))).max()<.15

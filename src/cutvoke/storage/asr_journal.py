@@ -4,11 +4,14 @@ from __future__ import annotations
 from contextlib import contextmanager
 import hashlib
 import json
+import logging
 import os
 from pathlib import Path
 import sqlite3
 import threading
 import time
+
+_LOG = logging.getLogger(__name__)
 
 ACTIVE = ("queued", "running")
 RETAIN_COMPLETED = 24
@@ -78,11 +81,16 @@ class AsrJournal:
             self._db.execute("BEGIN IMMEDIATE")
             try:
                 yield
-            except BaseException:
-                self._db.execute("ROLLBACK")
-                raise
-            else:
                 self._db.execute("COMMIT")
+            except BaseException:
+                # A failed COMMIT can leave SQLite in the transaction (for
+                # example, a rollback-journal reader can block the commit).
+                if self._db.in_transaction:
+                    try:
+                        self._db.execute("ROLLBACK")
+                    except sqlite3.Error:
+                        _LOG.warning("Could not roll back an ASR journal transaction")
+                raise
 
     def lock_job(self, job_id: str) -> JobLock | None:
         name = hashlib.sha256(job_id.encode()).hexdigest() + ".lock"

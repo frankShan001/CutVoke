@@ -263,6 +263,9 @@
   "人物特效": "Effets personnels",
   "人物范围": "Les gens à garder",
   "仅可删除空轨；非空轨道需先删除其上片段。": "Seuls les traces vides peuvent être supprimées. supprimer les clips d'abord.",
+  "使用所选片段的时间范围": "Utiliser la plage temporelle du clip sélectionné",
+  "工程或选择已变更，请重新选取范围或手动输入。": "Le projet ou la sélection a changé. Sélectionnez à nouveau la plage ou saisissez-la manuellement.",
+  "仅使用片段的时间范围，保留该时段的全部可见图层和可听音轨。": "Le clip définit uniquement la plage temporelle. L’export inclut toutes les couches visibles et les pistes audio audibles dans cette plage.",
   "仅导出时间范围": "Exporter uniquement la plage",
   "仅已选": "Sélection uniquement",
   "仅支持已声明的剪切子集；不支持 AAF，未映射项目会返回诊断。": "Seuls les sous-ensembles de coupes documentés sont pris en charge. AAF n’est pas pris en charge ; les éléments non convertis font l’objet de diagnostics.",
@@ -2228,5 +2231,13 @@
   "转换将在新目录中创建副本，原工程保留不变。新副本不能用旧版本编辑器打开。关闭将不打开或转换工程。": "La conversion crée une copie dans un nouveau dossier sans modifier l’original. Les anciens éditeurs ne peuvent pas ouvrir cette copie. Fermer laisse le projet non ouvert et non converti.",
   "转换中…": "Conversion…",
   "转换副本并打开": "Convertir la copie et ouvrir",
-  "原资源包保留不变。": "Le paquet d’origine reste inchangé."
+  "原资源包保留不变。": "Le paquet d’origine reste inchangé.",
+  "添加审片标记": "Ajouter un marqueur de révision",
+  "标记备注": "Note du marqueur",
+  "工程已变化或暂不可编辑，请关闭后重新添加标记。": "Le projet a changé ou n’est temporairement pas modifiable. Fermez cette boîte de dialogue, puis ajoutez de nouveau le marqueur.",
+  "下载与成片对齐的 SRT": "Télécharger le SRT synchronisé",
+  "本次导出范围内没有字幕。": "Cette plage d’exportation ne contient aucun sous-titre.",
+  "视频已导出，但无法验证 SRT 与画面时间对齐。": "La vidéo a été exportée, mais la synchronisation du SRT avec l’image n’a pas pu être vérifiée.",
+  "附带与成片对齐的 SRT": "Inclure un SRT synchronisé",
+  "同步 SRT 仅适用于带时间范围的 MP4。": "Le SRT synchronisé est disponible uniquement pour les exports MP4 avec une plage temporelle."
 }

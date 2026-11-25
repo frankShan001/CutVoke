@@ -48,7 +48,7 @@ KEYFRAME = {"type": "object", "properties": {
     "bezier": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number", "minimum": 0, "maximum": 1}}},
     "required": ["param", "time", "value"], "additionalProperties": False}
 
-_BOOLEAN_FIELDS = set("locked muted visible switch enabled bold preservePitch followAttachments includeAttached applyToProject clearExisting setCanvas overwrite versioned transparent replaceParams".split())
+_BOOLEAN_FIELDS = set("locked muted visible switch enabled bold preservePitch followAttachments includeAttached applyToProject clearExisting setCanvas overwrite versioned transparent captionSidecar replaceParams".split())
 _INTEGER_FIELDS = set("width height fontSize strokeWidth animIn animOut toIndex limit maxWords videoBitrateKbps audioBitrateKbps".split())
 _NUMBER_FIELDS = set("fps volume fadeIn fadeOut pitch stickerScale duration strength amount I seconds minSilence sharpness denoise overlap rotation scale x y value timelineTime t".split())
 _RATIONAL_FIELDS = set("timelineStart timelineEnd sourceStart sourceTime start end at fromTime toTime".split())

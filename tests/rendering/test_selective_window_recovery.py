@@ -1,5 +1,6 @@
 """Real CPU exporter acceptance for compiled keys, not a copied render pipeline."""
 import copy
+import re
 import sqlite3
 import subprocess
 import tempfile
@@ -13,6 +14,30 @@ from cutvoke.domain.keyframes import Keyframe
 from cutvoke.domain.rational import Rational
 from cutvoke.rendering.render import RenderService
 from cutvoke.rendering.window_cache import WindowCache
+
+
+def _reuse_failure_context(baseline, edited, *, reference, stage):
+    def outcome(rows, column):
+        if len(rows) > 1:
+            return 'ambiguous'
+        if not rows or rows[0][column] is None:
+            return 'not-called'
+        return 'true' if rows[0][column] else 'false'
+
+    rows = baseline + edited
+    frames = sorted({row[0] for row in rows if row[0] is not None})
+    summary = []
+    for frame in frames:
+        before = [row for row in baseline if row[0] == frame]
+        after = [row for row in edited if row[0] == frame]
+        same_key = 'unknown'
+        if len(before) == len(after) == 1:
+            same_key = 'true' if before[0][1] == after[0][1] else 'false'
+        summary.append(f'frame {frame}: {reference}_publish={outcome(before, 3)}, '
+                       f'{reference}_restore={outcome(before, 2)}, {stage}_restore={outcome(after, 2)}, '
+                       f'{stage}_copy_exists={outcome(after, 4)}, same_key={same_key}')
+    unidentified = sum(row[0] is None for row in rows)
+    return '; '.join([f'unidentified_windows={unidentified}', *summary])
 
 
 class SelectiveRecoveryTests(unittest.TestCase):
@@ -37,33 +62,55 @@ class SelectiveRecoveryTests(unittest.TestCase):
             edited=copy.deepcopy(project)
             edited.sequence.tracks[0].clips[-1].keyframes['opacity']=[Keyframe('late-opacity',Rational.of(0),.5)]
             runs=[]
-            def export(document, target, expected):
+            diagnostics = {}
+            def export(document, target, expected, *, observe=None):
                 renderer=RenderService(gpu_effects=False)
                 seen=set(); guard=threading.Lock(); pending=threading.local()
+                observations = []
                 original_restore,original_publish=WindowCache.restore,WindowCache.publish
                 def restore(cache,key,path):
                     pending.key=key
                     with guard: seen.add(threading.get_ident())
-                    return original_restore(cache,key,path)
+                    result = original_restore(cache,key,path)
+                    if observe is not None:
+                        match = re.fullmatch(r'window-([0-9]{9})\.mkv', Path(path).name)
+                        # Keep actual keys in-process only; the failure message
+                        # compares identity without printing the records.
+                        record = [int(match[1]) if match else None, key, bool(result), None,
+                                  Path(path).is_file()]
+                        pending.observation = record
+                        with guard: observations.append(record)
+                    return result
                 def publish(cache,key,path):
                     self.assertEqual(key,pending.key)
-                    return original_publish(cache,key,path)
+                    result = original_publish(cache,key,path)
+                    if observe is not None:
+                        pending.observation[3] = bool(result)
+                    return result
                 with patch.object(WindowCache,'restore',restore), patch.object(WindowCache,'publish',publish), \
                       patch.object(renderer,'_render_continuous_audio',wraps=renderer._render_continuous_audio) as audio, \
                      patch.object(renderer,'_verify_window_seams',wraps=renderer._verify_window_seams) as seams:
                     result=renderer.render(document,str(target))
                 self.assertEqual(len(seen),2 if cpus==16 else 1)
                 self.assertEqual(result['windowCount'],3)
-                self.assertEqual(result['reusedWindowCount'],expected)
+                failure_context = None
+                if observe is not None:
+                    diagnostics[observe] = observations
+                    previous = {'edited': 'baseline', 'warm': 'edited', 'capture': 'warm'}.get(observe)
+                    if previous and result['reusedWindowCount'] != expected:
+                        failure_context = _reuse_failure_context(
+                            diagnostics[previous], observations, reference=previous, stage=observe)
+                self.assertEqual(result['reusedWindowCount'],expected,msg=failure_context)
                 self.assertEqual(audio.call_count,1)
                 self.assertEqual(seams.call_count,1)
                 runs.append(result)
             baseline,changed,warm=(root/name for name in ('base.mp4','changed.mp4','warm.mp4'))
-            export(project,baseline,0)
+            observe_reuse = not motion and cpus == 16
+            export(project,baseline,0,observe='baseline' if observe_reuse else None)
             # PNG already forces canvas: only last window changes. Plain FFV1
             # with late keyframes is deliberately unsupported and uses full-snapshot recovery.
-            export(edited,changed,0 if motion else 2)
-            export(edited,warm,3)
+            export(edited,changed,0 if motion else 2,observe='edited' if observe_reuse else None)
+            export(edited,warm,3,observe="warm" if observe_reuse else None)
             cold_dir=root/'cold';cold_dir.mkdir();cold=cold_dir/'cold.mp4'
             export(edited,cold,0)
             for options in (['-an','-pix_fmt','rgba','-f','rawvideo'],['-vn','-f','f32le','-acodec','pcm_f32le']):
@@ -86,7 +133,7 @@ class SelectiveRecoveryTests(unittest.TestCase):
                 keys.append(key)
                 return original(cache,key,target)
             with patch.object(window_cache.WindowCache,'restore',capture):
-                export(edited,root/'capture.mp4',3)
+                export(edited,root/'capture.mp4',3,observe="capture" if observe_reuse else None)
             cache=WindowCache(root/'.cutvoke-render-cache')
             with sqlite3.connect(cache.database) as db:
                 db.execute('UPDATE windows SET data=? WHERE key=?',(b'truncated',keys[0]))

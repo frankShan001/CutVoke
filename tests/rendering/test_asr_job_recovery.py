@@ -6,6 +6,7 @@ import inspect
 import json
 import os
 from pathlib import Path
+import sqlite3
 import subprocess
 import sys
 import threading
@@ -19,7 +20,7 @@ from cutvoke.domain.protocol import Actor, Command
 from cutvoke.editing.service import EditError, EditService
 from cutvoke.interfaces.httpapi import HttpApi
 from cutvoke.rendering.asr_jobs import AsrJobManager
-from cutvoke.rendering.speech_recognition import find_source_clip, source_signature
+from cutvoke.rendering.speech_recognition import SpeechRecognitionError, find_source_clip, source_signature
 from cutvoke.storage.asr_journal import AsrJournal, RETAIN_COMPLETED
 from cutvoke.storage.storage_migration import migrate_library
 from cutvoke.storage.store import ProjectStore
@@ -187,6 +188,326 @@ def test_live_server_is_not_recovered_and_cross_server_cancel_survives_late_resu
         first.close()
         if second:
             second.close()
+        service.close()
+        store.close()
+
+
+def held_recognition():
+    entered, release = threading.Event(), threading.Event()
+    calls = []
+
+    def run(*args, **kwargs):
+        model = kwargs["model_size"]
+        calls.append(model)
+        if model == "tiny":
+            entered.set()
+            assert release.wait(5), "test did not release the active worker"
+        return proposal(*args, **kwargs)
+
+    return entered, release, calls, run
+
+
+@pytest.mark.parametrize("cross_manager", [False, True])
+def test_cancelled_queue_admits_replacement_before_active_worker_finishes(tmp_path, cross_manager):
+    store, service, _ = library(tmp_path / "library")
+    entered, release, calls, run = held_recognition()
+    manager = AsrJobManager(store.path, project_loader=store.load)
+    other = None
+    try:
+        with recognition(run):
+            project = store.load("speech")
+            active = manager.submit(project, "voice", model="tiny")["jobId"]
+            assert entered.wait(5)
+            if cross_manager:
+                other = AsrJobManager(store.path, project_loader=store.load)
+            cancel_from = other or manager
+            retired = []
+            for _ in range(3):
+                pending = manager.submit(project, "voice", model="base")["jobId"]
+                assert manager.get(pending)["status"] == "queued"
+                assert cancel_from.cancel(pending)["status"] == "cancelled"
+                retired.append(pending)
+            replacement = manager.submit(project, "voice", model="small")["jobId"]
+            assert manager.get(replacement)["status"] == "queued"
+            assert manager.cancel(active)["status"] == "cancelled"
+            assert manager._threads[active].is_alive()
+            assert set(manager._threads) == {active}
+            assert set(manager._leases) == {active, replacement}
+            assert calls == ["tiny"]
+            with pytest.raises(SpeechRecognitionError, match="已有两个识别任务"):
+                manager.submit(project, "voice", model="medium")
+            release.set()
+            completed(manager, replacement)
+            assert calls == ["tiny", "small"]
+            assert all(manager.get(key)["status"] == "cancelled" and
+                       manager.get(key)["result"] is None for key in [active, *retired])
+    finally:
+        release.set()
+        manager.close()
+        if other:
+            other.close()
+        service.close()
+        store.close()
+
+
+@pytest.mark.parametrize("outcome", ["close", "start-failure", "cancel-race"])
+def test_pending_recovery_or_cancellation_during_promotion(tmp_path, monkeypatch, outcome):
+    store, service, _ = library(tmp_path / "library")
+    entered, release, calls, run = held_recognition()
+    manager = AsrJobManager(store.path, project_loader=store.load)
+    reopened = other = None
+    try:
+        with recognition(run):
+            project = store.load("speech")
+            active = manager.submit(project, "voice", model="tiny")["jobId"]
+            assert entered.wait(5)
+            pending = manager.submit(project, "voice", model="base")["jobId"]
+            original_worker = manager._threads[active]
+            if outcome == "start-failure":
+                def fail_start(_thread):
+                    raise RuntimeError("synthetic thread creation failure")
+
+                with monkeypatch.context() as fault:
+                    fault.setattr(threading.Thread, "start", fail_start)
+                    release.set()
+                    original_worker.join(5)
+                    assert not original_worker.is_alive()
+                assert manager.get(pending)["status"] == "interrupted"
+                assert pending not in manager._threads and pending not in manager._leases
+            elif outcome == "cancel-race":
+                other = AsrJobManager(store.path, project_loader=store.load)
+                start = manager._start
+
+                def cancel_before_claim(job_id, snapshot):
+                    assert other.cancel(job_id)["status"] == "cancelled"
+                    start(job_id, snapshot)
+
+                with monkeypatch.context() as race:
+                    race.setattr(manager, "_start", cancel_before_claim)
+                    release.set()
+                    original_worker.join(5)
+                    assert not original_worker.is_alive()
+                    manager._threads[pending].join(5)
+                    assert not manager._threads[pending].is_alive()
+                assert pending not in manager._leases
+            else:
+                manager.close()
+                release.set()
+                original_worker.join(5)
+                assert not original_worker.is_alive()
+            assert calls == ["tiny"]
+            manager.close()
+        reopened = AsrJobManager(store.path, project_loader=store.load)
+        assert reopened.get(active)["status"] == ("interrupted" if outcome == "close" else "completed")
+        if outcome == "cancel-race":
+            assert reopened.get(pending)["status"] == "cancelled"
+            assert reopened.resume(pending)["status"] == "cancelled"
+        else:
+            assert reopened.get(pending)["status"] == "interrupted"
+            with recognition():
+                assert reopened.resume(pending)["status"] == "queued"
+                assert completed(reopened, pending)["result"]["model"] == "base"
+    finally:
+        release.set()
+        manager.close()
+        if reopened:
+            reopened.close()
+        if other:
+            other.close()
+        service.close()
+        store.close()
+
+
+@pytest.mark.parametrize("lease_close_fails", [False, True])
+def test_handoff_never_reads_pending_from_finishing_worker(tmp_path, monkeypatch, caplog, lease_close_fails):
+    store, service, _ = library(tmp_path / "library")
+    entered, release, calls, run = held_recognition()
+    manager = AsrJobManager(store.path, project_loader=store.load)
+    try:
+        with recognition(run):
+            project = store.load("speech")
+            active = manager.submit(project, "voice", model="tiny")["jobId"]
+            assert entered.wait(5)
+            pending = manager.submit(project, "voice", model="base")["jobId"]
+            worker = manager._threads[active]
+            read, close_lease = manager._journal.get, manager._leases[active].close
+            bad_reads = []
+
+            def fault_on_stale_handoff_read(job_id):
+                if threading.current_thread() is worker and job_id == pending:
+                    bad_reads.append(job_id)
+                    raise sqlite3.OperationalError("synthetic read failure")
+                return read(job_id)
+
+            def fault_after_lease_close():
+                close_lease()
+                raise OSError("synthetic lease close error")
+
+            monkeypatch.setattr(manager._journal, "get", fault_on_stale_handoff_read)
+            if lease_close_fails:
+                monkeypatch.setattr(manager._leases[active], "close", fault_after_lease_close)
+            release.set()
+            worker.join(5)
+            assert not worker.is_alive()
+            completed(manager, pending)
+            assert not bad_reads
+            assert calls == ["tiny", "base"]
+            assert ("Could not close an ASR job lease" in caplog.text) == lease_close_fails
+    finally:
+        release.set()
+        manager.close()
+        service.close()
+        store.close()
+
+
+@pytest.mark.parametrize("repair_fails", [False, True])
+def test_failed_sqlite_claim_leaves_no_worker_or_lease_and_recovers(
+    tmp_path, monkeypatch, caplog, repair_fails
+):
+    store, service, _ = library(tmp_path / "library")
+    entered, release, calls, run = held_recognition()
+    manager = AsrJobManager(store.path, project_loader=store.load)
+    try:
+        with recognition(run):
+            project = store.load("speech")
+            active = manager.submit(project, "voice", model="tiny")["jobId"]
+            assert entered.wait(5)
+            pending = manager.submit(project, "voice", model="base")["jobId"]
+            worker = manager._threads[active]
+            db = manager._journal._db
+            fault_statuses = {"running", "interrupted"} if repair_fails else {"running"}
+            claim_workers = []
+
+            class ClaimFault:
+                def __getattr__(self, name):
+                    return getattr(db, name)
+
+                def execute(self, sql, params=()):
+                    if (sql.startswith("UPDATE asr_jobs SET status=") and params[-1] == pending
+                            and params[0] in fault_statuses):
+                        # Statement fails inside the real journal transaction.
+                        if params[0] == "running":
+                            claim_workers.append(threading.current_thread())
+                        return db.execute("SELECT * FROM nonexistent_asr_claim_table")
+                    return db.execute(sql, params)
+
+            with monkeypatch.context() as fault:
+                fault.setattr(manager._journal, "_db", ClaimFault())
+                release.set()
+                worker.join(5)
+                assert not worker.is_alive()
+                successor = wait_for(lambda: claim_workers and claim_workers[0])
+                successor.join(5)
+                assert not successor.is_alive()
+            assert calls == ["tiny"]
+            assert manager._active_job is None and manager._pending is None and not manager._leases
+            assert pending not in manager._threads
+            assert not db.in_transaction
+            abandoned = manager.get(pending)
+            assert abandoned["status"] == ("queued" if repair_fails else "interrupted")
+            assert abandoned["result"] is None
+            assert "Could not claim an ASR job" in caplog.text
+            assert ("Could not record ASR interruption" in caplog.text) == repair_fails
+            assert "nonexistent_asr_claim_table" not in caplog.text
+            manager.jobs("speech")
+            assert manager.get(pending)["status"] == "interrupted"
+            assert manager.resume(pending)["status"] == "queued"
+            assert completed(manager, pending)["result"]["model"] == "base"
+            assert calls == ["tiny", "base"]
+    finally:
+        release.set()
+        manager.close()
+        service.close()
+        store.close()
+
+
+def test_busy_commit_rolls_back_asr_journal_before_resuming(tmp_path):
+    database = str(tmp_path / "commit-busy.sqlite")
+    journal = AsrJournal(database)
+    reader = sqlite3.connect(database, isolation_level=None)
+    job_id = "commit-busy"
+    try:
+        assert journal._db.execute("PRAGMA journal_mode=DELETE").fetchone() == ("delete",)
+        journal._db.execute("PRAGMA busy_timeout=0")
+        journal.insert({"jobId": job_id, "projectId": "speech", "status": "queued",
+                        "updatedAt": time.time()}, {})
+        reader.execute("BEGIN")
+        assert reader.execute("SELECT status FROM asr_jobs WHERE job_id=?", (job_id,)).fetchone() == ("queued",)
+        with pytest.raises(sqlite3.OperationalError, match="database is locked"):
+            journal.update(job_id, {"status": "running"}, statuses=("queued",))
+        assert not journal._db.in_transaction
+        assert journal.get(job_id)["status"] == "queued"
+        reader.execute("COMMIT")
+        assert journal.update(job_id, {"status": "interrupted"}, statuses=("queued",))["status"] == "interrupted"
+        assert journal.update(job_id, {"status": "queued"}, statuses=("interrupted",))["status"] == "queued"
+    finally:
+        reader.close()
+        journal.close()
+
+
+def test_worker_started_then_interrupted_cannot_claim_resumed_job(tmp_path, monkeypatch):
+    store, service, _ = library(tmp_path / "library")
+    manager = AsrJobManager(store.path, project_loader=store.load)
+    old_ready, new_ready = threading.Event(), threading.Event()
+    release_old, release_new = threading.Event(), threading.Event()
+    workers, recognized = [], []
+    run, start = manager._run, threading.Thread.start
+
+    def held_run(job_id, project):
+        worker = threading.current_thread()
+        if worker is workers[0]:
+            old_ready.set()
+            assert release_old.wait(5), "test did not release the original worker"
+        else:
+            workers.append(worker)
+            new_ready.set()
+            assert release_new.wait(5), "test did not release the resumed worker"
+        run(job_id, project)
+
+    def interrupt_after_native_start(worker):
+        workers.append(worker)
+        start(worker)
+        assert old_ready.wait(5)
+        raise KeyboardInterrupt
+
+    def recognize(*args, **kwargs):
+        recognized.append(threading.current_thread())
+        return proposal(*args, **kwargs)
+
+    try:
+        with recognition(recognize):
+            monkeypatch.setattr(manager, "_run", held_run)
+            with monkeypatch.context() as fault:
+                fault.setattr(threading.Thread, "start", interrupt_after_native_start)
+                with pytest.raises(KeyboardInterrupt):
+                    manager.submit(store.load("speech"), "voice", model="tiny")
+            old_worker = workers[0]
+            interrupted, = manager.jobs("speech")
+            job_id = interrupted["jobId"]
+            assert interrupted["status"] == "interrupted"
+            assert old_worker.is_alive()
+            assert manager._active_job is None and not manager._threads and not manager._leases
+            assert manager.resume(job_id)["status"] == "queued"
+            assert new_ready.wait(5)
+            new_worker = manager._threads[job_id]
+            resumed_lease = manager._leases[job_id]
+            release_old.set()
+            old_worker.join(5)
+            assert not old_worker.is_alive()
+            assert not recognized, "superseded worker reached the recognizer"
+            assert manager.get(job_id)["status"] == "queued"
+            assert manager._active_job == job_id
+            assert manager._threads[job_id] is new_worker
+            assert manager._leases[job_id] is resumed_lease
+            release_new.set()
+            assert completed(manager, job_id)["result"]["model"] == "tiny"
+            assert recognized == [new_worker]
+    finally:
+        release_old.set()
+        release_new.set()
+        for worker in workers:
+            worker.join(5)
+        manager.close()
         service.close()
         store.close()
 

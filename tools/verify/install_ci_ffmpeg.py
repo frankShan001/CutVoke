@@ -15,6 +15,10 @@ MIRROR_URI = 'mirror+file:/etc/apt/apt-mirrors.txt'
 PROBE_BYTES = 1024 * 1024
 
 
+class _ProbeTimeout(ValueError):
+    """Curl reported its bounded transfer timeout (exit 28)."""
+
+
 def candidates(text):
     urls, seen = [], set()
     for line in text.splitlines():
@@ -22,9 +26,12 @@ def candidates(text):
             continue
         url = line.split()[0]
         parsed = urlsplit(url)
-        # Exact hosts from actions/runner-images configure-apt-sources.sh.
+        # Exact hosts observed in GitHub-hosted Ubuntu runner mirror lists.
+        # select() still requires and probes only the configured HTTPS canonical archive.
         official = parsed.hostname in ('archive.ubuntu.com', 'azure.archive.ubuntu.com',
-                                       'us-east-2.ec2.archive.ubuntu.com', 'security.ubuntu.com')
+                                       'us-east-1.ec2.archive.ubuntu.com',
+                                       'us-east-2.ec2.archive.ubuntu.com',
+                                       'us-west-2.ec2.archive.ubuntu.com', 'security.ubuntu.com')
         if (not official or parsed.scheme not in ('http', 'https') or parsed.port is not None
                 or parsed.username or parsed.password or parsed.path != '/ubuntu/'
                 or parsed.query or parsed.fragment or parsed.hostname in seen):
@@ -53,24 +60,41 @@ def package_metadata(text):
 
 
 def probe(url, filename, size, directory, run=subprocess.run):
-    body, headers = directory / 'probe.deb.part', directory / 'probe.headers'
-    result = run(['curl', '--disable', '--fail', '--silent', '--show-error',
-                  '--proto', '=http,https', '--max-redirs', '0', '--connect-timeout', '5',
-                  '--max-time', '15', '--range', f'0-{PROBE_BYTES - 1}',
-                  '--max-filesize', str(PROBE_BYTES), '--output', str(body),
-                  '--dump-header', str(headers), '--write-out', '%{http_code} %{time_total}',
-                  url + filename], capture_output=True, text=True, timeout=17)
-    if result.returncode:
-        raise ValueError(f'bounded probe failed ({result.returncode})')
-    status, elapsed = result.stdout.split()
-    if (status != '206' or not body.is_file() or body.stat().st_size != PROBE_BYTES
-            or not re.search(rf'^content-range:\s*bytes 0-{PROBE_BYTES - 1}/{size}\s*$',
-                             headers.read_text(), re.I | re.M)):
-        raise ValueError('probe range/size mismatch or redirect')
-    seconds = float(elapsed)
-    if not 0 < seconds <= 4:
-        raise ValueError('probe below 256 KiB/s qualification floor')
-    return seconds
+    # A timed-out request can leave partial headers/body. Each attempt must
+    # qualify on its own response, even when the enclosing task dir is reused.
+    with tempfile.TemporaryDirectory(prefix='qualification-', dir=directory) as temp:
+        body, headers = Path(temp) / 'probe.deb.part', Path(temp) / 'probe.headers'
+        result = run(['curl', '--disable', '--fail', '--silent', '--show-error',
+                      '--proto', '=http,https', '--max-redirs', '0', '--connect-timeout', '5',
+                      '--max-time', '15', '--range', f'0-{PROBE_BYTES - 1}',
+                      '--max-filesize', str(PROBE_BYTES), '--output', str(body),
+                      '--dump-header', str(headers), '--write-out', '%{http_code} %{time_total} %{time_starttransfer}',
+                      url + filename], capture_output=True, text=True, timeout=17)
+        if result.returncode == 28:
+            raise _ProbeTimeout('bounded probe failed (28)')
+        if result.returncode:
+            raise ValueError(f'bounded probe failed ({result.returncode})')
+        status, elapsed, *timing = result.stdout.split(maxsplit=2)
+        if (status != '206' or not body.is_file() or body.stat().st_size != PROBE_BYTES
+                or not re.search(rf'^content-range:\s*bytes 0-{PROBE_BYTES - 1}/{size}\s*$',
+                                 headers.read_text(), re.I | re.M)):
+            raise ValueError('probe range/size mismatch or redirect')
+        seconds = float(elapsed)
+        qualified = 0 < seconds <= 4
+        elapsed_ms = ttfb_ms = None
+        if 0 < seconds <= 15:
+            elapsed_ms = round(seconds * 1000)
+            # Only curl's decimal timing is informational. Never print the token
+            # or use it to qualify the transfer or decide a retry.
+            if timing and re.fullmatch(r'[0-9]{1,2}(?:\.[0-9]{1,6})?', timing[0]):
+                first_byte = float(timing[0])
+                if first_byte <= seconds:
+                    ttfb_ms = round(first_byte * 1000)
+        print(json.dumps({'probe': 'qualified-range', 'outcome': 'pass' if qualified else 'below-floor',
+                          'elapsed_ms': elapsed_ms, 'ttfb_ms': ttfb_ms}), flush=True)
+        if not qualified:
+            raise ValueError('probe below 256 KiB/s qualification floor')
+        return seconds
 
 
 def select(urls, filename, size, directory, probe_fn=probe):
@@ -80,7 +104,14 @@ def select(urls, filename, size, directory, probe_fn=probe):
     if canonical not in urls:
         raise RuntimeError('Configured HTTPS canonical archive missing; installation not attempted')
     try:
-        elapsed = probe_fn(canonical, filename, size, directory)
+        try:
+            elapsed = probe_fn(canonical, filename, size, directory)
+        except _ProbeTimeout:
+            # Retry only curl's transient timeout on this same configured URL.
+            # Both attempts are covered by the existing process-group deadline.
+            print(json.dumps({'mirror': canonical, 'probe': 'retry', 'attempt': 2,
+                              'curlExit': 28}), flush=True)
+            elapsed = probe_fn(canonical, filename, size, directory)
     except (ValueError, OSError, subprocess.TimeoutExpired) as exc:
         print(json.dumps({'mirror': canonical, 'probe': 'failed', 'reason': str(exc)}), flush=True)
         raise RuntimeError('Canonical transfer qualification failed; no fallback or installation') from exc

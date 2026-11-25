@@ -18,11 +18,11 @@
 
 完整目录是 `skills/cutvoke-editor/`，含 `SKILL.md`、按需读取的参考文档和可运行的 `scripts/demo.py`。请复制**整个目录**，保留相对引用。
 
-使用 Codex 个人技能目录时，在仓库中运行：
+使用 Codex 的[个人技能目录](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills)时，在 CutVoke 仓库中运行：
 
 ```powershell
 # Windows PowerShell
-$skillTarget = Join-Path $env:USERPROFILE '.codex/skills/cutvoke-editor'
+$skillTarget = Join-Path $env:USERPROFILE '.agents/skills/cutvoke-editor'
 if (Test-Path -LiteralPath $skillTarget) { throw 'Skill already exists; review it before replacing it.' }
 New-Item -ItemType Directory -Path (Split-Path $skillTarget) -Force | Out-Null
 Copy-Item -LiteralPath skills/cutvoke-editor -Destination $skillTarget -Recurse
@@ -30,11 +30,11 @@ Copy-Item -LiteralPath skills/cutvoke-editor -Destination $skillTarget -Recurse
 
 ```bash
 # POSIX shell
-mkdir -p "$HOME/.codex/skills"
-test ! -e "$HOME/.codex/skills/cutvoke-editor" && cp -R skills/cutvoke-editor "$HOME/.codex/skills/"
+mkdir -p "$HOME/.agents/skills"
+test ! -e "$HOME/.agents/skills/cutvoke-editor" && cp -R skills/cutvoke-editor "$HOME/.agents/skills/"
 ```
 
-若自定义了 `CODEX_HOME`，改用其中的 `skills/`。按客户端要求重新加载技能后，可用 `$cutvoke-editor` 调用。安装路径来自本机 Codex 技能约定；本次验证覆盖技能文件及 CutVoke 的 stdio MCP，并未逐一验证所有 AI 客户端的安装界面。
+如果只想在一个项目中使用，请改为把整个目录复制到该项目根目录下的 `.agents/skills/cutvoke-editor/`。选择一个位置即可，避免同一技能重复出现。如果技能没有出现，重启 Codex 后用 `$cutvoke-editor` 调用。
 
 其他支持 Markdown 指令的工具，可以直接读取 `skills/cutvoke-editor/SKILL.md`，再按需读取引用。按该工具的文档配置本地 MCP 或 HTTP 接口。这是可复制的指令包，并非经过全平台验证的安装器；远程客户端也不一定能够访问本机文件。
 

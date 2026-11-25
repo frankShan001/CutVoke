@@ -243,7 +243,7 @@ export async function runCommand(
   state: EditorState,
   type: string,
   payload: Record<string, unknown>,
-  opts: { autoShow?: boolean; retryConflict?: boolean; isCurrent?: () => boolean } = {},
+  opts: { autoShow?: boolean; retryConflict?: boolean; ignoreOlderRevision?: boolean; isCurrent?: () => boolean } = {},
 ): Promise<ActionResult> {
   const autoShow = opts.autoShow ?? true;
   if (!state.currentId) {
@@ -271,6 +271,8 @@ export async function runCommand(
   }
   const projectId = state.currentId;
   const ownsFeedback = () => opts.isCurrent?.() !== false;
+  const acceptsSuccess = (revision: string) => ownsFeedback() && !(opts.ignoreOlderRevision &&
+    latestState?.currentId === projectId && isOlderRevision(revision, latestState.revision));
   const doPost = async (expected: string) => {
     const commandId = newCommandId();
     rememberLocalCommand(projectId, commandId);
@@ -285,7 +287,7 @@ export async function runCommand(
   dispatch({ type: "SYNC_STATE_SET", syncState: "saving" });
   try {
     const result = await doPost(state.revision);
-    if (!ownsFeedback()) return { ok: true, command: result };
+    if (!acceptsSuccess(result.revision)) return { ok: true, command: result };
     dispatch({ type: "REVISION_SET", revision: result.revision });
     if (!type.startsWith("history.") && result.revision !== state.revision) {
       dispatch({ type: "UNDO_SET", blocked: false });
@@ -305,7 +307,7 @@ export async function runCommand(
         const currentRev2 = latestState ? latestState.revision : currentRev;
         try {
           const result = await doPost(currentRev2);
-          if (!ownsFeedback()) return { ok: true, command: result };
+          if (!acceptsSuccess(result.revision)) return { ok: true, command: result };
           dispatch({ type: "REVISION_SET", revision: result.revision });
           if (!type.startsWith("history.") && result.revision !== currentRev2) {
             dispatch({ type: "UNDO_SET", blocked: false });
@@ -426,6 +428,7 @@ export async function doExport(
   quality: ExportQuality = "high",
   range?: ExportRange,
   options: import("../lib/api").ExportOptions = {},
+  selectedRangeGuard?: { revision: string; isCurrent: () => boolean },
 ): Promise<ExportOutcome> {
   if (!state.currentId) {
     const err = new ApiFailure({ status: 400, code: "NO_PROJECT", message: tr("请先选择工程") });
@@ -434,9 +437,23 @@ export async function doExport(
   }
   try {
     if (!await flushPendingEdits()) throw new ApiFailure({ status: 409, code: "UNSAVED_EDITS", message: tr("保存失败，请重试") });
-    const job = await apiEnqueueExport(state.currentId, outPath, quality, range, true, options);
+    // A range copied from a clip must be queued against the exact reviewed
+    // revision. The command uses the same queue and rejects revision conflicts.
+    let jobId: string;
+    if (selectedRangeGuard) {
+      if (!selectedRangeGuard.isCurrent()) return { ok: false };
+      const result = await sendCommand(state.currentId, "export.enqueue",
+        { outPath, quality, overwrite: true, ...options, ...(range ? { range } : {}) },
+        selectedRangeGuard.revision, newCommandId());
+      const receipt = (result.changedEntities as Array<{ type: string; jobId?: string }>)
+        .find(entity => entity.type === "export_enqueued");
+      if (!receipt?.jobId) throw new ApiFailure({ status: 502, code: "INVALID_RESPONSE", message: tr(" 导出失败").trim() });
+      jobId = receipt.jobId;
+    } else {
+      jobId = (await apiEnqueueExport(state.currentId, outPath, quality, range, true, options)).jobId;
+    }
     dispatch({ type: "STATUS_SET", severity: "ok", text: msg("导出任务已加入队列，正在等待成片…") });
-    return { ok: true, inFlight: true, jobId: job.jobId };
+    return { ok: true, inFlight: true, jobId };
   } catch (err) {
     const f = showError(dispatch, err);
     return { ok: false, error: f };

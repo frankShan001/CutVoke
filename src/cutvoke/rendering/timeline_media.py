@@ -23,6 +23,7 @@ _FLIGHTS_LOCK = threading.Lock()
 _FLIGHTS: dict[str, list] = {}
 _CACHE_BYTES = 128 * 1024 * 1024
 _CACHE_FILES = 2048
+_WAVEFORM_CACHE_VERSION = 5
 
 
 @contextlib.contextmanager
@@ -71,7 +72,8 @@ def _prune(directory: Path) -> None:
                 count -= 1
 
 
-def _waveform(render, source: str, clip, start: float, end: float, width: int, target: Path) -> None:
+def _waveform(render, source: str, clip, start: float, end: float, width: int, target: Path,
+              *, channels: int = 1) -> None:
     positions = [_source_at(clip, start + (end - start) * i / width) for i in range(width + 1)]
     lo, hi = min(positions), max(positions)
     if hi - lo < 1e-6:
@@ -81,7 +83,7 @@ def _waveform(render, source: str, clip, start: float, end: float, width: int, t
     expected = max(1, math.ceil((hi - lo) * rate))
     peaks = np.zeros(bins, dtype=np.float32)
     command = [render.ffmpeg, "-hide_banner", "-loglevel", "error", "-nostdin", "-ss", f"{max(0, lo):.6f}",
-               "-i", source, "-t", f"{hi - lo:.6f}", "-map", "0:a:0", "-ac", "1", "-ar", str(rate),
+               "-i", source, "-t", f"{hi - lo:.6f}", "-map", "0:a:0", "-ac", str(channels), "-ar", str(rate),
                "-f", "s16le", "pipe:1"]
     # stderr goes to a bounded temporary file rather than filling a pipe while PCM is read.
     import tempfile
@@ -97,19 +99,28 @@ def _waveform(render, source: str, clip, start: float, end: float, width: int, t
         timer.start()
         try:
             consumed = 0
+            incomplete = False
             while True:
                 block = process.stdout.read(64 * 1024)
                 if not block:
                     break
-                samples = np.frombuffer(block, dtype="<i2").astype(np.float32)
-                indices = np.minimum(bins - 1, ((np.arange(len(samples)) + consumed) * bins // expected).astype(np.int32))
-                np.maximum.at(peaks, indices, np.abs(samples) / 32768)
-                consumed += len(samples)
+                whole = len(block) - len(block) % (2 * channels)
+                incomplete |= whole != len(block)
+                magnitudes = np.abs(np.frombuffer(memoryview(block)[:whole], dtype="<i2").astype(np.float32))
+                # A stereo downmix can cancel audible opposite-polarity channels.
+                # Preserve one amplitude per time frame before binning by time.
+                if channels == 2:
+                    magnitudes = magnitudes.reshape(-1, 2).max(axis=1)
+                indices = np.minimum(bins - 1, ((np.arange(len(magnitudes)) + consumed) * bins // expected).astype(np.int32))
+                np.maximum.at(peaks, indices, magnitudes / 32768)
+                consumed += len(magnitudes)
             code = process.wait()
             if code or timed_out.is_set():
                 errors.seek(max(0, errors.tell() - 500))
                 raise RenderError("Timeline waveform timed out" if timed_out.is_set()
                                   else "Timeline waveform failed: " + errors.read(500).decode("utf-8", "replace"))
+            if incomplete:
+                raise RenderError("Timeline waveform produced an incomplete PCM frame")
         finally:
             timer.cancel()
             if process.poll() is None:
@@ -165,7 +176,8 @@ def timeline_media(*, render, clip, cache_dir: Path, kind: str, width: int,
                "consumed": clip.consumed_source_duration.to_json(),
                "curve": clip.speed_curve.to_dict() if clip.speed_curve else None,
                "freeze": clip.freeze_at.to_json() if clip.freeze_at else None}
-    digest = hashlib.sha256(json.dumps([5 if kind == "thumbnail" else 4, str(source.resolve()), stat.st_size, stat.st_mtime_ns,
+    digest = hashlib.sha256(json.dumps([5 if kind == "thumbnail" else _WAVEFORM_CACHE_VERSION,
+                           str(source.resolve()), stat.st_size, stat.st_mtime_ns,
                            kind, width, round(start, 6), round(end, 6), mapping], sort_keys=True).encode()).hexdigest()
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -189,12 +201,14 @@ def _build_strip(render, clip, source, cache_dir, output, kind, width, start, en
     try:
         if _valid_strip(output, kind, width):
             return output
-        info = render.probe_media(str(source))
         if kind == "waveform":
+            info = render.probe_media(str(source), include_audio_channels=True)
             if not info.get("has_audio"):
                 return None
-            _waveform(render, str(source), clip, start, end, width, temporary)
+            channels = 2 if info.get("audio_channels") == 2 else 1
+            _waveform(render, str(source), clip, start, end, width, temporary, channels=channels)
         else:
+            info = render.probe_media(str(source))
             if not info.get("has_video"):
                 return None
             columns = max(1, min(8, math.ceil(width / 96)))

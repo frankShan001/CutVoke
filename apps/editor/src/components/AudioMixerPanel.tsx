@@ -5,6 +5,8 @@ import { getLatestState, runCommand } from "../store/actions";
 import type { AudioMix } from "../types/api";
 import { Button, Field, Panel, Select, TextInput } from "./ui";
 
+const minGainDb = -96, maxGainDb = 24;
+
 const effectOptions = [
   { id: "cutvoke.fx.equalizer", label: "EQ", params: { frequency: 1000, width: 1, gainDb: 0 } },
   { id: "cutvoke.fx.compressor", label: "Compressor", params: { threshold: -20, ratio: 4, attack: 20, release: 250 } },
@@ -28,13 +30,23 @@ export function AudioMixerPanel() {
   };
   const envelope = draft.envelope || [], effects = draft.effects || [];
   const locked = busy || !!state.editLock || !!track?.locked || !state.currentId;
+  // A gain can be off the numeric input's step grid (for instance from an agent).
+  const gainDb = draft.gainDb ?? 0;
+  const gainInRange = Number.isFinite(gainDb) && gainDb >= minGainDb && gainDb <= maxGainDb;
+  const setGain = (gainDb: number) => setDraft(current => ({ ...current, gainDb }));
   return <Panel title={tr("混音台")} subtitle={tr("轨道 → 子混音总线 → 主输出；包络使用工程时间。") }>
     <Field label={tr("混音通道")}><Select value={target} disabled={busy} onChange={event => setTarget(event.target.value)} aria-label={tr("混音通道")}>
       <option value="master">{tr("主输出")}</option>
       {sequence?.tracks.filter(t => ["audio", "video"].includes(t.kind) && t.role !== "sticker").map(t => <option key={t.id} value={`track:${t.id}`}>{t.id}</option>)}
       {sequence?.audioBuses?.map(b => <option key={b.id} value={`bus:${b.id}`}>{b.name}</option>)}
     </Select></Field>
-    <Field label={tr("增益（dB）")}><TextInput type="number" min={-96} max={24} step={.5} value={draft.gainDb ?? 0} disabled={locked} onChange={e => setDraft({ ...draft, gainDb: Number(e.target.value) })} /></Field>
+    <Field label={tr("增益（dB）")}><TextInput type="number" min={minGainDb} max={maxGainDb} step={.5} value={gainDb} disabled={locked} onChange={e => setGain(Number(e.target.value))} /></Field>
+    {track ? <div className="cv-row">
+      <input type="range" className="cv-range" min={minGainDb} max={maxGainDb}
+        step="any" value={gainDb} disabled={locked || !gainInRange}
+        aria-label={`${tr("混音通道")} · ${tr("增益（dB）")}`}
+        onChange={e => setGain(e.currentTarget.valueAsNumber)} />
+    </div> : null}
     <Field label={tr("声像（左 -1，右 1）")}><TextInput type="number" min={-1} max={1} step={.05} value={draft.pan ?? 0} disabled={locked} onChange={e => setDraft({ ...draft, pan: Number(e.target.value) })} /></Field>
     <label className="cv-row"><input type="checkbox" checked={draft.muted || false} disabled={locked} onChange={e => setDraft({ ...draft, muted: e.target.checked })} />{tr("静音")}</label>
     {target !== "master" ? <label className="cv-row"><input type="checkbox" checked={draft.solo || false} disabled={locked} onChange={e => setDraft({ ...draft, solo: e.target.checked })} />{tr("独奏")}</label> : null}

@@ -341,16 +341,19 @@ export async function updateCaption(
   return res;
 }
 
-/** 裁剪片段：只改一端边界（{clipId, timelineStart?} 或 {clipId, timelineEnd?}）。 */
+/** 裁剪片段：只改一端边界；正向左拖可同时更新源入点。 */
 export async function trimClip(
   dispatch: Dispatch<EditorAction>,
   state: EditorState,
-  input: { clipId: string } & ({ newStart: Rational; newEnd?: never } | { newStart?: never; newEnd: Rational }),
+  input: { clipId: string } & ({ newStart: Rational; newEnd?: never; sourceStart?: Rational } | { newStart?: never; newEnd: Rational; sourceStart?: never }),
 ): Promise<ActionResult> {
   const payload: Record<string, unknown> = { clipId: input.clipId };
   if (input.newStart) payload.timelineStart = input.newStart;
   if (input.newEnd) payload.timelineEnd = input.newEnd;
-  const res = await runCommand(dispatch, state, "clip.trim", payload);
+  if (input.sourceStart) payload.sourceStart = input.sourceStart;
+  // A computed source in is tied to this revision; never replay it over a newer one.
+  const res = await runCommand(dispatch, state, "clip.trim", payload,
+    input.sourceStart ? { retryConflict: false } : undefined);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
     dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已裁剪片段") });
@@ -473,6 +476,7 @@ export async function addKeyframe(
     interpolation?: KeyframeInterpolation;
     bezier?: [number,number,number,number];
   },
+  options?: { retryConflict?: boolean },
 ): Promise<ActionResult> {
   const payload: Record<string, unknown> = {
     clipId: input.clipId,
@@ -483,7 +487,7 @@ export async function addKeyframe(
   };
   if (input.interpolation) payload.interpolation = input.interpolation;
   if (input.bezier) payload.bezier = input.bezier;
-  const res = await runCommand(dispatch, state, "clip.keyframe", payload);
+  const res = await runCommand(dispatch, state, "clip.keyframe", payload, options);
   if (res.ok) {
     dispatch({ type: "UNDO_SET", blocked: false });
     dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已添加关键帧 {0}", input.param) });

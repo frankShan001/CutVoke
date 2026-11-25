@@ -15,6 +15,7 @@ from pathlib import Path
 import sqlite3
 import shutil
 import subprocess
+import sys
 import time
 
 ABI = 'dense-ffv1-v1'
@@ -87,7 +88,7 @@ class WindowCache:
 
     def restore(self, key, target):
         try:
-            with closing(self._connect()) as db, db:
+            with closing(self._connect()) as db:
                 row = db.execute('SELECT data,digest FROM windows WHERE key=? AND length(data)<=?',
                                  (key, self.MAX_ITEM)).fetchone()
                 if (row is None or not isinstance(row[0], bytes)
@@ -95,8 +96,15 @@ class WindowCache:
                         or hashlib.sha256(row[0]).hexdigest() != row[1]):
                     return False
                 # Holding the bytes, not a shared cache path, makes eviction safe.
-                Path(target).write_bytes(row[0])
-                db.execute('UPDATE windows SET used=? WHERE key=?', (time.time(), key))
+                if Path(target).write_bytes(row[0]) != len(row[0]):
+                    return False
+                # Eviction recency is advisory after the verified copy. A
+                # competing writer must not discard the request's good bytes.
+                try:
+                    with db:
+                        db.execute('UPDATE windows SET used=? WHERE key=?', (time.time(), key))
+                except sqlite3.Error:
+                    pass
                 return True
         except (OSError, sqlite3.Error):
             return False
@@ -195,7 +203,9 @@ def compiled_tool_identity(ffmpeg, ffprobe, cancel=None):
 
 
 def recovery_session(directory, snapshot, ffmpeg, options, cancel=None, *, ffprobe=None):
-    if snapshot is None:
+    # Frozen loaders execute bundled bytecode, even if readable source files
+    # happen to be present. A source hash cannot identify that runtime.
+    if snapshot is None or getattr(sys, 'frozen', False):
         return None
     try:
         document, paths = snapshot
@@ -210,7 +220,7 @@ def recovery_session(directory, snapshot, ffmpeg, options, cancel=None, *, ffpro
         version = subprocess.run([ffmpeg, '-version'], capture_output=True, check=True,
                                  timeout=10).stdout.decode('utf-8', errors='replace')
         # Include domain timing/keyframes and every preprocessing dependency,
-        # not just the renderer entry point. Missing frozen sources fail closed.
+        # not just the renderer entry point. Missing sources fail closed.
         package = Path(__file__).resolve().parents[1]
         if not (package / 'rendering' / 'render.py').is_file():
             return None

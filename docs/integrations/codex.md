@@ -38,7 +38,7 @@ Start a new Codex session and check that the CutVoke tools are listed (`/mcp` in
 
 ## 3. (Optional) Add the cutvoke-editor skill
 
-Copy the whole [`skills/cutvoke-editor/`](../../skills/cutvoke-editor/) folder to `~/.codex/skills/cutvoke-editor/`, then invoke it with `$cutvoke-editor`. Step-by-step commands for Windows and POSIX are in the [Agent Skill Guide](../user/agent-skill.md#copy-or-install).
+Copy the whole [`skills/cutvoke-editor/`](../../skills/cutvoke-editor/) folder to `~/.agents/skills/cutvoke-editor/` for personal use, or to `.agents/skills/cutvoke-editor/` at your project root for project-only use. Then invoke it with `$cutvoke-editor`. Step-by-step commands for Windows and POSIX are in the [Agent Skill Guide](../user/agent-skill.md#copy-or-install).
 
 ## 4. Try it
 

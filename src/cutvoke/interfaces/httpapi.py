@@ -44,6 +44,7 @@ import threading
 import zipfile
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from socketserver import TCPServer
 from typing import Any, Optional
 from urllib.parse import urlparse, parse_qs, unquote
 import uuid
@@ -79,7 +80,7 @@ from cutvoke.storage.media_uploads import (receive_upload, relative_path as medi
 
 # Bump when preview rendering changes so neither disk cache nor browser ETag can
 # treat media produced by an older renderer as current for the same project data.
-PREVIEW_RENDER_CACHE_VERSION = 39
+PREVIEW_RENDER_CACHE_VERSION = 40
 # Keep first playback and local edits bounded even on dense effect timelines.
 PREVIEW_WINDOW_SECONDS = 2
 ASSET_MEDIA_TYPES = {
@@ -2545,6 +2546,14 @@ class HttpApi:
                 evs = self.service.events_since(pid, since)
                 return 200, {"events": [e.to_dict() for e in evs]}
 
+            if method == "GET" and len(parts) == 7 and parts[4] == "exports" and parts[6] == "captions.srt":
+                self.service.get_project(pid)
+                srt = self._export_queue().caption_srt(pid, parts[5])
+                if srt is None:
+                    return 404, {"error": {"code": "NOT_FOUND",
+                                           "message": "No synchronized captions for this export"}}
+                return 200, {"__srt_attachment__": srt}
+
             # 该工程的导出任务列表（导出任务 UI 用）
             if method == "GET" and len(parts) == 5 and parts[4] == "exports":
                 store = self.service.store
@@ -3064,10 +3073,14 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
             self._write_body(payload)
 
         def _respond_bytes(self, status: int, data: bytes,
-                           ctype: str = "application/octet-stream") -> None:
+                           ctype: str = "application/octet-stream", *,
+                           attachment_srt: bool = False) -> None:
             self.send_response(status)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(data)))
+            if attachment_srt:
+                self.send_header("Content-Disposition", 'attachment; filename="captions.srt"')
+                self.send_header("Cache-Control", "no-store")
             for k, v in self._cors_headers().items():
                 self.send_header(k, v)
             self.end_headers()
@@ -3300,6 +3313,10 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                                          data.get("__media_etag__", ""),
                                          data.get("__media_type__", "application/octet-stream"))
                 return
+            if isinstance(data, dict) and "__srt_attachment__" in data:
+                self._respond_bytes(200, data["__srt_attachment__"].encode("utf-8"),
+                                    "text/plain; charset=utf-8", attachment_srt=True)
+                return
             # SRT 导出：纯文本（UTF-8）
             if isinstance(data, dict) and "__text__" in data:
                 self._respond_bytes(200, data["__text__"].encode("utf-8"),
@@ -3478,6 +3495,14 @@ def serve(api: HttpApi, host: str = "127.0.0.1", port: int = 8787,
     # retries delay unrelated API requests behind that burst.
     class LocalHTTPServer(ThreadingHTTPServer):
         request_queue_size = 128
+
+        def server_bind(self):
+            if self.server_address[0] != "127.0.0.1":
+                return super().server_bind()
+            # HTTPServer does a reverse lookup between bind and listen. A
+            # literal loopback endpoint does not need a DNS-derived name.
+            TCPServer.server_bind(self)
+            self.server_name, self.server_port = self.server_address[:2]
 
     server = LocalHTTPServer((bound, port), handler)
     api.shutdown_callback = server.shutdown

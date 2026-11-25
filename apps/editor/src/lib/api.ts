@@ -317,6 +317,7 @@ export interface ExportOptions {
   videoBitrateKbps?: number;
   audioBitrateKbps?: number;
   transparent?: boolean;
+  captionSidecar?: boolean;
 }
 
 export interface ExportRange {
@@ -432,6 +433,13 @@ export async function cancelExportJob(jobId: string): Promise<Pick<ExportJob, "j
 }
 
 /** GET /projects/{id}/exports → 该工程的导出任务列表（最新在前）。 */
+export async function downloadExportSrt(projectId: string, jobId: string): Promise<Blob> {
+  const path = `/projects/${encodeURIComponent(projectId)}/exports/${encodeURIComponent(jobId)}/captions.srt`;
+  const response = await fetch(API_BASE + path, { method: "GET" });
+  if (!response.ok) throw normalizeError(await readJson(response), response.status, path);
+  return response.blob();
+}
+
 export async function listExportJobs(projectId: string): Promise<ExportJob[]> {
   const data = await get<{ jobs: ExportJob[] }>(
     `/projects/${encodeURIComponent(projectId)}/exports`,

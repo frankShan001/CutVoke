@@ -10,7 +10,7 @@ import { msg, tr, useLocale } from "../i18n";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type SyntheticEvent } from "react";
 import { Play, Pause, Square, SkipBack, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Scissors, Repeat, Flag, LoaderCircle } from "lucide-react";
-import { useEditor } from "../store/editor";
+import { useEditor, type AudioPlayheadPublication } from "../store/editor";
 import { getLatestState, runCommand } from "../store/actions";
 import { splitClip } from "../store/clipEdit";
 import { TitleCanvasOverlay } from "./TitleCanvasOverlay";
@@ -27,6 +27,7 @@ import { RatioIcon } from "./playerIcons";
 import { usePreviewFrame } from "./usePreviewFrame";
 import { usePreviewPoster } from "./usePreviewPoster";
 import { useVideoHandoff } from "./useVideoHandoff";
+import { previewLoadSeekSite, recordPreviewPhase, seekPreviewVideo } from "../lib/previewSeekEvidence";
 import { usePreviewSegments } from "./usePreviewSegments";
 import { usePreviewPreload } from "./usePreviewPreload";
 import { useTranscriptAudition } from "./useTranscriptAudition";
@@ -107,7 +108,12 @@ export function Player() {
   const nativeAudioPositionRef = useRef<(() => number | null) | null>(null);
   const onNativeAudioPosition = useCallback((position: (() => number | null) | null) => { nativeAudioPositionRef.current = position; }, []);
   const onNativeAudioClock = useCallback((clock: (() => number) | null) => { nativeAudioClockRef.current = clock; }, []);
-  const audioTransportRef = useRef({ active: false, time: 0, started: 0, clock: null as (() => number) | null });
+  const audioTransportRef = useRef({ active: false, time: 0, started: 0, clock: null as (() => number) | null, epoch: {} });
+  const lastAudioPublication = useRef<{
+    stamp: AudioPlayheadPublication; clockEpoch: object; scope: object; video: HTMLVideoElement; mediaSource: string; time: number;
+  } | null>(null);
+  const playheadSeekVersionRef = useRef(state.playheadSeekVersion);
+  playheadSeekVersionRef.current = state.playheadSeekVersion;
   const scrubbingRef = useRef(state.scrubbing);
   scrubbingRef.current = state.scrubbing;
   const scrubPausedVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -209,6 +215,7 @@ export function Player() {
     source: videoUrl, active: mode === "video", playing,
     onPresented: (source) => {
       setReadyVideoUrl(source);
+      recordPreviewPhase("presented", videoRef.current, () => readSeekEvidence(videoRef.current));
       if (state.opening && usePrepared && source === prepared?.url && currentId &&
           (videoRef.current?.readyState || 0) >= 3) {
         dispatch({ type: "PROJECT_OPEN_READY", projectId: currentId });
@@ -217,6 +224,36 @@ export function Player() {
   });
   const windowBoundsRef = useRef({ start: windowStart, end: windowEnd, source: videoUrl });
   windowBoundsRef.current = { start: windowStart, end: windowEnd, source: videoUrl };
+  const publicationScope = useRef({
+    projectId: currentId, source: videoUrl, mediaUrl, start: windowStart, end: windowEnd, mode, playing, scrubbing: state.scrubbing,
+  });
+  const previousPublicationScope = publicationScope.current;
+  if (previousPublicationScope.projectId !== currentId || previousPublicationScope.source !== videoUrl ||
+      previousPublicationScope.mediaUrl !== mediaUrl || previousPublicationScope.start !== windowStart ||
+      previousPublicationScope.end !== windowEnd || previousPublicationScope.mode !== mode ||
+      previousPublicationScope.playing !== playing || previousPublicationScope.scrubbing !== state.scrubbing) {
+    publicationScope.current = {
+      projectId: currentId, source: videoUrl, mediaUrl, start: windowStart, end: windowEnd, mode, playing, scrubbing: state.scrubbing,
+    };
+  }
+  const preparedEvidence = useRef(usePrepared);
+  preparedEvidence.current = usePrepared;
+  const readSeekEvidence = useCallback((video: HTMLVideoElement | null) => ({
+    prepared: preparedEvidence.current, nativeAudioReady: nativeAudioRef.current,
+    audioActive: audioTransportRef.current.active, playing: playingRef.current,
+    audioAnchor: audioTransportRef.current.time, playhead: playheadRef.current,
+    decodeTime: decodePlayheadRef.current, reportedTime: reportedVideoTimeRef.current,
+    windowStart: windowBoundsRef.current.start, windowEnd: windowBoundsRef.current.end,
+    sourceMatches: !!video && video.dataset.previewSource === windowBoundsRef.current.source,
+  }), []);
+  const hasOffer = !!offered;
+  const warmedOffer = !!offeredMatches && readyVideoUrl === offered?.url;
+  useEffect(() => {
+    recordPreviewPhase("selection", videoRef.current, () => ({
+      ...readSeekEvidence(videoRef.current), offered: hasOffer, matching: !!offeredMatches,
+      retained: !!retainPrepared, warmedOffer, ready: videoReady, holding,
+    }));
+  }, [readSeekEvidence, hasOffer, offeredMatches, retainPrepared, warmedOffer, usePrepared, videoReady, holding, nativeAudioReady, playing, videoUrl]);
   const auditionBoundary = useRef<(time: number) => number | null>(() => null);
   const audioPlaybackClock = useCallback((initialize = false, reset = false) => {
     if (reset) { audioTransportRef.current.active = false; return { time: playheadRef.current, playing: false }; }
@@ -243,7 +280,7 @@ export function Player() {
       if (!transport.active || transport.clock !== source) {
         const prior = transport.clock?.() ?? performance.now() / 1000;
         transport.time = transport.active ? transport.time + Math.max(0, prior - transport.started) : playheadRef.current;
-        transport.active = true; transport.clock = source; transport.started = now;
+        transport.active = true; transport.clock = source; transport.started = now; transport.epoch = {};
       }
       // Wall time can outrun the actual audio device under load. Use the
       // graph's clock so healthy voices are never repeatedly seeked forward.
@@ -272,7 +309,19 @@ export function Player() {
     frame = requestAnimationFrame(publish);
     return () => cancelAnimationFrame(frame);
   }, [audioPlaybackClock, mediaEndSecs]);
+  // React can commit an older audio publication after the RAF has already
+  // advanced the same clock. Provenance distinguishes that from seek intent.
+  const isSupersededAudioPublication = useCallback((shown: AudioPlayheadPublication | undefined) => {
+    const latest = lastAudioPublication.current, transport = audioTransportRef.current;
+    return !!shown && !!latest && playingRef.current && !scrubbingRef.current && transport.active &&
+      transport.clock === nativeAudioClockRef.current && transport.epoch === latest.clockEpoch &&
+      latest.scope === publicationScope.current && latest.video === videoRef.current &&
+      latest.video.dataset.previewSource === windowBoundsRef.current.source && latest.mediaSource === latest.video.currentSrc && latest.time === reportedVideoTimeRef.current &&
+      shown.seekVersion === playheadSeekVersionRef.current && shown.seekVersion === latest.stamp.seekVersion &&
+      shown.epoch === latest.stamp.epoch && shown.ordinal < latest.stamp.ordinal;
+  }, []);
   useLayoutEffect(() => {
+    if (mode === "video" && isSupersededAudioPublication(state.audioPlayheadPublication)) return;
     if (audioTransportRef.current.active && Math.abs(playhead - reportedVideoTimeRef.current) > .25)
       audioTransportRef.current.active = false;
   }, [playhead]);
@@ -281,11 +330,13 @@ export function Player() {
     if (video && video.readyState >= 1) {
       const { start, end } = windowBoundsRef.current;
       const target = Math.min(end, Math.max(start, decodePlayheadRef.current));
-      if (Math.abs(video.currentTime - (target - start)) > 0.03) video.currentTime = target - start;
+      if (Math.abs(video.currentTime - (target - start)) > 0.03)
+        seekPreviewVideo(video, target - start, "bind", () => readSeekEvidence(video));
       reportedVideoTimeRef.current = target;
     }
     bindVideo(video);
-  }, [bindVideo]);
+    if (video) recordPreviewPhase("bound", video, () => readSeekEvidence(video));
+  }, [bindVideo, readSeekEvidence]);
   useEffect(() => { if (videoRef.current) videoRef.current.muted = nativeAudioReady; }, [nativeAudioReady]);
   useEffect(() => {
     const pause = () => { playingRef.current = false; setPlaying(false); videoRef.current?.pause(); };
@@ -380,10 +431,11 @@ export function Player() {
   }, [mode, currentId, decodePlayhead, scheduleFrame]);
   useEffect(() => {
     if (!segments.error || mode !== "video") return;
+    recordPreviewPhase("fallback-segment", videoRef.current, () => readSeekEvidence(videoRef.current));
     setMode("image");
     dispatchRef.current({ type: "STATUS_SET", severity: "warn",
       text: msg("连续预览失败，已切换到单帧预览") });
-  }, [segments.error, mode]);
+  }, [segments.error, mode, readSeekEvidence]);
 
   useEffect(() => {
     const onAssetRestored = (event: Event) => {
@@ -454,6 +506,10 @@ export function Player() {
   // video 就绪 / 失败 → 切换主/降级模式
   const onVideoLoaded = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current) return;
+    // A queued seeked event can arrive after a newer seek has started.
+    // While audio owns playback, don't rewind the pending seek to a stale render playhead.
+    if (event.type === "seeked" && event.currentTarget.seeking && audioTransportRef.current.active &&
+        playingRef.current && !scrubbingRef.current) return;
     setMode("video");
     const v = videoRef.current;
     if (!v || Number.isNaN(v.duration) || v.duration <= 0) return;
@@ -461,7 +517,7 @@ export function Player() {
     const localTarget = Math.max(0, target - windowStart);
     if (Math.abs(v.currentTime - localTarget) > 0.03) {
       try {
-        v.currentTime = localTarget;
+        seekPreviewVideo(v, localTarget, previewLoadSeekSite(event.type), () => readSeekEvidence(v));
       } catch {
         /* keep the decoded position if the browser rejects an early metadata seek */
       }
@@ -470,21 +526,23 @@ export function Player() {
     reportedVideoTimeRef.current = target;
     if (v.readyState >= 2 && !v.seeking) confirmFrame(v);
     if (playingRef.current && !scrubbingRef.current && v.paused && target < mediaEndSecs - 0.01) requestVideoPlay(v);
-  }, [mediaEndSecs, windowStart, windowEnd, requestVideoPlay, confirmFrame]);
+  }, [mediaEndSecs, windowStart, windowEnd, requestVideoPlay, confirmFrame, readSeekEvidence]);
   const onVideoError = useCallback((video: HTMLVideoElement) => {
     if (video !== videoRef.current || video.dataset.previewSource !== videoUrl ||
         !video.error || video.error.code === 1) return;
     decodedPrepared.current = null;
     setReadyVideoUrl(null);
     if (state.opening && usePrepared) {
+      recordPreviewPhase("fallback-open", video, () => readSeekEvidence(video));
       window.dispatchEvent(new CustomEvent("cutvoke:prepared-preview-error", { detail: { projectId: currentId } }));
       return;
     }
+    recordPreviewPhase("fallback-video", video, () => readSeekEvidence(video));
     setMode("image");
     dispatchRef.current({ type: "STATUS_SET", severity: "warn",
       text: msg("连续预览失败，已切换到单帧预览") });
     scheduleFrame(playheadRef.current);
-  }, [scheduleFrame, state.opening, usePrepared, currentId, videoUrl]);
+  }, [scheduleFrame, state.opening, usePrepared, currentId, videoUrl, readSeekEvidence]);
   const onVideoEnded = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current || scrubbingRef.current) return;
     if (audioTransportRef.current.active && playingRef.current) return;
@@ -516,7 +574,7 @@ export function Player() {
       : null;
     if (mode === "video" && !v.paused && lp.enabled && lp.in != null && loopEnd != null && loopEnd > lp.in) {
       if (absoluteTime >= loopEnd) {
-        if (lp.in >= windowStart && lp.in < windowEnd) v.currentTime = lp.in - windowStart;
+        if (lp.in >= windowStart && lp.in < windowEnd) seekPreviewVideo(v, lp.in - windowStart, "video-loop", () => readSeekEvidence(v));
         reportedVideoTimeRef.current = lp.in;
         setVideoTime(lp.in);
         dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: lp.in });
@@ -525,7 +583,7 @@ export function Player() {
     }
     if (!usePrepared && !v.paused && mediaEndSecs > 0 && absoluteTime >= mediaEndSecs - 0.01) {
       try {
-        v.currentTime = mediaEndSecs - windowStart;
+        seekPreviewVideo(v, mediaEndSecs - windowStart, "video-end", () => readSeekEvidence(v));
       } catch {
         /* keep the current decoded frame if the media element rejects the exact end */
       }
@@ -546,7 +604,7 @@ export function Player() {
       dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: boundedTime });
       suppressSeek.current = false;
     }
-  }, [endPlayWithEvidence, mediaEndSecs, mode, windowStart, windowEnd, usePrepared]);
+  }, [endPlayWithEvidence, mediaEndSecs, mode, windowStart, windowEnd, usePrepared, readSeekEvidence]);
   const onPlay = useCallback((event: SyntheticEvent<HTMLVideoElement>) => {
     if (event.currentTarget !== videoRef.current) return;
     setShowColorBefore(false);
@@ -603,6 +661,7 @@ export function Player() {
   useEffect(() => {
     const v = videoRef.current;
     if (mode !== "video" || !v || suppressSeek.current) return;
+    if (isSupersededAudioPublication(state.audioPlayheadPublication)) return;
     const boundedPlayhead = Math.min(mediaEndSecs, Math.max(0, decodePlayhead));
     if (state.scrubbing && !usePrepared && decodePlayhead !== playhead) return;
     setVideoTime(boundedPlayhead);
@@ -611,7 +670,7 @@ export function Player() {
         boundedPlayhead >= windowStart && boundedPlayhead <= windowEnd) {
       try {
         if (Math.abs(v.currentTime - (boundedPlayhead - windowStart)) > 0.03) {
-          v.currentTime = Math.max(0, boundedPlayhead - windowStart);
+          seekPreviewVideo(v, Math.max(0, boundedPlayhead - windowStart), "external-sync", () => readSeekEvidence(v));
         }
         // An action may already have positioned the native video. Accept that
         // seek too, otherwise the playback guard rejects every subsequent tick.
@@ -620,7 +679,7 @@ export function Player() {
         /* ignore */
       }
     }
-  }, [decodePlayhead, playhead, state.scrubbing, usePrepared, mediaEndSecs, mode, windowStart, windowEnd]);
+  }, [decodePlayhead, playhead, state.scrubbing, usePrepared, mediaEndSecs, mode, windowStart, windowEnd, readSeekEvidence]);
 
   // Publish once per decoded frame, rather than repainting the editor at the
   // display's 60/144Hz rate while a 30fps video is still showing the same frame.
@@ -670,15 +729,27 @@ export function Player() {
         if (loop.enabled && loop.in != null && loop.out != null && loop.out > loop.in && time >= Math.min(loop.out, mediaEndSecs)) {
           time = loop.in;
           const source = nativeAudioClockRef.current;
-          audioTransportRef.current = { active: true, time, started: source?.() ?? performance.now() / 1000, clock: source };
+          audioTransportRef.current = { active: true, time, started: source?.() ?? performance.now() / 1000, clock: source, epoch: {} };
+        }
+        const video = videoRef.current, bounds = windowBoundsRef.current;
+        let audioPublication: AudioPlayheadPublication | undefined;
+        const transport = audioTransportRef.current;
+        if (clock.playing && transport.active && video && video.dataset.previewSource === bounds.source && video.currentSrc) {
+          const prior = lastAudioPublication.current, scope = publicationScope.current, mediaSource = video.currentSrc;
+          const previous = prior && prior.clockEpoch === transport.epoch && prior.scope === scope &&
+            prior.video === video && prior.mediaSource === mediaSource ? prior.stamp : null;
+          audioPublication = {
+            epoch: previous?.epoch ?? {}, seekVersion: playheadSeekVersionRef.current,
+            ordinal: (previous?.ordinal ?? 0) + 1,
+          };
+          lastAudioPublication.current = { stamp: audioPublication, clockEpoch: transport.epoch, scope, video, mediaSource, time };
         }
         reportedVideoTimeRef.current = time;
         setVideoTime(time);
-        dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: time });
-        const video = videoRef.current, bounds = windowBoundsRef.current;
+        dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: time, audioPublication });
         if (video && video.dataset.previewSource === bounds.source && video.readyState >= 2 && time >= bounds.start && time < bounds.end) {
           if (!video.seeking && Math.abs(video.currentTime - (time - bounds.start)) > .15)
-            video.currentTime = time - bounds.start;
+            seekPreviewVideo(video, time - bounds.start, "audio-tick", () => readSeekEvidence(video));
           if (video.paused) requestVideoPlay(video);
         }
         if (time >= mediaEndSecs) {
@@ -692,7 +763,7 @@ export function Player() {
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [playing, nativeAudioReady, state.scrubbing, mode, audioPlaybackClock, mediaEndSecs, requestVideoPlay, endPlayWithEvidence]);
+  }, [playing, nativeAudioReady, state.scrubbing, mode, audioPlaybackClock, mediaEndSecs, requestVideoPlay, endPlayWithEvidence, readSeekEvidence]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -737,9 +808,9 @@ export function Player() {
     const v = videoRef.current;
     if (v) {
       v.pause();
-      v.currentTime = 0;
+      seekPreviewVideo(v, 0, "project-reset", () => readSeekEvidence(v));
     }
-  }, [currentId, resetFrames]);
+  }, [currentId, resetFrames, readSeekEvidence]);
 
   // 基础画面变化后重新尝试 video 模式；字幕更新不应让已降级的预览反复重试。
   useEffect(() => {
@@ -782,7 +853,7 @@ export function Player() {
         // Explicit seeks update the timeline before the decoder catches up.
         // A stale video cursor at its old endpoint must not restart from zero.
         if (playhead >= mediaEndSecs - 0.01) {
-          if (windowStart === 0) v.currentTime = 0;
+          if (windowStart === 0) seekPreviewVideo(v, 0, "play-restart", () => readSeekEvidence(v));
           reportedVideoTimeRef.current = 0;
           setVideoTime(0);
           dispatch({ type: "PLAYHEAD_SET", t: 0 });
@@ -844,7 +915,8 @@ export function Player() {
       reportedVideoTimeRef.current = time;
       setVideoTime(time);
       const video = videoRef.current;
-      if (video && time >= windowStart && time <= windowEnd) video.currentTime = time - windowStart;
+      if (video && time >= windowStart && time <= windowEnd)
+        seekPreviewVideo(video, time - windowStart, "audition", () => readSeekEvidence(video));
       dispatchRef.current({ type: "PLAYHEAD_SET", source: "transport", t: time });
     },
     onEnd: () => dispatchRef.current({ type: "STATUS_SET", severity: "ok", text: msg("已暂停") }),
@@ -859,7 +931,7 @@ export function Player() {
     if (mode === "video" && v) {
       if (!v.paused) pauseStatusRef.current = tr("已回到开头");
       v.pause();
-      v.currentTime = 0;
+      seekPreviewVideo(v, 0, "stop", () => readSeekEvidence(v));
     }
     dispatch({ type: "PLAYHEAD_SET", t: 0 });
     dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已回到开头") });
@@ -880,7 +952,7 @@ export function Player() {
       setVideoTime(next);
       if (next >= windowStart && next < windowEnd) {
         try {
-          v.currentTime = next - windowStart;
+          seekPreviewVideo(v, next - windowStart, "frame-step", () => readSeekEvidence(v));
         } catch {
           /* ignore */
         }

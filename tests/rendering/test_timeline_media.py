@@ -188,3 +188,68 @@ def test_failed_replace_does_not_accept_corrupt_peer_cache(media, tmp_path, monk
     with pytest.raises(PermissionError):
         strip(tmp_path, clip(media[0]))
     assert not list(tmp_path.glob('*.tmp.png'))
+
+
+def test_stereo_waveform_preserves_first_stream_peaks_and_cache(tmp_path, monkeypatch):
+    """A later default stream must not determine channel count or waveform."""
+    import wave
+    import cutvoke.rendering.timeline_media as module
+
+    sample_rate = 16000
+    t = np.arange(12 * sample_rate) / sample_rate
+    active = ((1 <= t) & (t < 3)) | ((9 <= t) & (t < 11))
+    signal = (24000 * np.sin(2 * np.pi * 431 * t) * active).astype("<i2")
+
+    def wav(name, samples):
+        path = tmp_path / name
+        with wave.open(str(path), "wb") as audio:
+            audio.setnchannels(1 if samples.ndim == 1 else samples.shape[1])
+            audio.setsampwidth(2)
+            audio.setframerate(sample_rate)
+            audio.writeframes(samples.astype("<i2", copy=False).tobytes())
+        return path
+
+    opposite = wav("opposite.wav", np.column_stack((signal, -signal)))
+    same = wav("same.wav", np.column_stack((signal, signal)))
+    mono = wav("mono.wav", signal)
+    other = wav("default.wav", np.full(signal.shape, 25000, dtype="<i2"))
+    multi = tmp_path / "two-streams.mkv"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(opposite), "-i", str(other),
+                    "-map", "0:a:0", "-map", "1:a:0", "-c:a", "copy",
+                    "-disposition:a:0", "0", "-disposition:a:1", "default", str(multi)],
+                   check=True, capture_output=True, timeout=15)
+
+    renderer = RenderService(gpu_effects=False)
+    cache = tmp_path / "strips"
+
+    def render(path):
+        return timeline_media(render=renderer, clip=clip(path, duration=12), cache_dir=cache,
+                              kind="waveform", width=192)
+
+    def heights(path):
+        with Image.open(path) as image:
+            columns = np.count_nonzero(np.asarray(image)[..., 3], axis=0)
+        # Second signal is after at least one full 64 KiB PCM block, even in
+        # the old mono decoder. Ignore resampler transients at the boundaries.
+        return [int(np.median(columns[lo:hi])) for lo, hi in
+                ((2, 12), (20, 42), (70, 123), (148, 168), (182, 190))]
+
+    assert "audio_channels" not in renderer.probe_media(str(multi))
+    assert renderer.probe_media(str(multi), include_audio_channels=True)["audio_channels"] == 2
+    assert "audio_channels" not in renderer.probe_media(str(multi))
+
+    with monkeypatch.context() as legacy:
+        legacy.setattr(module, "_WAVEFORM_CACHE_VERSION", 4)
+        stale = render(multi)
+        Image.new("RGBA", (192, 36)).save(stale)
+
+    fixed = render(multi)
+    assert fixed != stale
+    assert heights(stale) == [0] * 5
+    stereo = heights(fixed)
+    assert stereo[0] == stereo[2] == stereo[4] <= 2
+    assert stereo[1] == stereo[3] >= 20
+    assert heights(render(same)) == stereo
+    assert heights(render(mono)) == stereo
+    monkeypatch.setattr(renderer, "probe_media", lambda *a, **kw: pytest.fail("cache hit probed source again"))
+    assert render(multi) == fixed

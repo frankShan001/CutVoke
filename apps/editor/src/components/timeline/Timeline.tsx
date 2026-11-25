@@ -20,6 +20,7 @@ import { playbackEndSecs } from "../playerUtils";
 import { getEffectCatalog, type EffectSpec } from "../../lib/effects";
 import { useTimelineViewport } from "./useTimelineViewport";
 import { TimelineEditTools } from "./TimelineEditTools";
+import { TimelineMarkerTool } from "./TimelineMarkerTool";
 import { selectedClipIds } from "../../store/timelineSelection";
 import { copySelectedClips, pasteClipsAtPlayhead } from "../../store/timelineClipboard";
 import { useTimelineMarquee } from "./useTimelineMarquee";
@@ -238,6 +239,7 @@ export function Timeline() {
         </span>
         <span className="timeline__spacer" />
         <TimelineEditTools />
+        <TimelineMarkerTool key={state.currentId} end={playableEndSecs} />
         <button
           className={`tool-btn ${state.mainTrackAutoFitEnabled ? "tool-btn--on" : ""}`}
           onClick={() => dispatch({ type: "MAIN_TRACK_AUTO_FIT_TOGGLE" })}

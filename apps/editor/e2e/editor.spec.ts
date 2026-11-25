@@ -3592,6 +3592,41 @@ test("timeline range export is queued and reports the selected duration", async 
   unlinkSync(outputPath);
 });
 
+test("ranged MP4 downloads its own synchronized SRT from a successful export", async ({ page, request }) => {
+  test.setTimeout(90_000);
+  const { id, name } = await createProject(request);
+  await apply(request, id, "caption.update", { captionId: "caption-one", text: "中文 · café" });
+  await openProject(page, name);
+  await page.getByRole("button", { name: "导出", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "导出成片" });
+  const include = dialog.getByRole("checkbox", { name: "附带与成片对齐的 SRT" });
+  const download = dialog.getByRole("button", { name: "下载与成片对齐的 SRT" });
+  const outputPath = await projectOutputPath(request, id, `${id}-synchronized.mp4`);
+  await dialog.getByLabel("输出文件路径").fill(outputPath);
+  await expect(include).toBeDisabled();
+  await expect(download).toHaveCount(0);
+  await dialog.getByLabel("仅导出时间范围").check();
+  await dialog.getByLabel("导出开始时间").fill("0.8");
+  await dialog.getByLabel("导出结束时间").fill("2.2");
+  await expect(include).toBeEnabled();
+  await expect(include).not.toBeChecked();
+  await include.check();
+  try {
+    await dialog.getByRole("button", { name: "开始导出" }).click();
+    await expect(download).toBeVisible({ timeout: 75_000 });
+    expect(statSync(outputPath).size).toBeGreaterThan(0);
+    const [file] = await Promise.all([page.waitForEvent("download"), download.click()]);
+    expect(file.suggestedFilename()).toMatch(/^captions-export_[a-f0-9]+\.srt$/);
+    expect(readFileSync((await file.path())!, "utf8")).toBe("1\n00:00:00,200 --> 00:00:01,400\n中文 · café\n");
+    const unchangedGlobal = await request.get(`${apiPath(id)}/captions.srt`);
+    expect(await unchangedGlobal.text()).toContain("00:00:01,000 --> 00:00:03,000");
+  } finally {
+    try { unlinkSync(outputPath); } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
+  }
+});
+
 test("transparent export UI writes a real ProRes MOV and restores its options", async ({ page, request }) => {
   const { id, name } = await createProject(request);
   await openProject(page, name);
@@ -5204,4 +5239,268 @@ test("live image and sticker picking respects transparent pixels and composition
   await page.getByRole("button", { name: "撤销", exact: true }).click();
   await expect(page.getByRole("spinbutton", { name: "水平位置 X（像素）" })).toHaveValue("100");
   await page.screenshot({ path: "../../.artifacts/live-image-sticker-composition.png" });
+});
+
+test("forward audio left-handle trim after a split preserves source out at 1x and 2x", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  const media = test.info().outputPath("left-trim.wav");
+  mkdirSync(dirname(media), { recursive: true });
+  execFileSync("ffmpeg", ["-v", "error", "-nostdin", "-y", "-f", "lavfi",
+    "-i", "sine=frequency=440:sample_rate=48000:duration=6", "-c:a", "pcm_s16le", media], { timeout: 10_000 });
+  const uploaded = await request.post("/api/v1/assets?name=left-trim.wav", {
+    headers: { "Content-Type": "application/octet-stream" }, data: readFileSync(media),
+  });
+  expect(uploaded.ok(), await uploaded.text()).toBeTruthy();
+  const asset = await uploaded.json();
+  for (const speed of [1, 2]) {
+    const trackId = `audio-lane-${speed}`;
+    const clipId = `audio-${speed}`;
+    await apply(request, id, "track.add", { trackId, kind: "audio" });
+    await apply(request, id, "clip.insert", { trackId, clipId, sourcePath: asset.path,
+      timelineStart: { num: 0, den: 1 }, timelineEnd: { num: 6, den: 1 } });
+    if (speed === 2) await apply(request, id, "clip.speed", { clipId, speed });
+    await apply(request, id, "clip.split", { clipId, at: { num: 6, den: 5 * speed } });
+  }
+  await openProject(page, name);
+  const zoom = page.locator(".timeline__zoom-val");
+  for (let level = 0; level < 7 && await zoom.textContent() !== "80px/s"; level += 1) {
+    const scale = Number((await zoom.textContent())!.split("px")[0]);
+    await page.locator(`.timeline__zoom button[aria-label='${scale < 80 ? "放大" : "缩小"}']`).click();
+  }
+  await expect(zoom).toHaveText("80px/s");
+  for (const speed of [1, 2]) {
+    const selector = page.locator(`[data-clip-id="audio-${speed}_r"]`);
+    const handle = selector.locator(".clip-block__drag--l");
+    await handle.scrollIntoViewIfNeeded();
+    const clipBox = (await selector.boundingBox())!;
+    const handleBox = (await handle.boundingBox())!;
+    expect(clipBox).toBeTruthy();
+    expect(handleBox).toBeTruthy();
+    const read = async () => {
+      const clip = (await readProject(request, id)).sequence.tracks.find(t => t.id === `audio-lane-${speed}`)!
+        .clips.find(c => c.id === `audio-${speed}_r`)!;
+      const sourceStart = (clip as typeof clip & { sourceStart: typeof clip.timelineStart }).sourceStart;
+      return [seconds(clip.timelineStart), seconds(clip.timelineEnd), seconds(sourceStart)];
+    };
+    const before = [1.2 / speed, 6 / speed, 1.2];
+    const after = [2.4 / speed, 6 / speed, 2.4];
+    const showsStart = (start: number) => expect(selector).toHaveAttribute("aria-label", new RegExp(`开始于 ${start.toFixed(3)} 秒`));
+    expect(await read()).toEqual(before);
+    await showsStart(before[0]);
+    const gestureRevision = (await readProject(request, id)).revision;
+    const x = handleBox.x + handleBox.width / 2, y = handleBox.y + handleBox.height / 2;
+    const destination = x + clipBox.width / 4;
+    const scroller = (await page.locator(".timeline__scroller").boundingBox())!;
+    expect(destination).toBeLessThan(scroller.x + scroller.width);
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    try {
+      await page.mouse.move(destination, y, { steps: 8 });
+      await expect(page.getByTestId("clip-trim-readout")).toHaveAttribute("data-edge-frame", String(36 / speed));
+      expect(await read()).toEqual(before);
+      expect((await readProject(request, id)).revision).toBe(gestureRevision);
+    } finally {
+      await page.mouse.up();
+    }
+    await expect.poll(read).toEqual(after);
+    await showsStart(after[0]);
+    await page.getByRole("button", { name: "撤销", exact: true }).click();
+    await expect.poll(read).toEqual(before);
+    await showsStart(before[0]);
+    await page.getByRole("button", { name: "重做", exact: true }).click();
+    await expect.poll(read).toEqual(after);
+    await showsStart(after[0]);
+  }
+});
+
+test("a human can save one review marker at the captured playhead and undo it", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await openProject(page, name);
+  const ruler = page.getByRole("slider", { name: "时间线播放头" });
+  await ruler.press("Home");
+  await ruler.press("ArrowRight");
+  await expect.poll(async () => Number(await ruler.getAttribute("aria-valuenow"))).toBeCloseTo(1 / 15, 6);
+  const trigger = page.getByRole("button", { name: "添加审片标记" });
+  const dialog = page.getByRole("dialog", { name: "添加审片标记" });
+  const input = dialog.getByLabel("标记备注");
+  const save = dialog.getByRole("button", { name: "保存", exact: true });
+  const cancel = dialog.getByRole("button", { name: "取消", exact: true });
+  const before = await readProject(request, id);
+  const markerRequests: unknown[] = [];
+  page.on("request", req => {
+    if (req.method() === "POST" && new URL(req.url()).pathname === `${apiPath(id)}/commands`) {
+      const body = req.postDataJSON();
+      if (body.type === "marker.add") markerRequests.push(body);
+    }
+  });
+  await trigger.click();
+  await expect(input).toBeFocused();
+  await input.fill("   ");
+  await expect(save).toBeDisabled();
+  await input.fill("Discard this note");
+  await cancel.click();
+  await expect(dialog).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await expect(input).toHaveValue("");
+  await input.press("Escape");
+  await expect(dialog).toBeHidden();
+  expect((await readProject(request, id)).revision).toBe(before.revision);
+  expect(markerRequests).toHaveLength(0);
+
+  await trigger.click();
+  await input.fill("Leave a little more time");
+  const acquired = await request.post(`${apiPath(id)}/edit-lock`, { data: { owner: "marker-review-agent", ttlSeconds: 30 } });
+  expect(acquired.ok(), await acquired.text()).toBeTruthy();
+  const leaseId = (await acquired.json()).lease.leaseId;
+  try {
+    await expect(dialog).toBeHidden();
+    await expect(trigger).toBeDisabled();
+    expect(markerRequests).toHaveLength(0);
+    expect((await readProject(request, id)).revision).toBe(before.revision);
+  } finally {
+    const released = await request.post(`${apiPath(id)}/edit-lock/release`, { data: { leaseId } });
+    expect(released.ok()).toBeTruthy();
+  }
+
+  await trigger.click();
+  await input.fill("  Hold the next shot  ");
+  await save.click();
+  await expect(dialog).toBeHidden();
+  expect(markerRequests).toHaveLength(1);
+  expect(markerRequests[0]).toMatchObject({
+    type: "marker.add", expectedRevision: before.revision,
+    payload: { name: "Hold the next shot", time: { num: "1", den: "15" } },
+  });
+  const markers = async () => {
+    const sequence = (await readProject(request, id)).sequence as Project["sequence"] & {
+      markers: Array<{ name: string; time: Parameters<typeof seconds>[0] }>;
+    };
+    return sequence.markers.map(item => [item.name, seconds(item.time)]);
+  };
+  await expect.poll(markers).toEqual([["Hold the next shot", 1 / 15]]);
+  await expect(page.locator(".timeline-ruler__marker")).toHaveCount(1);
+  await page.getByRole("button", { name: "撤销", exact: true }).click();
+  await expect.poll(markers).toEqual([]);
+  await expect(page.locator(".timeline-ruler__marker")).toHaveCount(0);
+});
+
+function reviewMarkerRoutes(id: string) {
+  const project = apiPath(id);
+  const commands = `${project}/commands`;
+  const isProjectRead = (path: string) => path === project || path === `${project}/sync`;
+  return { commands, isProjectRead, matches: (url: URL) => isProjectRead(url.pathname) || url.pathname === commands };
+}
+
+for (const blocked of ["post", "refresh"] as const) {
+  test(`closing a review marker while its ${blocked} is pending does not resubmit`, async ({ page, request }) => {
+    const { id, name } = await createProject(request);
+    await openProject(page, name);
+    const trigger = page.getByRole("button", { name: "添加审片标记" });
+    const dialog = page.getByRole("dialog", { name: "添加审片标记" });
+    const note = `Pending ${blocked}`;
+    let markerPosts = 0;
+    let withheld = false;
+    let release!: () => void;
+    const gate = new Promise<void>(resolve => { release = resolve; });
+    const paths = reviewMarkerRoutes(id);
+    await page.route(paths.matches, async route => {
+      const req = route.request();
+      const markerPost = req.method() === "POST" && new URL(req.url()).pathname === paths.commands &&
+        req.postDataJSON()?.type === "marker.add";
+      if (markerPost) markerPosts++;
+      if ((blocked === "post" && markerPost) ||
+          (blocked === "refresh" && markerPosts > 0 && req.method() === "GET" && paths.isProjectRead(new URL(req.url()).pathname))) {
+        withheld = true;
+        await gate;
+      }
+      await route.continue();
+    });
+    try {
+      await trigger.click();
+      await dialog.getByLabel("标记备注").fill(note);
+      await dialog.getByRole("button", { name: "保存", exact: true }).click();
+      await expect.poll(() => withheld, { timeout: 10_000, message: `Expected to intercept marker ${blocked}` }).toBe(true);
+      await expect(dialog.getByRole("status")).toHaveText("保存中…");
+      const readNames = async () => {
+        const current = await readProject(request, id);
+        const markers = (current.sequence as Project["sequence"] & { markers: Array<{ name: string }> }).markers;
+        return markers.map(item => item.name);
+      };
+      if (blocked === "post") expect(await readNames()).toEqual([]);
+      else await expect.poll(readNames).toEqual([note]);
+      if (blocked === "post") {
+        await page.keyboard.press("Escape");
+      } else {
+        await dialog.getByRole("button", { name: "关闭", exact: true }).click();
+      }
+      await expect(dialog).toBeHidden();
+      await expect(trigger).toBeDisabled();
+      await expect(page.getByRole("slider", { name: "时间线播放头" })).toBeFocused();
+      expect(markerPosts).toBe(1);
+    } finally {
+      release();
+    }
+
+    await expect(trigger).toBeEnabled();
+    const sequence = (await readProject(request, id)).sequence as Project["sequence"] & {
+      markers: Array<{ name: string }>;
+    };
+    expect(sequence.markers.map(item => item.name)).toEqual([note]);
+    expect(markerPosts).toBe(1);
+    await expect(page.getByRole("button", { name: "撤销", exact: true })).toBeEnabled();
+  });
+}
+
+test("a late review marker response does not roll a newer project revision backwards", async ({ page, request }) => {
+  const { id, name } = await createProject(request);
+  await openProject(page, name);
+  const trigger = page.getByRole("button", { name: "添加审片标记" });
+  const dialog = page.getByRole("dialog", { name: "添加审片标记" });
+  let committed = false;
+  let releaseReceipt!: () => void, releaseReads!: () => void;
+  const holdReceipt = new Promise<void>(resolve => { releaseReceipt = resolve; });
+  const holdReads = new Promise<void>(resolve => { releaseReads = resolve; });
+  let blockReads = false;
+  let markerPosts = 0;
+
+  const paths = reviewMarkerRoutes(id);
+  await page.route(paths.matches, async route => {
+    const req = route.request();
+    if (req.method() === "POST" && new URL(req.url()).pathname === paths.commands &&
+        req.postDataJSON()?.type === "marker.add") {
+      markerPosts++;
+      const response = await route.fetch();
+      committed = response.ok();
+      await holdReceipt;
+      await route.fulfill({ response });
+    } else {
+      if (blockReads && req.method() === "GET" && paths.isProjectRead(new URL(req.url()).pathname)) await holdReads;
+      await route.continue();
+    }
+  });
+  try {
+    const before = await readProject(request, id);
+    await trigger.click();
+    await dialog.getByLabel("标记备注").fill("First pending");
+    await dialog.getByRole("button", { name: "保存", exact: true }).click();
+    await expect.poll(() => committed, { timeout: 10_000, message: "Expected a held, successful marker POST receipt" }).toBe(true);
+    const first = await readProject(request, id);
+    expect(first.revision).not.toBe(before.revision);
+    await dialog.getByRole("button", { name: "关闭", exact: true }).click();
+    const newer = await apply(request, id, "marker.add", { name: "From another editor", time: { num: 1, den: 1 } });
+    expect(newer.revision).not.toBe(first.revision);
+    await expect(page.locator(".timeline-ruler__marker[title*='From another editor']")).toHaveCount(1);
+
+    // Keep any receipt-driven refresh from repairing a stale revision and
+    // masking the regression. The newer snapshot is already visible.
+    blockReads = true;
+    releaseReceipt();
+    await expect(trigger).toBeEnabled();
+    expect(markerPosts).toBe(1);
+    await expect(page.locator(".timeline-ruler__marker")).toHaveCount(2);
+  } finally {
+    releaseReceipt();
+    releaseReads();
+  }
 });

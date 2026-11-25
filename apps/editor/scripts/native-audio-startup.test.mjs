@@ -5,6 +5,19 @@ import assert from 'node:assert/strict';
 import ts from 'typescript';
 const deferred = () => { let resolve, reject; const promise = new Promise((a,b) => { resolve=a; reject=b; }); return { promise, resolve, reject }; };
 const flush = async () => { for(let i=0;i<20;i++) await Promise.resolve(); };
+function bindPlayerSeek(context) {
+  // Extracted Player callbacks do not execute Player's imports. Run the same
+  // setter helper with QA off, rather than replacing a native seek in the test.
+  const exports = {};
+  runInNewContext(ts.transpileModule(readFileSync(new URL('../src/lib/previewSeekEvidence.ts', import.meta.url), 'utf8'),
+    { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText,
+    { exports, window: {} });
+  context.seekPreviewVideo = exports.seekPreviewVideo;
+  context.previewLoadSeekSite = exports.previewLoadSeekSite;
+  context.qaSeekReads = 0;
+  context.readSeekEvidence = () => { context.qaSeekReads++; return {}; };
+  return context;
+}
 function harness(diagnostics = false) {
   const timers = new Map(); let timer=0;
   const exports = {};
@@ -221,8 +234,10 @@ test('real play handler honors the timeline seek while decoder still reports its
     const globals={exports:{},currentId:'p',project:{},hasRenderable:true,playingRef:{current:false},audioTransportRef:{current:{}},
       videoRef:{current:{paused:true,currentTime:15}},mode:'video',mediaEndSecs:15,playhead,windowStart:0,
       reportedVideoTimeRef:{current:14.8},setVideoTime:()=>{},setPlaying:()=>{},requestVideoPlay:()=>plays++,dispatch:a=>actions.push(a)};
-    runInNewContext(ts.transpileModule(`exports.toggle=${callback}`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,globals);
+    runInNewContext(ts.transpileModule(`exports.toggle=${callback}`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,bindPlayerSeek(globals));
     globals.exports.toggle();assert.equal(plays,1);
+    assert.equal(globals.videoRef.current.currentTime, playhead === 15 ? 0 : 15);
+    assert.equal(globals.qaSeekReads, 0);
     assert.equal(actions.some(a=>a.type==='PLAYHEAD_SET'&&a.t===0),playhead===15);
   }
 });
@@ -243,8 +258,9 @@ function playerTimeupdate({ native = true, active = false, playing = true } = {}
     windowStart: 0, loopRef: { current: { enabled: false, in: null, out: null } }, mode: 'video',
     usePrepared: true, mediaEndSecs: 6, setVideoTime: t => times.push(t), playheadRef: { current: 3 },
     reportedVideoTimeRef: { current: 3 }, suppressSeek: { current: false }, dispatchRef: { current: action => actions.push(action) } };
-  runInNewContext(ts.transpileModule(`exports.callback = ${callback}`, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText, context);
+  runInNewContext(ts.transpileModule(`exports.callback = ${callback}`, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText, bindPlayerSeek(context));
   context.exports.callback({ currentTarget: video });
+  assert.equal(context.qaSeekReads, 0);
   return { actions, times };
 }
 test('ready native mix owns start position before asynchronous startup commits', () => {
@@ -372,4 +388,214 @@ test('keyboard evidence snapshot and logging failures do not escape the listener
     assert.equal(window.__keyboardEvidence().startup, undefined);
     assert.doesNotThrow(() => exports.emit());
   }
+});
+
+function playerVideoLoaded({ seeking = true, active = true, playing = true, scrubbing = false, paused = true,
+  windowStart = 0, requested = 1.2422675736961448, decode = 1.1842176870748298 } = {}) {
+  const source = readFileSync(new URL('../src/components/Player.tsx', import.meta.url), 'utf8');
+  const file = ts.createSourceFile('Player.tsx', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let callback;
+  const visit = node => {
+    if (ts.isVariableDeclaration(node) && node.name.getText(file) === 'onVideoLoaded')
+      callback = node.initializer.arguments[0].getText(file);
+    ts.forEachChild(node, visit);
+  }; visit(file);
+  let cursor = requested;
+  const writes = [], modes = [], times = [], frames = [], plays = [];
+  const video = {
+    duration: 2, seeking, paused, readyState: seeking ? 1 : 4,
+    get currentTime() { return cursor; },
+    set currentTime(t) { writes.push(t); cursor = t; },
+  };
+  const context = bindPlayerSeek({
+    exports: {}, videoRef: { current: video }, audioTransportRef: { current: { active } },
+    playingRef: { current: playing }, scrubbingRef: { current: scrubbing },
+    decodePlayheadRef: { current: windowStart + decode },
+    reportedVideoTimeRef: { current: windowStart + requested },
+    windowStart, windowEnd: windowStart + 2, mediaEndSecs: windowStart + 3,
+    setMode: m => modes.push(m), setVideoTime: t => times.push(t),
+    confirmFrame: v => frames.push(v), requestVideoPlay: v => plays.push(v),
+  });
+  runInNewContext(ts.transpileModule(`exports.loaded = ${callback}`, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  }).outputText, context);
+  return { video, writes, modes, times, frames, plays, reported: context.reportedVideoTimeRef,
+    load: (type, currentTarget = video) => context.exports.loaded({ type, currentTarget }) };
+}
+
+test('queued seeked cannot rewind a newer in-flight seek during native audio playback', () => {
+  // First pair observed in native Intel CI; second models a newer explicit
+  // target already submitted to the decoder before the old notification.
+  for (const [requested, decode] of [[1.2422675736961448, 1.1842176870748298], [.1, 1.2]]) {
+    const h = playerVideoLoaded({ requested, decode, paused: false });
+    h.load('seeked');
+    assert.equal(h.video.currentTime, requested);
+    assert.equal(h.reported.current, requested);
+    assert.deepEqual([h.writes, h.times, h.modes, h.frames, h.plays], [[], [], [], [], []]);
+  }
+});
+
+test('metadata/data, settled seeks, and non-audio-owned editing still use Player load behavior', () => {
+  for (const type of ['loadedmetadata', 'loadeddata']) {
+    const h = playerVideoLoaded({ windowStart: 2, requested: 0, decode: .5 });
+    h.load(type);
+    assert.deepEqual(h.writes, [.5]);
+    assert.deepEqual(h.times, [2.5]);
+    assert.equal(h.plays.length, 1);
+  }
+  for (const options of [{ active: false }, { playing: false }, { scrubbing: true }]) {
+    const h = playerVideoLoaded({ ...options, requested: 1.25, decode: 1 });
+    h.load('seeked');
+    assert.deepEqual(h.writes, [1]);
+    assert.deepEqual(h.times, [1]);
+    assert.deepEqual(h.modes, ['video']);
+  }
+  const h = playerVideoLoaded({ seeking: false, requested: 1.25, decode: 1.25 });
+  h.load('seeked', { ...h.video }); // obsolete pool node
+  assert.deepEqual(h.modes, []);
+  h.load('seeked');
+  assert.deepEqual(h.writes, []);
+  assert.deepEqual(h.times, [1.25]);
+  assert.equal(h.frames.length, 1);
+  assert.equal(h.plays.length, 1);
+});
+
+function playerAudioPublication() {
+  const player = readFileSync(new URL('../src/components/Player.tsx', import.meta.url), 'utf8');
+  const store = readFileSync(new URL('../src/store/editor.tsx', import.meta.url), 'utf8');
+  const types = { compilerOptions: { target: ts.ScriptTarget.ES2022 } };
+  const callbacks = {};
+  const playerFile = ts.createSourceFile('Player.tsx', player, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const visitPlayer = node => {
+    if (ts.isVariableDeclaration(node) && node.name.getText(playerFile) === 'isSupersededAudioPublication')
+      callbacks.guard = node.initializer.arguments[0].getText(playerFile);
+    if (ts.isCallExpression(node) && ['useEffect', 'useLayoutEffect'].includes(node.expression.getText(playerFile))) {
+      const body = node.arguments[0]?.getText(playerFile);
+      if (body?.includes('Math.abs(playhead - reportedVideoTimeRef.current)')) callbacks.layout = body;
+      if (body?.includes('const externalSeek = ')) callbacks.external = body;
+      if (body?.includes('let frame = 0, lastPublished = -Infinity')) callbacks.startTick = body;
+    }
+    ts.forEachChild(node, visitPlayer);
+  }; visitPlayer(playerFile);
+  const storeFile = ts.createSourceFile('editor.tsx', store, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  let reducer;
+  const visitStore = node => {
+    if (ts.isFunctionDeclaration(node) && node.name?.text === 'reducer') reducer = node.getText(storeFile);
+    ts.forEachChild(node, visitStore);
+  }; visitStore(storeFile);
+
+  // Keep React commits and media/RAF timing at the host boundary. The
+  // reducer, RAF producer, both effects and video setter helper are real.
+  const writes = [], frames = [], pending = [];
+  let cursor = 1.161066, sample = { time: 0, playing: true };
+  const video = { dataset: { previewSource: 'raw' }, currentSrc: 'cached-raw', paused: false,
+    seeking: true, readyState: 4, get currentTime() { return cursor; }, set currentTime(t) { writes.push(t); cursor = t; } };
+  const clock = () => 0;
+  const context = bindPlayerSeek({
+    exports: {}, state: { playhead: 0, playheadSeekVersion: 19, scrubbing: false },
+    playhead: 0, decodePlayhead: 0, mode: 'video', mediaEndSecs: 3, playing: true,
+    nativeAudioReady: true, playingRef: { current: true }, scrubbingRef: { current: false },
+    videoRef: { current: video }, windowBoundsRef: { current: { source: 'raw', start: 0, end: 2 } },
+    windowStart: 0, windowEnd: 2, suppressSeek: { current: false }, usePrepared: false,
+    audioTransportRef: { current: { active: true, clock, epoch: {} } }, nativeAudioClockRef: { current: clock },
+    playheadSeekVersionRef: { current: 19 }, lastAudioPublication: { current: null }, publicationScope: { current: {} }, reportedVideoTimeRef: { current: 0 },
+    audioPlaybackClock: () => sample, requestAnimationFrame: fn => frames.push(fn), cancelAnimationFrame: () => {},
+    setVideoTime: () => {}, requestVideoPlay: () => {}, loopRef: { current: { enabled: false } },
+    dispatchRef: { current: action => pending.push(action) },
+  });
+  runInNewContext(ts.transpileModule(`${reducer}
+    ${callbacks.guard ? `const isSupersededAudioPublication = ${callbacks.guard};` : ''}
+    exports.reduce = reducer;
+    exports.layout = ${callbacks.layout};
+    exports.external = ${callbacks.external};
+    exports.startTick = ${callbacks.startTick};`, types).outputText, context);
+  const { reduce, layout, external, startTick } = context.exports;
+  startTick();
+  return { context, video, writes, layout, external, tick(time, now, playing = true) {
+    sample = { time, playing }; frames.shift()(now);
+  }, commit() {
+    for (const action of pending.splice(0)) context.state = reduce(context.state, action);
+    context.playhead = context.decodePlayhead = context.state.playhead;
+    context.playheadSeekVersionRef.current = context.state.playheadSeekVersion;
+  }, setCursor(t) { cursor = t; video.seeking = false; }, action: context.dispatchRef.current };
+}
+const staleAudioTime = .4411791383219956, nextAudioTime = .928798185941043;
+
+for (const delayedUntilPassive of [false, true]) {
+  test(`older native audio render is ignored when a newer tick arrives before ${delayedUntilPassive ? 'passive sync' : 'layout'}`, () => {
+    const h = playerAudioPublication();
+    h.tick(staleAudioTime, 100); h.commit();
+    if (delayedUntilPassive) h.layout();
+    h.tick(nextAudioTime, 600);
+    if (!delayedUntilPassive) h.layout();
+    h.setCursor(1.161066);
+    h.external();
+    assert.equal(h.context.state.playheadSeekVersion, 19);
+    assert.deepEqual(h.writes, []);
+    assert.equal(h.context.audioTransportRef.current.active, true);
+    assert.equal(h.context.reportedVideoTimeRef.current, nextAudioTime);
+  });
+}
+
+test('native publication proof is scoped to a running generation and does not absorb seek intent', () => {
+  const newRace = () => {
+    const h = playerAudioPublication();
+    h.tick(staleAudioTime, 100); h.commit(); h.tick(nextAudioTime, 600); h.setCursor(1.161066);
+    return h;
+  };
+  for (const invalidate of [
+    h => { h.context.publicationScope.current = {}; }, // source/bounds or play/scrub render boundary
+    h => { h.video.currentSrc = 'new-media-same-element'; },
+    h => { h.video.dataset.previewSource = 'new-binding'; },
+    h => { h.context.videoRef.current = Object.assign({}, h.video); },
+    h => { h.context.audioTransportRef.current.epoch = {}; },
+    h => { h.context.nativeAudioClockRef.current = () => 1; },
+    h => { h.context.playingRef.current = false; },
+    h => { h.context.scrubbingRef.current = true; },
+  ]) {
+    const h = newRace();
+    invalidate(h); h.layout();
+    assert.equal(h.context.audioTransportRef.current.active, false);
+  }
+  for (const action of [
+    { type: 'PLAYHEAD_SET', t: staleAudioTime }, // explicit same-time intent must replace proof
+    { type: 'PLAYHEAD_SET', t: staleAudioTime, source: 'transport' }, // another producer
+  ]) {
+    const h = newRace();
+    h.action(action); h.commit(); h.external();
+    assert.deepEqual(h.writes, [staleAudioTime]);
+    assert.equal(h.context.state.audioPlayheadPublication, undefined);
+    assert.equal(h.context.state.playheadSeekVersion, action.source ? 19 : 20);
+  }
+  const short = newRace();
+  short.action({ type: 'PLAYHEAD_SET', t: .99 }); short.commit(); short.layout(); short.external();
+  assert.equal(short.context.state.playheadSeekVersion, 20);
+  assert.deepEqual(short.writes, []); // Preserve the existing playing threshold.
+  const staleVersion = newRace();
+  staleVersion.action({ type: 'PLAYHEAD_SET', t: .99 }); staleVersion.commit();
+  const { stamp } = staleVersion.context.lastAudioPublication.current;
+  staleVersion.action({ type: 'PLAYHEAD_SET', source: 'transport', t: nextAudioTime, audioPublication: stamp });
+  staleVersion.commit();
+  assert.equal(staleVersion.context.state.audioPlayheadPublication, undefined);
+  assert.equal(staleVersion.context.state.playhead, nextAudioTime); // Do not redesign action ordering.
+  const pending = playerAudioPublication();
+  pending.context.audioTransportRef.current.active = false;
+  pending.tick(staleAudioTime, 100, false); pending.commit();
+  assert.equal(pending.context.state.audioPlayheadPublication, undefined);
+  pending.tick(nextAudioTime, 600, false); pending.setCursor(1.161066); pending.external();
+  assert.deepEqual(pending.writes, [staleAudioTime]);
+});
+
+test('loop creates a new publication epoch, and later same-epoch ordering is not numeric', () => {
+  const h = playerAudioPublication();
+  h.tick(nextAudioTime, 100); h.commit();
+  h.context.loopRef.current = { enabled: true, in: .2, out: 1.2 };
+  h.setCursor(1.3);
+  h.tick(1.3, 600);
+  assert.deepEqual(h.writes, [.2]); // Genuine backward loop seek before its render.
+  assert.notEqual(h.context.lastAudioPublication.current.stamp.epoch, h.context.state.audioPlayheadPublication.epoch);
+  h.commit(); h.video.seeking = true; h.tick(.52, 950);
+  h.setCursor(.52); h.layout(); h.external();
+  assert.equal(h.context.audioTransportRef.current.active, true);
+  assert.deepEqual(h.writes, [.2]);
 });

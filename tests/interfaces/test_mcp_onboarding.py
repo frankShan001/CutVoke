@@ -64,6 +64,34 @@ class MCPOnboardingTests(unittest.TestCase):
                 uri_value = self.rpc("resources/read", {"uri": "cutvoke://command/" + item["type"]})["result"]
                 self.assertEqual(schema, json.loads(uri_value["contents"][0]["text"])["inputSchema"])
 
+    def test_export_sidecar_is_a_discoverable_optional_boolean(self):
+        command = "export.enqueue"
+        args = {"topic": "command", "command": command}
+        help_value = self.call("editor_help", args)["help"]
+        schema = help_value["inputSchema"]
+        self.assertEqual(schema["properties"]["captionSidecar"]["type"], "boolean")
+        self.assertNotIn("captionSidecar", schema["required"])
+        payload = {"outPath": "video.mp4", "range": {"start": .5, "end": 1.5}}
+        for flag in ({}, {"captionSidecar": True}, {"captionSidecar": False}):
+            self.server._validate_arguments({**payload, **flag}, schema)
+        for invalid in ("true", 1):
+            with self.subTest(invalid=invalid), self.assertRaisesRegex(ValueError, "captionSidecar.*boolean"):
+                self.server._validate_arguments({**payload, "captionSidecar": invalid}, schema)
+
+        catalog = self.call("commands_list", {"type": command})["commands"]
+        self.assertEqual([command], [entry["type"] for entry in catalog])
+        self.assertEqual(schema, catalog[0]["inputSchema"])
+        resource = self.rpc("resources/read", {"uri": "cutvoke://command/" + command})["result"]
+        self.assertEqual(schema, json.loads(resource["contents"][0]["text"])["inputSchema"])
+        api = HttpApi(self.service, media_dir=str(self.root / "media"))
+        try:
+            status, catalog = api.handle("GET", "/api/v1/commands", {})
+            self.assertEqual(status, 200)
+            entry = next(item for item in catalog["commands"] if item["type"] == command)
+            self.assertEqual(schema, entry["inputSchema"])
+        finally:
+            api.close()
+
     def test_effect_schema_and_batch_keyframes_are_exact_and_independent(self):
         info = self.call("editor_help", {"topic": "command", "command": "effect.add", "effectId": "cutvoke.transform"})["help"]
         self.assertIn("opacity", info["inputSchema"]["properties"]["params"]["properties"])

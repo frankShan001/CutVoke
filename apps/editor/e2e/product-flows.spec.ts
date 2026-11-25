@@ -2,6 +2,7 @@ import { projectOutputPath } from "./projectDirectoryHelpers";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { copyFileSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { execFileSync } from "node:child_process";
 import { basename, resolve } from "node:path";
 
 const image = fileURLToPath(new URL("../../../src/cutvoke/assets/stickers/decor_sparkles.png", import.meta.url));
@@ -185,6 +186,82 @@ test("selected export passes its range to preflight and keeps out-of-range missi
   } finally {
     await restore(request, assets[1], id);
   }
+});
+
+test("selected clip prefills the mixed timeline range without queuing", async ({ page, request }) => {
+  test.setTimeout(90_000);
+  const { id, name } = await projectWithImages(request);
+  const sampleRate = 48_000;
+  const samples = sampleRate * 4;
+  const tone = Buffer.alloc(44 + samples * 2); // mono PCM16 WAV, including the nonzero source offset
+  tone.write("RIFF", 0);
+  tone.writeUInt32LE(tone.length - 8, 4);
+  tone.write("WAVEfmt ", 8);
+  tone.writeUInt32LE(16, 16);
+  tone.writeUInt16LE(1, 20);
+  tone.writeUInt16LE(1, 22);
+  tone.writeUInt32LE(sampleRate, 24);
+  tone.writeUInt32LE(sampleRate * 2, 28);
+  tone.writeUInt16LE(2, 32);
+  tone.writeUInt16LE(16, 34);
+  tone.write("data", 36);
+  tone.writeUInt32LE(samples * 2, 40);
+  for (let i = 0; i < samples; i++) tone.writeInt16LE(Math.round(4096 * Math.sin(2 * Math.PI * 440 * i / sampleRate)), 44 + i * 2);
+  const audioAsset = await request.post(`/api/v1/assets?name=range-tone.wav&projectId=${encodeURIComponent(id)}`, {
+    headers: { "Content-Type": "application/octet-stream" }, data: tone,
+  });
+  expect(audioAsset.ok()).toBeTruthy();
+  const { path: sourcePath, assetId } = await audioAsset.json();
+  await command(request, id, "track.add", { trackId: "sound", kind: "audio" });
+  await command(request, id, "clip.insert", {
+    trackId: "sound", clipId: "trimmed-sound", sourcePath, assetId,
+    timelineStart: { num: 1, den: 2 }, timelineEnd: { num: 3, den: 2 },
+    sourceStart: { num: 2, den: 1 },
+  });
+  await open(page, name);
+  const selected = page.locator('.clip-block[data-clip-id="trimmed-sound"]');
+  await selected.click();
+  await page.locator('.clip-block[data-clip-id="image-0"]').click({ modifiers: ["Control"] });
+  await expect(page.locator('.clip-block[aria-pressed="true"]')).toHaveCount(2);
+  const { dialog, path } = await exportDialog(page, request, id);
+  const preset = dialog.getByRole("button", { name: "使用所选片段的时间范围" });
+  await expect(dialog.getByRole("button", { name: "开始导出" })).toBeEnabled();
+  await expect(preset).toBeDisabled();
+  await dialog.getByRole("button", { name: "关闭导出" }).click();
+  await selected.click();
+  await expect(page.locator('.clip-block[aria-pressed="true"]')).toHaveCount(1);
+  await exportDialog(page, request, id);
+  await preset.click();
+  await expect(dialog.getByLabel("导出开始时间")).toHaveValue("0.5");
+  await expect(dialog.getByLabel("导出结束时间")).toHaveValue("1.5");
+  await dialog.getByLabel("导出结束时间").fill("1.25");
+  await expect(dialog.getByLabel("导出开始时间")).toHaveValue("0.5");
+  await expect(dialog.getByLabel("导出结束时间")).toHaveValue("1.25");
+  await preset.click();
+  await expect(dialog.getByLabel("导出结束时间")).toHaveValue("1.5");
+  await expect(dialog.getByText("仅使用片段的时间范围，保留该时段的全部可见图层和可听音轨。")).toBeVisible();
+  expect((await (await request.get(`${api(id)}/exports`)).json()).jobs).toEqual([]);
+
+  const commandRequest = (type: string) => page.waitForRequest(req =>
+    req.method() === "POST" && req.url().endsWith(`${api(id)}/commands`) && req.postDataJSON()?.type === type);
+  const preflight = commandRequest("project.preflight");
+  const queued = commandRequest("export.enqueue");
+  await dialog.getByRole("button", { name: "开始导出" }).click();
+  const before = (await preflight).postDataJSON();
+  const receipt = (await queued).postDataJSON();
+  expect(before.payload.range).toEqual({ start: 0.5, end: 1.5 });
+  expect(receipt.payload.range).toEqual(before.payload.range);
+  expect(receipt.expectedRevision).toBe(before.expectedRevision);
+  await expect(dialog.getByText("导出完成", { exact: false })).toBeVisible({ timeout: 75_000 });
+  await expect(dialog.locator(".inspector__row").filter({ hasText: "时长" })).toContainText("1.00 秒");
+  const ffmpeg = (options: string[]) => execFileSync("ffmpeg", ["-v", "error", "-i", path, ...options, "-"],
+    { timeout: 10_000, maxBuffer: 2 * 1024 * 1024 });
+  const picture = ffmpeg(["-frames:v", "1", "-threads", "1", "-pix_fmt", "rgb24", "-f", "rawvideo"]);
+  expect(picture.some(level => level > 32)).toBe(true); // retains the other track's picture
+  const waveform = ffmpeg(["-vn", "-t", "1", "-f", "s16le"]);
+  let peak = 0;
+  for (let i = 0; i + 1 < waveform.length; i += 2) peak = Math.max(peak, Math.abs(waveform.readInt16LE(i)));
+  expect(peak).toBeGreaterThan(16);
 });
 
 test("preflight request failure keeps export settings and allows an explicit retry", async ({ page, request }) => {

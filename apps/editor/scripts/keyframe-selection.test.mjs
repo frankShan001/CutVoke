@@ -16,15 +16,15 @@ const clip = (keys, id = 'clip-one') => ({ id, timelineStart: r(0), timelineEnd:
 // Run the actual component and React effects; isolate only the store/transport
 // and numerical graph dependencies. This does not replace browser acceptance.
 async function harness(initial) {
-  const calls = [], listeners = new Map();
-  const state = { project: { sequence: { width: 160, height: 90, tracks: [] } }, editLock: null, playhead: 0 };
+  const calls = [], added = [], listeners = new Map();
+  const state = { currentId: 'project', revision: '1', project: { revision: '1', sequence: { width: 160, height: 90, tracks: [{ kind: 'video', clips: [initial] }] } }, editLock: null, playhead: 0 };
   const dependencies = {
     react: React, 'react/jsx-runtime': jsx,
     '../../i18n': { useLocale() {}, tr: (s, ...args) => s.replace(/\{(\d+)\}/g, (_, i) => args[i]) },
     'lucide-react': { Plus: () => null, Trash2: () => null },
     '../../store/editor': { useEditor: () => ({ state, dispatch() {} }) },
     '../../store/actions': { getLatestState: () => state, runCommand: async (...args) => { calls.push(args[3]); return { ok: true }; } },
-    '../../store/clipEdit': { addKeyframe: async () => {}, removeKeyframe: async () => {} },
+    '../../store/clipEdit': { addKeyframe: async (_dispatch,_state,input) => { added.push(input); }, removeKeyframe: async () => {} },
     '../../lib/rational': { rationalToSecs, secsToRational: r },
     '../../lib/keyframes': { evaluateKeyframes: () => .5, keyframeVelocity: () => 0 },
   };
@@ -36,8 +36,11 @@ async function harness(initial) {
   let tree;
   await act(async () => { tree = create(React.createElement(exports.KeyframeSection, { clip: initial })); });
   return {
-    calls, tree,
-    update: async value => act(async () => tree.update(React.createElement(exports.KeyframeSection, { clip: value }))),
+    calls, added, tree,
+    update: async value => act(async () => {
+      state.project.sequence.tracks[0].clips = [value];
+      tree.update(React.createElement(exports.KeyframeSection, { clip: value }));
+    }),
     select: async id => act(async () => tree.root.findByProps({ 'aria-label': `选择关键帧 ${id}` }).props.onChange()),
     button: label => tree.root.findAllByType('button').find(node => node.children.includes(label)),
     checked: id => tree.root.findByProps({ 'aria-label': `选择关键帧 ${id}` }).props.checked,
@@ -131,27 +134,76 @@ test('Bezier pointerUp blocks a stale form and commits only an explicitly select
   const a = { ...key('a', 1), interpolation: 'cubic-bezier', bezier: [.2, .1, .8, .9] };
   const b = { ...key('b', 2), interpolation: 'cubic-bezier', bezier: [.7, .2, .9, .4] };
   const h = await harness(clip([a, b]));
-  const release = () => ({ pointerId: 1, currentTarget: { dataset: { handle: '0' }, releasePointerCapture() {} } });
+  const release = () => ({ pointerId: 1, currentTarget: { dataset: {}, setPointerCapture() {}, releasePointerCapture() {} } });
+  const press = gesture => h.tree.root.findByProps({ 'aria-label': '贝塞尔控制点 1' }).props.onPointerDown({pointerId: 1, currentTarget: { ownerSVGElement: gesture.currentTarget }});
   try {
-    await h.select('a'); await h.select('b'); await h.update(clip([a]));
-    // Also invoke the disabled button's handler directly: the guard must live
-    // in the handler, not only in the DOM's disabled attribute.
-    await act(async () => h.button('更新节点').props.onClick());
-    const staleRelease = release();
+    await h.select('b');
+    const staleRelease = release(); await act(async () => press(staleRelease));
+    await act(async () => h.tree.root.findByProps({ 'aria-label': '曲线节点 a' }).props.onKeyDown({key:'Enter'}));
+    assert.equal(h.button('更新节点').props.disabled, false);
     await act(async () => h.tree.root.findByProps({ 'aria-label': '缓动控制曲线' }).props.onPointerUp(staleRelease));
     assert.equal(staleRelease.currentTarget.dataset.handle, undefined);
+    assert.equal(h.calls.length, 0);
+    await h.select('b'); await h.update(clip([a]));
+    // Also invoke the disabled button's handler directly: the guard must live
+    // in the handler, not only in the DOM's disabled attribute.
+    assert.equal(h.button('更新节点').props.disabled, true);
+    await act(async () => h.button('更新节点').props.onClick());
     assert.equal(h.calls.length, 0);
 
     await h.select('a'); await h.select('a');
     await act(async () => h.tree.root.findByProps({ 'aria-label': 'Bezier x1' }).props.onChange({ target: { value: '.35' } }));
     await h.update(clip([a])); // An unrelated refresh must preserve the draft.
-    const validRelease = release();
+    const validRelease = release(); await act(async () => press(validRelease));
     await act(async () => h.tree.root.findByProps({ 'aria-label': '缓动控制曲线' }).props.onPointerUp(validRelease));
     assert.equal(validRelease.currentTarget.dataset.handle, undefined);
     assert.equal(h.calls.length, 1);
     assert.equal(h.calls[0].keyframeId, 'a');
     assert.equal(h.calls[0].interpolation, 'cubic-bezier');
     assert.deepEqual(Array.from(h.calls[0].bezier), [.35, .1, .8, .9]);
+  } finally { await h.close(); }
+});
+
+test('Bezier drag edits an unselected Add draft without submitting on release', async () => {
+  const h = await harness(clip([]));
+  const prop = label => h.tree.root.findByProps({'aria-label':label}).props;
+  const capture = [];
+  const svg={dataset:{}, setPointerCapture:id=>capture.push(['set',id]),
+    releasePointerCapture:id=>capture.push(['release',id]), getBoundingClientRect:()=>({left:0,top:0,width:160,height:120})};
+  try {
+    await act(async()=>prop('关键帧插值').onChange({target:{value:'cubic-bezier'}}));
+    assert.equal(Boolean(h.button('更新节点')), false);
+    await act(async()=>prop('贝塞尔控制点 1').onPointerDown({pointerId:3,currentTarget:{ownerSVGElement:svg}}));
+    await act(async()=>prop('缓动控制曲线').onLostPointerCapture({pointerId:3,currentTarget:svg}));
+    await act(async()=>prop('贝塞尔控制点 1').onPointerDown({pointerId:4,currentTarget:{ownerSVGElement:svg}}));
+    await act(async()=>prop('缓动控制曲线').onPointerMove({pointerId:4,currentTarget:svg,clientX:80,clientY:60}));
+    await act(async()=>prop('缓动控制曲线').onPointerUp({pointerId:4,currentTarget:svg}));
+    assert.deepEqual(capture,[['set',3],['set',4],['release',4]]);
+    assert.equal(prop('Bezier x1').value,.5); assert.equal(prop('Bezier y1').value,.5);
+    assert.equal(h.calls.length,0); assert.equal(h.added.length,0);
+    await act(async()=>h.button(' 添加').props.onClick());
+    assert.equal(h.added.length,1); assert.equal(h.added[0].interpolation,'cubic-bezier');
+    assert.deepEqual(Array.from(h.added[0].bezier),[.5,.5,.25,1]);
+  } finally { await h.close(); }
+});
+
+test('an observed deleted draft target stays conflicted after Undo restores identical fields', async () => {
+  const a=key('a');
+  const h=await harness(clip([a]));
+  try {
+    await h.select('a');
+    await act(async()=>h.tree.root.findByProps({'aria-label':'关键帧 opacity 值（0-1）'}).props.onChange({target:{value:'.8'}}));
+    await h.update(clip([]));
+    assert.equal(h.button(' 添加').props.disabled,true);
+    await h.update(clip([{...a}]));
+    assert.equal(h.checked('a'),false);
+    assert.equal(h.tree.root.findByProps({'aria-label':'关键帧 opacity 值（0-1）'}).props.value,'.8');
+    assert.equal(h.button(' 添加').props.disabled,true);
+    await act(async()=>h.button(' 添加').props.onClick());
+    assert.equal(h.added.length,0);
+    await act(async()=>h.button('重置参数').props.onClick());
+    assert.equal(h.button(' 添加').props.disabled,false);
+    assert.equal(h.tree.root.findByProps({'aria-label':'关键帧 opacity 值（0-1）'}).props.value,'0.5');
   } finally { await h.close(); }
 });
 

@@ -2,6 +2,7 @@ const { verifyNativeCaptionFonts } = require("./verify_native_caption_fonts.cjs"
 const { scheduleStackCapture } = require("../../apps/desktop/qa-diagnostics.cjs");
 const { verifyNativePreview } = require("./verify_native_preview.cjs");
 const { verifyNativeTransition } = require("./verify_native_transition.cjs");
+const { verifyUnixFrozenRecovery } = require("./verify_unix_frozen_recovery.cjs");
 // Extract and run the exact Unix download, with a sandboxed visible renderer.
 // Shares the established Windows GUI/MCP/import/preview/export acceptance flow.
 const assert = require("node:assert/strict");
@@ -76,9 +77,16 @@ async function main() {
   const zip = path.join(root, "dist/portable", download.filename);
   assert.equal(crypto.createHash("sha256").update(fs.readFileSync(zip)).digest("hex"), download.sha256);
   const extracted = path.join(out, "中文 空格路径");
-  fs.mkdirSync(extracted, { recursive: true });
-  if (process.platform === "darwin") run("/usr/bin/ditto", ["-x", "-k", zip, extracted]);
-  else run("/usr/bin/tar", ["-xzf", zip, "-C", extracted]);
+  if (process.platform === "darwin") {
+    fs.mkdirSync(extracted, { recursive: true });
+    run("/usr/bin/ditto", ["-x", "-k", zip, extracted]);
+  } else {
+    // Never let an earlier extraction supply members missing from this tarball.
+    // Exclusive mkdir rejects any existing path, including a symlink.
+    assert.ok(fs.lstatSync(out).isDirectory(), "Acceptance output must be a real directory");
+    fs.mkdirSync(extracted);
+    run("/usr/bin/tar", ["-xzf", zip, "-C", extracted]);
+  }
   const folder = path.join(extracted, download.filename.replace(/\.(zip|tar\.gz)$/, ""));
   const resources = process.platform === "darwin" ? path.join(folder, "CutVoke.app/Contents/Resources") : path.join(folder, "resources");
   const executable = process.platform === "darwin" ? path.join(folder, "CutVoke.app/Contents/MacOS/CutVoke") : path.join(folder, "cutvoke");
@@ -92,11 +100,27 @@ async function main() {
     assert.equal(crypto.createHash("sha256").update(fs.readFileSync(path.join(folder, name))).digest("hex"), hash, name);
   }
   report.checks.extractedZipIntegrity = true;
+  if (target === "linux-x64") {
+    for (const directory of [folder, resources]) {
+      assert.ok(fs.lstatSync(directory).isDirectory(), "Extracted engine must be inside the real archive directories");
+    }
+    report.checks.linuxFrozenEngineInventory = JSON.parse(run(process.env.CUTVOKE_VERIFY_PYTHON, [
+      path.join(root, "tools/verify/verify_unix_frozen_engine_inventory.py"),
+      path.join(root, ".artifacts/build/desktop-engine/cutvoke-engine"),
+      path.join(resources, "engine"),
+    ], env));
+  }
   const doctor = JSON.parse(run(engine, ["doctor", "--json"], env));
   assert.equal(doctor.ok, true, JSON.stringify(doctor));
   assert.equal(doctor.optionalDependencies.asr, false);
   assert.equal(doctor.optionalDependencies.person, false);
-  assert.ok(doctor.ffmpeg.startsWith(bin));
+  if (target === "linux-x64") {
+    assert.equal(doctor.runtime.pythonExecutable, fs.realpathSync(engine));
+    assert.equal(doctor.ffmpeg, fs.realpathSync(ffmpeg));
+    assert.equal(doctor.ffprobe, fs.realpathSync(ffprobe));
+  } else {
+    assert.ok(doctor.ffmpeg.startsWith(bin));
+  }
   report.doctor = doctor;
   fs.writeFileSync(path.join(out, "ffmpeg-version.txt"), run(ffmpeg, ["-version"], env));
   run(process.env.CUTVOKE_VERIFY_PYTHON, [path.join(root, "tools/verify/verify_unix_runtime.py"), folder, path.join(root, "dist/portable/native-runtime.json")]);
@@ -255,6 +279,7 @@ async function main() {
     try {
       report.previewObserverDiagnostics = [];
       report.previewPlayback = await verifyNativePreview(page, expect, {
+        traceSeekWrites: target === "macos-x64",
         onDiagnostic: diagnostic => report.previewObserverDiagnostics.push(diagnostic),
       });
     } catch (error) {
@@ -321,6 +346,12 @@ async function main() {
     }
     report.checks.guiExportAndFullVideoAudioDecode = true;
     report.transitionClock = await verifyNativeTransition({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath });
+    if (target === "linux-x64") {
+      report.checks.linuxFrozenRecoveryFailsClosed = await verifyUnixFrozenRecovery({
+        origin, engine, ffmpeg, ffprobe, env, dataPath: runtime.dataPath,
+        sourcePython: process.env.CUTVOKE_VERIFY_PYTHON, sourceRoot: path.join(root, "src"),
+      });
+    }
     report.captionFonts = await verifyNativeCaptionFonts({ origin, engine, ffmpeg, out, env, dataPath: runtime.dataPath, assets: path.join(resources, "engine/_internal/cutvoke/assets") });
     report.checks.packagedCaptionColdExport = true;
     report.checks.threeShotTransitionClockAndPixels = true;

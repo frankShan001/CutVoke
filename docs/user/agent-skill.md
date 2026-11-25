@@ -18,11 +18,11 @@ For substantial expressive work, design observable changes and compare a short d
 
 The self-contained folder is `skills/cutvoke-editor/`: `SKILL.md`, progressively loaded references, and a runnable `scripts/demo.py`. Copy the **whole folder**, so its relative references remain available.
 
-For Codex's personal skill directory, from the checkout:
+For Codex's [personal skill directory](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills), run these commands from the CutVoke checkout:
 
 ```powershell
 # Windows PowerShell
-$skillTarget = Join-Path $env:USERPROFILE '.codex/skills/cutvoke-editor'
+$skillTarget = Join-Path $env:USERPROFILE '.agents/skills/cutvoke-editor'
 if (Test-Path -LiteralPath $skillTarget) { throw 'Skill already exists; review it before replacing it.' }
 New-Item -ItemType Directory -Path (Split-Path $skillTarget) -Force | Out-Null
 Copy-Item -LiteralPath skills/cutvoke-editor -Destination $skillTarget -Recurse
@@ -30,11 +30,11 @@ Copy-Item -LiteralPath skills/cutvoke-editor -Destination $skillTarget -Recurse
 
 ```bash
 # POSIX shell
-mkdir -p "$HOME/.codex/skills"
-test ! -e "$HOME/.codex/skills/cutvoke-editor" && cp -R skills/cutvoke-editor "$HOME/.codex/skills/"
+mkdir -p "$HOME/.agents/skills"
+test ! -e "$HOME/.agents/skills/cutvoke-editor" && cp -R skills/cutvoke-editor "$HOME/.agents/skills/"
 ```
 
-If `CODEX_HOME` is customized, use its `skills/` directory instead. Reload the host's skill discovery as required, then invoke `$cutvoke-editor`. The installation convention comes from the local Codex skill workflow; the actual validation here covers the skill files and CutVoke's stdio MCP, not every AI host's installation UI.
+To use the skill only in one project, copy the folder to `.agents/skills/cutvoke-editor/` at that project's root instead. Choose one location so the same skill does not appear twice. If the skill does not appear, restart Codex, then invoke it with `$cutvoke-editor`.
 
 For another tool that can read Markdown instructions, point it at `skills/cutvoke-editor/SKILL.md` and let it follow the linked references on demand. Configure its supported local MCP/HTTP interface using that tool's documentation. This is a portable instruction package, not a verified universal installer or a promise that every remote client can access local files.
 

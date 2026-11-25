@@ -1,5 +1,5 @@
 // Shared by browser regression coverage and all four packaged-app acceptances.
-async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3, onDiagnostic = () => {} } = {}) {
+async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3, traceSeekWrites = false, onDiagnostic = () => {} } = {}) {
   const video = page.locator("video.player__video");
   const ruler = page.getByRole("slider", { name: "时间线播放头", exact: true });
   const samples = [];
@@ -13,13 +13,38 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
     // Install the compositor observer before Play. Slow automation round trips
     // must not consume a short clip before its first playing frame is observed.
     const observerKey = `__cutvokeNativePreview_${Date.now()}_${cycle}`;
-    await page.evaluate(({ timeout, key }) => {
+    await page.evaluate(({ timeout, key, traceSeekWrites }) => {
       // Strict allowlist: no URLs, DOM text, media paths or exception messages.
       const state = { promise: null, cancel: null, diagnostic: { events: [], counts: {}, dropped: 0, media: [], mediaDropped: 0, clocks: [], clocksDropped: 0, stops: [], stopsDropped: 0 } };
+      const seekCoverage = traceSeekWrites ? {
+        status: "unavailable", startOrdinal: null, acceptedOrdinal: null, snapshotOrdinal: null,
+        endOrdinal: null, absenceEvidence: false,
+      } : null;
+      if (seekCoverage) Object.assign(state.diagnostic, {
+        seekCoverage, seekWrites: [], seekWritesDropped: 0, phases: [], phasesDropped: 0,
+        callerProbeInstalled: false, unknownSeekCallers: 0,
+      });
+      const seekSites = ["bind", "loadedmetadata", "loadeddata", "seeked", "loaded-other", "video-loop", "video-end",
+        "external-sync", "audio-tick", "project-reset", "play-restart", "audition", "stop", "frame-step"];
+      const phaseNames = ["selection", "bound", "presented", "fallback-segment", "fallback-open", "fallback-video"];
+      const fieldEvidence = raw => {
+        const values = {};
+        for (const key of ["prepared", "audioActive", "nativeAudioReady", "playing", "offered", "matching", "retained", "warmedOffer", "ready", "holding", "sourceMatches"]) {
+          const value = raw?.[key];
+          if (typeof value === "boolean") values[key] = value;
+        }
+        for (const key of ["playhead", "decodeTime", "reportedTime", "audioAnchor", "windowStart", "windowEnd"]) {
+          const value = number(raw?.[key]);
+          if (value !== null) values[key] = value;
+        }
+        return values;
+      };
+      let origin = null;
       const started = Date.now(), nodes = new WeakMap();
+      let ordinal = 0;
       let nextNode = 0, previousState = "", previousClock = "";
       const number = value => Number.isFinite(value) ? value : null;
-      const record = (event, video, metadata, channel = "events") => {
+      const record = (event, video, metadata, channel = "events", requestedTime, evidence = null) => {
         try {
           const d = state.diagnostic;
           d.counts[event] = Math.min(1_000_000, (d.counts[event] || 0) + 1);
@@ -34,6 +59,13 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
             seeking: video ? Boolean(video.seeking) : null, ended: video ? Boolean(video.ended) : null,
             readyState: number(video?.readyState), time: number(video?.currentTime),
             duration: number(video?.duration), active: video ? video === document.querySelector("video.player__video") : null };
+          if (channel === "seekWrites") {
+            entry.requestedTime = number(requestedTime);
+            entry.caller = evidence?.site ?? "unknown";
+            if (entry.caller === "unknown") d.unknownSeekCallers = Math.min(1_000_000, d.unknownSeekCallers + 1);
+            else entry.evidence = evidence.fields;
+          }
+          if (channel === "phases") entry.evidence = evidence;
           if (metadata) { entry.mediaTime = number(metadata.mediaTime); entry.presentedFrames = number(metadata.presentedFrames); }
           // Poll transitions, not the continuously advancing clock. Preserve the
           // final state on timeout even when no compositor callback ever arrives.
@@ -43,12 +75,14 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
             previousState = signature;
           }
           append(channel, entry);
+          return true;
         } catch { /* Diagnostic collection must not interrupt the observer. */ }
       };
       // Independent bounded channels prevent RAF samples from evicting the
       // media/stop events needed to explain an early stop or a lagging decoder.
       const append = (channel, entry) => {
         const d = state.diagnostic, values = d[channel];
+        if (seekCoverage) entry.ordinal = ++ordinal;
         if (values.length === 64) {
           values.splice(32, 1); // retain first and most recent observations
           const counter = channel === "events" ? "dropped" : `${channel}Dropped`;
@@ -109,19 +143,103 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
         window.addEventListener("cutvoke:transport-clock", clock);
         window.addEventListener("cutvoke:preview-stop", stop);
       } catch { /* Existing frame acceptance still runs if diagnostics cannot. */ }
+      let restoreCaller = () => {};
+      if (seekCoverage) try {
+        const key = "__cutvokeNativeSeekEvidence";
+        const prior = Object.getOwnPropertyDescriptor(window, key);
+        if (!prior) {
+          let listening = true;
+          const hook = {
+            beginSeek(site, video, raw) {
+              if (!listening || !seekSites.includes(site)) return;
+              const previous = origin;
+              const scope = { site, video, used: false, fields: fieldEvidence(raw) };
+              origin = scope;
+              return () => { if (origin === scope) origin = previous; };
+            },
+            phase(phase, video, raw) {
+              if (listening && phaseNames.includes(phase)) record(phase, video, null, "phases", undefined, fieldEvidence(raw));
+            },
+          };
+          Object.defineProperty(window, key, { configurable: true, value: hook });
+          state.diagnostic.callerProbeInstalled = true;
+          restoreCaller = () => {
+            listening = false;
+            origin = null;
+            if (Object.getOwnPropertyDescriptor(window, key)?.value === hook) delete window[key];
+          };
+        }
+      } catch { /* Existing acceptance still applies without caller telemetry. */ }
+      let stopSeekWrites = () => {};
+      if (seekCoverage) try {
+        const proto = window.HTMLMediaElement?.prototype;
+        const prior = proto && Object.getOwnPropertyDescriptor(proto, "currentTime");
+        if (prior?.configurable && typeof prior.get === "function" && typeof prior.set === "function") {
+          let observing = true, missed = false;
+          const nativeSet = prior.set;
+          const set = function (value) {
+            if (observing) try {
+              const active = document.querySelector("video.player__video");
+              if (active && this === active) {
+                const caller = origin?.video === this && !origin.used ? origin : null;
+                if (caller) caller.used = true;
+                if (!Number.isFinite(value) || !record("seek-write-attempt", this, null, "seekWrites", value, caller)) missed = true;
+              }
+            } catch { missed = true; }
+            // The probe never coerces values or changes native setter errors.
+            return Reflect.apply(nativeSet, this, [value]);
+          };
+          Object.defineProperty(proto, "currentTime", { ...prior, set });
+          seekCoverage.startOrdinal = ++ordinal;
+          stopSeekWrites = () => {
+            if (!observing) return;
+            observing = false;
+            seekCoverage.endOrdinal = ++ordinal;
+            try {
+              const current = Object.getOwnPropertyDescriptor(proto, "currentTime");
+              if (!current || current.set !== set || current.get !== prior.get
+                || current.configurable !== prior.configurable || current.enumerable !== prior.enumerable) missed = true;
+              else Object.defineProperty(proto, "currentTime", prior);
+            } catch { missed = true; }
+            seekCoverage.status = missed ? "incomplete" : "observed";
+          };
+        }
+      } catch { /* An unavailable probe never changes frame acceptance. */ }
       const cleanEvidence = () => {
+        stopSeekWrites();
         try { for (const type of mediaTypes) document.removeEventListener(type, media, true); } catch {}
         try { window.removeEventListener("cutvoke:transport-clock", clock); window.removeEventListener("cutvoke:preview-stop", stop); } catch {}
         try { restoreEvidence(); } catch {}
+        try { restoreCaller(); } catch {}
         restoreEvidence = () => {};
+        restoreCaller = () => {};
       };
-      state.snapshot = () => { record("snapshot", document.querySelector("video.player__video")); return state.diagnostic; };
+      state.snapshot = (completed) => {
+        if (!completed) stopSeekWrites();
+        try {
+          if (record("snapshot", document.querySelector("video.player__video")) && seekCoverage) seekCoverage.snapshotOrdinal = ordinal;
+        } finally { stopSeekWrites(); }
+        if (seekCoverage) {
+          const d = state.diagnostic;
+          // Absence applies only between the marker ordinals to attempted JS
+          // calls through this prototype on the active video. It is not proof
+          // of no seek; a capped/unavailable trace cannot rule out even writes.
+          if (seekCoverage.snapshotOrdinal === null || d.seekWritesDropped || d.dropped
+            || d.mediaDropped || d.clocksDropped || d.stopsDropped || d.phasesDropped) {
+            if (seekCoverage.status === "observed") seekCoverage.status = "incomplete";
+          }
+          seekCoverage.absenceEvidence = seekCoverage.status === "observed";
+        }
+        return state.diagnostic;
+      };
       window[key] = state;
       state.promise = new Promise((resolve, reject) => {
         let target = null, source = "", callback = null, generation = 0, done = false;
-        const cleanup = () => {
-          done = true; generation++;
-          cleanEvidence();
+        const cleanup = (retainEvidence = false) => {
+          const stopFrameObserver = !done;
+          if (stopFrameObserver) { done = true; generation++; }
+          if (!retainEvidence) cleanEvidence();
+          if (!stopFrameObserver) return;
           clearInterval(watch); clearTimeout(deadline);
           if (target && callback !== null) target.cancelVideoFrameCallback(callback);
         };
@@ -146,7 +264,9 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
             const reason = current !== document.querySelector("video.player__video") ? "inactive-node"
               : current.currentSrc !== source ? "changed-source" : current.paused ? "paused"
               : current.seeking ? "seeking" : metadata.mediaTime <= .25 ? "early-frame" : null;
-            record(reason || "accepted", current, metadata);
+            if (record(reason || "accepted", current, metadata) && !reason && seekCoverage) {
+              seekCoverage.acceptedOrdinal = ordinal;
+            }
             if (reason) { arm(); return; }
             try {
               const canvas = document.createElement("canvas");
@@ -155,7 +275,9 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
               const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
               let energy = 0;
               for (let i = 0; i < pixels.length; i += 4) energy += pixels[i] + pixels[i + 1] + pixels[i + 2];
-              cleanup();
+              // Stop the strict frame observer now. On a normal opt-in success,
+              // keep only passive evidence through the existing final snapshot.
+              cleanup(Boolean(seekCoverage && canvas.width > 0 && canvas.height > 0 && energy > 0));
               resolve({ width: canvas.width, height: canvas.height, energy, time: current.currentTime,
                 mediaTime: metadata.mediaTime, presentedFrames: metadata.presentedFrames });
             } catch (error) { cleanup(); reject(error); }
@@ -168,7 +290,7 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
       // A failed Play/locator assertion can outlive the observer's deadline.
       // Retain its rejection for the later await without an unhandled event.
       void state.promise.catch(() => {});
-    }, { timeout, key: observerKey });
+    }, { timeout, key: observerKey, traceSeekWrites });
     let frame;
     try {
       await page.getByRole("button", { name: "播放", exact: true }).click();
@@ -181,12 +303,12 @@ async function verifyNativePreview(page, expect, { timeout = 90_000, cycles = 3,
       // pool/source handoff while waiting, rejecting callbacks from old sources.
       frame = await page.evaluate(key => window[key].promise, observerKey);
     } finally {
-      const diagnostic = await page.evaluate(key => {
+      const diagnostic = await page.evaluate(({ key, completed }) => {
         const state = window[key];
         if (!state) return null;
-        try { return state.snapshot(); } catch { return null; }
+        try { return state.snapshot(completed); } catch { return null; }
         finally { state.cancel(); delete window[key]; }
-      }, observerKey).catch(() => null);
+      }, { key: observerKey, completed: frame !== undefined }).catch(() => null);
       // Diagnostics never change acceptance or hide the original failure.
       try { if (diagnostic) onDiagnostic({ cycle, ...diagnostic }); } catch {}
     }

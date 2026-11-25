@@ -263,6 +263,9 @@
   "人物特效": "Efectos Personales",
   "人物范围": "La gente tiene que mantener",
   "仅可删除空轨；非空轨道需先删除其上片段。": "Sólo las pistas vacías se pueden eliminar. remover los clips primero.",
+  "使用所选片段的时间范围": "Usar el intervalo de tiempo del clip seleccionado",
+  "工程或选择已变更，请重新选取范围或手动输入。": "El proyecto o la selección ha cambiado. Vuelve a elegir el intervalo o introdúcelo manualmente.",
+  "仅使用片段的时间范围，保留该时段的全部可见图层和可听音轨。": "El clip solo define el intervalo de tiempo. Se exportan todas las capas visibles y las pistas audibles de ese intervalo.",
   "仅导出时间范围": "Exportar solo el intervalo",
   "仅已选": "Solo seleccionados",
   "仅支持已声明的剪切子集；不支持 AAF，未映射项目会返回诊断。": "Solo se admiten los subconjuntos de cortes documentados. AAF no es compatible; los elementos no convertidos generan diagnósticos.",
@@ -2228,5 +2231,13 @@
   "转换将在新目录中创建副本，原工程保留不变。新副本不能用旧版本编辑器打开。关闭将不打开或转换工程。": "La conversión crea una copia en una carpeta nueva y conserva el original sin cambios. Los editores antiguos no pueden abrir la nueva copia. Cerrar no abre ni convierte el proyecto.",
   "转换中…": "Convirtiendo…",
   "转换副本并打开": "Convertir copia y abrir",
-  "原资源包保留不变。": "El paquete original permanece sin cambios."
+  "原资源包保留不变。": "El paquete original permanece sin cambios.",
+  "添加审片标记": "Añadir marcador de revisión",
+  "标记备注": "Nota del marcador",
+  "工程已变化或暂不可编辑，请关闭后重新添加标记。": "El proyecto ha cambiado o no se puede editar temporalmente. Cierra este cuadro y vuelve a añadir el marcador.",
+  "下载与成片对齐的 SRT": "Descargar SRT sincronizado",
+  "本次导出范围内没有字幕。": "No hay subtítulos en este intervalo de exportación.",
+  "视频已导出，但无法验证 SRT 与画面时间对齐。": "El vídeo se exportó, pero no se pudo verificar que los tiempos del SRT coincidan con la imagen.",
+  "附带与成片对齐的 SRT": "Incluir un SRT sincronizado",
+  "同步 SRT 仅适用于带时间范围的 MP4。": "El SRT sincronizado solo está disponible al exportar un intervalo de MP4."
 }
