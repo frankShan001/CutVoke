@@ -38,6 +38,7 @@ import contextlib
 import copy
 import hashlib
 import json
+import ntpath
 import os
 import re
 import threading
@@ -46,7 +47,7 @@ from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from socketserver import TCPServer
 from typing import Any, Optional
-from urllib.parse import urlparse, parse_qs, unquote
+from urllib.parse import urlparse, parse_qs, quote, unquote
 import uuid
 
 from cutvoke.editing.service import EditService, EditError
@@ -2548,11 +2549,13 @@ class HttpApi:
 
             if method == "GET" and len(parts) == 7 and parts[4] == "exports" and parts[6] == "captions.srt":
                 self.service.get_project(pid)
-                srt = self._export_queue().caption_srt(pid, parts[5])
-                if srt is None:
+                sidecar = self._export_queue().caption_sidecar(pid, parts[5])
+                if sidecar is None:
                     return 404, {"error": {"code": "NOT_FOUND",
                                            "message": "No synchronized captions for this export"}}
-                return 200, {"__srt_attachment__": srt}
+                srt, video_path = sidecar
+                return 200, {"__srt_attachment__": srt,
+                             "__srt_disposition__": _srt_download_disposition(video_path)}
 
             # 该工程的导出任务列表（导出任务 UI 用）
             if method == "GET" and len(parts) == 5 and parts[4] == "exports":
@@ -3030,6 +3033,16 @@ class HttpApi:
 # HTTP 服务器封装
 # ---------------------------------------------------------------------------
 
+def _srt_download_disposition(video_path: str) -> str:
+    """Use only the reserved video's basename, safe in a response header."""
+    stem, suffix = ntpath.splitext(ntpath.basename(video_path))
+    stem = re.sub(r'[<>:"|?*\x00-\x1f\x7f-\x9f\u202a-\u202e\u2066-\u2069\ud800-\udfff]', "_", stem).strip(" .")
+    name = (stem if suffix.lower() == ".mp4" and stem else "captions") + ".srt"
+    fallback = re.sub(r"[^A-Za-z0-9_. -]", "_", name)
+    encoded = quote(name, safe="")
+    return f"""attachment; filename="{fallback}"; filename*=UTF-8''{encoded}"""
+
+
 def build_handler(api: HttpApi, web_dir: Optional[str] = None):
     import os
 
@@ -3074,12 +3087,12 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
 
         def _respond_bytes(self, status: int, data: bytes,
                            ctype: str = "application/octet-stream", *,
-                           attachment_srt: bool = False) -> None:
+                           attachment_srt: Optional[str] = None) -> None:
             self.send_response(status)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(data)))
             if attachment_srt:
-                self.send_header("Content-Disposition", 'attachment; filename="captions.srt"')
+                self.send_header("Content-Disposition", attachment_srt)
                 self.send_header("Cache-Control", "no-store")
             for k, v in self._cors_headers().items():
                 self.send_header(k, v)
@@ -3315,7 +3328,8 @@ def build_handler(api: HttpApi, web_dir: Optional[str] = None):
                 return
             if isinstance(data, dict) and "__srt_attachment__" in data:
                 self._respond_bytes(200, data["__srt_attachment__"].encode("utf-8"),
-                                    "text/plain; charset=utf-8", attachment_srt=True)
+                                    "text/plain; charset=utf-8",
+                                    attachment_srt=data.get("__srt_disposition__", 'attachment; filename="captions.srt"'))
                 return
             # SRT 导出：纯文本（UTF-8）
             if isinstance(data, dict) and "__text__" in data:

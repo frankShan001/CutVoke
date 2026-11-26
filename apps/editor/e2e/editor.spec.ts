@@ -3616,7 +3616,7 @@ test("ranged MP4 downloads its own synchronized SRT from a successful export", a
     await expect(download).toBeVisible({ timeout: 75_000 });
     expect(statSync(outputPath).size).toBeGreaterThan(0);
     const [file] = await Promise.all([page.waitForEvent("download"), download.click()]);
-    expect(file.suggestedFilename()).toMatch(/^captions-export_[a-f0-9]+\.srt$/);
+    expect(file.suggestedFilename()).toBe(`${id}-synchronized.srt`);
     expect(readFileSync((await file.path())!, "utf8")).toBe("1\n00:00:00,200 --> 00:00:01,400\n中文 · café\n");
     const unchangedGlobal = await request.get(`${apiPath(id)}/captions.srt`);
     expect(await unchangedGlobal.text()).toContain("00:00:01,000 --> 00:00:03,000");

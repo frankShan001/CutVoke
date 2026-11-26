@@ -262,3 +262,36 @@ test('switching projects in an open dialog cannot mask an active job range', asy
     assert.equal(h.find('导出结束时间').props.value, '5');
   } finally { await h.close(); }
 });
+
+test('export SRT download uses the engine-provided filename with a safe job fallback', async () => {
+  let disposition;
+  let requested;
+  const { downloadExportSrt } = loadModule('../src/lib/api.ts', {
+    '../i18n': { tr: text => text },
+    '../i18n/locale': { getLocale: () => 'en' },
+    './projectSync': {},
+  }, {
+    fetch: async path => {
+      requested = path;
+      return new Response('1\n00:00:00,125 --> 00:00:00,375\nReview\n', {
+        headers: disposition ? { 'Content-Disposition': disposition } : {},
+      });
+    },
+  });
+  const cases = [
+    ["attachment; filename=\"__ caf__v2.srt\"; filename*=UTF-8''%E5%89%AA%E8%BE%91%20caf%C3%A9_v2.srt", '剪辑 café_v2.srt'],
+    ["attachment; filename=\"take.srt\"; filename*=UTF-8''take.srt", 'take.srt'],
+    ["attachment; filename*=UTF-8''%2Fhidden%2Fname.srt", 'captions-job.srt'],
+    ["attachment; filename*=UTF-8''bad%0D%0Avalue.srt", 'captions-job.srt'],
+    ["attachment; filename*=UTF-8''bad%FF.srt", 'captions-job.srt'],
+    ['attachment; filename="captions.srt"', 'captions-job.srt'],
+    [undefined, 'captions-job.srt'],
+  ];
+  for (const [header, expected] of cases) {
+    disposition = header;
+    const { blob, filename } = await downloadExportSrt('review/one', 'job');
+    assert.equal(filename, expected);
+    assert.equal(requested, '/api/v1/projects/review%2Fone/exports/job/captions.srt');
+    assert.match(await blob.text(), /Review/);
+  }
+});
