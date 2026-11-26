@@ -58,16 +58,24 @@ test("review guide follows visible portrait pixels and stays separate from the t
 
   let lastTestWidth = 0;
   for (const [w, h] of [[960, 540], [360, 800]]) {
-    await frame.evaluate((node: HTMLElement, [width,height]) => {
-      node.style.setProperty("width", width+"px", "important");
-      node.style.setProperty("height", height+"px", "important");
-      node.style.setProperty("max-width", "none", "important");
-      node.style.setProperty("max-height", "none", "important");
-      node.style.setProperty("flex-shrink", "0", "important");
-    }, [w,h]);
-    const bbox = (await frame.boundingBox())!;
-    expect(Math.abs(bbox.width-w)).toBeLessThan(1);
-    expect(Math.abs(bbox.height-h)).toBeLessThan(1);
+    // Keep the fixture size stable even when the mounted Player applies a new
+    // inline fit size after its ResizeObserver and media updates settle.
+    await page.addStyleTag({ content: `
+      .player__stage .player__canvas-frame {
+        width: ${w}px !important;
+        height: ${h}px !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        max-width: none !important;
+        max-height: none !important;
+        flex: 0 0 auto !important;
+        transition: none !important;
+      }
+    ` });
+    await expect.poll(async () => {
+      const bbox = await frame.boundingBox();
+      return bbox && [Math.round(bbox.width), Math.round(bbox.height)];
+    }).toEqual([w,h]);
     const scale = Math.min(w/180, h/320), visibleW = 180*scale, visibleH = 320*scale;
     const x = Math.round((w-visibleW)/2 + visibleW*.75);
     const y = Math.round((h-visibleH)/2 + visibleH*.8);
