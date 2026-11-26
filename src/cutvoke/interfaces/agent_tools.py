@@ -91,6 +91,8 @@ AGENT_TOOLS = [
           ("projectId", "expectedRevision", "type", "payload", "times")),
     _tool("preview_frames", "查看工程或素材在指定秒数的实际画面，返回 PNG 图片供视觉检查。工程画面含文字轨和字幕，并标注渲染 revision；每个非空帧返回实际 PNG 字节的 sha256 与 sizeBytes（不是感知哈希或持久存档）；一次最多 6 帧。",
           {**REVISION, "assetId": STRING, "path": STRING,
+           "includeReviewGuide": {"type": "boolean", "default": False,
+                                  "description": "For a project only: composite its current sequence's configured review guide into these PNGs. Never changes exports."},
            "times": {"type": "array", "minItems": 1, "maxItems": 6,
                      "items": {"type": "number", "minimum": 0}},
            "width": {"type": "integer", "minimum": 160, "maximum": 1920, "default": 960}}, ("times",)),
@@ -485,6 +487,11 @@ class AgentTools:
                 id="source-clip", asset_ref=AssetReference("source-asset", str(source)),
                 timeline_start=R.of(0), timeline_end=R.from_float(duration), source_start=R.of(0))])]
             project = Project("1", "source", "0", sequence)
+        guide = None
+        if a.get("includeReviewGuide"):
+            if not a.get("projectId"):
+                raise ValueError("a review guide needs a projectId")
+            guide = self.api.review_guides.get(project.project_id, project.sequence)
         duration = self.render._sequence_duration(project.sequence)
         if any(t >= duration for t in a["times"]):
             raise ValueError(f"times must be before the timeline end ({duration}s)")
@@ -517,6 +524,18 @@ class AgentTools:
                             Path(temporary).unlink(missing_ok=True)
             with cache.pin(path):
                 data = Path(path).read_bytes()
+            if guide is not None:
+                from cutvoke.storage.review_guides import derivative, derivative_key
+                name = "frame_" + derivative_key(data, guide) + ".png"
+                # The decorated frame is a review-only derivative. The clean
+                # PNG used by the preview renderer keeps its original name and bytes.
+                data = derivative(data, guide)
+                temporary = str(cache.path(name)) + "." + uuid.uuid4().hex + ".building.png"
+                try:
+                    Path(temporary).write_bytes(data)
+                    path = cache.publish(name, temporary)
+                finally:
+                    Path(temporary).unlink(missing_ok=True)
             frames.append({"time": at, "path": path, "mimeType": "image/png", "empty": False,
                            "sha256": hashlib.sha256(data).hexdigest(), "sizeBytes": len(data)})
             images.append({"type": "image", "mimeType": "image/png", "data": base64.b64encode(data).decode()})

@@ -2239,5 +2239,12 @@
   "本次导出范围内没有字幕。": "Dieser Exportbereich enthält keine Untertitel.",
   "视频已导出，但无法验证 SRT 与画面时间对齐。": "Das Video wurde exportiert, aber die Synchronisierung der SRT-Datei mit dem Bild konnte nicht überprüft werden.",
   "附带与成片对齐的 SRT": "Synchronisierte SRT-Datei hinzufügen",
-  "同步 SRT 仅适用于带时间范围的 MP4。": "Synchronisierte SRT-Dateien sind nur beim MP4-Export eines Zeitbereichs verfügbar."
+  "同步 SRT 仅适用于带时间范围的 MP4。": "Synchronisierte SRT-Dateien sind nur beim MP4-Export eines Zeitbereichs verfügbar.",
+  "仅预览参考线": "Nur Vorschauhilfe",
+  "选择与当前序列比例相同的透明 PNG。参考线不会出现在导出中。": "Wählen Sie eine transparente PNG-Datei im Seitenverhältnis dieser Sequenz. Die Vorschauhilfe wird nie exportiert.",
+  "选择参考线 PNG": "Vorschau-PNG auswählen",
+  "显示参考线": "Vorschauhilfe anzeigen",
+  "移除参考线": "Vorschauhilfe entfernen",
+  "参考线 PNG 不能超过 4 MB": "Die PNG-Datei darf höchstens 4 MB groß sein",
+  "读取参考线失败": "Vorschauhilfe konnte nicht gelesen werden"
 }

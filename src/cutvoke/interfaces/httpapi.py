@@ -157,6 +157,9 @@ class HttpApi:
         from cutvoke.storage.agent_inbox import AgentInbox
         self.agent_inbox=(_directory_owner.agent_inbox if _directory_owner is not None else
                           AgentInbox(Path(self.media_dir)/'.agent-inbox'/'requests.sqlite'))
+        from cutvoke.storage.review_guides import ReviewGuides
+        self.review_guides = (_directory_owner.review_guides if _directory_owner is not None else
+                              ReviewGuides(self.media_dir))
         # V02 异步导出队列：**挂在 EditService 上**（架构矫正）。本 HttpApi 不再
         # 自持队列实例——否则会与 service 命令各持一份，导致两个后台线程重复
         # 消费任务。HttpApi 只做薄封装，转调 service._get_export_queue()，
@@ -1224,6 +1227,39 @@ class HttpApi:
                 body = {**body, "outPath": self.service.store.export_path(body["outPath"])}
             except ValueError as error:
                 raise EditError(ErrorCode.INVALID_ARGUMENT, str(error)) from error
+
+        if (len(parts) == 6 and parts[:3] == ["api", "v1", "projects"]
+                and parts[4] == "review-guide" and method in ("GET", "POST")):
+            import base64
+            import binascii
+            from cutvoke.storage.review_guides import MAX_BYTES, ingest
+            project = self.service.get_project(parts[3])
+            sequence = next((candidate for candidate in project.sequences if candidate.id == parts[5]), None)
+            if sequence is None:
+                raise ValueError("unknown review sequence")
+            if method == "POST":
+                if set(body) != {"pngBase64", "expectedRevision"}:
+                    raise ValueError("review guide requires pngBase64 and expectedRevision")
+                if body["expectedRevision"] != project.revision:
+                    raise EditError(ErrorCode.REVISION_CONFLICT, "read the latest project before changing its guide",
+                                    retryable=True)
+                payload = body["pngBase64"]
+                guide = None
+                if payload is not None:
+                    if not isinstance(payload, str) or len(payload) > ((MAX_BYTES+2)//3)*4:
+                        raise ValueError("guide PNG byte limit")
+                    try:
+                        png = base64.b64decode(payload, validate=True)
+                    except (ValueError, binascii.Error) as exc:
+                        raise ValueError("invalid PNG encoding") from exc
+                    guide = ingest(png, (sequence.width, sequence.height))
+                self.review_guides.set(project.project_id, sequence, guide)
+            else:
+                guide = self.review_guides.get(project.project_id, sequence)
+            return 200, {"sequenceId": sequence.id, "guide": None if guide is None else {
+                "sha256": guide.digest, "width": guide.width, "height": guide.height,
+                "pngBase64": base64.b64encode(guide.png).decode("ascii"),
+            }}
 
         if method == "POST" and len(parts) == 4 and parts[:3] == ["api", "v1", "agent"]:
             from cutvoke.interfaces.agent_tools import AgentTools, AGENT_TOOLS

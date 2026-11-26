@@ -2239,5 +2239,12 @@
   "本次导出范围内没有字幕。": "Cette plage d’exportation ne contient aucun sous-titre.",
   "视频已导出，但无法验证 SRT 与画面时间对齐。": "La vidéo a été exportée, mais la synchronisation du SRT avec l’image n’a pas pu être vérifiée.",
   "附带与成片对齐的 SRT": "Inclure un SRT synchronisé",
-  "同步 SRT 仅适用于带时间范围的 MP4。": "Le SRT synchronisé est disponible uniquement pour les exports MP4 avec une plage temporelle."
+  "同步 SRT 仅适用于带时间范围的 MP4。": "Le SRT synchronisé est disponible uniquement pour les exports MP4 avec une plage temporelle.",
+  "仅预览参考线": "Guide réservé à l’aperçu",
+  "选择与当前序列比例相同的透明 PNG。参考线不会出现在导出中。": "Choisissez un PNG transparent au même format que cette séquence. Le guide n’apparaît jamais dans les exports.",
+  "选择参考线 PNG": "Choisir le PNG du guide",
+  "显示参考线": "Afficher le guide",
+  "移除参考线": "Retirer le guide",
+  "参考线 PNG 不能超过 4 MB": "Le PNG du guide ne doit pas dépasser 4 Mo",
+  "读取参考线失败": "Impossible de lire le guide"
 }

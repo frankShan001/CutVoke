@@ -25,6 +25,7 @@ import { fmtTime, fmtTimePrecise } from "./timeline/util";
 import { findClipById, hasVideoCoverageAt, playbackEndSecs, rationalSeconds, secsToRational, PLAYER_RATIOS } from "./playerUtils";
 import { RatioIcon } from "./playerIcons";
 import { usePreviewFrame } from "./usePreviewFrame";
+import { useReviewGuide } from "./useReviewGuide";
 import { usePreviewPoster } from "./usePreviewPoster";
 import { useVideoHandoff } from "./useVideoHandoff";
 import { previewLoadSeekSite, recordPreviewPhase, seekPreviewVideo } from "../lib/previewSeekEvidence";
@@ -1002,6 +1003,9 @@ export function Player() {
   const ratioLabel = PLAYER_RATIOS.find((x) => x.wh[0] === ratio[0] && x.wh[1] === ratio[1])?.label || "16:9";
   const canvasWidth = project?.sequence.width || 1920;
   const canvasHeight = project?.sequence.height || 1080;
+  const [reviewGuideOpen, setReviewGuideOpen] = useState(false);
+  const review = useReviewGuide(currentId || undefined, project?.sequence.id, project?.revision,
+                                canvasWidth, canvasHeight);
   const canvasBackground = project?.sequence.backgroundColor || "#000000";
   const backgroundSwatches = [
     { name: tr("黑色"), color: "#000000" },
@@ -1113,6 +1117,13 @@ export function Player() {
           <CropCanvasOverlay />
           {state.project && !hasLayerGraph(state.project.sequence) ? <TitleCanvasOverlay /> : null}
           <CaptionCanvasOverlay />
+          {review.shown && review.guide ? (
+            <svg className="player__title-safe-area" viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
+              preserveAspectRatio="xMidYMid meet" role="img" aria-label={tr("仅预览参考线")}>
+              <image href={`data:image/png;base64,${review.guide.pngBase64}`}
+                width={canvasWidth} height={canvasHeight} preserveAspectRatio="none" />
+            </svg>
+          ) : null}
           {showTitleSafeArea && currentId ? (
             <svg className="player__title-safe-area" viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
               preserveAspectRatio="xMidYMid meet" role="img"
@@ -1127,6 +1138,26 @@ export function Player() {
           ) : null}
         </div>
       </div>
+
+      {reviewGuideOpen && currentId ? (
+        <div className="player__background-popover" role="dialog" aria-label={tr("仅预览参考线")}>
+          <div className="player__background-heading">{tr("仅预览参考线")}</div>
+          <p>{tr("选择与当前序列比例相同的透明 PNG。参考线不会出现在导出中。")}</p>
+          <label>{tr("选择参考线 PNG")}
+            <input type="file" accept="image/png,.png" disabled={review.busy}
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0];
+                event.currentTarget.value = "";
+                if (file) void review.replace(file);
+              }} />
+          </label>
+          <button type="button" disabled={!review.guide || review.busy} aria-pressed={review.shown}
+            onClick={review.toggle}>{tr("显示参考线")}</button>
+          <button type="button" disabled={!review.guide || review.busy}
+            onClick={() => void review.replace(null)}>{tr("移除参考线")}</button>
+          {review.error ? <p role="alert">{review.error}</p> : null}
+        </div>
+      ) : null}
 
       {backgroundPickerOpen && currentId ? (
         <div className="player__background-popover" role="dialog" aria-label={tr("画布背景设置")}>
@@ -1237,6 +1268,11 @@ export function Player() {
           aria-label={tr("设置画布背景")} aria-expanded={backgroundPickerOpen}
           title={tr("设置透出区域与空白区域的画布底色")}>
           <span className="player__background-chip" style={{ backgroundColor: canvasBackground }} />{tr("背景")}</button>
+        <button type="button" className={`player__safe-toggle ${review.shown ? "player__safe-toggle--on" : ""}`}
+          disabled={!currentId} aria-expanded={reviewGuideOpen} aria-label={tr("仅预览参考线")}
+          onClick={() => { setReviewGuideOpen((value) => !value); setBackgroundPickerOpen(false); }}>
+          {tr("仅预览参考线")}
+        </button>
         <button type="button" className={`player__safe-toggle ${showTitleSafeArea ? "player__safe-toggle--on" : ""}`}
           onClick={() => setShowTitleSafeArea((value) => !value)} disabled={!currentId}
           aria-label={tr("切换标题安全区")} aria-pressed={showTitleSafeArea}
