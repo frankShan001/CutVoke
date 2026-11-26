@@ -578,12 +578,12 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
           </div>
           {job?.projectId === state.currentId && job?.status === "succeeded" && result.captionSidecarStatus === "available" ? (
             <Button variant="secondary" size="sm" onClick={() => {
-              void downloadExportSrt(job.projectId, job.jobId).then(blob => {
+              void downloadExportSrt(job.projectId, job.jobId).then(({ blob, filename }) => {
                 if (!aliveRef.current || committedState.current?.currentId !== job.projectId) return;
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement("a");
                 link.href = url;
-                link.download = `captions-${job.jobId}.srt`;
+                link.download = filename;
                 document.body.appendChild(link);
                 link.click();
                 link.remove();

@@ -353,7 +353,12 @@ class ExportQueue:
         return export_picture_srt(project.sequence.captions, origin, duration)
 
     def caption_srt(self, project_id: str, job_id: str) -> Optional[str]:
-        """Read the immutable job snapshot only after terminal success."""
+        """Return the immutable export's SRT text, if available."""
+        sidecar = self.caption_sidecar(project_id, job_id)
+        return sidecar[0] if sidecar else None
+
+    def caption_sidecar(self, project_id: str, job_id: str) -> Optional[tuple[str, str]]:
+        """Return the SRT and its reserved video path after terminal success."""
         with self._lock:
             job = self._store.get_export_job(job_id) if self._store is not None else self._jobs.get(job_id)
             if (not job or job["projectId"] != project_id or job["status"] != STATUS_SUCCEEDED
@@ -371,7 +376,8 @@ class ExportQueue:
         project = self._load_project(project_id, job["revision"], snapshot)
         if project.project_id != project_id:
             return None
-        return self._picture_srt(project, clock, requested) or None
+        srt = self._picture_srt(project, clock, requested)
+        return (srt, job["outPath"]) if srt else None
 
     def list(self, project_id: Optional[str] = None,
              status: Optional[str] = None) -> list[dict]:

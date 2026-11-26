@@ -279,6 +279,35 @@ class ExportCaptionSidecarTests(unittest.TestCase):
         self.assertTrue(self.api.render._verify_picture_packet_grid(regular, Fraction(30), 30, timebase, None))
         self.assertFalse(self.api.render._verify_picture_packet_grid(shifted, Fraction(30), 30, timebase, None))
 
+    def test_two_ranged_versions_get_matching_download_names(self):
+        from cutvoke.storage.export_queue import ExportQueue
+
+        project = self.project("two-versions")
+        self.service.import_project(project, project_id=project.project_id)
+        queue = ExportQueue(self.store, self.service,
+                            render_factory=lambda: self.api.render, autostart=False)
+        self.service._export_queue = queue
+        first, _, first_url = self.submit(project, "take", ("3.25", "90.75"),
+                                          extra={"versioned": True})
+        second, _, second_url = self.submit(project, "take", ("217", "254"),
+                                            extra={"versioned": True})
+
+        queue.start()
+        for jid, endpoint, stem, cue, frames in (
+            (first, first_url, "take", "中文 / café ☀", range(4, 91)),
+            (second, second_url, "take_v2", "検証", range(217, 254)),
+        ):
+            with self.subTest(stem=stem):
+                job = self.wait_job(jid)
+                expected_path = self.root / f"{stem}.mp4"
+                self.assertEqual(Path(job["outPath"]), expected_path)
+                self.assertEqual(_frame_ids(expected_path), list(frames))
+                code, response = self.api.handle("GET", endpoint, {})
+                self.assertEqual(code, 200, response)
+                self.assertEqual(response["__srt_disposition__"],
+                                 f"""attachment; filename="{stem}.srt"; filename*=UTF-8''{stem}.srt""")
+                self.assertEqual(set(self.read_cues(endpoint)), {cue})
+
     def test_selected_sequence_frozen_job_after_edit_and_restart(self):
         project = self.project("main")
         requested = copy.deepcopy(project.sequence)
@@ -301,7 +330,7 @@ class ExportCaptionSidecarTests(unittest.TestCase):
 
         self.api.render.render = pause
         self.addCleanup(released.set)
-        jid, path, endpoint = self.submit(project, "frozen", ("3.25", "90.75"), command=True,
+        jid, path, endpoint = self.submit(project, "剪辑 café_v2", ("3.25", "90.75"), command=True,
                                           extra={"sequenceId": "selected"})
         self.assertTrue(blocked.wait(10))
         self.assertEqual(self.api.handle("GET", endpoint, {})[0], 404)
@@ -355,7 +384,9 @@ class ExportCaptionSidecarTests(unittest.TestCase):
                     self.assertEqual(response.status, 200)
                     self.assertEqual(response.getheader("Content-Type"), "text/plain; charset=utf-8")
                     self.assertEqual(response.getheader("Cache-Control"), "no-store")
-                    self.assertEqual(response.getheader("Content-Disposition"), 'attachment; filename="captions.srt"')
+                    self.assertEqual(
+                        response.getheader("Content-Disposition"),
+                        """attachment; filename="__ caf__v2.srt"; filename*=UTF-8''%E5%89%AA%E8%BE%91%20caf%C3%A9_v2.srt""")
                     self.assertIn("中文 / café ☀", response.read().decode("utf-8"))
                 finally:
                     connection.close()

@@ -432,12 +432,21 @@ export async function cancelExportJob(jobId: string): Promise<Pick<ExportJob, "j
   return post(`/jobs/${encodeURIComponent(jobId)}/cancel`, {});
 }
 
-/** GET /projects/{id}/exports → 该工程的导出任务列表（最新在前）。 */
-export async function downloadExportSrt(projectId: string, jobId: string): Promise<Blob> {
+/** The engine derives the download name from the immutable export receipt. */
+export async function downloadExportSrt(projectId: string, jobId: string): Promise<{ blob: Blob; filename: string }> {
   const path = `/projects/${encodeURIComponent(projectId)}/exports/${encodeURIComponent(jobId)}/captions.srt`;
   const response = await fetch(API_BASE + path, { method: "GET" });
   if (!response.ok) throw normalizeError(await readJson(response), response.status, path);
-  return response.blob();
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const encoded = disposition.match(/(?:^|;\s*)filename\*=UTF-8''([^;]+)/i)?.[1];
+  let filename = `captions-${jobId}.srt`;
+  if (encoded) {
+    try {
+      const candidate = decodeURIComponent(encoded);
+      if (/^[^/\\\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]+\.srt$/i.test(candidate)) filename = candidate;
+    } catch { /* older or malformed response: keep a job-specific name */ }
+  }
+  return { blob: await response.blob(), filename };
 }
 
 export async function listExportJobs(projectId: string): Promise<ExportJob[]> {
