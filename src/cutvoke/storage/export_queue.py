@@ -8,14 +8,15 @@
     互相拖慢（本机实测），队列语义比并发更贴近"导出"这件事。
   - **取消**：cancel 置 threading.Event，RenderService 的看门狗会 terminate
     ffmpeg 进程，任务落到 cancelled，**不留半成品成片**。
-  - **多版本**：versioned=true 时永不覆盖已有成片，依次产出
-    `name.mp4` → `name_v2.mp4` → `name_v3.mp4`（"导出多版本"）。
+  - **多版本**：versioned=true 时跳过已有文件和本队列待导出的路径，依次产出
+    `name.mp4` → `name_v2.mp4` → `name_v3.mp4`，并禁用渲染覆盖选项。
   - **可查**：任务状态同时写 SQLite 账本（复用 store.export_jobs），
     进程重启后仍能查到历史任务与结果。
 
 设计边界（不装作更强）：
   - 队列是**进程内**的：服务重启后，之前 queued/running 的任务不会自动续跑，
     会被标记为 interrupted，避免"卡在 running 永远不结束"的假状态。
+    多版本路径的预约只在同一队列内生效，不协调其它进程或同步导出。
   - 不做优先级/并行度配置，先保证"串行 + 可取消 + 状态可查"三件事是真的。
 """
 
@@ -97,19 +98,25 @@ class _LedgerCancelEvent(threading.Event):
         return super().is_set()
 
 
-def versioned_path(out_path: str) -> str:
-    """多版本落点：已被占用则依次尝试 _v2 / _v3 …
+def _output_key(path: str) -> str:
+    """Compare output entries, including aliases of their parent directory."""
+    parent, name = os.path.split(os.path.abspath(path))
+    return os.path.normcase(os.path.join(os.path.realpath(parent), name))
 
-    `name.mp4`（空闲）→ `name.mp4`；`name.mp4` 已存在 → `name_v2.mp4`。
-    多版本语义是"保留历史成片"，所以永不覆盖。
-    """
-    if not os.path.exists(out_path):
+
+def versioned_path(out_path: str, *, reserved: frozenset[str] = frozenset()) -> str:
+    """Choose the first version absent from disk and this queue's reservations."""
+    def available(path: str) -> bool:
+        return (not os.path.lexists(path)
+                and (not reserved or _output_key(path) not in reserved))
+
+    if available(out_path):
         return out_path
     base, ext = os.path.splitext(out_path)
     n = 2
     while True:
         cand = f"{base}_v{n}{ext}"
-        if not os.path.exists(cand):
+        if available(cand):
             return cand
         n += 1
 
@@ -225,50 +232,56 @@ class ExportQueue:
         if payload.get("transparent") and os.path.splitext(str(out_path))[1].lower() != ".mov":
             raise ValueError("transparent export requires a .mov file (ProRes 4444)")
         out_path = os.path.abspath(out_path)
-        if payload.get("versioned"):
-            out_path = versioned_path(out_path)
-        job_id = f"export_{uuid.uuid4().hex[:12]}"
-        job = {
-            "jobId": job_id,
-            "projectId": project.project_id,
-            "revision": project.revision,
-            "outPath": out_path,
-            "quality": str(payload.get("quality", "high")),
-            "status": STATUS_QUEUED,
-            # 入队顺序（队列视图里按它排队；账本按 updated_at 排序）
-            "queuedAt": time.time(),
-            "versioned": bool(payload.get("versioned")),
-            "payload": dict(payload, outPath=out_path),
-            "request": dict(payload, outPath=out_path),
-            "createdAt": time.time(),
-            "progress": None,
-        }
         snapshot = project.to_dict()
-        if self._store is not None:
-            # 队列任务用独立 request_hash（含 jobId）：允许"同一工程同样参数"
-            # 排多次队，不撞 export_jobs 的自然键唯一索引。
-            receipt = self._store.create_export_job(
-                job_id=job_id, project_id=project.project_id,
-                revision=project.revision,
-                request_hash=f"{_QUEUE_HASH_PREFIX}{self._owner}:{job_id}",
-                out_path=out_path, quality=job["quality"],
-                status=STATUS_QUEUED,
-                project_snapshot=snapshot,
-                request=job["request"],
-                command_id=command_id, command_hash=command_hash,
-                expected_revision=expected_revision,
-                command_result={"commandId": command_id, "previousRevision": project.revision,
-                                "revision": project.revision, "transactionId": "",
-                                "changedEntities": [{"type": "export_enqueued", "jobId": job_id,
-                                                     "status": STATUS_QUEUED, "outPath": out_path,
-                                                     "versioned": job["versioned"]}]})
-            if receipt.get("_replayed"):
-                return receipt
+        versioned = bool(payload.get("versioned"))
+        # Allocation, durable receipt, and in-memory publication share one
+        # lock. A concurrent submit cannot claim the same unrendered version.
         with self._lock:
+            if versioned:
+                reserved = frozenset(
+                    _output_key(pending["outPath"]) for pending in self._jobs.values()
+                    if pending["status"] in (STATUS_QUEUED, STATUS_RUNNING))
+                out_path = versioned_path(out_path, reserved=reserved)
+            job_id = f"export_{uuid.uuid4().hex[:12]}"
+            job = {
+                "jobId": job_id,
+                "projectId": project.project_id,
+                "revision": project.revision,
+                "outPath": out_path,
+                "quality": str(payload.get("quality", "high")),
+                "status": STATUS_QUEUED,
+                # 入队顺序（队列视图里按它排队；账本按 updated_at 排序）
+                "queuedAt": time.time(),
+                "versioned": versioned,
+                "payload": dict(payload, outPath=out_path),
+                "request": dict(payload, outPath=out_path),
+                "createdAt": time.time(),
+                "progress": None,
+            }
+            if self._store is not None:
+                # 队列任务用独立 request_hash（含 jobId）：允许"同一工程同样参数"
+                # 排多次队，不撞 export_jobs 的自然键唯一索引。
+                receipt = self._store.create_export_job(
+                    job_id=job_id, project_id=project.project_id,
+                    revision=project.revision,
+                    request_hash=f"{_QUEUE_HASH_PREFIX}{self._owner}:{job_id}",
+                    out_path=out_path, quality=job["quality"],
+                    status=STATUS_QUEUED,
+                    project_snapshot=snapshot,
+                    request=job["request"],
+                    command_id=command_id, command_hash=command_hash,
+                    expected_revision=expected_revision,
+                    command_result={"commandId": command_id, "previousRevision": project.revision,
+                                    "revision": project.revision, "transactionId": "",
+                                    "changedEntities": [{"type": "export_enqueued", "jobId": job_id,
+                                                         "status": STATUS_QUEUED, "outPath": out_path,
+                                                         "versioned": job["versioned"]}]})
+                if receipt.get("_replayed"):
+                    return receipt
             self._jobs[job_id] = job
             self._snapshots[job_id] = snapshot
             self._cancel_events[job_id] = _LedgerCancelEvent(self._store, job_id)
-        self._q.put(job_id)
+            self._q.put(job_id)
         return dict(job, payload=None)
 
     def cancel(self, job_id: str) -> dict:
@@ -453,7 +466,7 @@ class ExportQueue:
                 self._snapshots.get(job["jobId"]))
             render_options = dict(
                 quality=job["quality"],
-                overwrite=bool(payload.get("overwrite", False)),
+                overwrite=not job["versioned"] and bool(payload.get("overwrite", False)),
                 cancel_event=cancel_event,
                 video_bitrate_kbps=(int(payload["videoBitrateKbps"])
                                     if payload.get("videoBitrateKbps") else None),
