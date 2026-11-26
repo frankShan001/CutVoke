@@ -956,3 +956,21 @@ export async function applyTemplate(
 }
 
 export type { Template };
+
+interface ReviewGuideResponse {
+  sequenceId: string;
+  guide: { sha256: string; pngBase64: string } | null;
+}
+
+function reviewGuidePath(projectId: string, sequenceId: string): string {
+  return `/projects/${encodeURIComponent(projectId)}/review-guide/${encodeURIComponent(sequenceId)}`;
+}
+
+export function getReviewGuide(projectId: string, sequenceId: string, signal?: AbortSignal) {
+  return get<ReviewGuideResponse>(reviewGuidePath(projectId, sequenceId), signal);
+}
+
+export function saveReviewGuide(projectId: string, sequenceId: string, expectedRevision: string,
+                                pngBase64: string | null) {
+  return post<ReviewGuideResponse>(reviewGuidePath(projectId, sequenceId), { expectedRevision, pngBase64 });
+}
