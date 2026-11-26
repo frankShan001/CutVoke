@@ -82,7 +82,7 @@ class AdmissionTests(unittest.TestCase):
             _working_video_filter=lambda:'format=rgb24',_sequence_duration=lambda seq:6.,
             _video_input_arguments=lambda path:[])
         session=RecoverySession(None,[],[],compiled_namespace='tools',
-            source_hashes=(('/source.png','a'*64),('/source.mkv','a'*64)))
+            source_hashes=(('/source.png','a'*64),('/source.mkv','a'*64),('/source.webm','a'*64)))
         arguments=dict(cursor=2.,duration=2.,origin=0.,overlay_position=(0,0),
                        alpha=False,quality='high',chunk_audio=False,caption_cwd=None)
         def admit(inputs=('/source.png',),**changes):
@@ -104,8 +104,17 @@ class AdmissionTests(unittest.TestCase):
             seq.tracks=[Track('v','video',[clip])]
             self.assertIsNone(admit(('/source.mkv',)))
             seq.tracks=[]
-            renderer._video_input_arguments=lambda path:['-c:v','libvpx-vp9']
-            self.assertIsNone(admit(('/source.mkv',)))
+            keys = set()
+            for decoder in ('libvpx', 'libvpx-vp9'):
+                with patch.object(renderer, '_video_input_arguments', return_value=['-c:v', decoder]):
+                    self.assertIsNone(admit(('/source.mkv',)))
+                    plan = admit(('/source.webm',))
+                    self.assertEqual(plan.inputs[0].arguments, ('-threads', '2', '-c:v', decoder))
+                    keys.add(plan.key('tools'))
+            self.assertEqual(len(keys), 2)
+            for override in (['-c:v', 'unknown'], ['-c:v', 'libvpx', '-unknown']):
+                with patch.object(renderer, '_video_input_arguments', return_value=override):
+                    self.assertIsNone(admit(('/source.webm',)))
             for error in (RuntimeError('probe unavailable'),RenderError('probe unavailable')):
                 with patch.object(renderer,'_video_input_arguments',side_effect=error):
                     self.assertIsNone(admit(('/source.mkv',)))

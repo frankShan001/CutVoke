@@ -121,8 +121,11 @@ def admit_window(renderer, session, seq, graph, inputs, *, cursor, duration,
                         return None
                     args += ['-ss', str(seek)]
                 decoder_args = renderer._video_input_arguments(path)
-                if decoder_args:
-                    return None  # Special decoders await production-path acceptance.
+                # The selected transparent WebM decoder is part of the
+                # exact per-input argument identity. Other overrides stay out.
+                if decoder_args and (os.path.splitext(path)[1].lower() != '.webm'
+                        or decoder_args not in (['-c:v', 'libvpx'], ['-c:v', 'libvpx-vp9'])):
+                    return None
                 args += decoder_args
             ordered.append(CompiledInput(path, digest, tuple(args)))
         threads = min(8, max(2, (os.cpu_count() or 2) // 2),
