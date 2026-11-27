@@ -80,6 +80,24 @@ class CacheStorage(unittest.TestCase):
                 self.assertEqual(writer.execute(
                     "SELECT used FROM windows WHERE key='key'").fetchone(), (1.,))
 
+    def test_restore_can_read_committed_blob_while_another_writer_has_reserved_lock(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cache = WindowCache(root / 'cache')
+            source, target = root / 'source', root / 'private'
+            payload = b'committed window'
+            source.write_bytes(payload)
+            self.assertTrue(cache.publish('key', source))
+            with closing(sqlite3.connect(cache.database)) as writer:
+                writer.execute('BEGIN IMMEDIATE')
+                writer.execute("UPDATE windows SET data=? WHERE key='key'", (b'uncommitted',))
+                try:
+                    self.assertTrue(cache.restore('key', target))
+                    self.assertTrue(writer.in_transaction)
+                    self.assertEqual(target.read_bytes(), payload)
+                finally:
+                    writer.rollback()
+
     def test_restore_requires_successful_lookup_and_complete_destination_write(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -403,3 +421,4 @@ class RealRecovery(unittest.TestCase):
             self.assertTrue(all(result['audioVerification'] for result in results))
             self.assertTrue((root / '0.mp4').exists() and (root / '1.mp4').exists())
             self.assertFalse(list(root.glob('cutvoke-export-windows-*')))
+
