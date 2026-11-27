@@ -102,9 +102,11 @@ sibling directories, unused imports and undeclared dependencies are not collecte
 Import receipts expose `projectPackagePolicy="include_when_referenced"` in place
 of the former always-false `includedInProjectPackage` flag.
 
-Packages containing sources use **package format 4**; packages without sources
-retain formats 1–3. Older CutVoke builds explicitly reject format 4. New builds
-continue reading old packages. `inspect_package` reports the declared source
+On the current development branch, all newly exported project packages use
+**package format 5**, with or without generated sources. If prompted to upgrade
+an older package, convert and open a copy; the original stays unchanged. CutVoke
+v0.3.6 can still open a format-4 original that worked in that version, but
+cannot open newly exported format-5 packages. `inspect_package` reports the declared source
 inventory; source ZIP and input hashes are strictly verified on unpack. Duplicate
 archive names, unsafe paths, unsupported schemas/types and hash mismatches are
 hard errors, unlike historical ordinary-media compatibility warnings. Existing
@@ -146,9 +148,11 @@ reproducibility. Missing undeclared fonts/plugins cannot be inferred or recovere
 
 透明素材仅支持 straight Alpha 的 ProRes 4444 MOV，必须另查实际合成像素。
 工程包会携带所有序列（包括嵌套序列）已引用素材的源码 ZIP，并按 bundle ID 去重。
-新包使用格式 4，旧包继续兼容；旧版程序会明确拒绝格式 4。解包只保留 ZIP，
-不展开或执行源码。用 `generated_source` 的 list/inspect 查看，restore 显式恢复到
-全新目录；已有恢复中的人工修改不会被覆盖。源码哈希、重复条目、路径和格式
+当前开发分支新导出的工程包均使用**格式 5**，无论是否包含生成源码。若打开旧包时
+提示升级，请转换并打开副本，原包不变。CutVoke v0.3.6 仍能打开原先就能打开的格式 4 包，
+但无法打开新导出的格式 5 包。解包只保留 ZIP，不展开或执行源码。
+用 `generated_source` 的 list/inspect 查看，restore 显式恢复到全新目录；
+已有恢复中的人工修改不会被覆盖。源码哈希、重复条目、路径和格式
 错误会阻断迁移。未声明依赖、渲染缓存索引、任意代码隔离运行时、自动重渲或 GUI
 参数编辑尚未提供。性能和视听效果应使用
 真实作品另行比较，不能由一次导入或导出成功推断。
