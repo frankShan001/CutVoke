@@ -66,11 +66,14 @@ class WindowCache:
     def __init__(self, directory):
         self.database = Path(directory) / 'windows.sqlite3'
 
-    def _connect(self):
+    def _check_paths(self):
         if self.database.parent.is_symlink() or any(
                 Path(str(self.database) + suffix).is_symlink()
                 for suffix in ('', '-journal', '-wal', '-shm')):
             raise OSError('cache symlinks are not supported')
+
+    def _connect(self):
+        self._check_paths()
         self.database.parent.mkdir(parents=True, exist_ok=True)
         db = sqlite3.connect(self.database, timeout=0.25)
         try:
@@ -88,7 +91,11 @@ class WindowCache:
 
     def restore(self, key, target):
         try:
-            with closing(self._connect()) as db:
+            self._check_paths()
+            # Look up committed bytes without running the writer's setup PRAGMAs.
+            # A RESERVED writer lock is compatible with reading, not schema setup.
+            uri = self.database.absolute().as_uri() + '?mode=rw'
+            with closing(sqlite3.connect(uri, uri=True, timeout=0.25)) as db:
                 row = db.execute('SELECT data,digest FROM windows WHERE key=? AND length(data)<=?',
                                  (key, self.MAX_ITEM)).fetchone()
                 if (row is None or not isinstance(row[0], bytes)
@@ -101,6 +108,7 @@ class WindowCache:
                 # Eviction recency is advisory after the verified copy. A
                 # competing writer must not discard the request's good bytes.
                 try:
+                    db.execute('PRAGMA busy_timeout=0')
                     with db:
                         db.execute('UPDATE windows SET used=? WHERE key=?', (time.time(), key))
                 except sqlite3.Error:
@@ -245,3 +253,4 @@ def recovery_session(directory, snapshot, ffmpeg, options, cancel=None, *, ffpro
             compiled_namespace=compiled_namespace, source_hashes=hashes, tool_sources=tool_sources, tool_commands=tool_commands)
     except (OSError, ValueError, TypeError, subprocess.SubprocessError):
         return None
+
