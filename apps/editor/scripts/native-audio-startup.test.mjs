@@ -18,6 +18,24 @@ function bindPlayerSeek(context) {
   context.readSeekEvidence = () => { context.qaSeekReads++; return {}; };
   return context;
 }
+function bindPlayerAudioClockReset(context, file, enabled = false) {
+  let reset;
+  const visit = node => {
+    if (ts.isVariableDeclaration(node) && node.name.getText(file) === 'resetAudioClock')
+      reset = node.initializer.arguments[0].getText(file);
+    ts.forEachChild(node, visit);
+  };
+  visit(file); assert.ok(reset, 'missing real Player reset callback');
+  const compilerOptions = { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS };
+  const evidence = {}, events = [];
+  const window = { __cutvokeAudioClockResetEvidence: enabled, dispatchEvent: event => events.push(event) };
+  runInNewContext(ts.transpileModule(readFileSync(new URL('../src/lib/previewStopEvidence.ts', import.meta.url), 'utf8'),
+    { compilerOptions }).outputText, { exports: evidence, window, CustomEvent });
+  runInNewContext(ts.transpileModule(`exports.reset = ${reset}`, { compilerOptions }).outputText,
+    { ...context, exports: evidence, recordAudioClockReset: evidence.recordAudioClockReset });
+  context.resetAudioClock = evidence.reset;
+  return events;
+}
 function harness(diagnostics = false) {
   const timers = new Map(); let timer=0;
   const exports = {};
@@ -162,6 +180,7 @@ test('real Player clock and audio update restart transport on image to video han
   const globals={exports:{},mode:'image',mediaEndSecs:6,audioTransportRef:transport,playheadRef:{current:3},
     auditionBoundary:{current:()=>null},nativeAudioRef:{current:true},playingRef:{current:true},scrubbingRef:{current:false},
     nativeAudioPositionRef: { current: null }, nativeAudioClockRef:{current:()=>deviceTime},performance:{now:()=>deviceTime*1000}};
+  bindPlayerAudioClockReset(globals, file);
   runInNewContext(ts.transpileModule(`exports.clock=${callback}`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,globals);
   h.latest.current.playbackClock=globals.exports.clock;
   h.update();await flush();assert.equal(transport.current.active,false);assert.equal(h.element.paused,false);
@@ -201,6 +220,7 @@ test('real Player deadline stops at the native cursor even when graph transport 
     const globals={exports:{},mode,mediaEndSecs:6,audioTransportRef:{current:transport},playheadRef:{current:3},
       auditionBoundary:{current:time=>{seen.push(time);return time>=3.5?3.5:null;}},nativeAudioRef:{current:true},playingRef:{current:true},scrubbingRef:{current:false},
       nativeAudioPositionRef:{current:()=>cursor},nativeAudioClockRef:{current:clock},performance:{now:()=>10470}};
+    bindPlayerAudioClockReset(globals, file);
     runInNewContext(ts.transpileModule(`exports.clock=${callback}`,{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,globals);
     if(mode==='video')assert.ok(Math.abs(globals.exports.clock(false).time-3.47)<.00001);
     else assert.equal(globals.exports.clock(false),null);
@@ -460,7 +480,7 @@ test('metadata/data, settled seeks, and non-audio-owned editing still use Player
   assert.equal(h.plays.length, 1);
 });
 
-function playerAudioPublication() {
+function playerAudioPublication(evidence = false) {
   const player = readFileSync(new URL('../src/components/Player.tsx', import.meta.url), 'utf8');
   const store = readFileSync(new URL('../src/store/editor.tsx', import.meta.url), 'utf8');
   const types = { compilerOptions: { target: ts.ScriptTarget.ES2022 } };
@@ -494,15 +514,17 @@ function playerAudioPublication() {
   const context = bindPlayerSeek({
     exports: {}, state: { playhead: 0, playheadSeekVersion: 19, scrubbing: false },
     playhead: 0, decodePlayhead: 0, mode: 'video', mediaEndSecs: 3, playing: true,
+    playheadRef: { current: 0 }, nativeAudioRef: { current: true },
     nativeAudioReady: true, playingRef: { current: true }, scrubbingRef: { current: false },
     videoRef: { current: video }, windowBoundsRef: { current: { source: 'raw', start: 0, end: 2 } },
     windowStart: 0, windowEnd: 2, suppressSeek: { current: false }, usePrepared: false,
-    audioTransportRef: { current: { active: true, clock, epoch: {} } }, nativeAudioClockRef: { current: clock },
+    audioTransportRef: { current: { active: true, time: 0, clock, epoch: {} } }, nativeAudioClockRef: { current: clock },
     playheadSeekVersionRef: { current: 19 }, lastAudioPublication: { current: null }, publicationScope: { current: {} }, reportedVideoTimeRef: { current: 0 },
     audioPlaybackClock: () => sample, requestAnimationFrame: fn => frames.push(fn), cancelAnimationFrame: () => {},
     setVideoTime: () => {}, requestVideoPlay: () => {}, loopRef: { current: { enabled: false } },
     dispatchRef: { current: action => pending.push(action) },
   });
+  const resetEvents = bindPlayerAudioClockReset(context, playerFile, evidence);
   runInNewContext(ts.transpileModule(`${reducer}
     ${callbacks.guard ? `const isSupersededAudioPublication = ${callbacks.guard};` : ''}
     exports.reduce = reducer;
@@ -511,12 +533,13 @@ function playerAudioPublication() {
     exports.startTick = ${callbacks.startTick};`, types).outputText, context);
   const { reduce, layout, external, startTick } = context.exports;
   startTick();
-  return { context, video, writes, layout, external, tick(time, now, playing = true) {
+  return { context, video, writes, layout, external, resetEvents, tick(time, now, playing = true) {
     sample = { time, playing }; frames.shift()(now);
   }, commit() {
     for (const action of pending.splice(0)) context.state = reduce(context.state, action);
     context.playhead = context.decodePlayhead = context.state.playhead;
     context.playheadSeekVersionRef.current = context.state.playheadSeekVersion;
+    context.playheadRef.current = context.playhead;
   }, setCursor(t) { cursor = t; video.seeking = false; }, action: context.dispatchRef.current };
 }
 const staleAudioTime = .4411791383219956, nextAudioTime = .928798185941043;
@@ -536,6 +559,23 @@ for (const delayedUntilPassive of [false, true]) {
     assert.equal(h.context.reportedVideoTimeRef.current, nextAudioTime);
   });
 }
+
+test('opt-in clock evidence identifies a reconciliation reset but not a superseded publication', () => {
+  const h = playerAudioPublication(true);
+  h.tick(staleAudioTime, 100); h.commit(); h.tick(nextAudioTime, 600);
+  h.layout();
+  assert.equal(h.context.audioTransportRef.current.active, true);
+  assert.equal(h.resetEvents.length, 0);
+  h.context.publicationScope.current = {};
+  h.layout();
+  assert.equal(h.context.audioTransportRef.current.active, false);
+  assert.equal(h.resetEvents.length, 1);
+  assert.equal(h.resetEvents[0].type, 'cutvoke:audio-clock-reset');
+  assert.deepEqual(JSON.parse(JSON.stringify(h.resetEvents[0].detail)), {
+    reason: 'playhead-layout', playhead: staleAudioTime, reportedTime: nextAudioTime, anchor: 0,
+    playing: true, nativeReady: true, scrubbing: false,
+  });
+});
 
 test('native publication proof is scoped to a running generation and does not absorb seek intent', () => {
   const newRace = () => {
