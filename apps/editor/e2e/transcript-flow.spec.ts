@@ -101,6 +101,7 @@ for (const delayedFrames of [false, true]) {
 test(`transcript audition stops actual video and native audio at the selected word boundary${delayedFrames ? ' with delayed animation frames' : ''}`, async ({ page, request }, testInfo) => {
   try {
   await page.addInitScript(() => {
+    (window as any).__cutvokeNativeStartupDiagnostics = true;
     const captured: HTMLAudioElement[] = []; (window as any).__transcriptAudio = captured;
     // Bounded numeric/event-only evidence: never record source URLs or project paths.
     const began = performance.now();
@@ -191,15 +192,20 @@ test(`transcript audition stops actual video and native audio at the selected wo
   } catch (error) {
     // Diagnostics must not replace the original failure, even if the page crashed.
     try {
-      const evidence = await page.evaluate(() => ({
-        ...((window as any).__auditionEvidence?.() ?? {}),
-        voices: ((window as any).__transcriptAudio ?? []).slice(0, 16).map((audio: HTMLAudioElement, voice: number) => ({
-          voice, time: audio.currentTime, paused: audio.paused, muted: audio.muted,
-          seeking: audio.seeking, readyState: audio.readyState, errorCode: audio.error?.code ?? null,
-        })),
-        nativeStarts: ((window as any).__nativePlayTimes ?? []).slice(-80),
-        nativePauses: ((window as any).__nativePauseTimes ?? []).slice(-80),
-      }));
+      const evidence = await page.evaluate(() => {
+        let nativeStartup;
+        try { nativeStartup = (window as any).__cutvokeNativeStartupEvidence?.(); } catch { /* Best effort. */ }
+        return {
+          ...((window as any).__auditionEvidence?.() ?? {}),
+          nativeStartup,
+          voices: ((window as any).__transcriptAudio ?? []).slice(0, 16).map((audio: HTMLAudioElement, voice: number) => ({
+            voice, time: audio.currentTime, paused: audio.paused, muted: audio.muted,
+            seeking: audio.seeking, readyState: audio.readyState, errorCode: audio.error?.code ?? null,
+          })),
+          nativeStarts: ((window as any).__nativePlayTimes ?? []).slice(-80),
+          nativePauses: ((window as any).__nativePauseTimes ?? []).slice(-80),
+        };
+      });
       await testInfo.attach('audition-media-timeline', {
         body: JSON.stringify({ delayedFrames, ...evidence }, null, 2), contentType: 'application/json',
       });
