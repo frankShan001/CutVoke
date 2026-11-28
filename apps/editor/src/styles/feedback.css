@@ -394,3 +394,10 @@
   padding: 0 6px;
   font-size: 11px;
 }
+
+.export-dialog__share-copy {
+  flex: 1 1 100%;
+  min-width: 0;
+  font: inherit;
+  resize: vertical;
+}

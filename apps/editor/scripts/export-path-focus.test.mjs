@@ -21,7 +21,7 @@ function loadModule(relative, dependencies, globals = {}) {
   return exports;
 }
 
-async function harness(draft = null, deferJobs = false, selectedRange = null, { withDialog = false, flush, shareDismissed = null } = {}) {
+async function harness(draft = null, deferJobs = false, selectedRange = null, { withDialog = false, flush, shareDismissed = null, denyShareStorage = false, denyClipboard = false } = {}) {
   let resolveJobs;
   const jobs = new Promise(resolve => { resolveJobs = resolve; });
   if (!deferJobs) resolveJobs([]);
@@ -30,7 +30,8 @@ async function harness(draft = null, deferJobs = false, selectedRange = null, { 
   let resolveDirectory;
   const directory = new Promise(resolve => { resolveDirectory = resolve; });
   let state = { currentId: 'p', revision: '7', project: { sequence: { tracks: [{ clips: [{ timelineEnd: 8 }] }] } } };
-  const dispatch = () => {};
+  const actionsSeen = [];
+  const dispatch = action => { actionsSeen.push(action); };
   const text = s => s;
   const node = tag => props => React.createElement(tag, props);
   const queued = [];
@@ -42,6 +43,7 @@ async function harness(draft = null, deferJobs = false, selectedRange = null, { 
     '../store/editor': { useEditor: () => ({ state, dispatch }), showError() {} },
     '../store/actions': { getLatestState: () => state },
     '../lib/api': {
+      ApiFailure: class extends Error { constructor({message, code}) { super(message); this.code = code; } },
       listExportJobs: id => id === 'p' ? jobs : otherJobs,
       preflightProject: async () => ({ readyToRender: true, warnings: [], errors: [] }),
       sendCommand: async (id, type) => { queued.push([id, type]); return { changedEntities: [{ type: 'export_enqueued', jobId: 'fixture' }] }; },
@@ -64,11 +66,18 @@ async function harness(draft = null, deferJobs = false, selectedRange = null, { 
   const memory = { shareDismissed };
   const storage = {
     getItem: key => key === 'cutvoke.sharePrompt.dismissed' ? memory.shareDismissed : JSON.stringify(draft),
-    setItem(key, value) { if (key === 'cutvoke.sharePrompt.dismissed') memory.shareDismissed = value; },
+    setItem(key, value) {
+      if (key !== 'cutvoke.sharePrompt.dismissed') return;
+      if (denyShareStorage) throw new Error('denied');
+      memory.shareDismissed = value;
+    },
   };
   const globals = { window: { addEventListener() {}, removeEventListener() {} },
     localStorage: storage,
-    navigator: { clipboard: { writeText: async text => { copied.push(text); } } },
+    navigator: { clipboard: { writeText: async text => {
+      if (denyClipboard) throw new Error('denied');
+      copied.push(text);
+    } } },
     setTimeout, clearTimeout, setInterval, clearInterval };
   dependencies['../lib/sharePrompt'] = loadModule('../src/lib/sharePrompt.ts', {}, globals);
   const { ExportVideoSection } = loadModule('../src/components/ExportVideoSection.tsx', dependencies, globals);
@@ -88,7 +97,12 @@ async function harness(draft = null, deferJobs = false, selectedRange = null, { 
     state = { ...state, currentId: id };
     tree.update(view());
   });
-  return { input, find, prefill, submit, button, revise, queued, copied, memory,
+  const shareField = () => tree.root.findAllByType('textarea').find(n => n.props['aria-label'] === '复制分享文案');
+  return { input, find, prefill, submit, button, shareField, revise, queued, copied, memory, actionsSeen,
+    reopen: async () => {
+      await act(async () => tree.unmount());
+      await act(async () => { tree = create(view()); });
+    },
     restore: job => act(async () => resolveJobs([job])),
     restoreOther: job => act(async () => resolveOtherJobs([job])),
     focus: () => act(async () => input().props.onFocus?.()),
@@ -353,4 +367,32 @@ test('warnings and a stored dismissal omit the share line', async () => {
     assert.equal(dismissed.button('复制分享文案'), undefined);
     assert.equal(dismissed.button('不再显示'), undefined);
   } finally { await dismissed.close(); }
+});
+
+
+test('clipboard denial reveals the exact share copy as selectable, read-only text', async () => {
+  const h = await harness(null, true, null, { denyClipboard: true });
+  try {
+    await h.restore(exportJob('succeeded'));
+    assert.equal(h.shareField(), undefined);
+    await act(async () => { h.button('复制分享文案').props.onClick(); });
+    assert.equal(h.shareField()?.props.value, shareText);
+    assert.equal(h.shareField()?.props.readOnly, true);
+    assert.deepEqual(h.copied, []);
+  } finally { await h.close(); }
+});
+
+test('denied storage does not revive the dismissed share prompt after remount', async () => {
+  const h = await harness(null, true, null, { denyShareStorage: true });
+  try {
+    await h.restore(exportJob('succeeded'));
+    await act(async () => { h.button('不再显示').props.onClick(); });
+    assert.equal(h.memory.shareDismissed, null);
+    const done = () => h.actionsSeen.filter(action => action.text === '导出完成（见结果面板）').length;
+    assert.ok(done() > 0);
+    const originalDone = done();
+    await h.reopen();
+    assert.ok(done() > originalDone, 'the successful job was restored');
+    assert.equal(Boolean(h.button('复制分享文案')), false, 'share prompt stays hidden after reopening');
+  } finally { await h.close(); }
 });
