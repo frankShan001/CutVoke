@@ -13,6 +13,7 @@ import { rationalToSecs } from "../lib/rational";
 import type { ExportResult } from "../types/api";
 import { getProjectDirectory } from "../lib/projectDirectories";
 import { selectedExportRange, type SelectedExportRange } from "../store/selectedExportRange";
+import { dismissSharePrompt, sharePromptDismissed } from "../lib/sharePrompt";
 
 function savedExportSettings(projectId: string | null) {
   try { return JSON.parse(localStorage.getItem(`cutvoke.export.${projectId}`) || "null") as {
@@ -61,6 +62,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
   const [cancelling, setCancelling] = useState(false);
   const [result, setResult] = useState<ExportResult | null>(null);
   const [busy, setBusy] = useState(false);
+  const [shareHidden, setShareHidden] = useState(() => sharePromptDismissed());
   const [phase, setPhase] = useState<"idle" | "checking" | "blocked" | "running" | "done" | "error" | "cancelled">("idle");
   const [preflight, setPreflight] = useState<ProjectPreflightReport | null>(null);
   const [checkError, setCheckError] = useState<string | null>(null);
@@ -364,6 +366,15 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const copyShareText = async () => {
+    try {
+      await navigator.clipboard.writeText(tr("刚用 CutVoke 做了个视频：开源、本地，AI Agent 和我改同一条时间线。https://github.com/frankShan001/CutVoke @shansjl"));
+      dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已复制分享文案") });
+    } catch {
+      showError(dispatch, new ApiFailure({ status: 0, code: "CLIPBOARD", message: tr("复制失败，请手动选择文案") }));
+    }
+  };
+
   const durStr = result && !isNaN(result.duration) ? tr("{0} 秒", result.duration.toFixed(2)) : "—";
 
   const chooseFile = async () => {
@@ -619,6 +630,15 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
             </pre>
           )}
           {!window.cutvokeDesktop ? <p className="cv-hint" style={{ marginTop: 6 }}>{tr("Web 端暂无法直接打开资源管理器，已提供“复制路径”，可在文件管理器中粘贴定位。")}</p> : null}
+          {!shareHidden && !(result.warnings && result.warnings.length > 0) ? (
+            <p className="cv-hint export-dialog__share" role="note">
+              <span>{tr("用 CutVoke 做了点什么？欢迎分享，@shansjl 能看到。")}</span>
+              <span className="export-dialog__share-actions">
+                <Button variant="ghost" size="sm" onClick={() => void copyShareText()}>{tr("复制分享文案")}</Button>
+                <Button variant="ghost" size="sm" onClick={() => { dismissSharePrompt(); setShareHidden(true); }}>{tr("不再显示")}</Button>
+              </span>
+            </p>
+          ) : null}
         </div>
       ) : null}
     </>

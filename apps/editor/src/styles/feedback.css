@@ -372,3 +372,25 @@
   font-weight: 600;
   color: var(--text);
 }
+.export-dialog__share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 0;
+}
+.export-dialog__share > span:first-child {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+.export-dialog__share-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+}
+.export-dialog__share .cv-btn {
+  height: 22px;
+  padding: 0 6px;
+  font-size: 11px;
+}
