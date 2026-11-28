@@ -6,7 +6,7 @@
 
 **你的素材，你的 AI，同一条可编辑时间线。**
 
-*一款本地优先（Local-First）的开源视频剪辑软件。人类创作者与 AI Agent 共享同一条非破坏性时间线——既能用可视化界面精细打磨每一帧，也能接入 MCP 让 AI 自动完成粗剪、字幕与特效，并支持社区共建可复用的特效生态。*
+*一款本地优先（Local-First）的开源视频剪辑软件。人类创作者与 AI Agent 共享同一条非破坏性时间线——既能用可视化界面精细打磨每一帧，也能接入外部 AI Agent，通过 MCP 辅助粗剪、字幕与特效，并支持社区共建可复用的特效生态。*
 
 [![Release](https://img.shields.io/github/v/release/frankShan001/CutVoke?include_prereleases&label=Release&color=blue)](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -17,7 +17,7 @@
 
 [**English**](README.md) | [**简体中文**](README.zh-CN.md)
 
-[下载桌面版](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [v0.3.6 最新动态](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [观看剪辑案例](examples/showcases/) · [接入 AI Agent](docs/user/agent-skill.zh-CN.md) · [贡献社区特效](CONTRIBUTING.zh-CN.md) · [保存自己的特效预设](docs/user/effect-contributing.zh-CN.md#边剪辑边创作无需开发环境) · [文档](https://frankshan001.github.io/CutVoke/) · [常见问题](#常见问题)
+[下载桌面版](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [v0.3.6 最新动态](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [剪辑武器库](#剪辑武器库) · [观看剪辑案例](examples/showcases/) · [接入 AI Agent](docs/user/agent-skill.zh-CN.md) · [贡献社区特效](CONTRIBUTING.zh-CN.md) · [保存自己的特效预设](docs/user/effect-contributing.zh-CN.md#边剪辑边创作无需开发环境) · [文档](https://frankshan001.github.io/CutVoke/) · [常见问题](#常见问题)
 
 </div>
 
@@ -34,7 +34,7 @@
 
 1. [下载 CutVoke v0.3.6](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) 并启动一次。
 2. 打开数据目录下的 `profile/mcp-config.json`（Windows 便携版：exe 旁的 `CutVoke Data`；macOS：`~/Library/Application Support/CutVoke/`；Linux：`${XDG_DATA_HOME:-~/.local/share}/CutVoke/`）。里面已经写好了内置引擎的命令，不需要另装 Python。
-3. 把其中的 `cutvoke` 配置加到你的 Agent：[Claude Code](docs/integrations/claude-code.md) · [Codex](docs/integrations/codex.md) · [Cursor](docs/integrations/cursor.md)。然后直接说："剪掉停顿、加字幕、出一个 9:16 竖版，导出前先给我看几帧。"
+3. 把其中的 `cutvoke` 配置加到你的 Agent：[Claude Code](docs/integrations/claude-code.md) · [Codex](docs/integrations/codex.md) · [Cursor](docs/integrations/cursor.md)。然后直接说："先标出长停顿，给我看建议剪切区间；确认后加字幕、出一个 9:16 竖版，导出前先看几帧。"
 
 ⭐ **觉得有用的话，点个 Star 能让更多创作者找到它。**
 
@@ -145,7 +145,7 @@ Agent 持有编辑租约时，编辑器显示持有者和剩余时间。点击**
 
 将 CutVoke 接入 Claude Desktop、Cursor 或任意支持 MCP 的智能体后，你可以把繁琐的机械操作交给 AI，自己专注于审美把控：
 
-> *“检查我当前的 CutVoke 时间线，自动剪掉超过 0.6 秒的静音停顿，在镜头切换处加上柔和的叠化转场，并用本地 ASR 生成中文字幕轨。”*
+> *“检查我当前的 CutVoke 时间线，标出超过 0.6 秒的低音量区间，先试听再确定哪些要删；给镜头切换加叠化，如果已配置本地语音模型，再生成中文字幕草稿。”*
 
 > *“按照 `cutvoke-editor` 的纪录片剪辑规范，把 `./raw_clips` 里的素材配合 `bgm.mp3` 剪成一段 60 秒的高燃混剪，审阅关键渲染帧确认切镜自然，完成后我会在编辑器界面里微调标题动画。”*
 
@@ -153,13 +153,24 @@ Agent 持有编辑租约时，编辑器显示持有者和剩余时间。点击**
 
 ## 核心功能亮点
 
-### 1. 面向创作者的全功能多轨剪辑台
-- **直观的多轨与预合成时间线**：支持视频、音频、调整图层、预合成（Pre-comp）、贴纸素材、动态标题与字幕轨道的自由叠加、吸附、拆分与非破坏性修剪（参见 [基础剪辑](docs/user/BASIC_EDITING.md)、[高级时间线](docs/user/ADVANCED_TIMELINE.md)）。
-- **电影级特效、轨道遮罩与动态蒙版**：内置丰富的氛围纹理叠加、贝塞尔关键帧动画、Alpha/Luma 轨道遮罩与动态遮罩能力（参见 [电影级特效](docs/cinematic-vfx.md)、[动态遮罩](docs/moving-masks.md)、[合成工作流](docs/user/COMPOSITING_WORKFLOW.md)）。
-- **本地离线 ASR、文本剪辑与音频工作台**：无需联网即可将人声转为高精度字幕轨，支持按句/按词直接删减音画片段；内置多轨混音、背景音乐自动闪避（Ducking）与节奏对齐（参见 [本地语音识别](docs/user/LOCAL_ASR.md)、[音频工作台](docs/user/AUDIO_WORKBENCH.md)）。
-- **本地 3D 渲染引擎与人像分割**：支持配置本地人物抠像模型（`cutvoke-person-model`），并提供 OpenGL 加速的 3D 平面、网格、材质与灯光系统（参见 [本地 3D 与模型](docs/user/LOCAL_3D_AND_MODELS.md)）。
+### 剪辑武器库
 
-### 2. 四种使用模式，按需自由组合
+手动剪辑不需要 AI。CutVoke 也能在同一条时间线上使用可选本地模型、接入外部 Agent、把外部渲染结果当镜头继续剪。
+
+![CutVoke 剪辑武器库：原生时间线、合成和音频工具；需要可选模型、外部 Agent 或外部渲染器的能力另行标注](docs/images/readme/zh-CN/editing-toolkit.svg)
+
+| 能力 | 能做什么 | 依赖 |
+| :--- | :--- | :--- |
+| 时间线、预览与交付 | 多轨修剪、拆分、变速、波纹删除、预合成、撤销/重做、视频导出和工程打包 | **原生，无需 AI** · [基础剪辑](docs/user/BASIC_EDITING.md) · [高级时间线](docs/user/ADVANCED_TIMELINE.md) |
+| 视觉、动画与字幕 | 关键帧、转场、滤镜、贴纸、动态标题、蒙版、Alpha/Luma 轨道遮罩；手工字幕、样式与 SRT；轻量可编辑 3D 和简单 OBJ 网格 | **原生，无需 AI** · [合成](docs/user/COMPOSITING_WORKFLOW.md) · [轻量 3D](docs/user/LOCAL_3D_AND_MODELS.md) |
+| 声音工作台与低音量检测 | 配音录制、混音和子总线、音量包络、背景音乐闪避、响度/节拍分析。FFmpeg 可按电平找低音量区间，只给候选，不会自动剪掉视频 | **原生 / 本地信号分析，无需 AI** · [音频工作台](docs/user/AUDIO_WORKBENCH.md) · [口播流程](docs/user/prompts-talking-head.zh-CN.md) |
+| 语音转字幕、分轨与抠像 | 自动生成字幕草稿及时间；分离人声/伴奏或四轨；人物 / 点选物体抠像。已有逐词时间时，人工按词或句试听和剪辑不需要再次运行模型 | **可选本地模型** · [语音识别](docs/user/LOCAL_ASR.md) · [分离](docs/user/AUDIO_WORKBENCH.md#本地模型音源分离) · [抠像](docs/user/LOCAL_3D_AND_MODELS.md) |
+| 理解内容后精简口播 | 判断哪个气口、口头禅、重复句该删，哪些停顿应保留；先审候选，CutVoke 再执行可撤销的时间线编辑 | **人工判断；AI 辅助时需外部 Agent** · [Agent 口播流程](docs/user/prompts-talking-head.zh-CN.md) |
+| 外部 3D / 代码视频 | Blender、Unreal 或其他工具先渲染复杂镜头，再到 CutVoke 剪辑、合成和出片。符合桥接规格的素材可校验来源、按指定片段换版，不等于直接打开完整 3D 工程 | **渲染需外部工具，不需要 AI** · [外部素材桥](docs/user/generated-media.md) |
+
+**举例：剪口播空口。** 按音量找出「这里很安静」不需要 AI；判断「这是多余的气口，还是保留会更自然」需要人或合适的外部 Agent 审听、看转录并复核。语音模型负责识别说了什么，CutVoke 负责把确认后的区间剪准。这不是软件内置的一键语义粗剪。
+
+### 四种使用模式，按需组合
 - **可视化桌面剪辑**：直接打开桌面应用拖拽素材、精修时间线，零代码门槛。
 - **MCP / AI Agent 实时协作**：AI 可直接提交创作方案、读取时间线状态、审阅渲染帧证据并执行局部修补（参见 [Agent 技能说明](docs/user/agent-skill.zh-CN.md)）。
 - **内置五大题材剪辑规范（`skills/cutvoke-editor/`）**：预置面向 **MV/音乐视觉**（[`music-video.md`](skills/cutvoke-editor/references/workflows/music-video.md)）、**纪录片/Vlog**（[`documentary.md`](skills/cutvoke-editor/references/workflows/documentary.md)）、**剧情叙事**（[`narrative.md`](skills/cutvoke-editor/references/workflows/narrative.md)）、**知识解说/教程**（[`explainer.md`](skills/cutvoke-editor/references/workflows/explainer.md)）与 **产品宣传片**（[`showcase.md`](skills/cutvoke-editor/references/workflows/showcase.md)）的专业 Agent 剪辑指南。

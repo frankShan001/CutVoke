@@ -17,7 +17,7 @@
 
 [**English**](README.md) | [**简体中文**](README.zh-CN.md)
 
-[Download Desktop App](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [What's New in v0.3.6](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [Watch Showcases](examples/showcases/) · [Connect AI Agents](docs/user/LOCAL_DELIVERY_MCP.md) · [Contribute Effects](CONTRIBUTING.md) · [Save your own effect preset](effects/README.md#create-while-editing-no-development-setup) · [Docs](https://frankshan001.github.io/CutVoke/) · [FAQ](#faq)
+[Download Desktop App](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [What's New in v0.3.6](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) · [Editing Toolkit](#the-editing-toolkit) · [Watch Showcases](examples/showcases/) · [Connect AI Agents](docs/user/LOCAL_DELIVERY_MCP.md) · [Contribute Effects](CONTRIBUTING.md) · [Save your own effect preset](effects/README.md#create-while-editing-no-development-setup) · [Docs](https://frankshan001.github.io/CutVoke/) · [FAQ](#faq)
 
 </div>
 
@@ -34,7 +34,7 @@
 
 1. [Download CutVoke v0.3.6](https://github.com/frankShan001/CutVoke/releases/tag/v0.3.6) and launch it once.
 2. Open `profile/mcp-config.json` in the CutVoke data folder (Windows portable: `CutVoke Data` next to the exe · macOS: `~/Library/Application Support/CutVoke/` · Linux: `${XDG_DATA_HOME:-~/.local/share}/CutVoke/`). It already contains the bundled engine command, so no Python install is needed.
-3. Add the `cutvoke` entry to your agent: [Claude Code](docs/integrations/claude-code.md) · [Codex](docs/integrations/codex.md) · [Cursor](docs/integrations/cursor.md). Then ask: *"Cut the silences, add captions, make a 9:16 version, and show me a few frames before you export."*
+3. Add the `cutvoke` entry to your agent: [Claude Code](docs/integrations/claude-code.md) · [Codex](docs/integrations/codex.md) · [Cursor](docs/integrations/cursor.md). Then ask: *"Find long pauses, show me suggested cuts, then add captions and make a 9:16 version. Show me a few frames before export."*
 
 ⭐ **If CutVoke is useful to you, a star helps other creators find it.**
 
@@ -145,7 +145,7 @@ While an agent holds an editing lease, the editor shows its owner and remaining 
 
 Once CutVoke is connected to Claude Desktop, Cursor, or any MCP client, you can hand off tedious tasks while keeping full creative control in the UI:
 
-> *"Inspect my current CutVoke timeline, remove silent pauses longer than 0.6s, add a smooth dissolve transition between scene changes, and generate English subtitles using local ASR."*
+> *"Inspect my current CutVoke timeline, flag quiet pauses longer than 0.6 s for review, add a dissolve between scenes, and generate draft English subtitles if local ASR is configured."*
 
 > *"Use the `cutvoke-editor` documentary workflow to assemble the footage in `./raw_clips` into a 60-second highlight reel synced to `bgm.mp3`, review the rendered keyframes for any awkward cuts, and let me fine-tune the title animations in the UI."*
 
@@ -153,13 +153,24 @@ For a single-caption correction, `project_lookup(requireUnique=true)` rejects mu
 
 ## Key Features
 
-### 1. Visual Multi-Track Editor Built for Creators
-- **Full Multi-Track & Pre-Comp Timeline**: Arrange video, audio, adjustment layers, pre-compositions, overlay stickers, motion titles, and subtitle tracks with non-destructive trimming ([Basic Editing](docs/user/BASIC_EDITING.md), [Advanced Timeline](docs/user/ADVANCED_TIMELINE.md)).
-- **Cinematic VFX, Track Mattes & Moving Masks**: Layer atmospheric overlays, Bezier keyframe animations, Alpha/Luma track mattes, and dynamic moving masks ([Cinematic VFX](docs/cinematic-vfx.md), [Moving Masks](docs/moving-masks.md), [Compositing Workflow](docs/user/COMPOSITING_WORKFLOW.md)).
-- **Local ASR, Transcript Editing & Audio Workbench**: Generate accurate subtitles offline, cut video directly by deleting spoken words/sentences, mix multi-track audio, and duck background music ([Local ASR](docs/user/LOCAL_ASR.md), [Audio Workbench](docs/user/AUDIO_WORKBENCH.md)).
-- **Local 3D Engine & Person Segmentation**: Enhance edits with local person segmentation models (`cutvoke-person-model`) and OpenGL-accelerated 3D planes, meshes, materials, and lighting ([Local 3D & Models](docs/user/LOCAL_3D_AND_MODELS.md)).
+### The Editing Toolkit
 
-### 2. Four Flexible Ways to Use CutVoke
+Hands-on editing does not require AI. The same CutVoke timeline can also use optional local models, connect an external agent, or edit shots rendered in a separate application.
+
+![CutVoke editing toolkit: native timeline, compositing and audio features, with local-model, external-agent and external-renderer dependencies marked separately](docs/images/readme/en/editing-toolkit.svg)
+
+| Capability | What you can do | Dependency |
+| :--- | :--- | :--- |
+| Timeline, preview & delivery | Multitrack trimming, splitting, retiming, ripple deletion, pre-comps, undo/redo, video export, and editable project packages | **Native, no AI** · [Basic editing](docs/user/BASIC_EDITING.md) · [Advanced timeline](docs/user/ADVANCED_TIMELINE.md) |
+| Visuals, motion & captions | Keyframes, transitions, filters, stickers, animated titles, masks and alpha/luma mattes; manual captions and SRT; lightweight editable 3D and simple OBJ meshes | **Native, no AI** · [Compositing](docs/user/COMPOSITING_WORKFLOW.md) · [Lightweight 3D](docs/user/LOCAL_3D_AND_MODELS.md) |
+| Audio tools & quiet-region detection | Voice-over recording, mixing and buses, envelopes, ducking, level and beat analysis. FFmpeg finds quiet candidates by level; it does not delete footage | **Native / local signal analysis, no AI** · [Audio workbench](docs/user/AUDIO_WORKBENCH.md) · [Quiet-region recipe](docs/user/prompts-talking-head.md#2-shorten-long-pauses-keep-breathing-room) |
+| Transcription, separation & matting | Generate draft captions and timestamps; separate vocals/backing or four stems; matte people or selected objects. If word timing is already available, manual auditioning and text-based cuts do not need the model again | **Optional local models** · [Speech recognition](docs/user/LOCAL_ASR.md) · [Separation](docs/user/AUDIO_WORKBENCH.md) · [Matting](docs/user/LOCAL_3D_AND_MODELS.md) |
+| Content-aware speech editing | Decide which breaths, filler words and repeated lines to trim and which pauses to keep. Review candidates first; use CutVoke to apply reversible timeline edits | **Human judgment; external agent for AI assistance** · [Talking-head workflow](docs/user/prompts-talking-head.md) |
+| External 3D & code video | Render complex shots in Blender, Unreal, or another tool; edit, composite and deliver in CutVoke. The media bridge verifies conforming renders and supports targeted clip replacement; it does not open a full 3D project | **External renderer, not an AI dependency** · [Media bridge](docs/user/generated-media.md) |
+
+**Example: cleaning up speech gaps.** Detecting a low audio level needs no AI. Deciding whether a breath, filler word or intentional pause should remain takes a human or a suitable external agent reviewing the audio and transcript. Speech recognition provides words and timing; CutVoke performs the reviewed edit. There is no built-in one-click semantic rough cut.
+
+### Four Ways to Use CutVoke
 - **Visual Desktop / Web Editor**: Open the app and edit directly with mouse and keyboard shortcuts—no coding required.
 - **AI Agent Collaboration (MCP)**: Let AI agents propose creative edits, inspect rendered frame evidence, and patch specific timeline ranges via MCP ([Local Delivery MCP](docs/user/LOCAL_DELIVERY_MCP.md)).
 - **Pre-Built Agent Skills (`skills/cutvoke-editor/`)**: Includes specialized editing guides for **Music Videos** ([`music-video.md`](skills/cutvoke-editor/references/workflows/music-video.md)), **Documentaries & Vlogs** ([`documentary.md`](skills/cutvoke-editor/references/workflows/documentary.md)), **Narrative Films** ([`narrative.md`](skills/cutvoke-editor/references/workflows/narrative.md)), **Explainers & Tutorials** ([`explainer.md`](skills/cutvoke-editor/references/workflows/explainer.md)), and **Product Showcases** ([`showcase.md`](skills/cutvoke-editor/references/workflows/showcase.md)).
