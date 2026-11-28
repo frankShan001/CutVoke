@@ -22,3 +22,21 @@ export function recordPreviewStop(reason: PreviewStopReason, snapshot: () => Pre
     window.dispatchEvent(new CustomEvent('cutvoke:preview-stop', { detail }));
   } catch { /* Even hostile getters/listeners must not change playback outcomes. */ }
 }
+
+export type AudioClockResetReason = 'mixer-disabled' | 'startup-begin' | 'startup-failed' | 'clock-fallback' | 'playhead-layout';
+type AudioClockResetSnapshot = {
+  playhead: number; reportedTime: number; anchor: number; playing: boolean; nativeReady: boolean; scrubbing: boolean;
+};
+
+/** Observe active clock resets only. Do not read the clock to diagnose why it reset. */
+export function recordAudioClockReset(reason: AudioClockResetReason, snapshot: () => AudioClockResetSnapshot) {
+  try {
+    if ((window as unknown as Record<string, unknown>).__cutvokeAudioClockResetEvidence !== true) return;
+    const source = snapshot();
+    const detail = { reason, playhead: Number.isFinite(source.playhead) ? source.playhead : null,
+      reportedTime: Number.isFinite(source.reportedTime) ? source.reportedTime : null,
+      anchor: Number.isFinite(source.anchor) ? source.anchor : null, playing: source.playing,
+      nativeReady: source.nativeReady, scrubbing: source.scrubbing };
+    window.dispatchEvent(new CustomEvent('cutvoke:audio-clock-reset', { detail }));
+  } catch { /* Diagnostics must not change playback. */ }
+}

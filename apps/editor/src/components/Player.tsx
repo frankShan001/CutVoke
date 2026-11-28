@@ -1,4 +1,4 @@
-import { recordPreviewStop, type PreviewStopReason, type PreviewStopSnapshot } from "../lib/previewStopEvidence";
+import { recordAudioClockReset, recordPreviewStop, type AudioClockResetReason, type PreviewStopReason, type PreviewStopSnapshot } from "../lib/previewStopEvidence";
 import { InteractionStatus } from "./InteractionStatus";
 import { InteractiveScene } from "./InteractiveScene";
 import { InteractiveAudio } from "./InteractiveAudio";
@@ -256,8 +256,17 @@ export function Player() {
     }));
   }, [readSeekEvidence, hasOffer, offeredMatches, retainPrepared, warmedOffer, usePrepared, videoReady, holding, nativeAudioReady, playing, videoUrl]);
   const auditionBoundary = useRef<(time: number) => number | null>(() => null);
-  const audioPlaybackClock = useCallback((initialize = false, reset = false) => {
-    if (reset) { audioTransportRef.current.active = false; return { time: playheadRef.current, playing: false }; }
+  const resetAudioClock = useCallback((reason: AudioClockResetReason) => {
+    const transport = audioTransportRef.current;
+    const wasActive = transport.active;
+    transport.active = false;
+    if (wasActive) recordAudioClockReset(reason, () => ({
+      anchor: transport.time, playhead: playheadRef.current, reportedTime: reportedVideoTimeRef.current,
+      playing: playingRef.current, nativeReady: nativeAudioRef.current, scrubbing: scrubbingRef.current,
+    }));
+  }, []);
+  const audioPlaybackClock = useCallback((initialize = false, reset?: AudioClockResetReason) => {
+    if (reset) { resetAudioClock(reset); return { time: playheadRef.current, playing: false }; }
     const bounded = (time: number, running: boolean) => {
       const end = auditionBoundary.current(time);
       return end === null ? { time, playing: running } : { time: end, playing: false };
@@ -287,7 +296,7 @@ export function Player() {
       // graph's clock so healthy voices are never repeatedly seeked forward.
       return bounded(Math.min(mediaEndSecs, transport.time + now - transport.started), true);
     }
-    audioTransportRef.current.active = false;
+    resetAudioClock("clock-fallback");
     if (scrubbingRef.current) return { time: playheadRef.current, playing: false };
     if (mode !== "video") return null;
     if (!playingRef.current) return { time: playheadRef.current, playing: false };
@@ -296,7 +305,7 @@ export function Player() {
       return { time: playheadRef.current, playing: false };
     return bounded(windowBoundsRef.current.start + video.currentTime,
       !video.paused && !video.seeking && !bufferingRef.current && video.readyState >= 3);
-  }, [mode, mediaEndSecs]);
+  }, [mode, mediaEndSecs, resetAudioClock]);
   useEffect(() => {
     let frame = 0;
     const publish = () => {
@@ -324,8 +333,8 @@ export function Player() {
   useLayoutEffect(() => {
     if (mode === "video" && isSupersededAudioPublication(state.audioPlayheadPublication)) return;
     if (audioTransportRef.current.active && Math.abs(playhead - reportedVideoTimeRef.current) > .25)
-      audioTransportRef.current.active = false;
-  }, [playhead]);
+      resetAudioClock("playhead-layout");
+  }, [playhead, resetAudioClock]);
   const bindPreviewVideo = useCallback((video: HTMLVideoElement | null) => {
     if (video) video.muted = nativeAudioRef.current;
     if (video && video.readyState >= 1) {

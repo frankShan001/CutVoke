@@ -102,6 +102,8 @@ test(`transcript audition stops actual video and native audio at the selected wo
   try {
   await page.addInitScript(() => {
     (window as any).__cutvokeNativeStartupDiagnostics = true;
+    (window as any).__cutvokeAudioClockResetEvidence = true;
+    (window as any).__cutvokePreviewStopEvidence = true;
     const captured: HTMLAudioElement[] = []; (window as any).__transcriptAudio = captured;
     // Bounded numeric/event-only evidence: never record source URLs or project paths.
     const began = performance.now();
@@ -120,6 +122,14 @@ test(`transcript audition stops actual video and native audio at the selected wo
       }
     };
     (window as any).__auditionEvidence = () => ({ events, dropped, critical, criticalDropped });
+    window.addEventListener('cutvoke:audio-clock-reset', event => {
+      const { reason, anchor, playhead, reportedTime, playing, nativeReady, scrubbing } = (event as CustomEvent).detail;
+      record('audio-clock-reset', { reason, anchor, playhead, reportedTime, playing, nativeReady, scrubbing });
+    });
+    window.addEventListener('cutvoke:preview-stop', event => {
+      const { reason, observedTime, decisionEnd, playhead, playing } = (event as CustomEvent).detail;
+      record('preview-stop', { reason, observedTime, decisionEnd, playhead, playing });
+    });
     const Original = window.Audio;
     (window as any).__nativePauseTimes = [];
     (window as any).__nativePlayTimes = [];

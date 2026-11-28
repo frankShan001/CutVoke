@@ -4,6 +4,7 @@ import { useEditor } from "../store/editor";
 import { pendingCommands, useInteractionProject } from "../store/interactive";
 import { probeMedia } from "../lib/mediaApi";
 import { rationalToSecs } from "../lib/rational";
+import type { AudioClockResetReason } from "../lib/previewStopEvidence";
 import { STOP_AUDITION_AUDIO_EVENT } from "../lib/transcript";
 import { NativeAudioStartup, type StartupVoice } from "../lib/nativeAudioStartup";
 import { playbackEndSecs } from "./playerUtils";
@@ -44,7 +45,7 @@ export function nativeAudioPosition(project: Project | null, voices: Map<string,
 /** One gain envelope per clip. Moving a fader never re-encodes the mixed video. */
 export function InteractiveAudio({ playing, transportMode, onReady, playbackClock, onClockSource, onPositionSource }: {
   playing: boolean; transportMode: "image" | "video"; onReady(ready: boolean): void;
-  playbackClock(initialize?: boolean, reset?: boolean): { time: number; playing: boolean } | null;
+  playbackClock(initialize?: boolean, reset?: AudioClockResetReason): { time: number; playing: boolean } | null;
   onClockSource(clock: (() => number) | null): void;
   onPositionSource(position: (() => number | null) | null): void;
 }) {
@@ -203,20 +204,20 @@ export function InteractiveAudio({ playing, transportMode, onReady, playbackCloc
         // At the sequence end the last voice is removed before Player's RAF
         // can publish the endpoint. Preserve the running clock for that finalizer.
         const reachedEnd = running && snapshot && time >= playbackEndSecs(snapshot.sequence.tracks);
-        if (!enabled && !reachedEnd) latest.current.playbackClock(false, true);
+        if (!enabled && !reachedEnd) latest.current.playbackClock(false, "mixer-disabled");
         for (const voice of voices.current.values()) voice.element.pause();
         ready(enabled);
       } else {
         const phase = startup.current.start({ key, voices: playable, context: context.current!,
           current: () => !disposed && latest.current.playing && !latest.current.scrubbing &&
             JSON.stringify([latest.current.scope, latest.current.transportMode, nativeAudioGeneration(latest.current.project), latest.current.seek]) === key,
-          begin: () => { latest.current.playbackClock(false, true); },
+          begin: () => { latest.current.playbackClock(false, "startup-begin"); },
           commit: () => {
             const accepted = latest.current.playbackClock(true)?.playing ?? latest.current.playing;
             positionGeneration.current = accepted ? key : null;
             return accepted;
           },
-          failed: () => { latest.current.playbackClock(false, true); latest.current.onReady(false); },
+          failed: () => { latest.current.playbackClock(false, "startup-failed"); latest.current.onReady(false); },
         });
         ready(phase !== 'failed');
       }
