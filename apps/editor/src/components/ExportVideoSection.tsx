@@ -63,6 +63,7 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
   const [result, setResult] = useState<ExportResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [shareHidden, setShareHidden] = useState(() => sharePromptDismissed());
+  const [shareCopyFallback, setShareCopyFallback] = useState(false);
   const [phase, setPhase] = useState<"idle" | "checking" | "blocked" | "running" | "done" | "error" | "cancelled">("idle");
   const [preflight, setPreflight] = useState<ProjectPreflightReport | null>(null);
   const [checkError, setCheckError] = useState<string | null>(null);
@@ -366,11 +367,14 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const shareText = tr("刚用 CutVoke 做了个视频：开源、本地，AI Agent 和我改同一条时间线。https://github.com/frankShan001/CutVoke @shansjl");
   const copyShareText = async () => {
     try {
-      await navigator.clipboard.writeText(tr("刚用 CutVoke 做了个视频：开源、本地，AI Agent 和我改同一条时间线。https://github.com/frankShan001/CutVoke @shansjl"));
+      await navigator.clipboard.writeText(shareText);
+      setShareCopyFallback(false);
       dispatch({ type: "STATUS_SET", severity: "ok", text: msg("已复制分享文案") });
     } catch {
+      setShareCopyFallback(true);
       showError(dispatch, new ApiFailure({ status: 0, code: "CLIPBOARD", message: tr("复制失败，请手动选择文案") }));
     }
   };
@@ -637,6 +641,9 @@ export function ExportVideoSection({ onClose }: { onClose: () => void }) {
                 <Button variant="ghost" size="sm" onClick={() => void copyShareText()}>{tr("复制分享文案")}</Button>
                 <Button variant="ghost" size="sm" onClick={() => { dismissSharePrompt(); setShareHidden(true); }}>{tr("不再显示")}</Button>
               </span>
+              {shareCopyFallback ? (
+                <textarea className="export-dialog__share-copy" aria-label={tr("复制分享文案")} readOnly rows={2} value={shareText} />
+              ) : null}
             </p>
           ) : null}
         </div>
