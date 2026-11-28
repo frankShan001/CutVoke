@@ -21,7 +21,7 @@ function loadModule(relative, dependencies, globals = {}) {
   return exports;
 }
 
-async function harness(draft = null, deferJobs = false, selectedRange = null, { withDialog = false, flush } = {}) {
+async function harness(draft = null, deferJobs = false, selectedRange = null, { withDialog = false, flush, shareDismissed = null } = {}) {
   let resolveJobs;
   const jobs = new Promise(resolve => { resolveJobs = resolve; });
   if (!deferJobs) resolveJobs([]);
@@ -60,8 +60,17 @@ async function harness(draft = null, deferJobs = false, selectedRange = null, { 
     });
     dependencies['../store/actions'].doExport = actions.doExport;
   }
+  const copied = [];
+  const memory = { shareDismissed };
+  const storage = {
+    getItem: key => key === 'cutvoke.sharePrompt.dismissed' ? memory.shareDismissed : JSON.stringify(draft),
+    setItem(key, value) { if (key === 'cutvoke.sharePrompt.dismissed') memory.shareDismissed = value; },
+  };
   const globals = { window: { addEventListener() {}, removeEventListener() {} },
-    localStorage: { getItem: () => JSON.stringify(draft), setItem() {} }, setTimeout, clearTimeout, setInterval, clearInterval };
+    localStorage: storage,
+    navigator: { clipboard: { writeText: async text => { copied.push(text); } } },
+    setTimeout, clearTimeout, setInterval, clearInterval };
+  dependencies['../lib/sharePrompt'] = loadModule('../src/lib/sharePrompt.ts', {}, globals);
   const { ExportVideoSection } = loadModule('../src/components/ExportVideoSection.tsx', dependencies, globals);
   const View = withDialog ? loadModule('../src/components/ExportDialog.tsx', {
     ...dependencies, './ExportVideoSection': { ExportVideoSection },
@@ -73,12 +82,13 @@ async function harness(draft = null, deferJobs = false, selectedRange = null, { 
   const find = label => tree.root.findAllByType('input').find(n => n.props['aria-label'] === label);
   const prefill = () => tree.root.findAllByType('button').find(n => n.props.children === '使用所选片段的时间范围');
   const submit = () => tree.root.findAllByType('button').find(n => n.props['aria-label'] === '开始导出');
+  const button = label => tree.root.findAllByType('button').find(n => n.props.children === label);
   const revise = (next, id = state.currentId) => act(async () => {
     selectedRange = next;
     state = { ...state, currentId: id };
     tree.update(view());
   });
-  return { input, find, prefill, submit, revise, queued,
+  return { input, find, prefill, submit, button, revise, queued, copied, memory,
     restore: job => act(async () => resolveJobs([job])),
     restoreOther: job => act(async () => resolveOtherJobs([job])),
     focus: () => act(async () => input().props.onFocus?.()),
@@ -294,4 +304,53 @@ test('export SRT download uses the engine-provided filename with a safe job fall
     assert.equal(requested, '/api/v1/projects/review%2Fone/exports/job/captions.srt');
     assert.match(await blob.text(), /Review/);
   }
+});
+
+const shareText = '刚用 CutVoke 做了个视频：开源、本地，AI Agent 和我改同一条时间线。https://github.com/frankShan001/CutVoke @shansjl';
+
+test('share prompt dismissal persists only its flag and survives a denied store', () => {
+  const data = new Map();
+  const api = loadModule('../src/lib/sharePrompt.ts', {}, {
+    localStorage: { getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) },
+  });
+  assert.equal(api.sharePromptDismissed(), false);
+  api.dismissSharePrompt();
+  assert.deepEqual([...data.entries()], [['cutvoke.sharePrompt.dismissed', '1']]);
+  assert.equal(api.sharePromptDismissed(), true);
+  const denied = loadModule('../src/lib/sharePrompt.ts', {}, {
+    localStorage: { getItem() { throw new Error('denied'); }, setItem() { throw new Error('denied'); } },
+  });
+  assert.equal(denied.sharePromptDismissed(), false);
+  assert.doesNotThrow(() => denied.dismissSharePrompt());
+});
+
+test('a clean export offers the share line, copy, and dismissal', async () => {
+  const h = await harness(null, true);
+  try {
+    await h.restore(exportJob('succeeded'));
+    assert.equal(h.button('复制分享文案').props.variant, 'ghost');
+    assert.equal(h.button('不再显示').props.size, 'sm');
+    await act(async () => { h.button('复制分享文案').props.onClick(); });
+    assert.deepEqual(h.copied, [shareText]);
+    await act(async () => { h.button('不再显示').props.onClick(); });
+    assert.equal(h.button('复制分享文案'), undefined);
+    assert.equal(h.memory.shareDismissed, '1');
+  } finally { await h.close(); }
+});
+
+test('warnings and a stored dismissal omit the share line', async () => {
+  const warned = exportJob('succeeded');
+  warned.result = { ...warned.result, warnings: ['audio drifted'] };
+  const withWarnings = await harness(null, true);
+  try {
+    await withWarnings.restore(warned);
+    assert.equal(withWarnings.button('复制分享文案'), undefined);
+    assert.equal(withWarnings.button('不再显示'), undefined);
+  } finally { await withWarnings.close(); }
+  const dismissed = await harness(null, true, null, { shareDismissed: '1' });
+  try {
+    await dismissed.restore(exportJob('succeeded'));
+    assert.equal(dismissed.button('复制分享文案'), undefined);
+    assert.equal(dismissed.button('不再显示'), undefined);
+  } finally { await dismissed.close(); }
 });
