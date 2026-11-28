@@ -434,3 +434,38 @@ test("caption font selection renders the bundled face and survives undo, redo, r
   expect(statSync(path).size).toBeGreaterThan(0);
     copyFileSync(path, resolve(evidence, "exports", basename(path)));
 });
+test("export share copy is selectable and dismissal survives reopening when permissions are denied", async ({ page, request }) => {
+  test.setTimeout(120_000);
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", { configurable: true,
+      value: { writeText: async () => { throw new DOMException("denied", "NotAllowedError"); } } });
+    const set = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === "cutvoke.sharePrompt.dismissed") throw new DOMException("denied", "SecurityError");
+      return set.call(this, key, value);
+    };
+  });
+  const { id, name } = await projectWithImages(request);
+  await open(page, name);
+  const { dialog, path } = await exportDialog(page, request, id);
+  await dialog.getByRole("button", { name: "开始导出" }).click();
+  await expect(dialog.getByText("导出完成", { exact: false })).toBeVisible({ timeout: 80_000 });
+  const copy = dialog.getByRole("button", { name: "复制分享文案" });
+  await expect(copy).toBeVisible();
+  await copy.click();
+  const field = dialog.getByRole("textbox", { name: "复制分享文案" });
+  await expect(field).toHaveValue(/https:\/\/github\.com\/frankShan001\/CutVoke @shansjl$/);
+  await expect(field).toHaveAttribute("readonly", "");
+  expect(await field.evaluate((el: HTMLTextAreaElement) => {
+    el.select(); return el.value.slice(el.selectionStart, el.selectionEnd);
+  })).toContain("https://github.com/frankShan001/CutVoke");
+  await dialog.getByRole("button", { name: "不再显示" }).click();
+  await expect(copy).toHaveCount(0);
+  await expect(field).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await page.getByRole("button", { name: "导出", exact: true }).click();
+  await expect(dialog.getByText("导出完成", { exact: false })).toBeVisible();
+  await expect(copy).toHaveCount(0);
+  execFileSync("ffmpeg", ["-v", "error", "-i", path, "-f", "null", "-"]);
+});
